@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowRight, Mail, LucideGoogle } from "lucide-react";
+import { ArrowRight, Mail, Globe } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -109,7 +109,7 @@ const SignUp = () => {
                 onClick={handleSignUpWithGoogle}
                 disabled={isLoading}
               >
-                <LucideGoogle className="mr-2 h-4 w-4" />
+                <Globe className="mr-2 h-4 w-4" />
                 Sign up with Google
               </Button>
               

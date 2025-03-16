@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowRight, LucideGoogle } from "lucide-react";
+import { ArrowRight, Globe } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -87,7 +87,7 @@ const Login = () => {
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
               >
-                <LucideGoogle className="mr-2 h-4 w-4" />
+                <Globe className="mr-2 h-4 w-4" />
                 Log in with Google
               </Button>
               
