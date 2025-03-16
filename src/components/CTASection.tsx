@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const CTASection = () => {
   return (
@@ -22,12 +23,16 @@ export const CTASection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" variant="default" className="rounded-full px-8 bg-white text-primary hover:bg-white/90 group">
-              Get Started for Free
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <Button size="lg" variant="default" className="rounded-full px-8 bg-white text-primary hover:bg-white/90 group" asChild>
+              <Link to="/signup">
+                Get Started for Free
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
             </Button>
-            <Button size="lg" variant="outline" className="rounded-full px-8 text-white border-white/30 hover:bg-white/10 hover:text-white">
-              Contact Sales
+            <Button size="lg" variant="outline" className="rounded-full px-8 text-white border-white/30 hover:bg-white/10 hover:text-white" asChild>
+              <Link to="/support">
+                Contact Sales
+              </Link>
             </Button>
           </div>
           

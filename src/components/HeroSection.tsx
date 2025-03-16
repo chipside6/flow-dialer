@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const HeroSection = () => {
   const phoneRef = useRef<HTMLDivElement>(null);
@@ -46,12 +47,16 @@ export const HeroSection = () => {
             </p>
             
             <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start animate-slide-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
-              <Button size="lg" className="rounded-full px-8 group">
-                Try for Free
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <Button size="lg" className="rounded-full px-8 group" asChild>
+                <Link to="/signup">
+                  Try for Free
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </Button>
-              <Button variant="outline" size="lg" className="rounded-full px-8">
-                Learn More
+              <Button variant="outline" size="lg" className="rounded-full px-8" asChild>
+                <Link to="/features">
+                  Learn More
+                </Link>
               </Button>
             </div>
             

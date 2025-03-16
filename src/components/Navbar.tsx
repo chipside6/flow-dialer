@@ -39,11 +39,11 @@ export const Navbar = () => {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Button variant="outline" size="sm" className="rounded-full px-4 transition-all duration-300">
-            Log In
+          <Button variant="outline" size="sm" className="rounded-full px-4 transition-all duration-300" asChild>
+            <Link to="/login">Log In</Link>
           </Button>
-          <Button size="sm" className="rounded-full px-4 transition-all duration-300">
-            Get Started
+          <Button size="sm" className="rounded-full px-4 transition-all duration-300" asChild>
+            <Link to="/signup">Get Started</Link>
           </Button>
         </div>
 
@@ -64,11 +64,15 @@ export const Navbar = () => {
               <NavLinks mobile onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
             <div className="flex flex-col gap-4">
-              <Button variant="outline" className="rounded-full py-6">
-                Log In
+              <Button variant="outline" className="rounded-full py-6" asChild>
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  Log In
+                </Link>
               </Button>
-              <Button className="rounded-full py-6">
-                Get Started
+              <Button className="rounded-full py-6" asChild>
+                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                  Get Started
+                </Link>
               </Button>
             </div>
           </div>
