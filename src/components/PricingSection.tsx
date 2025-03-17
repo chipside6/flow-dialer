@@ -24,7 +24,7 @@ const plans = [
     features: [
       "Unlimited calls",
       "5 campaigns",
-      "Up to 1000 contacts per campaign",
+      "1000 contacts per campaign",
       "View-only contact lists",
       "No editing of assigned campaign contacts",
       "Basic contact management",
@@ -38,7 +38,7 @@ const plans = [
     features: [
       "Unlimited calls",
       "10 campaigns",
-      "Up to 1000 contacts per campaign",
+      "1000 contacts per campaign",
       "View-only contact lists",
       "Advanced contact management",
       "Priority support",
@@ -54,7 +54,7 @@ const plans = [
     features: [
       "Unlimited calls",
       "Unlimited campaigns",
-      "Up to 1000 contacts per campaign",
+      "1000 contacts per campaign",
       "Edit or change assigned contact lists",
       "Call recording & transcription",
       "Advanced analytics",
