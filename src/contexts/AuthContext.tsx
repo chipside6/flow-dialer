@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, AuthResponse } from '@supabase/supabase-js';
 import { toast } from '@/components/ui/use-toast';
@@ -22,7 +21,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Check active session on mount
@@ -114,7 +112,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    navigate('/');
+    
+    // Instead of using navigate, we'll use window.location
+    window.location.href = '/';
   };
 
   const updateProfile = async (data: any) => {
