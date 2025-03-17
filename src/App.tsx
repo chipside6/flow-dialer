@@ -16,6 +16,7 @@ import ContactLists from "./pages/ContactLists";
 import TransferNumbers from "./pages/TransferNumbers";
 import SipProviders from "./pages/SipProviders";
 import Dashboard from "./pages/Dashboard";
+import Billing from "./pages/Billing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/contacts" element={<ContactLists />} />
           <Route path="/transfers" element={<TransferNumbers />} />
           <Route path="/sip-providers" element={<SipProviders />} />
+          <Route path="/billing" element={<Billing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

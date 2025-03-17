@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const plans = [
   {
@@ -83,11 +84,13 @@ export const PricingSection = () => {
                 <span className="text-muted-foreground">/month</span>
               </div>
               
-              <Button 
-                className={`w-full rounded-full ${plan.popular ? '' : 'bg-primary/90 hover:bg-primary'}`}
-              >
-                Get Started
-              </Button>
+              <Link to="/billing">
+                <Button 
+                  className={`w-full rounded-full ${plan.popular ? '' : 'bg-primary/90 hover:bg-primary'}`}
+                >
+                  Get Started
+                </Button>
+              </Link>
               
               <div className="mt-8 space-y-4">
                 {plan.features.map((feature, idx) => (
