@@ -9,12 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowRight, Calendar, Target, Users } from "lucide-react";
+import { ArrowRight, Calendar, Target, Users, Phone } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import PhoneNumberList from "@/components/PhoneNumberList";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const campaignSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -34,6 +36,8 @@ const Campaign = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [campaignCreated, setCampaignCreated] = useState(false);
+  const [campaignId, setCampaignId] = useState<string>("");
   
   const form = useForm<z.infer<typeof campaignSchema>>({
     resolver: zodResolver(campaignSchema),
@@ -53,7 +57,12 @@ const Campaign = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Generate a mock campaign ID
+      const mockCampaignId = `camp-${Date.now()}`;
+      setCampaignId(mockCampaignId);
+      
       setIsDialogOpen(false);
+      setCampaignCreated(true);
       
       toast({
         title: "Campaign created!",
@@ -62,9 +71,6 @@ const Campaign = () => {
       
       // Reset form
       form.reset();
-      
-      // In a real application, you might redirect to the campaign page
-      // navigate(`/campaigns/${campaignId}`);
     } catch (error) {
       toast({
         title: "Failed to create campaign",
@@ -88,7 +94,7 @@ const Campaign = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
             <Card className="border-border/40 shadow-md">
               <CardHeader className="text-center">
                 <Target className="h-12 w-12 mx-auto text-primary mb-4" />
@@ -118,95 +124,135 @@ const Campaign = () => {
                 </CardDescription>
               </CardHeader>
             </Card>
+            
+            <Card className="border-border/40 shadow-md">
+              <CardHeader className="text-center">
+                <Phone className="h-12 w-12 mx-auto text-primary mb-4" />
+                <CardTitle>Connect with Contacts</CardTitle>
+                <CardDescription>
+                  Use Asterisk dialer to reach contacts for your campaign.
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
           
-          <div className="max-w-md mx-auto text-center">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="lg" className="group">
-                  Create Campaign <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Create a new campaign</DialogTitle>
-                  <DialogDescription>
-                    Fill in the details to start your new campaign.
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Campaign Title</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Give your campaign a catchy title" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Description</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Describe your campaign and what you hope to achieve" 
-                              className="resize-none h-20"
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="goal"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Goal Amount</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="1" placeholder="Enter amount" {...field} />
-                          </FormControl>
-                          <FormDescription>How much do you need to raise?</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="deadline"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Deadline</FormLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                          <FormDescription>When will your campaign end?</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <DialogFooter className="mt-6">
-                      <Button type="submit">Create Campaign</Button>
-                    </DialogFooter>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
-          </div>
+          {campaignCreated ? (
+            <div className="max-w-5xl mx-auto">
+              <Tabs defaultValue="details" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="details">Campaign Details</TabsTrigger>
+                  <TabsTrigger value="contacts">Phone Contacts</TabsTrigger>
+                </TabsList>
+                <TabsContent value="details" className="mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Campaign Management</CardTitle>
+                      <CardDescription>
+                        Your campaign has been created. You can now manage it and add contacts for outreach.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Your Campaign ID: <span className="font-mono">{campaignId}</span>
+                      </p>
+                      <p>Use the "Phone Contacts" tab to add and manage your outreach list for this campaign.</p>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                <TabsContent value="contacts" className="mt-6">
+                  <PhoneNumberList campaignId={campaignId} />
+                </TabsContent>
+              </Tabs>
+            </div>
+          ) : (
+            <div className="max-w-md mx-auto text-center">
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="group">
+                    Create Campaign <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Create a new campaign</DialogTitle>
+                    <DialogDescription>
+                      Fill in the details to start your new campaign.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Campaign Title</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Give your campaign a catchy title" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Describe your campaign and what you hope to achieve" 
+                                className="resize-none h-20"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="goal"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Goal Amount</FormLabel>
+                            <FormControl>
+                              <Input type="number" min="1" placeholder="Enter amount" {...field} />
+                            </FormControl>
+                            <FormDescription>How much do you need to raise?</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="deadline"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Deadline</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                            <FormDescription>When will your campaign end?</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <DialogFooter className="mt-6">
+                        <Button type="submit">Create Campaign</Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
         </div>
       </main>
       <Footer />
