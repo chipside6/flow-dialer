@@ -11,6 +11,11 @@ import Support from "./pages/Support";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Campaign from "./pages/Campaign";
+import GreetingFiles from "./pages/GreetingFiles";
+import ContactLists from "./pages/ContactLists";
+import TransferNumbers from "./pages/TransferNumbers";
+import SipProviders from "./pages/SipProviders";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +34,11 @@ const App = () => (
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/campaign" element={<Campaign />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/greetings" element={<GreetingFiles />} />
+          <Route path="/contacts" element={<ContactLists />} />
+          <Route path="/transfers" element={<TransferNumbers />} />
+          <Route path="/sip-providers" element={<SipProviders />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
