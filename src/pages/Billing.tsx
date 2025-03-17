@@ -18,7 +18,7 @@ const plans = [
     description: "Perfect for individual users",
     features: [
       "Unlimited calls",
-      "Unlimited campaigns per month",
+      "5 campaigns per month",
       "View-only contact lists",
       "No editing of assigned campaign contacts",
       "Basic contact management",
@@ -32,7 +32,7 @@ const plans = [
     description: "Ideal for professionals and small teams",
     features: [
       "Unlimited calls",
-      "Unlimited campaigns per month",
+      "10 campaigns per month",
       "View-only contact lists",
       "Advanced contact management",
       "Priority support",
