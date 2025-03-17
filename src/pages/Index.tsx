@@ -5,7 +5,6 @@ import { FeaturesSection } from "@/components/FeaturesSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { PricingSection } from "@/components/PricingSection";
 import { CTASection } from "@/components/CTASection";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -32,7 +31,6 @@ const Index = () => {
         <PricingSection />
         <CTASection />
       </main>
-      <Footer />
     </div>
   );
 };

@@ -1,8 +1,6 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { SquarePaymentForm } from "@/components/SquarePaymentForm";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -176,7 +174,6 @@ const Billing = () => {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

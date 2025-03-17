@@ -9,7 +9,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { ArrowRight, Globe } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -153,7 +152,6 @@ const Login = () => {
           </Card>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { ArrowRight, Mail, Globe } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -198,7 +196,6 @@ const SignUp = () => {
           </Card>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

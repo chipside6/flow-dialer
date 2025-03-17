@@ -1,6 +1,5 @@
 
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { CTASection } from "@/components/CTASection";
 import { Button } from "@/components/ui/button";
@@ -91,7 +90,6 @@ const Features = () => {
         <FeaturesSection />
         <CTASection />
       </main>
-      <Footer />
     </div>
   );
 };

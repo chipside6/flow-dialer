@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { DashboardNav } from "@/components/DashboardNav";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
@@ -51,7 +50,6 @@ const Campaign = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
