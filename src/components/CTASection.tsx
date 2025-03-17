@@ -37,7 +37,7 @@ export const CTASection = () => {
           </div>
           
           <p className="mt-8 text-sm text-white/70">
-            No credit card required • Each sign-up includes a test call
+            No credit card required
           </p>
         </div>
       </div>

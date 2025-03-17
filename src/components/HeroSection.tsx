@@ -61,7 +61,7 @@ export const HeroSection = () => {
             </div>
             
             <div className="mt-8 text-sm text-muted-foreground animate-slide-up opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
-              No credit card required • Each sign-up includes a test call
+              No credit card required
             </div>
           </div>
           
