@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -9,10 +8,11 @@ const plans = [
     price: 49,
     description: "Perfect for individual users",
     features: [
-      "Unlimited calls within the network",
-      "Up to 5 hours of external calls",
+      "Unlimited calls per campaign",
+      "5 campaigns per month",
+      "View-only contact lists",
+      "No editing of assigned campaign contacts",
       "Basic contact management",
-      "Core calling features",
       "Standard support"
     ]
   },
@@ -21,9 +21,10 @@ const plans = [
     price: 99,
     description: "Ideal for professionals and small teams",
     features: [
-      "Unlimited calls",
+      "Unlimited calls per campaign",
+      "10 campaigns per month",
+      "View-only contact lists",
       "Advanced contact management",
-      "Call recording & transcription",
       "Priority support",
       "Team management features",
       "Custom branding options"
@@ -35,12 +36,12 @@ const plans = [
     price: 149,
     description: "For organizations with advanced needs",
     features: [
-      "Everything in Professional",
-      "Dedicated account manager",
-      "Custom integrations",
+      "Unlimited campaigns per month",
+      "Edit or change assigned contact lists",
+      "Call recording & transcription",
       "Advanced analytics",
       "Enhanced security features",
-      "Service level agreement",
+      "Dedicated account manager",
       "24/7 premium support"
     ]
   }
