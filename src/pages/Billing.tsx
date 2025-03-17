@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -10,6 +11,20 @@ import { useToast } from "@/components/ui/use-toast";
 // Plans from the pricing section
 const plans = [
   {
+    id: "free",
+    name: "Free Trial",
+    price: 0,
+    description: "Perfect for getting started",
+    features: [
+      "1 campaign only",
+      "50 contacts per campaign",
+      "Basic call functionality",
+      "View-only contact lists",
+      "Community support",
+      "24-hour campaign duration"
+    ]
+  },
+  {
     id: "basic",
     name: "Basic",
     price: 49,
@@ -17,6 +32,7 @@ const plans = [
     features: [
       "Unlimited calls",
       "5 campaigns",
+      "Up to 1000 contacts per campaign",
       "View-only contact lists",
       "No editing of assigned campaign contacts",
       "Basic contact management",
@@ -31,6 +47,7 @@ const plans = [
     features: [
       "Unlimited calls",
       "10 campaigns",
+      "Up to 1000 contacts per campaign",
       "View-only contact lists",
       "Advanced contact management",
       "Priority support",
@@ -47,6 +64,7 @@ const plans = [
     features: [
       "Unlimited calls",
       "Unlimited campaigns",
+      "Up to 1000 contacts per campaign",
       "Edit or change assigned contact lists",
       "Call recording & transcription",
       "Advanced analytics",
@@ -109,7 +127,7 @@ const Billing = () => {
 
           {!showPaymentForm ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {plans.map((plan) => (
+              {plans.filter(plan => plan.price > 0).map((plan) => (
                 <Card 
                   key={plan.id}
                   className={`

@@ -1,8 +1,22 @@
+
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const plans = [
+  {
+    name: "Free Trial",
+    price: 0,
+    description: "Perfect for getting started",
+    features: [
+      "1 campaign only",
+      "50 contacts per campaign",
+      "Basic call functionality",
+      "View-only contact lists",
+      "Community support",
+      "24-hour campaign duration"
+    ]
+  },
   {
     name: "Basic",
     price: 49,
@@ -10,6 +24,7 @@ const plans = [
     features: [
       "Unlimited calls",
       "5 campaigns",
+      "Up to 1000 contacts per campaign",
       "View-only contact lists",
       "No editing of assigned campaign contacts",
       "Basic contact management",
@@ -23,6 +38,7 @@ const plans = [
     features: [
       "Unlimited calls",
       "10 campaigns",
+      "Up to 1000 contacts per campaign",
       "View-only contact lists",
       "Advanced contact management",
       "Priority support",
@@ -38,6 +54,7 @@ const plans = [
     features: [
       "Unlimited calls",
       "Unlimited campaigns",
+      "Up to 1000 contacts per campaign",
       "Edit or change assigned contact lists",
       "Call recording & transcription",
       "Advanced analytics",
@@ -61,7 +78,7 @@ export const PricingSection = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {plans.map((plan, index) => (
             <div 
               key={index}
@@ -82,15 +99,21 @@ export const PricingSection = () => {
               <p className="text-muted-foreground mt-2 text-sm">{plan.description}</p>
               
               <div className="mt-6 mb-6">
-                <span className="text-4xl font-bold">${plan.price}</span>
-                <span className="text-muted-foreground">/month</span>
+                {plan.price === 0 ? (
+                  <span className="text-4xl font-bold">Free</span>
+                ) : (
+                  <>
+                    <span className="text-4xl font-bold">${plan.price}</span>
+                    <span className="text-muted-foreground">/month</span>
+                  </>
+                )}
               </div>
               
-              <Link to="/billing">
+              <Link to={plan.price === 0 ? "/signup" : "/billing"}>
                 <Button 
                   className={`w-full rounded-full ${plan.popular ? '' : 'bg-primary/90 hover:bg-primary'}`}
                 >
-                  Get Started
+                  {plan.price === 0 ? 'Start Free Trial' : 'Get Started'}
                 </Button>
               </Link>
               
