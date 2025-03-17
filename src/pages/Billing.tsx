@@ -14,7 +14,7 @@ const plans = [
   {
     id: "basic",
     name: "Basic",
-    price: 9,
+    price: 49,
     description: "Perfect for individual users",
     features: [
       "Unlimited calls within the network",
@@ -27,7 +27,7 @@ const plans = [
   {
     id: "professional",
     name: "Professional",
-    price: 19,
+    price: 99,
     description: "Ideal for professionals and small teams",
     features: [
       "Unlimited calls",
@@ -42,7 +42,7 @@ const plans = [
   {
     id: "enterprise",
     name: "Enterprise",
-    price: 49,
+    price: 149,
     description: "For organizations with advanced needs",
     features: [
       "Everything in Professional",

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 const plans = [
   {
     name: "Basic",
-    price: 9,
+    price: 49,
     description: "Perfect for individual users",
     features: [
       "Unlimited calls within the network",
@@ -18,7 +18,7 @@ const plans = [
   },
   {
     name: "Professional",
-    price: 19,
+    price: 99,
     description: "Ideal for professionals and small teams",
     features: [
       "Unlimited calls",
@@ -32,7 +32,7 @@ const plans = [
   },
   {
     name: "Enterprise",
-    price: 49,
+    price: 149,
     description: "For organizations with advanced needs",
     features: [
       "Everything in Professional",
