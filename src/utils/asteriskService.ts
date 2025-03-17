@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/use-toast";
 
 interface DialContactsOptions {
@@ -35,7 +34,7 @@ export const asteriskService = {
           transferNumber,
           sipProviderId,
           greetingFile,
-          maxConcurrentCalls: maxConcurrentCalls || 1  // Changed from 10 to 1
+          maxConcurrentCalls: maxConcurrentCalls || 3  // Changed from 1 to 3
         }),
       });
       

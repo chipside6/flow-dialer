@@ -39,7 +39,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
   const [selectedSipProvider, setSelectedSipProvider] = useState<string>("");
   const [selectedContactList, setSelectedContactList] = useState<string>("");
   const [transferNumber, setTransferNumber] = useState<string>("");
-  const [maxConcurrentCalls, setMaxConcurrentCalls] = useState<string>("1");
+  const [maxConcurrentCalls, setMaxConcurrentCalls] = useState<string>("3");  // Changed from "1" to "3"
   const [greetingFile, setGreetingFile] = useState<string>("greeting.wav");
   
   const [isDialing, setIsDialing] = useState<boolean>(false);
@@ -250,7 +250,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
                   type="number"
                   min="1"
                   max="50"
-                  placeholder="1"
+                  placeholder="3"  // Changed from "1" to "3"
                   value={maxConcurrentCalls}
                   onChange={(e) => setMaxConcurrentCalls(e.target.value)}
                 />
