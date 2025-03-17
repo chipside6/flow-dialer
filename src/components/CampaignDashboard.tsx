@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Play, Pause, BarChart, PhoneCall, PhoneForwarded, PhoneOff, Phone } from "lucide-react";
+import { Play, Pause, BarChart, PhoneCall, PhoneForwarded, PhoneOff, Phone, PlusCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -18,15 +17,19 @@ interface Campaign {
   failedCalls: number;
 }
 
-const CampaignDashboard = () => {
+interface CampaignDashboardProps {
+  initialCampaigns?: Campaign[];
+}
+
+const CampaignDashboard = ({ initialCampaigns = [] }: CampaignDashboardProps) => {
   const { toast } = useToast();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
 
-  // Mock data for demo purposes
+  // Load campaigns from props and mock data
   useEffect(() => {
-    // This would come from your API in a real app
-    const demoData: Campaign[] = [
+    // Combine initialCampaigns with demo data if needed
+    const demoData: Campaign[] = initialCampaigns.length > 0 ? initialCampaigns : [
       {
         id: "camp-123456",
         title: "Summer Sales Outreach",
@@ -50,7 +53,7 @@ const CampaignDashboard = () => {
     ];
     
     setCampaigns(demoData);
-  }, []);
+  }, [initialCampaigns]);
 
   const startCampaign = (campaignId: string) => {
     setCampaigns(prev => 
@@ -156,13 +159,8 @@ const CampaignDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Campaign Dashboard</h2>
-        <Button variant="default" className="bg-green-600 hover:bg-green-700">
-          Add New Campaign
-        </Button>
-      </div>
-
+      
+      
       <Card>
         <CardHeader className="bg-muted/40">
           <CardTitle>Active Campaigns</CardTitle>
