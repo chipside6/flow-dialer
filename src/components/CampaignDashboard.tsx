@@ -114,13 +114,16 @@ const CampaignDashboard = () => {
             const newTransferred = Math.floor(newAnswered * 0.4); // 40% transfer rate
             const newFailed = Math.floor((newProgress / 100) * c.totalCalls * 0.3); // 30% fail rate
             
-            const updatedCampaign = {
+            // Explicitly type the status as one of the allowed values
+            const newStatus: Campaign["status"] = newProgress >= 100 ? "completed" : "running";
+            
+            const updatedCampaign: Campaign = {
               ...c,
               progress: Math.round(newProgress),
               answeredCalls: newAnswered,
               transferredCalls: newTransferred,
               failedCalls: newFailed,
-              status: newProgress >= 100 ? "completed" : "running"
+              status: newStatus
             };
             
             // Update selected campaign if it's the same one
