@@ -9,7 +9,7 @@ const plans = [
     price: 49,
     description: "Perfect for individual users",
     features: [
-      "Unlimited calls per campaign",
+      "Unlimited calls",
       "5 campaigns per month",
       "View-only contact lists",
       "No editing of assigned campaign contacts",
@@ -22,7 +22,7 @@ const plans = [
     price: 99,
     description: "Ideal for professionals and small teams",
     features: [
-      "Unlimited calls per campaign",
+      "Unlimited calls",
       "10 campaigns per month",
       "View-only contact lists",
       "Advanced contact management",
@@ -37,7 +37,7 @@ const plans = [
     price: 149,
     description: "For organizations with advanced needs",
     features: [
-      "Unlimited calls per campaign",
+      "Unlimited calls",
       "Unlimited campaigns per month",
       "Edit or change assigned contact lists",
       "Call recording & transcription",
