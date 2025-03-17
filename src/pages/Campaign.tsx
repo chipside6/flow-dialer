@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import PhoneNumberList from "@/components/PhoneNumberList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CampaignDashboard from "@/components/CampaignDashboard";
+import BackgroundDialer from "@/components/BackgroundDialer";
 
 const campaignSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
@@ -144,9 +145,10 @@ const Campaign = () => {
               {campaignCreated ? (
                 <div className="max-w-5xl mx-auto">
                   <Tabs defaultValue="details" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
                       <TabsTrigger value="details">Campaign Details</TabsTrigger>
                       <TabsTrigger value="contacts">Phone Contacts</TabsTrigger>
+                      <TabsTrigger value="dialer">Background Dialer</TabsTrigger>
                       <TabsTrigger value="dashboard" onClick={() => setShowDashboard(true)}>
                         Campaign Dashboard
                       </TabsTrigger>
@@ -169,6 +171,9 @@ const Campaign = () => {
                     </TabsContent>
                     <TabsContent value="contacts" className="mt-6">
                       <PhoneNumberList campaignId={campaignId} />
+                    </TabsContent>
+                    <TabsContent value="dialer" className="mt-6">
+                      <BackgroundDialer campaignId={campaignId} />
                     </TabsContent>
                     <TabsContent value="dashboard" className="mt-6">
                       <div className="text-center py-8">
