@@ -1,11 +1,11 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { Phone, Download, Plus, Trash } from "lucide-react";
+import { Phone, Download, Plus, Trash, AudioLines } from "lucide-react";
+import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 
 interface PhoneNumberListProps {
   campaignId?: string;
@@ -16,6 +16,8 @@ const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
   const [newNumber, setNewNumber] = useState("");
   const [bulkNumbers, setBulkNumbers] = useState("");
   const [showBulkInput, setShowBulkInput] = useState(false);
+  const [transferNumber, setTransferNumber] = useState("");
+  const [recordingFile, setRecordingFile] = useState("greeting.wav");
 
   const handleAddNumber = () => {
     if (!newNumber) return;
@@ -87,19 +89,27 @@ const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
       return;
     }
     
-    // Format for Asterisk dialplan
+    // Format for Asterisk dialplan with IVR functionality
     const formattedNumbers = phoneNumbers.map(num => {
       // Remove non-numeric characters for Asterisk
       const cleanNumber = num.replace(/[^0-9+]/g, '');
-      return `exten => s,n,Dial(SIP/${cleanNumber},30)`;
+      return `exten => s,n,Dial(SIP/${cleanNumber},30,g)`;
     }).join('\n');
     
-    // Add common Asterisk dialplan structure
+    // Create a dialplan with IVR functionality
     const dialplan = `
 [campaign-${campaignId || 'unknown'}]
 exten => s,1,Answer()
+exten => s,n,Wait(1)
+exten => s,n,Playback(${recordingFile})
+exten => s,n,WaitExten(5)
 ${formattedNumbers}
 exten => s,n,Hangup()
+
+; Handle keypress 1 for transfer
+exten => 1,1,NoOp(Transferring call to ${transferNumber})
+exten => 1,n,Dial(SIP/${transferNumber},30)
+exten => 1,n,Hangup()
     `.trim();
     
     // Create and download the file
@@ -115,7 +125,7 @@ exten => s,n,Hangup()
     
     toast({
       title: "Dialplan exported",
-      description: "Asterisk dialplan file has been downloaded",
+      description: "Asterisk dialplan file with IVR functionality has been downloaded",
     });
   };
 
@@ -168,6 +178,44 @@ exten => s,n,Hangup()
           <Button onClick={handleAddNumber}>
             <Plus className="h-4 w-4 mr-2" /> Add
           </Button>
+        </div>
+        
+        {/* IVR Configuration Section */}
+        <div className="border rounded-md p-4 space-y-3">
+          <h3 className="font-medium flex items-center">
+            <AudioLines className="h-4 w-4 mr-2" />
+            Call Flow Configuration
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormItem>
+              <FormLabel>Pre-recorded Message</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="greeting.wav"
+                  value={recordingFile}
+                  onChange={(e) => setRecordingFile(e.target.value)}
+                />
+              </FormControl>
+              <FormDescription>
+                Filename of the greeting to play (on your Asterisk server)
+              </FormDescription>
+            </FormItem>
+            
+            <FormItem>
+              <FormLabel>Transfer Number</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter transfer destination"
+                  value={transferNumber}
+                  onChange={(e) => setTransferNumber(e.target.value)}
+                />
+              </FormControl>
+              <FormDescription>
+                Where to transfer calls when recipient presses 1
+              </FormDescription>
+            </FormItem>
+          </div>
         </div>
         
         <div className="flex justify-between">
