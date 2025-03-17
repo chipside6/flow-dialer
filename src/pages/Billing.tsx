@@ -12,8 +12,8 @@ import { useToast } from "@/components/ui/use-toast";
 // Plans from the pricing section
 const plans = [
   {
-    id: "personal",
-    name: "Personal",
+    id: "basic",
+    name: "Basic",
     price: 9,
     description: "Perfect for individual users",
     features: [

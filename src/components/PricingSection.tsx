@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 const plans = [
   {
-    name: "Personal",
+    name: "Basic",
     price: 9,
     description: "Perfect for individual users",
     features: [
