@@ -10,8 +10,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const SignUp = () => {
-  const [fullName, setFullName] = useState('');
-  const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,10 +22,7 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await signUp(email, password, {
-        full_name: fullName,
-        company_name: companyName
-      });
+      const { error } = await signUp(email, password);
 
       if (error) {
         throw new Error(error.message);
@@ -76,25 +71,6 @@ const SignUp = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                placeholder="Your full name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="companyName">Company Name (Optional)</Label>
-              <Input
-                id="companyName"
-                placeholder="Your company"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
