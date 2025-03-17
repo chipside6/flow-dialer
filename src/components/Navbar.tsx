@@ -33,7 +33,7 @@ export const Navbar = () => {
           <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white">
             <Phone size={16} />
           </span>
-          Dandy Dialer
+          Flow Dialer
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
