@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { Phone, Download, Plus, Trash, AudioLines } from "lucide-react";
+import { Phone, Download, Plus, Trash, AudioLines, Upload, Server } from "lucide-react";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PhoneNumberListProps {
   campaignId?: string;
@@ -18,6 +20,14 @@ const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
   const [showBulkInput, setShowBulkInput] = useState(false);
   const [transferNumber, setTransferNumber] = useState("");
   const [recordingFile, setRecordingFile] = useState("greeting.wav");
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [sipTrunkProvider, setSipTrunkProvider] = useState("");
+  const [sipUsername, setSipUsername] = useState("");
+  const [sipPassword, setSipPassword] = useState("");
+  const [sipHost, setSipHost] = useState("");
+  const [sipPort, setSipPort] = useState("5060");
+  const [showSipConfig, setShowSipConfig] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddNumber = () => {
     if (!newNumber) return;
@@ -79,6 +89,30 @@ const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
     setShowBulkInput(false);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      // Check if it's an audio file
+      if (!file.type.startsWith('audio/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload an audio file (wav, mp3)",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setAudioFile(file);
+      setRecordingFile(file.name);
+      
+      toast({
+        title: "Audio file selected",
+        description: `File "${file.name}" will be used as the greeting`,
+      });
+    }
+  };
+
   const handleExportForAsterisk = () => {
     if (phoneNumbers.length === 0) {
       toast({
@@ -89,15 +123,42 @@ const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
       return;
     }
     
+    if (!sipTrunkProvider || !sipUsername || !sipHost) {
+      toast({
+        title: "Missing SIP configuration",
+        description: "Please provide SIP trunk configuration",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Format for Asterisk dialplan with IVR functionality
     const formattedNumbers = phoneNumbers.map(num => {
       // Remove non-numeric characters for Asterisk
       const cleanNumber = num.replace(/[^0-9+]/g, '');
-      return `exten => s,n,Dial(SIP/${cleanNumber},30,g)`;
+      return `exten => s,n,Dial(SIP/${cleanNumber}@${sipTrunkProvider},30,g)`;
     }).join('\n');
+    
+    // Create SIP trunk configuration
+    const sipConfig = `
+[${sipTrunkProvider}]
+type=peer
+host=${sipHost}
+port=${sipPort}
+username=${sipUsername}
+secret=${sipPassword}
+fromuser=${sipUsername}
+context=from-trunk
+disallow=all
+allow=ulaw
+allow=alaw
+    `.trim();
     
     // Create a dialplan with IVR functionality
     const dialplan = `
+; SIP Provider Configuration
+${sipConfig}
+
 [campaign-${campaignId || 'unknown'}]
 exten => s,1,Answer()
 exten => s,n,Wait(1)
@@ -123,10 +184,18 @@ exten => 1,n,Hangup()
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    toast({
-      title: "Dialplan exported",
-      description: "Asterisk dialplan file with IVR functionality has been downloaded",
-    });
+    // If there's an audio file, create a zip file and include it
+    if (audioFile) {
+      toast({
+        title: "Dialplan exported",
+        description: "Remember to upload the audio file to your Asterisk server",
+      });
+    } else {
+      toast({
+        title: "Dialplan exported",
+        description: "Asterisk dialplan file with IVR functionality has been downloaded",
+      });
+    }
   };
 
   const handleExportCSV = () => {
@@ -190,15 +259,31 @@ exten => 1,n,Hangup()
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormItem>
               <FormLabel>Pre-recorded Message</FormLabel>
-              <FormControl>
+              <div className="flex gap-2">
                 <Input
-                  placeholder="greeting.wav"
+                  type="file"
+                  accept="audio/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                />
+                <Input
+                  placeholder="Select greeting audio file"
                   value={recordingFile}
                   onChange={(e) => setRecordingFile(e.target.value)}
+                  className="flex-1"
+                  readOnly={!!audioFile}
                 />
-              </FormControl>
+                <Button 
+                  variant="outline" 
+                  onClick={() => fileInputRef.current?.click()}
+                  type="button"
+                >
+                  <Upload className="h-4 w-4 mr-2" /> Upload
+                </Button>
+              </div>
               <FormDescription>
-                Filename of the greeting to play (on your Asterisk server)
+                Upload an audio file for greeting (WAV or MP3)
               </FormDescription>
             </FormItem>
             
@@ -216,6 +301,87 @@ exten => 1,n,Hangup()
               </FormDescription>
             </FormItem>
           </div>
+        </div>
+        
+        {/* SIP Trunk Configuration */}
+        <div className="border rounded-md p-4 space-y-3">
+          <div className="flex justify-between items-center">
+            <h3 className="font-medium flex items-center">
+              <Server className="h-4 w-4 mr-2" />
+              SIP Trunk Configuration
+            </h3>
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowSipConfig(!showSipConfig)}
+              size="sm"
+            >
+              {showSipConfig ? "Hide" : "Show"}
+            </Button>
+          </div>
+          
+          {showSipConfig && (
+            <div className="space-y-4">
+              <FormItem>
+                <FormLabel>SIP Trunk Provider</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter provider name (e.g., twilio, voip.ms)"
+                    value={sipTrunkProvider}
+                    onChange={(e) => setSipTrunkProvider(e.target.value)}
+                  />
+                </FormControl>
+              </FormItem>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormItem>
+                  <FormLabel>SIP Username</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Username/Account ID"
+                      value={sipUsername}
+                      onChange={(e) => setSipUsername(e.target.value)}
+                    />
+                  </FormControl>
+                </FormItem>
+                
+                <FormItem>
+                  <FormLabel>SIP Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Password/API Key"
+                      value={sipPassword}
+                      onChange={(e) => setSipPassword(e.target.value)}
+                    />
+                  </FormControl>
+                </FormItem>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormItem>
+                  <FormLabel>SIP Host</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Host/Server (e.g., sip.provider.com)"
+                      value={sipHost}
+                      onChange={(e) => setSipHost(e.target.value)}
+                    />
+                  </FormControl>
+                </FormItem>
+                
+                <FormItem>
+                  <FormLabel>SIP Port</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Port (default: 5060)"
+                      value={sipPort}
+                      onChange={(e) => setSipPort(e.target.value)}
+                    />
+                  </FormControl>
+                </FormItem>
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="flex justify-between">
