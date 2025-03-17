@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Phone } from "lucide-react";
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -30,8 +30,10 @@ export const Navbar = () => {
           to="/" 
           className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"
         >
-          <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white">D</span>
-          Dandy
+          <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white">
+            <Phone size={16} />
+          </span>
+          Dandy Dialer
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">

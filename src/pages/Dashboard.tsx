@@ -5,16 +5,18 @@ import { DashboardNav } from "@/components/DashboardNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { AudioWaveform, ContactIcon, PhoneForwarded, Server, BarChart3, PlusCircle } from "lucide-react";
+import { AudioWaveform, ContactIcon, PhoneForwarded, Server, BarChart3, PlusCircle, Phone } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import BackgroundDialer from "@/components/BackgroundDialer";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -54,7 +56,25 @@ const Dashboard = () => {
               <DashboardNav />
             </div>
             <div className="md:w-3/4">
-              <h1 className="text-3xl font-bold mb-6">Campaign Analytics</h1>
+              <div className="flex items-center justify-between mb-6">
+                <h1 className="text-3xl font-bold">Campaign Analytics</h1>
+                <div className="flex space-x-2">
+                  <Button 
+                    variant={activeTab === 'overview' ? 'default' : 'outline'} 
+                    size="sm" 
+                    onClick={() => setActiveTab('overview')}
+                  >
+                    Overview
+                  </Button>
+                  <Button 
+                    variant={activeTab === 'dialer' ? 'default' : 'outline'} 
+                    size="sm" 
+                    onClick={() => setActiveTab('dialer')}
+                  >
+                    Quick Dial
+                  </Button>
+                </div>
+              </div>
               
               {isLoading ? (
                 <div className="flex justify-center items-center h-64">
@@ -64,9 +84,11 @@ const Dashboard = () => {
                 <Card className="border-dashed border-2 border-border">
                   <CardContent className="py-12">
                     <div className="text-center space-y-6">
-                      <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground" />
+                      <div className="mx-auto h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Phone className="h-12 w-12 text-primary" />
+                      </div>
                       <div className="space-y-2">
-                        <h3 className="text-xl font-medium">No campaigns yet</h3>
+                        <h3 className="text-xl font-medium">Start making calls</h3>
                         <p className="text-muted-foreground">
                           Create your first campaign to start making automated calls.
                         </p>
@@ -80,6 +102,8 @@ const Dashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
+              ) : activeTab === 'dialer' ? (
+                <BackgroundDialer campaignId={campaigns[0]?.id || "demo"} />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card>
