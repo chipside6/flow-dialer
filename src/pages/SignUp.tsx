@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ArrowRight, Mail, Globe } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Navbar } from "@/components/Navbar";
+import { supabase } from "@/integrations/supabase/client";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -43,19 +46,30 @@ const SignUp = () => {
     setIsLoading(true);
     
     try {
-      // In a real app, connect to your authentication provider here
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        }
+      });
+      
+      if (error) throw error;
       
       toast({
         title: "Account created!",
-        description: "Welcome to Dandy! You can now make a test call.",
+        description: "Welcome to Dandy! Please check your email to confirm your account.",
       });
       
-      navigate("/");
-    } catch (error) {
+      // Redirect to dashboard but user will need to verify email first
+      navigate("/dashboard");
+    } catch (error: any) {
       toast({
         title: "Sign up failed",
-        description: "There was a problem creating your account.",
+        description: error.message || "There was a problem creating your account.",
         variant: "destructive",
       });
     } finally {
@@ -67,22 +81,21 @@ const SignUp = () => {
     setIsLoading(true);
     
     try {
-      // In a real app, connect to your Google auth provider here
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Google sign-in successful!",
-        description: "Welcome to Dandy! You can now make a test call.",
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
       });
       
-      navigate("/");
-    } catch (error) {
+      if (error) throw error;
+      
+    } catch (error: any) {
       toast({
         title: "Google sign-in failed",
-        description: "There was a problem signing in with Google.",
+        description: error.message || "There was a problem signing in with Google.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -123,6 +136,17 @@ const SignUp = () => {
               </div>
               
               <form onSubmit={handleSignUpWithEmail} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="John Doe"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input

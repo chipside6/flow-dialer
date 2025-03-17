@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ArrowRight, Globe } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Navbar } from "@/components/Navbar";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,19 +23,23 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // In a real app, connect to your authentication provider here
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
       
       toast({
         title: "Logged in successfully!",
         description: "Welcome back to Dandy.",
       });
       
-      navigate("/");
-    } catch (error) {
+      navigate("/dashboard");
+    } catch (error: any) {
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: error.message || "Please check your credentials and try again.",
         variant: "destructive",
       });
     } finally {
@@ -46,22 +51,21 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      // In a real app, connect to your Google auth provider here
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Google sign-in successful!",
-        description: "Welcome back to Dandy.",
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
       });
       
-      navigate("/");
-    } catch (error) {
+      if (error) throw error;
+      
+    } catch (error: any) {
       toast({
         title: "Google sign-in failed",
-        description: "There was a problem signing in with Google.",
+        description: error.message || "There was a problem signing in with Google.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
