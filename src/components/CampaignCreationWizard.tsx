@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,10 +63,20 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setCampaign(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    if (name === "timezone") {
+      setCampaign(prev => ({
+        ...prev,
+        schedule: {
+          ...prev.schedule,
+          timezone: value
+        }
+      }));
+    } else {
+      setCampaign(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleNext = () => {
@@ -279,7 +288,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
                 <Label htmlFor="timezone">Timezone</Label>
                 <Select
                   value={campaign.schedule.timezone}
-                  onValueChange={(value) => handleSelectChange("schedule", {...campaign.schedule, timezone: value})}
+                  onValueChange={(value) => handleSelectChange("timezone", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a timezone" />
