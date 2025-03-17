@@ -35,7 +35,7 @@ export const asteriskService = {
           transferNumber,
           sipProviderId,
           greetingFile,
-          maxConcurrentCalls: maxConcurrentCalls || 10
+          maxConcurrentCalls: maxConcurrentCalls || 1  // Changed from 10 to 1
         }),
       });
       

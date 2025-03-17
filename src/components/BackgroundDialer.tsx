@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,7 +39,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
   const [selectedSipProvider, setSelectedSipProvider] = useState<string>("");
   const [selectedContactList, setSelectedContactList] = useState<string>("");
   const [transferNumber, setTransferNumber] = useState<string>("");
-  const [maxConcurrentCalls, setMaxConcurrentCalls] = useState<string>("10");
+  const [maxConcurrentCalls, setMaxConcurrentCalls] = useState<string>("1");
   const [greetingFile, setGreetingFile] = useState<string>("greeting.wav");
   
   const [isDialing, setIsDialing] = useState<boolean>(false);
@@ -251,7 +250,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
                   type="number"
                   min="1"
                   max="50"
-                  placeholder="10"
+                  placeholder="1"
                   value={maxConcurrentCalls}
                   onChange={(e) => setMaxConcurrentCalls(e.target.value)}
                 />
