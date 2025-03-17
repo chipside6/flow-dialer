@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -64,7 +63,6 @@ const plans = [
     features: [
       "Unlimited calls",
       "Unlimited campaigns",
-      "1000 contacts per campaign",
       "Edit or change assigned contact lists",
       "Call recording & transcription",
       "Advanced analytics",

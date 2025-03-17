@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -54,7 +53,6 @@ const plans = [
     features: [
       "Unlimited calls",
       "Unlimited campaigns",
-      "1000 contacts per campaign",
       "Edit or change assigned contact lists",
       "Call recording & transcription",
       "Advanced analytics",
