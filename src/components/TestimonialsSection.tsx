@@ -3,25 +3,25 @@ import { useRef, useState, useEffect } from 'react';
 
 const testimonials = [
   {
-    quote: "Dandy Dialer has completely transformed how I stay in touch with clients. The interface is beautiful and the call quality is exceptional.",
+    quote: "Flow Dialer has completely transformed how I stay in touch with clients. The interface is beautiful and the call quality is exceptional.",
     author: "Sarah Johnson",
     role: "Marketing Director",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&h=100&q=80"
   },
   {
-    quote: "I've tried many calling apps, but nothing comes close to the elegance and functionality of Dandy Dialer. It's in a league of its own.",
+    quote: "I've tried many calling apps, but nothing comes close to the elegance and functionality of Flow Dialer. It's in a league of its own.",
     author: "Michael Chen",
     role: "Product Designer",
     avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&h=100&q=80"
   },
   {
-    quote: "The attention to detail in Dandy Dialer is remarkable. Every interaction feels intentional and delightful. It's a joy to use daily.",
+    quote: "The attention to detail in Flow Dialer is remarkable. Every interaction feels intentional and delightful. It's a joy to use daily.",
     author: "Emily Rodriguez",
     role: "UX Researcher",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&h=100&q=80"
   },
   {
-    quote: "As someone who makes dozens of calls daily, I can't imagine going back to any other platform. Dandy Dialer is simply perfect.",
+    quote: "As someone who makes dozens of calls daily, I can't imagine going back to any other platform. Flow Dialer is simply perfect.",
     author: "David Wilson",
     role: "Sales Executive",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&h=100&q=80"
@@ -48,7 +48,7 @@ export const TestimonialsSection = () => {
             Loved by People Worldwide
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Join thousands of satisfied users who have transformed their communication experience with Dandy Dialer.
+            Join thousands of satisfied users who have transformed their communication experience with Flow Dialer.
           </p>
         </div>
         
