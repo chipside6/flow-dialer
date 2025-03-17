@@ -5,7 +5,7 @@ export const Footer = () => {
   return (
     <footer className="bg-secondary/50 py-16 px-6 md:px-10">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <div className="space-y-4">
             <Link 
               to="/" 
@@ -24,28 +24,7 @@ export const Footer = () => {
             <ul className="space-y-3">
               <FooterLink to="/features">Features</FooterLink>
               <FooterLink to="/pricing">Pricing</FooterLink>
-              <FooterLink to="/integrations">Integrations</FooterLink>
-              <FooterLink to="/changelog">Changelog</FooterLink>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4">Resources</h3>
-            <ul className="space-y-3">
-              <FooterLink to="/support">Support</FooterLink>
-              <FooterLink to="/docs">Documentation</FooterLink>
-              <FooterLink to="/guides">Guides</FooterLink>
-              <FooterLink to="/api">API</FooterLink>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold mb-4">Company</h3>
-            <ul className="space-y-3">
-              <FooterLink to="/about">About</FooterLink>
-              <FooterLink to="/blog">Blog</FooterLink>
-              <FooterLink to="/careers">Careers</FooterLink>
-              <FooterLink to="/contact">Contact</FooterLink>
+              <FooterLink to="/support">Contact</FooterLink>
             </ul>
           </div>
         </div>
