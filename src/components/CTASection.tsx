@@ -35,10 +35,6 @@ export const CTASection = () => {
               </Link>
             </Button>
           </div>
-          
-          <p className="mt-8 text-sm text-white/70">
-            No credit card required
-          </p>
         </div>
       </div>
     </section>

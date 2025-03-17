@@ -59,10 +59,6 @@ export const HeroSection = () => {
                 </Link>
               </Button>
             </div>
-            
-            <div className="mt-8 text-sm text-muted-foreground animate-slide-up opacity-0" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
-              No credit card required
-            </div>
           </div>
           
           <div className="flex-1 w-full max-w-md lg:max-w-xl mx-auto" ref={phoneRef}>
