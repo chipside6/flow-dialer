@@ -1,75 +1,49 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/components/ui/use-toast";
-import { ArrowRight, Mail, Globe } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Navbar } from "@/components/Navbar";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { Loader2 } from 'lucide-react';
 
 const SignUp = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { signUp, signInWithGoogle } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSignUpWithEmail = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!agreeToTerms) {
-      toast({
-        title: "Terms Required",
-        description: "You must agree to the terms and conditions to continue.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     setIsLoading(true);
-    
+
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        }
+      const { error } = await signUp(email, password, {
+        full_name: fullName,
+        company_name: companyName
       });
-      
-      if (error) throw error;
-      
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
       toast({
-        title: "Account created!",
-        description: "Welcome to Dandy! Please check your email to confirm your account.",
+        title: "Account created",
+        description: "Please check your email for a confirmation link.",
       });
-      
-      // Redirect to dashboard but user will need to verify email first
-      navigate("/dashboard");
+
+      // Navigate to login so they can sign in after confirmation
+      navigate('/login');
     } catch (error: any) {
       toast({
-        title: "Sign up failed",
-        description: error.message || "There was a problem creating your account.",
+        title: "Signup failed",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -77,149 +51,125 @@ const SignUp = () => {
     }
   };
 
-  const handleSignUpWithGoogle = async () => {
-    setIsLoading(true);
-    
+  const handleGoogleSignUp = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`
-        }
-      });
-      
-      if (error) throw error;
-      
+      await signInWithGoogle();
     } catch (error: any) {
       toast({
-        title: "Google sign-in failed",
-        description: error.message || "There was a problem signing in with Google.",
+        title: "Google signup failed",
+        description: error.message,
         variant: "destructive",
       });
-      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="py-32 px-6 md:px-10">
-        <div className="max-w-md mx-auto">
-          <Card className="border-border/40 shadow-lg">
-            <CardHeader className="space-y-1 text-center">
-              <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-              <CardDescription>
-                Get started with a free test call
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button
-                variant="outline"
-                type="button"
-                className="w-full"
-                onClick={handleSignUpWithGoogle}
-                disabled={isLoading}
-              >
-                <Globe className="mr-2 h-4 w-4" />
-                Sign up with Google
-              </Button>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-              
-              <form onSubmit={handleSignUpWithEmail} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="John Doe"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="example@email.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="terms"
-                    checked={agreeToTerms}
-                    onCheckedChange={(checked) => 
-                      setAgreeToTerms(checked === true)
-                    }
-                  />
-                  <label
-                    htmlFor="terms"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    I agree to the{" "}
-                    <a href="#" className="text-primary hover:underline">
-                      terms and conditions
-                    </a>
-                  </label>
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full group"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Creating account..." : "Create Account"}
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </form>
-            </CardContent>
-            <CardFooter className="flex justify-center">
-              <div className="text-sm text-muted-foreground">
-                Already have an account?{" "}
-                <a
-                  href="/login"
-                  className="text-primary font-medium hover:underline"
-                >
-                  Log in
-                </a>
-              </div>
-            </CardFooter>
-          </Card>
-        </div>
-      </main>
+    <div className="container max-w-md mx-auto py-10">
+      <Card className="border border-border/40 shadow-sm">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-semibold text-center">
+            Create an account
+          </CardTitle>
+          <CardDescription className="text-center">
+            Enter your details below to create your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                placeholder="Your full name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="companyName">Company Name (Optional)</Label>
+              <Input
+                id="companyName"
+                placeholder="Your company"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Create a strong password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                "Sign Up"
+              )}
+            </Button>
+          </form>
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={handleGoogleSignUp}
+            disabled={isLoading}
+          >
+            <svg
+              className="mr-2 h-4 w-4"
+              aria-hidden="true"
+              focusable="false"
+              data-prefix="fab"
+              data-icon="google"
+              role="img"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 488 512"
+            >
+              <path
+                fill="currentColor"
+                d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
+              ></path>
+            </svg>
+            Sign up with Google
+          </Button>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <p className="text-sm text-center text-muted-foreground">
+            Already have an account?{" "}
+            <Link to="/login" className="text-primary hover:underline">
+              Login
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

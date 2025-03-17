@@ -9,7 +9,323 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      campaigns: {
+        Row: {
+          answered_calls: number | null
+          contact_list_id: string | null
+          created_at: string
+          description: string | null
+          failed_calls: number | null
+          greeting_file_name: string | null
+          greeting_file_url: string | null
+          id: string
+          progress: number | null
+          status: string | null
+          title: string
+          total_calls: number | null
+          transfer_number: string | null
+          transferred_calls: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answered_calls?: number | null
+          contact_list_id?: string | null
+          created_at?: string
+          description?: string | null
+          failed_calls?: number | null
+          greeting_file_name?: string | null
+          greeting_file_url?: string | null
+          id?: string
+          progress?: number | null
+          status?: string | null
+          title: string
+          total_calls?: number | null
+          transfer_number?: string | null
+          transferred_calls?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answered_calls?: number | null
+          contact_list_id?: string | null
+          created_at?: string
+          description?: string | null
+          failed_calls?: number | null
+          greeting_file_name?: string | null
+          greeting_file_url?: string | null
+          id?: string
+          progress?: number | null
+          status?: string | null
+          title?: string
+          total_calls?: number | null
+          transfer_number?: string | null
+          transferred_calls?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_contact_list_id_fkey"
+            columns: ["contact_list_id"]
+            isOneToOne: false
+            referencedRelation: "contact_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_list_items: {
+        Row: {
+          contact_id: string
+          contact_list_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          contact_id: string
+          contact_list_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          contact_id?: string
+          contact_list_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_list_items_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_list_items_contact_list_id_fkey"
+            columns: ["contact_list_id"]
+            isOneToOne: false
+            referencedRelation: "contact_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_lists: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          notes: string | null
+          phone_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          notes?: string | null
+          phone_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          notes?: string | null
+          phone_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      greeting_files: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          filename: string
+          id: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          filename: string
+          id?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          filename?: string
+          id?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sip_providers: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          host: string
+          id: string
+          name: string
+          password: string
+          port: number
+          updated_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          host: string
+          id?: string
+          name: string
+          password: string
+          port: number
+          updated_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          host?: string
+          id?: string
+          name?: string
+          password?: string
+          port?: number
+          updated_at?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan_id: string
+          plan_name: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan_id: string
+          plan_name: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan_id?: string
+          plan_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transfer_numbers: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          phone_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          phone_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          phone_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

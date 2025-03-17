@@ -1,85 +1,170 @@
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
-import { useToast } from '@/components/ui/use-toast';
+import type { User, AuthResponse } from '@supabase/supabase-js';
+import { toast } from '@/components/ui/use-toast';
 
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
+  profile: any | null;
   isLoading: boolean;
+  signUp: (email: string, password: string, metadata?: any) => Promise<AuthResponse>;
+  signIn: (email: string, password: string) => Promise<AuthResponse>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (data: any) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  session: null,
-  isLoading: true,
-  signOut: async () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
+    // Check active session on mount
+    const checkSession = async () => {
+      setIsLoading(true);
       try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          throw error;
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          setUser(session.user);
+          // Fetch user profile
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          setProfile(profileData);
         }
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
       } catch (error) {
-        console.error('Error getting initial session:', error);
+        console.error('Error checking auth session:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    getInitialSession();
+    checkSession();
 
-    // Set up auth state listener
+    // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      async (event, session) => {
+        if (session?.user) {
+          setUser(session.user);
+          // Fetch user profile when auth state changes
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          setProfile(profileData);
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
         setIsLoading(false);
       }
     );
 
+    // Cleanup subscription
     return () => {
       subscription.unsubscribe();
     };
   }, []);
 
-  const signOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
+  const signUp = async (email: string, password: string, metadata?: any) => {
+    return await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: metadata,
+      }
+    });
+  };
+
+  const signIn = async (email: string, password: string) => {
+    return await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+  };
+
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      }
+    });
+
+    if (error) {
       toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of your account."
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error signing out",
-        description: error.message || "An error occurred while signing out.",
-        variant: "destructive"
+        title: "Authentication error",
+        description: error.message,
+        variant: "destructive",
       });
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ user, session, isLoading, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
 
-export const useAuth = () => useContext(AuthContext);
+  const updateProfile = async (data: any) => {
+    try {
+      if (!user) return;
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update(data)
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      // Update local profile state
+      setProfile({
+        ...profile,
+        ...data
+      });
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error updating profile",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const value = {
+    user,
+    profile,
+    isLoading,
+    signUp,
+    signIn,
+    signInWithGoogle,
+    signOut,
+    updateProfile,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
