@@ -10,8 +10,9 @@ interface DialContactsOptions {
   maxConcurrentCalls?: number;
 }
 
-// This service would connect to your backend which controls Asterisk
-// In a real implementation, this would make API calls to your server
+// Configuration for connecting to your Asterisk server
+const ASTERISK_API_URL = "http://your-asterisk-server/api"; // Replace with your actual Asterisk API URL
+
 export const asteriskService = {
   /**
    * Start dialing a contact list in the background via Asterisk
@@ -21,16 +22,45 @@ export const asteriskService = {
     
     console.log("Starting dial job with options:", options);
     
-    // In a real implementation, this would be an API call to your backend
-    // which would then control Asterisk via AMI or ARI
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Simulate successful response with a job ID
-    return {
-      jobId: `job-${Date.now()}`
-    };
+    try {
+      // Make an actual API call to your backend which controls Asterisk
+      const response = await fetch(`${ASTERISK_API_URL}/start-dialing`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contactListId,
+          campaignId,
+          transferNumber,
+          sipProviderId,
+          greetingFile,
+          maxConcurrentCalls: maxConcurrentCalls || 10
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to start dialing');
+      }
+      
+      const data = await response.json();
+      return {
+        jobId: data.jobId
+      };
+    } catch (error) {
+      console.error("Error starting dialing job:", error);
+      toast({
+        title: "Connection Error",
+        description: "Could not connect to Asterisk server. Please check your server configuration.",
+        variant: "destructive",
+      });
+      
+      // Return a fallback job ID to prevent UI errors
+      return {
+        jobId: `offline-${Date.now()}`
+      };
+    }
   },
   
   /**
@@ -39,10 +69,28 @@ export const asteriskService = {
   stopDialing: async (jobId: string): Promise<{ success: boolean }> => {
     console.log("Stopping dial job:", jobId);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    return { success: true };
+    try {
+      const response = await fetch(`${ASTERISK_API_URL}/stop-dialing/${jobId}`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to stop dialing');
+      }
+      
+      const data = await response.json();
+      return { success: data.success };
+    } catch (error) {
+      console.error("Error stopping dialing job:", error);
+      toast({
+        title: "Connection Error",
+        description: "Could not connect to Asterisk server to stop dialing.",
+        variant: "destructive",
+      });
+      
+      return { success: false };
+    }
   },
   
   /**
@@ -57,21 +105,31 @@ export const asteriskService = {
   }> => {
     console.log("Getting status for job:", jobId);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 600));
-    
-    // Simulate random progress
-    const totalCalls = Math.floor(Math.random() * 100) + 50;
-    const completedCalls = Math.floor(Math.random() * totalCalls);
-    const answeredCalls = Math.floor(completedCalls * 0.7);
-    const failedCalls = Math.floor(completedCalls * 0.3);
-    
-    return {
-      status: 'running',
-      totalCalls,
-      completedCalls,
-      answeredCalls,
-      failedCalls
-    };
+    try {
+      const response = await fetch(`${ASTERISK_API_URL}/dialing-status/${jobId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to get dialing status');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error getting dialing status:", error);
+      toast({
+        title: "Connection Error",
+        description: "Could not retrieve status from Asterisk server.",
+        variant: "destructive",
+      });
+      
+      // Return fallback status to prevent UI errors
+      return {
+        status: 'failed',
+        totalCalls: 0,
+        completedCalls: 0,
+        answeredCalls: 0,
+        failedCalls: 0
+      };
+    }
   }
 };
