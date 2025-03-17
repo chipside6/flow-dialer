@@ -29,7 +29,7 @@ export const CTASection = () => {
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="rounded-full px-8 text-white border-white/30 hover:bg-white/10 hover:text-white" asChild>
+            <Button size="lg" variant="outline" className="rounded-full px-8 text-primary-foreground border-white/30 bg-primary/20 hover:bg-white/20 hover:text-white" asChild>
               <Link to="/support">
                 Contact Sales
               </Link>
