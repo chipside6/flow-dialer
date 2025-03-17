@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -36,6 +37,7 @@ const plans = [
     price: 149,
     description: "For organizations with advanced needs",
     features: [
+      "Unlimited calls per campaign",
       "Unlimited campaigns per month",
       "Edit or change assigned contact lists",
       "Call recording & transcription",

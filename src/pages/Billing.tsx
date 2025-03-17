@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -46,6 +47,7 @@ const plans = [
     price: 149,
     description: "For organizations with advanced needs",
     features: [
+      "Unlimited calls per campaign",
       "Unlimited campaigns per month",
       "Edit or change assigned contact lists",
       "Call recording & transcription",
