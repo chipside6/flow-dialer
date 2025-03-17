@@ -3,34 +3,34 @@ import { Check } from "lucide-react";
 
 const features = [
   {
-    title: "Seamless Calling",
-    description: "Make crystal-clear calls to anyone, anywhere with our state-of-the-art audio technology.",
-    icon: "📱"
+    title: "Campaign Automation",
+    description: "Set up and forget with our automated campaign system that handles calls without manual intervention.",
+    icon: "🤖"
   },
   {
-    title: "Smart Contact Management",
-    description: "Organize your contacts with intelligent grouping and instant search capabilities.",
-    icon: "👥"
+    title: "Real-time Analytics",
+    description: "Track campaign performance with comprehensive analytics dashboards showing conversion rates and call metrics.",
+    icon: "📊"
   },
   {
-    title: "Personalized Experience",
-    description: "Customize your interface and settings to match your unique communication style.",
-    icon: "✨"
-  },
-  {
-    title: "Secure Conversations",
-    description: "End-to-end encryption ensures your calls and messages remain private and secure.",
-    icon: "🔒"
-  },
-  {
-    title: "Cross-Platform Sync",
-    description: "Seamlessly transition between devices without missing a beat in your conversations.",
+    title: "Intelligent Call Routing",
+    description: "Route calls to the right team members based on custom rules, availability, and expertise.",
     icon: "🔄"
   },
   {
-    title: "Smart Notifications",
-    description: "Receive intelligent alerts that know when not to disturb you.",
-    icon: "🔔"
+    title: "Voice Recognition",
+    description: "Advanced AI analyzes call content to provide insights and automatically categorize responses.",
+    icon: "🎤"
+  },
+  {
+    title: "Multi-channel Integration",
+    description: "Connect your calling campaigns with email, SMS, and other communication channels for comprehensive outreach.",
+    icon: "📱"
+  },
+  {
+    title: "Compliance Management",
+    description: "Stay compliant with calling regulations with built-in compliance tools and do-not-call list integration.",
+    icon: "✅"
   }
 ];
 
@@ -40,10 +40,10 @@ export const FeaturesSection = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-6">
-            Designed for How You Communicate Today
+            Advanced Calling Campaign Features
           </h2>
           <p className="text-lg text-muted-foreground mb-16">
-            Every feature is thoughtfully crafted to enhance your calling experience with beautiful, intuitive design.
+            Our platform provides powerful tools specifically designed to make your calling campaigns more effective and efficient.
           </p>
         </div>
         
