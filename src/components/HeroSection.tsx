@@ -43,7 +43,7 @@ export const HeroSection = () => {
             </h1>
             
             <p className="mt-6 text-lg md:text-xl text-muted-foreground animate-slide-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
-              A cutting-edge communication tool designed with a beautiful interface to transform the way you connect with others.
+              A cutting-edge communication tool with a simple interface to transform the way you connect with others.
             </p>
             
             <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start animate-slide-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
