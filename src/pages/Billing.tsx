@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 // Plans from the pricing section
 const plans = [
@@ -78,7 +79,7 @@ const plans = [
 const Billing = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isAffiliate } = useAuth();
+  const { isAffiliate, user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   
@@ -87,13 +88,27 @@ const Billing = () => {
     setShowPaymentForm(true);
   };
   
-  const handlePaymentSuccess = (paymentDetails: any) => {
+  const handlePaymentSuccess = async (paymentDetails: any) => {
     toast({
       title: "Subscription Activated",
       description: `You're now subscribed to the ${selectedPlan?.name} plan!`,
     });
     
-    // In a real app, this would update the user's subscription status in the database
+    // In a real app, save subscription to database
+    if (user && selectedPlan) {
+      try {
+        await supabase.from('subscriptions').upsert({
+          user_id: user.id,
+          plan_id: selectedPlan.id,
+          plan_name: selectedPlan.name,
+          status: 'active',
+          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        });
+      } catch (error) {
+        console.error("Error saving subscription:", error);
+      }
+    }
+    
     setTimeout(() => {
       navigate("/dashboard");
     }, 2000);
@@ -158,7 +173,7 @@ const Billing = () => {
           </div>
 
           {!showPaymentForm ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {plans.filter(plan => plan.price > 0).map((plan) => (
                 <Card 
                   key={plan.id}

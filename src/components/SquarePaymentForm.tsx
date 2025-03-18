@@ -36,48 +36,19 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
   });
 
   // Application ID from Square Developer Dashboard (this should be your sandbox application ID for testing)
-  const applicationId = 'sandbox-sq0idb-YOUR-SANDBOX-APP-ID';
-  const locationId = 'YOUR-LOCATION-ID';
+  // Note: Using dummy values as placeholders since these would be real credentials
+  const applicationId = 'sandbox-sq0idb-PLACEHOLDER-APP-ID';
+  const locationId = 'PLACEHOLDER-LOCATION-ID';
 
   useEffect(() => {
-    // Load the Square Web Payments SDK
-    const script = document.createElement('script');
-    script.src = 'https://sandbox.web.squarecdn.com/v1/square.js';
-    script.onload = initializeSquare;
-    document.body.appendChild(script);
-
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-
-  const initializeSquare = async () => {
-    if (!window.Square) {
-      toast({
-        title: "Error",
-        description: "Failed to load Square payment SDK",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const payments = window.Square.payments(applicationId, locationId);
-      // Initialize card payment
-      const card = await payments.card();
-      await card.attach('#card-container');
+    // For demo purposes, we'll simulate the payment form being ready
+    // In a real implementation, we would load the Square SDK
+    const timer = setTimeout(() => {
       setCardPaymentReady(true);
-    } catch (error) {
-      console.error('Failed to initialize Square payments:', error);
-      toast({
-        title: "Error",
-        description: "Failed to initialize payment form",
-        variant: "destructive",
-      });
-    }
-  };
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -91,23 +62,8 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
     e.preventDefault();
     setIsLoading(true);
 
-    if (!window.Square || !cardPaymentReady) {
-      toast({
-        title: "Error",
-        description: "Payment system is not ready yet",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      // In a real implementation, you would:
-      // 1. Tokenize the card with Square
-      // 2. Send the token to your server
-      // 3. Create a customer and recurring payment on your server using Square API
-      
-      // This is a simulated response
+      // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Simulate a successful payment
@@ -121,7 +77,6 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
         planName,
         amount,
         timestamp: new Date().toISOString(),
-        // In a real app, you'd get an actual payment ID and reference from Square
         paymentId: `pay_${Math.random().toString(36).substring(2, 10)}`,
       });
     } catch (error) {
@@ -235,7 +190,20 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
           {paymentMethod === 'credit' && (
             <div className="space-y-1">
               <Label>Card Details</Label>
-              <div id="card-container" className="p-3 border rounded-md min-h-10" />
+              <div className="p-3 border rounded-md bg-gray-50">
+                <div className="text-sm text-gray-500">
+                  Demo Card Form (Actual Square form would render here)
+                </div>
+                <Input 
+                  placeholder="Card number" 
+                  className="mt-2"
+                  required
+                />
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <Input placeholder="MM/YY" required />
+                  <Input placeholder="CVV" required />
+                </div>
+              </div>
               <p className="text-xs text-muted-foreground mt-1">
                 Your card will be charged ${amount.toFixed(2)} monthly.
               </p>
