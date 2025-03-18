@@ -76,7 +76,7 @@ export function ProfileInformationForm() {
   };
 
   return (
-    <Card className="w-full overflow-hidden max-w-full">
+    <Card>
       <CardHeader>
         <CardTitle>Profile Information</CardTitle>
         <CardDescription>
@@ -93,7 +93,7 @@ export function ProfileInformationForm() {
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input {...field} className="max-w-full" />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -107,9 +107,9 @@ export function ProfileInformationForm() {
                 <FormItem>
                   <FormLabel>Company Name</FormLabel>
                   <FormControl>
-                    <Input {...field} className="max-w-full" />
+                    <Input {...field} />
                   </FormControl>
-                  <FormDescription className="text-xs">
+                  <FormDescription>
                     Optional: Enter your company or organization name
                   </FormDescription>
                   <FormMessage />
@@ -124,9 +124,9 @@ export function ProfileInformationForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input {...field} type="email" className="max-w-full" />
+                    <Input {...field} type="email" />
                   </FormControl>
-                  <FormDescription className="text-xs">
+                  <FormDescription>
                     Changing your email will require verification
                   </FormDescription>
                   <FormMessage />
@@ -135,7 +135,7 @@ export function ProfileInformationForm() {
             />
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isUpdating} className="w-full sm:w-auto">
+            <Button type="submit" disabled={isUpdating}>
               {isUpdating ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

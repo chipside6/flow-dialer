@@ -59,7 +59,7 @@ export function PasswordChangeForm() {
   };
 
   return (
-    <Card className="w-full overflow-hidden max-w-full">
+    <Card>
       <CardHeader>
         <CardTitle>Change Password</CardTitle>
         <CardDescription>
@@ -75,7 +75,6 @@ export function PasswordChangeForm() {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="New password"
-            className="max-w-full"
           />
         </div>
         
@@ -87,7 +86,6 @@ export function PasswordChangeForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm new password"
-            className="max-w-full"
           />
         </div>
         
@@ -95,11 +93,10 @@ export function PasswordChangeForm() {
           <p className="text-sm font-medium text-destructive">{passwordError}</p>
         )}
       </CardContent>
-      <CardFooter className="flex flex-wrap">
+      <CardFooter>
         <Button 
           onClick={handlePasswordChange} 
           disabled={isChangingPassword}
-          className="w-full sm:w-auto"
         >
           {isChangingPassword ? (
             <>
