@@ -38,6 +38,19 @@ export const Navbar = () => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
+  // Add a body class when menu is open to prevent scrolling
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.classList.remove('menu-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('menu-open');
+    };
+  }, [isMobileMenuOpen]);
+
   if (isDashboard) {
     return (
       <header 
@@ -72,54 +85,56 @@ export const Navbar = () => {
   }
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 md:px-10 ${
-        isScrolled || isMobileMenuOpen
-          ? 'py-3 bg-white/95 backdrop-blur-md shadow-sm dark:bg-background/95' 
-          : 'py-5 bg-transparent'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link 
-          to="/" 
-          className="flex items-center gap-2 text-xl font-display font-bold tracking-tight z-50 relative"
-        >
-          <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white">
-            <Phone size={16} />
-          </span>
-          Flow Dialer
-        </Link>
+    <>
+      <header 
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 md:px-10 ${
+          isScrolled || isMobileMenuOpen
+            ? 'py-3 bg-white/95 backdrop-blur-md shadow-sm dark:bg-background/95' 
+            : 'py-5 bg-transparent'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Link 
+            to="/" 
+            className="flex items-center gap-2 text-xl font-display font-bold tracking-tight z-50 relative"
+          >
+            <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white">
+              <Phone size={16} />
+            </span>
+            Flow Dialer
+          </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
-          <NavLinks />
-        </nav>
+          <nav className="hidden md:flex items-center gap-8">
+            <NavLinks />
+          </nav>
 
-        <div className="hidden md:flex items-center gap-4">
-          <Button variant="outline" size="sm" className="rounded-full px-4 transition-all duration-300" asChild>
-            <Link to="/login">Log In</Link>
-          </Button>
-          <Button size="sm" className="rounded-full px-4 transition-all duration-300" asChild>
-            <Link to="/signup">Get Started</Link>
-          </Button>
+          <div className="hidden md:flex items-center gap-4">
+            <Button variant="outline" size="sm" className="rounded-full px-4 transition-all duration-300" asChild>
+              <Link to="/login">Log In</Link>
+            </Button>
+            <Button size="sm" className="rounded-full px-4 transition-all duration-300" asChild>
+              <Link to="/signup">Get Started</Link>
+            </Button>
+          </div>
+
+          <button 
+            className="md:hidden p-2 z-50 relative"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+      </header>
 
-        <button 
-          className="md:hidden p-2 z-50 relative"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
+      {/* Mobile menu - moved outside header for better positioning */}
       {isMobileMenuOpen && (
-        <div className="mobile-menu md:hidden fixed inset-0 top-0 z-40 bg-white dark:bg-background">
-          <div className="flex flex-col h-full justify-center items-center px-8">
-            <nav className="flex flex-col gap-6 items-center w-full mb-8">
+        <div className="mobile-menu-container">
+          <div className="mobile-menu-content">
+            <nav className="mobile-menu-nav">
               <NavLinks mobile onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
-            <div className="flex flex-col gap-4 w-full max-w-xs">
+            <div className="mobile-menu-buttons">
               <Button variant="outline" className="w-full rounded-full py-6" asChild>
                 <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                   Log In
@@ -134,13 +149,13 @@ export const Navbar = () => {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 };
 
 const NavLinks = ({ mobile = false, onClick }: { mobile?: boolean; onClick?: () => void }) => {
   const linkClass = mobile 
-    ? "text-2xl font-medium py-4 block text-center w-full" 
+    ? "mobile-nav-link" 
     : "text-sm font-medium hover:text-primary transition-colors";
 
   return (
@@ -160,4 +175,3 @@ const NavLinks = ({ mobile = false, onClick }: { mobile?: boolean; onClick?: () 
     </>
   );
 };
-
