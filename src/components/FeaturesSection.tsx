@@ -21,12 +21,6 @@ const features = [
     imageUrl: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=800&h=600&q=80"
   },
   {
-    title: "Voice Recognition",
-    description: "Advanced AI analyzes call content to provide insights and automatically categorize responses.",
-    icon: "🎤",
-    imageUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=600&q=80"
-  },
-  {
     title: "Multi-channel Integration",
     description: "Connect your calling campaigns with email, SMS, and other communication channels for comprehensive outreach.",
     icon: "📱",
