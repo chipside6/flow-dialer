@@ -25,20 +25,20 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 gap-3 mb-6 w-full">
+          <TabsList className="grid grid-cols-2 mb-6 w-full">
             <TabsTrigger 
               value="upload" 
-              className="px-2 py-2.5 min-h-[44px] flex items-center justify-center"
+              className="px-2 py-2.5 text-sm whitespace-normal flex items-center justify-center h-auto min-h-[44px]"
             >
               <Upload className="h-4 w-4 mr-1.5 flex-shrink-0" />
-              <span className="whitespace-nowrap">Upload File</span>
+              <span>Upload File</span>
             </TabsTrigger>
             <TabsTrigger 
               value="record" 
-              className="px-2 py-2.5 min-h-[44px] flex items-center justify-center"
+              className="px-2 py-2.5 text-sm whitespace-normal flex items-center justify-center h-auto min-h-[44px]"
             >
               <Mic className="h-4 w-4 mr-1.5 flex-shrink-0" />
-              <span className="whitespace-nowrap">Record Audio</span>
+              <span>Record Audio</span>
             </TabsTrigger>
           </TabsList>
           
