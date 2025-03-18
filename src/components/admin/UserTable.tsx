@@ -32,6 +32,8 @@ interface UserTableProps {
 }
 
 export function UserTable({ users, toggleAffiliate, isLoading }: UserTableProps) {
+  console.log("UserTable - Rendering with users:", users?.length || 0);
+  
   return (
     <div className="rounded-md border">
       <Table>
@@ -54,9 +56,13 @@ export function UserTable({ users, toggleAffiliate, isLoading }: UserTableProps)
           ) : (
             users.map((user) => (
               <TableRow key={user.id}>
-                <TableCell className="font-mono text-xs">{user.id.split('-')[0]}...</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                <TableCell className="font-mono text-xs">
+                  {user.id ? user.id.split('-')[0] + '...' : 'N/A'}
+                </TableCell>
+                <TableCell>{user.email || 'No Email'}</TableCell>
+                <TableCell>
+                  {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                </TableCell>
                 <TableCell>
                   {user.profile?.is_admin && (
                     <Badge variant="secondary" className="mr-1">Admin</Badge>

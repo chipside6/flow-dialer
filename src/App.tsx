@@ -40,8 +40,8 @@ const queryClient = new QueryClient({
   },
 });
 
-// Remove the App.css import which could be causing style conflicts
-// import "./App.css"; 
+// Import the App.css for styling
+import "./App.css"; 
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

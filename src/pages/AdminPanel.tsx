@@ -37,22 +37,23 @@ const AdminPanel = () => {
     };
   }, []);
 
-  // Fetch all users with their profiles
+  // Fetch all users with their profiles - fixed to use the ListUsersResponse method
   const { data: users, isLoading, error } = useQuery({
     queryKey: ["admin", "users"],
     queryFn: async () => {
       console.log("AdminPanel - Fetching users data");
       
       try {
-        // Get all users
-        const { data: users, error } = await supabase.auth.admin.listUsers();
+        // Get all users using the auth API
+        const { data, error } = await supabase.auth.admin.listUsers();
         
         if (error) {
           console.error("AdminPanel - Error fetching users:", error);
           throw error;
         }
         
-        console.log("AdminPanel - Users fetched:", users?.users?.length || 0);
+        const userList = data?.users || [];
+        console.log("AdminPanel - Users fetched:", userList.length);
         
         // Get all profiles
         const { data: profiles, error: profilesError } = await supabase
@@ -67,7 +68,7 @@ const AdminPanel = () => {
         console.log("AdminPanel - Profiles fetched:", profiles?.length || 0);
         
         // Join users with their profiles
-        const usersWithProfiles = users?.users?.map((user: User) => {
+        const usersWithProfiles = userList.map((user: User) => {
           // Find the profile that matches the user ID
           const profile = profiles?.find((p: ProfileData) => p.id === user.id);
           
@@ -83,8 +84,8 @@ const AdminPanel = () => {
           };
         });
         
-        console.log("AdminPanel - Users with profiles processed:", usersWithProfiles?.length || 0);
-        return usersWithProfiles || [];
+        console.log("AdminPanel - Users with profiles processed:", usersWithProfiles.length);
+        return usersWithProfiles;
       } catch (err) {
         console.error("AdminPanel - Error in queryFn:", err);
         throw err;
