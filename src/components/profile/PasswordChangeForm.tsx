@@ -4,7 +4,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { FormLabel } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -68,7 +68,7 @@ export function PasswordChangeForm() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <FormLabel htmlFor="new-password">New Password</FormLabel>
+          <Label htmlFor="new-password">New Password</Label>
           <Input
             id="new-password"
             type="password"
@@ -79,7 +79,7 @@ export function PasswordChangeForm() {
         </div>
         
         <div className="space-y-2">
-          <FormLabel htmlFor="confirm-password">Confirm Password</FormLabel>
+          <Label htmlFor="confirm-password">Confirm Password</Label>
           <Input
             id="confirm-password"
             type="password"
