@@ -18,9 +18,11 @@ const DashboardFallback = () => (
  * Dashboard page that uses the DashboardLayout wrapper
  */
 const Dashboard = () => {
+  console.log("Dashboard component rendering");
+  
   return (
     <DashboardLayout>
-      <div className="w-full">
+      <div className="w-full max-w-full">
         <Suspense fallback={<DashboardFallback />}>
           <DashboardContent />
         </Suspense>

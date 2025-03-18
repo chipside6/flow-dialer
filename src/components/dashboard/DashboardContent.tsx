@@ -19,6 +19,8 @@ export const DashboardContent = () => {
   const [loadingProgress, setLoadingProgress] = useState(45);
   const [loadingTimedOut, setLoadingTimedOut] = useState(false);
   
+  console.log("DashboardContent rendering", { isLoading, campaignsLength: campaigns?.length, error });
+  
   useEffect(() => {
     console.log("DashboardContent mounted, loading state:", isLoading);
     console.log("Campaigns data:", campaigns);
@@ -116,6 +118,9 @@ export const DashboardContent = () => {
 
     console.log("Rendering content for tab:", activeTab);
     
+    // Safely check if campaigns exists before trying to access its properties
+    const hasCampaigns = Array.isArray(campaigns) && campaigns.length > 0;
+    
     switch (activeTab) {
       case 'dialer':
         return (
@@ -131,7 +136,7 @@ export const DashboardContent = () => {
                 </div>
               </div>
             </div>
-            {campaigns && campaigns.length > 0 ? (
+            {hasCampaigns ? (
               <BackgroundDialer campaignId={campaigns[0]?.id} />
             ) : (
               <EmptyCampaignState />
@@ -157,7 +162,7 @@ export const DashboardContent = () => {
         );
       case 'overview':
       default:
-        return campaigns && campaigns.length > 0 ? <DashboardCards /> : <EmptyCampaignState />;
+        return hasCampaigns ? <DashboardCards /> : <EmptyCampaignState />;
     }
   };
 

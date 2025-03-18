@@ -25,6 +25,8 @@ export const useCampaigns = () => {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    console.log("useCampaigns hook initialized, user:", user?.id);
+    
     let isMounted = true;
     let timeoutId: NodeJS.Timeout;
     const maxRetries = 2;
@@ -123,6 +125,7 @@ export const useCampaigns = () => {
 
     // Cleanup function
     return () => {
+      console.log("useCampaigns cleanup");
       isMounted = false;
       clearTimeout(timeoutId);
       clearTimeout(loadingTimeout);
