@@ -24,6 +24,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
   const { user } = useAuth();
   const [step, setStep] = useState<WizardStep>("basics");
   const [campaign, setCampaign] = useState<CampaignData>({
+    id: `camp-${Date.now().toString(36)}`, // Generate a unique ID
     title: "",
     description: "",
     contactListId: "",
@@ -142,8 +143,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
     // Format campaign data for submission
     const newCampaign = {
       ...campaign,
-      id: `camp-${Date.now().toString(36)}`,
-      status: "pending",
+      status: "pending" as const, // Use type assertion to fix the status type
       progress: 0,
       totalCalls: contactLists.find(list => list.id === campaign.contactListId)?.name.includes("250") ? 250 : 50,
       answeredCalls: 0,

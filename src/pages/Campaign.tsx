@@ -20,7 +20,7 @@ const CampaignPage = () => {
     const campaignWithRequiredFields: Campaign = {
       id: newCampaign.id,
       title: newCampaign.title,
-      status: newCampaign.status || "pending",
+      status: (newCampaign.status as Campaign["status"]) || "pending",
       progress: newCampaign.progress || 0,
       totalCalls: newCampaign.totalCalls || 0,
       answeredCalls: newCampaign.answeredCalls || 0,

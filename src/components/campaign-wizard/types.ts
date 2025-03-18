@@ -11,7 +11,7 @@ export interface CampaignData {
     timezone: string;
     maxConcurrentCalls: number;
   };
-  status?: string;
+  status?: "pending" | "running" | "completed" | "paused";
   progress?: number;
   totalCalls?: number;
   answeredCalls?: number;
