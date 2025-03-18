@@ -46,18 +46,34 @@ serve(async (req) => {
     let userId;
 
     if (existingUser) {
-      console.log("Admin user already exists, updating status");
+      console.log("Admin user already exists, using existing user");
       userId = existingUser.id;
       
-      // Log more details about the existing user
       console.log("Existing user details:", {
         id: existingUser.id,
         email: existingUser.email,
         created_at: existingUser.created_at
       });
+      
+      // Try to update password for existing user
+      try {
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+          userId,
+          { password }
+        );
+        
+        if (updateError) {
+          console.error("Error updating existing user password:", updateError);
+        } else {
+          console.log("Updated password for existing user");
+        }
+      } catch (passwordUpdateError) {
+        console.error("Exception updating password:", passwordUpdateError);
+      }
+      
     } else {
       // Create the new user
-      console.log("Creating new admin user");
+      console.log("No existing admin user found, creating new one");
       const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
@@ -73,9 +89,6 @@ serve(async (req) => {
       userId = newUser.user.id;
     }
 
-    // Set the user as an admin in the profiles table
-    console.log("Updating profile for user:", userId);
-    
     // Check if profile already exists
     const { data: existingProfile, error: profileCheckError } = await supabaseAdmin
       .from('profiles')
@@ -85,22 +98,26 @@ serve(async (req) => {
       
     if (profileCheckError && profileCheckError.code !== 'PGRST116') { // PGRST116 is "not found" which is expected
       console.error("Error checking existing profile:", profileCheckError);
-      // We'll continue anyway to try to upsert
     } else {
       console.log("Existing profile check result:", existingProfile);
     }
     
+    // Set profile data and ensure we have the email field populated
+    const profileData = { 
+      id: userId, 
+      is_affiliate: true, 
+      is_admin: true,
+      full_name: 'Admin User',
+      email: email,
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log("Updating profile with data:", profileData);
+    
     // Update or create the profile
-    const { data: profileData, error: updateError } = await supabaseAdmin
+    const { data: updatedProfile, error: updateError } = await supabaseAdmin
       .from('profiles')
-      .upsert({ 
-        id: userId, 
-        is_affiliate: true, 
-        is_admin: true,
-        full_name: 'Admin User',
-        email: email,
-        updated_at: new Date().toISOString()
-      }, { 
+      .upsert(profileData, { 
         onConflict: 'id',
         returning: 'representation'
       });
@@ -110,14 +127,27 @@ serve(async (req) => {
       throw updateError;
     }
     
-    console.log("Admin user profile updated successfully:", profileData);
+    console.log("Admin user profile updated successfully:", updatedProfile);
+
+    // Double-check the profiles table to verify data was properly saved
+    const { data: verifyProfile, error: verifyError } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+      
+    if (verifyError) {
+      console.error("Error verifying profile update:", verifyError);
+    } else {
+      console.log("Verification of profile update:", verifyProfile);
+    }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: "Admin user created/updated successfully",
         userId: userId,
-        profile: profileData
+        profile: updatedProfile
       }),
       { 
         headers: { 

@@ -33,14 +33,27 @@ export function CreateAdminButton() {
       
       console.log("Admin user created response:", data);
       
-      // Force invalidate and refetch admin users query
-      await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
-      await queryClient.refetchQueries({ queryKey: ["admin", "users"] });
-      
+      // Force refresh the user data
       toast({
         title: "Success",
-        description: "Admin user created/updated successfully! Email: admin@gmail.com, Password: test123",
+        description: "Admin user created successfully! Refreshing data...",
       });
+      
+      // Wait a moment for the database to propagate the changes
+      setTimeout(async () => {
+        try {
+          // Force invalidate and refetch admin users query
+          await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+          await queryClient.refetchQueries({ queryKey: ["admin", "users"] });
+          
+          toast({
+            title: "Success",
+            description: "Admin user created/updated successfully! Email: admin@gmail.com, Password: test123",
+          });
+        } catch (refetchError) {
+          console.error("Error refreshing data:", refetchError);
+        }
+      }, 1000);
       
     } catch (err) {
       console.error("Unexpected error:", err);
