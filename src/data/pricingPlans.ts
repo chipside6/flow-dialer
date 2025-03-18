@@ -18,7 +18,7 @@ export const pricingPlans: PricingPlan[] = [
     description: "Basic access with limitations",
     features: [
       "500 calls only",
-      "4 campaigns per month (1 per week)",
+      "5 campaigns",
       "100 contacts per campaign",
       "Cannot modify contact lists once campaign starts",
       "View-only contact lists",
