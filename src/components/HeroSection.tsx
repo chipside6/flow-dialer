@@ -30,7 +30,14 @@ export const HeroSection = () => {
   }, []);
   
   return (
-    <section className="pt-40 md:pt-44 pb-20 px-6 md:px-10 overflow-hidden">
+    <section className="pt-40 md:pt-44 pb-20 px-6 md:px-10 overflow-hidden relative">
+      {/* Background gradient shapes */}
+      <div className="absolute inset-0 overflow-hidden -z-10">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 to-secondary/5 opacity-70"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl opacity-70"></div>
+        <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-secondary/10 rounded-full blur-3xl opacity-70"></div>
+      </div>
+      
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row items-center gap-16">
           <div className="flex-1 text-center lg:text-left max-w-2xl mx-auto lg:mx-0 z-10">
