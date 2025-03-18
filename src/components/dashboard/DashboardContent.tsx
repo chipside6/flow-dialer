@@ -19,8 +19,11 @@ export const DashboardContent = () => {
   const [loadingProgress, setLoadingProgress] = useState(45);
   const [loadingTimedOut, setLoadingTimedOut] = useState(false);
   
-  // Add timeout to prevent infinite loading state
   useEffect(() => {
+    console.log("DashboardContent mounted, loading state:", isLoading);
+    console.log("Campaigns data:", campaigns);
+    console.log("Error state:", error);
+    
     let progressInterval: NodeJS.Timeout;
     
     if (isLoading) {
@@ -60,7 +63,7 @@ export const DashboardContent = () => {
     return () => {
       clearInterval(progressInterval);
     };
-  }, [isLoading, toast]);
+  }, [isLoading, toast, campaigns, error]);
 
   const handleRetry = () => {
     window.location.reload();
@@ -102,13 +105,17 @@ export const DashboardContent = () => {
 
   const renderContent = () => {
     if (isLoading && !loadingTimedOut) {
+      console.log("Rendering loading state");
       return renderLoadingState();
     }
     
     if (error) {
+      console.log("Rendering error state:", error);
       return renderErrorState();
     }
 
+    console.log("Rendering content for tab:", activeTab);
+    
     switch (activeTab) {
       case 'dialer':
         return (
@@ -124,7 +131,7 @@ export const DashboardContent = () => {
                 </div>
               </div>
             </div>
-            {campaigns.length > 0 ? (
+            {campaigns && campaigns.length > 0 ? (
               <BackgroundDialer campaignId={campaigns[0]?.id} />
             ) : (
               <EmptyCampaignState />

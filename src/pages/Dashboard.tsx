@@ -20,9 +20,11 @@ const DashboardFallback = () => (
 const Dashboard = () => {
   return (
     <DashboardLayout>
-      <Suspense fallback={<DashboardFallback />}>
-        <DashboardContent />
-      </Suspense>
+      <div className="w-full">
+        <Suspense fallback={<DashboardFallback />}>
+          <DashboardContent />
+        </Suspense>
+      </div>
     </DashboardLayout>
   );
 };
