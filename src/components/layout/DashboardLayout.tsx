@@ -1,6 +1,13 @@
+
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth";
-import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, useSidebar } from "@/components/ui/sidebar";
+import { 
+  Sidebar, 
+  SidebarContent, 
+  SidebarHeader, 
+  SidebarInset, 
+  useSidebar 
+} from "@/components/ui/sidebar";
 import { 
   Phone, 
   Home, 
