@@ -1,7 +1,5 @@
 
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { AudioFileCard } from './AudioFileCard';
 import { EmptyGreetingsState } from './EmptyGreetingsState';
@@ -18,7 +16,15 @@ export const GreetingFilesList = ({ userId, onUploadClick }: GreetingFilesListPr
   const { activeAudio, isPlaying, togglePlayback } = useAudioPlayer();
   const { user } = useAuth();
   const effectiveUserId = userId || user?.id;
-  const { greetingFiles, isLoading, isError, error, deleteGreetingFile } = useGreetingFiles(effectiveUserId);
+  
+  // Directly use the hook rather than passing variables
+  const { 
+    greetingFiles, 
+    isLoading, 
+    isError, 
+    error, 
+    deleteGreetingFile 
+  } = useGreetingFiles(effectiveUserId);
   
   useEffect(() => {
     // Log the state for debugging
@@ -30,6 +36,15 @@ export const GreetingFilesList = ({ userId, onUploadClick }: GreetingFilesListPr
       errorMessage: error ? (error as Error).message : undefined
     });
   }, [effectiveUserId, greetingFiles, isLoading, isError, error]);
+
+  // Handle when no user ID is available - show empty state instead of loader
+  if (!effectiveUserId) {
+    return (
+      <div className="flex flex-col justify-center items-center h-40 text-muted-foreground">
+        <p>Please log in to view your greeting files</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -59,10 +74,10 @@ export const GreetingFilesList = ({ userId, onUploadClick }: GreetingFilesListPr
         <AudioFileCard
           key={file.id}
           file={file}
-          isPlaying={isPlaying}
+          isPlaying={isPlaying && activeAudio === file.url}
           isActiveAudio={activeAudio === file.url}
-          onPlayToggle={togglePlayback}
-          onDelete={(fileId) => deleteGreetingFile.mutate(fileId)}
+          onPlayToggle={() => togglePlayback(file.url)}
+          onDelete={() => deleteGreetingFile.mutate(file.id)}
         />
       ))}
     </div>

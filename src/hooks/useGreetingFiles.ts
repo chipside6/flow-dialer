@@ -13,11 +13,19 @@ export function useGreetingFiles(userId: string | undefined) {
     queryFn: async () => {
       console.log("Fetching greeting files for user:", userId);
       if (!userId) {
-        console.error("User ID is undefined in useGreetingFiles");
-        throw new Error('User not authenticated');
+        console.log("User ID is undefined in useGreetingFiles - returning empty array");
+        return []; // Return empty array instead of throwing when userId is undefined
       }
       
       try {
+        // First check if the user is authenticated at all
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !session) {
+          console.error("No active session in useGreetingFiles:", sessionError);
+          return []; // Return empty array for unauthenticated users
+        }
+        
         const { data, error } = await supabase
           .from('greeting_files')
           .select('*')
@@ -36,18 +44,21 @@ export function useGreetingFiles(userId: string | undefined) {
         throw error;
       }
     },
-    enabled: !!userId,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 30000, // 30 seconds
+    enabled: !!userId, // Only run query when userId is available
+    staleTime: 10000, // 10 seconds
+    gcTime: 300000, // 5 minutes
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    refetchInterval: false,
   });
 
   // Delete greeting file mutation
   const deleteGreetingFile = useMutation({
     mutationFn: async (fileId: string) => {
-      if (!userId) throw new Error('User not authenticated');
+      if (!userId) {
+        console.error("No user ID available for file deletion");
+        throw new Error('User not authenticated');
+      }
       
       console.log("Deleting file:", fileId);
       
@@ -95,7 +106,7 @@ export function useGreetingFiles(userId: string | undefined) {
       
       return fileId;
     },
-    onSuccess: () => {
+    onSuccess: (fileId) => {
       queryClient.invalidateQueries({ queryKey: ['greetingFiles', userId] });
       toast({
         title: 'File deleted',

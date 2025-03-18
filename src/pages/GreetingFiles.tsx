@@ -23,7 +23,9 @@ const GreetingFiles = () => {
     document.getElementById('tab-trigger-upload')?.click();
   };
 
-  if (authLoading) {
+  // Don't show loading state for too long - if auth is taking time,
+  // still render the main UI which will handle access control internally
+  if (authLoading && !user) {
     return (
       <div className="container mx-auto py-6 flex justify-center items-center h-40">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
