@@ -18,6 +18,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isAffiliate: boolean;
+  initialized: boolean; // Flag to indicate when the initial auth check is complete
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, metadata?: { full_name?: string }) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<void>;

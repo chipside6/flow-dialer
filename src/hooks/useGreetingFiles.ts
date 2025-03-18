@@ -2,10 +2,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/auth';
 
 export function useGreetingFiles(userId: string | undefined) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { initialized } = useAuth();
   
   // Fetch greeting files
   const greetingFilesQuery = useQuery({
@@ -21,8 +23,13 @@ export function useGreetingFiles(userId: string | undefined) {
         // First check if the user is authenticated at all
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (sessionError || !session) {
-          console.error("No active session in useGreetingFiles:", sessionError);
+        if (sessionError) {
+          console.error("Session error in useGreetingFiles:", sessionError);
+          throw sessionError;
+        }
+        
+        if (!session) {
+          console.warn("No active session in useGreetingFiles");
           return []; // Return empty array for unauthenticated users
         }
         
@@ -44,7 +51,7 @@ export function useGreetingFiles(userId: string | undefined) {
         throw error;
       }
     },
-    enabled: !!userId, // Only run query when userId is available
+    enabled: !!userId && initialized, // Only run query when userId is available and auth is initialized
     staleTime: 10000, // 10 seconds
     gcTime: 300000, // 5 minutes
     refetchOnWindowFocus: true,

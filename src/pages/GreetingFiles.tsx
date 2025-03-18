@@ -5,25 +5,40 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GreetingFilesList } from '@/components/greeting-files/GreetingFilesList';
 import { UploadGreetingForm } from '@/components/greeting-files/UploadGreetingForm';
 import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const GreetingFiles = () => {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, initialized } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('files');
   const [timeoutReached, setTimeoutReached] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   useEffect(() => {
     console.log("GreetingFiles page - Auth state:", { 
       userId: user?.id, 
-      isLoading: authLoading 
+      isLoading: authLoading,
+      initialized
     });
 
     // Set a timeout to force UI to render even if auth check takes too long
     const timer = setTimeout(() => {
       setTimeoutReached(true);
     }, 2000); // 2 second timeout
+    
+    // If auth initialization is complete but no user after a delay, show error
+    if (initialized && !user && !authLoading) {
+      const errorTimer = setTimeout(() => {
+        setShowError(true);
+      }, 1000);
+      
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(errorTimer);
+      };
+    }
 
     return () => clearTimeout(timer);
-  }, [user, authLoading]);
+  }, [user, authLoading, initialized]);
 
   // Helper function to switch to upload tab
   const goToUploadTab = () => {
@@ -36,6 +51,25 @@ const GreetingFiles = () => {
     return (
       <div className="container mx-auto py-6 flex justify-center items-center h-40">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show auth error if we've detected one
+  if (showError && !user && initialized) {
+    return (
+      <div className="container mx-auto py-6">
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>
+            Please log in to access your greeting files.
+          </AlertDescription>
+        </Alert>
+        <button 
+          onClick={() => window.location.href = '/login'} 
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md mt-2 hover:bg-primary/90 transition-colors"
+        >
+          Log in
+        </button>
       </div>
     );
   }
