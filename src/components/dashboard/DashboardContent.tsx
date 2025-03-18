@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardCards } from "./DashboardCards";
@@ -5,20 +6,21 @@ import { EmptyCampaignState } from "./EmptyCampaignState";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import BackgroundDialer from "@/components/BackgroundDialer";
 import CampaignDashboard from "@/components/CampaignDashboard";
-import { Phone, BarChart3, Loader2 } from "lucide-react";
+import { Phone, BarChart3, Loader2, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 export const DashboardContent = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const { campaigns, isLoading } = useCampaigns();
+  const { campaigns, isLoading, error } = useCampaigns();
   const { toast } = useToast();
   const [loadingProgress, setLoadingProgress] = useState(45);
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
   
   // Add timeout to prevent infinite loading state
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
     let progressInterval: NodeJS.Timeout;
     
     if (isLoading) {
@@ -31,8 +33,10 @@ export const DashboardContent = () => {
       }, 800);
       
       // Add timeout to exit loading state if it takes too long
-      timeout = setTimeout(() => {
+      const timeout = setTimeout(() => {
         if (isLoading) {
+          setLoadingTimedOut(true);
+          setLoadingProgress(100);
           toast({
             title: "Taking longer than expected",
             description: "We're having trouble loading your campaigns. You can try refreshing the page.",
@@ -41,17 +45,26 @@ export const DashboardContent = () => {
           clearInterval(progressInterval);
         }
       }, 10000); // 10 seconds timeout
+      
+      return () => {
+        clearTimeout(timeout);
+        clearInterval(progressInterval);
+      };
     } else {
       // Reset progress when loading completes
       setLoadingProgress(100);
       setTimeout(() => setLoadingProgress(45), 500);
+      clearInterval(progressInterval);
     }
     
     return () => {
-      clearTimeout(timeout);
       clearInterval(progressInterval);
     };
   }, [isLoading, toast]);
+
+  const handleRetry = () => {
+    window.location.reload();
+  };
 
   const renderLoadingState = () => {
     return (
@@ -67,10 +80,33 @@ export const DashboardContent = () => {
       </div>
     );
   };
+  
+  const renderErrorState = () => {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col justify-center items-center h-64 rounded-lg border border-dashed border-destructive p-8 text-center animate-fade-in">
+          <div className="mb-4 text-destructive">
+            <AlertCircle className="h-10 w-10" />
+          </div>
+          <h3 className="text-xl font-medium mb-3">Something went wrong</h3>
+          <p className="text-muted-foreground max-w-md mb-6">
+            We encountered an error while loading your campaigns.
+          </p>
+          <Button onClick={handleRetry} variant="outline">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   const renderContent = () => {
-    if (isLoading) {
+    if (isLoading && !loadingTimedOut) {
       return renderLoadingState();
+    }
+    
+    if (error) {
+      return renderErrorState();
     }
 
     switch (activeTab) {
@@ -119,7 +155,7 @@ export const DashboardContent = () => {
   };
 
   return (
-    <div className="space-y-4 dashboard-content-wrapper">
+    <div className="space-y-4 dashboard-content-wrapper w-full max-w-full overflow-x-hidden">
       <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       {renderContent()}
     </div>

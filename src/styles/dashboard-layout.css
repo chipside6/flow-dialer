@@ -63,3 +63,21 @@ main {
 .progress-loading {
   animation: progressPulse 1.5s infinite ease-in-out;
 }
+
+/* These fixes ensure no horizontal scrolling */
+.dashboard-container {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Make sure all tables and grids fit within viewport */
+table, .grid {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Force content to stay within boundaries */
+* {
+  max-width: 100%;
+  box-sizing: border-box;
+}

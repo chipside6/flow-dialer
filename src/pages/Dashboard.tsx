@@ -8,16 +8,16 @@ import { Loader2 } from "lucide-react";
 
 const DashboardFallback = () => (
   <div className="w-full h-96 flex items-center justify-center">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    <span className="ml-2 text-lg">Loading dashboard...</span>
+    <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+    <span className="text-lg">Loading dashboard...</span>
   </div>
 );
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="flex flex-1 w-full overflow-x-hidden">
+      <div className="flex flex-1 w-full max-w-full overflow-hidden">
         <DashboardLayout>
           <Suspense fallback={<DashboardFallback />}>
             <DashboardContent />
