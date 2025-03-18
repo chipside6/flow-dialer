@@ -14,12 +14,10 @@ import {
 import { useAuth } from "@/contexts/auth";
 import { NavItem } from "@/components/navigation/NavItem";
 import { AffiliateStatus } from "@/components/navigation/AffiliateStatus";
-import { useSidebar } from "@/components/ui/sidebar";
 
 export function DashboardNav() {
   const location = useLocation();
   const { profile } = useAuth();
-  const { state } = useSidebar();
   
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5 mr-3" /> },
@@ -34,7 +32,7 @@ export function DashboardNav() {
   const isAdmin = profile?.is_admin === true;
   
   return (
-    <div className={`bg-card rounded-lg border p-4 ${state === "collapsed" ? "w-auto" : ""}`}>
+    <div className="bg-card rounded-lg border p-4">
       <h2 className="font-semibold mb-4">Navigation</h2>
       <nav className="space-y-2">
         {navItems.map((item) => (
