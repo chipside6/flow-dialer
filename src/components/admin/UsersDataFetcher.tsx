@@ -57,10 +57,10 @@ export function UsersDataFetcher() {
     refetch();
   };
 
-  // UPDATED CONDITION: Only show loading during initial load, not during refetches
-  // This prevents getting stuck in loading state during background refreshes
-  if (isLoading && !isRefetching && !Array.isArray(users)) {
-    console.log("UsersDataFetcher - Showing initial loading screen");
+  // FIXED LOADING CONDITION: Only show loading when no data is available yet
+  // This prevents getting stuck in loading state indefinitely
+  if (isLoading && !users) {
+    console.log("UsersDataFetcher - Showing loading screen (no users data yet)");
     return (
       <DashboardLayout>
         <div className="h-[calc(100vh-200px)] w-full flex flex-col items-center justify-center">
@@ -84,8 +84,8 @@ export function UsersDataFetcher() {
   }
 
   // This ensures we show an error page only if we have an error AND no data
-  if (error && !Array.isArray(users)) {
-    console.log("UsersDataFetcher - Showing error screen (users is not an array)");
+  if (error && !users) {
+    console.log("UsersDataFetcher - Showing error screen (no users data available)");
     return (
       <DashboardLayout>
         <div className="space-y-6 py-8">
@@ -124,7 +124,7 @@ export function UsersDataFetcher() {
   }
 
   // Proceed with rendering the main content with whatever data we have
-  // At this point, users should always be an array (even if empty)
+  // At this point, we should always have users (even if it's an empty array)
   console.log("UsersDataFetcher - Showing main content screen with users:", users?.length ?? 0);
   
   return (

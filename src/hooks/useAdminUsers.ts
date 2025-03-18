@@ -102,6 +102,6 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
     enabled,
     staleTime: 30000, // Add stale time to prevent too frequent refetches
-    gcTime: 60000 * 5, // Keep data in cache for 5 minutes (replacement for cacheTime)
+    gcTime: 60000 * 5, // Keep data in cache for 5 minutes
   });
 }
