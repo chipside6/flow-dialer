@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -101,10 +100,11 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
         variant: 'destructive',
       });
     } finally {
-      // Short delay before resetting to make sure the 100% progress is shown
+      // Short delay before resetting upload state (not the progress)
+      // to make sure the 100% progress is shown
       setTimeout(() => {
         setIsUploading(false);
-      }, 500);
+      }, 1000); // Increased from 500ms to 1000ms to ensure the progress bar is visible
       
       // Reset the file input element
       const fileInput = document.getElementById('greeting-file') as HTMLInputElement;
@@ -155,10 +155,10 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
               </div>
             )}
             
-            {isUploading && (
+            {(isUploading || uploadProgress === 100) && (
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Uploading...</span>
+                  <span>{uploadProgress === 100 ? 'Upload complete!' : 'Uploading...'}</span>
                   <span>{uploadProgress}%</span>
                 </div>
                 <Progress value={uploadProgress} className="h-2" />

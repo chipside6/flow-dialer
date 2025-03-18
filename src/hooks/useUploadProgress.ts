@@ -12,18 +12,23 @@ export function useUploadProgress(isUploading: boolean) {
       
       interval = window.setInterval(() => {
         setUploadProgress(prev => {
-          // Increment progress but cap at 90% until actual upload completes
-          return prev < 90 ? prev + 5 : prev;
+          // Increment progress but cap at 95% until actual upload completes
+          // Changed from 90% to 95% to show more progress
+          return prev < 95 ? prev + 5 : prev;
         });
       }, 300);
     } else {
-      setUploadProgress(0);
+      // Only reset progress to 0 when upload is canceled or hasn't started
+      // Don't reset when upload completes successfully
+      if (uploadProgress !== 100) {
+        setUploadProgress(0);
+      }
     }
     
     return () => {
       if (interval) window.clearInterval(interval);
     };
-  }, [isUploading]);
+  }, [isUploading, uploadProgress]);
 
   return {
     uploadProgress,

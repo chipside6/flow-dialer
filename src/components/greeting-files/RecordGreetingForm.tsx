@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -137,9 +136,10 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
         variant: 'destructive',
       });
     } finally {
+      // Longer delay before resetting upload state to ensure 100% is shown
       setTimeout(() => {
         setIsUploading(false);
-      }, 500);
+      }, 1000); // Increased from 500ms to 1000ms
     }
   };
 
@@ -250,10 +250,10 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
           )}
         </div>
 
-        {isUploading && (
+        {(isUploading || uploadProgress === 100) && (
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Uploading...</span>
+              <span>{uploadProgress === 100 ? 'Upload complete!' : 'Uploading...'}</span>
               <span>{uploadProgress}%</span>
             </div>
             <Progress value={uploadProgress} className="h-2" />
