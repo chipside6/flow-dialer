@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Upload, Mic } from 'lucide-react';
 import { RecordGreetingForm } from './RecordGreetingForm';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface UploadGreetingFormProps {
   userId: string | undefined;
@@ -24,6 +24,7 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
   const { uploadProgress, setUploadProgress } = useUploadProgress(isUploading);
   const [file, setFile] = useState<File | null>(null);
   const [activeTab, setActiveTab] = useState<string>('upload');
+  const isMobile = useIsMobile();
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,14 +126,20 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 gap-1 mb-6">
-            <TabsTrigger value="upload" className="px-4 py-2">
-              <Upload className="h-4 w-4 mr-2" />
-              Upload File
+          <TabsList className="grid grid-cols-2 gap-3 mb-6 w-full">
+            <TabsTrigger 
+              value="upload" 
+              className="px-2 py-2.5 min-h-[44px] flex items-center justify-center"
+            >
+              <Upload className="h-4 w-4 mr-1.5 flex-shrink-0" />
+              <span className="whitespace-nowrap">Upload File</span>
             </TabsTrigger>
-            <TabsTrigger value="record" className="px-4 py-2">
-              <Mic className="h-4 w-4 mr-2" />
-              Record Audio
+            <TabsTrigger 
+              value="record" 
+              className="px-2 py-2.5 min-h-[44px] flex items-center justify-center"
+            >
+              <Mic className="h-4 w-4 mr-1.5 flex-shrink-0" />
+              <span className="whitespace-nowrap">Record Audio</span>
             </TabsTrigger>
           </TabsList>
           
