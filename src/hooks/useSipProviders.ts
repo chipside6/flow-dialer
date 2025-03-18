@@ -1,16 +1,35 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SipProvider } from "@/types/sipProviders";
 import { toast } from "@/components/ui/use-toast";
 
 export const useSipProviders = () => {
-  const [providers, setProviders] = useState<SipProvider[]>([]);
-  const [editingProvider, setEditingProvider] = useState<SipProvider | null>(null);
+  const [providers, setProviders] = useState<SipProvider[]>([
+    {
+      id: "1",
+      name: "Twilio SIP",
+      host: "sip.twilio.com",
+      port: "5060",
+      username: "AC123456789",
+      password: "••••••••••",
+      description: "Main Twilio SIP trunk for outbound calls",
+      dateAdded: new Date(2023, 4, 15),
+      isActive: true
+    },
+    {
+      id: "2",
+      name: "Vonage API",
+      host: "sip.vonage.com",
+      port: "5060",
+      username: "vonage_user",
+      password: "••••••••",
+      description: "Vonage SIP trunk for international calls",
+      dateAdded: new Date(2023, 5, 10),
+      isActive: false
+    }
+  ]);
 
-  // Log to confirm empty initial state
-  useEffect(() => {
-    console.log("SIP Providers initialized with:", providers);
-  }, []);
+  const [editingProvider, setEditingProvider] = useState<SipProvider | null>(null);
 
   const handleAddProvider = (providerData: Omit<SipProvider, 'id' | 'dateAdded' | 'isActive'>) => {
     if (editingProvider) {
