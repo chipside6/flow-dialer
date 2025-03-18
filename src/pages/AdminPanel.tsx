@@ -16,10 +16,11 @@ const AdminPanel = () => {
       isLoading, 
       hasUser: !!user, 
       authChecked,
-      forceTimeout
+      forceTimeout,
+      isAdmin: profile?.is_admin
     });
 
-    // Set a timeout to force continue after 3 seconds
+    // Set a timeout to force continue after 2 seconds
     // This prevents getting stuck in authentication checking
     const timer = setTimeout(() => {
       if (!authChecked) {
@@ -27,29 +28,29 @@ const AdminPanel = () => {
         setForceTimeout(true);
         setAuthChecked(true);
       }
-    }, 3000);
+    }, 2000);
 
     // Only redirect if we're done loading and the user isn't authenticated
     if (!isLoading) {
       setAuthChecked(true);
       if (!user) {
         console.log("AdminPanel - User not authenticated, redirecting to login");
-        navigate("/login");
+        navigate("/login", { replace: true });
       }
     }
 
     return () => clearTimeout(timer);
-  }, [user, isLoading, navigate, authChecked]);
+  }, [user, isLoading, navigate, authChecked, profile]);
 
   // If still checking auth but force timeout triggered, proceed with available data
   if (forceTimeout && !user) {
     console.log("AdminPanel - Force timeout, no user, redirecting");
-    navigate("/login");
+    navigate("/login", { replace: true });
     return null;
   }
 
   // If still checking auth and no force timeout, show loading
-  if (isLoading && !authChecked && !forceTimeout) {
+  if ((isLoading && !authChecked && !forceTimeout) || (!user && !authChecked)) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
@@ -61,7 +62,7 @@ const AdminPanel = () => {
   // If auth check completed but no user, show nothing (redirect will happen)
   if (!user) {
     console.log("AdminPanel - No user after auth check, redirecting");
-    navigate("/login");
+    navigate("/login", { replace: true });
     return null;
   }
 

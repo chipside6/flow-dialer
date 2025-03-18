@@ -22,7 +22,8 @@ export function UsersDataFetcher() {
     status,
     isFetching
   } = useAdminUsers({
-    enabled: true // Force enable the query
+    enabled: true, // Force enable the query
+    staleTime: 0 // Always fetch fresh data
   });
 
   useEffect(() => {
@@ -57,9 +58,7 @@ export function UsersDataFetcher() {
     refetch();
   };
 
-  // MODIFIED LOADING CONDITION: Don't get stuck in loading state
-  // Always show content if we have passed the initial loading phase
-  // even if the data is empty (we'll show "No users found" in that case)
+  // Show loading state only during initial load with no data
   if (isLoading && !users) {
     console.log("UsersDataFetcher - Showing loading screen (initial load, no data yet)");
     return (
@@ -84,7 +83,7 @@ export function UsersDataFetcher() {
     );
   }
 
-  // This ensures we show an error page only if we have a critical error AND no data
+  // Show error page only if there's a critical error and no data
   if (error && !users) {
     console.log("UsersDataFetcher - Showing error screen (critical error, no data)");
     return (
@@ -124,8 +123,7 @@ export function UsersDataFetcher() {
     );
   }
 
-  // Guaranteed to have users at this point, even if it's an empty array
-  // Proceed with rendering the main content
+  // Render main content (user data is available or empty array)
   console.log("UsersDataFetcher - Showing main content screen with users:", users?.length ?? 0);
   
   return (

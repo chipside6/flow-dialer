@@ -5,10 +5,11 @@ import { AdminPanelUser, UserProfile } from "@/components/admin/UserManagement";
 
 interface UseAdminUsersOptions {
   enabled?: boolean;
+  staleTime?: number;
 }
 
 export function useAdminUsers(options: UseAdminUsersOptions = {}) {
-  const { enabled = true } = options;
+  const { enabled = true, staleTime = 30000 } = options;
   
   return useQuery({
     queryKey: ["admin", "users"],
@@ -23,8 +24,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         
         if (profilesError) {
           console.error("useAdminUsers - Error fetching profiles:", profilesError);
-          // Return empty array instead of throwing to avoid loading state getting stuck
-          return [];
+          throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
         }
         
         console.log("useAdminUsers - Successfully fetched profiles count:", profiles?.length || 0);
@@ -86,22 +86,21 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
           
           console.log("useAdminUsers - Successfully processed users with profiles:", usersWithProfiles.length);
           return usersWithProfiles;
-        } catch (error) {
+        } catch (error: any) {
           console.log("useAdminUsers - Error accessing admin API, using profiles only:", error);
-          // Return mapped profiles instead of throwing
           return mapProfilesOnly();
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("useAdminUsers - Critical error:", error);
-        // Return empty array instead of throwing to avoid loading state getting stuck
-        return [];
+        // For critical errors, throw to trigger error state in UI
+        throw error;
       }
     },
     refetchOnWindowFocus: false,
-    retry: 1, // Reduced retry count to fail faster in case of real errors
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     enabled,
-    staleTime: 30000, // Add stale time to prevent too frequent refetches
+    staleTime, // Use the provided stale time
     gcTime: 60000 * 5, // Keep data in cache for 5 minutes
   });
 }
