@@ -9,7 +9,7 @@ interface UseAdminUsersOptions {
 }
 
 export function useAdminUsers(options: UseAdminUsersOptions = {}) {
-  const { enabled = true, staleTime = 30000 } = options;
+  const { enabled = true, staleTime = 10000 } = options;
   
   return useQuery({
     queryKey: ["admin", "users"],
@@ -98,7 +98,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
     },
     refetchOnWindowFocus: true,
     retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
     enabled,
     staleTime, // Use the provided stale time
     gcTime: 60000 * 5, // Keep data in cache for 5 minutes

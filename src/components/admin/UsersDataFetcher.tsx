@@ -22,7 +22,7 @@ export function UsersDataFetcher() {
     status,
     isFetching
   } = useAdminUsers({
-    staleTime: 30000 // Use a reasonable stale time
+    staleTime: 10000 // Shorter stale time
   });
 
   useEffect(() => {
@@ -36,9 +36,15 @@ export function UsersDataFetcher() {
       userCount: users?.length ?? 0,
       hasUsersData: Array.isArray(users)
     });
-  }, [users, isLoading, error, isRefetching, isSuccess, status, isFetching]);
+    
+    // Auto-retry once if we have an error but no users
+    if (error && !users && !isRefetching && !isFetching) {
+      console.log("UsersDataFetcher - Auto-retrying after error");
+      setTimeout(() => refetch(), 1000);
+    }
+  }, [users, isLoading, error, isRefetching, isSuccess, status, isFetching, refetch]);
 
-  // Calculate stats
+  // Calculate stats - providing defaults in case data isn't available yet
   const userCount = users?.length ?? 0;
   const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
   const hasLimitedData = users?.some(user => user.email === "Unknown");
@@ -57,33 +63,8 @@ export function UsersDataFetcher() {
     refetch();
   };
 
-  // Show loading state during initial load but with a retry button
-  if (isLoading && !users) {
-    console.log("UsersDataFetcher - Showing loading screen (initial load, no data yet)");
-    return (
-      <DashboardLayout>
-        <div className="h-[calc(100vh-200px)] w-full flex flex-col items-center justify-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-          <span className="text-xl font-medium">Loading admin panel data...</span>
-          <p className="text-sm text-muted-foreground mt-2">
-            Initializing...
-          </p>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRetry}
-            className="mt-4"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Render main content regardless of error state as long as we have users data
-  // This ensures we show something even if there's an error but we have cached data
+  // Always render content after initial mount, regardless of loading state
+  // This ensures we don't get stuck in a loading screen
   return (
     <DashboardLayout>
       <div className="space-y-6 py-8">
@@ -91,6 +72,7 @@ export function UsersDataFetcher() {
           <h1 className="text-3xl font-bold tracking-tight">Admin Panel</h1>
           <p className="text-muted-foreground mt-2">
             Manage users and configure system settings
+            {isLoading && !users && " (Loading...)"}
           </p>
         </div>
 
@@ -128,18 +110,23 @@ export function UsersDataFetcher() {
           </Alert>
         )}
 
-        {isFetching && (
+        {(isLoading || isFetching) && (
           <div className="flex items-center space-x-2 mb-4 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm">Refreshing data...</span>
+            <span className="text-sm">
+              {isLoading && !users ? "Loading initial data..." : "Refreshing data..."}
+            </span>
           </div>
         )}
 
-        <AdminHeader userCount={userCount} affiliateCount={affiliateCount} />
+        <AdminHeader 
+          userCount={userCount} 
+          affiliateCount={affiliateCount} 
+        />
         
         <UserManagement 
           users={users || []} 
-          isLoading={isFetching} 
+          isLoading={isLoading || isFetching} 
           error={error instanceof Error ? error : null} 
           onRetry={handleRetry}
         />
