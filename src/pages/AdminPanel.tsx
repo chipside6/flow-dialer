@@ -10,12 +10,20 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { UserTable } from "@/components/admin/UserTable";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 
-interface UserProfile {
+// Updated to match the actual database schema
+interface ProfileData {
   id: string;
-  user_id: string;
+  full_name: string | null;
+  company_name: string | null;
   created_at: string;
-  is_admin: boolean;
-  is_affiliate: boolean;
+  updated_at: string;
+  is_admin: boolean | null;
+  is_affiliate: boolean | null;
+}
+
+// Define a type for the profile with user_id field for components that expect it
+interface UserProfile extends Omit<ProfileData, 'id'> {
+  user_id: string;
 }
 
 const AdminPanel = () => {
@@ -40,8 +48,19 @@ const AdminPanel = () => {
       
       // Join users with their profiles
       const usersWithProfiles = users.users.map((user: User) => {
-        const profile = profiles.find((p: UserProfile) => p.user_id === user.id);
-        return { ...user, profile };
+        // Find the profile that matches the user ID
+        const profile = profiles.find((p: ProfileData) => p.id === user.id);
+        
+        // Create a UserProfile compatible object with user_id for components that need it
+        const formattedProfile = profile ? {
+          ...profile,
+          user_id: user.id, // Add user_id property expected by UserProfile interface
+        } : undefined;
+        
+        return { 
+          ...user, 
+          profile: formattedProfile 
+        };
       });
       
       return usersWithProfiles;
@@ -54,7 +73,7 @@ const AdminPanel = () => {
       const { data, error } = await supabase
         .from("profiles")
         .update({ is_affiliate: setAffiliate })
-        .eq("user_id", userId);
+        .eq("id", userId); // Use id instead of user_id because in profiles table, id is the user id
       
       if (error) throw error;
       return data;
@@ -70,7 +89,7 @@ const AdminPanel = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: `Failed to update user: ${error.message}`,
+        description: `Failed to update user: ${error instanceof Error ? error.message : "Unknown error"}`,
       });
     },
   });
