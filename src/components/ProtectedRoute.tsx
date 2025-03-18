@@ -23,15 +23,28 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     console.log('Protected Route - Auth State:', {
       user: user ? 'Authenticated' : 'Not authenticated',
       isLoading,
-      path: location.pathname
+      path: location.pathname,
+      isCheckingAuth
     });
-  }, [isLoading, user, location.pathname]);
+  }, [isLoading, user, location.pathname, isCheckingAuth]);
+
+  // Clear any potential UI overlaps by forcing a small delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isCheckingAuth && !isLoading) {
+        console.log('Forced auth check completion after timeout');
+        setIsCheckingAuth(false);
+      }
+    }, 1000); // 1 second timeout as a fallback
+    
+    return () => clearTimeout(timer);
+  }, [isCheckingAuth, isLoading]);
 
   if (isCheckingAuth || isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-lg">Loading authentication...</span>
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+        <span className="text-xl font-medium">Verifying authentication...</span>
       </div>
     );
   }

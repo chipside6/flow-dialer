@@ -29,9 +29,25 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes 
+    },
+    mutations: {
+      retry: 0,
+      onError: (error) => {
+        console.error("Mutation error:", error);
+      }
     },
   },
+  // Enable detailed logging in development
+  logger: {
+    log: console.log,
+    warn: console.warn,
+    error: process.env.NODE_ENV === "development" ? console.error : () => {},
+  },
 });
+
+// Remove the App.css import which could be causing style conflicts
+// import "./App.css"; 
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

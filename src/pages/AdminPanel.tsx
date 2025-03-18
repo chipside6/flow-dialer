@@ -1,10 +1,10 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { UserTable } from "@/components/admin/UserTable";
@@ -30,6 +30,13 @@ const AdminPanel = () => {
 
   console.log("AdminPanel - Rendering component");
 
+  useEffect(() => {
+    console.log("AdminPanel - Component mounted");
+    return () => {
+      console.log("AdminPanel - Component unmounted");
+    };
+  }, []);
+
   // Fetch all users with their profiles
   const { data: users, isLoading, error } = useQuery({
     queryKey: ["admin", "users"],
@@ -45,7 +52,7 @@ const AdminPanel = () => {
           throw error;
         }
         
-        console.log("AdminPanel - Users fetched:", users.users.length);
+        console.log("AdminPanel - Users fetched:", users?.users?.length || 0);
         
         // Get all profiles
         const { data: profiles, error: profilesError } = await supabase
@@ -60,9 +67,9 @@ const AdminPanel = () => {
         console.log("AdminPanel - Profiles fetched:", profiles?.length || 0);
         
         // Join users with their profiles
-        const usersWithProfiles = users.users.map((user: User) => {
+        const usersWithProfiles = users?.users?.map((user: User) => {
           // Find the profile that matches the user ID
-          const profile = profiles.find((p: ProfileData) => p.id === user.id);
+          const profile = profiles?.find((p: ProfileData) => p.id === user.id);
           
           // If profile exists, add user_id property for component compatibility
           const formattedProfile = profile ? {
@@ -76,8 +83,8 @@ const AdminPanel = () => {
           };
         });
         
-        console.log("AdminPanel - Users with profiles processed:", usersWithProfiles.length);
-        return usersWithProfiles;
+        console.log("AdminPanel - Users with profiles processed:", usersWithProfiles?.length || 0);
+        return usersWithProfiles || [];
       } catch (err) {
         console.error("AdminPanel - Error in queryFn:", err);
         throw err;
@@ -134,12 +141,23 @@ const AdminPanel = () => {
 
   console.log("AdminPanel - Rendering with stats:", { userCount, affiliateCount });
 
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="h-[calc(100vh-200px)] w-full flex flex-col items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+          <span className="text-xl font-medium">Loading admin panel data...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 py-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Admin Panel</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight">Admin Panel</h1>
+          <p className="text-muted-foreground mt-2">
             Manage users and configure system settings
           </p>
         </div>

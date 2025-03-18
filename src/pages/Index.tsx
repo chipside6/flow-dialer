@@ -13,7 +13,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main>
+      <main className="pt-20"> {/* Added padding to prevent content from being hidden under navbar */}
         <HeroSection />
         <div className="max-w-7xl mx-auto py-20 px-6 text-center">
           <div className="mx-auto h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
