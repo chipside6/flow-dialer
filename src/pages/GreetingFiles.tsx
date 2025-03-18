@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -78,10 +77,8 @@ const GreetingFiles = () => {
 
   const content = (
     <div className="container py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Greeting Audio Files</h1>
-      </div>
-
+      {/* Removed the duplicate header here */}
+      
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger id="tab-trigger-files" value="files">My Greetings</TabsTrigger>
