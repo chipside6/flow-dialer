@@ -52,6 +52,7 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError || !user) {
+      console.error("Authentication error:", userError);
       return new Response(
         JSON.stringify({ error: "Invalid user token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -63,26 +64,53 @@ serve(async (req) => {
     const file = formData.get("file");
     
     if (!file || !(file instanceof File)) {
+      console.error("No file uploaded or invalid file");
       return new Response(
         JSON.stringify({ error: "No file uploaded" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Create a storage bucket if it doesn't exist
-    const { data: { publicUrl } } = supabase.storage.from('greetings').getPublicUrl(`${user.id}/${file.name}`);
+    console.log(`Processing file upload: ${file.name} (${file.size} bytes)`);
+
+    // Check if the greetings bucket exists, create it if not
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const greetingsBucketExists = buckets?.some(bucket => bucket.name === 'greetings');
+    
+    if (!greetingsBucketExists) {
+      console.log("Creating greetings bucket");
+      const { error: createBucketError } = await supabase.storage.createBucket('greetings', {
+        public: true,
+      });
+      
+      if (createBucketError) {
+        console.error("Error creating bucket:", createBucketError);
+        throw createBucketError;
+      }
+    }
+
+    const filePath = `${user.id}/${file.name}`;
+    console.log(`Uploading file to path: ${filePath}`);
 
     // Upload the file
     const { data, error } = await supabase.storage
       .from('greetings')
-      .upload(`${user.id}/${file.name}`, file, {
+      .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true,
       });
 
     if (error) {
+      console.error("Upload error:", error);
       throw error;
     }
+
+    // Get the public URL for the uploaded file
+    const { data: { publicUrl } } = supabase.storage
+      .from('greetings')
+      .getPublicUrl(filePath);
+
+    console.log(`File uploaded successfully. Public URL: ${publicUrl}`);
 
     // Save the file metadata in the greeting_files table
     const { data: greetingFile, error: insertError } = await supabase
@@ -96,6 +124,7 @@ serve(async (req) => {
       .single();
 
     if (insertError) {
+      console.error("Database insert error:", insertError);
       throw insertError;
     }
 

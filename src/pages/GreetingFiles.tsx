@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Upload, Trash2, Play, Pause, FileAudio } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Progress } from '@/components/ui/progress';
 
 const GreetingFiles = () => {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ const GreetingFiles = () => {
   const [file, setFile] = useState<File | null>(null);
   const [activeAudio, setActiveAudio] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const audioRef = useState<HTMLAudioElement | null>(null);
   const queryClient = useQueryClient();
 
@@ -103,6 +105,28 @@ const GreetingFiles = () => {
     }
   };
 
+  // Simulated progress for upload feedback
+  useEffect(() => {
+    let interval: number | null = null;
+    
+    if (isUploading) {
+      setUploadProgress(10); // Start at 10%
+      
+      interval = window.setInterval(() => {
+        setUploadProgress(prev => {
+          // Increment progress but cap at 90% until actual upload completes
+          return prev < 90 ? prev + 5 : prev;
+        });
+      }, 300);
+    } else {
+      setUploadProgress(0);
+    }
+    
+    return () => {
+      if (interval) window.clearInterval(interval);
+    };
+  }, [isUploading]);
+
   // Handle file upload
   const handleUpload = async () => {
     if (!file || !user) return;
@@ -133,6 +157,9 @@ const GreetingFiles = () => {
         }
       );
       
+      // Set progress to 100% when upload completes
+      setUploadProgress(100);
+      
       const result = await response.json();
       
       if (!response.ok) {
@@ -157,7 +184,10 @@ const GreetingFiles = () => {
         variant: 'destructive',
       });
     } finally {
-      setIsUploading(false);
+      // Short delay before resetting to make sure the 100% progress is shown
+      setTimeout(() => {
+        setIsUploading(false);
+      }, 500);
     }
   };
 
@@ -316,6 +346,16 @@ const GreetingFiles = () => {
               {file && (
                 <div className="text-sm">
                   Selected file: <span className="font-medium">{file.name}</span> ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                </div>
+              )}
+              
+              {isUploading && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Uploading...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <Progress value={uploadProgress} className="h-2" />
                 </div>
               )}
             </CardContent>
