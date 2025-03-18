@@ -14,6 +14,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Creating admin user function started");
+    
     // Create a Supabase client with the Admin key
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -44,7 +46,7 @@ serve(async (req) => {
     let userId;
 
     if (existingUser) {
-      console.log("User already exists, updating affiliate status");
+      console.log("Admin user already exists, updating affiliate status");
       userId = existingUser.id;
     } else {
       // Create the new user
@@ -60,11 +62,12 @@ serve(async (req) => {
         throw createError;
       }
       
-      console.log("Admin user created successfully");
+      console.log("Admin user created successfully:", newUser.user.id);
       userId = newUser.user.id;
     }
 
     // Set the user as an affiliate and admin in the profiles table
+    console.log("Updating profile for user:", userId);
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .upsert({ 
@@ -72,6 +75,7 @@ serve(async (req) => {
         is_affiliate: true, 
         is_admin: true,
         full_name: 'Admin User',
+        email: email,
         updated_at: new Date().toISOString()
       });
 
@@ -85,7 +89,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Admin user created/updated and set as affiliate" 
+        message: "Admin user created/updated and set as affiliate",
+        userId: userId
       }),
       { 
         headers: { 

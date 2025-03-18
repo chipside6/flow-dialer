@@ -12,7 +12,14 @@ export function CreateAdminButton() {
   const handleCreateAdmin = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-admin-user');
+      console.log("CreateAdminButton - Invoking create-admin-user function");
+      
+      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+        // Set a reasonable timeout for the function
+        method: 'POST',
+        body: {},
+        timeout: 20000 // 20 seconds timeout
+      });
       
       if (error) {
         console.error("Error creating admin user:", error);
@@ -24,19 +31,19 @@ export function CreateAdminButton() {
         return;
       }
       
+      console.log("Admin user created response:", data);
+      
       toast({
         title: "Success",
         description: "Admin user created/updated successfully! Email: admin@gmail.com, Password: test123",
       });
-      
-      console.log("Admin user created response:", data);
       
     } catch (err) {
       console.error("Unexpected error:", err);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "An unexpected error occurred while creating admin user",
       });
     } finally {
       setIsLoading(false);

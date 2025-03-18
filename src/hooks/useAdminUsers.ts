@@ -17,7 +17,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
       console.log("useAdminUsers - Fetching users data");
       
       try {
-        // Get auth users directly from the profiles table
+        // Get profiles directly from the profiles table
         const { data: profiles, error } = await supabase
           .from("profiles")
           .select("*");
@@ -50,11 +50,12 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         throw error;
       }
     },
-    refetchOnWindowFocus: false,
-    retry: 1,
+    refetchOnWindowFocus: true,  // Refresh data when window regains focus
+    refetchOnMount: true,        // Refresh data when component mounts
+    retry: 2,                    // Increase retry attempts
     retryDelay: 1000,
     enabled,
     staleTime,
-    gcTime: 60000 * 5, // Keep data in cache for 5 minutes
+    gcTime: 60000 * 5,           // Keep data in cache for 5 minutes
   });
 }
