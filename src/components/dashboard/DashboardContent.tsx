@@ -7,19 +7,44 @@ import { useCampaigns } from "@/hooks/useCampaigns";
 import BackgroundDialer from "@/components/BackgroundDialer";
 import CampaignDashboard from "@/components/CampaignDashboard";
 import { Phone, BarChart3 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 
 export const DashboardContent = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const { campaigns, isLoading } = useCampaigns();
 
+  const renderLoadingState = () => {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col justify-center items-center h-64 rounded-lg border border-dashed p-8 text-center">
+          <div className="mb-4 relative">
+            <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center relative">
+              <div className="w-10 h-10 rounded-full border-t-2 border-primary animate-spin absolute"></div>
+              <img 
+                src="/lovable-uploads/e18e0430-6752-4a7c-9482-8c6b1779a284.png" 
+                alt="Campaign loading" 
+                className="w-8 h-8 object-contain opacity-70"
+              />
+            </div>
+          </div>
+          <h3 className="text-xl font-medium mb-2">Preparing your dashboard</h3>
+          <p className="text-muted-foreground max-w-md mb-4">Loading your campaign data and analytics...</p>
+          <Progress value={65} className="w-64 h-2" />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton className="h-48 rounded-lg" />
+          <Skeleton className="h-48 rounded-lg" />
+          <Skeleton className="h-48 rounded-lg md:col-span-2" />
+        </div>
+      </div>
+    );
+  };
+
   const renderContent = () => {
     if (isLoading) {
-      return (
-        <div className="flex flex-col justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-          <p className="text-muted-foreground">Loading campaign data...</p>
-        </div>
-      );
+      return renderLoadingState();
     }
 
     // Always show content, even when campaigns is empty

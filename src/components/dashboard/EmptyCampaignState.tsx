@@ -12,7 +12,7 @@ export const EmptyCampaignState = () => {
         <div className="flex flex-col md:flex-row">
           <div className="bg-gradient-to-br from-primary/10 to-purple-500/10 p-10 flex items-center justify-center md:w-1/3">
             <img 
-              src="/lovable-uploads/00303cf4-6c2b-43fe-b860-86bde113058d.png" 
+              src="/lovable-uploads/e18e0430-6752-4a7c-9482-8c6b1779a284.png" 
               alt="Campaign illustration" 
               className="max-w-full max-h-52 object-contain"
               onError={(e) => {
