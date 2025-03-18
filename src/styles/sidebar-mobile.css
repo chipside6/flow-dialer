@@ -71,31 +71,6 @@
     z-index: 50 !important;
     display: flex !important;
   }
-  
-  /* Fix table display on mobile */
-  table {
-    font-size: 14px !important;
-  }
-  
-  td, th {
-    padding: 10px 8px !important;
-  }
-  
-  /* Ensure form controls are properly sized */
-  input, select, textarea, .select-trigger, [role="combobox"] {
-    height: auto !important;
-    min-height: 44px !important;
-  }
-  
-  /* Fix button sizing on mobile */
-  button {
-    min-height: 44px !important;
-  }
-  
-  /* Add proper spacing for forms and cards */
-  form, .card {
-    margin-bottom: 24px !important;
-  }
 }
 
 /* Add animation to mobile sidebar */
