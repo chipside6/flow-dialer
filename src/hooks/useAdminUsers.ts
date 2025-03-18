@@ -25,7 +25,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         throw new Error(`Failed to fetch user profiles: ${profilesError.message}`);
       }
       
-      console.log("useAdminUsers - Successfully fetched profiles:", profiles?.length || 0);
+      console.log("useAdminUsers - Successfully fetched profiles count:", profiles?.length || 0);
       
       // When we only have profiles data (no auth data), map them to the expected format
       const mapProfilesOnly = () => {
@@ -38,7 +38,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         return profiles.map((profile: any): AdminPanelUser => ({
           id: profile.id,
           email: "Unknown", // We don't have emails without auth data
-          created_at: profile.created_at,
+          created_at: profile.created_at || new Date().toISOString(),
           profile: {
             ...profile,
             user_id: profile.id
@@ -86,12 +86,13 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         return usersWithProfiles;
       } catch (error) {
         console.log("useAdminUsers - Error accessing admin API, using profiles only:", error);
+        // Make sure to return the mapped profiles here
         return mapProfilesOnly();
       }
     },
     refetchOnWindowFocus: false,
-    retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    retry: 1, // Reduced retry count to fail faster in case of real errors
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
     enabled,
   });
 }

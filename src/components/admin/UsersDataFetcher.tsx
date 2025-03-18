@@ -17,32 +17,43 @@ export function UsersDataFetcher() {
     isLoading, 
     error, 
     refetch, 
-    isRefetching 
+    isRefetching,
+    isSuccess,
   } = useAdminUsers();
 
   useEffect(() => {
     console.log("UsersDataFetcher - Data status:", { 
       isLoading, 
-      isRefetching, 
+      isRefetching,
+      isSuccess, 
       hasError: !!error, 
-      userCount: users?.length || 0 
+      userCount: users?.length || 0,
+      users: users 
     });
-  }, [users, isLoading, error, isRefetching]);
+  }, [users, isLoading, error, isRefetching, isSuccess]);
 
   // Calculate stats
   const userCount = users?.length ?? 0;
   const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
   const hasLimitedData = users?.some(user => user.email === "Unknown");
 
-  console.log("UsersDataFetcher - Rendering with stats:", { userCount, affiliateCount, hasLimitedData });
+  console.log("UsersDataFetcher - Rendering with stats:", { 
+    userCount, 
+    affiliateCount, 
+    hasLimitedData,
+    isLoading,
+    isSuccess
+  });
 
   const handleRetry = () => {
     console.log("UsersDataFetcher - Retrying data fetch");
     refetch();
   };
 
-  // Fixed condition: Only show loading screen when isLoading is true AND users is null/undefined
+  // Only show the loading screen during the initial loading when we have no data
+  // Important: we check for !users, not just isLoading
   if (isLoading && !users) {
+    console.log("UsersDataFetcher - Showing loading screen");
     return (
       <DashboardLayout>
         <div className="h-[calc(100vh-200px)] w-full flex flex-col items-center justify-center">
@@ -55,6 +66,7 @@ export function UsersDataFetcher() {
 
   // This ensures we show an error page only if we have an error AND no data
   if (error && !users) {
+    console.log("UsersDataFetcher - Showing error screen");
     return (
       <DashboardLayout>
         <div className="space-y-6 py-8">
@@ -92,6 +104,10 @@ export function UsersDataFetcher() {
     );
   }
 
+  // Even if we've not got data yet or are in an error state, if users is defined (empty array),
+  // we should render the main interface
+  console.log("UsersDataFetcher - Showing main content screen with users:", users?.length || 0);
+  
   return (
     <DashboardLayout>
       <div className="space-y-6 py-8">
