@@ -35,7 +35,7 @@ interface UserManagementProps {
   onRetry?: () => void;
 }
 
-export function UserManagement({ users, isLoading, error, onRetry }: UserManagementProps) {
+export function UserManagement({ users = [], isLoading, error, onRetry }: UserManagementProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   

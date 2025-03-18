@@ -127,7 +127,7 @@ export function UsersDataFetcher() {
             
             <UserManagement 
               users={users || []} 
-              isLoading={isLoading && !users} 
+              isLoading={isLoading} 
               error={error instanceof Error ? error : null} 
               onRetry={handleRetry}
             />
