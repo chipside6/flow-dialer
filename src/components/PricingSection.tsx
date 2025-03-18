@@ -10,7 +10,7 @@ const plans = [
     description: "Basic access with limitations",
     features: [
       "500 calls only",
-      "5 campaigns",
+      "Unlimited campaigns",
       "100 contacts per campaign",
       "Cannot modify contact lists once campaign starts",
       "View-only contact lists",
@@ -24,7 +24,7 @@ const plans = [
     description: "Perfect for individual users",
     features: [
       "5,000 calls",
-      "5 campaigns",
+      "Unlimited campaigns",
       "1000 contacts per campaign",
       "View-only contact lists",
       "No editing of assigned campaign contacts",
@@ -38,7 +38,7 @@ const plans = [
     description: "Ideal for professionals and small teams",
     features: [
       "10,000 calls",
-      "10 campaigns",
+      "Unlimited campaigns",
       "1000 contacts per campaign",
       "View-only contact lists",
       "Advanced contact management",
