@@ -5,3 +5,32 @@
 @import './mobile-menu.css';
 @import './responsive-layout.css';
 @import './sidebar-mobile.css';
+
+/* Fix profile page layout specifically */
+@media (max-width: 768px) {
+  /* Improve profile form display */
+  .profile-form-container {
+    padding: 0 8px;
+  }
+  
+  /* Fix input overflow on mobile */
+  input, select, textarea {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Prevent form overflow */
+  form {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Fix card overflow */
+  .card {
+    width: 100%;
+    max-width: 100%;
+    overflow-hidden;
+  }
+}
