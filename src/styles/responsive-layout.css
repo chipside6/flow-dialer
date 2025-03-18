@@ -19,7 +19,6 @@
     font-size: 16px !important; /* Prevents iOS zoom */
     margin-bottom: 16px;
     padding: 12px 16px;
-    max-width: 100% !important; /* Prevent horizontal overflow */
   }
   
   /* Improve card styling on mobile */
@@ -31,7 +30,6 @@
   /* Adjust content padding for mobile */
   [data-sidebar-inset] {
     padding: 16px 12px !important;
-    overflow-x: hidden !important; /* Prevent horizontal scrolling */
   }
 
   /* Fix table overflow */
@@ -63,21 +61,6 @@
   .container, .max-w-6xl, .max-w-7xl {
     padding-left: 12px !important;
     padding-right: 12px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-  }
-  
-  /* Prevent elements from stretching beyond screen width */
-  div, form, section {
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-  
-  /* Ensure form elements don't overflow */
-  form {
-    width: 100%;
-    max-width: 100%;
   }
 }
 
@@ -91,7 +74,6 @@
   /* More spacing around forms */
   form > div {
     margin-bottom: 16px;
-    max-width: 100%;
   }
   
   /* Larger touch targets */
@@ -105,7 +87,6 @@
   .bg-card {
     padding: 16px !important;
     margin-bottom: 16px;
-    width: 100% !important;
   }
   
   /* Improve readability of headings */
@@ -123,20 +104,10 @@
   [data-sidebar-inset] {
     margin-top: 56px !important; /* Account for mobile menu button */
     min-height: calc(100vh - 56px) !important;
-    width: 100% !important; 
-    overflow-x: hidden !important;
   }
   
   /* Add bottom spacing to prevent content from being hidden */
   [data-sidebar-inset] > div {
     padding-bottom: 32px !important;
-    width: 100% !important;
-  }
-  
-  /* Force body and html to not scroll horizontally */
-  body, html {
-    overflow-x: hidden !important;
-    width: 100% !important;
-    position: relative;
   }
 }

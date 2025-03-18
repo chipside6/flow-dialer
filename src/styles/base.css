@@ -6,19 +6,4 @@
   margin: 0;
   padding: 0;
   text-align: left;
-  overflow-x: hidden !important;
-}
-
-/* Prevent horizontal scrolling on all devices */
-html, body {
-  overflow-x: hidden !important;
-  width: 100%;
-  max-width: 100%;
-  position: relative;
-}
-
-/* Make sure large tables and components don't break layout */
-* {
-  box-sizing: border-box;
-  max-width: 100%;
 }
