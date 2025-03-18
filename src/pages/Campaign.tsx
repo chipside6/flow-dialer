@@ -8,20 +8,28 @@ import { PlusCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CampaignData } from "@/components/campaign-wizard/types";
 import { useAuth } from "@/contexts/auth/useAuth";
+import { Campaign } from "@/hooks/useCampaigns";
 
 const CampaignPage = () => {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
-  const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const { user } = useAuth();
   
   const handleCreateCampaign = (newCampaign: CampaignData) => {
-    // Ensure the campaign has a user_id property
-    const campaignWithUserId = {
-      ...newCampaign,
+    // Ensure the campaign has a user_id property and matches the Campaign type
+    const campaignWithRequiredFields: Campaign = {
+      id: newCampaign.id || `camp-${Date.now().toString(36)}`,
+      title: newCampaign.title,
+      status: "pending",
+      progress: 0,
+      totalCalls: 0,
+      answeredCalls: 0,
+      transferredCalls: 0,
+      failedCalls: 0,
       user_id: user?.id || 'demo'
     };
     
-    setCampaigns([...campaigns, campaignWithUserId]);
+    setCampaigns([...campaigns, campaignWithRequiredFields]);
     setShowCreateWizard(false);
   };
   
