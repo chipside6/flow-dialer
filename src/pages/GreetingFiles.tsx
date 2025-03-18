@@ -78,14 +78,14 @@ const GreetingFiles = () => {
 
   const content = (
     <div className="container py-6">
-      <div className="flex justify-between items-center mb-6 mt-6 pt-6">
-        <h1 className="text-3xl font-bold">Greeting Audio Files</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold">Greeting Audio Files</h1>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger id="tab-trigger-files" value="files">My Greetings</TabsTrigger>
-          <TabsTrigger id="tab-trigger-upload" value="upload">Add New Greeting</TabsTrigger>
+        <TabsList className="mb-4 w-full md:w-auto">
+          <TabsTrigger id="tab-trigger-files" value="files" className="flex-1 md:flex-none">My Greetings</TabsTrigger>
+          <TabsTrigger id="tab-trigger-upload" value="upload" className="flex-1 md:flex-none">Add New Greeting</TabsTrigger>
         </TabsList>
         
         <TabsContent value="files">
@@ -104,7 +104,7 @@ const GreetingFiles = () => {
 
   return (
     <>
-      <Navbar />
+      {/* We don't need Navbar in dashboard views as it's handled by DashboardLayout */}
       <DashboardLayout>
         {content}
       </DashboardLayout>

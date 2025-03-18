@@ -2,7 +2,8 @@
 /* Mobile menu styles */
 
 /* Prevent scrolling when mobile menu is open */
-body.menu-open {
+body.menu-open,
+body.mobile-menu-open {
   overflow: hidden;
 }
 
@@ -64,4 +65,12 @@ body.menu-open {
 
 .mobile-nav-link:hover {
   color: hsl(var(--primary));
+}
+
+/* Ensure mobile menu is visible */
+@media (max-width: 768px) {
+  [data-sidebar] {
+    visibility: visible;
+    display: block;
+  }
 }

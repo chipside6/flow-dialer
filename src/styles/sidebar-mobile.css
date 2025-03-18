@@ -6,6 +6,7 @@
   [data-sidebar][data-mobile="true"] {
     max-width: 100% !important;
     width: 85% !important;
+    z-index: 60 !important; /* Increase z-index to ensure it appears above everything */
   }
   
   /* Customize the mobile sidebar style */
@@ -24,9 +25,9 @@
     backdrop-filter: blur(8px);
   }
   
-  /* Fixed position for the navbar - hide on page content view */
-  .dashboard-header {
-    display: none;
+  /* Fixed position for the navbar - complete hide on mobile in dashboard */
+  .navbar-dashboard {
+    display: none !important;
   }
   
   /* Fix SheetContent appearance on mobile */
@@ -56,12 +57,19 @@
     padding-top: 16px !important;  /* Reduced from 72px to remove top nav space */
     min-height: 100vh !important;
   }
+  
+  /* Fix overflow issues on mobile */
+  .mobile-menu-open {
+    overflow: hidden !important;
+  }
 }
 
 /* Add animation to mobile sidebar */
 @media (max-width: 768px) {
   [data-state="open"] {
     animation: slideIn 0.3s ease;
+    visibility: visible !important;
+    display: flex !important;
   }
   
   [data-state="closed"] {

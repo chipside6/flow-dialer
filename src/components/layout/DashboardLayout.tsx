@@ -11,7 +11,8 @@ import {
   PhoneForwarded, 
   Server, 
   ShieldCheck,
-  X
+  X,
+  Menu
 } from "lucide-react";
 import { NavItem } from "@/components/navigation/NavItem";
 import { useLocation } from "react-router-dom";
@@ -26,7 +27,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { profile } = useAuth();
   const location = useLocation();
-  const { setOpenMobile, openMobile } = useSidebar();
+  const { setOpenMobile, openMobile, toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();
   
   // Close mobile sidebar when route changes
@@ -50,6 +51,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   
   return (
     <div className="flex flex-1 w-full">
+      {/* Mobile menu button - always visible on mobile */}
+      {isMobile && (
+        <div className="fixed top-4 left-4 z-50">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="bg-background rounded-full" 
+            onClick={toggleSidebar}
+          >
+            <Menu size={20} />
+          </Button>
+        </div>
+      )}
+      
       <Sidebar collapsible="offcanvas">
         <SidebarHeader>
           <div className="flex items-center p-4 mt-16 md:mt-0"> {/* Increased mt for mobile to avoid navbar overlap */}

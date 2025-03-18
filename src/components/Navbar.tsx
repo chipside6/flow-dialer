@@ -21,8 +21,8 @@ export const Navbar = () => {
                       location.pathname.includes('/admin');
 
   // Only use the sidebar hook when in dashboard mode
-  const sidebar = isDashboard ? useSidebar() : { toggleSidebar: () => {} };
-  const { toggleSidebar } = sidebar;
+  const sidebar = isDashboard ? useSidebar() : { toggleSidebar: () => {}, openMobile: false, setOpenMobile: () => {} };
+  const { toggleSidebar, openMobile, setOpenMobile } = sidebar;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,10 +51,23 @@ export const Navbar = () => {
     };
   }, [isMobileMenuOpen]);
 
+  // Make sure we handle the sidebar's openMobile state
+  useEffect(() => {
+    if (isDashboard && openMobile) {
+      document.body.classList.add('mobile-menu-open');
+    } else {
+      document.body.classList.remove('mobile-menu-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+    };
+  }, [isDashboard, openMobile]);
+
   if (isDashboard) {
     return (
       <header 
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm"
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm navbar-dashboard"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
