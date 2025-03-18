@@ -154,13 +154,9 @@ body.menu-open {
     backdrop-filter: blur(8px);
   }
   
-  /* Fixed position for the navbar */
+  /* Fixed position for the navbar - hide on page content view */
   .dashboard-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 40;
+    display: none;
   }
   
   /* Fix SheetContent appearance on mobile */
@@ -177,11 +173,17 @@ body.menu-open {
   /* Ensure page content is visible when navigating to a page */
   [data-sidebar="sidebar"][data-mobile="true"] {
     z-index: 100;
+    left: -100%;
+    transition: left 0.3s ease;
   }
 
-  /* Ensure the main content area is properly positioned */
+  [data-sidebar="sidebar"][data-mobile="true"][data-state="open"] {
+    left: 0;
+  }
+
+  /* Ensure the main content area is properly positioned - crucial fix */
   [data-sidebar-inset] {
-    padding-top: 72px !important;
+    padding-top: 16px !important;  /* Reduced from 72px to remove top nav space */
     min-height: 100vh !important;
   }
 }
