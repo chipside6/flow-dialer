@@ -7,10 +7,11 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  adminOnly?: boolean;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, initialized } = useAuth();
+const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
+  const { isAuthenticated, isLoading, initialized, isAdmin } = useAuth();
   const location = useLocation();
   const [timeoutReached, setTimeoutReached] = useState(false);
   const [authError, setAuthError] = useState(false);
@@ -36,8 +37,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
   }, [isLoading, initialized, isAuthenticated]);
 
-  // If authentication check is complete and user is authenticated, render children
+  // If authentication check is complete and user is authenticated, check admin status if needed
   if (isAuthenticated) {
+    // If adminOnly is true and user is not an admin, redirect to dashboard
+    if (adminOnly && !isAdmin) {
+      return <Navigate to="/dashboard" state={{ from: location }} replace />;
+    }
+    
+    // User is authenticated (and is admin if adminOnly is true)
     return <>{children}</>;
   }
   
