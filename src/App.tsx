@@ -19,6 +19,7 @@ import TransferNumbers from "./pages/TransferNumbers";
 import SipProviders from "./pages/SipProviders";
 import Dashboard from "./pages/Dashboard";
 import Billing from "./pages/Billing";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/transfers" element={<ProtectedRoute><TransferNumbers /></ProtectedRoute>} />
             <Route path="/sip-providers" element={<ProtectedRoute><SipProviders /></ProtectedRoute>} />
             <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

@@ -17,11 +17,22 @@ interface AuthContextType {
   setAsAffiliate: (userId: string) => Promise<void>;
 }
 
+// Define the profile interface to include the new columns
+interface Profile {
+  id: string;
+  full_name: string | null;
+  company_name: string | null;
+  created_at: string;
+  updated_at: string;
+  is_affiliate: boolean;
+  is_admin: boolean;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAffiliate, setIsAffiliate] = useState(false);
 

@@ -2,12 +2,12 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
-import { AudioWaveform, ContactIcon, PhoneForwarded, Server, BarChart3, Home, Settings } from "lucide-react";
+import { AudioWaveform, ContactIcon, PhoneForwarded, Server, BarChart3, Home, Settings, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function DashboardNav() {
   const location = useLocation();
-  const { profile } = useAuth();
+  const { profile, isAffiliate } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -21,6 +21,9 @@ export function DashboardNav() {
     { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5 mr-3" /> },
     { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5 mr-3" /> },
   ];
+  
+  // Admin link for admin users
+  const isAdmin = profile?.is_admin === true;
   
   return (
     <div className="bg-card rounded-lg border p-4">
@@ -38,6 +41,20 @@ export function DashboardNav() {
             </Button>
           </Link>
         ))}
+        
+        {/* Admin Panel Link */}
+        {isAdmin && (
+          <Link to="/admin" className="block w-full">
+            <Button
+              variant={isActive("/admin") ? "default" : "ghost"}
+              className={`w-full justify-start rounded-lg py-6 ${isActive("/admin") ? "bg-primary text-primary-foreground" : "hover:bg-accent text-foreground"}`}
+              size="lg"
+            >
+              <ShieldCheck className="h-5 w-5 mr-3" />
+              Admin Panel
+            </Button>
+          </Link>
+        )}
         
         {/* Show user type badge */}
         {profile?.is_affiliate && (
