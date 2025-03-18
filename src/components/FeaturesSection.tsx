@@ -1,3 +1,4 @@
+
 import { Check } from "lucide-react";
 
 const features = [
@@ -18,6 +19,24 @@ const features = [
     description: "Stay compliant with calling regulations with built-in compliance tools and do-not-call list integration.",
     icon: "✅",
     imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&h=600&q=80"
+  },
+  {
+    title: "Customizable Call Flows",
+    description: "Design personalized call experiences with our intuitive call flow builder to improve customer engagement.",
+    icon: "🔀",
+    imageUrl: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&h=600&q=80"
+  },
+  {
+    title: "Scheduling & Time Zones",
+    description: "Schedule campaigns with timezone intelligence to ensure calls are made at appropriate times.",
+    icon: "🕒",
+    imageUrl: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&h=600&q=80"
+  },
+  {
+    title: "Call Recording & Playback",
+    description: "Record calls for quality assurance and training purposes with secure storage and easy playback.",
+    icon: "🎙️",
+    imageUrl: "https://images.unsplash.com/photo-1590086782957-93c06ef21604?auto=format&fit=crop&w=800&h=600&q=80"
   }
 ];
 
