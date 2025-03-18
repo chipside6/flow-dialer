@@ -20,6 +20,8 @@ export interface AuthContextType {
   isAffiliate: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, metadata?: { full_name?: string }) => Promise<{ error: Error | null }>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<{ error: Error | null }>;
+  setAsAffiliate?: (userId: string) => Promise<void>;
 }

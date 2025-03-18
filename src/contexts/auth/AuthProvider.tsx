@@ -4,14 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User, AuthResponse } from '@supabase/supabase-js';
 import { toast } from '@/components/ui/use-toast';
 import { AuthContext } from './AuthContext';
-import { Profile } from './types';
+import { UserProfile, AuthContextType } from './types';
 import { fetchUserProfile, updateUserProfile, setUserAsAffiliate } from './authUtils';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAffiliate, setIsAffiliate] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Check active session on mount
@@ -30,6 +31,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Check if user is an affiliate
           if (profileData?.is_affiliate) {
             setIsAffiliate(true);
+          }
+          
+          // Check if user is an admin
+          if (profileData?.is_admin) {
+            setIsAdmin(true);
           }
         }
       } catch (error) {
@@ -57,10 +63,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } else {
             setIsAffiliate(false);
           }
+          
+          // Check if user is an admin
+          if (profileData?.is_admin) {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
         } else {
           setUser(null);
           setProfile(null);
           setIsAffiliate(false);
+          setIsAdmin(false);
         }
         setIsLoading(false);
       }
@@ -72,18 +86,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const signUp = async (email: string, password: string) => {
-    return await supabase.auth.signUp({
-      email,
-      password
-    });
+  const signUp = async (email: string, password: string, metadata?: { full_name?: string }) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: metadata
+        }
+      });
+      
+      return { error: error ? new Error(error.message) : null };
+    } catch (error: any) {
+      return { error: new Error(error.message) };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    return await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      return { error: error ? new Error(error.message) : null };
+    } catch (error: any) {
+      return { error: new Error(error.message) };
+    }
   };
 
   const signInWithGoogle = async () => {
@@ -110,21 +139,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.location.href = '/';
   };
 
-  const updateProfile = async (data: any) => {
+  const updateProfile = async (data: Partial<UserProfile>) => {
     try {
-      if (!user) return;
+      if (!user) return { error: new Error('No user authenticated') };
       
       const success = await updateUserProfile(user.id, data);
       
       if (success) {
         // Update local profile state
-        setProfile({
-          ...profile,
+        setProfile(prevProfile => ({
+          ...prevProfile,
           ...data
-        } as Profile);
+        } as UserProfile));
+        
+        return { error: null };
       }
+      
+      return { error: new Error('Failed to update profile') };
     } catch (error: any) {
       console.error('Error updating profile:', error);
+      return { error: new Error(error.message) };
     }
   };
   
@@ -136,20 +170,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // If updating the current user, update the state
       if (success && user && user.id === userId) {
         setIsAffiliate(true);
-        setProfile({
-          ...profile,
+        setProfile(prevProfile => ({
+          ...prevProfile,
           is_affiliate: true
-        } as Profile);
+        } as UserProfile));
       }
     } catch (error: any) {
       console.error('Error setting affiliate status:', error);
     }
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     profile,
     isLoading,
+    isAuthenticated: !!user,
+    isAdmin,
     isAffiliate,
     signUp,
     signIn,

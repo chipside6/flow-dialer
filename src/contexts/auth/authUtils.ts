@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Profile } from './types';
+import { UserProfile } from './types';
 
 export const fetchUserProfile = async (userId: string) => {
   try {
@@ -13,7 +13,7 @@ export const fetchUserProfile = async (userId: string) => {
     
     if (error) throw error;
     
-    return data as Profile;
+    return data as UserProfile;
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return null;
