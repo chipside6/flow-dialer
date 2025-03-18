@@ -39,6 +39,15 @@
     padding-left: 12px;
     padding-right: 12px;
   }
+
+  /* Ensure buttons don't cause overflow */
+  .button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Dashboard specific mobile improvements */
@@ -90,5 +99,11 @@
     max-width: 100% !important;
     width: 100% !important;
     overflow-x: hidden;
+  }
+
+  /* Campaign page specific fixes */
+  .campaign-table-container {
+    max-width: calc(100vw - 32px);
+    overflow-x: auto;
   }
 }

@@ -12,3 +12,14 @@ main {
   margin-bottom: 3rem;
 }
 
+/* Fix for campaign card overflow */
+.card {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure tables don't cause horizontal overflow */
+.table-container {
+  max-width: 100%;
+  overflow-x: auto;
+}
