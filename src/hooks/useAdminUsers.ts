@@ -50,12 +50,12 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         throw error;
       }
     },
-    refetchOnWindowFocus: true,  // Refresh data when window regains focus
-    refetchOnMount: true,        // Refresh data when component mounts
-    retry: 2,                    // Increase retry attempts
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    retry: 2,
     retryDelay: 1000,
     enabled,
     staleTime,
-    gcTime: 60000 * 5,           // Keep data in cache for 5 minutes
+    gcTime: 60000 * 5,
   });
 }

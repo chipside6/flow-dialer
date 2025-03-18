@@ -46,7 +46,7 @@ serve(async (req) => {
     let userId;
 
     if (existingUser) {
-      console.log("Admin user already exists, updating affiliate status");
+      console.log("Admin user already exists, updating status");
       userId = existingUser.id;
     } else {
       // Create the new user
@@ -66,7 +66,7 @@ serve(async (req) => {
       userId = newUser.user.id;
     }
 
-    // Set the user as an affiliate and admin in the profiles table
+    // Set the user as an admin in the profiles table
     console.log("Updating profile for user:", userId);
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
@@ -84,12 +84,12 @@ serve(async (req) => {
       throw updateError;
     }
 
-    console.log("Admin user set as affiliate successfully");
+    console.log("Admin user set successfully");
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Admin user created/updated and set as affiliate",
+        message: "Admin user created/updated successfully",
         userId: userId
       }),
       { 

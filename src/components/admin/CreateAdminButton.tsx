@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function CreateAdminButton() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleCreateAdmin = async () => {
     setIsLoading(true);
@@ -15,7 +17,6 @@ export function CreateAdminButton() {
       console.log("CreateAdminButton - Invoking create-admin-user function");
       
       const { data, error } = await supabase.functions.invoke('create-admin-user', {
-        // Set the proper options without the invalid timeout property
         method: 'POST',
         body: {}
       });
@@ -31,6 +32,9 @@ export function CreateAdminButton() {
       }
       
       console.log("Admin user created response:", data);
+      
+      // Invalidate admin users query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       
       toast({
         title: "Success",
