@@ -11,7 +11,7 @@ import {
   Home, 
   ShieldCheck 
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { NavItem } from "@/components/navigation/NavItem";
 import { AffiliateStatus } from "@/components/navigation/AffiliateStatus";
 import { useSidebar } from "@/components/ui/sidebar";
