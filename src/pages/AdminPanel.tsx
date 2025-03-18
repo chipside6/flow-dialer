@@ -1,235 +1,122 @@
 
-import React, { useState, useEffect } from "react";
-import { Navbar } from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import React from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { User } from "@supabase/supabase-js";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { UserTable } from "@/components/admin/UserTable";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 
-interface UserListItem {
+interface UserProfile {
   id: string;
-  full_name: string | null;
-  email: string | null;
+  user_id: string;
+  created_at: string;
+  is_admin: boolean;
   is_affiliate: boolean;
 }
 
 const AdminPanel = () => {
   const { toast } = useToast();
-  const { user, profile, setAsAffiliate } = useAuth();
-  const [users, setUsers] = useState<UserListItem[]>([]);
-  const [emailToSearch, setEmailToSearch] = useState("");
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Check if current user is an admin
-  const isAdmin = profile?.is_admin === true;
-
-  useEffect(() => {
-    // Fetch all users if admin
-    if (isAdmin) {
-      fetchUsers();
-    }
-  }, [isAdmin]);
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      // Fetch profiles with emails from auth user table
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*');
+  // Fetch all users with their profiles
+  const { data: users, isLoading, error } = useQuery({
+    queryKey: ["admin", "users"],
+    queryFn: async () => {
+      // Get all users
+      const { data: users, error } = await supabase.auth.admin.listUsers();
       
       if (error) throw error;
       
-      // Get email data for each user
-      const usersWithEmail = await Promise.all(
-        (data || []).map(async (profile) => {
-          // In a real app, you might use an admin API to get user emails
-          // This is simplified for demo purposes
-          return {
-            id: profile.id,
-            full_name: profile.full_name,
-            email: `user-${profile.id.substring(0, 6)}@example.com`, // Simulated email
-            is_affiliate: profile.is_affiliate || false
-          };
-        })
-      );
+      // Get all profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("*");
       
-      setUsers(usersWithEmail);
-    } catch (error: any) {
-      console.error("Error fetching users:", error.message);
-      toast({
-        title: "Error",
-        description: "Failed to load users",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = async () => {
-    if (!emailToSearch.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter an email to search",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // In a real application, you would search for the user by email
-      // This is a simplified version that just filters the existing users
-      const foundUsers = users.filter(user => 
-        user.email?.toLowerCase().includes(emailToSearch.toLowerCase())
-      );
+      if (profilesError) throw profilesError;
       
-      if (foundUsers.length > 0) {
-        setUsers(foundUsers);
-      } else {
-        toast({
-          title: "User not found",
-          description: "No user found with this email",
-        });
-      }
-    } catch (error: any) {
-      console.error("Error searching user:", error.message);
-      toast({
-        title: "Error",
-        description: "Failed to search for user",
-        variant: "destructive",
+      // Join users with their profiles
+      const usersWithProfiles = users.users.map((user: User) => {
+        const profile = profiles.find((p: UserProfile) => p.user_id === user.id);
+        return { ...user, profile };
       });
-    } finally {
-      setLoading(false);
-    }
+      
+      return usersWithProfiles;
+    },
+  });
+
+  // Toggle affiliate status mutation
+  const toggleAffiliateMutation = useMutation({
+    mutationFn: async ({ userId, setAffiliate }: { userId: string; setAffiliate: boolean }) => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .update({ is_affiliate: setAffiliate })
+        .eq("user_id", userId);
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      toast({
+        title: "Success",
+        description: "User affiliate status updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Failed to update user: ${error.message}`,
+      });
+    },
+  });
+
+  const handleToggleAffiliate = (userId: string, isCurrentlyAffiliate: boolean) => {
+    toggleAffiliateMutation.mutate({
+      userId,
+      setAffiliate: !isCurrentlyAffiliate,
+    });
   };
 
-  const handleSetAffiliate = async (userId: string) => {
-    try {
-      await setAsAffiliate(userId);
-      // Refresh the user list
-      fetchUsers();
-    } catch (error: any) {
-      console.error("Error setting affiliate:", error.message);
-    }
-  };
-
-  // Redirect or show access denied if not admin
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="py-32 px-6">
-          <div className="max-w-md mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle>Access Denied</CardTitle>
-                <CardDescription>
-                  You don't have permission to access the admin panel.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>This area is restricted to administrators only.</p>
-              </CardContent>
-              <CardFooter>
-                <Button asChild className="w-full">
-                  <a href="/dashboard">Return to Dashboard</a>
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-        </main>
-      </div>
-    );
-  }
+  // Calculate stats
+  const userCount = users?.length ?? 0;
+  const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="py-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Admin Panel</h1>
-          
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>User Management</CardTitle>
-              <CardDescription>
-                Search for users and manage their roles and permissions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-4 mb-8">
-                <div className="space-y-2 flex-1">
-                  <Label htmlFor="email">User Email</Label>
-                  <Input 
-                    id="email" 
-                    placeholder="Enter email to search" 
-                    value={emailToSearch}
-                    onChange={(e) => setEmailToSearch(e.target.value)}
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button onClick={handleSearch} disabled={loading}>
-                    {loading ? "Searching..." : "Search"}
-                  </Button>
-                </div>
-              </div>
-
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
-                        {loading ? "Loading users..." : "No users found"}
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.email || "N/A"}</TableCell>
-                        <TableCell>{user.full_name || "N/A"}</TableCell>
-                        <TableCell>
-                          {user.is_affiliate ? (
-                            <Badge className="bg-green-500">Affiliate</Badge>
-                          ) : (
-                            <Badge variant="outline">Regular</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {!user.is_affiliate && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleSetAffiliate(user.id)}
-                              variant="outline"
-                            >
-                              Set as Affiliate
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Admin Panel</h1>
+          <p className="text-muted-foreground">
+            Manage users and configure system settings
+          </p>
         </div>
-      </main>
-    </div>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error instanceof Error ? error.message : "An unknown error occurred"}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <AdminHeader userCount={userCount} affiliateCount={affiliateCount} />
+
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">User Management</h2>
+          <UserTable 
+            users={users || []} 
+            toggleAffiliate={handleToggleAffiliate}
+            isLoading={isLoading || toggleAffiliateMutation.isPending}
+          />
+        </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

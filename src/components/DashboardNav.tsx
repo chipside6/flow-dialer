@@ -2,16 +2,22 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
-import { AudioWaveform, ContactIcon, PhoneForwarded, Server, BarChart3, Home, Settings, ShieldCheck } from "lucide-react";
+import { 
+  AudioWaveform, 
+  ContactIcon, 
+  PhoneForwarded, 
+  Server, 
+  BarChart3, 
+  Home, 
+  ShieldCheck 
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { NavItem } from "@/components/navigation/NavItem";
+import { AffiliateStatus } from "@/components/navigation/AffiliateStatus";
 
 export function DashboardNav() {
   const location = useLocation();
-  const { profile, isAffiliate } = useAuth();
-  
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
+  const { profile } = useAuth();
   
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5 mr-3" /> },
@@ -30,39 +36,27 @@ export function DashboardNav() {
       <h2 className="font-semibold mb-4">Navigation</h2>
       <nav className="space-y-2">
         {navItems.map((item) => (
-          <Link key={item.path} to={item.path} className="block w-full">
-            <Button
-              variant={isActive(item.path) ? "default" : "ghost"}
-              className={`w-full justify-start rounded-lg py-6 ${isActive(item.path) ? "bg-primary text-primary-foreground" : "hover:bg-accent text-foreground"}`}
-              size="lg"
-            >
-              {item.icon}
-              {item.name}
-            </Button>
-          </Link>
+          <NavItem 
+            key={item.path} 
+            item={item} 
+            isActive={location.pathname === item.path} 
+          />
         ))}
         
         {/* Admin Panel Link */}
         {isAdmin && (
-          <Link to="/admin" className="block w-full">
-            <Button
-              variant={isActive("/admin") ? "default" : "ghost"}
-              className={`w-full justify-start rounded-lg py-6 ${isActive("/admin") ? "bg-primary text-primary-foreground" : "hover:bg-accent text-foreground"}`}
-              size="lg"
-            >
-              <ShieldCheck className="h-5 w-5 mr-3" />
-              Admin Panel
-            </Button>
-          </Link>
+          <NavItem 
+            item={{
+              name: "Admin Panel",
+              path: "/admin",
+              icon: <ShieldCheck className="h-5 w-5 mr-3" />
+            }}
+            isActive={location.pathname === "/admin"}
+          />
         )}
         
-        {/* Show user type badge */}
-        {profile?.is_affiliate && (
-          <div className="mt-6 px-3 py-2 bg-green-50 border border-green-200 rounded-md">
-            <p className="text-green-700 text-sm font-medium">Affiliate Account</p>
-            <p className="text-green-600 text-xs">Full access to all features</p>
-          </div>
-        )}
+        {/* Affiliate Status Badge */}
+        {profile?.is_affiliate && <AffiliateStatus />}
       </nav>
     </div>
   );
