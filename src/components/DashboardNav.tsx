@@ -19,12 +19,12 @@ export function DashboardNav() {
   const { profile } = useAuth();
   
   const navItems = [
-    { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5 mr-3" /> },
-    { name: "Campaigns", path: "/campaign", icon: <BarChart3 className="h-5 w-5 mr-3" /> },
-    { name: "Greeting Files", path: "/greetings", icon: <AudioWaveform className="h-5 w-5 mr-3" /> },
-    { name: "Contact Lists", path: "/contacts", icon: <ContactIcon className="h-5 w-5 mr-3" /> },
-    { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5 mr-3" /> },
-    { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5 mr-3" /> },
+    { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },
+    { name: "Campaigns", path: "/campaign", icon: <BarChart3 className="h-5 w-5" /> },
+    { name: "Greeting Files", path: "/greetings", icon: <AudioWaveform className="h-5 w-5" /> },
+    { name: "Contact Lists", path: "/contacts", icon: <ContactIcon className="h-5 w-5" /> },
+    { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
+    { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5" /> },
   ];
   
   // Admin link for admin users
@@ -47,7 +47,7 @@ export function DashboardNav() {
             item={{
               name: "Admin Panel",
               path: "/admin",
-              icon: <ShieldCheck className="h-5 w-5 mr-3" />
+              icon: <ShieldCheck className="h-5 w-5" />
             }}
             isActive={location.pathname === "/admin"}
           />

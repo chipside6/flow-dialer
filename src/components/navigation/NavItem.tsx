@@ -25,8 +25,8 @@ export function NavItem({ item, isActive, onClick }: NavItemProps) {
         }`}
         size="sm"
       >
-        <div className="flex items-center gap-3 text-sm">
-          <span className="flex items-center justify-center w-5 h-5">
+        <div className="flex items-center gap-3 text-sm w-full pr-2">
+          <span className="flex items-center justify-center w-5 h-5 flex-shrink-0">
             {item.icon}
           </span>
           <span className="font-medium truncate">{item.name}</span>
