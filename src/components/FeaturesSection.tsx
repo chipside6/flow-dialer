@@ -18,7 +18,7 @@ const features = [
     title: "Intelligent Call Routing",
     description: "Route calls to the right team members based on custom rules, availability, and expertise.",
     icon: "🔄",
-    imageUrl: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=800&h=600&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=800&h=600&q=80"
   },
   {
     title: "Voice Recognition",
