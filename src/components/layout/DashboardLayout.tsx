@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/auth";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, useSidebar } from "@/components/ui/sidebar";
