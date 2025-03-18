@@ -10,11 +10,12 @@ export interface NavItemProps {
     icon: React.ReactNode;
   };
   isActive: boolean;
+  onClick?: () => void;
 }
 
-export function NavItem({ item, isActive }: NavItemProps) {
+export function NavItem({ item, isActive, onClick }: NavItemProps) {
   return (
-    <Link to={item.path} className="block w-full">
+    <Link to={item.path} className="block w-full" onClick={onClick}>
       <Button
         variant={isActive ? "default" : "ghost"}
         className={`w-full justify-start rounded-md py-3 mb-1 text-left ${

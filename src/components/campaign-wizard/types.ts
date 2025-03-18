@@ -18,6 +18,7 @@ export interface CampaignData {
   transferredCalls?: number;
   failedCalls?: number;
   createdAt?: string;
+  user_id?: string; // Adding user_id to match Campaign type
 }
 
 export type WizardStep = "basics" | "contacts" | "audio" | "transfers" | "schedule" | "review";

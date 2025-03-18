@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Menu, X, Phone } from "lucide-react";
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Navbar = () => {
@@ -54,13 +54,13 @@ export const Navbar = () => {
   if (isDashboard) {
     return (
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm`}
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
               onClick={toggleSidebar}
-              className="md:hidden p-2"
+              className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted"
               aria-label="Toggle sidebar"
             >
               <Menu size={24} />
@@ -119,7 +119,7 @@ export const Navbar = () => {
           </div>
 
           <button 
-            className="md:hidden p-2 z-50 relative"
+            className="md:hidden p-2 z-50 relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted/20"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >

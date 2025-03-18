@@ -186,6 +186,31 @@ main {
     opacity: 0;
     transform: translateY(-10px);
   }
+  
+  /* Improved mobile sidebar styling */
+  [data-sidebar][data-mobile="true"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Ensure navbar and sidebar don't overlap */
+  .dashboard-content {
+    padding-top: 70px;
+  }
+  
+  /* Fix mobile navigation touch targets */
+  .mobile-nav-item {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+  }
+  
+  /* Add better spacing to the mobile sidebar */
+  [data-sidebar="sidebar"] [data-sidebar="content"] {
+    padding-top: 8px;
+  }
 }
 
 /* Dashboard specific mobile styles */
