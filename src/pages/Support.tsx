@@ -62,8 +62,8 @@ const Support = () => {
                         answer: "You can reset your password by clicking on the 'Forgot Password' link on the login screen and following the instructions sent to your email."
                       },
                       {
-                        question: "Can I use Dandy Dialer internationally?",
-                        answer: "Yes, Dandy Dialer works worldwide. International calling rates may apply depending on your subscription plan."
+                        question: "Can I use Flow Dialer internationally?",
+                        answer: "Yes, Flow Dialer works worldwide. International calling rates may apply depending on your subscription plan."
                       },
                       {
                         question: "How do I update my payment information?",
