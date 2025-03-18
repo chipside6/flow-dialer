@@ -14,9 +14,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <Sidebar collapsible="offcanvas">
         <SidebarHeader>
           <div className="flex items-center p-2">
-            <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-2">
+            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-2">
               <Phone size={16} />
-            </span>
+            </div>
             <span className="font-semibold text-lg">Flow Dialer</span>
           </div>
         </SidebarHeader>
@@ -24,7 +24,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <DashboardNav />
         </SidebarContent>
       </Sidebar>
-      <SidebarInset className="p-6">
+      <SidebarInset className="p-6 bg-background/50 dark:bg-background/10 min-h-screen">
         <div className="max-w-6xl mx-auto w-full">
           {children}
         </div>
