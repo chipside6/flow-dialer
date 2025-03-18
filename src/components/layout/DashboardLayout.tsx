@@ -65,6 +65,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       )}
       
+      {/* Backdrop for sidebar on mobile */}
+      {isMobile && (
+        <div 
+          className={`sidebar-backdrop ${openMobile ? 'open' : ''}`}
+          onClick={() => setOpenMobile(false)}
+        />
+      )}
+      
       <Sidebar collapsible="offcanvas">
         <SidebarHeader>
           <div className="flex items-center p-4 mt-16 md:mt-0"> {/* Increased mt for mobile to avoid navbar overlap */}

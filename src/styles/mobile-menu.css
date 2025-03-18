@@ -71,7 +71,7 @@ body.mobile-menu-open {
 @media (max-width: 768px) {
   [data-sidebar] {
     visibility: visible;
-    display: block;
+    display: block !important;
   }
   
   /* Hide the navbar completely on all protected routes */
@@ -83,5 +83,18 @@ body.mobile-menu-open {
   .mobile-menu-button {
     display: flex !important;
     z-index: 60;
+  }
+  
+  /* SheetContent full visibility fix */
+  [role="dialog"].fixed {
+    visibility: visible !important;
+    display: flex !important;
+  }
+  
+  /* Force sidebar to always be visible when open on mobile */
+  [data-sidebar][data-mobile="true"][data-state="open"] {
+    visibility: visible !important;
+    display: flex !important;
+    opacity: 1 !important;
   }
 }
