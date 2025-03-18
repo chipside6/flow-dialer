@@ -15,7 +15,7 @@ const DashboardFallback = () => (
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col w-full max-w-full overflow-hidden">
       <Navbar />
       <div className="flex flex-1 w-full max-w-full overflow-hidden">
         <DashboardLayout>
