@@ -1,6 +1,6 @@
 
 export interface CampaignData {
-  id?: string;
+  id: string; // Changed from optional to required
   title: string;
   description: string;
   contactListId: string;

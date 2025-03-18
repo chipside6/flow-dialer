@@ -18,14 +18,14 @@ const CampaignPage = () => {
   const handleCreateCampaign = (newCampaign: CampaignData) => {
     // Ensure the campaign has a user_id property and matches the Campaign type
     const campaignWithRequiredFields: Campaign = {
-      id: newCampaign.id || `camp-${Date.now().toString(36)}`,
+      id: newCampaign.id,
       title: newCampaign.title,
-      status: "pending",
-      progress: 0,
-      totalCalls: 0,
-      answeredCalls: 0,
-      transferredCalls: 0,
-      failedCalls: 0,
+      status: newCampaign.status || "pending",
+      progress: newCampaign.progress || 0,
+      totalCalls: newCampaign.totalCalls || 0,
+      answeredCalls: newCampaign.answeredCalls || 0,
+      transferredCalls: newCampaign.transferredCalls || 0,
+      failedCalls: newCampaign.failedCalls || 0,
       user_id: user?.id || 'demo'
     };
     
