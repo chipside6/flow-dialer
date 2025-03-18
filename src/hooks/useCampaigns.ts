@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -24,10 +24,28 @@ export const useCampaigns = () => {
 
   useEffect(() => {
     const fetchCampaigns = async () => {
-      if (!user) return;
-
       try {
         setIsLoading(true);
+        
+        // Generate demo data if no user is logged in
+        if (!user) {
+          const demoData: Campaign[] = [
+            {
+              id: "demo-123",
+              title: "Demo Campaign",
+              status: "pending",
+              progress: 0,
+              totalCalls: 100,
+              answeredCalls: 0,
+              transferredCalls: 0,
+              failedCalls: 0,
+              user_id: "demo"
+            }
+          ];
+          setCampaigns(demoData);
+          return;
+        }
+
         const { data, error } = await supabase
           .from('campaigns')
           .select('*')
@@ -56,6 +74,22 @@ export const useCampaigns = () => {
           description: error.message,
           variant: "destructive"
         });
+        
+        // Set default demo campaigns on error
+        const demoData: Campaign[] = [
+          {
+            id: "demo-123",
+            title: "Demo Campaign",
+            status: "pending",
+            progress: 0,
+            totalCalls: 100,
+            answeredCalls: 0,
+            transferredCalls: 0,
+            failedCalls: 0,
+            user_id: "demo"
+          }
+        ];
+        setCampaigns(demoData);
       } finally {
         setIsLoading(false);
       }

@@ -16,8 +16,8 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <SidebarProvider defaultOpen>
-        <div className="flex flex-1 w-full pt-16">
+      <div className="flex flex-1 w-full pt-16">
+        <SidebarProvider defaultOpen>
           <Sidebar collapsible="offcanvas">
             <SidebarHeader>
               <div className="flex items-center p-2">
@@ -36,8 +36,8 @@ const Dashboard = () => {
               <DashboardContent />
             </div>
           </SidebarInset>
-        </div>
-      </SidebarProvider>
+        </SidebarProvider>
+      </div>
     </div>
   );
 };

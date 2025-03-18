@@ -1,7 +1,8 @@
 
 import React from "react";
 import { DashboardNav } from "@/components/DashboardNav";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarInset } from "@/components/ui/sidebar";
+import { Phone } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -9,19 +10,27 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="hidden md:flex md:w-64 md:flex-col">
-          <div className="flex flex-col flex-grow pt-5 overflow-y-auto border-r">
+    <div className="flex flex-1 w-full">
+      <SidebarProvider defaultOpen>
+        <Sidebar collapsible="offcanvas">
+          <SidebarHeader>
+            <div className="flex items-center p-2">
+              <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-2">
+                <Phone size={16} />
+              </span>
+              <span className="font-semibold text-lg">Flow Dialer</span>
+            </div>
+          </SidebarHeader>
+          <SidebarContent>
             <DashboardNav />
-          </div>
-        </div>
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <main className="flex-1 p-4 overflow-x-hidden overflow-y-auto md:p-6">
+          </SidebarContent>
+        </Sidebar>
+        <SidebarInset className="p-6">
+          <div className="max-w-6xl mx-auto w-full">
             {children}
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   );
 }

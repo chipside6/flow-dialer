@@ -20,7 +20,7 @@ export const DashboardContent = () => {
       );
     }
 
-    if (campaigns.length === 0) {
+    if (!campaigns || campaigns.length === 0) {
       return <EmptyCampaignState />;
     }
 
@@ -36,9 +36,9 @@ export const DashboardContent = () => {
   };
 
   return (
-    <>
+    <div className="space-y-4">
       <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       {renderContent()}
-    </>
+    </div>
   );
 };
