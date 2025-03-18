@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -54,7 +54,7 @@ const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) =>
   };
 
   return (
-    <Card className="mb-8">
+    <Card className="mb-8 w-full">
       <CardHeader>
         <CardTitle className="flex items-center text-xl">
           <UserPlus className="mr-2 h-5 w-5" />
@@ -70,6 +70,7 @@ const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) =>
               placeholder={isMobile ? "List name" : "Enter a name for your contact list"}
               value={newListName}
               onChange={(e) => setNewListName(e.target.value)}
+              className="w-full"
             />
           </div>
           <div>
@@ -79,9 +80,10 @@ const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) =>
               placeholder={isMobile ? "List purpose" : "Describe the purpose of this list"}
               value={newListDescription}
               onChange={(e) => setNewListDescription(e.target.value)}
+              className="w-full"
             />
           </div>
-          <Button onClick={handleCreateList} className="bg-purple-500 hover:bg-purple-600">
+          <Button onClick={handleCreateList} className="bg-purple-500 hover:bg-purple-600 w-full sm:w-auto">
             <UserPlus className="mr-2 h-4 w-4" />
             Create List
           </Button>
