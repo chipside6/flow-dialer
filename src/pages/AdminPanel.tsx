@@ -10,7 +10,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { UserTable } from "@/components/admin/UserTable";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 
-// Updated to match the actual database schema
+// Interface that matches the actual database schema
 interface ProfileData {
   id: string;
   full_name: string | null;
@@ -21,10 +21,8 @@ interface ProfileData {
   is_affiliate: boolean | null;
 }
 
-// Define a type for the profile with user_id field for components that expect it
-interface UserProfile extends Omit<ProfileData, 'id'> {
-  user_id: string;
-}
+// Define an extended type for use in components that expect user_id
+type UserProfileWithUserId = ProfileData & { user_id: string };
 
 const AdminPanel = () => {
   const { toast } = useToast();
@@ -51,10 +49,10 @@ const AdminPanel = () => {
         // Find the profile that matches the user ID
         const profile = profiles.find((p: ProfileData) => p.id === user.id);
         
-        // Create a UserProfile compatible object with user_id for components that need it
+        // If profile exists, add user_id property for component compatibility
         const formattedProfile = profile ? {
           ...profile,
-          user_id: user.id, // Add user_id property expected by UserProfile interface
+          user_id: user.id
         } : undefined;
         
         return { 
@@ -73,7 +71,7 @@ const AdminPanel = () => {
       const { data, error } = await supabase
         .from("profiles")
         .update({ is_affiliate: setAffiliate })
-        .eq("id", userId); // Use id instead of user_id because in profiles table, id is the user id
+        .eq("id", userId);
       
       if (error) throw error;
       return data;

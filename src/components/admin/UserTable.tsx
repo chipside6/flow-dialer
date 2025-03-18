@@ -13,15 +13,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle } from "lucide-react";
 
-// Define the interface for profile data
+// Updated interface to match the AdminPanel component
 interface UserProfile {
-  user_id: string;
-  created_at: string;
-  is_admin: boolean | null;
-  is_affiliate: boolean | null;
+  id: string;
   full_name: string | null;
   company_name: string | null;
+  created_at: string;
   updated_at: string;
+  is_admin: boolean | null;
+  is_affiliate: boolean | null;
+  user_id: string; // This is added for component compatibility
 }
 
 interface UserTableProps {
