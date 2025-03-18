@@ -23,7 +23,7 @@ const ContactLists = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4 max-w-full overflow-x-hidden">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Contact Lists</h1>
         </div>
