@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,25 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   const [password, setPassword] = useState(editingProvider?.password || "");
   const [description, setDescription] = useState(editingProvider?.description || "");
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Update form when editingProvider changes
+  useEffect(() => {
+    if (editingProvider) {
+      setName(editingProvider.name);
+      setHost(editingProvider.host);
+      setPort(editingProvider.port);
+      setUsername(editingProvider.username);
+      setPassword(editingProvider.password);
+      setDescription(editingProvider.description);
+    } else {
+      setName("");
+      setHost("");
+      setPort("5060");
+      setUsername("");
+      setPassword("");
+      setDescription("");
+    }
+  }, [editingProvider]);
   
   const handleSubmit = () => {
     if (!name || !host || !username || !password) {

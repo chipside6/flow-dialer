@@ -43,8 +43,6 @@ const SidebarProvider = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof SidebarContextProvider>
 >((props, ref) => {
-  const { isMobile } = useSidebar();
-  
   return (
     <SidebarContextProvider ref={ref} {...props}>
       <TooltipProvider delayDuration={0}>
