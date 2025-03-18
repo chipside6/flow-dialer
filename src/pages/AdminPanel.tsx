@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -23,6 +23,14 @@ interface ProfileData {
 
 // Define an extended type for use in components that expect user_id
 type UserProfileWithUserId = ProfileData & { user_id: string };
+
+// Define a simplified User type for our admin panel
+interface AdminPanelUser {
+  id: string;
+  email?: string | null;
+  created_at?: string;
+  profile?: UserProfileWithUserId;
+}
 
 const AdminPanel = () => {
   const { toast } = useToast();
@@ -61,7 +69,7 @@ const AdminPanel = () => {
           if (!authData || !authData.users) {
             console.log("AdminPanel - No users returned from admin API");
             // Fallback to using just profiles if admin API fails
-            return profiles.map((profile: ProfileData) => ({
+            return profiles.map((profile: ProfileData): AdminPanelUser => ({
               id: profile.id,
               email: "Unknown",
               created_at: profile.created_at,
@@ -76,7 +84,7 @@ const AdminPanel = () => {
           console.log("AdminPanel - Users fetched from admin API:", userList.length);
           
           // Join users with their profiles
-          const usersWithProfiles = userList.map((user: User) => {
+          const usersWithProfiles = userList.map((user: User): AdminPanelUser => {
             // Find the profile that matches the user ID
             const profile = profiles?.find((p: ProfileData) => p.id === user.id);
             
@@ -87,7 +95,9 @@ const AdminPanel = () => {
             } : undefined;
             
             return { 
-              ...user, 
+              id: user.id, 
+              email: user.email,
+              created_at: user.created_at,
               profile: formattedProfile 
             };
           });
@@ -97,7 +107,7 @@ const AdminPanel = () => {
         } catch (adminError) {
           console.error("AdminPanel - Admin API failed, using profiles only:", adminError);
           // Fallback to using just profiles if admin API fails
-          return profiles.map((profile: ProfileData) => ({
+          return profiles.map((profile: ProfileData): AdminPanelUser => ({
             id: profile.id,
             email: "Unknown",
             created_at: profile.created_at,

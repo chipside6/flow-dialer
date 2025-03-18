@@ -1,6 +1,5 @@
 
 import React from "react";
-import { User } from "@supabase/supabase-js";
 import { 
   Table, 
   TableHeader, 
@@ -13,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle } from "lucide-react";
 
-// Updated interface to match the AdminPanel component
+// Updated interface for admin panel users
 interface UserProfile {
   id: string;
   full_name: string | null;
@@ -25,8 +24,15 @@ interface UserProfile {
   user_id: string; // This is added for component compatibility
 }
 
+interface AdminPanelUser {
+  id: string;
+  email?: string | null;
+  created_at?: string;
+  profile?: UserProfile;
+}
+
 interface UserTableProps {
-  users: (User & { profile?: UserProfile })[];
+  users: AdminPanelUser[];
   toggleAffiliate: (userId: string, isAffiliate: boolean) => void;
   isLoading: boolean;
 }
@@ -57,7 +63,7 @@ export function UserTable({ users, toggleAffiliate, isLoading }: UserTableProps)
             users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-mono text-xs">
-                  {user.id ? user.id.split('-')[0] + '...' : 'N/A'}
+                  {user.id ? user.id.substring(0, 8) + '...' : 'N/A'}
                 </TableCell>
                 <TableCell>{user.email || 'No Email'}</TableCell>
                 <TableCell>
