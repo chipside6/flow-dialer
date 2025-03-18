@@ -41,6 +41,7 @@ export function UsersDataFetcher() {
     refetch();
   };
 
+  // Fixed condition: Only show loading screen when isLoading is true AND users is null/undefined
   if (isLoading && !users) {
     return (
       <DashboardLayout>
@@ -52,6 +53,7 @@ export function UsersDataFetcher() {
     );
   }
 
+  // This ensures we show an error page only if we have an error AND no data
   if (error && !users) {
     return (
       <DashboardLayout>
