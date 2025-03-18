@@ -15,10 +15,9 @@ export function CreateAdminButton() {
       console.log("CreateAdminButton - Invoking create-admin-user function");
       
       const { data, error } = await supabase.functions.invoke('create-admin-user', {
-        // Set a reasonable timeout for the function
+        // Set the proper options without the invalid timeout property
         method: 'POST',
-        body: {},
-        timeout: 20000 // 20 seconds timeout
+        body: {}
       });
       
       if (error) {
