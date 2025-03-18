@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,7 +34,7 @@ const Login = () => {
       const { error } = await signIn(email, password);
 
       if (error) {
-        throw new Error(error.message);
+        throw error;
       }
 
       toast({
@@ -44,7 +43,9 @@ const Login = () => {
       });
       
       console.log("Login - Sign in successful, redirecting to dashboard");
-      navigate('/dashboard');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 100);
     } catch (error: any) {
       console.error("Login - Sign in failed:", error.message);
       toast({
@@ -72,6 +73,7 @@ const Login = () => {
     }
   };
 
+  
   return (
     <div className="container max-w-md mx-auto py-10">
       <Card className="border border-border/40 shadow-sm">

@@ -21,11 +21,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       timeoutReached
     });
     
-    // Set an even shorter timeout to prevent getting stuck
+    // Set a timeout to prevent getting stuck in loading state
     const timer = setTimeout(() => {
       setTimeoutReached(true);
       console.log('Protected Route - Timeout reached, forcing render decision');
-    }, 300); // 300ms timeout
+    }, 1000); // 1s timeout
     
     return () => clearTimeout(timer);
   }, [user, isLoading, location.pathname, timeoutReached]);
@@ -42,7 +42,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Only show loading state very briefly
+  // Only show loading state briefly
   return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
       <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />

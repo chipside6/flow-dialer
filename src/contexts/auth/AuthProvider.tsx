@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
@@ -28,16 +27,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Fetch user profile
           const profileData = await fetchUserProfile(session.user.id);
           
-          setProfile(profileData);
-          
-          // Check if user is an affiliate
-          if (profileData?.is_affiliate) {
-            setIsAffiliate(true);
-          }
-          
-          // Check if user is an admin
-          if (profileData?.is_admin) {
-            setIsAdmin(true);
+          if (profileData) {
+            console.log("AuthProvider - Profile data:", profileData);
+            setProfile(profileData);
+            
+            // Check if user is an affiliate
+            if (profileData.is_affiliate) {
+              setIsAffiliate(true);
+            }
+            
+            // Check if user is an admin
+            if (profileData.is_admin) {
+              setIsAdmin(true);
+            }
+          } else {
+            console.log("AuthProvider - No profile found for user");
           }
         } else {
           console.log("AuthProvider - No active session found");
@@ -61,19 +65,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Fetch user profile when auth state changes
           const profileData = await fetchUserProfile(session.user.id);
           
-          setProfile(profileData);
-          
-          // Check if user is an affiliate
-          if (profileData?.is_affiliate) {
-            setIsAffiliate(true);
+          if (profileData) {
+            console.log("AuthProvider - Profile data on auth change:", profileData);
+            setProfile(profileData);
+            
+            // Check if user is an affiliate
+            if (profileData.is_affiliate) {
+              setIsAffiliate(true);
+            } else {
+              setIsAffiliate(false);
+            }
+            
+            // Check if user is an admin
+            if (profileData.is_admin) {
+              setIsAdmin(true);
+            } else {
+              setIsAdmin(false);
+            }
           } else {
+            console.log("AuthProvider - No profile found after auth change");
+            setProfile(null);
             setIsAffiliate(false);
-          }
-          
-          // Check if user is an admin
-          if (profileData?.is_admin) {
-            setIsAdmin(true);
-          } else {
             setIsAdmin(false);
           }
         } else {
@@ -147,10 +159,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     console.log("AuthProvider - Signing out user");
-    await supabase.auth.signOut();
-    
-    // Instead of using navigate, we'll use window.location
-    window.location.href = '/';
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("AuthProvider - Sign out error:", error.message);
+        toast({
+          title: "Error signing out",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+      
+      // Instead of using navigate, we'll use window.location
+      window.location.href = '/';
+    } catch (error: any) {
+      console.error("AuthProvider - Sign out error:", error.message);
+    }
   };
 
   const updateProfile = async (data: Partial<UserProfile>) => {

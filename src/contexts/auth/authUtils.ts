@@ -14,10 +14,10 @@ export const fetchUserProfile = async (userId: string) => {
     
     if (error) {
       console.error("authUtils - Error fetching profile:", error.message);
-      throw error;
+      return null;
     }
     
-    console.log("authUtils - Profile retrieved successfully");
+    console.log("authUtils - Profile retrieved successfully:", data);
     return data as UserProfile;
   } catch (error) {
     console.error('Error fetching user profile:', error);
