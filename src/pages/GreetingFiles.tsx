@@ -85,18 +85,18 @@ const GreetingFiles = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`mb-4 ${isMobile ? 'w-full flex gap-2' : 'w-auto'}`}>
+          <TabsList className={`mb-4 ${isMobile ? 'w-full flex gap-4' : 'w-auto'}`}>
             <TabsTrigger 
               id="tab-trigger-files" 
               value="files" 
-              className={`${isMobile ? 'flex-1 px-2' : ''}`}
+              className={`${isMobile ? 'flex-1 px-3' : ''}`}
             >
               My Greetings
             </TabsTrigger>
             <TabsTrigger 
               id="tab-trigger-upload" 
               value="upload" 
-              className={`${isMobile ? 'flex-1 px-2' : ''}`}
+              className={`${isMobile ? 'flex-1 px-3' : ''}`}
             >
               Add New Greeting
             </TabsTrigger>
