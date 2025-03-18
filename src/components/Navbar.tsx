@@ -112,14 +112,14 @@ export const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile menu - fixed position with improved styling */}
+      {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-0 bg-white dark:bg-background z-40 overflow-y-auto pt-16">
-          <div className="pt-4 pb-8 px-8">
-            <nav className="flex flex-col gap-6 mb-8">
+        <div className="mobile-menu md:hidden fixed inset-0 top-0 z-40 bg-white dark:bg-background">
+          <div className="flex flex-col h-full justify-center items-center px-8">
+            <nav className="flex flex-col gap-6 items-center w-full mb-8">
               <NavLinks mobile onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 w-full max-w-xs">
               <Button variant="outline" className="w-full rounded-full py-6" asChild>
                 <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                   Log In
@@ -140,7 +140,7 @@ export const Navbar = () => {
 
 const NavLinks = ({ mobile = false, onClick }: { mobile?: boolean; onClick?: () => void }) => {
   const linkClass = mobile 
-    ? "text-2xl font-medium py-4 block text-center" 
+    ? "text-2xl font-medium py-4 block text-center w-full" 
     : "text-sm font-medium hover:text-primary transition-colors";
 
   return (
@@ -160,3 +160,4 @@ const NavLinks = ({ mobile = false, onClick }: { mobile?: boolean; onClick?: () 
     </>
   );
 };
+
