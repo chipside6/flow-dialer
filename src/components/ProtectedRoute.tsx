@@ -4,13 +4,14 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { toast } from '@/components/ui/use-toast';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, initialized } = useAuth();
+  const { isAuthenticated, isLoading, initialized, user } = useAuth();
   const location = useLocation();
   const [timeoutReached, setTimeoutReached] = useState(false);
   const [authError, setAuthError] = useState(false);
@@ -21,6 +22,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       const timer = setTimeout(() => {
         setTimeoutReached(true);
         console.log('ProtectedRoute: Timeout reached while verifying authentication');
+        
+        toast({
+          title: "Authentication Check Timeout",
+          description: "Taking longer than expected to verify your login status.",
+          variant: "destructive",
+        });
       }, 3000); // 3 second timeout
       
       return () => clearTimeout(timer);
@@ -30,14 +37,25 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     if (initialized && !isAuthenticated && !isLoading) {
       const errorTimer = setTimeout(() => {
         setAuthError(true);
+        
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to access this page",
+          variant: "destructive",
+        });
       }, 500);
       
       return () => clearTimeout(errorTimer);
     }
+    
+    // Log authentication status for debugging
+    if (initialized) {
+      console.log(`ProtectedRoute: Auth initialized - User ${isAuthenticated ? 'authenticated' : 'not authenticated'}`);
+    }
   }, [isLoading, initialized, isAuthenticated]);
 
   // If authentication check is complete and user is authenticated, render children
-  if (isAuthenticated) {
+  if (isAuthenticated && user) {
     return <>{children}</>;
   }
   
@@ -51,9 +69,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-background p-4">
         <Alert variant="destructive" className="max-w-md mb-4">
-          <AlertTitle>Authentication Error</AlertTitle>
+          <AlertTitle>Authentication Required</AlertTitle>
           <AlertDescription>
-            There was a problem verifying your authentication status. Please try logging in again.
+            You need to be logged in to access this page. Please log in to continue.
           </AlertDescription>
         </Alert>
         <button 
