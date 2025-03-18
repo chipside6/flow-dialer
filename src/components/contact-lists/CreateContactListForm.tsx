@@ -1,11 +1,12 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { UserPlus } from "lucide-react";
+import { useMediaQuery } from "@/hooks/use-mobile";
 
 interface CreateContactListFormProps {
   onListCreated: (list: {
@@ -21,6 +22,7 @@ interface CreateContactListFormProps {
 const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) => {
   const [newListName, setNewListName] = useState("");
   const [newListDescription, setNewListDescription] = useState("");
+  const isMobile = useMediaQuery("(max-width: 768px)");
   
   const handleCreateList = () => {
     if (!newListName) {
@@ -65,7 +67,7 @@ const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) =>
             <label htmlFor="list-name" className="text-sm font-medium leading-none mb-2 block">List Name</label>
             <Input
               id="list-name"
-              placeholder="Enter a name for your contact list"
+              placeholder={isMobile ? "List name" : "Enter a name for your contact list"}
               value={newListName}
               onChange={(e) => setNewListName(e.target.value)}
             />
@@ -74,7 +76,7 @@ const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) =>
             <label htmlFor="list-description" className="text-sm font-medium leading-none mb-2 block">Description</label>
             <Textarea
               id="list-description"
-              placeholder="Describe the purpose of this list"
+              placeholder={isMobile ? "List purpose" : "Describe the purpose of this list"}
               value={newListDescription}
               onChange={(e) => setNewListDescription(e.target.value)}
             />

@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CampaignData } from "./types";
+import { useMediaQuery } from "@/hooks/use-mobile";
 
 interface BasicsStepProps {
   campaign: CampaignData;
@@ -11,6 +12,8 @@ interface BasicsStepProps {
 }
 
 export const BasicsStep = ({ campaign, onChange }: BasicsStepProps) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  
   return (
     <div className="space-y-4">
       <div>
@@ -20,7 +23,7 @@ export const BasicsStep = ({ campaign, onChange }: BasicsStepProps) => {
           name="title"
           value={campaign.title}
           onChange={onChange}
-          placeholder="Enter a title for your campaign"
+          placeholder={isMobile ? "Campaign title" : "Enter a title for your campaign"}
         />
       </div>
       <div>
@@ -30,7 +33,7 @@ export const BasicsStep = ({ campaign, onChange }: BasicsStepProps) => {
           name="description"
           value={campaign.description}
           onChange={onChange}
-          placeholder="Describe the purpose of this campaign"
+          placeholder={isMobile ? "Describe campaign purpose" : "Describe the purpose of this campaign"}
           rows={3}
         />
       </div>

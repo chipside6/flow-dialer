@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PhoneForwarded, Plus } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { TransferNumber } from "@/types/transferNumbers";
+import { useMediaQuery } from "@/hooks/use-mobile";
 
 interface TransferNumberFormProps {
   onAddTransferNumber: (transferNumber: TransferNumber) => void;
@@ -16,6 +17,7 @@ export const TransferNumberForm = ({ onAddTransferNumber }: TransferNumberFormPr
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [description, setDescription] = useState("");
+  const isMobile = useMediaQuery("(max-width: 768px)");
   
   const handleAddTransferNumber = () => {
     if (!name || !number) {
@@ -72,7 +74,7 @@ export const TransferNumberForm = ({ onAddTransferNumber }: TransferNumberFormPr
             <Label htmlFor="transfer-name">Name</Label>
             <Input
               id="transfer-name"
-              placeholder="Enter a name for this transfer destination"
+              placeholder={isMobile ? "Destination name" : "Enter a name for this transfer destination"}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -81,7 +83,7 @@ export const TransferNumberForm = ({ onAddTransferNumber }: TransferNumberFormPr
             <Label htmlFor="transfer-number">Phone Number</Label>
             <Input
               id="transfer-number"
-              placeholder="Enter the phone number (e.g., +1-555-123-4567)"
+              placeholder={isMobile ? "Phone (e.g. +1-555-123-4567)" : "Enter the phone number (e.g., +1-555-123-4567)"}
               value={number}
               onChange={(e) => setNumber(e.target.value)}
             />
@@ -90,7 +92,7 @@ export const TransferNumberForm = ({ onAddTransferNumber }: TransferNumberFormPr
             <Label htmlFor="transfer-description">Description</Label>
             <Input
               id="transfer-description"
-              placeholder="Enter a description for this transfer number"
+              placeholder={isMobile ? "Brief description" : "Enter a description for this transfer number"}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
