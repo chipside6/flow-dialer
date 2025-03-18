@@ -1,4 +1,3 @@
-
 import { Check } from "lucide-react";
 
 const features = [
@@ -13,12 +12,6 @@ const features = [
     description: "Track campaign performance with comprehensive analytics dashboards showing conversion rates and call metrics.",
     icon: "📊",
     imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&h=600&q=80"
-  },
-  {
-    title: "Intelligent Call Routing",
-    description: "Route calls to the right team members based on custom rules, availability, and expertise.",
-    icon: "🔄",
-    imageUrl: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=800&h=600&q=80"
   },
   {
     title: "Compliance Management",
