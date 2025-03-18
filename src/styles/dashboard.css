@@ -40,3 +40,14 @@ main {
 [data-sidebar][data-mobile="true"] {
   padding: 0 !important;
 }
+
+/* Fix spacing for navigation items */
+[data-sidebar="menu-button"],
+.sidebar-nav-button {
+  padding-right: 1rem !important;
+}
+
+/* Ensure long text in nav items doesn't touch the edge */
+[data-sidebar="content"] .truncate {
+  max-width: calc(100% - 8px);
+}
