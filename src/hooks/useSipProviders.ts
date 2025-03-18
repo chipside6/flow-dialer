@@ -1,10 +1,16 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { SipProvider } from "@/types/sipProviders";
 import { toast } from "@/components/ui/use-toast";
 
 export const useSipProviders = () => {
   const [providers, setProviders] = useState<SipProvider[]>([]);
   const [editingProvider, setEditingProvider] = useState<SipProvider | null>(null);
+
+  // Log to confirm empty initial state
+  useEffect(() => {
+    console.log("SIP Providers initialized with:", providers);
+  }, []);
 
   const handleAddProvider = (providerData: Omit<SipProvider, 'id' | 'dateAdded' | 'isActive'>) => {
     if (editingProvider) {
