@@ -19,7 +19,7 @@ export const pricingPlans: PricingPlan[] = [
     features: [
       "500 calls only",
       "Unlimited campaigns",
-      "100 contacts per campaign",
+      "500 contacts per campaign",
       "Cannot modify contact lists once campaign starts",
       "View-only contact lists",
       "Community support",
@@ -61,7 +61,7 @@ export const pricingPlans: PricingPlan[] = [
   {
     id: "enterprise",
     name: "Enterprise",
-    price: 149,
+    price: 299,
     description: "For organizations with advanced needs",
     features: [
       "Unlimited calls",
