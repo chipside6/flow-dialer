@@ -143,7 +143,7 @@ export const Navbar = () => {
       {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="mobile-menu-container">
-          <div className="mobile-menu-header flex justify-between items-center w-full px-6 py-4 absolute top-0">
+          <div className="mobile-menu-header">
             <Link 
               to="/" 
               className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"

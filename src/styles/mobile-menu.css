@@ -20,7 +20,7 @@ body.mobile-menu-open {
   z-index: 40;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   overflow: auto;
   animation: fadeIn 0.2s ease-in-out;
@@ -31,6 +31,15 @@ body.mobile-menu-open {
   to { opacity: 1; }
 }
 
+.mobile-menu-header {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 .mobile-menu-content {
   width: 100%;
   max-width: 320px;
@@ -38,6 +47,7 @@ body.mobile-menu-open {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
+  margin-top: 2rem;
 }
 
 .mobile-menu-nav {
