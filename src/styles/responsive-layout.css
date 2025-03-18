@@ -91,26 +91,21 @@
     width: 100% !important;
     overflow-x: hidden;
   }
-  
-  /* Add specific styles for SIP providers page */
-  body.sip-providers-page .sidebar-open [data-sidebar="sidebar"] {
-    display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    z-index: 50 !important;
-  }
 }
 
-/* Add specific styles for different routes */
-body.sip-providers-page [data-sidebar][data-mobile="true"][data-state="open"] {
+/* Critical fix for SIP providers page visibility */
+.sip-providers-page {
+  display: block !important;
   visibility: visible !important;
-  display: flex !important;
   opacity: 1 !important;
-  transform: translateX(0) !important;
-  z-index: 50 !important;
 }
 
-/* Route-specific z-index adjustments */
-.sip-providers-page [data-sidebar-container="true"] {
-  z-index: 51 !important;
+/* Ensure SIP providers page tables are visible */
+.sip-providers-page .card,
+.sip-providers-page .table,
+.sip-providers-page h1,
+.sip-providers-page form {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }

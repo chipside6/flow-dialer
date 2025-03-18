@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { SipProviderForm } from "@/components/sip/SipProviderForm";
 import { SipProviderTable } from "@/components/sip/SipProviderTable";
 import { useSipProviders } from "@/hooks/useSipProviders";
@@ -16,17 +16,9 @@ const SipProviders = () => {
     toggleProviderStatus
   } = useSipProviders();
   
-  // Add a class to the body to ensure our CSS selectors work
-  useEffect(() => {
-    document.body.classList.add('sip-providers-page');
-    return () => {
-      document.body.classList.remove('sip-providers-page');
-    };
-  }, []);
-  
   return (
     <DashboardLayout>
-      <div className="container-fluid px-4 py-6 w-full">
+      <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">SIP Providers</h1>
         </div>

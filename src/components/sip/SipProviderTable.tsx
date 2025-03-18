@@ -21,6 +21,8 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
   onDelete,
   onToggleStatus
 }) => {
+  console.log("SipProviderTable rendered with", providers.length, "providers");
+  
   if (providers.length === 0) {
     return (
       <Card>
