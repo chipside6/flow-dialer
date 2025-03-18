@@ -6,9 +6,9 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
       <Navbar />
-      <div className="flex flex-1 w-full">
+      <div className="flex flex-1 w-full overflow-x-hidden">
         <DashboardLayout>
           <DashboardContent />
         </DashboardLayout>

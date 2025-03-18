@@ -32,3 +32,9 @@ body, html {
   max-width: 100%;
   overflow-x: hidden;
 }
+
+/* Fix for dashboard content overflow */
+[data-sidebar-inset] {
+  max-width: 100vw;
+  overflow-x: hidden;
+}

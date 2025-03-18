@@ -40,3 +40,9 @@ main {
   }
 }
 
+/* Fix for content overflow */
+.dashboard-content-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}

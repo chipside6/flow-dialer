@@ -106,4 +106,15 @@
     max-width: calc(100vw - 32px);
     overflow-x: auto;
   }
+  
+  /* Fix for scrollable tabs on mobile */
+  .tab-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .tab-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
 }

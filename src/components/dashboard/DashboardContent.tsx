@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardCards } from "./DashboardCards";
@@ -79,7 +80,7 @@ export const DashboardContent = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 dashboard-content-wrapper">
       <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       {renderContent()}
     </div>
