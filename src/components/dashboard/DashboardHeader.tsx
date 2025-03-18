@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { BarChart3, PhoneCall } from "lucide-react";
 
 interface DashboardHeaderProps {
   activeTab: string;
@@ -17,6 +18,7 @@ export const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProp
           size="sm" 
           onClick={() => setActiveTab('overview')}
         >
+          <BarChart3 className="h-4 w-4 mr-2" />
           Overview
         </Button>
         <Button 
@@ -24,7 +26,16 @@ export const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProp
           size="sm" 
           onClick={() => setActiveTab('dialer')}
         >
+          <PhoneCall className="h-4 w-4 mr-2" />
           Quick Dial
+        </Button>
+        <Button 
+          variant={activeTab === 'campaigns' ? 'default' : 'outline'} 
+          size="sm" 
+          onClick={() => setActiveTab('campaigns')}
+        >
+          <BarChart3 className="h-4 w-4 mr-2" />
+          Campaigns
         </Button>
       </div>
     </div>
