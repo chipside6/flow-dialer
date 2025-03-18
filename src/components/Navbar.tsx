@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Menu, X, Phone } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Navbar = () => {
@@ -11,6 +11,8 @@ export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { toggleSidebar } = useSidebar();
+  
   const isDashboard = location.pathname.includes('/dashboard') || 
                       location.pathname.includes('/campaign') || 
                       location.pathname.includes('/greetings') ||
@@ -40,7 +42,13 @@ export const Navbar = () => {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <SidebarTrigger className="md:hidden" />
+            <button
+              onClick={toggleSidebar}
+              className="md:hidden p-2"
+              aria-label="Toggle sidebar"
+            >
+              <Menu size={20} />
+            </button>
             <Link 
               to="/" 
               className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"
