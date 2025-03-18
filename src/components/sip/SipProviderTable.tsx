@@ -21,90 +21,92 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
   onToggleStatus
 }) => {
   return (
-    <Card>
+    <Card className="w-full max-w-full overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center">
           <Server className="mr-2 h-5 w-5" />
           Your SIP Providers
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto">
         {providers.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
             No SIP providers configured yet. Add your first provider.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Host</TableHead>
-                <TableHead>Username</TableHead>
-                <TableHead>Added</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {providers.map((provider) => (
-                <TableRow key={provider.id}>
-                  <TableCell className="font-medium">{provider.name}</TableCell>
-                  <TableCell>
-                    {provider.host}:{provider.port}
-                  </TableCell>
-                  <TableCell>{provider.username}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                      {formatDistanceToNow(provider.dateAdded, { addSuffix: true })}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      {provider.isActive ? (
-                        <span className="flex items-center text-green-600">
-                          <Check className="mr-1 h-4 w-4" /> Active
-                        </span>
-                      ) : (
-                        <span className="flex items-center text-red-600">
-                          <X className="mr-1 h-4 w-4" /> Inactive
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => onToggleStatus(provider.id)}
-                      >
-                        {provider.isActive ? (
-                          <X className="h-4 w-4 text-red-600" />
-                        ) : (
-                          <Check className="h-4 w-4 text-green-600" />
-                        )}
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => onEdit(provider)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => onDelete(provider.id)}
-                      >
-                        <Trash className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="w-full overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Host</TableHead>
+                  <TableHead>Username</TableHead>
+                  <TableHead>Added</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {providers.map((provider) => (
+                  <TableRow key={provider.id}>
+                    <TableCell className="font-medium whitespace-nowrap">{provider.name}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {provider.host}:{provider.port}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">{provider.username}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <div className="flex items-center">
+                        <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                        {formatDistanceToNow(provider.dateAdded, { addSuffix: true })}
+                      </div>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <div className="flex items-center">
+                        {provider.isActive ? (
+                          <span className="flex items-center text-green-600">
+                            <Check className="mr-1 h-4 w-4" /> Active
+                          </span>
+                        ) : (
+                          <span className="flex items-center text-red-600">
+                            <X className="mr-1 h-4 w-4" /> Inactive
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => onToggleStatus(provider.id)}
+                        >
+                          {provider.isActive ? (
+                            <X className="h-4 w-4 text-red-600" />
+                          ) : (
+                            <Check className="h-4 w-4 text-green-600" />
+                          )}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => onEdit(provider)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => onDelete(provider.id)}
+                        >
+                          <Trash className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>

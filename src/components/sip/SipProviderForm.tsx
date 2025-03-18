@@ -48,7 +48,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   };
   
   return (
-    <Card className="mb-8">
+    <Card className="mb-8 w-full max-w-full overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center">
           <Plus className="mr-2 h-5 w-5" />
@@ -63,56 +63,61 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
       <CardContent>
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="provider-name">Provider Name*</Label>
               <Input
                 id="provider-name"
                 placeholder="E.g., Twilio, Vonage, etc."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                className="w-full"
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="provider-host">Host/Server*</Label>
               <Input
                 id="provider-host"
                 placeholder="E.g., sip.provider.com"
                 value={host}
                 onChange={(e) => setHost(e.target.value)}
+                className="w-full"
               />
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="w-full">
               <Label htmlFor="provider-username">Username/Account ID*</Label>
               <Input
                 id="provider-username"
                 placeholder="Enter SIP username or account ID"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                className="w-full"
               />
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="provider-port">Port</Label>
               <Input
                 id="provider-port"
                 placeholder="Default: 5060"
                 value={port}
                 onChange={(e) => setPort(e.target.value)}
+                className="w-full"
               />
             </div>
           </div>
           
-          <div>
+          <div className="w-full">
             <Label htmlFor="provider-password">Password/API Key*</Label>
-            <div className="relative">
+            <div className="relative w-full">
               <Input
                 id="provider-password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter SIP password or API key"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="w-full pr-10"
               />
               <Button
                 type="button"
@@ -126,13 +131,14 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
             </div>
           </div>
           
-          <div>
+          <div className="w-full">
             <Label htmlFor="provider-description">Description</Label>
             <Input
               id="provider-description"
               placeholder="Enter a description for this SIP provider"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              className="w-full"
             />
           </div>
           

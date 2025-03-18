@@ -50,14 +50,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const isAdmin = profile?.is_admin === true;
   
   return (
-    <div className="flex flex-1 w-full">
+    <div className="flex flex-1 w-full overflow-x-hidden">
       {/* Mobile menu button - always visible on mobile */}
       {isMobile && (
         <div className="fixed top-4 left-4 z-50">
           <Button 
             variant="outline" 
             size="icon" 
-            className="bg-background rounded-full" 
+            className="bg-background rounded-full shadow-md" 
             onClick={toggleSidebar}
           >
             <Menu size={20} />
@@ -123,8 +123,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </SidebarContent>
       </Sidebar>
-      <SidebarInset className="p-4 md:p-6 bg-background/50 dark:bg-background/10 min-h-screen pt-16 md:pt-6">
-        <div className="max-w-6xl mx-auto w-full">
+      <SidebarInset className="p-4 md:p-6 bg-background/50 dark:bg-background/10 min-h-screen pt-16 md:pt-6 overflow-x-hidden w-full">
+        <div className="max-w-6xl mx-auto w-full overflow-x-hidden px-0 sm:px-2">
           {children}
         </div>
       </SidebarInset>

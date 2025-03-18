@@ -6,4 +6,21 @@
   margin: 0;
   padding: 0;
   text-align: left;
+  overflow-x: hidden; /* Prevent horizontal scrolling at root level */
+}
+
+/* Add container styles for consistent padding */
+.container-fluid {
+  width: 100%;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  margin-right: auto;
+  margin-left: auto;
+  box-sizing: border-box;
+}
+
+/* Ensure all content fits within viewport */
+body, html {
+  overflow-x: hidden;
+  max-width: 100vw;
 }
