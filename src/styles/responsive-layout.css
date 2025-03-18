@@ -17,7 +17,7 @@
   /* Better spacing for forms on mobile */
   input, select, textarea {
     font-size: 16px !important; /* Prevents iOS zoom */
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     padding: 12px 16px;
     max-width: 100% !important; /* Prevent horizontal overflow */
   }
@@ -78,69 +78,6 @@
   form {
     width: 100%;
     max-width: 100%;
-  }
-  
-  /* Tab improvements for mobile */
-  [role="tablist"] {
-    width: 100% !important;
-    gap: 3px !important;
-  }
-
-  [role="tab"] {
-    font-size: 14px !important;
-    padding: 8px 4px !important;
-    white-space: normal !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    height: auto !important;
-    min-height: 44px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-  
-  [role="tab"] span {
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 100% !important;
-  }
-  
-  /* Fix for file input on mobile */
-  input[type="file"] {
-    font-size: 14px !important;
-    width: 100% !important;
-    padding: 8px !important;
-    white-space: normal !important;
-    text-overflow: ellipsis !important;
-    overflow: hidden !important;
-  }
-  
-  input[type="file"]::file-selector-button {
-    font-size: 12px !important;
-    padding: 4px 8px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 80px !important;
-  }
-  
-  /* Fix button text wrapping */
-  button span {
-    white-space: normal !important;
-    display: inline-block !important;
-  }
-  
-  /* Fix label display */
-  label {
-    white-space: normal !important;
-    display: block !important;
-    margin-bottom: 4px !important;
-  }
-  
-  /* Prevent horizontal scroll on card content */
-  .card-content {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
   }
 }
 

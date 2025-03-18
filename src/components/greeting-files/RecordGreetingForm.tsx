@@ -1,13 +1,13 @@
-
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useUploadProgress } from '@/hooks/useUploadProgress';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { PreviewPlayer } from './PreviewPlayer';
-import { RecordingControls } from './RecordingControls';
+import { Loader2, Mic, Square, Upload } from 'lucide-react';
+import { AudioWaveform } from './AudioWaveform';
 
 interface RecordGreetingFormProps {
   userId: string | undefined;
@@ -18,6 +18,9 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
   const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
   const { uploadProgress, setUploadProgress } = useUploadProgress(isUploading);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const {
     isRecording,
@@ -27,6 +30,49 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
     stopRecording,
     cancelRecording
   } = useAudioRecorder();
+
+  // Create a temporary object URL for preview
+  const handleCreatePreview = () => {
+    if (audioBlob) {
+      // Revoke old URL if exists
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      
+      // Create new URL
+      const url = URL.createObjectURL(audioBlob);
+      setPreviewUrl(url);
+      
+      // Create audio element for preview
+      if (!previewAudioRef.current) {
+        previewAudioRef.current = new Audio(url);
+        previewAudioRef.current.onended = () => setIsPreviewPlaying(false);
+      } else {
+        previewAudioRef.current.src = url;
+      }
+    }
+  };
+
+  // Toggle preview playback
+  const togglePreview = () => {
+    if (!previewAudioRef.current || !previewUrl) return;
+    
+    if (isPreviewPlaying) {
+      previewAudioRef.current.pause();
+      setIsPreviewPlaying(false);
+    } else {
+      previewAudioRef.current.play()
+        .then(() => setIsPreviewPlaying(true))
+        .catch(error => {
+          console.error('Preview playback error:', error);
+          toast({
+            title: 'Playback error',
+            description: 'Could not play the recording. Please try again.',
+            variant: 'destructive',
+          });
+        });
+    }
+  };
 
   // Upload the recorded audio
   const handleUpload = async () => {
@@ -66,6 +112,8 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
         throw new Error(errorData.error || 'Failed to upload file');
       }
       
+      const result = await response.json();
+      
       // Refresh the greeting files list
       queryClient.invalidateQueries({ queryKey: ['greetingFiles'] });
       
@@ -73,6 +121,12 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
         title: 'Recording uploaded',
         description: 'Your greeting recording has been uploaded successfully.',
       });
+      
+      // Reset the state
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      setPreviewUrl(null);
       
     } catch (error: any) {
       console.error('Upload error:', error);
@@ -85,9 +139,25 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
       // Longer delay before resetting upload state to ensure 100% is shown
       setTimeout(() => {
         setIsUploading(false);
-      }, 1000);
+      }, 1000); // Increased from 500ms to 1000ms
     }
   };
+
+  // Cleanup function to revoke object URL
+  useState(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  });
+
+  // Create preview when audio blob is available
+  useState(() => {
+    if (audioBlob && !previewUrl) {
+      handleCreatePreview();
+    }
+  });
 
   return (
     <div className="space-y-6">
@@ -108,17 +178,77 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
           )}
         </div>
 
-        <PreviewPlayer audioBlob={audioBlob} isUploading={isUploading} />
+        {previewUrl && (
+          <div className="my-4">
+            <AudioWaveform 
+              audioUrl={previewUrl} 
+              isPlaying={isPreviewPlaying}
+            />
+          </div>
+        )}
 
-        <RecordingControls 
-          isRecording={isRecording}
-          audioBlob={audioBlob}
-          isUploading={isUploading}
-          startRecording={startRecording}
-          stopRecording={stopRecording}
-          cancelRecording={cancelRecording}
-          handleUpload={handleUpload}
-        />
+        <div className="flex justify-center gap-2">
+          {!isRecording && !audioBlob && (
+            <Button 
+              onClick={startRecording}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <Mic className="h-4 w-4 mr-2" />
+              Start Recording
+            </Button>
+          )}
+
+          {isRecording && (
+            <>
+              <Button 
+                onClick={stopRecording}
+                variant="outline"
+              >
+                <Square className="h-4 w-4 mr-2" />
+                Stop Recording
+              </Button>
+              <Button 
+                onClick={cancelRecording}
+                variant="ghost"
+              >
+                Cancel
+              </Button>
+            </>
+          )}
+
+          {audioBlob && !isRecording && (
+            <>
+              <Button
+                onClick={togglePreview}
+                variant="secondary"
+              >
+                {isPreviewPlaying ? 'Pause' : 'Play'} Preview
+              </Button>
+              <Button 
+                onClick={handleUpload}
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Recording
+                  </>
+                )}
+              </Button>
+              <Button 
+                onClick={cancelRecording}
+                variant="ghost"
+              >
+                Discard
+              </Button>
+            </>
+          )}
+        </div>
 
         {(isUploading || uploadProgress === 100) && (
           <div className="mt-4 space-y-2">

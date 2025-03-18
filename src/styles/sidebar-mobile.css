@@ -7,10 +7,6 @@
     max-width: 100% !important;
     width: 85% !important;
     z-index: 60 !important; /* Increase z-index to ensure it appears above everything */
-    transform: none !important; /* Remove any transforms that might be hiding it */
-    opacity: 1 !important; /* Ensure it's visible */
-    visibility: visible !important; /* Make sure visibility property isn't hiding it */
-    display: flex !important; /* Force display */
   }
   
   /* Customize the mobile sidebar style */
@@ -43,24 +39,17 @@
   /* Improve drawer components */
   [data-state="open"][data-side="left"] {
     width: 85% !important;
-    transform: translateX(0) !important; /* Ensure it's not translated out of view */
-    visibility: visible !important;
-    display: flex !important;
   }
 
   /* Ensure page content is visible when navigating to a page */
   [data-sidebar="sidebar"][data-mobile="true"] {
     z-index: 100;
-    transform: none !important; /* Remove any transforms that might be hiding it */
-    transition: all 0.3s ease;
-    display: flex !important;
+    left: -100%;
+    transition: left 0.3s ease;
   }
 
-  /* Ensure the sidebar is visible when open */
   [data-sidebar="sidebar"][data-mobile="true"][data-state="open"] {
-    display: flex !important;
-    visibility: visible !important;
-    transform: translateX(0) !important;
+    left: 0;
   }
 
   /* Ensure the main content area is properly positioned - crucial fix */
@@ -125,21 +114,18 @@
     padding-right: 12px !important;
     box-sizing: border-box !important;
   }
-
-  /* Fix for the Sheet component on mobile - force visibility */
-  [role="dialog"][data-state="open"] {
-    display: flex !important;
-    visibility: visible !important;
-  }
 }
 
-/* Add animation to mobile sidebar but ensure it always renders correctly */
+/* Add animation to mobile sidebar */
 @media (max-width: 768px) {
   [data-state="open"] {
-    animation: none !important; /* Disable animations that might be causing issues */
+    animation: slideIn 0.3s ease;
     visibility: visible !important;
     display: flex !important;
-    transform: translateX(0) !important;
+  }
+  
+  [data-state="closed"] {
+    animation: slideOut 0.3s ease;
   }
 
   /* Prevent sidebar from showing behind main content */
@@ -148,22 +134,6 @@
     z-index: 1;
     width: 100% !important;
     overflow-x: hidden !important;
-  }
-
-  /* Force sidebar visibility by positioning */
-  [data-sidebar="sidebar"][data-mobile="true"][data-state="open"] {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    bottom: 0 !important;
-    right: auto !important;
-    width: 85% !important;
-    height: 100% !important;
-    z-index: 100 !important;
-    display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
   }
 }
 
