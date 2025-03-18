@@ -6,6 +6,7 @@ import { useCampaigns } from "@/hooks/useCampaigns";
 import BackgroundDialer from "@/components/BackgroundDialer";
 import CampaignDashboard from "@/components/CampaignDashboard";
 import { Phone, BarChart3, Loader2, AlertCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -107,10 +108,6 @@ export const DashboardContent = () => {
       return renderErrorState();
     }
 
-    if (!campaigns || campaigns.length === 0) {
-      return <EmptyCampaignState />;
-    }
-
     switch (activeTab) {
       case 'dialer':
         return (
@@ -126,7 +123,11 @@ export const DashboardContent = () => {
                 </div>
               </div>
             </div>
-            <BackgroundDialer campaignId={campaigns[0]?.id} />
+            {campaigns.length > 0 ? (
+              <BackgroundDialer campaignId={campaigns[0]?.id} />
+            ) : (
+              <EmptyCampaignState />
+            )}
           </div>
         );
       case 'campaigns':
@@ -148,15 +149,13 @@ export const DashboardContent = () => {
         );
       case 'overview':
       default:
-        return <DashboardCards />;
+        return campaigns && campaigns.length > 0 ? <DashboardCards /> : <EmptyCampaignState />;
     }
   };
 
   return (
     <div className="space-y-4 dashboard-content-wrapper w-full max-w-full overflow-x-hidden content-with-fixed-header">
-      {campaigns && campaigns.length > 0 && (
-        <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
-      )}
+      <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       {renderContent()}
     </div>
   );
