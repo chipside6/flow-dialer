@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,13 +13,23 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signInWithGoogle } = useAuth();
+  const { signIn, signInWithGoogle, isAuthenticated, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    console.log("Login - Auth state:", { isAuthenticated, user: user ? 'Authenticated' : 'Not authenticated' });
+    if (isAuthenticated && user) {
+      console.log("Login - User is already authenticated, redirecting to dashboard");
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log("Login - Attempting to sign in with email:", email);
 
     try {
       const { error } = await signIn(email, password);
@@ -32,9 +42,11 @@ const Login = () => {
         title: "Login successful",
         description: "Welcome back!",
       });
-
+      
+      console.log("Login - Sign in successful, redirecting to dashboard");
       navigate('/dashboard');
     } catch (error: any) {
+      console.error("Login - Sign in failed:", error.message);
       toast({
         title: "Login failed",
         description: error.message,
@@ -46,9 +58,12 @@ const Login = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    console.log("Login - Attempting to sign in with Google");
     try {
       await signInWithGoogle();
+      // No need to navigate here as it's handled by the Supabase redirect
     } catch (error: any) {
+      console.error("Login - Google sign in failed:", error.message);
       toast({
         title: "Google login failed",
         description: error.message,

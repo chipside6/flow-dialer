@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User, AuthResponse } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 import { toast } from '@/components/ui/use-toast';
 import { AuthContext } from './AuthContext';
 import { UserProfile, AuthContextType } from './types';
@@ -18,9 +19,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const checkSession = async () => {
       setIsLoading(true);
       try {
+        console.log("AuthProvider - Checking active session");
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
+          console.log("AuthProvider - Found active session, user:", session.user.email);
           setUser(session.user);
           // Fetch user profile
           const profileData = await fetchUserProfile(session.user.id);
@@ -36,6 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (profileData?.is_admin) {
             setIsAdmin(true);
           }
+        } else {
+          console.log("AuthProvider - No active session found");
         }
       } catch (error) {
         console.error('Error checking auth session:', error);
@@ -49,7 +54,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("AuthProvider - Auth state changed:", event);
         if (session?.user) {
+          console.log("AuthProvider - User authenticated:", session.user.email);
           setUser(session.user);
           // Fetch user profile when auth state changes
           const profileData = await fetchUserProfile(session.user.id);
@@ -70,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsAdmin(false);
           }
         } else {
+          console.log("AuthProvider - User signed out or no session");
           setUser(null);
           setProfile(null);
           setIsAffiliate(false);
@@ -87,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, metadata?: { full_name?: string }) => {
     try {
+      console.log("AuthProvider - Signing up new user:", email);
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -97,12 +106,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       return { error: error ? new Error(error.message) : null };
     } catch (error: any) {
+      console.error("AuthProvider - Sign up error:", error.message);
       return { error: new Error(error.message) };
     }
   };
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log("AuthProvider - Signing in user:", email);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -110,11 +121,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       return { error: error ? new Error(error.message) : null };
     } catch (error: any) {
+      console.error("AuthProvider - Sign in error:", error.message);
       return { error: new Error(error.message) };
     }
   };
 
   const signInWithGoogle = async () => {
+    console.log("AuthProvider - Initiating Google sign in");
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -123,6 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (error) {
+      console.error("AuthProvider - Google sign in error:", error.message);
       toast({
         title: "Authentication error",
         description: error.message,
@@ -132,6 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    console.log("AuthProvider - Signing out user");
     await supabase.auth.signOut();
     
     // Instead of using navigate, we'll use window.location
@@ -142,6 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       if (!user) return { error: new Error('No user authenticated') };
       
+      console.log("AuthProvider - Updating user profile");
       const success = await updateUserProfile(user.id, data);
       
       if (success) {
@@ -164,6 +180,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Function to set a user as an affiliate (admin only function)
   const setAsAffiliate = async (userId: string) => {
     try {
+      console.log("AuthProvider - Setting user as affiliate:", userId);
       const success = await setUserAsAffiliate(userId);
       
       // If updating the current user, update the state
