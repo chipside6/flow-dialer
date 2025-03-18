@@ -12,6 +12,7 @@ import { ReviewStep } from "./ReviewStep";
 import { WizardStepTabs } from "./WizardStepTabs";
 import { WizardNavigation } from "./WizardNavigation";
 import { CampaignData, WizardStep, ContactList, GreetingFile } from "./types";
+import { useAuth } from "@/contexts/auth/useAuth";
 
 interface CampaignCreationWizardProps {
   onComplete: (campaign: CampaignData) => void;
@@ -20,6 +21,7 @@ interface CampaignCreationWizardProps {
 
 export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreationWizardProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [step, setStep] = useState<WizardStep>("basics");
   const [campaign, setCampaign] = useState<CampaignData>({
     title: "",
@@ -147,7 +149,8 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
       answeredCalls: 0,
       transferredCalls: 0,
       failedCalls: 0,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      user_id: user?.id || 'demo' // Add user_id to the campaign data
     };
     
     onComplete(newCampaign);

@@ -3,17 +3,25 @@ import React, { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
-import { CampaignCreationWizard } from "@/components/CampaignCreationWizard";
+import { CampaignCreationWizard } from "@/components/campaign-wizard/CampaignCreationWizard";
 import { PlusCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CampaignData } from "@/components/campaign-wizard/types";
+import { useAuth } from "@/contexts/auth/useAuth";
 
 const CampaignPage = () => {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
+  const { user } = useAuth();
   
   const handleCreateCampaign = (newCampaign: CampaignData) => {
-    setCampaigns([...campaigns, newCampaign]);
+    // Ensure the campaign has a user_id property
+    const campaignWithUserId = {
+      ...newCampaign,
+      user_id: user?.id || 'demo'
+    };
+    
+    setCampaigns([...campaigns, campaignWithUserId]);
     setShowCreateWizard(false);
   };
   
