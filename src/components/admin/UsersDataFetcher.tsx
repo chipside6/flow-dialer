@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Info } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { UserManagement } from "@/components/admin/UserManagement";
@@ -23,8 +23,9 @@ export function UsersDataFetcher() {
   // Calculate stats
   const userCount = users?.length ?? 0;
   const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
+  const hasLimitedData = users?.some(user => user.email === "Unknown");
 
-  console.log("UsersDataFetcher - Rendering with stats:", { userCount, affiliateCount });
+  console.log("UsersDataFetcher - Rendering with stats:", { userCount, affiliateCount, hasLimitedData });
 
   const handleRetry = () => {
     refetch();
@@ -88,6 +89,15 @@ export function UsersDataFetcher() {
             Manage users and configure system settings
           </p>
         </div>
+
+        {hasLimitedData && (
+          <Alert className="mb-6 bg-amber-50 border-amber-200">
+            <Info className="h-4 w-4 text-amber-600 mr-2" />
+            <AlertDescription>
+              Limited admin access. Some user information (like email addresses) may not be visible.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {error && (
           <Alert variant="destructive" className="mb-6">

@@ -15,7 +15,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
     queryFn: async () => {
       console.log("useAdminUsers - Fetching users data");
       
-      // Get profiles first since this doesn't require admin privileges
+      // Get profiles first - this doesn't require admin privileges
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*");
@@ -25,29 +25,34 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         throw new Error(`Failed to fetch user profiles: ${profilesError.message}`);
       }
       
-      console.log("useAdminUsers - Profiles fetched:", profiles?.length || 0);
+      console.log("useAdminUsers - Successfully fetched profiles:", profiles?.length || 0);
       
-      // Try to get users via the admin API
+      // When we only have profiles data (no auth data), map them to the expected format
+      const mapProfilesOnly = () => {
+        return profiles.map((profile: any): AdminPanelUser => ({
+          id: profile.id,
+          email: "Unknown", // We don't have emails without auth data
+          created_at: profile.created_at,
+          profile: {
+            ...profile,
+            user_id: profile.id
+          }
+        }));
+      };
+      
+      // Try to use admin API, but gracefully handle permission errors
       try {
+        // Attempt to use admin API (will fail for non-admin users)
         const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
         
         if (authError) {
-          console.error("useAdminUsers - Error fetching users via admin API:", authError);
-          throw new Error(`Admin API error: ${authError.message}`);
+          console.log("useAdminUsers - Cannot access admin API, using profiles only:", authError.message);
+          return mapProfilesOnly();
         }
         
-        if (!authData || !authData.users) {
-          console.log("useAdminUsers - No users returned from admin API");
-          // Fallback to using just profiles if admin API returns empty
-          return profiles.map((profile: any): AdminPanelUser => ({
-            id: profile.id,
-            email: "Unknown",
-            created_at: profile.created_at,
-            profile: {
-              ...profile,
-              user_id: profile.id
-            }
-          }));
+        if (!authData || !authData.users || authData.users.length === 0) {
+          console.log("useAdminUsers - No users returned from admin API, using profiles only");
+          return mapProfilesOnly();
         }
         
         // Join users with their profiles
@@ -69,25 +74,16 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
           };
         });
         
-        console.log("useAdminUsers - Users with profiles processed:", usersWithProfiles.length);
+        console.log("useAdminUsers - Successfully processed users with profiles:", usersWithProfiles.length);
         return usersWithProfiles;
-      } catch (adminError) {
-        console.error("useAdminUsers - Admin API failed, using profiles only:", adminError);
-        
-        // Fallback to using just profiles if admin API fails
-        return profiles.map((profile: any): AdminPanelUser => ({
-          id: profile.id,
-          email: "Unknown",
-          created_at: profile.created_at,
-          profile: {
-            ...profile,
-            user_id: profile.id
-          }
-        }));
+      } catch (error) {
+        console.log("useAdminUsers - Error accessing admin API, using profiles only:", error);
+        return mapProfilesOnly();
       }
     },
     refetchOnWindowFocus: false,
-    retry: 1,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     enabled,
   });
 }
