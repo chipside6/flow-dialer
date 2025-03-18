@@ -3,8 +3,9 @@
 
 /* Prevent scrolling when mobile menu is open */
 body.menu-open,
-body.mobile-menu-open {
-  overflow: hidden;
+body.mobile-menu-open,
+body.sidebar-open {
+  overflow: hidden !important;
 }
 
 /* Mobile menu container */
@@ -70,7 +71,7 @@ body.mobile-menu-open {
 /* Ensure mobile menu is visible */
 @media (max-width: 768px) {
   [data-sidebar] {
-    visibility: visible;
+    visibility: visible !important;
     display: block !important;
   }
   
@@ -109,6 +110,14 @@ body.mobile-menu-open {
   
   /* Fix for SheetContent hiding */
   .fixed.inset-0 > [role="dialog"] {
+    visibility: visible !important;
+    display: flex !important;
+    opacity: 1 !important;
+  }
+  
+  /* Fix for sip providers page specifically */
+  body.sidebar-open [data-sidebar="sidebar"][data-mobile="true"] {
+    transform: translateX(0) !important;
     visibility: visible !important;
     display: flex !important;
     opacity: 1 !important;

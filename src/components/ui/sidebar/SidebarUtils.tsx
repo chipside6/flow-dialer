@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -73,10 +74,20 @@ const SidebarProvider = React.forwardRef<
 
     // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
-      return isMobile
-        ? setOpenMobile((open) => !open)
-        : setOpen((open) => !open)
-    }, [isMobile, setOpen, setOpenMobile])
+      if (isMobile) {
+        setOpenMobile((prevOpen) => {
+          // Ensure the body class is added/removed correctly
+          if (!prevOpen) {
+            document.body.classList.add('sidebar-open');
+          } else {
+            document.body.classList.remove('sidebar-open');
+          }
+          return !prevOpen;
+        });
+      } else {
+        setOpen((prevOpen) => !prevOpen);
+      }
+    }, [isMobile, setOpen]);
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {

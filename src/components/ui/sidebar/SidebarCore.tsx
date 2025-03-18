@@ -53,10 +53,15 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
+            data-state={openMobile ? "open" : "closed"}
             className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+                visibility: openMobile ? "visible" : "hidden",
+                display: openMobile ? "flex" : "none",
+                opacity: openMobile ? 1 : 0,
+                transform: openMobile ? "translateX(0)" : "translateX(-100%)",
               } as React.CSSProperties
             }
             side={side}
@@ -176,6 +181,7 @@ const SidebarInset = React.forwardRef<
   return (
     <main
       ref={ref}
+      data-sidebar-inset
       className={cn(
         "relative flex min-h-svh flex-1 flex-col bg-background",
         "peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow",

@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/auth";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, useSidebar } from "@/components/ui/sidebar";
@@ -48,6 +49,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       document.body.classList.remove('sidebar-open');
     };
   }, [openMobile]);
+  
+  // Special handling for SIP providers page
+  const isSipProvidersPage = location.pathname === "/sip-providers";
+  
+  useEffect(() => {
+    if (isSipProvidersPage) {
+      // Apply specific class for SIP providers page
+      document.body.classList.add('sip-providers-page');
+    } else {
+      document.body.classList.remove('sip-providers-page');
+    }
+    
+    return () => {
+      document.body.classList.remove('sip-providers-page');
+    };
+  }, [isSipProvidersPage]);
   
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },

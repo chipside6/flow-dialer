@@ -3,7 +3,7 @@ import * as React from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { 
-  SidebarProvider, 
+  SidebarProvider as SidebarContextProvider, 
   useSidebar 
 } from "./SidebarUtils"
 
@@ -39,12 +39,12 @@ import {
 } from "./SidebarMenu"
 
 // Wrap the SidebarProvider with TooltipProvider
-const SidebarWithTooltip = React.forwardRef<
+const SidebarProvider = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<typeof SidebarProvider>
+  React.ComponentProps<typeof SidebarContextProvider>
 >((props, ref) => {
   return (
-    <SidebarProvider ref={ref} {...props}>
+    <SidebarContextProvider ref={ref} {...props}>
       <TooltipProvider delayDuration={0}>
         <div
           style={
@@ -62,12 +62,12 @@ const SidebarWithTooltip = React.forwardRef<
           {props.children}
         </div>
       </TooltipProvider>
-    </SidebarProvider>
+    </SidebarContextProvider>
   )
 })
-SidebarWithTooltip.displayName = "SidebarWithTooltip"
+SidebarProvider.displayName = "SidebarProvider"
 
-// Replace the original SidebarProvider with our wrapped version
+// Export all components
 export {
   Sidebar,
   SidebarContent,
@@ -88,7 +88,7 @@ export {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarWithTooltip as SidebarProvider,
+  SidebarProvider,
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
