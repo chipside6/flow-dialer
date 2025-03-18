@@ -41,15 +41,21 @@
     width: 85% !important;
   }
 
-  /* Ensure page content is visible when navigating to a page */
+  /* Fix sidebar visibility issue - crucial fix */
   [data-sidebar="sidebar"][data-mobile="true"] {
     z-index: 100;
-    left: -100%;
-    transition: left 0.3s ease;
+    display: flex !important; /* Ensure sidebar is displayed when needed */
+    left: 0;
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
   }
 
-  [data-sidebar="sidebar"][data-mobile="true"][data-state="open"] {
-    left: 0;
+  [data-sidebar="sidebar"][data-mobile="true"][data-state="closed"] {
+    transform: translateX(-100%);
+    opacity: 0;
+    visibility: hidden;
   }
 
   /* Ensure the main content area is properly positioned - crucial fix */
@@ -86,6 +92,7 @@
 
 /* Add animation to mobile sidebar */
 @media (max-width: 768px) {
+  /* Fix sidebar animation and visibility */
   [data-state="open"] {
     animation: slideIn 0.3s ease;
     visibility: visible !important;
