@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Loader2, Info } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -20,6 +20,15 @@ export function UsersDataFetcher() {
     isRefetching 
   } = useAdminUsers();
 
+  useEffect(() => {
+    console.log("UsersDataFetcher - Data status:", { 
+      isLoading, 
+      isRefetching, 
+      hasError: !!error, 
+      userCount: users?.length || 0 
+    });
+  }, [users, isLoading, error, isRefetching]);
+
   // Calculate stats
   const userCount = users?.length ?? 0;
   const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
@@ -28,10 +37,11 @@ export function UsersDataFetcher() {
   console.log("UsersDataFetcher - Rendering with stats:", { userCount, affiliateCount, hasLimitedData });
 
   const handleRetry = () => {
+    console.log("UsersDataFetcher - Retrying data fetch");
     refetch();
   };
 
-  if (isLoading) {
+  if (isLoading && !users) {
     return (
       <DashboardLayout>
         <div className="h-[calc(100vh-200px)] w-full flex flex-col items-center justify-center">
