@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardCards } from "./DashboardCards";
 import { EmptyCampaignState } from "./EmptyCampaignState";
@@ -9,10 +8,50 @@ import CampaignDashboard from "@/components/CampaignDashboard";
 import { Phone, BarChart3, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/components/ui/use-toast";
 
 export const DashboardContent = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const { campaigns, isLoading } = useCampaigns();
+  const { toast } = useToast();
+  const [loadingProgress, setLoadingProgress] = useState(45);
+  
+  // Add timeout to prevent infinite loading state
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    let progressInterval: NodeJS.Timeout;
+    
+    if (isLoading) {
+      // Start progress animation
+      progressInterval = setInterval(() => {
+        setLoadingProgress(prev => {
+          const newProgress = prev + Math.random() * 5;
+          return newProgress > 85 ? 85 : newProgress;
+        });
+      }, 800);
+      
+      // Add timeout to exit loading state if it takes too long
+      timeout = setTimeout(() => {
+        if (isLoading) {
+          toast({
+            title: "Taking longer than expected",
+            description: "We're having trouble loading your campaigns. You can try refreshing the page.",
+            variant: "default",
+          });
+          clearInterval(progressInterval);
+        }
+      }, 10000); // 10 seconds timeout
+    } else {
+      // Reset progress when loading completes
+      setLoadingProgress(100);
+      setTimeout(() => setLoadingProgress(45), 500);
+    }
+    
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(progressInterval);
+    };
+  }, [isLoading, toast]);
 
   const renderLoadingState = () => {
     return (
@@ -23,7 +62,7 @@ export const DashboardContent = () => {
           </div>
           <h3 className="text-xl font-medium mb-3">Preparing your dashboard</h3>
           <p className="text-muted-foreground max-w-md mb-4">Loading your campaign data and analytics...</p>
-          <Progress value={45} className="w-64 h-2" />
+          <Progress value={loadingProgress} className="w-64 h-2" />
         </div>
       </div>
     );

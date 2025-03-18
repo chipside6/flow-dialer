@@ -3,6 +3,15 @@ import React from "react";
 import { Navbar } from "@/components/Navbar";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+const DashboardFallback = () => (
+  <div className="w-full h-96 flex items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <span className="ml-2 text-lg">Loading dashboard...</span>
+  </div>
+);
 
 const Dashboard = () => {
   return (
@@ -10,7 +19,9 @@ const Dashboard = () => {
       <Navbar />
       <div className="flex flex-1 w-full overflow-x-hidden">
         <DashboardLayout>
-          <DashboardContent />
+          <Suspense fallback={<DashboardFallback />}>
+            <DashboardContent />
+          </Suspense>
         </DashboardLayout>
       </div>
     </div>

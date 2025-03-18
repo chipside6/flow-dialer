@@ -46,3 +46,20 @@ main {
   max-width: 100%;
   overflow-x: hidden;
 }
+
+/* Progress bar animation */
+@keyframes progressPulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.progress-loading {
+  animation: progressPulse 1.5s infinite ease-in-out;
+}
