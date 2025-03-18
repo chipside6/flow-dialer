@@ -79,6 +79,27 @@
     width: 100%;
     max-width: 100%;
   }
+  
+  /* Fix text wrapping in file inputs and labels */
+  input[type="file"], 
+  label[for="greeting-file"] {
+    width: 100%;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Fix tabs layout on mobile */
+  .tabs-list {
+    width: 100%;
+  }
+  
+  /* Ensure buttons are properly sized on mobile */
+  button.upload-btn {
+    width: 100%;
+    margin-top: 8px;
+    white-space: nowrap;
+  }
 }
 
 /* Dashboard specific mobile improvements */

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Upload, Mic } from 'lucide-react';
 import { RecordGreetingForm } from './RecordGreetingForm';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface UploadGreetingFormProps {
   userId: string | undefined;
@@ -23,6 +25,7 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
   const { uploadProgress, setUploadProgress } = useUploadProgress(isUploading);
   const [file, setFile] = useState<File | null>(null);
   const [activeTab, setActiveTab] = useState<string>('upload');
+  const isMobile = useIsMobile();
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,12 +127,12 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="upload">
+          <TabsList className={`grid grid-cols-2 mb-4 ${isMobile ? 'w-full' : ''}`}>
+            <TabsTrigger value="upload" className="px-2 py-2">
               <Upload className="h-4 w-4 mr-2" />
               Upload File
             </TabsTrigger>
-            <TabsTrigger value="record">
+            <TabsTrigger value="record" className="px-2 py-2">
               <Mic className="h-4 w-4 mr-2" />
               Record Audio
             </TabsTrigger>
@@ -137,20 +140,21 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
           
           <TabsContent value="upload" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="greeting-file">Greeting audio file</Label>
+              <Label htmlFor="greeting-file" className="block mb-1">Greeting audio file</Label>
               <Input
                 id="greeting-file"
                 type="file"
                 accept="audio/*"
                 onChange={handleFileChange}
                 disabled={isUploading}
+                className={`${isMobile ? 'text-sm' : ''} w-full`}
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mt-1">
                 Accepted formats: MP3, WAV, M4A (Max 10MB)
               </p>
             </div>
             {file && (
-              <div className="text-sm">
+              <div className="text-sm break-words">
                 Selected file: <span className="font-medium">{file.name}</span> ({(file.size / 1024 / 1024).toFixed(2)} MB)
               </div>
             )}
@@ -169,7 +173,7 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
               <Button
                 onClick={handleUpload}
                 disabled={!file || isUploading}
-                className="w-full"
+                className={`${isMobile ? 'w-full' : ''}`}
               >
                 {isUploading ? (
                   <>
@@ -179,7 +183,7 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
                 ) : (
                   <>
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload File
+                    {isMobile ? "Upload File" : "Upload File"}
                   </>
                 )}
               </Button>
