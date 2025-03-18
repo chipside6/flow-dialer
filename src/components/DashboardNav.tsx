@@ -8,7 +8,8 @@ import {
   Server, 
   BarChart3, 
   Home, 
-  ShieldCheck 
+  ShieldCheck,
+  User
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { NavItem } from "@/components/navigation/NavItem";
@@ -25,6 +26,7 @@ export function DashboardNav() {
     { name: "Contact Lists", path: "/contacts", icon: <ContactIcon className="h-5 w-5" /> },
     { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
     { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5" /> },
+    { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
   ];
   
   // Admin link for admin users

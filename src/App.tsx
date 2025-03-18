@@ -22,6 +22,7 @@ import SipProviders from "./pages/SipProviders";
 import Dashboard from "./pages/Dashboard";
 import Billing from "./pages/Billing";
 import AdminPanel from "./pages/AdminPanel";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 // Create a new QueryClient with better error handling
@@ -116,6 +117,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Billing />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 } 
               />
