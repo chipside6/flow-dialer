@@ -1,11 +1,9 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SipProvider } from "@/types/sipProviders";
 import { toast } from "@/components/ui/use-toast";
 
 export const useSipProviders = () => {
-  console.log("useSipProviders hook initialized");
-  
   const [providers, setProviders] = useState<SipProvider[]>([
     {
       id: "1",
@@ -31,15 +29,9 @@ export const useSipProviders = () => {
     }
   ]);
 
-  useEffect(() => {
-    console.log("Providers loaded:", providers.length);
-  }, [providers]);
-
   const [editingProvider, setEditingProvider] = useState<SipProvider | null>(null);
 
   const handleAddProvider = (providerData: Omit<SipProvider, 'id' | 'dateAdded' | 'isActive'>) => {
-    console.log("Adding provider:", providerData);
-    
     if (editingProvider) {
       // Update existing provider
       setProviders(providers.map(provider => 
@@ -77,17 +69,14 @@ export const useSipProviders = () => {
   };
   
   const handleEditProvider = (provider: SipProvider) => {
-    console.log("Editing provider:", provider);
     setEditingProvider(provider);
   };
   
   const handleCancelEdit = () => {
-    console.log("Canceling edit");
     setEditingProvider(null);
   };
   
   const handleDeleteProvider = (id: string) => {
-    console.log("Deleting provider:", id);
     setProviders(providers.filter(provider => provider.id !== id));
     toast({
       title: "Provider deleted",
@@ -96,7 +85,6 @@ export const useSipProviders = () => {
   };
   
   const toggleProviderStatus = (id: string) => {
-    console.log("Toggling provider status:", id);
     setProviders(providers.map(provider => 
       provider.id === id 
         ? { ...provider, isActive: !provider.isActive }

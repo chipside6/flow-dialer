@@ -43,20 +43,13 @@
 
   /* Ensure page content is visible when navigating to a page */
   [data-sidebar="sidebar"][data-mobile="true"] {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    height: 100% !important;
     z-index: 100;
-    transition: transform 0.3s ease !important;
-    will-change: transform;
+    left: -100%;
+    transition: left 0.3s ease;
   }
 
   [data-sidebar="sidebar"][data-mobile="true"][data-state="open"] {
-    transform: translateX(0) !important;
-    visibility: visible !important;
-    display: flex !important;
-    opacity: 1 !important;
+    left: 0;
   }
 
   /* Ensure the main content area is properly positioned - crucial fix */
@@ -89,37 +82,6 @@
     padding-right: 8px !important;
     box-sizing: border-box !important;
   }
-
-  /* Fixed backdrop for sidebar */
-  .sidebar-backdrop {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 90;
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-  }
-
-  .sidebar-backdrop.open {
-    visibility: visible;
-    opacity: 1;
-  }
-
-  /* Force dialog to stay visible - critical fix */
-  [role="dialog"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  /* Critical fix for SIP providers page and other pages */
-  .radix-dialog-content {
-    visibility: visible !important;
-    display: flex !important;
-    opacity: 1 !important;
-    transform: translateX(0) !important;
-  }
 }
 
 /* Add animation to mobile sidebar */
@@ -128,7 +90,6 @@
     animation: slideIn 0.3s ease;
     visibility: visible !important;
     display: flex !important;
-    opacity: 1 !important;
   }
   
   [data-state="closed"] {
@@ -147,20 +108,6 @@
     max-width: 100% !important;
     overflow-x: hidden !important;
     padding: 0 8px !important;
-  }
-  
-  /* Specifically for SIP pages */
-  .sip-providers-page {
-    padding-top: 60px !important;
-  }
-  
-  /* Force visibility on sheet content - important fix */
-  .fixed.inset-0 > div[role="dialog"],
-  .fixed.inset-0 > [data-state="open"] {
-    visibility: visible !important;
-    display: flex !important;
-    opacity: 1 !important;
-    transform: translateX(0) !important;
   }
 }
 

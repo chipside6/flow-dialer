@@ -92,20 +92,3 @@
     overflow-x: hidden;
   }
 }
-
-/* Critical fix for SIP providers page visibility */
-.sip-providers-page {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Ensure SIP providers page tables are visible */
-.sip-providers-page .card,
-.sip-providers-page .table,
-.sip-providers-page h1,
-.sip-providers-page form {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
