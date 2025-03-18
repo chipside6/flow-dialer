@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { UserPlus } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CreateContactListFormProps {
   onListCreated: (list: {
@@ -22,7 +21,6 @@ interface CreateContactListFormProps {
 const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) => {
   const [newListName, setNewListName] = useState("");
   const [newListDescription, setNewListDescription] = useState("");
-  const isMobile = useIsMobile();
   
   const handleCreateList = () => {
     if (!newListName) {
@@ -54,7 +52,7 @@ const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) =>
   };
 
   return (
-    <Card className="mb-8 w-full">
+    <Card className="mb-8">
       <CardHeader>
         <CardTitle className="flex items-center text-xl">
           <UserPlus className="mr-2 h-5 w-5" />
@@ -67,23 +65,21 @@ const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) =>
             <label htmlFor="list-name" className="text-sm font-medium leading-none mb-2 block">List Name</label>
             <Input
               id="list-name"
-              placeholder={isMobile ? "List name" : "Enter a name for your contact list"}
+              placeholder="Enter a name for your contact list"
               value={newListName}
               onChange={(e) => setNewListName(e.target.value)}
-              className="w-full"
             />
           </div>
           <div>
             <label htmlFor="list-description" className="text-sm font-medium leading-none mb-2 block">Description</label>
             <Textarea
               id="list-description"
-              placeholder={isMobile ? "List purpose" : "Describe the purpose of this list"}
+              placeholder="Describe the purpose of this list"
               value={newListDescription}
               onChange={(e) => setNewListDescription(e.target.value)}
-              className="w-full"
             />
           </div>
-          <Button onClick={handleCreateList} className="bg-purple-500 hover:bg-purple-600 w-full sm:w-auto">
+          <Button onClick={handleCreateList} className="bg-purple-500 hover:bg-purple-600">
             <UserPlus className="mr-2 h-4 w-4" />
             Create List
           </Button>

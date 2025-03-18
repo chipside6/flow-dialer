@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Server, Plus, Edit, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { SipProvider } from "@/types/sipProviders";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SipProviderFormProps {
   onSubmit: (provider: Omit<SipProvider, 'id' | 'dateAdded' | 'isActive'>) => void;
@@ -27,7 +26,6 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   const [password, setPassword] = useState(editingProvider?.password || "");
   const [description, setDescription] = useState(editingProvider?.description || "");
   const [showPassword, setShowPassword] = useState(false);
-  const isMobile = useIsMobile();
   
   const handleSubmit = () => {
     if (!name || !host || !username || !password) {
@@ -59,7 +57,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
         <CardDescription>
           {editingProvider 
             ? `Editing ${editingProvider.name}` 
-            : isMobile ? "Configure new SIP provider" : "Configure a new SIP trunk provider for outgoing calls"}
+            : "Configure a new SIP trunk provider for outgoing calls"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -69,7 +67,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
               <Label htmlFor="provider-name">Provider Name*</Label>
               <Input
                 id="provider-name"
-                placeholder={isMobile ? "Provider name" : "E.g., Twilio, Vonage, etc."}
+                placeholder="E.g., Twilio, Vonage, etc."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -78,7 +76,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
               <Label htmlFor="provider-host">Host/Server*</Label>
               <Input
                 id="provider-host"
-                placeholder={isMobile ? "Host address" : "E.g., sip.provider.com"}
+                placeholder="E.g., sip.provider.com"
                 value={host}
                 onChange={(e) => setHost(e.target.value)}
               />
@@ -90,7 +88,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
               <Label htmlFor="provider-username">Username/Account ID*</Label>
               <Input
                 id="provider-username"
-                placeholder={isMobile ? "Username or ID" : "Enter SIP username or account ID"}
+                placeholder="Enter SIP username or account ID"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
@@ -99,7 +97,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
               <Label htmlFor="provider-port">Port</Label>
               <Input
                 id="provider-port"
-                placeholder={isMobile ? "Port (default: 5060)" : "Default: 5060"}
+                placeholder="Default: 5060"
                 value={port}
                 onChange={(e) => setPort(e.target.value)}
               />
@@ -112,7 +110,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
               <Input
                 id="provider-password"
                 type={showPassword ? "text" : "password"}
-                placeholder={isMobile ? "Password or API key" : "Enter SIP password or API key"}
+                placeholder="Enter SIP password or API key"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -132,7 +130,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
             <Label htmlFor="provider-description">Description</Label>
             <Input
               id="provider-description"
-              placeholder={isMobile ? "Brief description" : "Enter a description for this SIP provider"}
+              placeholder="Enter a description for this SIP provider"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />

@@ -56,9 +56,6 @@
   [data-sidebar-inset] {
     padding-top: 16px !important;  /* Reduced from 72px to remove top nav space */
     min-height: 100vh !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    overflow-x: hidden !important;
   }
   
   /* Fix overflow issues on mobile */
@@ -73,46 +70,6 @@
     left: 16px !important;
     z-index: 50 !important;
     display: flex !important;
-  }
-  
-  /* Fix table display on mobile */
-  table {
-    font-size: 14px !important;
-    max-width: 100% !important;
-  }
-  
-  td, th {
-    padding: 10px 8px !important;
-  }
-  
-  /* Ensure form controls are properly sized */
-  input, select, textarea, .select-trigger, [role="combobox"] {
-    height: auto !important;
-    min-height: 44px !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-  
-  /* Fix button sizing on mobile */
-  button {
-    min-height: 44px !important;
-  }
-  
-  /* Add proper spacing for forms and cards */
-  form, .card {
-    margin-bottom: 24px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-  
-  /* Ensure all content containers don't overflow */
-  .container, div[class*="w-"], div[class*="max-w-"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    box-sizing: border-box !important;
   }
 }
 
@@ -132,8 +89,6 @@
   .main-content {
     position: relative;
     z-index: 1;
-    width: 100% !important;
-    overflow-x: hidden !important;
   }
 }
 
