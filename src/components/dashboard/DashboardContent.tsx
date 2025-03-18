@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardCards } from "./DashboardCards";
@@ -6,7 +5,7 @@ import { EmptyCampaignState } from "./EmptyCampaignState";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import BackgroundDialer from "@/components/BackgroundDialer";
 import CampaignDashboard from "@/components/CampaignDashboard";
-import { Phone, BarChart3 } from "lucide-react";
+import { Phone, BarChart3, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 
@@ -17,15 +16,13 @@ export const DashboardContent = () => {
   const renderLoadingState = () => {
     return (
       <div className="space-y-8">
-        <div className="flex flex-col justify-center items-center h-64 rounded-lg border border-dashed p-8 text-center bg-white dark:bg-background shadow-sm">
-          <div className="mb-6 relative">
-            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <div className="w-10 h-10 rounded-full border-t-2 border-primary animate-spin absolute"></div>
-            </div>
+        <div className="flex flex-col justify-center items-center h-64 rounded-lg border border-dashed p-8 text-center bg-white dark:bg-gray-950/30">
+          <div className="mb-8 relative">
+            <Loader2 className="h-12 w-12 text-primary animate-spin" />
           </div>
           <h3 className="text-xl font-medium mb-2">Preparing your dashboard</h3>
-          <p className="text-muted-foreground max-w-md mb-4">Loading your campaign data and analytics...</p>
-          <Progress value={40} className="w-64 h-2" />
+          <p className="text-muted-foreground max-w-md mb-6">Loading your campaign data and analytics...</p>
+          <Progress value={45} className="w-64 h-2" />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
