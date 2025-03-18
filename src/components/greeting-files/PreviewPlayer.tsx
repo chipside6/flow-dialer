@@ -1,6 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Play, Pause } from 'lucide-react';
 import { AudioWaveform } from './AudioWaveform';
 
 interface PreviewPlayerProps {
@@ -71,8 +72,19 @@ export const PreviewPlayer = ({ audioBlob, isUploading }: PreviewPlayerProps) =>
           onClick={togglePreview}
           variant="secondary"
           disabled={isUploading}
+          className="flex items-center gap-2"
         >
-          {isPreviewPlaying ? 'Pause' : 'Play'} Preview
+          {isPreviewPlaying ? (
+            <>
+              <Pause className="h-4 w-4" />
+              Pause
+            </>
+          ) : (
+            <>
+              <Play className="h-4 w-4" />
+              Play
+            </>
+          )} Preview
         </Button>
       </div>
     </div>
