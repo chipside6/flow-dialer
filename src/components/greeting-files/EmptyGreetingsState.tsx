@@ -26,7 +26,7 @@ export const EmptyGreetingsState = ({ onUploadClick }: EmptyGreetingsStateProps)
           variant="default"
           className={`${isMobile ? "w-full" : ""} px-4 py-2 text-sm font-medium whitespace-normal h-auto min-h-[44px]`}
         >
-          {isMobile ? "Upload Audio File" : "Upload your first greeting"}
+          {isMobile ? "Upload" : "Upload your first greeting"}
         </Button>
       </CardContent>
     </Card>
