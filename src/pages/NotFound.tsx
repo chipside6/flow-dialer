@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { 
-  SidebarProvider,
   Sidebar, 
   SidebarContent, 
   SidebarHeader,
@@ -33,37 +32,35 @@ const NotFound = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <SidebarProvider defaultOpen>
-          <div className="flex flex-1 w-full pt-16">
-            <Sidebar collapsible="offcanvas">
-              <SidebarHeader>
-                <div className="flex items-center p-2">
-                  <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-2">
-                    <Phone size={16} />
-                  </span>
-                  <span className="font-semibold text-lg">Flow Dialer</span>
-                </div>
-              </SidebarHeader>
-              <SidebarContent>
-                <DashboardNav />
-              </SidebarContent>
-            </Sidebar>
-            <SidebarInset className="p-6">
-              <div className="max-w-6xl mx-auto w-full">
-                <div className="text-center max-w-md mx-auto">
-                  <h1 className="text-6xl md:text-8xl font-display font-bold text-primary mb-6">404</h1>
-                  <p className="text-xl md:text-2xl font-medium mb-8">Oops! We couldn't find that page</p>
-                  <p className="text-muted-foreground mb-8">
-                    The page you're looking for doesn't exist or has been moved.
-                  </p>
-                  <Button asChild size="lg" className="rounded-full px-8">
-                    <a href="/dashboard">Return to Dashboard</a>
-                  </Button>
-                </div>
+        <div className="flex flex-1 w-full pt-16">
+          <Sidebar collapsible="offcanvas">
+            <SidebarHeader>
+              <div className="flex items-center p-2">
+                <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-2">
+                  <Phone size={16} />
+                </span>
+                <span className="font-semibold text-lg">Flow Dialer</span>
               </div>
-            </SidebarInset>
-          </div>
-        </SidebarProvider>
+            </SidebarHeader>
+            <SidebarContent>
+              <DashboardNav />
+            </SidebarContent>
+          </Sidebar>
+          <SidebarInset className="p-6">
+            <div className="max-w-6xl mx-auto w-full">
+              <div className="text-center max-w-md mx-auto">
+                <h1 className="text-6xl md:text-8xl font-display font-bold text-primary mb-6">404</h1>
+                <p className="text-xl md:text-2xl font-medium mb-8">Oops! We couldn't find that page</p>
+                <p className="text-muted-foreground mb-8">
+                  The page you're looking for doesn't exist or has been moved.
+                </p>
+                <Button asChild size="lg" className="rounded-full px-8">
+                  <a href="/dashboard">Return to Dashboard</a>
+                </Button>
+              </div>
+            </div>
+          </SidebarInset>
+        </div>
       </div>
     );
   }

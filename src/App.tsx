@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
 import Features from "./pages/Features";
 import Pricing from "./pages/Pricing";
@@ -46,90 +47,92 @@ import "./App.css";
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/support" element={<Support />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/login" element={<Login />} />
-            
-            {/* Protected routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/campaign" 
-              element={
-                <ProtectedRoute>
-                  <Campaign />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/greetings" 
-              element={
-                <ProtectedRoute>
-                  <GreetingFiles />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/contacts" 
-              element={
-                <ProtectedRoute>
-                  <ContactLists />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/transfers" 
-              element={
-                <ProtectedRoute>
-                  <TransferNumbers />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/sip-providers" 
-              element={
-                <ProtectedRoute>
-                  <SipProviders />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/billing" 
-              element={
-                <ProtectedRoute>
-                  <Billing />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute>
-                  <AdminPanel />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <SidebarProvider defaultOpen>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/login" element={<Login />} />
+              
+              {/* Protected routes */}
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/campaign" 
+                element={
+                  <ProtectedRoute>
+                    <Campaign />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/greetings" 
+                element={
+                  <ProtectedRoute>
+                    <GreetingFiles />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/contacts" 
+                element={
+                  <ProtectedRoute>
+                    <ContactLists />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/transfers" 
+                element={
+                  <ProtectedRoute>
+                    <TransferNumbers />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/sip-providers" 
+                element={
+                  <ProtectedRoute>
+                    <SipProviders />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/billing" 
+                element={
+                  <ProtectedRoute>
+                    <Billing />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute>
+                    <AdminPanel />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </SidebarProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
