@@ -27,23 +27,10 @@ export const useCampaigns = () => {
       try {
         setIsLoading(true);
         
-        // Generate demo data if no user is logged in
+        // If no user is logged in, return empty array
         if (!user) {
-          console.log("No user, using demo data");
-          const demoData: Campaign[] = [
-            {
-              id: "demo-123",
-              title: "Demo Campaign",
-              status: "pending",
-              progress: 0,
-              totalCalls: 100,
-              answeredCalls: 0,
-              transferredCalls: 0,
-              failedCalls: 0,
-              user_id: "demo"
-            }
-          ];
-          setCampaigns(demoData);
+          console.log("No user, returning empty campaigns array");
+          setCampaigns([]);
           setIsLoading(false);
           return;
         }
@@ -79,21 +66,8 @@ export const useCampaigns = () => {
           variant: "destructive"
         });
         
-        // Set default demo campaigns on error
-        const demoData: Campaign[] = [
-          {
-            id: "demo-123",
-            title: "Demo Campaign",
-            status: "pending",
-            progress: 0,
-            totalCalls: 100,
-            answeredCalls: 0,
-            transferredCalls: 0,
-            failedCalls: 0,
-            user_id: "demo"
-          }
-        ];
-        setCampaigns(demoData);
+        // Return empty array on error
+        setCampaigns([]);
       } finally {
         setIsLoading(false);
       }

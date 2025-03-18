@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardCards } from "./DashboardCards";
@@ -39,7 +40,6 @@ export const DashboardContent = () => {
       return renderLoadingState();
     }
 
-    // Always show content, even when campaigns is empty
     switch (activeTab) {
       case 'dialer':
         return (
@@ -55,7 +55,11 @@ export const DashboardContent = () => {
                 </div>
               </div>
             </div>
-            <BackgroundDialer campaignId={campaigns?.[0]?.id || "demo"} />
+            {campaigns.length > 0 ? (
+              <BackgroundDialer campaignId={campaigns[0]?.id} />
+            ) : (
+              <EmptyCampaignState />
+            )}
           </div>
         );
       case 'campaigns':

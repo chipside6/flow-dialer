@@ -21,24 +21,7 @@ interface ContactList {
 }
 
 const ContactLists = () => {
-  const [lists, setLists] = useState<ContactList[]>([
-    {
-      id: "1",
-      name: "Main Customer List",
-      description: "Primary customer contacts for general campaigns",
-      contactCount: 250,
-      dateCreated: new Date(2023, 4, 15),
-      lastModified: new Date(2023, 6, 20)
-    },
-    {
-      id: "2",
-      name: "VIP Customers",
-      description: "High-value customer list for premium offers",
-      contactCount: 50,
-      dateCreated: new Date(2023, 5, 10),
-      lastModified: new Date(2023, 6, 5)
-    }
-  ]);
+  const [lists, setLists] = useState<ContactList[]>([]);
   
   const [newListName, setNewListName] = useState("");
   const [newListDescription, setNewListDescription] = useState("");
@@ -209,7 +192,7 @@ const ContactLists = () => {
                 <CardContent>
                   {lists.length === 0 ? (
                     <div className="text-center py-10 text-muted-foreground">
-                      No contact lists yet. Create your first list.
+                      No contact lists yet. Create your first list above.
                     </div>
                   ) : (
                     <div className="space-y-6">

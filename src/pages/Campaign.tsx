@@ -26,7 +26,7 @@ const CampaignPage = () => {
       answeredCalls: newCampaign.answeredCalls || 0,
       transferredCalls: newCampaign.transferredCalls || 0,
       failedCalls: newCampaign.failedCalls || 0,
-      user_id: user?.id || 'demo'
+      user_id: user?.id || ''
     };
     
     setCampaigns([...campaigns, campaignWithRequiredFields]);

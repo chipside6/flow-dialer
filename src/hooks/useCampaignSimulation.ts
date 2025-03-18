@@ -8,35 +8,9 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   
-  // Load campaigns from props and mock data
+  // Load campaigns from props
   useEffect(() => {
-    // Combine initialCampaigns with demo data if needed
-    const demoData: Campaign[] = initialCampaigns.length > 0 ? initialCampaigns : [
-      {
-        id: "camp-123456",
-        title: "Summer Sales Outreach",
-        status: "pending",
-        progress: 0,
-        totalCalls: 150,
-        answeredCalls: 0,
-        transferredCalls: 0,
-        failedCalls: 0,
-        user_id: "demo"
-      },
-      {
-        id: "camp-234567",
-        title: "Customer Follow-up",
-        status: "pending",
-        progress: 0,
-        totalCalls: 75,
-        answeredCalls: 0,
-        transferredCalls: 0,
-        failedCalls: 0,
-        user_id: "demo"
-      }
-    ];
-    
-    setCampaigns(demoData);
+    setCampaigns(initialCampaigns);
   }, [initialCampaigns]);
 
   const startCampaign = (campaignId: string) => {
