@@ -3,12 +3,15 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useUploadProgress } from '@/hooks/useUploadProgress';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { Loader2, Upload } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, Upload, Mic } from 'lucide-react';
+import { RecordGreetingForm } from './RecordGreetingForm';
 
 interface UploadGreetingFormProps {
   userId: string | undefined;
@@ -18,8 +21,9 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
+  const { uploadProgress, setUploadProgress } = useUploadProgress(isUploading);
   const [file, setFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [activeTab, setActiveTab] = useState<string>('upload');
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,28 +41,6 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
       setFile(selectedFile);
     }
   };
-
-  // Simulated progress for upload feedback
-  useState(() => {
-    let interval: number | null = null;
-    
-    if (isUploading) {
-      setUploadProgress(10); // Start at 10%
-      
-      interval = window.setInterval(() => {
-        setUploadProgress(prev => {
-          // Increment progress but cap at 90% until actual upload completes
-          return prev < 90 ? prev + 5 : prev;
-        });
-      }, 300);
-    } else {
-      setUploadProgress(0);
-    }
-    
-    return () => {
-      if (interval) window.clearInterval(interval);
-    };
-  });
 
   // Handle file upload
   const handleUpload = async () => {
@@ -135,59 +117,80 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upload a new greeting file</CardTitle>
+        <CardTitle>Add a new greeting file</CardTitle>
         <CardDescription>
-          Upload an audio file to use as your campaign greeting
+          Upload or record an audio file to use as your campaign greeting
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="greeting-file">Greeting audio file</Label>
-          <Input
-            id="greeting-file"
-            type="file"
-            accept="audio/*"
-            onChange={handleFileChange}
-            disabled={isUploading}
-          />
-          <p className="text-sm text-muted-foreground">
-            Accepted formats: MP3, WAV, M4A (Max 10MB)
-          </p>
-        </div>
-        {file && (
-          <div className="text-sm">
-            Selected file: <span className="font-medium">{file.name}</span> ({(file.size / 1024 / 1024).toFixed(2)} MB)
-          </div>
-        )}
-        
-        {isUploading && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Uploading...</span>
-              <span>{uploadProgress}%</span>
-            </div>
-            <Progress value={uploadProgress} className="h-2" />
-          </div>
-        )}
-      </CardContent>
-      <CardFooter>
-        <Button
-          onClick={handleUpload}
-          disabled={!file || isUploading}
-        >
-          {isUploading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Uploading...
-            </>
-          ) : (
-            <>
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 mb-4">
+            <TabsTrigger value="upload">
               <Upload className="h-4 w-4 mr-2" />
               Upload File
-            </>
-          )}
-        </Button>
-      </CardFooter>
+            </TabsTrigger>
+            <TabsTrigger value="record">
+              <Mic className="h-4 w-4 mr-2" />
+              Record Audio
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="upload" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="greeting-file">Greeting audio file</Label>
+              <Input
+                id="greeting-file"
+                type="file"
+                accept="audio/*"
+                onChange={handleFileChange}
+                disabled={isUploading}
+              />
+              <p className="text-sm text-muted-foreground">
+                Accepted formats: MP3, WAV, M4A (Max 10MB)
+              </p>
+            </div>
+            {file && (
+              <div className="text-sm">
+                Selected file: <span className="font-medium">{file.name}</span> ({(file.size / 1024 / 1024).toFixed(2)} MB)
+              </div>
+            )}
+            
+            {isUploading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Uploading...</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
+            )}
+            
+            <div className="pt-2">
+              <Button
+                onClick={handleUpload}
+                disabled={!file || isUploading}
+                className="w-full"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload File
+                  </>
+                )}
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="record">
+            <RecordGreetingForm userId={userId} />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
     </Card>
   );
 };

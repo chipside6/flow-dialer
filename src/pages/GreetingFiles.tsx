@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { GreetingFilesList } from '@/components/greeting-files/GreetingFilesList';
 import { UploadGreetingForm } from '@/components/greeting-files/UploadGreetingForm';
 
@@ -25,7 +24,7 @@ const GreetingFiles = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger id="tab-trigger-files" value="files">My Greetings</TabsTrigger>
-          <TabsTrigger id="tab-trigger-upload" value="upload">Upload New</TabsTrigger>
+          <TabsTrigger id="tab-trigger-upload" value="upload">Add New Greeting</TabsTrigger>
         </TabsList>
         
         <TabsContent value="files">
