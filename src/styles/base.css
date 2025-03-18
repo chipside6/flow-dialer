@@ -38,4 +38,16 @@ body, html {
     visibility: visible !important;
     display: flex !important;
   }
+  
+  /* Force dialogs to stay visible */
+  [role="dialog"] {
+    visibility: visible !important;
+    display: flex !important;
+    opacity: 1 !important;
+  }
+  
+  /* Add body class when menu is open to prevent scrolling */
+  body.sidebar-open {
+    overflow: hidden !important;
+  }
 }

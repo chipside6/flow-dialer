@@ -89,10 +89,26 @@ body.mobile-menu-open {
   [role="dialog"].fixed {
     visibility: visible !important;
     display: flex !important;
+    opacity: 1 !important;
   }
   
   /* Force sidebar to always be visible when open on mobile */
   [data-sidebar][data-mobile="true"][data-state="open"] {
+    visibility: visible !important;
+    display: flex !important;
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+  }
+  
+  /* Critical fix for sheet content on mobile */
+  [role="dialog"].fixed.inset-0 {
+    visibility: visible !important;
+    display: flex !important;
+    opacity: 1 !important;
+  }
+  
+  /* Fix for SheetContent hiding */
+  .fixed.inset-0 > [role="dialog"] {
     visibility: visible !important;
     display: flex !important;
     opacity: 1 !important;

@@ -37,6 +37,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [location.pathname, isMobile, setOpenMobile, openMobile]);
   
+  // Add or remove body class when sidebar is open/closed
+  useEffect(() => {
+    if (openMobile) {
+      document.body.classList.add('sidebar-open');
+    } else {
+      document.body.classList.remove('sidebar-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('sidebar-open');
+    };
+  }, [openMobile]);
+  
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },
     { name: "Campaigns", path: "/campaign", icon: <BarChart3 className="h-5 w-5" /> },
