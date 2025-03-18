@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { UserTable } from "@/components/admin/UserTable";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Interface for the simplified User type for our admin panel
 export interface AdminPanelUser {
@@ -28,12 +29,13 @@ export interface UserProfile {
 }
 
 interface UserManagementProps {
-  users: AdminPanelUser[] | undefined;
+  users: AdminPanelUser[];
   isLoading: boolean;
   error: Error | null;
+  onRetry?: () => void;
 }
 
-export function UserManagement({ users, isLoading, error }: UserManagementProps) {
+export function UserManagement({ users, isLoading, error, onRetry }: UserManagementProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -80,14 +82,28 @@ export function UserManagement({ users, isLoading, error }: UserManagementProps)
     });
   };
 
-  if (error) {
+  if (error && onRetry) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          {error instanceof Error ? error.message : "An unknown error occurred"}
-        </AlertDescription>
-      </Alert>
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">User Management</h2>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <div>
+              {error instanceof Error ? error.message : "An unknown error occurred"}
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onRetry}
+              className="ml-4"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
@@ -95,7 +111,7 @@ export function UserManagement({ users, isLoading, error }: UserManagementProps)
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">User Management</h2>
       <UserTable 
-        users={users || []} 
+        users={users} 
         toggleAffiliate={handleToggleAffiliate}
         isLoading={isLoading || toggleAffiliateMutation.isPending}
       />
