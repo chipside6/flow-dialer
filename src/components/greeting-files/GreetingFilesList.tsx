@@ -9,6 +9,7 @@ import { useGreetingFiles } from '@/hooks/useGreetingFiles';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Trash } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GreetingFilesListProps {
   userId?: string;
@@ -18,6 +19,7 @@ interface GreetingFilesListProps {
 export const GreetingFilesList = ({ userId, onUploadClick }: GreetingFilesListProps) => {
   const { toast } = useToast();
   const [greeting, setGreeting] = useState('');
+  const isMobile = useIsMobile();
   
   // Get greeting files
   const { greetingFiles, isLoading, isError, error, deleteGreetingFile } = useGreetingFiles(userId);
@@ -82,17 +84,29 @@ export const GreetingFilesList = ({ userId, onUploadClick }: GreetingFilesListPr
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {greetingFiles.map((file) => (
-        <Card key={file.id}>
-          <CardContent className="aspect-square flex items-center justify-center p-4">
-            <audio src={file.url} controls={greeting === file.url} className="w-full" />
+        <Card key={file.id} className="overflow-hidden">
+          <CardContent className={`${isMobile ? 'p-3' : 'p-4'} flex items-center justify-center`}>
+            <audio src={file.url} controls={greeting === file.url} className="w-full max-w-full" />
           </CardContent>
-          <CardFooter className="flex justify-between items-center">
-            <span className="text-sm">{file.filename}</span>
-            <div>
-              <Button variant="outline" size="icon" onClick={() => handlePlay(file.url)} className="mr-2">
+          <CardFooter className={`flex ${isMobile ? 'flex-col' : 'justify-between'} items-center gap-2 p-3`}>
+            <span className={`text-sm truncate ${isMobile ? 'w-full text-center mb-2' : ''}`}>
+              {file.filename}
+            </span>
+            <div className={isMobile ? "flex w-full gap-2" : ""}>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => handlePlay(file.url)} 
+                className={isMobile ? "flex-1" : "mr-2"}
+              >
                 <Play className="h-4 w-4" />
               </Button>
-              <Button variant="destructive" size="icon" onClick={() => handleDelete(file.id)}>
+              <Button 
+                variant="destructive" 
+                size="icon" 
+                onClick={() => handleDelete(file.id)}
+                className={isMobile ? "flex-1" : ""}
+              >
                 <Trash className="h-4 w-4" />
               </Button>
             </div>
