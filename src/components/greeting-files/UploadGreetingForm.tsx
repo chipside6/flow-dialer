@@ -28,17 +28,17 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
           <TabsList className="grid grid-cols-2 mb-6 w-full">
             <TabsTrigger 
               value="upload" 
-              className="px-2 py-2.5 text-sm whitespace-normal flex items-center justify-center h-auto min-h-[44px]"
+              className="px-2 py-2.5 text-sm flex items-center justify-center h-auto min-h-[44px]"
             >
               <Upload className="h-4 w-4 mr-1.5 flex-shrink-0" />
-              <span>Upload File</span>
+              <span className="truncate">Upload</span>
             </TabsTrigger>
             <TabsTrigger 
               value="record" 
-              className="px-2 py-2.5 text-sm whitespace-normal flex items-center justify-center h-auto min-h-[44px]"
+              className="px-2 py-2.5 text-sm flex items-center justify-center h-auto min-h-[44px]"
             >
               <Mic className="h-4 w-4 mr-1.5 flex-shrink-0" />
-              <span>Record Audio</span>
+              <span className="truncate">Record</span>
             </TabsTrigger>
           </TabsList>
           

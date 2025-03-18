@@ -94,6 +94,15 @@
     text-overflow: ellipsis !important;
     height: auto !important;
     min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  [role="tab"] span {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
   }
   
   /* Fix for file input on mobile */
@@ -104,6 +113,14 @@
     white-space: normal !important;
     text-overflow: ellipsis !important;
     overflow: hidden !important;
+  }
+  
+  input[type="file"]::file-selector-button {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 80px !important;
   }
   
   /* Fix button text wrapping */
