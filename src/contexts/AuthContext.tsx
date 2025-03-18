@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, AuthResponse } from '@supabase/supabase-js';
@@ -7,11 +8,13 @@ interface AuthContextType {
   user: User | null;
   profile: any | null;
   isLoading: boolean;
+  isAffiliate: boolean;
   signUp: (email: string, password: string) => Promise<AuthResponse>;
   signIn: (email: string, password: string) => Promise<AuthResponse>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (data: any) => Promise<void>;
+  setAsAffiliate: (userId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAffiliate, setIsAffiliate] = useState(false);
 
   useEffect(() => {
     // Check active session on mount
@@ -38,6 +42,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .single();
           
           setProfile(profileData);
+          
+          // Check if user is an affiliate
+          if (profileData?.is_affiliate) {
+            setIsAffiliate(true);
+          }
         }
       } catch (error) {
         console.error('Error checking auth session:', error);
@@ -61,9 +70,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .single();
           
           setProfile(profileData);
+          
+          // Check if user is an affiliate
+          if (profileData?.is_affiliate) {
+            setIsAffiliate(true);
+          } else {
+            setIsAffiliate(false);
+          }
         } else {
           setUser(null);
           setProfile(null);
+          setIsAffiliate(false);
         }
         setIsLoading(false);
       }
@@ -142,16 +159,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     }
   };
+  
+  // Function to set a user as an affiliate (admin only function)
+  const setAsAffiliate = async (userId: string) => {
+    try {
+      // In a real app, this would check if the current user has admin rights
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_affiliate: true })
+        .eq('id', userId);
+      
+      if (error) throw error;
+      
+      // If updating the current user, update the state
+      if (user && user.id === userId) {
+        setIsAffiliate(true);
+        setProfile({
+          ...profile,
+          is_affiliate: true
+        });
+      }
+      
+      toast({
+        title: "Affiliate status updated",
+        description: "User has been set as an affiliate.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error updating affiliate status",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const value = {
     user,
     profile,
     isLoading,
+    isAffiliate,
     signUp,
     signIn,
     signInWithGoogle,
     signOut,
     updateProfile,
+    setAsAffiliate,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

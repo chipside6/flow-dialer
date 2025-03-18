@@ -2,10 +2,12 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
-import { AudioWaveform, ContactIcon, PhoneForwarded, Server, BarChart3, Home } from "lucide-react";
+import { AudioWaveform, ContactIcon, PhoneForwarded, Server, BarChart3, Home, Settings } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function DashboardNav() {
   const location = useLocation();
+  const { profile } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -36,6 +38,14 @@ export function DashboardNav() {
             </Button>
           </Link>
         ))}
+        
+        {/* Show user type badge */}
+        {profile?.is_affiliate && (
+          <div className="mt-6 px-3 py-2 bg-green-50 border border-green-200 rounded-md">
+            <p className="text-green-700 text-sm font-medium">Affiliate Account</p>
+            <p className="text-green-600 text-xs">Full access to all features</p>
+          </div>
+        )}
       </nav>
     </div>
   );

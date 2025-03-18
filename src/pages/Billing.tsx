@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -6,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Plans from the pricing section
 const plans = [
@@ -76,6 +78,7 @@ const plans = [
 const Billing = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAffiliate } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   
@@ -108,6 +111,37 @@ const Billing = () => {
   const handleBack = () => {
     setShowPaymentForm(false);
   };
+
+  // If user is an affiliate, show a message and redirect to dashboard
+  if (isAffiliate) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="py-32 px-6 md:px-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">Affiliate Access</CardTitle>
+                <CardDescription>
+                  As an affiliate, you have access to all features without a subscription.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-6">Your account has special affiliate status with access to all enterprise features.</p>
+                <Check className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                <p className="text-lg font-medium mb-6">All Enterprise Features Unlocked</p>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full" onClick={() => navigate("/dashboard")}>
+                  Go to Dashboard
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
