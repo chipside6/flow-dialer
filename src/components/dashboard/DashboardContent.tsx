@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, ErrorBoundary } from "react";
+import React, { useState, useEffect } from "react";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardCards } from "./DashboardCards";
 import { EmptyCampaignState } from "./EmptyCampaignState";
