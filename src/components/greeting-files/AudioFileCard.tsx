@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileAudio, Loader2, Pause, Play, Trash2 } from 'lucide-react';
+import { AudioWaveform } from './AudioWaveform';
 
 interface AudioFileCardProps {
   file: {
@@ -89,6 +90,12 @@ export const AudioFileCard = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {isActiveAudio && (
+          <AudioWaveform 
+            audioUrl={file.url} 
+            isPlaying={isPlaying} 
+          />
+        )}
         <div className="flex justify-between items-center">
           <Button
             variant="outline"

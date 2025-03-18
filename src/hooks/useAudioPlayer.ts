@@ -5,6 +5,7 @@ import { useToast } from '@/components/ui/use-toast';
 export function useAudioPlayer() {
   const [activeAudio, setActiveAudio] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
@@ -25,6 +26,7 @@ export function useAudioPlayer() {
       setActiveAudio(url);
       const audio = new Audio(url);
       audioRef.current = audio;
+      setAudioElement(audio);
       
       audio.onplay = () => setIsPlaying(true);
       audio.onpause = () => setIsPlaying(false);
@@ -47,6 +49,7 @@ export function useAudioPlayer() {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
+        setAudioElement(null);
       }
     };
   }, []);
@@ -54,6 +57,7 @@ export function useAudioPlayer() {
   return {
     activeAudio,
     isPlaying,
+    audioElement,
     togglePlayback
   };
 }
