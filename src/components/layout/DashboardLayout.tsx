@@ -11,7 +11,6 @@ import {
   PhoneForwarded, 
   Server, 
   ShieldCheck,
-  LogOut,
   X
 } from "lucide-react";
 import { NavItem } from "@/components/navigation/NavItem";
@@ -27,7 +26,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { profile } = useAuth();
   const location = useLocation();
-  const { state, openMobile, setOpenMobile } = useSidebar();
+  const { setOpenMobile } = useSidebar();
   const isMobile = useIsMobile();
   
   const navItems = [
@@ -67,7 +66,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </SidebarHeader>
         <SidebarContent className="px-4 py-2">
           <div className="bg-card rounded-lg border shadow-sm p-4 mb-4">
-            <h2 className="font-semibold mb-4 text-lg">Navigation</h2>
             <nav className="space-y-2">
               {navItems.map((item) => (
                 <NavItem 

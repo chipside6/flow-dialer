@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { 
   AudioWaveform, 
@@ -33,7 +32,6 @@ export function DashboardNav() {
   
   return (
     <div className="bg-card rounded-lg border p-4">
-      <h2 className="font-semibold mb-4">Navigation</h2>
       <nav className="space-y-2">
         {navItems.map((item) => (
           <NavItem 
