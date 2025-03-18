@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, useSidebar } from "@/components/ui/sidebar";
 import { 
@@ -29,6 +29,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
   const { setOpenMobile, openMobile, toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();
+  const [showOverlay, setShowOverlay] = useState(false);
   
   // Close mobile sidebar when route changes
   useEffect(() => {
@@ -37,18 +38,29 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [location.pathname, isMobile, setOpenMobile, openMobile]);
   
-  // Add/remove body class when mobile sidebar is opened/closed
+  // Handle overlay and body class for mobile menu
   useEffect(() => {
     if (openMobile) {
       document.body.classList.add('mobile-menu-open');
+      // Delay showing overlay slightly for a smoother transition
+      setTimeout(() => setShowOverlay(true), 50);
     } else {
       document.body.classList.remove('mobile-menu-open');
+      setShowOverlay(false);
     }
     
     return () => {
       document.body.classList.remove('mobile-menu-open');
+      setShowOverlay(false);
     };
   }, [openMobile]);
+  
+  // Handle closing the sidebar when clicking outside
+  const handleOverlayClick = () => {
+    if (openMobile) {
+      setOpenMobile(false);
+    }
+  };
   
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },
@@ -76,6 +88,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <Menu size={20} />
           </Button>
         </div>
+      )}
+      
+      {/* Background overlay for mobile */}
+      {isMobile && (
+        <div 
+          className={`sidebar-overlay ${showOverlay ? 'active' : ''}`}
+          onClick={handleOverlayClick}
+        />
       )}
       
       <Sidebar collapsible="offcanvas">
