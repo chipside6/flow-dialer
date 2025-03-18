@@ -30,6 +30,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { setOpenMobile, openMobile, toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();
   
+  // Add effect to prevent scrolling when mobile sidebar is open
+  useEffect(() => {
+    if (isMobile) {
+      if (openMobile) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [openMobile, isMobile]);
+  
   // Close mobile sidebar when route changes
   useEffect(() => {
     if (isMobile && openMobile) {
@@ -50,7 +65,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const isAdmin = profile?.is_admin === true;
   
   return (
-    <div className="flex flex-1 w-full">
+    <div className="flex flex-1 w-full overflow-x-hidden">
       {/* Mobile menu button - always visible on mobile */}
       {isMobile && (
         <div className="fixed top-4 left-4 z-50">
@@ -123,7 +138,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </SidebarContent>
       </Sidebar>
-      <SidebarInset className="p-4 md:p-6 bg-background/50 dark:bg-background/10 min-h-screen pt-16 md:pt-6">
+      <SidebarInset className="p-4 md:p-6 bg-background/50 dark:bg-background/10 min-h-screen pt-16 md:pt-6 overflow-x-hidden">
         <div className="max-w-6xl mx-auto w-full">
           {children}
         </div>

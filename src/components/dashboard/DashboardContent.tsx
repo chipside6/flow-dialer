@@ -43,7 +43,7 @@ export const DashboardContent = () => {
     switch (activeTab) {
       case 'dialer':
         return (
-          <div className="mt-4">
+          <div className="mt-4 overflow-x-hidden w-full">
             <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-xl border border-blue-100 dark:border-blue-900">
               <div className="flex flex-col md:flex-row gap-4 items-center">
                 <div className="bg-primary/10 p-4 rounded-full">
@@ -64,7 +64,7 @@ export const DashboardContent = () => {
         );
       case 'campaigns':
         return (
-          <div className="mt-4">
+          <div className="mt-4 overflow-x-hidden w-full">
             <div className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 p-6 rounded-xl border border-green-100 dark:border-green-900">
               <div className="flex flex-col md:flex-row gap-4 items-center">
                 <div className="bg-green-500/10 p-4 rounded-full">
@@ -86,7 +86,7 @@ export const DashboardContent = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden w-full">
       <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       {renderContent()}
     </div>

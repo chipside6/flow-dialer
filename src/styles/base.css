@@ -6,4 +6,12 @@
   margin: 0;
   padding: 0;
   text-align: left;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
+
+/* Ensure the body and html also prevent horizontal scrolling */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
