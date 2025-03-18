@@ -78,7 +78,7 @@ const GreetingFiles = () => {
 
   const content = (
     <div className="container py-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 mt-4 pt-4">
         <h1 className="text-3xl font-bold">Greeting Audio Files</h1>
       </div>
       
