@@ -35,7 +35,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
           
           return profiles.map((profile: any): AdminPanelUser => ({
             id: profile.id,
-            email: "Restricted", // We don't have access to email without admin API
+            email: profile.email || "Restricted", // We don't have access to email without admin API
             created_at: profile.created_at || new Date().toISOString(),
             profile: {
               ...profile,
@@ -44,20 +44,18 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
           }));
         }
         
-        // If no profiles found, return empty array
+        // Make sure we return an empty array instead of undefined
         console.log("useAdminUsers - No profiles found, returning empty array");
         return [];
         
       } catch (error: any) {
         console.error("useAdminUsers - Critical error:", error);
-        // Return an empty array and log the error instead of throwing
-        // This prevents the UI from getting stuck in a loading state
-        return [];
+        throw error; // Throw the error so React Query can handle it properly
       }
     },
     refetchOnWindowFocus: false,
-    retry: 1,
-    retryDelay: 500,
+    retry: 2, // Increased retry attempts
+    retryDelay: 1000, // Increased retry delay
     enabled,
     staleTime,
     gcTime: 60000 * 5, // Keep data in cache for 5 minutes

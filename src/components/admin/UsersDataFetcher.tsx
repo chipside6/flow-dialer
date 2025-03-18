@@ -19,7 +19,8 @@ export function UsersDataFetcher() {
     error, 
     refetch, 
     isRefetching,
-    isSuccess
+    isSuccess,
+    isFetched
   } = useAdminUsers({
     staleTime: 5000 // Short stale time
   });
@@ -27,7 +28,8 @@ export function UsersDataFetcher() {
   console.log("UsersDataFetcher - Data status:", { 
     isLoading, 
     isRefetching,
-    isSuccess, 
+    isSuccess,
+    isFetched,
     hasError: !!error,
     userCount: users?.length ?? 0
   });
@@ -61,16 +63,17 @@ export function UsersDataFetcher() {
   
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (isLoading && !users.length) {
+      if ((isLoading || !isFetched) && !users.length) {
         console.log("UsersDataFetcher - Forcing render after timeout");
         setForceRender(true);
       }
     }, 3000); // 3 second timeout
     
     return () => clearTimeout(timer);
-  }, [isLoading, users]);
+  }, [isLoading, isFetched, users]);
 
-  const shouldShowContent = !isLoading || users.length > 0 || forceRender;
+  // Show content when: data is loaded, or data exists, or timeout occurred
+  const shouldShowContent = !isLoading || users.length > 0 || forceRender || isFetched;
 
   return (
     <DashboardLayout>
@@ -143,7 +146,7 @@ export function UsersDataFetcher() {
             
             <UserManagement 
               users={users} 
-              isLoading={isLoading || isRefetching} 
+              isLoading={isLoading && !forceRender && !isFetched} 
               error={error instanceof Error ? error : null} 
               onRetry={handleRetry}
             />
