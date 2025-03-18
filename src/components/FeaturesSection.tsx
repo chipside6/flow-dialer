@@ -24,7 +24,7 @@ const features = [
     title: "Voice Recognition",
     description: "Advanced AI analyzes call content to provide insights and automatically categorize responses.",
     icon: "🎤",
-    imageUrl: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=800&h=600&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=600&q=80"
   },
   {
     title: "Multi-channel Integration",
