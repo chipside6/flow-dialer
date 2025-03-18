@@ -23,9 +23,13 @@ export const ContactsStep = ({ campaign, contactLists, onSelectChange }: Contact
             <SelectValue placeholder="Select a contact list" />
           </SelectTrigger>
           <SelectContent>
-            {contactLists.map(list => (
-              <SelectItem key={list.id} value={list.id}>{list.name}</SelectItem>
-            ))}
+            {contactLists.length === 0 ? (
+              <SelectItem value="empty" disabled>No contact lists available</SelectItem>
+            ) : (
+              contactLists.map(list => (
+                <SelectItem key={list.id} value={list.id}>{list.name}</SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
       </div>

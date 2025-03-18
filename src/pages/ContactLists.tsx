@@ -1,15 +1,13 @@
+
 import React, { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { DashboardNav } from "@/components/DashboardNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/use-toast";
-import { ContactIcon, Trash, UserPlus, UploadCloud, Download, Contact, Users, Calendar, FileText } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { UserPlus } from "lucide-react";
 
 interface ContactList {
   id: string;
@@ -22,11 +20,8 @@ interface ContactList {
 
 const ContactLists = () => {
   const [lists, setLists] = useState<ContactList[]>([]);
-  
   const [newListName, setNewListName] = useState("");
   const [newListDescription, setNewListDescription] = useState("");
-  const [bulkNumbers, setBulkNumbers] = useState("");
-  const [showBulkInput, setShowBulkInput] = useState(false);
   
   const handleCreateList = () => {
     if (!newListName) {
@@ -57,81 +52,19 @@ const ContactLists = () => {
     });
   };
   
-  const handleBulkAdd = (listId: string) => {
-    if (!bulkNumbers.trim()) {
-      toast({
-        title: "No numbers provided",
-        description: "Please enter phone numbers to add to the list",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Split by newlines, commas, or semicolons
-    const numbers = bulkNumbers
-      .split(/[\n,;]+/)
-      .map(num => num.trim())
-      .filter(num => num.length > 0);
-    
-    // Basic validation
-    const phoneRegex = /^\+?[0-9\s\-()]+$/;
-    const validNumbers = numbers.filter(num => phoneRegex.test(num));
-    
-    // Update the contact count for the list
-    setLists(lists.map(list => {
-      if (list.id === listId) {
-        return {
-          ...list,
-          contactCount: list.contactCount + validNumbers.length,
-          lastModified: new Date()
-        };
-      }
-      return list;
-    }));
-    
-    setBulkNumbers("");
-    setShowBulkInput(false);
-    
-    toast({
-      title: "Contacts added",
-      description: `Added ${validNumbers.length} contacts to the list`,
-    });
-  };
-  
-  const handleDeleteList = (id: string) => {
-    setLists(lists.filter(list => list.id !== id));
-    toast({
-      title: "List deleted",
-      description: "The contact list has been removed",
-    });
-  };
-  
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, listId: string) => {
-    const selectedFiles = e.target.files;
-    if (!selectedFiles || selectedFiles.length === 0) return;
-    
-    const file = selectedFiles[0];
-    
-    // In a real application, we would parse the file and extract contacts
-    // For this demo, we'll simulate adding a random number of contacts
-    const contactsAdded = Math.floor(Math.random() * 100) + 10;
-    
-    setLists(lists.map(list => {
-      if (list.id === listId) {
-        return {
-          ...list,
-          contactCount: list.contactCount + contactsAdded,
-          lastModified: new Date()
-        };
-      }
-      return list;
-    }));
-    
-    toast({
-      title: "File processed",
-      description: `Added ${contactsAdded} contacts from ${file.name}`,
-    });
-  };
+  // Empty state component
+  const EmptyListsState = () => (
+    <Card className="mt-6">
+      <CardHeader>
+        <CardTitle className="text-xl text-center">No Contact Lists Yet</CardTitle>
+      </CardHeader>
+      <CardContent className="text-center">
+        <p className="text-muted-foreground mb-4">
+          Create your first contact list to start adding phone numbers
+        </p>
+      </CardContent>
+    </Card>
+  );
   
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -143,13 +76,13 @@ const ContactLists = () => {
               <DashboardNav />
             </div>
             <div className="md:w-3/4">
-              <div className="flex justify-between items-center mb-6">
+              <div className="mb-6">
                 <h1 className="text-3xl font-bold">Contact Lists</h1>
               </div>
               
               <Card className="mb-8">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-xl">
                     <UserPlus className="mr-2 h-5 w-5" />
                     Create New Contact List
                   </CardTitle>
@@ -157,7 +90,7 @@ const ContactLists = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="list-name">List Name</Label>
+                      <label htmlFor="list-name" className="text-sm font-medium leading-none mb-2 block">List Name</label>
                       <Input
                         id="list-name"
                         placeholder="Enter a name for your contact list"
@@ -166,7 +99,7 @@ const ContactLists = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="list-description">Description</Label>
+                      <label htmlFor="list-description" className="text-sm font-medium leading-none mb-2 block">Description</label>
                       <Textarea
                         id="list-description"
                         placeholder="Describe the purpose of this list"
@@ -174,7 +107,7 @@ const ContactLists = () => {
                         onChange={(e) => setNewListDescription(e.target.value)}
                       />
                     </div>
-                    <Button onClick={handleCreateList}>
+                    <Button onClick={handleCreateList} className="bg-purple-500 hover:bg-purple-600">
                       <UserPlus className="mr-2 h-4 w-4" />
                       Create List
                     </Button>
@@ -182,109 +115,45 @@ const ContactLists = () => {
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <ContactIcon className="mr-2 h-5 w-5" />
-                    Your Contact Lists
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {lists.length === 0 ? (
-                    <div className="text-center py-10 text-muted-foreground">
-                      No contact lists yet. Create your first list above.
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
+              {lists.length === 0 ? (
+                <EmptyListsState />
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl">Your Contact Lists</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Contact list UI would render here when lists exist */}
+                    <div className="space-y-4">
                       {lists.map((list) => (
                         <Card key={list.id} className="border border-border/40">
-                          <CardHeader className="bg-muted/30 pb-2">
+                          <CardContent className="p-4">
                             <div className="flex justify-between items-start">
                               <div>
-                                <CardTitle className="text-xl flex items-center">
-                                  <Contact className="mr-2 h-5 w-5" />
-                                  {list.name}
-                                </CardTitle>
+                                <h3 className="font-medium">{list.name}</h3>
                                 <p className="text-sm text-muted-foreground mt-1">
                                   {list.description}
                                 </p>
-                              </div>
-                              <Button variant="ghost" size="sm" onClick={() => handleDeleteList(list.id)}>
-                                <Trash className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="pt-4">
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                              <div>
-                                <p className="text-sm text-muted-foreground">Contacts</p>
-                                <p className="text-lg font-medium flex items-center">
-                                  <Users className="mr-2 h-4 w-4 text-primary" />
-                                  {list.contactCount}
+                                <p className="text-sm mt-2">
+                                  <span className="text-muted-foreground">Contacts:</span> {list.contactCount}
                                 </p>
                               </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">Created</p>
-                                <p className="text-sm font-medium flex items-center">
-                                  <Calendar className="mr-2 h-4 w-4 text-primary" />
-                                  {formatDistanceToNow(list.dateCreated, { addSuffix: true })}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">Last Modified</p>
-                                <p className="text-sm font-medium flex items-center">
-                                  <Calendar className="mr-2 h-4 w-4 text-primary" />
-                                  {formatDistanceToNow(list.lastModified, { addSuffix: true })}
-                                </p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex flex-wrap gap-2">
-                              <input
-                                type="file"
-                                accept=".csv,.txt"
-                                id={`file-upload-${list.id}`}
-                                className="hidden"
-                                onChange={(e) => handleFileUpload(e, list.id)}
-                              />
-                              <Button variant="outline" size="sm" onClick={() => document.getElementById(`file-upload-${list.id}`)?.click()}>
-                                <UploadCloud className="mr-2 h-4 w-4" />
-                                Import CSV
-                              </Button>
-                              <Button variant="outline" size="sm" onClick={() => setShowBulkInput(!showBulkInput)}>
-                                <UserPlus className="mr-2 h-4 w-4" />
-                                Add Contacts
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <Download className="mr-2 h-4 w-4" />
-                                Export
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <FileText className="mr-2 h-4 w-4" />
-                                View Contacts
-                              </Button>
-                            </div>
-                            
-                            {showBulkInput && (
-                              <div className="mt-4 space-y-2">
-                                <Textarea
-                                  placeholder="Enter multiple phone numbers (separated by newlines, commas, or semicolons)"
-                                  value={bulkNumbers}
-                                  onChange={(e) => setBulkNumbers(e.target.value)}
-                                  className="min-h-[100px]"
-                                />
-                                <Button size="sm" onClick={() => handleBulkAdd(list.id)}>
+                              <div className="flex gap-2">
+                                <Button variant="outline" size="sm">
                                   Add Contacts
                                 </Button>
+                                <Button variant="outline" size="sm" className="text-destructive">
+                                  Delete
+                                </Button>
                               </div>
-                            )}
+                            </div>
                           </CardContent>
                         </Card>
                       ))}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>
