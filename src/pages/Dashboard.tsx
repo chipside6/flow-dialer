@@ -8,7 +8,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="flex flex-1 w-full pt-16">
+      <div className="flex flex-1 w-full pt-16"> {/* This pt-16 creates space for the fixed navbar */}
         <DashboardLayout>
           <DashboardContent />
         </DashboardLayout>
