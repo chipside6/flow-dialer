@@ -6,37 +6,37 @@ const features = [
     title: "Campaign Automation",
     description: "Set up and forget with our automated campaign system that handles calls without manual intervention.",
     icon: "🤖",
-    imageUrl: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=800&h=600&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&h=600&q=80"
   },
   {
     title: "Real-time Analytics",
     description: "Track campaign performance with comprehensive analytics dashboards showing conversion rates and call metrics.",
     icon: "📊",
-    imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&h=600&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&h=600&q=80"
   },
   {
     title: "Intelligent Call Routing",
     description: "Route calls to the right team members based on custom rules, availability, and expertise.",
     icon: "🔄",
-    imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=600&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=800&h=600&q=80"
   },
   {
     title: "Voice Recognition",
     description: "Advanced AI analyzes call content to provide insights and automatically categorize responses.",
     icon: "🎤",
-    imageUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&h=600&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=800&h=600&q=80"
   },
   {
     title: "Multi-channel Integration",
     description: "Connect your calling campaigns with email, SMS, and other communication channels for comprehensive outreach.",
     icon: "📱",
-    imageUrl: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&h=600&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=800&h=600&q=80"
   },
   {
     title: "Compliance Management",
     description: "Stay compliant with calling regulations with built-in compliance tools and do-not-call list integration.",
     icon: "✅",
-    imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&h=600&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&h=600&q=80"
   }
 ];
 

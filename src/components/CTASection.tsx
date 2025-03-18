@@ -17,7 +17,7 @@ export const CTASection = () => {
         {/* Abstract image overlay */}
         <div className="absolute inset-0 opacity-20">
           <img 
-            src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80" 
+            src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=1200&q=80" 
             alt=""
             className="w-full h-full object-cover"
           />
@@ -52,7 +52,7 @@ export const CTASection = () => {
               <div className="absolute inset-0 bg-white/10 rounded-2xl blur-xl"></div>
               <div className="relative rounded-2xl overflow-hidden border border-white/20">
                 <img 
-                  src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=600&h=800&q=80" 
+                  src="https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=600&h=800&q=80" 
                   alt="Person using communication platform"
                   className="w-full h-auto"
                 />
