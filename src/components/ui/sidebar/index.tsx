@@ -43,6 +43,8 @@ const SidebarProvider = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof SidebarContextProvider>
 >((props, ref) => {
+  const { isMobile } = useSidebar();
+  
   return (
     <SidebarContextProvider ref={ref} {...props}>
       <TooltipProvider delayDuration={0}>
@@ -58,6 +60,7 @@ const SidebarProvider = React.forwardRef<
             "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
             props.className
           )}
+          data-sidebar-wrapper="true"
         >
           {props.children}
         </div>

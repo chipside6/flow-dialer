@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -89,21 +88,18 @@ const SidebarProvider = React.forwardRef<
       }
     }, [isMobile, setOpen]);
 
-    // Adds a keyboard shortcut to toggle the sidebar.
+    // Add body class when mobile sidebar opens
     React.useEffect(() => {
-      const handleKeyDown = (event: KeyboardEvent) => {
-        if (
-          event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-          (event.metaKey || event.ctrlKey)
-        ) {
-          event.preventDefault()
-          toggleSidebar()
-        }
+      if (isMobile && openMobile) {
+        document.body.classList.add('sidebar-open');
+      } else {
+        document.body.classList.remove('sidebar-open');
       }
-
-      window.addEventListener("keydown", handleKeyDown)
-      return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [toggleSidebar])
+      
+      return () => {
+        document.body.classList.remove('sidebar-open');
+      };
+    }, [isMobile, openMobile]);
 
     // We add a state so that we can do data-state="expanded" or "collapsed".
     // This makes it easier to style the sidebar with Tailwind classes.

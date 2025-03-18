@@ -99,6 +99,13 @@ body.sidebar-open {
     display: flex !important;
     opacity: 1 !important;
     transform: translateX(0) !important;
+    z-index: 50 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 280px !important;
+    height: 100vh !important;
   }
   
   /* Critical fix for sheet content on mobile */
@@ -121,5 +128,20 @@ body.sidebar-open {
     visibility: visible !important;
     display: flex !important;
     opacity: 1 !important;
+    z-index: 50 !important;
+  }
+  
+  /* Ensure sidebar wrapper is properly positioned */
+  [data-sidebar-wrapper="true"] {
+    position: relative !important;
+    overflow: visible !important;
+  }
+  
+  /* Ensure SIP providers page sidebar shows correctly */
+  .route-sip-providers [data-sidebar][data-mobile="true"][data-state="open"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 50 !important;
   }
 }
