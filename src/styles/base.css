@@ -32,10 +32,3 @@ body, html {
   max-width: 100%;
   overflow-x: hidden;
 }
-
-/* Dashboard content wrapper */
-.dashboard-content-wrapper {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-}

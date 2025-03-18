@@ -22,13 +22,4 @@ main {
 .table-container {
   max-width: 100%;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-}
-
-/* Dashboard content container */
-.dashboard-container {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  padding: 0 1rem;
 }
