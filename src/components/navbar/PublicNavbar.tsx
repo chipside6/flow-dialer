@@ -4,17 +4,21 @@ import { Menu, Phone } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { NavLinks } from './NavLinks';
 import { MobileMenu } from './MobileMenu';
-import { useState } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 
-export const PublicNavbar = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+interface PublicNavbarProps {
+  isScrolled: boolean;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen }: PublicNavbarProps) => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b ${isScrolled ? 'shadow-sm' : 'border-transparent'}`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setMobileMenuOpen(true)}
+            onClick={() => setIsMobileMenuOpen(true)}
             className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted"
             aria-label="Open mobile menu"
           >
@@ -48,8 +52,8 @@ export const PublicNavbar = () => {
       </div>
       
       <MobileMenu 
-        isOpen={mobileMenuOpen} 
-        onClose={() => setMobileMenuOpen(false)} 
+        isOpen={isMobileMenuOpen} 
+        onClose={() => setIsMobileMenuOpen(false)} 
       />
     </header>
   );
