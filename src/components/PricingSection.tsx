@@ -22,7 +22,7 @@ const plans = [
     price: 49,
     description: "Perfect for individual users",
     features: [
-      "Unlimited calls",
+      "5,000 calls",
       "5 campaigns",
       "1000 contacts per campaign",
       "View-only contact lists",
@@ -36,7 +36,7 @@ const plans = [
     price: 99,
     description: "Ideal for professionals and small teams",
     features: [
-      "Unlimited calls",
+      "10,000 calls",
       "10 campaigns",
       "1000 contacts per campaign",
       "View-only contact lists",
