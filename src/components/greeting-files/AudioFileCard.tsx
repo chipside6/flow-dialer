@@ -1,13 +1,9 @@
 
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileAudio, Loader2, Pause, Play, Trash2 } from 'lucide-react';
 import { AudioWaveform } from './AudioWaveform';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface AudioFileCardProps {
   file: {
@@ -19,71 +15,26 @@ interface AudioFileCardProps {
   isPlaying: boolean;
   isActiveAudio: boolean;
   onPlayToggle: (url: string) => void;
+  onDelete: (fileId: string) => void;
 }
 
 export const AudioFileCard = ({ 
   file, 
   isPlaying, 
   isActiveAudio,
-  onPlayToggle 
+  onPlayToggle,
+  onDelete
 }: AudioFileCardProps) => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const [isDeleting, setIsDeleting] = useState(false);
   
-  // Delete greeting file mutation
-  const deleteGreetingFile = useMutation({
-    mutationFn: async (fileId: string) => {
-      if (!user) throw new Error('User not authenticated');
-      
-      const { data: fileData, error: fetchError } = await supabase
-        .from('greeting_files')
-        .select('filename, url')
-        .eq('id', fileId)
-        .single();
-      
-      if (fetchError) throw fetchError;
-      
-      // Parse filename from URL to get the storage path
-      const urlPath = new URL(fileData.url).pathname;
-      const filePath = urlPath.split('/').pop();
-      const storagePath = `${user.id}/${filePath}`;
-      
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('greetings')
-        .remove([storagePath]);
-      
-      if (storageError) {
-        console.warn("Storage delete error (continuing anyway):", storageError);
-        // We still continue with the database deletion even if storage fails
-      }
-      
-      // Delete from database
-      const { error: deleteError } = await supabase
-        .from('greeting_files')
-        .delete()
-        .eq('id', fileId);
-      
-      if (deleteError) throw deleteError;
-      
-      return fileId;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['greetingFiles'] });
-      toast({
-        title: 'File deleted',
-        description: 'The greeting file has been deleted successfully.',
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error deleting file',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onDelete(file.id);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <Card key={file.id} className="overflow-hidden">
@@ -121,10 +72,10 @@ export const AudioFileCard = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => deleteGreetingFile.mutate(file.id)}
-            disabled={deleteGreetingFile.isPending}
+            onClick={handleDelete}
+            disabled={isDeleting}
           >
-            {deleteGreetingFile.isPending ? (
+            {isDeleting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <Trash2 className="h-4 w-4 text-destructive" />
