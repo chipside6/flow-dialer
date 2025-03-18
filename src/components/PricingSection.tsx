@@ -2,86 +2,25 @@
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const plans = [
-  {
-    name: "Free",
-    price: 0,
-    description: "Basic access with limitations",
-    features: [
-      "500 calls only",
-      "Unlimited campaigns",
-      "500 contacts per campaign",
-      "Cannot modify contact lists once campaign starts",
-      "View-only contact lists",
-      "Community support",
-      "No credit card required"
-    ]
-  },
-  {
-    name: "Basic",
-    price: 49,
-    description: "Perfect for individual users",
-    features: [
-      "5,000 calls",
-      "Unlimited campaigns",
-      "1000 contacts per campaign",
-      "View-only contact lists",
-      "No editing of assigned campaign contacts",
-      "Basic contact management",
-      "Standard support"
-    ]
-  },
-  {
-    name: "Professional",
-    price: 99,
-    description: "Ideal for professionals and small teams",
-    features: [
-      "10,000 calls",
-      "Unlimited campaigns",
-      "1000 contacts per campaign",
-      "View-only contact lists",
-      "Advanced contact management",
-      "Priority support",
-      "Team management features",
-      "Custom branding options"
-    ],
-    popular: true
-  },
-  {
-    name: "Enterprise",
-    price: 299,
-    description: "For organizations with advanced needs",
-    features: [
-      "Unlimited calls",
-      "Unlimited campaigns",
-      "Edit or change assigned contact lists",
-      "Call recording & transcription",
-      "Advanced analytics",
-      "Enhanced security features",
-      "Dedicated account manager",
-      "24/7 premium support"
-    ]
-  }
-];
+import { pricingPlans } from "@/data/pricingPlans";
 
 export const PricingSection = () => {
   return (
     <section className="py-24 px-6 md:px-10">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-6">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight mb-6">
             Simple, Transparent Pricing
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Choose the plan that works best for your communication needs.
+            Start with our free tier or choose a premium plan that fits your needs. No trials - use the free tier with basic features as long as you want.
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {plans.map((plan, index) => (
+          {pricingPlans.map((plan) => (
             <div 
-              key={index}
+              key={plan.id}
               className={`
                 rounded-2xl p-8 border border-border/70 transition-all duration-300
                 ${plan.popular 
