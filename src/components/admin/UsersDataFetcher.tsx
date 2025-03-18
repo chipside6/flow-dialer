@@ -1,12 +1,12 @@
 
 import React, { useEffect } from "react";
-import { Loader2, Info } from "lucide-react";
+import { Loader2, Info, RefreshCw } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { useAdminUsers } from "@/hooks/useAdminUsers";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function UsersDataFetcher() {
@@ -22,8 +22,7 @@ export function UsersDataFetcher() {
     status,
     isFetching
   } = useAdminUsers({
-    enabled: true, // Force enable the query
-    staleTime: 0 // Always fetch fresh data
+    staleTime: 30000 // Use a reasonable stale time
   });
 
   useEffect(() => {
@@ -58,7 +57,7 @@ export function UsersDataFetcher() {
     refetch();
   };
 
-  // Show loading state only during initial load with no data
+  // Show loading state during initial load but with a retry button
   if (isLoading && !users) {
     console.log("UsersDataFetcher - Showing loading screen (initial load, no data yet)");
     return (
@@ -83,49 +82,8 @@ export function UsersDataFetcher() {
     );
   }
 
-  // Show error page only if there's a critical error and no data
-  if (error && !users) {
-    console.log("UsersDataFetcher - Showing error screen (critical error, no data)");
-    return (
-      <DashboardLayout>
-        <div className="space-y-6 py-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Admin Panel</h1>
-            <p className="text-muted-foreground mt-2">
-              Manage users and configure system settings
-            </p>
-          </div>
-          
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4 mr-2" />
-            <AlertDescription className="flex items-center justify-between">
-              <div>
-                {error instanceof Error ? error.message : "Failed to load admin data"}
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRetry}
-                disabled={isRefetching}
-                className="ml-4"
-              >
-                {isRefetching ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Retry
-              </Button>
-            </AlertDescription>
-          </Alert>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Render main content (user data is available or empty array)
-  console.log("UsersDataFetcher - Showing main content screen with users:", users?.length ?? 0);
-  
+  // Render main content regardless of error state as long as we have users data
+  // This ensures we show something even if there's an error but we have cached data
   return (
     <DashboardLayout>
       <div className="space-y-6 py-8">

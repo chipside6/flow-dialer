@@ -96,8 +96,8 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         throw error;
       }
     },
-    refetchOnWindowFocus: false,
-    retry: 2,
+    refetchOnWindowFocus: true,
+    retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     enabled,
     staleTime, // Use the provided stale time

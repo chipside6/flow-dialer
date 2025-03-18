@@ -20,7 +20,7 @@ const AdminPanel = () => {
       isAdmin: profile?.is_admin
     });
 
-    // Set a timeout to force continue after 2 seconds
+    // Set a timeout to force continue after 1 second
     // This prevents getting stuck in authentication checking
     const timer = setTimeout(() => {
       if (!authChecked) {
@@ -28,7 +28,7 @@ const AdminPanel = () => {
         setForceTimeout(true);
         setAuthChecked(true);
       }
-    }, 2000);
+    }, 1000);
 
     // Only redirect if we're done loading and the user isn't authenticated
     if (!isLoading) {
@@ -59,7 +59,7 @@ const AdminPanel = () => {
     );
   }
 
-  // If auth check completed but no user, show nothing (redirect will happen)
+  // If auth check completed but no user, redirect
   if (!user) {
     console.log("AdminPanel - No user after auth check, redirecting");
     navigate("/login", { replace: true });
