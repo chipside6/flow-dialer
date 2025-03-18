@@ -38,6 +38,10 @@ body.mobile-menu-open {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 10;
 }
 
 .mobile-menu-content {
@@ -47,7 +51,7 @@ body.mobile-menu-open {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .mobile-menu-nav {
@@ -69,10 +73,13 @@ body.mobile-menu-open {
   font-size: 1.25rem;
   font-weight: 500;
   text-align: center;
-  padding: 0.5rem 0;
-  display: block;
+  padding: 0.75rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   transition: color 0.2s;
+  min-height: 44px; /* Better touch target */
 }
 
 .mobile-nav-link:hover {
@@ -95,5 +102,15 @@ body.mobile-menu-open {
   .mobile-menu-button {
     display: flex !important;
     z-index: 60;
+  }
+  
+  /* Ensure content has proper top padding to account for navbar */
+  .dashboard-content-wrapper {
+    padding-top: 70px;
+  }
+  
+  /* Fix content positioning */
+  [data-sidebar-inset] {
+    padding-top: 60px;
   }
 }

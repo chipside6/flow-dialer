@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardCards } from "./DashboardCards";
@@ -155,7 +154,7 @@ export const DashboardContent = () => {
   };
 
   return (
-    <div className="space-y-4 dashboard-content-wrapper w-full max-w-full overflow-x-hidden">
+    <div className="space-y-4 dashboard-content-wrapper w-full max-w-full overflow-x-hidden content-with-fixed-header">
       <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       {renderContent()}
     </div>

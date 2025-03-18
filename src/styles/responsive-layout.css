@@ -48,6 +48,16 @@
     max-width: 100%;
     justify-content: center;
   }
+  
+  /* Account for fixed header to prevent content being hidden */
+  .dashboard-content-wrapper {
+    padding-top: 70px;
+  }
+  
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
 }
 
 /* Dashboard specific mobile improvements */
@@ -116,5 +126,10 @@
   
   .tab-container::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Edge */
+  }
+  
+  /* Add proper spacing for fixed headers */
+  .content-with-fixed-header {
+    padding-top: 60px !important;
   }
 }
