@@ -1,0 +1,86 @@
+
+/* Mobile sidebar styling */
+
+@media (max-width: 768px) {
+  /* Make the sidebar appear cleaner on mobile */
+  [data-sidebar][data-mobile="true"] {
+    max-width: 100% !important;
+    width: 85% !important;
+  }
+  
+  /* Customize the mobile sidebar style */
+  [data-sidebar="sidebar"] {
+    background-color: white;
+    border-radius: 0 !important;
+  }
+  
+  /* Give sidebar items more spacing */
+  [data-sidebar="sidebar"] [data-sidebar="content"] {
+    padding-top: 8px;
+  }
+  
+  /* Improve the navbar design */
+  .navbar-container {
+    backdrop-filter: blur(8px);
+  }
+  
+  /* Fixed position for the navbar - hide on page content view */
+  .dashboard-header {
+    display: none;
+  }
+  
+  /* Fix SheetContent appearance on mobile */
+  [role="dialog"] {
+    background-color: white !important;
+    max-width: 100% !important;
+  }
+  
+  /* Improve drawer components */
+  [data-state="open"][data-side="left"] {
+    width: 85% !important;
+  }
+
+  /* Ensure page content is visible when navigating to a page */
+  [data-sidebar="sidebar"][data-mobile="true"] {
+    z-index: 100;
+    left: -100%;
+    transition: left 0.3s ease;
+  }
+
+  [data-sidebar="sidebar"][data-mobile="true"][data-state="open"] {
+    left: 0;
+  }
+
+  /* Ensure the main content area is properly positioned - crucial fix */
+  [data-sidebar-inset] {
+    padding-top: 16px !important;  /* Reduced from 72px to remove top nav space */
+    min-height: 100vh !important;
+  }
+}
+
+/* Add animation to mobile sidebar */
+@media (max-width: 768px) {
+  [data-state="open"] {
+    animation: slideIn 0.3s ease;
+  }
+  
+  [data-state="closed"] {
+    animation: slideOut 0.3s ease;
+  }
+
+  /* Prevent sidebar from showing behind main content */
+  .main-content {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
