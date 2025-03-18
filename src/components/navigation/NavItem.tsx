@@ -20,12 +20,14 @@ export function NavItem({ item, isActive }: NavItemProps) {
         className={`w-full justify-start rounded-lg py-6 text-left ${
           isActive 
             ? "bg-primary text-primary-foreground" 
-            : "hover:bg-accent text-foreground"
+            : "hover:bg-accent hover:text-primary text-foreground"
         }`}
         size="lg"
       >
-        {item.icon}
-        {item.name}
+        <div className="flex items-center gap-3 text-base">
+          {item.icon}
+          <span className="font-medium">{item.name}</span>
+        </div>
       </Button>
     </Link>
   );

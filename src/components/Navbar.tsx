@@ -54,7 +54,7 @@ export const Navbar = () => {
   if (isDashboard) {
     return (
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -63,14 +63,14 @@ export const Navbar = () => {
               className="md:hidden p-2"
               aria-label="Toggle sidebar"
             >
-              <Menu size={20} />
+              <Menu size={24} />
             </button>
             <Link 
               to="/" 
               className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"
             >
-              <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white">
-                <Phone size={16} />
+              <span className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+                <Phone size={18} />
               </span>
               Flow Dialer
             </Link>
@@ -98,8 +98,8 @@ export const Navbar = () => {
             to="/" 
             className="flex items-center gap-2 text-xl font-display font-bold tracking-tight z-50 relative"
           >
-            <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white">
-              <Phone size={16} />
+            <span className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+              <Phone size={18} />
             </span>
             Flow Dialer
           </Link>
