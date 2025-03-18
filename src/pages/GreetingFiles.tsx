@@ -54,13 +54,20 @@ const GreetingFiles = () => {
       
       if (fetchError) throw fetchError;
       
+      // Parse filename from URL to get the storage path
+      const urlPath = new URL(fileData.url).pathname;
+      const filePath = urlPath.split('/').pop();
+      const storagePath = `${user.id}/${filePath}`;
+      
       // Delete from storage
-      const filePath = `${user.id}/${fileData.filename}`;
       const { error: storageError } = await supabase.storage
         .from('greetings')
-        .remove([filePath]);
+        .remove([storagePath]);
       
-      if (storageError) throw storageError;
+      if (storageError) {
+        console.warn("Storage delete error (continuing anyway):", storageError);
+        // We still continue with the database deletion even if storage fails
+      }
       
       // Delete from database
       const { error: deleteError } = await supabase
@@ -160,11 +167,12 @@ const GreetingFiles = () => {
       // Set progress to 100% when upload completes
       setUploadProgress(100);
       
-      const result = await response.json();
-      
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to upload file');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload file');
       }
+      
+      const result = await response.json();
       
       // Refresh the greeting files list
       queryClient.invalidateQueries({ queryKey: ['greetingFiles'] });
@@ -178,6 +186,7 @@ const GreetingFiles = () => {
       setFile(null);
       
     } catch (error: any) {
+      console.error('Upload error:', error);
       toast({
         title: 'Upload failed',
         description: error.message,
@@ -188,6 +197,12 @@ const GreetingFiles = () => {
       setTimeout(() => {
         setIsUploading(false);
       }, 500);
+      
+      // Reset the file input element
+      const fileInput = document.getElementById('greeting-file') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
     }
   };
 

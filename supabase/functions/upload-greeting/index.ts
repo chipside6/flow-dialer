@@ -73,26 +73,14 @@ serve(async (req) => {
 
     console.log(`Processing file upload: ${file.name} (${file.size} bytes)`);
 
-    // Check if the greetings bucket exists, create it if not
-    const { data: buckets } = await supabase.storage.listBuckets();
-    const greetingsBucketExists = buckets?.some(bucket => bucket.name === 'greetings');
+    // Generate a unique filename to avoid collisions
+    const timestamp = new Date().getTime();
+    const uniqueFilename = `${timestamp}_${file.name}`;
+    const filePath = `${user.id}/${uniqueFilename}`;
     
-    if (!greetingsBucketExists) {
-      console.log("Creating greetings bucket");
-      const { error: createBucketError } = await supabase.storage.createBucket('greetings', {
-        public: true,
-      });
-      
-      if (createBucketError) {
-        console.error("Error creating bucket:", createBucketError);
-        throw createBucketError;
-      }
-    }
-
-    const filePath = `${user.id}/${file.name}`;
     console.log(`Uploading file to path: ${filePath}`);
 
-    // Upload the file
+    // Upload the file to storage
     const { data, error } = await supabase.storage
       .from('greetings')
       .upload(filePath, file, {
