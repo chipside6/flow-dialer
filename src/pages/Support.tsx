@@ -8,8 +8,8 @@ const Support = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main>
-        <section className="pt-32 pb-20 px-6 md:px-10">
+      <main className="pt-20 md:pt-32">
+        <section className="pb-16 md:pb-20 px-6 md:px-10">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-6">
               We're Here to Help

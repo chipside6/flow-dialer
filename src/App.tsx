@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -66,7 +67,6 @@ const App = () => (
                 path="/dashboard" 
                 element={
                   <ProtectedRoute>
-                    <Navbar />
                     <Dashboard />
                   </ProtectedRoute>
                 } 
@@ -75,7 +75,6 @@ const App = () => (
                 path="/campaign" 
                 element={
                   <ProtectedRoute>
-                    <Navbar />
                     <Campaign />
                   </ProtectedRoute>
                 } 
@@ -84,7 +83,6 @@ const App = () => (
                 path="/greetings" 
                 element={
                   <ProtectedRoute>
-                    <Navbar />
                     <GreetingFiles />
                   </ProtectedRoute>
                 } 
@@ -93,7 +91,6 @@ const App = () => (
                 path="/contacts" 
                 element={
                   <ProtectedRoute>
-                    <Navbar />
                     <ContactLists />
                   </ProtectedRoute>
                 } 
@@ -102,7 +99,6 @@ const App = () => (
                 path="/transfers" 
                 element={
                   <ProtectedRoute>
-                    <Navbar />
                     <TransferNumbers />
                   </ProtectedRoute>
                 } 
@@ -111,7 +107,6 @@ const App = () => (
                 path="/sip-providers" 
                 element={
                   <ProtectedRoute>
-                    <Navbar />
                     <SipProviders />
                   </ProtectedRoute>
                 } 
@@ -120,7 +115,6 @@ const App = () => (
                 path="/billing" 
                 element={
                   <ProtectedRoute>
-                    <Navbar />
                     <Billing />
                   </ProtectedRoute>
                 } 
@@ -129,7 +123,6 @@ const App = () => (
                 path="/admin" 
                 element={
                   <ProtectedRoute>
-                    <Navbar />
                     <AdminPanel />
                   </ProtectedRoute>
                 } 
