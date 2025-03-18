@@ -18,22 +18,31 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     if (!isLoading) {
       setIsCheckingAuth(false);
     }
-  }, [isLoading]);
+    
+    // Add debug logs
+    console.log('Protected Route - Auth State:', {
+      user: user ? 'Authenticated' : 'Not authenticated',
+      isLoading,
+      path: location.pathname
+    });
+  }, [isLoading, user, location.pathname]);
 
-  if (isCheckingAuth) {
+  if (isCheckingAuth || isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-lg">Loading...</span>
+        <span className="ml-2 text-lg">Loading authentication...</span>
       </div>
     );
   }
 
   if (!user) {
+    console.log('Redirecting to login - No user found');
     // Redirect to login if not authenticated
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  console.log('Rendering protected content');
   return <>{children}</>;
 };
 

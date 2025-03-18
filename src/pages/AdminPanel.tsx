@@ -28,52 +28,79 @@ const AdminPanel = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  console.log("AdminPanel - Rendering component");
+
   // Fetch all users with their profiles
   const { data: users, isLoading, error } = useQuery({
     queryKey: ["admin", "users"],
     queryFn: async () => {
-      // Get all users
-      const { data: users, error } = await supabase.auth.admin.listUsers();
+      console.log("AdminPanel - Fetching users data");
       
-      if (error) throw error;
-      
-      // Get all profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("*");
-      
-      if (profilesError) throw profilesError;
-      
-      // Join users with their profiles
-      const usersWithProfiles = users.users.map((user: User) => {
-        // Find the profile that matches the user ID
-        const profile = profiles.find((p: ProfileData) => p.id === user.id);
+      try {
+        // Get all users
+        const { data: users, error } = await supabase.auth.admin.listUsers();
         
-        // If profile exists, add user_id property for component compatibility
-        const formattedProfile = profile ? {
-          ...profile,
-          user_id: user.id
-        } : undefined;
+        if (error) {
+          console.error("AdminPanel - Error fetching users:", error);
+          throw error;
+        }
         
-        return { 
-          ...user, 
-          profile: formattedProfile 
-        };
-      });
-      
-      return usersWithProfiles;
+        console.log("AdminPanel - Users fetched:", users.users.length);
+        
+        // Get all profiles
+        const { data: profiles, error: profilesError } = await supabase
+          .from("profiles")
+          .select("*");
+        
+        if (profilesError) {
+          console.error("AdminPanel - Error fetching profiles:", profilesError);
+          throw profilesError;
+        }
+        
+        console.log("AdminPanel - Profiles fetched:", profiles?.length || 0);
+        
+        // Join users with their profiles
+        const usersWithProfiles = users.users.map((user: User) => {
+          // Find the profile that matches the user ID
+          const profile = profiles.find((p: ProfileData) => p.id === user.id);
+          
+          // If profile exists, add user_id property for component compatibility
+          const formattedProfile = profile ? {
+            ...profile,
+            user_id: user.id
+          } : undefined;
+          
+          return { 
+            ...user, 
+            profile: formattedProfile 
+          };
+        });
+        
+        console.log("AdminPanel - Users with profiles processed:", usersWithProfiles.length);
+        return usersWithProfiles;
+      } catch (err) {
+        console.error("AdminPanel - Error in queryFn:", err);
+        throw err;
+      }
     },
   });
 
   // Toggle affiliate status mutation
   const toggleAffiliateMutation = useMutation({
     mutationFn: async ({ userId, setAffiliate }: { userId: string; setAffiliate: boolean }) => {
+      console.log("AdminPanel - Toggling affiliate status:", { userId, setAffiliate });
+      
       const { data, error } = await supabase
         .from("profiles")
         .update({ is_affiliate: setAffiliate })
         .eq("id", userId);
       
-      if (error) throw error;
+      if (error) {
+        console.error("AdminPanel - Error updating affiliate status:", error);
+        throw error;
+      }
+      
+      console.log("AdminPanel - Affiliate status updated successfully");
       return data;
     },
     onSuccess: () => {
@@ -84,6 +111,7 @@ const AdminPanel = () => {
       });
     },
     onError: (error) => {
+      console.error("AdminPanel - Mutation error:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -93,6 +121,7 @@ const AdminPanel = () => {
   });
 
   const handleToggleAffiliate = (userId: string, isCurrentlyAffiliate: boolean) => {
+    console.log("AdminPanel - Handle toggle affiliate called:", { userId, isCurrentlyAffiliate });
     toggleAffiliateMutation.mutate({
       userId,
       setAffiliate: !isCurrentlyAffiliate,
@@ -102,6 +131,8 @@ const AdminPanel = () => {
   // Calculate stats
   const userCount = users?.length ?? 0;
   const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
+
+  console.log("AdminPanel - Rendering with stats:", { userCount, affiliateCount });
 
   return (
     <DashboardLayout>
