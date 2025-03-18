@@ -24,6 +24,7 @@ interface UserProfile {
   user_id: string; // This is added for component compatibility
 }
 
+// Simplified interface that matches what's being provided by AdminPanel
 interface AdminPanelUser {
   id: string;
   email?: string | null;
