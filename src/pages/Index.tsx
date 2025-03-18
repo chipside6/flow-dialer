@@ -42,8 +42,8 @@ const Index = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl blur-3xl opacity-30"></div>
               <div className="relative bg-card p-5 rounded-2xl shadow-lg border border-border/50">
                 <img 
-                  src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80" 
-                  alt="Person using communication system"
+                  src="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=800&q=80" 
+                  alt="Call center representative using autodialer system"
                   className="rounded-xl w-full h-auto shadow-md"
                 />
                 <div className="absolute -bottom-3 -right-3 bg-primary/10 rounded-full p-4">
