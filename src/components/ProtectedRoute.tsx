@@ -14,33 +14,32 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
   useEffect(() => {
-    // Wait for auth state to settle
-    if (!isLoading) {
-      setIsCheckingAuth(false);
-    }
-    
-    // Add debug logs
-    console.log('Protected Route - Auth State:', {
+    console.log('Protected Route - Initial Auth State:', {
       user: user ? 'Authenticated' : 'Not authenticated',
       isLoading,
-      path: location.pathname,
-      isCheckingAuth
+      path: location.pathname
     });
-  }, [isLoading, user, location.pathname, isCheckingAuth]);
-
-  // Clear any potential UI overlaps by forcing a small delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isCheckingAuth && !isLoading) {
-        console.log('Forced auth check completion after timeout');
-        setIsCheckingAuth(false);
-      }
-    }, 1000); // 1 second timeout as a fallback
     
-    return () => clearTimeout(timer);
-  }, [isCheckingAuth, isLoading]);
+    // Set a short timeout to ensure we don't get stuck in loading
+    const timer = setTimeout(() => {
+      setIsCheckingAuth(false);
+      console.log('Protected Route - Forced auth check completion');
+    }, 2000); // 2 second max timeout
+    
+    // If auth is already determined, clear timeout and set checking to false
+    if (!isLoading) {
+      clearTimeout(timer);
+      setIsCheckingAuth(false);
+      console.log('Protected Route - Auth check completed naturally');
+    }
+    
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [isLoading, user, location.pathname]);
 
-  if (isCheckingAuth || isLoading) {
+  // Show loading state only during the initial check
+  if (isLoading && isCheckingAuth) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
@@ -49,13 +48,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
+  // If no user after loading completes, redirect to login
   if (!user) {
-    console.log('Redirecting to login - No user found');
-    // Redirect to login if not authenticated
+    console.log('Protected Route - Redirecting to login - No user found');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  console.log('Rendering protected content');
+  // User is authenticated, render the protected content
+  console.log('Protected Route - User authenticated, rendering content');
   return <>{children}</>;
 };
 

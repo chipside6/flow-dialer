@@ -28,16 +28,9 @@ const AdminPanel = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  console.log("AdminPanel - Rendering component");
+  console.log("AdminPanel - Component mounting");
 
-  useEffect(() => {
-    console.log("AdminPanel - Component mounted");
-    return () => {
-      console.log("AdminPanel - Component unmounted");
-    };
-  }, []);
-
-  // Fetch all users with their profiles - fixed to use the ListUsersResponse method
+  // Fetch all users with their profiles
   const { data: users, isLoading, error } = useQuery({
     queryKey: ["admin", "users"],
     queryFn: async () => {
@@ -45,14 +38,19 @@ const AdminPanel = () => {
       
       try {
         // Get all users using the auth API
-        const { data, error } = await supabase.auth.admin.listUsers();
+        const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
         
-        if (error) {
-          console.error("AdminPanel - Error fetching users:", error);
-          throw error;
+        if (authError) {
+          console.error("AdminPanel - Error fetching users:", authError);
+          throw authError;
         }
         
-        const userList = data?.users || [];
+        if (!authData || !authData.users) {
+          console.log("AdminPanel - No users returned from API");
+          return [];
+        }
+        
+        const userList = authData.users;
         console.log("AdminPanel - Users fetched:", userList.length);
         
         // Get all profiles
@@ -91,6 +89,8 @@ const AdminPanel = () => {
         throw err;
       }
     },
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   // Toggle affiliate status mutation
@@ -98,7 +98,7 @@ const AdminPanel = () => {
     mutationFn: async ({ userId, setAffiliate }: { userId: string; setAffiliate: boolean }) => {
       console.log("AdminPanel - Toggling affiliate status:", { userId, setAffiliate });
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("profiles")
         .update({ is_affiliate: setAffiliate })
         .eq("id", userId);
@@ -109,7 +109,7 @@ const AdminPanel = () => {
       }
       
       console.log("AdminPanel - Affiliate status updated successfully");
-      return data;
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
