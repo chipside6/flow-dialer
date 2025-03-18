@@ -11,7 +11,6 @@ export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { toggleSidebar } = useSidebar();
   
   const isDashboard = location.pathname.includes('/dashboard') || 
                       location.pathname.includes('/campaign') || 
@@ -20,6 +19,10 @@ export const Navbar = () => {
                       location.pathname.includes('/transfers') ||
                       location.pathname.includes('/sip-providers') ||
                       location.pathname.includes('/admin');
+
+  // Only use the sidebar hook when in dashboard mode
+  const sidebar = isDashboard ? useSidebar() : { toggleSidebar: () => {} };
+  const { toggleSidebar } = sidebar;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -157,3 +160,4 @@ const NavLinks = ({ mobile = false, onClick }: { mobile?: boolean; onClick?: () 
     </>
   );
 };
+

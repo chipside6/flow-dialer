@@ -60,7 +60,7 @@ export function UsersDataFetcher() {
   // MODIFIED LOADING CONDITION: Don't get stuck in loading state
   // Always show content if we have passed the initial loading phase
   // even if the data is empty (we'll show "No users found" in that case)
-  if (isLoading && !users && status !== "success") {
+  if (isLoading && !users) {
     console.log("UsersDataFetcher - Showing loading screen (initial load, no data yet)");
     return (
       <DashboardLayout>
@@ -85,7 +85,7 @@ export function UsersDataFetcher() {
   }
 
   // This ensures we show an error page only if we have a critical error AND no data
-  if (error && !users && status === "error") {
+  if (error && !users) {
     console.log("UsersDataFetcher - Showing error screen (critical error, no data)");
     return (
       <DashboardLayout>
