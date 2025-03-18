@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -74,7 +75,7 @@ export const Navbar = () => {
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 md:px-10 ${
         isScrolled || isMobileMenuOpen
-          ? 'py-3 bg-white/95 backdrop-blur-md shadow-sm' 
+          ? 'py-3 bg-white/95 backdrop-blur-md shadow-sm dark:bg-background/95' 
           : 'py-5 bg-transparent'
       }`}
     >
@@ -111,10 +112,10 @@ export const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile menu - fixed position and higher z-index */}
+      {/* Mobile menu - fixed position with improved styling */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-0 bg-white z-40 overflow-y-auto">
-          <div className="pt-20 pb-8 px-8">
+        <div className="md:hidden fixed inset-0 top-0 bg-white dark:bg-background z-40 overflow-y-auto pt-16">
+          <div className="pt-4 pb-8 px-8">
             <nav className="flex flex-col gap-6 mb-8">
               <NavLinks mobile onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
@@ -139,7 +140,7 @@ export const Navbar = () => {
 
 const NavLinks = ({ mobile = false, onClick }: { mobile?: boolean; onClick?: () => void }) => {
   const linkClass = mobile 
-    ? "text-2xl font-medium py-4 block" 
+    ? "text-2xl font-medium py-4 block text-center" 
     : "text-sm font-medium hover:text-primary transition-colors";
 
   return (

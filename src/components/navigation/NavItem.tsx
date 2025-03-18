@@ -17,7 +17,7 @@ export function NavItem({ item, isActive }: NavItemProps) {
     <Link to={item.path} className="block w-full">
       <Button
         variant={isActive ? "default" : "ghost"}
-        className={`w-full justify-start rounded-lg py-6 ${
+        className={`w-full justify-start rounded-lg py-6 text-left ${
           isActive 
             ? "bg-primary text-primary-foreground" 
             : "hover:bg-accent text-foreground"

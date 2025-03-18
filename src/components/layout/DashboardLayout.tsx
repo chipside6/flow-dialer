@@ -71,7 +71,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </SidebarContent>
       </Sidebar>
-      <SidebarInset className="p-6 bg-background/50 dark:bg-background/10 min-h-screen">
+      <SidebarInset className="p-6 bg-background/50 dark:bg-background/10 min-h-screen pt-16 md:pt-6">
         <div className="max-w-6xl mx-auto w-full">
           {children}
         </div>
