@@ -5,7 +5,14 @@ import { DashboardNav } from "@/components/DashboardNav";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
 import { CampaignCreationWizard } from "@/components/CampaignCreationWizard";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Phone } from "lucide-react";
+import { 
+  SidebarProvider, 
+  Sidebar, 
+  SidebarContent, 
+  SidebarHeader,
+  SidebarInset
+} from "@/components/ui/sidebar";
 
 const Campaign = () => {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
@@ -19,13 +26,23 @@ const Campaign = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="flex-1">
-        <div className="container mx-auto py-8">
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="md:w-1/4">
+      <SidebarProvider defaultOpen>
+        <div className="flex flex-1 w-full pt-16">
+          <Sidebar collapsible="offcanvas">
+            <SidebarHeader>
+              <div className="flex items-center p-2">
+                <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-2">
+                  <Phone size={16} />
+                </span>
+                <span className="font-semibold text-lg">Flow Dialer</span>
+              </div>
+            </SidebarHeader>
+            <SidebarContent>
               <DashboardNav />
-            </div>
-            <div className="md:w-3/4">
+            </SidebarContent>
+          </Sidebar>
+          <SidebarInset className="p-6">
+            <div className="max-w-6xl mx-auto w-full">
               {showCreateWizard ? (
                 <CampaignCreationWizard 
                   onComplete={handleCreateCampaign}
@@ -47,9 +64,9 @@ const Campaign = () => {
                 </>
               )}
             </div>
-          </div>
+          </SidebarInset>
         </div>
-      </main>
+      </SidebarProvider>
     </div>
   );
 };
