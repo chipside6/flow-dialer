@@ -23,19 +23,17 @@ const ContactLists = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Contact Lists</h1>
-        </div>
-        
-        <CreateContactListForm onListCreated={handleListCreated} />
-        
-        {lists.length === 0 ? (
-          <EmptyContactListsState />
-        ) : (
-          <ContactListsDisplay lists={lists} />
-        )}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Contact Lists</h1>
       </div>
+      
+      <CreateContactListForm onListCreated={handleListCreated} />
+      
+      {lists.length === 0 ? (
+        <EmptyContactListsState />
+      ) : (
+        <ContactListsDisplay lists={lists} />
+      )}
     </DashboardLayout>
   );
 };

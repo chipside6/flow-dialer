@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const EmptyContactListsState = () => {
   return (
-    <Card className="mt-6 w-full overflow-hidden">
+    <Card className="mt-6">
       <CardHeader>
         <CardTitle className="text-xl text-center">No Contact Lists Yet</CardTitle>
       </CardHeader>
