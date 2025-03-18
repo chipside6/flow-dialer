@@ -20,18 +20,15 @@ export const DashboardContent = () => {
       );
     }
 
-    if (!campaigns || campaigns.length === 0) {
-      return <EmptyCampaignState />;
-    }
-
+    // Always show content, even when campaigns is empty
     switch (activeTab) {
       case 'dialer':
-        return <BackgroundDialer campaignId={campaigns[0]?.id || "demo"} />;
+        return <BackgroundDialer campaignId={campaigns?.[0]?.id || "demo"} />;
       case 'campaigns':
-        return <CampaignDashboard initialCampaigns={campaigns} />;
+        return <CampaignDashboard initialCampaigns={campaigns || []} />;
       case 'overview':
       default:
-        return <DashboardCards />;
+        return campaigns && campaigns.length > 0 ? <DashboardCards /> : <EmptyCampaignState />;
     }
   };
 

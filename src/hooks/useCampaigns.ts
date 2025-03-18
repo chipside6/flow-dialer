@@ -29,6 +29,7 @@ export const useCampaigns = () => {
         
         // Generate demo data if no user is logged in
         if (!user) {
+          console.log("No user, using demo data");
           const demoData: Campaign[] = [
             {
               id: "demo-123",
@@ -43,9 +44,11 @@ export const useCampaigns = () => {
             }
           ];
           setCampaigns(demoData);
+          setIsLoading(false);
           return;
         }
 
+        console.log("Fetching campaigns for user:", user.id);
         const { data, error } = await supabase
           .from('campaigns')
           .select('*')
@@ -66,6 +69,7 @@ export const useCampaigns = () => {
           user_id: campaign.user_id
         }));
         
+        console.log("Campaigns fetched:", transformedData);
         setCampaigns(transformedData);
       } catch (error: any) {
         console.error('Error fetching campaigns:', error.message);
