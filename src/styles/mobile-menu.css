@@ -74,8 +74,14 @@ body.mobile-menu-open {
     display: block;
   }
   
-  /* Hide the navbar completely on protected routes */
+  /* Hide the navbar completely on all protected routes */
   .navbar-dashboard {
     display: none !important;
+  }
+  
+  /* Ensure menu button is always visible */
+  .mobile-menu-button {
+    display: flex !important;
+    z-index: 60;
   }
 }
