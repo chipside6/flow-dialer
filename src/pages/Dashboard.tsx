@@ -1,11 +1,12 @@
 
-import React from "react";
-import { Navbar } from "@/components/Navbar";
+import React, { Suspense } from "react";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
+/**
+ * Fallback component shown while dashboard content is loading
+ */
 const DashboardFallback = () => (
   <div className="w-full h-96 flex items-center justify-center">
     <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
@@ -13,18 +14,16 @@ const DashboardFallback = () => (
   </div>
 );
 
+/**
+ * Dashboard page that uses the DashboardLayout wrapper
+ */
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-      <div className="flex flex-1 w-full max-w-full overflow-hidden">
-        <DashboardLayout>
-          <Suspense fallback={<DashboardFallback />}>
-            <DashboardContent />
-          </Suspense>
-        </DashboardLayout>
-      </div>
-    </div>
+    <DashboardLayout>
+      <Suspense fallback={<DashboardFallback />}>
+        <DashboardContent />
+      </Suspense>
+    </DashboardLayout>
   );
 };
 
