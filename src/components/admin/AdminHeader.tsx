@@ -1,6 +1,7 @@
 
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { CreateAdminButton } from "./CreateAdminButton";
 
 interface AdminHeaderProps {
   userCount: number;
@@ -9,29 +10,34 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ userCount, affiliateCount }: AdminHeaderProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{userCount}</div>
-          <p className="text-xs text-muted-foreground">
-            Registered accounts in the system
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Affiliate Users</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{affiliateCount}</div>
-          <p className="text-xs text-muted-foreground">
-            Users with affiliate status
-          </p>
-        </CardContent>
-      </Card>
+    <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+            </div>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{userCount}</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <p className="text-sm font-medium text-muted-foreground">Affiliate Users</p>
+            </div>
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{affiliateCount}</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6 flex items-center justify-center">
+            <CreateAdminButton />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

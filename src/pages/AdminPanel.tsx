@@ -37,23 +37,7 @@ const AdminPanel = () => {
       console.log("AdminPanel - Fetching users data");
       
       try {
-        // Get all users using the auth API
-        const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-        
-        if (authError) {
-          console.error("AdminPanel - Error fetching users:", authError);
-          throw authError;
-        }
-        
-        if (!authData || !authData.users) {
-          console.log("AdminPanel - No users returned from API");
-          return [];
-        }
-        
-        const userList = authData.users;
-        console.log("AdminPanel - Users fetched:", userList.length);
-        
-        // Get all profiles
+        // Get profiles first since this doesn't require admin privileges
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select("*");
@@ -65,25 +49,64 @@ const AdminPanel = () => {
         
         console.log("AdminPanel - Profiles fetched:", profiles?.length || 0);
         
-        // Join users with their profiles
-        const usersWithProfiles = userList.map((user: User) => {
-          // Find the profile that matches the user ID
-          const profile = profiles?.find((p: ProfileData) => p.id === user.id);
+        // Try to get users via the admin API
+        try {
+          const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
-          // If profile exists, add user_id property for component compatibility
-          const formattedProfile = profile ? {
-            ...profile,
-            user_id: user.id
-          } : undefined;
+          if (authError) {
+            console.error("AdminPanel - Error fetching users via admin API:", authError);
+            throw authError;
+          }
           
-          return { 
-            ...user, 
-            profile: formattedProfile 
-          };
-        });
-        
-        console.log("AdminPanel - Users with profiles processed:", usersWithProfiles.length);
-        return usersWithProfiles;
+          if (!authData || !authData.users) {
+            console.log("AdminPanel - No users returned from admin API");
+            // Fallback to using just profiles if admin API fails
+            return profiles.map((profile: ProfileData) => ({
+              id: profile.id,
+              email: "Unknown",
+              created_at: profile.created_at,
+              profile: {
+                ...profile,
+                user_id: profile.id
+              }
+            }));
+          }
+          
+          const userList = authData.users;
+          console.log("AdminPanel - Users fetched from admin API:", userList.length);
+          
+          // Join users with their profiles
+          const usersWithProfiles = userList.map((user: User) => {
+            // Find the profile that matches the user ID
+            const profile = profiles?.find((p: ProfileData) => p.id === user.id);
+            
+            // If profile exists, add user_id property for component compatibility
+            const formattedProfile = profile ? {
+              ...profile,
+              user_id: user.id
+            } : undefined;
+            
+            return { 
+              ...user, 
+              profile: formattedProfile 
+            };
+          });
+          
+          console.log("AdminPanel - Users with profiles processed:", usersWithProfiles.length);
+          return usersWithProfiles;
+        } catch (adminError) {
+          console.error("AdminPanel - Admin API failed, using profiles only:", adminError);
+          // Fallback to using just profiles if admin API fails
+          return profiles.map((profile: ProfileData) => ({
+            id: profile.id,
+            email: "Unknown",
+            created_at: profile.created_at,
+            profile: {
+              ...profile,
+              user_id: profile.id
+            }
+          }));
+        }
       } catch (err) {
         console.error("AdminPanel - Error in queryFn:", err);
         throw err;
