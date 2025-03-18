@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -141,20 +140,40 @@ export const Navbar = () => {
         </div>
       </header>
 
-      {/* Mobile menu - moved outside header for better positioning */}
+      {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="mobile-menu-container">
+          <div className="mobile-menu-header flex justify-between items-center w-full px-6 py-4 absolute top-0">
+            <Link 
+              to="/" 
+              className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+                <Phone size={18} />
+              </span>
+              Flow Dialer
+            </Link>
+            <button 
+              className="p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted/20"
+              onClick={() => setIsMobileMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          
           <div className="mobile-menu-content">
             <nav className="mobile-menu-nav">
               <NavLinks mobile onClick={() => setIsMobileMenuOpen(false)} />
             </nav>
             <div className="mobile-menu-buttons">
-              <Button variant="outline" className="w-full rounded-full py-6" asChild>
+              <Button variant="outline" className="w-full rounded-lg py-2" asChild>
                 <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                   Log In
                 </Link>
               </Button>
-              <Button className="w-full rounded-full py-6" asChild>
+              <Button className="w-full rounded-lg py-2 bg-violet-500 hover:bg-violet-600" asChild>
                 <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
                   Get Started
                 </Link>

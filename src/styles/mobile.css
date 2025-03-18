@@ -8,6 +8,16 @@
 
 /* Fix profile page layout specifically */
 @media (max-width: 768px) {
+  /* Button styles for mobile menu */
+  .mobile-menu-buttons .button {
+    border-radius: 8px;
+  }
+  
+  /* Logo and header styles for mobile */
+  .mobile-menu-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
   /* Improve profile form display */
   .profile-form-container {
     padding: 0 8px;
@@ -32,5 +42,13 @@
     width: 100%;
     max-width: 100%;
     overflow: hidden;
+  }
+  
+  /* Fix mobile menu button appearance */
+  .mobile-menu-container button[aria-label="Close menu"] {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 50;
   }
 }
