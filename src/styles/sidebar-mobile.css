@@ -15,8 +15,6 @@
     background-color: white;
     border-radius: 0 !important;
     overflow-x: hidden !important;
-    visibility: visible !important;
-    display: flex !important;
   }
   
   /* Give sidebar items more spacing */
@@ -40,16 +38,12 @@
     background-color: white !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
-    visibility: visible !important;
-    display: flex !important;
   }
   
   /* Improve drawer components */
   [data-state="open"][data-side="left"] {
     width: 85% !important;
     overflow-x: hidden !important;
-    visibility: visible !important;
-    display: flex !important;
   }
 
   /* Ensure page content is visible when navigating to a page */
@@ -58,15 +52,11 @@
     left: -100%;
     transition: left 0.3s ease;
     overflow-x: hidden !important;
-    visibility: visible !important;
-    display: flex !important;
   }
 
   [data-sidebar="sidebar"][data-mobile="true"][data-state="open"] {
     left: 0;
     overflow-x: hidden !important;
-    visibility: visible !important;
-    display: flex !important;
   }
 
   /* Ensure the main content area is properly positioned - crucial fix */
