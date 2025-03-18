@@ -38,12 +38,6 @@ const queryClient = new QueryClient({
       }
     },
   },
-  // Enable detailed logging in development
-  logger: {
-    log: console.log,
-    warn: console.warn,
-    error: process.env.NODE_ENV === "development" ? console.error : () => {},
-  },
 });
 
 // Remove the App.css import which could be causing style conflicts
