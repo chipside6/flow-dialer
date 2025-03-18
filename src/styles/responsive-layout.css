@@ -58,6 +58,23 @@
     overflow-x: hidden;
     width: 100%;
   }
+
+  /* Fix admin panel card layout on small screens */
+  .grid.md\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+
+  /* Ensure refresh button doesn't cause overflow */
+  .flex.justify-between.items-center {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* Make admin header text smaller on mobile */
+  h1.text-3xl {
+    font-size: 1.75rem;
+    line-height: 2rem;
+  }
 }
 
 /* Dashboard specific mobile improvements */
@@ -131,5 +148,18 @@
   /* Add proper spacing for fixed headers */
   .content-with-fixed-header {
     padding-top: 60px !important;
+  }
+
+  /* Fix admin panel cards layout */
+  .space-y-4 {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Ensure the buttons in admin header fit */
+  .rounded-md.border {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
