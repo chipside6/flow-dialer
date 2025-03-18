@@ -1,24 +1,25 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCampaignSimulation } from "@/hooks/useCampaignSimulation";
+import { Campaign } from "@/hooks/useCampaigns";
 import { CampaignTable } from "@/components/campaigns/CampaignTable";
 import { CampaignDetails } from "@/components/campaigns/CampaignDetails";
 import { CampaignStats } from "@/components/campaigns/CampaignStats";
-import { Campaign } from "@/hooks/useCampaigns";
+import { CampaignProvider, useCampaignContext } from "@/contexts/campaign/CampaignContext";
 
 interface CampaignDashboardProps {
   initialCampaigns?: Campaign[];
 }
 
-const CampaignDashboard = ({ initialCampaigns = [] }: CampaignDashboardProps) => {
+// Inner component that uses the context
+const CampaignDashboardContent = () => {
   const {
     campaigns,
     selectedCampaign,
     setSelectedCampaign,
     startCampaign,
     pauseCampaign
-  } = useCampaignSimulation(initialCampaigns);
+  } = useCampaignContext();
 
   return (
     <div className="space-y-6">
@@ -47,6 +48,15 @@ const CampaignDashboard = ({ initialCampaigns = [] }: CampaignDashboardProps) =>
         </div>
       )}
     </div>
+  );
+};
+
+// Wrapper component that provides the context
+const CampaignDashboard = ({ initialCampaigns = [] }: CampaignDashboardProps) => {
+  return (
+    <CampaignProvider initialCampaigns={initialCampaigns}>
+      <CampaignDashboardContent />
+    </CampaignProvider>
   );
 };
 

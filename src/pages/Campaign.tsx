@@ -13,12 +13,13 @@ import {
   SidebarHeader,
   SidebarInset
 } from "@/components/ui/sidebar";
+import { Campaign } from "@/hooks/useCampaigns";
 
-const Campaign = () => {
+const CampaignPage = () => {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
-  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   
-  const handleCreateCampaign = (newCampaign: any) => {
+  const handleCreateCampaign = (newCampaign: Campaign) => {
     setCampaigns([...campaigns, newCampaign]);
     setShowCreateWizard(false);
   };
@@ -71,4 +72,4 @@ const Campaign = () => {
   );
 };
 
-export default Campaign;
+export default CampaignPage;
