@@ -6,13 +6,13 @@ import CampaignDashboard from "@/components/CampaignDashboard";
 import { CampaignCreationWizard } from "@/components/CampaignCreationWizard";
 import { PlusCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Campaign } from "@/hooks/useCampaigns";
+import { CampaignData } from "@/components/campaign-wizard/types";
 
 const CampaignPage = () => {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
   
-  const handleCreateCampaign = (newCampaign: Campaign) => {
+  const handleCreateCampaign = (newCampaign: CampaignData) => {
     setCampaigns([...campaigns, newCampaign]);
     setShowCreateWizard(false);
   };
