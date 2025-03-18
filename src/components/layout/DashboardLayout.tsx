@@ -39,10 +39,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <span className="font-semibold text-lg">Flow Dialer</span>
           </div>
         </SidebarHeader>
-        <SidebarContent className="px-3 py-4">
+        <SidebarContent className="px-4 py-4">
           <div className="bg-card rounded-lg border shadow-sm p-4 mb-4">
-            <h2 className="font-semibold mb-4 text-lg">Navigation</h2>
-            <nav className="space-y-3">
+            <h2 className="font-semibold mb-6 text-lg">Navigation</h2>
+            <nav className="space-y-2">
               {navItems.map((item) => (
                 <NavItem 
                   key={item.path} 
@@ -66,7 +66,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             
             {/* Logout button */}
             <div className="mt-6 pt-4 border-t border-border">
-              <LogoutButton variant="ghost" className="w-full justify-start py-6 text-left" />
+              <LogoutButton variant="ghost" className="w-full justify-start py-3 text-left" />
             </div>
           </div>
         </SidebarContent>
