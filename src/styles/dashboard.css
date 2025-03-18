@@ -1,53 +1,8 @@
 
 /* Dashboard specific styles */
 
-/* Ensure content doesn't overlap with fixed elements */
-main {
-  padding-top: 4rem;
-}
+/* Import the refactored CSS files */
+@import './dashboard-layout.css';
+@import './dashboard-sidebar.css';
+@import './dashboard-z-index.css';
 
-/* Add some spacing to improve readability */
-.space-y-section {
-  margin-top: 3rem;
-  margin-bottom: 3rem;
-}
-
-/* Fix z-index issues */
-.z-header {
-  z-index: 50;
-}
-
-.z-content {
-  z-index: 10;
-}
-
-.z-overlay {
-  z-index: 40;
-}
-
-/* Sidebar animation fixes */
-[data-sidebar="sidebar"] {
-  transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease !important;
-}
-
-/* Custom sidebar styling in dark mode */
-.dark [data-sidebar="sidebar"] {
-  background-color: hsl(var(--card));
-  border-color: hsl(var(--border));
-}
-
-/* Improve mobile drawer appearance */
-[data-sidebar][data-mobile="true"] {
-  padding: 0 !important;
-}
-
-/* Fix spacing for navigation items */
-[data-sidebar="menu-button"],
-.sidebar-nav-button {
-  padding-right: 1rem !important;
-}
-
-/* Ensure long text in nav items doesn't touch the edge */
-[data-sidebar="content"] .truncate {
-  max-width: calc(100% - 8px);
-}

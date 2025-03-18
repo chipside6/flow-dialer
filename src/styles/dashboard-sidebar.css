@@ -1,0 +1,30 @@
+
+/* Dashboard sidebar specific styles */
+
+/* Sidebar animation fixes */
+[data-sidebar="sidebar"] {
+  transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease !important;
+}
+
+/* Custom sidebar styling in dark mode */
+.dark [data-sidebar="sidebar"] {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+/* Improve mobile drawer appearance */
+[data-sidebar][data-mobile="true"] {
+  padding: 0 !important;
+}
+
+/* Fix spacing for navigation items */
+[data-sidebar="menu-button"],
+.sidebar-nav-button {
+  padding-right: 1rem !important;
+}
+
+/* Ensure long text in nav items doesn't touch the edge */
+[data-sidebar="content"] .truncate {
+  max-width: calc(100% - 8px);
+}
+

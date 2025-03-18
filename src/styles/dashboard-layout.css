@@ -1,0 +1,14 @@
+
+/* Dashboard layout specific styles */
+
+/* Ensure content doesn't overlap with fixed elements */
+main {
+  padding-top: 4rem;
+}
+
+/* Add some spacing to improve readability */
+.space-y-section {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+

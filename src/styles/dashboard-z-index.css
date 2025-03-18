@@ -1,0 +1,16 @@
+
+/* Dashboard z-index management */
+
+/* Fix z-index issues */
+.z-header {
+  z-index: 50;
+}
+
+.z-content {
+  z-index: 10;
+}
+
+.z-overlay {
+  z-index: 40;
+}
+
