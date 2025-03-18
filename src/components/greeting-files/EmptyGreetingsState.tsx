@@ -23,9 +23,10 @@ export const EmptyGreetingsState = ({ onUploadClick }: EmptyGreetingsStateProps)
         </CardDescription>
         <Button 
           onClick={onUploadClick}
-          className={isMobile ? "w-full" : ""}
+          className={`relative ${isMobile ? "w-full" : ""} overflow-hidden group`}
         >
-          Upload your first greeting
+          <span className="relative z-10">Upload your first greeting</span>
+          <span className="absolute inset-0 bg-primary group-hover:bg-primary/90 transition-colors"></span>
         </Button>
       </CardContent>
     </Card>
