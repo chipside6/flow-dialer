@@ -6,6 +6,8 @@ import { GreetingFilesList } from '@/components/greeting-files/GreetingFilesList
 import { UploadGreetingForm } from '@/components/greeting-files/UploadGreetingForm';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { Navbar } from '@/components/Navbar';
 
 const GreetingFiles = () => {
   const { user, isLoading: authLoading, initialized } = useAuth();
@@ -74,8 +76,8 @@ const GreetingFiles = () => {
     );
   }
 
-  return (
-    <div className="container mx-auto py-6">
+  const content = (
+    <div className="container py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Greeting Audio Files</h1>
       </div>
@@ -98,6 +100,15 @@ const GreetingFiles = () => {
         </TabsContent>
       </Tabs>
     </div>
+  );
+
+  return (
+    <>
+      <Navbar />
+      <DashboardLayout>
+        {content}
+      </DashboardLayout>
+    </>
   );
 };
 

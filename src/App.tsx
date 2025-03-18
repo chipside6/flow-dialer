@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Navbar } from "@/components/Navbar";
 import Index from "./pages/Index";
 import Features from "./pages/Features";
 import Pricing from "./pages/Pricing";
@@ -49,9 +50,9 @@ const App = () => (
     <TooltipProvider>
       <SidebarProvider defaultOpen>
         <AuthProvider>
-          <Toaster />
-          <Sonner />
           <BrowserRouter>
+            <Toaster />
+            <Sonner />
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
@@ -66,6 +67,7 @@ const App = () => (
                 path="/dashboard" 
                 element={
                   <ProtectedRoute>
+                    <Navbar />
                     <Dashboard />
                   </ProtectedRoute>
                 } 
@@ -74,6 +76,7 @@ const App = () => (
                 path="/campaign" 
                 element={
                   <ProtectedRoute>
+                    <Navbar />
                     <Campaign />
                   </ProtectedRoute>
                 } 
@@ -90,6 +93,7 @@ const App = () => (
                 path="/contacts" 
                 element={
                   <ProtectedRoute>
+                    <Navbar />
                     <ContactLists />
                   </ProtectedRoute>
                 } 
@@ -98,6 +102,7 @@ const App = () => (
                 path="/transfers" 
                 element={
                   <ProtectedRoute>
+                    <Navbar />
                     <TransferNumbers />
                   </ProtectedRoute>
                 } 
@@ -106,6 +111,7 @@ const App = () => (
                 path="/sip-providers" 
                 element={
                   <ProtectedRoute>
+                    <Navbar />
                     <SipProviders />
                   </ProtectedRoute>
                 } 
@@ -114,6 +120,7 @@ const App = () => (
                 path="/billing" 
                 element={
                   <ProtectedRoute>
+                    <Navbar />
                     <Billing />
                   </ProtectedRoute>
                 } 
@@ -122,6 +129,7 @@ const App = () => (
                 path="/admin" 
                 element={
                   <ProtectedRoute>
+                    <Navbar />
                     <AdminPanel />
                   </ProtectedRoute>
                 } 
