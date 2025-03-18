@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileAudio, Loader2, Pause, Play, Trash2 } from 'lucide-react';
 import { AudioWaveform } from './AudioWaveform';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AudioFileCardProps {
   file: {
@@ -28,10 +29,13 @@ export const AudioFileCard = ({
 }: AudioFileCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
+  const { user } = useAuth();
+  
   // Delete greeting file mutation
   const deleteGreetingFile = useMutation({
     mutationFn: async (fileId: string) => {
+      if (!user) throw new Error('User not authenticated');
+      
       const { data: fileData, error: fetchError } = await supabase
         .from('greeting_files')
         .select('filename, url')
@@ -43,7 +47,7 @@ export const AudioFileCard = ({
       // Parse filename from URL to get the storage path
       const urlPath = new URL(fileData.url).pathname;
       const filePath = urlPath.split('/').pop();
-      const storagePath = `${file.id}/${filePath}`;
+      const storagePath = `${user.id}/${filePath}`;
       
       // Delete from storage
       const { error: storageError } = await supabase.storage

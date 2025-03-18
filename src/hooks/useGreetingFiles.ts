@@ -12,16 +12,23 @@ export function useGreetingFiles(userId: string | undefined) {
     queryKey: ['greetingFiles'],
     queryFn: async () => {
       if (!userId) throw new Error('User not authenticated');
+      
       const { data, error } = await supabase
         .from('greeting_files')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Error fetching greeting files:", error);
+        throw error;
+      }
+      
+      return data || [];
     },
     enabled: !!userId,
+    retry: 1,
+    refetchOnWindowFocus: true,
   });
 
   // Delete greeting file mutation
@@ -82,6 +89,8 @@ export function useGreetingFiles(userId: string | undefined) {
   return {
     greetingFiles: greetingFilesQuery.data || [],
     isLoading: greetingFilesQuery.isLoading,
+    isError: greetingFilesQuery.isError,
+    error: greetingFilesQuery.error,
     deleteGreetingFile
   };
 }

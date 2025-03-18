@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { AudioFileCard } from './AudioFileCard';
 import { EmptyGreetingsState } from './EmptyGreetingsState';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
+import { useGreetingFiles } from '@/hooks/useGreetingFiles';
 
 interface GreetingFilesListProps {
   userId: string | undefined;
@@ -14,23 +15,7 @@ interface GreetingFilesListProps {
 
 export const GreetingFilesList = ({ userId, onUploadClick }: GreetingFilesListProps) => {
   const { activeAudio, isPlaying, togglePlayback } = useAudioPlayer();
-
-  // Fetch greeting files
-  const { data: greetingFiles, isLoading } = useQuery({
-    queryKey: ['greetingFiles'],
-    queryFn: async () => {
-      if (!userId) throw new Error('User not authenticated');
-      const { data, error } = await supabase
-        .from('greeting_files')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!userId,
-  });
+  const { greetingFiles, isLoading } = useGreetingFiles(userId);
 
   if (isLoading) {
     return (
