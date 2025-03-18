@@ -25,8 +25,6 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
     transferNumber: "",
     schedule: {
       startDate: new Date().toISOString().split("T")[0],
-      startTime: "09:00",
-      endTime: "17:00",
       timezone: "America/New_York",
       maxConcurrentCalls: 5
     }
@@ -163,13 +161,14 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
       </CardHeader>
       <CardContent>
         <Tabs value={step} className="w-full">
-          <TabsList className="grid grid-cols-6 mb-6">
-            <TabsTrigger value="basics" onClick={() => step !== "basics" && setStep("basics")}>Basics</TabsTrigger>
-            <TabsTrigger value="contacts" onClick={() => step !== "contacts" && campaign.title && setStep("contacts")}>Contacts</TabsTrigger>
-            <TabsTrigger value="audio" onClick={() => step !== "audio" && campaign.contactListId && setStep("audio")}>Audio</TabsTrigger>
-            <TabsTrigger value="transfers" onClick={() => step !== "transfers" && campaign.greetingFileId && setStep("transfers")}>Transfers</TabsTrigger>
-            <TabsTrigger value="schedule" onClick={() => step !== "schedule" && campaign.transferNumber && setStep("schedule")}>Schedule</TabsTrigger>
-            <TabsTrigger value="review" onClick={() => step !== "review" && campaign.schedule.startDate && setStep("review")}>Review</TabsTrigger>
+          {/* Fixed overlapping text by adding spacing and responsive class names */}
+          <TabsList className="grid grid-cols-6 mb-6 gap-1 overflow-x-auto">
+            <TabsTrigger value="basics" onClick={() => step !== "basics" && setStep("basics")} className="text-xs sm:text-sm whitespace-nowrap px-1 sm:px-2">Basics</TabsTrigger>
+            <TabsTrigger value="contacts" onClick={() => step !== "contacts" && campaign.title && setStep("contacts")} className="text-xs sm:text-sm whitespace-nowrap px-1 sm:px-2">Contacts</TabsTrigger>
+            <TabsTrigger value="audio" onClick={() => step !== "audio" && campaign.contactListId && setStep("audio")} className="text-xs sm:text-sm whitespace-nowrap px-1 sm:px-2">Audio</TabsTrigger>
+            <TabsTrigger value="transfers" onClick={() => step !== "transfers" && campaign.greetingFileId && setStep("transfers")} className="text-xs sm:text-sm whitespace-nowrap px-1 sm:px-2">Transfers</TabsTrigger>
+            <TabsTrigger value="schedule" onClick={() => step !== "schedule" && campaign.transferNumber && setStep("schedule")} className="text-xs sm:text-sm whitespace-nowrap px-1 sm:px-2">Schedule</TabsTrigger>
+            <TabsTrigger value="review" onClick={() => step !== "review" && campaign.schedule.startDate && setStep("review")} className="text-xs sm:text-sm whitespace-nowrap px-1 sm:px-2">Review</TabsTrigger>
           </TabsList>
           
           <TabsContent value="basics" className="space-y-4">
@@ -251,7 +250,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
           </TabsContent>
           
           <TabsContent value="schedule" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
                 <Label htmlFor="startDate">Start Date</Label>
                 <Input
@@ -261,29 +260,11 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
                   value={campaign.schedule.startDate}
                   onChange={handleScheduleChange}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  When should this campaign begin?
+                </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="startTime">Start Time</Label>
-                  <Input
-                    id="startTime"
-                    name="startTime"
-                    type="time"
-                    value={campaign.schedule.startTime}
-                    onChange={handleScheduleChange}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="endTime">End Time</Label>
-                  <Input
-                    id="endTime"
-                    name="endTime"
-                    type="time"
-                    value={campaign.schedule.endTime}
-                    onChange={handleScheduleChange}
-                  />
-                </div>
-              </div>
+              
               <div>
                 <Label htmlFor="timezone">Timezone</Label>
                 <Select
@@ -301,6 +282,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
                   </SelectContent>
                 </Select>
               </div>
+              
               <div>
                 <Label htmlFor="maxConcurrentCalls">Max Concurrent Calls</Label>
                 <Input
@@ -314,6 +296,12 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
                 />
                 <p className="text-sm text-muted-foreground mt-1">
                   Maximum number of simultaneous calls (1-50)
+                </p>
+              </div>
+              
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm">
+                  <strong>Note:</strong> The campaign will run continuously until all contacts have been called.
                 </p>
               </div>
             </div>
@@ -347,10 +335,12 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
                 <div>
                   <h3 className="font-medium">Schedule</h3>
                   <p>
-                    Start: {campaign.schedule.startDate} at {campaign.schedule.startTime}<br />
-                    End time: {campaign.schedule.endTime}<br />
+                    Start Date: {campaign.schedule.startDate}<br />
                     Timezone: {campaign.schedule.timezone}<br />
                     Max concurrent calls: {campaign.schedule.maxConcurrentCalls}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    The campaign will run until all contacts have been called.
                   </p>
                 </div>
               </CardContent>

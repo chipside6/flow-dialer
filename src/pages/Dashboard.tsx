@@ -8,7 +8,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="flex flex-1 w-full"> {/* Removed pt-16 since it's now handled in the SidebarInset component */}
+      <div className="flex flex-1 w-full">
         <DashboardLayout>
           <DashboardContent />
         </DashboardLayout>
