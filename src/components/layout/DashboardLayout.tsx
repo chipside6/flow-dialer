@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/contexts/auth";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, useSidebar } from "@/components/ui/sidebar";
@@ -10,7 +11,8 @@ import {
   PhoneForwarded, 
   Server, 
   ShieldCheck,
-  LogOut
+  LogOut,
+  X
 } from "lucide-react";
 import { NavItem } from "@/components/navigation/NavItem";
 import { useLocation } from "react-router-dom";
@@ -63,7 +65,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             )}
           </div>
         </SidebarHeader>
-        <SidebarContent className="px-4 py-4">
+        <SidebarContent className="px-4 py-2">
           <div className="bg-card rounded-lg border shadow-sm p-4 mb-4">
             <h2 className="font-semibold mb-4 text-lg">Navigation</h2>
             <nav className="space-y-2">
@@ -109,6 +111,3 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     </div>
   );
 }
-
-// Import X icon at the top
-import { X } from "lucide-react";

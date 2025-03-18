@@ -18,15 +18,15 @@ export function NavItem({ item, isActive, onClick }: NavItemProps) {
     <Link to={item.path} className="block w-full" onClick={onClick}>
       <Button
         variant={isActive ? "default" : "ghost"}
-        className={`w-full justify-start rounded-md py-3 mb-1 text-left ${
+        className={`w-full justify-start rounded-md py-2 mb-1 text-left ${
           isActive 
             ? "bg-primary text-primary-foreground" 
-            : "hover:bg-accent hover:text-primary text-foreground"
+            : "hover:bg-muted hover:text-primary text-foreground"
         }`}
-        size="lg"
+        size="sm"
       >
-        <div className="flex items-center gap-4 text-base">
-          <span className="flex items-center justify-center w-8 h-8">
+        <div className="flex items-center gap-3 text-sm">
+          <span className="flex items-center justify-center w-5 h-5">
             {item.icon}
           </span>
           <span className="font-medium">{item.name}</span>

@@ -140,7 +140,7 @@ main {
   [role="button"], 
   button,
   .clickable {
-    padding: 12px !important;
+    padding: 8px !important;
   }
   
   /* Better card spacing */
@@ -161,75 +161,83 @@ main {
   }
 }
 
-/* Improve mobile menu transitions */
+/* Fix mobile sidebar styling */
 @media (max-width: 768px) {
-  .nav-transition {
-    transition: transform 0.3s ease, opacity 0.3s ease;
-  }
-  
-  .nav-enter {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  
-  .nav-enter-active {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .nav-exit {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .nav-exit-active {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  
-  /* Improved mobile sidebar styling */
+  /* Make the sidebar appear cleaner on mobile */
   [data-sidebar][data-mobile="true"] {
-    width: 100% !important;
     max-width: 100% !important;
   }
   
-  /* Ensure navbar and sidebar don't overlap */
-  .dashboard-content {
-    padding-top: 70px;
+  /* Customize the mobile sidebar style */
+  [data-sidebar="sidebar"] {
+    background-color: white;
+    border-radius: 0 !important;
   }
   
-  /* Fix mobile navigation touch targets */
-  .mobile-nav-item {
-    display: block;
-    width: 100%;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-  }
-  
-  /* Add better spacing to the mobile sidebar */
+  /* Give sidebar items more spacing */
   [data-sidebar="sidebar"] [data-sidebar="content"] {
     padding-top: 8px;
   }
-}
-
-/* Dashboard specific mobile styles */
-@media (max-width: 768px) {
-  /* Make the sidebar full width when open */
-  [data-sidebar-open="true"] .sidebar-content {
+  
+  /* Improve the navbar design */
+  .navbar-container {
+    backdrop-filter: blur(8px);
+  }
+  
+  /* Fixed position for the navbar */
+  .dashboard-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+  }
+  
+  /* Fix SheetContent appearance on mobile */
+  [role="dialog"] {
+    background-color: white !important;
+    max-width: 100% !important;
+  }
+  
+  /* Improve drawer components */
+  [data-state="open"][data-side="left"] {
     width: 100% !important;
   }
-  
-  /* Improve tap targets */
-  .btn, button, .clickable, [role="button"] {
-    min-height: 44px;
-    display: flex;
-    align-items: center;
+}
+
+/* Sidebar animation fixes */
+[data-sidebar="sidebar"] {
+  transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease !important;
+}
+
+/* Custom sidebar styling in dark mode */
+.dark [data-sidebar="sidebar"] {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+/* Improve mobile drawer appearance */
+[data-sidebar][data-mobile="true"] {
+  padding: 0 !important;
+}
+
+/* Add animation to mobile sidebar */
+@media (max-width: 768px) {
+  [data-state="open"] {
+    animation: slideIn 0.3s ease;
   }
   
-  /* Better form styling */
-  input, select, textarea {
-    border-radius: 8px !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  [data-state="closed"] {
+    animation: slideOut 0.3s ease;
   }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
 }

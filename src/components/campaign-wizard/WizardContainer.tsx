@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs } from "@/components/ui/tabs";
 import { WizardStepTabs } from "./WizardStepTabs";
 import { WizardNavigation } from "./WizardNavigation";
 import { CampaignData, WizardStep } from "./types";
@@ -33,21 +33,23 @@ export const WizardContainer: React.FC<WizardContainerProps> = ({
   const isStepAvailable = getStepAvailability(campaign);
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
+    <Card className="w-full max-w-4xl mx-auto shadow-md">
+      <CardHeader className="border-b bg-muted/30">
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <Tabs value={step} className="w-full">
           <WizardStepTabs 
             currentStep={step} 
             setStep={setStep} 
             isStepAvailable={isStepAvailable} 
           />
-          {children}
+          <div className="p-6">
+            {children}
+          </div>
         </Tabs>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="border-t bg-muted/30 py-4">
         <WizardNavigation 
           step={step}
           onPrevious={onPrevious}
@@ -58,4 +60,4 @@ export const WizardContainer: React.FC<WizardContainerProps> = ({
       </CardFooter>
     </Card>
   );
-};
+}
