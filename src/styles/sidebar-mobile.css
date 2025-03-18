@@ -52,6 +52,12 @@
     left: 0;
   }
 
+  /* Ensure all navigation items are visible and scrollable */
+  [data-sidebar="content"] {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto !important;
+  }
+
   /* Ensure the main content area is properly positioned - crucial fix */
   [data-sidebar-inset] {
     padding-top: 16px !important;  /* Reduced from 72px to remove top nav space */
