@@ -12,12 +12,12 @@ export function DashboardNav() {
   };
   
   const navItems = [
-    { name: "Dashboard", path: "/dashboard", icon: <Home className="h-4 w-4 mr-2" /> },
-    { name: "Campaigns", path: "/campaign", icon: <BarChart3 className="h-4 w-4 mr-2" /> },
-    { name: "Greeting Files", path: "/greetings", icon: <AudioWaveform className="h-4 w-4 mr-2" /> },
-    { name: "Contact Lists", path: "/contacts", icon: <ContactIcon className="h-4 w-4 mr-2" /> },
-    { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-4 w-4 mr-2" /> },
-    { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-4 w-4 mr-2" /> },
+    { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5 mr-3" /> },
+    { name: "Campaigns", path: "/campaign", icon: <BarChart3 className="h-5 w-5 mr-3" /> },
+    { name: "Greeting Files", path: "/greetings", icon: <AudioWaveform className="h-5 w-5 mr-3" /> },
+    { name: "Contact Lists", path: "/contacts", icon: <ContactIcon className="h-5 w-5 mr-3" /> },
+    { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5 mr-3" /> },
+    { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5 mr-3" /> },
   ];
   
   return (
@@ -28,7 +28,8 @@ export function DashboardNav() {
           <Link key={item.path} to={item.path} className="block w-full">
             <Button
               variant={isActive(item.path) ? "default" : "ghost"}
-              className={`w-full justify-start ${isActive(item.path) ? "" : "hover:bg-accent"}`}
+              className={`w-full justify-start rounded-lg py-6 ${isActive(item.path) ? "bg-primary text-primary-foreground" : "hover:bg-accent text-foreground"}`}
+              size="lg"
             >
               {item.icon}
               {item.name}

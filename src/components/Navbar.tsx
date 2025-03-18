@@ -1,12 +1,20 @@
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Menu, X, Phone } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isDashboard = location.pathname.includes('/dashboard') || 
+                      location.pathname.includes('/campaign') || 
+                      location.pathname.includes('/greetings') ||
+                      location.pathname.includes('/contacts') ||
+                      location.pathname.includes('/transfers') ||
+                      location.pathname.includes('/sip-providers');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,6 +24,33 @@ export const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  if (isDashboard) {
+    return (
+      <header 
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b`}
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="md:hidden" />
+            <Link 
+              to="/" 
+              className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"
+            >
+              <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white">
+                <Phone size={16} />
+              </span>
+              Flow Dialer
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* Dashboard actions could go here */}
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header 
