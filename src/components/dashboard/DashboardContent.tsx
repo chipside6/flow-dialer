@@ -9,6 +9,7 @@ import CampaignDashboard from "@/components/CampaignDashboard";
 import { Phone, BarChart3, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const DashboardContent = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -43,7 +44,7 @@ export const DashboardContent = () => {
     switch (activeTab) {
       case 'dialer':
         return (
-          <div className="mt-4">
+          <div className="mt-4 overflow-x-hidden">
             <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-xl border border-blue-100 dark:border-blue-900">
               <div className="flex flex-col md:flex-row gap-4 items-center">
                 <div className="bg-primary/10 p-4 rounded-full">
@@ -55,16 +56,18 @@ export const DashboardContent = () => {
                 </div>
               </div>
             </div>
-            {campaigns.length > 0 ? (
-              <BackgroundDialer campaignId={campaigns[0]?.id} />
-            ) : (
-              <EmptyCampaignState />
-            )}
+            <div className="overflow-x-hidden w-full">
+              {campaigns.length > 0 ? (
+                <BackgroundDialer campaignId={campaigns[0]?.id} />
+              ) : (
+                <EmptyCampaignState />
+              )}
+            </div>
           </div>
         );
       case 'campaigns':
         return (
-          <div className="mt-4">
+          <div className="mt-4 overflow-x-hidden">
             <div className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 p-6 rounded-xl border border-green-100 dark:border-green-900">
               <div className="flex flex-col md:flex-row gap-4 items-center">
                 <div className="bg-green-500/10 p-4 rounded-full">
@@ -76,19 +79,27 @@ export const DashboardContent = () => {
                 </div>
               </div>
             </div>
-            <CampaignDashboard initialCampaigns={campaigns || []} />
+            <div className="overflow-x-hidden w-full">
+              <CampaignDashboard initialCampaigns={campaigns || []} />
+            </div>
           </div>
         );
       case 'overview':
       default:
-        return campaigns && campaigns.length > 0 ? <DashboardCards /> : <EmptyCampaignState />;
+        return (
+          <div className="overflow-x-hidden w-full">
+            {campaigns && campaigns.length > 0 ? <DashboardCards /> : <EmptyCampaignState />}
+          </div>
+        );
     }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden w-full px-2">
       <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
-      {renderContent()}
+      <ScrollArea className="w-full overflow-x-hidden">
+        {renderContent()}
+      </ScrollArea>
     </div>
   );
 };
