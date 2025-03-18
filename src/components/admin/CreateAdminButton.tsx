@@ -33,8 +33,9 @@ export function CreateAdminButton() {
       
       console.log("Admin user created response:", data);
       
-      // Invalidate admin users query to refresh the list
-      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      // Force invalidate and refetch admin users query
+      await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      await queryClient.refetchQueries({ queryKey: ["admin", "users"] });
       
       toast({
         title: "Success",

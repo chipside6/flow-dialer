@@ -48,6 +48,13 @@ serve(async (req) => {
     if (existingUser) {
       console.log("Admin user already exists, updating status");
       userId = existingUser.id;
+      
+      // Log more details about the existing user
+      console.log("Existing user details:", {
+        id: existingUser.id,
+        email: existingUser.email,
+        created_at: existingUser.created_at
+      });
     } else {
       // Create the new user
       console.log("Creating new admin user");
@@ -68,7 +75,23 @@ serve(async (req) => {
 
     // Set the user as an admin in the profiles table
     console.log("Updating profile for user:", userId);
-    const { error: updateError } = await supabaseAdmin
+    
+    // Check if profile already exists
+    const { data: existingProfile, error: profileCheckError } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+      
+    if (profileCheckError && profileCheckError.code !== 'PGRST116') { // PGRST116 is "not found" which is expected
+      console.error("Error checking existing profile:", profileCheckError);
+      // We'll continue anyway to try to upsert
+    } else {
+      console.log("Existing profile check result:", existingProfile);
+    }
+    
+    // Update or create the profile
+    const { data: profileData, error: updateError } = await supabaseAdmin
       .from('profiles')
       .upsert({ 
         id: userId, 
@@ -77,20 +100,24 @@ serve(async (req) => {
         full_name: 'Admin User',
         email: email,
         updated_at: new Date().toISOString()
+      }, { 
+        onConflict: 'id',
+        returning: 'representation'
       });
 
     if (updateError) {
       console.error("Error updating profile:", updateError);
       throw updateError;
     }
-
-    console.log("Admin user set successfully");
+    
+    console.log("Admin user profile updated successfully:", profileData);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: "Admin user created/updated successfully",
-        userId: userId
+        userId: userId,
+        profile: profileData
       }),
       { 
         headers: { 
@@ -107,7 +134,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message 
+        error: error.message,
+        stack: error.stack
       }),
       { 
         headers: { 

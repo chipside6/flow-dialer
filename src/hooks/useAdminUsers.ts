@@ -52,10 +52,10 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
     },
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    retry: 2,
+    retry: 3,
     retryDelay: 1000,
     enabled,
-    staleTime,
+    staleTime: 1000, // Reduced stale time to refresh more frequently
     gcTime: 60000 * 5,
   });
 }
