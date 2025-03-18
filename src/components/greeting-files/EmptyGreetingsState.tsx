@@ -2,31 +2,24 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { FileAudio } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EmptyGreetingsStateProps {
   onUploadClick: () => void;
 }
 
 export const EmptyGreetingsState = ({ onUploadClick }: EmptyGreetingsStateProps) => {
-  const isMobile = useIsMobile();
-  
   return (
-    <Card className="w-full overflow-hidden">
+    <Card>
       <CardContent className="flex flex-col items-center justify-center p-6">
         <div className="rounded-full bg-primary/10 p-3 mb-4">
           <FileAudio className="h-6 w-6 text-primary" />
         </div>
-        <CardTitle className="mb-2 text-center">No greeting files yet</CardTitle>
+        <CardTitle className="mb-2">No greeting files yet</CardTitle>
         <CardDescription className="text-center mb-4">
           Upload greeting audio files to use in your campaigns
         </CardDescription>
-        <Button 
-          onClick={onUploadClick}
-          variant="default"
-          className={`${isMobile ? "w-full" : ""} px-6 py-3 text-base font-medium`}
-        >
-          {isMobile ? "Upload Audio" : "Upload your first greeting"}
+        <Button onClick={onUploadClick}>
+          Upload your first greeting
         </Button>
       </CardContent>
     </Card>

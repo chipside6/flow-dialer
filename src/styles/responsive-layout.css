@@ -79,20 +79,6 @@
     width: 100%;
     max-width: 100%;
   }
-  
-  /* Tab improvements for mobile */
-  [role="tablist"] {
-    width: 100% !important;
-    gap: 3px !important;
-  }
-
-  [role="tab"] {
-    font-size: 14px !important;
-    padding: 8px 4px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
 }
 
 /* Dashboard specific mobile improvements */
