@@ -6,9 +6,9 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { useAdminUsers } from "@/hooks/useAdminUsers";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function UsersDataFetcher() {
   console.log("UsersDataFetcher - Component rendering");
@@ -19,8 +19,7 @@ export function UsersDataFetcher() {
     error, 
     refetch, 
     isRefetching,
-    isSuccess,
-    status
+    isSuccess
   } = useAdminUsers({
     staleTime: 5000 // Short stale time
   });
@@ -30,7 +29,6 @@ export function UsersDataFetcher() {
     isRefetching,
     isSuccess, 
     hasError: !!error,
-    status,
     userCount: users?.length ?? 0
   });
 
@@ -40,7 +38,7 @@ export function UsersDataFetcher() {
       console.log("UsersDataFetcher - Auto-retrying after error");
       const timer = setTimeout(() => {
         refetch();
-      }, 500);
+      }, 1000);
       return () => clearTimeout(timer);
     }
   }, [error, isRefetching, isSuccess, refetch]);
@@ -48,18 +46,16 @@ export function UsersDataFetcher() {
   const handleRetry = () => {
     console.log("UsersDataFetcher - Manual retry triggered");
     toast({
-      title: "Retrying",
+      title: "Refreshing Data",
       description: "Fetching updated user data...",
     });
     refetch();
   };
 
-  // Calculate stats - providing defaults in case data isn't available yet
+  // Calculate stats - providing defaults for when data isn't available
   const userCount = users?.length ?? 0;
   const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
-  const hasLimitedData = users?.some(user => user.email === "Unknown");
 
-  // Always render content regardless of loading state
   return (
     <DashboardLayout>
       <div className="space-y-6 py-8">
@@ -86,21 +82,12 @@ export function UsersDataFetcher() {
           </Button>
         </div>
 
-        {hasLimitedData && (
-          <Alert className="mb-6 bg-amber-50 border-amber-200">
-            <Info className="h-4 w-4 text-amber-600 mr-2" />
-            <AlertDescription>
-              Limited admin access. Some user information (like email addresses) may not be visible.
-            </AlertDescription>
-          </Alert>
-        )}
-
         {error && (
           <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4 mr-2" />
+            <Info className="h-4 w-4 mr-2" />
             <AlertDescription className="flex items-center justify-between">
               <div>
-                {error instanceof Error ? error.message : "Error loading complete data"}
+                There was an error loading user data. Please try refreshing.
               </div>
               <Button 
                 variant="outline" 
@@ -120,26 +107,32 @@ export function UsersDataFetcher() {
           </Alert>
         )}
 
-        {(isLoading || isRefetching) && (
-          <div className="flex items-center space-x-2 mb-4 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm">
-              {isLoading && !users ? "Loading data..." : "Refreshing data..."}
-            </span>
+        {isLoading && !users && (
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-lg" />
+              ))}
+            </div>
+            <Skeleton className="h-64 w-full rounded-lg mt-6" />
           </div>
         )}
 
-        <AdminHeader 
-          userCount={userCount} 
-          affiliateCount={affiliateCount} 
-        />
-        
-        <UserManagement 
-          users={users || []} 
-          isLoading={isLoading && !users} 
-          error={error instanceof Error ? error : null} 
-          onRetry={handleRetry}
-        />
+        {(!isLoading || users) && (
+          <>
+            <AdminHeader 
+              userCount={userCount} 
+              affiliateCount={affiliateCount} 
+            />
+            
+            <UserManagement 
+              users={users || []} 
+              isLoading={isLoading && !users} 
+              error={error instanceof Error ? error : null} 
+              onRetry={handleRetry}
+            />
+          </>
+        )}
       </div>
     </DashboardLayout>
   );
