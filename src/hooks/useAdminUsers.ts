@@ -9,7 +9,7 @@ interface UseAdminUsersOptions {
 }
 
 export function useAdminUsers(options: UseAdminUsersOptions = {}) {
-  const { enabled = true, staleTime = 10000 } = options;
+  const { enabled = true, staleTime = 5000 } = options;
   
   return useQuery({
     queryKey: ["admin", "users"],
@@ -24,12 +24,13 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         
         if (profilesError) {
           console.error("useAdminUsers - Error fetching profiles:", profilesError);
-          throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
+          // Return empty array instead of throwing to prevent loading state
+          return [];
         }
         
         console.log("useAdminUsers - Successfully fetched profiles count:", profiles?.length || 0);
         
-        // When we only have profiles data (no auth data), map them to the expected format
+        // Map profiles to expected format function
         const mapProfilesOnly = () => {
           if (!profiles || profiles.length === 0) {
             console.log("useAdminUsers - No profiles found, returning empty array");
@@ -91,13 +92,12 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
       } catch (error: any) {
         console.error("useAdminUsers - Critical error:", error);
         // Return an empty array instead of throwing an error
-        // This prevents the UI from getting stuck in a loading state
         return [];
       }
     },
-    refetchOnWindowFocus: true,
-    retry: 1, // Reduce retries to prevent long loading states
-    retryDelay: 1000, // Fixed retry delay of 1 second
+    refetchOnWindowFocus: false,
+    retry: 1, // Reduce retries
+    retryDelay: 500, // Shorter retry delay
     enabled,
     staleTime,
     gcTime: 60000 * 5, // Keep data in cache for 5 minutes
