@@ -6,7 +6,7 @@
   [data-sidebar][data-mobile="true"] {
     max-width: 100% !important;
     width: 85% !important;
-    z-index: 100 !important; /* Increased z-index */
+    z-index: 999 !important; /* Higher z-index */
     position: fixed !important;
     top: 0 !important;
     bottom: 0 !important;
@@ -15,6 +15,8 @@
     transition: transform 0.3s ease;
     display: block !important; /* Ensure sidebar is visible */
     visibility: visible !important; /* Force visibility */
+    pointer-events: auto !important; /* Ensure clicks work */
+    opacity: 1 !important; /* Make sure it's not transparent */
   }
   
   /* Show sidebar when open */
@@ -27,13 +29,16 @@
   [role="dialog"][data-state="open"] {
     display: flex !important;
     visibility: visible !important;
-    z-index: 100 !important;
+    z-index: 999 !important;
+    opacity: 1 !important;
   }
   
   /* Customize the mobile sidebar style */
   [data-sidebar="sidebar"] {
     background-color: white;
     border-radius: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
   }
   
   /* Give sidebar items more spacing */
@@ -55,6 +60,8 @@
   [role="dialog"] {
     background-color: white !important;
     max-width: 100% !important;
+    display: flex !important;
+    visibility: visible !important;
   }
   
   /* Improve drawer components */
@@ -62,6 +69,8 @@
     width: 85% !important;
     transform: translateX(0) !important;
     display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   /* Ensure the main content area is properly positioned */
@@ -103,7 +112,7 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 90;
+    z-index: 900;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -115,10 +124,28 @@
   }
 
   /* Fix for the SheetContent container */
-  .fixed.inset-y-0.right-auto {
+  .fixed.inset-y-0.right-auto,
+  .fixed.inset-y-0.left-0 {
     display: flex !important;
     visibility: visible !important;
-    z-index: 100 !important;
+    z-index: 999 !important;
+    opacity: 1 !important;
+  }
+  
+  /* Important fix for Radix Dialog/Sheet positioning */
+  [data-radix-popper-content-wrapper] {
+    display: block !important;
+    visibility: visible !important;
+    z-index: 999 !important;
+    opacity: 1 !important;
+  }
+  
+  /* Fix for any sheet content that might be hidden */
+  .radix-sheet-content,
+  [data-state="open"] > div {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 
@@ -153,6 +180,7 @@
   [data-radix-popper-content-wrapper] {
     display: block !important;
     visibility: visible !important;
-    z-index: 100 !important;
+    z-index: 999 !important;
+    opacity: 1 !important;
   }
 }
