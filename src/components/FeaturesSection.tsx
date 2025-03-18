@@ -1,3 +1,4 @@
+
 import { Check } from "lucide-react";
 
 const features = [
@@ -17,7 +18,7 @@ const features = [
     title: "Compliance Management",
     description: "Stay compliant with calling regulations with built-in compliance tools and do-not-call list integration.",
     icon: "✅",
-    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&h=600&q=80"
+    imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=600&q=80"
   }
 ];
 
