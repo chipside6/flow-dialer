@@ -48,20 +48,6 @@
     max-width: 100%;
     justify-content: center;
   }
-  
-  /* Campaign table on mobile */
-  .campaign-table th,
-  .campaign-table td {
-    padding: 8px 4px !important;
-    font-size: 0.875rem;
-  }
-  
-  /* Campaign table header - make it visible on small screens */
-  .campaign-table th {
-    white-space: normal;
-    font-size: 0.75rem;
-    line-height: 1.2;
-  }
 }
 
 /* Dashboard specific mobile improvements */
@@ -113,7 +99,6 @@
     max-width: 100% !important;
     width: 100% !important;
     overflow-x: hidden;
-    padding: 0 4px !important;
   }
 
   /* Campaign page specific fixes */
@@ -131,31 +116,5 @@
   
   .tab-container::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Edge */
-  }
-}
-
-/* Fix for tables in campaign dashboard */
-.card .campaign-table {
-  width: 100%;
-  table-layout: fixed;
-}
-
-.card .campaign-table td:first-child,
-.card .campaign-table th:first-child {
-  width: 40%;
-  word-break: break-word;
-}
-
-@media (max-width: 480px) {
-  /* Improve space efficiency on very small screens */
-  .campaign-table td,
-  .campaign-table th {
-    padding: 6px 4px !important;
-  }
-  
-  /* Make campaign titles readable on small screens */
-  .campaign-table td:first-child {
-    font-size: 0.875rem;
-    line-height: 1.25;
   }
 }

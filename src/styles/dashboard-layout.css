@@ -22,7 +22,6 @@ main {
 .table-container {
   max-width: 100%;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Loading state styling */
@@ -41,13 +40,11 @@ main {
   }
 }
 
-/* Fix for content overflow - critical fix */
+/* Fix for content overflow */
 .dashboard-content-wrapper {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  padding: 0 0.5rem;
-  box-sizing: border-box;
 }
 
 /* Progress bar animation */
@@ -76,7 +73,6 @@ main {
 /* Make sure all tables and grids fit within viewport */
 table, .grid {
   max-width: 100%;
-  table-layout: fixed;
   box-sizing: border-box;
 }
 
@@ -84,31 +80,4 @@ table, .grid {
 * {
   max-width: 100%;
   box-sizing: border-box;
-}
-
-/* Fix for campaign table cells */
-.campaign-table th,
-.campaign-table td {
-  white-space: normal;
-  word-break: break-word;
-}
-
-/* Fix for mobile table view */
-@media (max-width: 640px) {
-  .table-container {
-    margin: 0 -0.5rem;
-    width: calc(100% + 1rem);
-  }
-  
-  /* Adjust cell padding on small screens */
-  td, th {
-    padding: 0.75rem 0.5rem !important;
-  }
-  
-  /* Prevent text overflow in table cells */
-  td {
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }

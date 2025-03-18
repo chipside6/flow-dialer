@@ -11,13 +11,13 @@ export const CampaignTable: React.FC = () => {
   const { campaigns } = useCampaignContext();
 
   return (
-    <Table className="campaign-table">
+    <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[40%]">Name</TableHead>
-          <TableHead className="w-[20%]">Execution</TableHead>
-          <TableHead className="w-[20%]">Progress</TableHead>
-          <TableHead className="w-[20%] text-right">Actions</TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Execution</TableHead>
+          <TableHead>Progress</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
