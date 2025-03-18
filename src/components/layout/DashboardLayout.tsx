@@ -44,6 +44,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       document.body.classList.add('mobile-menu-open');
       // Delay showing overlay slightly for a smoother transition
       setTimeout(() => setShowOverlay(true), 50);
+      
+      // Ensure that any dialogs that might be open have the correct z-index
+      const dialogs = document.querySelectorAll('[role="dialog"]');
+      dialogs.forEach(dialog => {
+        if (dialog instanceof HTMLElement) {
+          dialog.style.display = 'flex';
+          dialog.style.visibility = 'visible';
+          dialog.style.zIndex = '100';
+        }
+      });
     } else {
       document.body.classList.remove('mobile-menu-open');
       setShowOverlay(false);
@@ -74,6 +84,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   // Add admin link for admin users
   const isAdmin = profile?.is_admin === true;
   
+  // Debug mobile sidebar state
+  useEffect(() => {
+    console.log('Mobile sidebar state:', { isMobile, openMobile });
+  }, [isMobile, openMobile]);
+  
   return (
     <div className="flex flex-1 w-full overflow-x-hidden">
       {/* Mobile menu button - always visible on mobile */}
@@ -83,7 +98,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             variant="outline" 
             size="icon" 
             className="bg-background rounded-full shadow-md" 
-            onClick={toggleSidebar}
+            onClick={() => {
+              console.log('Menu button clicked, toggling sidebar');
+              setOpenMobile(!openMobile);
+            }}
           >
             <Menu size={20} />
           </Button>
@@ -112,7 +130,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 variant="ghost" 
                 size="icon" 
                 className="ml-auto" 
-                onClick={() => setOpenMobile(false)}
+                onClick={() => {
+                  console.log('Close button clicked');
+                  setOpenMobile(false);
+                }}
               >
                 <X size={20} />
               </Button>
@@ -127,7 +148,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   key={item.path} 
                   item={item} 
                   isActive={location.pathname === item.path}
-                  onClick={() => isMobile && setOpenMobile(false)}
+                  onClick={() => {
+                    console.log('Nav item clicked:', item.path);
+                    if (isMobile) setOpenMobile(false);
+                  }}
                 />
               ))}
               
@@ -140,7 +164,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     icon: <ShieldCheck className="h-5 w-5" />
                   }}
                   isActive={location.pathname === "/admin"}
-                  onClick={() => isMobile && setOpenMobile(false)}
+                  onClick={() => {
+                    if (isMobile) setOpenMobile(false);
+                  }}
                 />
               )}
             </nav>
@@ -150,7 +176,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <LogoutButton 
                 variant="ghost" 
                 className="w-full justify-start py-3 text-left" 
-                onClick={() => isMobile && setOpenMobile(false)}
+                onClick={() => {
+                  if (isMobile) setOpenMobile(false);
+                }}
               />
             </div>
           </div>

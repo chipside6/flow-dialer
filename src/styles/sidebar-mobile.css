@@ -13,12 +13,21 @@
     left: 0 !important;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    display: block !important; /* Ensure sidebar is visible */
+    visibility: visible !important; /* Force visibility */
   }
   
   /* Show sidebar when open */
   [data-sidebar][data-mobile="true"][data-state="open"] {
     transform: translateX(0) !important;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Force SheetContent to be visible */
+  [role="dialog"][data-state="open"] {
+    display: flex !important;
+    visibility: visible !important;
+    z-index: 100 !important;
   }
   
   /* Customize the mobile sidebar style */
@@ -51,6 +60,8 @@
   /* Improve drawer components */
   [data-state="open"][data-side="left"] {
     width: 85% !important;
+    transform: translateX(0) !important;
+    display: flex !important;
   }
 
   /* Ensure the main content area is properly positioned */
@@ -102,6 +113,13 @@
     opacity: 1;
     pointer-events: auto;
   }
+
+  /* Fix for the SheetContent container */
+  .fixed.inset-y-0.right-auto {
+    display: flex !important;
+    visibility: visible !important;
+    z-index: 100 !important;
+  }
 }
 
 /* Add animation to mobile sidebar */
@@ -129,5 +147,12 @@
     max-width: 100% !important;
     overflow-x: hidden !important;
     padding: 0 8px !important;
+  }
+
+  /* Fix for Radix Dialog/Sheet */
+  [data-radix-popper-content-wrapper] {
+    display: block !important;
+    visibility: visible !important;
+    z-index: 100 !important;
   }
 }
