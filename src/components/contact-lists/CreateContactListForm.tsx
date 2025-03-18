@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { UserPlus } from "lucide-react";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CreateContactListFormProps {
   onListCreated: (list: {
@@ -22,7 +22,7 @@ interface CreateContactListFormProps {
 const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) => {
   const [newListName, setNewListName] = useState("");
   const [newListDescription, setNewListDescription] = useState("");
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   
   const handleCreateList = () => {
     if (!newListName) {

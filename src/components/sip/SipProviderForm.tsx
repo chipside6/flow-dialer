@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Server, Plus, Edit, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { SipProvider } from "@/types/sipProviders";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SipProviderFormProps {
   onSubmit: (provider: Omit<SipProvider, 'id' | 'dateAdded' | 'isActive'>) => void;
@@ -27,7 +27,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   const [password, setPassword] = useState(editingProvider?.password || "");
   const [description, setDescription] = useState(editingProvider?.description || "");
   const [showPassword, setShowPassword] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   
   const handleSubmit = () => {
     if (!name || !host || !username || !password) {

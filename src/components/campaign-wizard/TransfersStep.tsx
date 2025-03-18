@@ -3,7 +3,7 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CampaignData } from "./types";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TransfersStepProps {
   campaign: CampaignData;
@@ -11,7 +11,7 @@ interface TransfersStepProps {
 }
 
 export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   
   return (
     <div className="space-y-4">

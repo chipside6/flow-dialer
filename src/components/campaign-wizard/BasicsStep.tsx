@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CampaignData } from "./types";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BasicsStepProps {
   campaign: CampaignData;
@@ -12,7 +12,7 @@ interface BasicsStepProps {
 }
 
 export const BasicsStep = ({ campaign, onChange }: BasicsStepProps) => {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   
   return (
     <div className="space-y-4">

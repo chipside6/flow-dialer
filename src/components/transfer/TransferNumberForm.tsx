@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PhoneForwarded, Plus } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { TransferNumber } from "@/types/transferNumbers";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TransferNumberFormProps {
   onAddTransferNumber: (transferNumber: TransferNumber) => void;
@@ -17,7 +17,7 @@ export const TransferNumberForm = ({ onAddTransferNumber }: TransferNumberFormPr
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [description, setDescription] = useState("");
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   
   const handleAddTransferNumber = () => {
     if (!name || !number) {
