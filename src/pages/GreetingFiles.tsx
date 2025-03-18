@@ -9,12 +9,20 @@ import { Loader2 } from 'lucide-react';
 const GreetingFiles = () => {
   const { user, isLoading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('files');
+  const [timeoutReached, setTimeoutReached] = useState(false);
 
   useEffect(() => {
     console.log("GreetingFiles page - Auth state:", { 
       userId: user?.id, 
       isLoading: authLoading 
     });
+
+    // Set a timeout to force UI to render even if auth check takes too long
+    const timer = setTimeout(() => {
+      setTimeoutReached(true);
+    }, 2000); // 2 second timeout
+
+    return () => clearTimeout(timer);
   }, [user, authLoading]);
 
   // Helper function to switch to upload tab
@@ -23,9 +31,8 @@ const GreetingFiles = () => {
     document.getElementById('tab-trigger-upload')?.click();
   };
 
-  // Don't show loading state for too long - if auth is taking time,
-  // still render the main UI which will handle access control internally
-  if (authLoading && !user) {
+  // Show loading state only if auth is loading AND timeout hasn't been reached
+  if (authLoading && !user && !timeoutReached) {
     return (
       <div className="container mx-auto py-6 flex justify-center items-center h-40">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

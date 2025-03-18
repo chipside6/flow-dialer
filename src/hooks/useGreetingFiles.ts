@@ -50,6 +50,8 @@ export function useGreetingFiles(userId: string | undefined) {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchInterval: false,
+    retry: 3, // Retry 3 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
   });
 
   // Delete greeting file mutation

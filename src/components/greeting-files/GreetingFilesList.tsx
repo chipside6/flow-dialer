@@ -1,11 +1,12 @@
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { AudioFileCard } from './AudioFileCard';
 import { EmptyGreetingsState } from './EmptyGreetingsState';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { useGreetingFiles } from '@/hooks/useGreetingFiles';
 import { useAuth } from '@/contexts/auth';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface GreetingFilesListProps {
   userId: string | undefined;
@@ -16,6 +17,7 @@ export const GreetingFilesList = ({ userId, onUploadClick }: GreetingFilesListPr
   const { activeAudio, isPlaying, togglePlayback } = useAudioPlayer();
   const { user } = useAuth();
   const effectiveUserId = userId || user?.id;
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   
   // Directly use the hook rather than passing variables
   const { 
@@ -35,18 +37,34 @@ export const GreetingFilesList = ({ userId, onUploadClick }: GreetingFilesListPr
       isError,
       errorMessage: error ? (error as Error).message : undefined
     });
+
+    // Set a timeout to prevent infinite loading state
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        setLoadingTimeout(true);
+      }
+    }, 5000); // 5 second timeout for loading
+
+    return () => clearTimeout(timer);
   }, [effectiveUserId, greetingFiles, isLoading, isError, error]);
 
-  // Handle when no user ID is available - show empty state instead of loader
+  // Handle when no user ID is available - show login prompt
   if (!effectiveUserId) {
     return (
-      <div className="flex flex-col justify-center items-center h-40 text-muted-foreground">
-        <p>Please log in to view your greeting files</p>
-      </div>
+      <Card>
+        <CardContent className="flex flex-col justify-center items-center h-40 p-6">
+          <p className="text-muted-foreground mb-2">Please log in to view your greeting files</p>
+        </CardContent>
+      </Card>
     );
   }
 
-  if (isLoading) {
+  // Show empty state if loading times out
+  if (isLoading && loadingTimeout) {
+    return <EmptyGreetingsState onUploadClick={onUploadClick} />;
+  }
+
+  if (isLoading && !loadingTimeout) {
     return (
       <div className="flex justify-center items-center h-40">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
