@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/auth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Phone } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -73,11 +73,15 @@ const Login = () => {
     }
   };
 
-  
   return (
     <div className="container max-w-md mx-auto py-10">
       <Card className="border border-border/40 shadow-sm">
         <CardHeader className="space-y-1">
+          <div className="flex justify-center mb-2">
+            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white">
+              <Phone size={32} />
+            </div>
+          </div>
           <CardTitle className="text-2xl font-semibold text-center">
             Log in to your account
           </CardTitle>
