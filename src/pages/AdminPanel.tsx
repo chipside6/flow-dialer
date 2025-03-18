@@ -2,8 +2,8 @@
 import React from "react";
 import { UsersDataFetcher } from "@/components/admin/UsersDataFetcher";
 
-// AdminPanel is now simplified since the ProtectedRoute component handles authentication
 const AdminPanel = () => {
+  console.log("AdminPanel - Rendering component");
   return <UsersDataFetcher />;
 };
 

@@ -14,7 +14,7 @@ export function UsersDataFetcher() {
   console.log("UsersDataFetcher - Component rendering");
 
   const { 
-    data: users, 
+    data: users = [], 
     isLoading, 
     error, 
     refetch, 
@@ -55,6 +55,22 @@ export function UsersDataFetcher() {
   // Calculate stats - providing defaults for when data isn't available
   const userCount = users?.length ?? 0;
   const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
+
+  // Force rendering content after a reasonable timeout, even if still loading
+  const [forceRender, setForceRender] = React.useState(false);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoading && !users.length) {
+        console.log("UsersDataFetcher - Forcing render after timeout");
+        setForceRender(true);
+      }
+    }, 3000); // 3 second timeout
+    
+    return () => clearTimeout(timer);
+  }, [isLoading, users]);
+
+  const shouldShowContent = !isLoading || users.length > 0 || forceRender;
 
   return (
     <DashboardLayout>
@@ -107,7 +123,7 @@ export function UsersDataFetcher() {
           </Alert>
         )}
 
-        {isLoading && !users && (
+        {(!shouldShowContent) && (
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
               {[1, 2, 3].map((i) => (
@@ -118,7 +134,7 @@ export function UsersDataFetcher() {
           </div>
         )}
 
-        {(!isLoading || users) && (
+        {shouldShowContent && (
           <>
             <AdminHeader 
               userCount={userCount} 
@@ -126,8 +142,8 @@ export function UsersDataFetcher() {
             />
             
             <UserManagement 
-              users={users || []} 
-              isLoading={isLoading} 
+              users={users} 
+              isLoading={isLoading || isRefetching} 
               error={error instanceof Error ? error : null} 
               onRetry={handleRetry}
             />

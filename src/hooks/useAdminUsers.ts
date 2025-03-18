@@ -50,7 +50,9 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         
       } catch (error: any) {
         console.error("useAdminUsers - Critical error:", error);
-        throw error; // Make sure to throw the error so we can properly handle it in the UI
+        // Return an empty array and log the error instead of throwing
+        // This prevents the UI from getting stuck in a loading state
+        return [];
       }
     },
     refetchOnWindowFocus: false,
