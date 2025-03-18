@@ -21,12 +21,6 @@ const features = [
     imageUrl: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=800&h=600&q=80"
   },
   {
-    title: "Multi-channel Integration",
-    description: "Connect your calling campaigns with email, SMS, and other communication channels for comprehensive outreach.",
-    icon: "📱",
-    imageUrl: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=800&h=600&q=80"
-  },
-  {
     title: "Compliance Management",
     description: "Stay compliant with calling regulations with built-in compliance tools and do-not-call list integration.",
     icon: "✅",
