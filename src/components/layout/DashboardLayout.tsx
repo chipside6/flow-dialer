@@ -37,21 +37,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [location.pathname, isMobile, setOpenMobile, openMobile]);
   
-  // Control body overflow when sidebar is open
-  useEffect(() => {
-    if (isMobile) {
-      if (openMobile) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = '';
-      }
-    }
-    
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [openMobile, isMobile]);
-  
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },
     { name: "Campaigns", path: "/campaign", icon: <BarChart3 className="h-5 w-5" /> },
@@ -65,14 +50,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const isAdmin = profile?.is_admin === true;
   
   return (
-    <div className="flex flex-1 w-full overflow-x-hidden">
+    <div className="flex flex-1 w-full">
       {/* Mobile menu button - always visible on mobile */}
       {isMobile && (
         <div className="fixed top-4 left-4 z-50">
           <Button 
             variant="outline" 
             size="icon" 
-            className="bg-background rounded-full shadow-md" 
+            className="bg-background rounded-full" 
             onClick={toggleSidebar}
           >
             <Menu size={20} />
@@ -138,8 +123,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </SidebarContent>
       </Sidebar>
-      <SidebarInset className="p-0 md:p-6 bg-background/50 dark:bg-background/10 min-h-screen pt-16 md:pt-6 overflow-x-hidden">
-        <div className="max-w-6xl mx-auto w-full px-4 overflow-x-hidden">
+      <SidebarInset className="p-4 md:p-6 bg-background/50 dark:bg-background/10 min-h-screen pt-16 md:pt-6">
+        <div className="max-w-6xl mx-auto w-full">
           {children}
         </div>
       </SidebarInset>

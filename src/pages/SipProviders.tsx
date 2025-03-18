@@ -18,24 +18,22 @@ const SipProviders = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 max-w-full overflow-x-hidden">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">SIP Providers</h1>
-        </div>
-        
-        <SipProviderForm 
-          onSubmit={handleAddProvider}
-          editingProvider={editingProvider}
-          onCancel={handleCancelEdit}
-        />
-        
-        <SipProviderTable 
-          providers={providers}
-          onEdit={handleEditProvider}
-          onDelete={handleDeleteProvider}
-          onToggleStatus={toggleProviderStatus}
-        />
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">SIP Providers</h1>
       </div>
+      
+      <SipProviderForm 
+        onSubmit={handleAddProvider}
+        editingProvider={editingProvider}
+        onCancel={handleCancelEdit}
+      />
+      
+      <SipProviderTable 
+        providers={providers}
+        onEdit={handleEditProvider}
+        onDelete={handleDeleteProvider}
+        onToggleStatus={toggleProviderStatus}
+      />
     </DashboardLayout>
   );
 };

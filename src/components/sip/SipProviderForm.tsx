@@ -48,7 +48,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   };
   
   return (
-    <Card className="mb-8 w-full overflow-hidden">
+    <Card className="mb-8">
       <CardHeader>
         <CardTitle className="flex items-center">
           <Plus className="mr-2 h-5 w-5" />
@@ -61,69 +61,64 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-            <div className="w-full">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               <Label htmlFor="provider-name">Provider Name*</Label>
               <Input
                 id="provider-name"
                 placeholder="E.g., Twilio, Vonage, etc."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full"
               />
             </div>
-            <div className="w-full">
+            <div>
               <Label htmlFor="provider-host">Host/Server*</Label>
               <Input
                 id="provider-host"
                 placeholder="E.g., sip.provider.com"
                 value={host}
                 onChange={(e) => setHost(e.target.value)}
-                className="w-full"
               />
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-            <div className="w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               <Label htmlFor="provider-username">Username/Account ID*</Label>
               <Input
                 id="provider-username"
                 placeholder="Enter SIP username or account ID"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full"
               />
             </div>
-            <div className="w-full">
+            <div>
               <Label htmlFor="provider-port">Port</Label>
               <Input
                 id="provider-port"
                 placeholder="Default: 5060"
                 value={port}
                 onChange={(e) => setPort(e.target.value)}
-                className="w-full"
               />
             </div>
           </div>
           
-          <div className="w-full">
+          <div>
             <Label htmlFor="provider-password">Password/API Key*</Label>
-            <div className="relative w-full">
+            <div className="relative">
               <Input
                 id="provider-password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter SIP password or API key"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pr-10"
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -131,18 +126,17 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
             </div>
           </div>
           
-          <div className="w-full">
+          <div>
             <Label htmlFor="provider-description">Description</Label>
             <Input
               id="provider-description"
               placeholder="Enter a description for this SIP provider"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full"
             />
           </div>
           
-          <div className="flex flex-wrap gap-2">
+          <div className="flex space-x-2">
             <Button onClick={handleSubmit}>
               {editingProvider ? (
                 <>
