@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 export const HeroSection = () => {
   return (
-    <section className="pt-40 md:pt-44 pb-20 px-6 md:px-10 overflow-hidden relative">
+    <section className="py-32 md:py-40 px-6 md:px-10 overflow-hidden relative">
       {/* Background gradient shapes */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 to-secondary/5 opacity-70"></div>
@@ -22,15 +22,15 @@ export const HeroSection = () => {
               </span>
             </div>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight leading-tight md:leading-tight animate-slide-up">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight leading-tight md:leading-tight">
               Simplify Your Calling Experience
             </h1>
             
-            <p className="mt-6 text-lg md:text-xl text-muted-foreground animate-slide-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
+            <p className="mt-6 text-lg md:text-xl text-muted-foreground">
               A cutting-edge communication tool with a simple interface to transform the way you connect with others.
             </p>
             
-            <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center animate-slide-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+            <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 justify-center">
               <Button size="lg" className="rounded-full px-8 group" asChild>
                 <Link to="/signup">
                   Try for Free

@@ -24,7 +24,7 @@ const features = [
 
 export const FeaturesSection = () => {
   return (
-    <section className="py-24 px-6 md:px-10 bg-secondary/30 relative overflow-hidden">
+    <section className="py-24 px-6 md:px-10 bg-secondary/10 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 to-secondary/5"></div>
@@ -42,7 +42,7 @@ export const FeaturesSection = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <FeatureCard 
               key={index}
@@ -74,7 +74,7 @@ const FeatureCard = ({
 }) => {
   return (
     <div 
-      className="bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up opacity-0 overflow-hidden" 
+      className="bg-card rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden" 
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
     >
       <div className="h-40 overflow-hidden">

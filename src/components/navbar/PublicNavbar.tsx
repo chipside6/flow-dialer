@@ -14,7 +14,7 @@ interface PublicNavbarProps {
 
 export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen }: PublicNavbarProps) => {
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b ${isScrolled ? 'shadow-sm' : 'border-transparent'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 py-4 ${isScrolled ? 'bg-background/80 backdrop-blur-sm shadow-sm border-b' : 'border-transparent'}`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
@@ -41,11 +41,11 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
           </nav>
         </div>
         
-        <div className="hidden md:flex items-center gap-2">
-          <Button variant="ghost" asChild>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" asChild className="hidden md:flex">
             <Link to="/login">Log In</Link>
           </Button>
-          <Button asChild>
+          <Button className="bg-primary rounded-full" asChild>
             <Link to="/signup">Get Started</Link>
           </Button>
         </div>

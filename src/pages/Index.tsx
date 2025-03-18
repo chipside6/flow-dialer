@@ -10,7 +10,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-20"> {/* Added padding to prevent content from being hidden under navbar */}
+      <main> 
         <HeroSection />
         <FeaturesSection />
         <TestimonialsSection />
