@@ -57,17 +57,17 @@ export function UsersDataFetcher() {
     refetch();
   };
 
-  // CRITICAL FIX: Only show loading during initial fetch when users array is undefined
-  // This prevents getting stuck in the loading state
-  if ((isLoading || isFetching) && !Array.isArray(users)) {
-    console.log("UsersDataFetcher - Showing loading screen (users is not an array yet)");
+  // UPDATED CONDITION: Only show loading during initial load, not during refetches
+  // This prevents getting stuck in loading state during background refreshes
+  if (isLoading && !isRefetching && !Array.isArray(users)) {
+    console.log("UsersDataFetcher - Showing initial loading screen");
     return (
       <DashboardLayout>
         <div className="h-[calc(100vh-200px)] w-full flex flex-col items-center justify-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
           <span className="text-xl font-medium">Loading admin panel data...</span>
           <p className="text-sm text-muted-foreground mt-2">
-            {isFetching ? "Fetching data..." : "Initializing..."}
+            Initializing...
           </p>
           <Button 
             variant="outline" 
@@ -169,6 +169,13 @@ export function UsersDataFetcher() {
               </Button>
             </AlertDescription>
           </Alert>
+        )}
+
+        {isFetching && (
+          <div className="flex items-center space-x-2 mb-4 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm">Refreshing data...</span>
+          </div>
         )}
 
         <AdminHeader userCount={userCount} affiliateCount={affiliateCount} />
