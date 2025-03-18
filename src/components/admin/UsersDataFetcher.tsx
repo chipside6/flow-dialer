@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Loader2, Info, RefreshCw } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -25,37 +25,15 @@ export function UsersDataFetcher() {
     staleTime: 10000 // Shorter stale time
   });
 
-  useEffect(() => {
-    console.log("UsersDataFetcher - Data status:", { 
-      isLoading, 
-      isRefetching,
-      isFetching,
-      isSuccess, 
-      hasError: !!error,
-      status,
-      userCount: users?.length ?? 0,
-      hasUsersData: Array.isArray(users)
-    });
-    
-    // Auto-retry once if we have an error but no users
-    if (error && !users && !isRefetching && !isFetching) {
-      console.log("UsersDataFetcher - Auto-retrying after error");
-      setTimeout(() => refetch(), 1000);
-    }
-  }, [users, isLoading, error, isRefetching, isSuccess, status, isFetching, refetch]);
-
-  // Calculate stats - providing defaults in case data isn't available yet
-  const userCount = users?.length ?? 0;
-  const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
-  const hasLimitedData = users?.some(user => user.email === "Unknown");
-
-  console.log("UsersDataFetcher - Rendering with stats:", { 
-    userCount, 
-    affiliateCount, 
-    hasLimitedData,
-    isLoading,
+  console.log("UsersDataFetcher - Data status:", { 
+    isLoading, 
+    isRefetching,
     isFetching,
-    isSuccess
+    isSuccess, 
+    hasError: !!error,
+    status,
+    userCount: users?.length ?? 0,
+    hasUsersData: Array.isArray(users)
   });
 
   const handleRetry = () => {
@@ -63,8 +41,12 @@ export function UsersDataFetcher() {
     refetch();
   };
 
-  // Always render content after initial mount, regardless of loading state
-  // This ensures we don't get stuck in a loading screen
+  // Calculate stats - providing defaults in case data isn't available yet
+  const userCount = users?.length ?? 0;
+  const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
+  const hasLimitedData = users?.some(user => user.email === "Unknown");
+
+  // Always render content regardless of loading state
   return (
     <DashboardLayout>
       <div className="space-y-6 py-8">
@@ -126,7 +108,7 @@ export function UsersDataFetcher() {
         
         <UserManagement 
           users={users || []} 
-          isLoading={isLoading || isFetching} 
+          isLoading={isLoading && !users} 
           error={error instanceof Error ? error : null} 
           onRetry={handleRetry}
         />

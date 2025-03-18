@@ -1,42 +1,24 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { UsersDataFetcher } from "@/components/admin/UsersDataFetcher";
 import { Loader2 } from "lucide-react";
 
 const AdminPanel = () => {
-  const { user, profile, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
-  const [authChecked, setAuthChecked] = useState(false);
   
   useEffect(() => {
-    console.log("AdminPanel - Auth status:", { 
-      isLoading, 
-      hasUser: !!user, 
-      authChecked,
-      isAdmin: profile?.is_admin
-    });
-
     // Only redirect if we're done loading and the user isn't authenticated
-    if (!isLoading) {
-      setAuthChecked(true);
-      if (!user) {
-        console.log("AdminPanel - User not authenticated, redirecting to login");
-        navigate("/login", { replace: true });
-      }
+    if (!isLoading && !user) {
+      console.log("AdminPanel - User not authenticated, redirecting to login");
+      navigate("/login", { replace: true });
     }
-    
-    // Force continue after a very short timeout to prevent getting stuck
-    const timer = setTimeout(() => {
-      setAuthChecked(true);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [user, isLoading, navigate, profile]);
+  }, [user, isLoading, navigate]);
 
   // If still checking auth, show minimal loading
-  if (isLoading && !authChecked) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
@@ -45,15 +27,12 @@ const AdminPanel = () => {
     );
   }
 
-  // If no user, redirect
+  // If no user, don't render anything (redirect will happen in useEffect)
   if (!user) {
-    console.log("AdminPanel - No user after auth check, redirecting");
-    navigate("/login", { replace: true });
     return null;
   }
 
   // User is authenticated, render the admin panel
-  console.log("AdminPanel - Rendering admin panel for authenticated user");
   return <UsersDataFetcher />;
 };
 

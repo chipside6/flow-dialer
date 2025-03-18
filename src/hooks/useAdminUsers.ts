@@ -1,7 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminPanelUser, UserProfile } from "@/components/admin/UserManagement";
+import { AdminPanelUser } from "@/components/admin/UserManagement";
 
 interface UseAdminUsersOptions {
   enabled?: boolean;
@@ -48,9 +48,9 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
           }));
         };
         
+        // Try to fetch auth data, but fall back to using profiles only if not an admin
         try {
-          console.log("useAdminUsers - Attempting to access admin API");
-          // Attempt to use admin API (will fail for non-admin users)
+          // Attempt to get auth data (will fail for non-admin users)
           const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
           if (authError) {
@@ -67,10 +67,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
           
           // Join users with their profiles
           const usersWithProfiles = authData.users.map((user: any): AdminPanelUser => {
-            // Find the profile that matches the user ID
             const profile = profiles?.find((p: any) => p.id === user.id);
-            
-            // If profile exists, add user_id property for component compatibility
             const formattedProfile = profile ? {
               ...profile,
               user_id: user.id
@@ -88,19 +85,21 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
           return usersWithProfiles;
         } catch (error: any) {
           console.log("useAdminUsers - Error accessing admin API, using profiles only:", error);
+          // Return only profile data if we can't access admin data
           return mapProfilesOnly();
         }
       } catch (error: any) {
         console.error("useAdminUsers - Critical error:", error);
-        // For critical errors, throw to trigger error state in UI
-        throw error;
+        // Return an empty array instead of throwing an error
+        // This prevents the UI from getting stuck in a loading state
+        return [];
       }
     },
     refetchOnWindowFocus: true,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
+    retry: 1, // Reduce retries to prevent long loading states
+    retryDelay: 1000, // Fixed retry delay of 1 second
     enabled,
-    staleTime, // Use the provided stale time
+    staleTime,
     gcTime: 60000 * 5, // Keep data in cache for 5 minutes
   });
 }
