@@ -39,7 +39,6 @@ export const ReviewStep = ({ campaign, contactLists, greetingFiles }: ReviewStep
           <h3 className="font-medium">Schedule</h3>
           <p>
             Start Date: {campaign.schedule.startDate}<br />
-            Timezone: {campaign.schedule.timezone}<br />
             Max concurrent calls: {campaign.schedule.maxConcurrentCalls}
           </p>
           <p className="text-sm text-muted-foreground mt-1">

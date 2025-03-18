@@ -2,7 +2,6 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CampaignData } from "./types";
 
 interface ScheduleStepProps {
@@ -11,7 +10,7 @@ interface ScheduleStepProps {
   onSelectChange: (name: string, value: string) => void;
 }
 
-export const ScheduleStep = ({ campaign, onChange, onSelectChange }: ScheduleStepProps) => {
+export const ScheduleStep = ({ campaign, onChange }: ScheduleStepProps) => {
   return (
     <div className="space-y-4">
       <div>
@@ -26,24 +25,6 @@ export const ScheduleStep = ({ campaign, onChange, onSelectChange }: ScheduleSte
         <p className="text-sm text-muted-foreground mt-1">
           When should this campaign begin?
         </p>
-      </div>
-      
-      <div>
-        <Label htmlFor="timezone">Timezone</Label>
-        <Select
-          value={campaign.schedule.timezone}
-          onValueChange={(value) => onSelectChange("timezone", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a timezone" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
-            <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-            <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-            <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
       
       <div>

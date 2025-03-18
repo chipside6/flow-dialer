@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -32,7 +31,6 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
     transferNumber: "",
     schedule: {
       startDate: new Date().toISOString().split("T")[0],
-      timezone: "America/New_York",
       maxConcurrentCalls: 5
     }
   });
@@ -68,20 +66,10 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    if (name === "timezone") {
-      setCampaign(prev => ({
-        ...prev,
-        schedule: {
-          ...prev.schedule,
-          timezone: value
-        }
-      }));
-    } else {
-      setCampaign(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+    setCampaign(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleNext = () => {

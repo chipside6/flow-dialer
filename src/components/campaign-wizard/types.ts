@@ -8,7 +8,6 @@ export interface CampaignData {
   transferNumber: string;
   schedule: {
     startDate: string;
-    timezone: string;
     maxConcurrentCalls: number;
   };
   status?: "pending" | "running" | "completed" | "paused";
