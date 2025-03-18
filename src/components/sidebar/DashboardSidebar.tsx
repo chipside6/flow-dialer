@@ -10,7 +10,8 @@ import {
   PhoneForwarded, 
   Server, 
   ShieldCheck,
-  X
+  X,
+  User
 } from "lucide-react";
 import { SidebarNavItem } from "@/components/sidebar/SidebarNavItem";
 import LogoutButton from "@/components/LogoutButton";
@@ -41,6 +42,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     { name: "Contact Lists", path: "/contacts", icon: <ContactIcon className="h-5 w-5" /> },
     { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
     { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5" /> },
+    { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
   ];
   
   // Add admin link for admin users
