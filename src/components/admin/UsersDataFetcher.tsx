@@ -19,7 +19,8 @@ export function UsersDataFetcher() {
     refetch, 
     isRefetching,
     isSuccess,
-    status
+    status,
+    isFetching
   } = useAdminUsers({
     enabled: true // Force enable the query
   });
@@ -28,13 +29,14 @@ export function UsersDataFetcher() {
     console.log("UsersDataFetcher - Data status:", { 
       isLoading, 
       isRefetching,
+      isFetching,
       isSuccess, 
       hasError: !!error,
       status,
       userCount: users?.length ?? 0,
-      users: users 
+      hasUsersData: Array.isArray(users)
     });
-  }, [users, isLoading, error, isRefetching, isSuccess, status]);
+  }, [users, isLoading, error, isRefetching, isSuccess, status, isFetching]);
 
   // Calculate stats
   const userCount = users?.length ?? 0;
@@ -46,6 +48,7 @@ export function UsersDataFetcher() {
     affiliateCount, 
     hasLimitedData,
     isLoading,
+    isFetching,
     isSuccess
   });
 
@@ -54,23 +57,35 @@ export function UsersDataFetcher() {
     refetch();
   };
 
-  // FIXED: Only show the loading screen during the initial loading when we have no data
-  // Important: We want to render content as soon as users is defined, even if empty array
-  if (isLoading && users === undefined) {
-    console.log("UsersDataFetcher - Showing loading screen (users undefined)");
+  // CRITICAL FIX: Only show loading during initial fetch when users array is undefined
+  // This prevents getting stuck in the loading state
+  if ((isLoading || isFetching) && !Array.isArray(users)) {
+    console.log("UsersDataFetcher - Showing loading screen (users is not an array yet)");
     return (
       <DashboardLayout>
         <div className="h-[calc(100vh-200px)] w-full flex flex-col items-center justify-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
           <span className="text-xl font-medium">Loading admin panel data...</span>
+          <p className="text-sm text-muted-foreground mt-2">
+            {isFetching ? "Fetching data..." : "Initializing..."}
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRetry}
+            className="mt-4"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
         </div>
       </DashboardLayout>
     );
   }
 
   // This ensures we show an error page only if we have an error AND no data
-  if (error && users === undefined) {
-    console.log("UsersDataFetcher - Showing error screen (users undefined)");
+  if (error && !Array.isArray(users)) {
+    console.log("UsersDataFetcher - Showing error screen (users is not an array)");
     return (
       <DashboardLayout>
         <div className="space-y-6 py-8">
@@ -108,7 +123,8 @@ export function UsersDataFetcher() {
     );
   }
 
-  // Show the main interface with whatever data we have, even if it's an empty array
+  // Proceed with rendering the main content with whatever data we have
+  // At this point, users should always be an array (even if empty)
   console.log("UsersDataFetcher - Showing main content screen with users:", users?.length ?? 0);
   
   return (
@@ -159,7 +175,7 @@ export function UsersDataFetcher() {
         
         <UserManagement 
           users={users || []} 
-          isLoading={isLoading || isRefetching} 
+          isLoading={isFetching} 
           error={error instanceof Error ? error : null} 
           onRetry={handleRetry}
         />

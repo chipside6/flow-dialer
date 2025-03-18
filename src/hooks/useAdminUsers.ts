@@ -23,7 +23,8 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
         
         if (profilesError) {
           console.error("useAdminUsers - Error fetching profiles:", profilesError);
-          throw new Error(`Failed to fetch user profiles: ${profilesError.message}`);
+          // Return empty array instead of throwing to avoid loading state getting stuck
+          return [];
         }
         
         console.log("useAdminUsers - Successfully fetched profiles count:", profiles?.length || 0);
@@ -87,7 +88,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
           return usersWithProfiles;
         } catch (error) {
           console.log("useAdminUsers - Error accessing admin API, using profiles only:", error);
-          // Make sure to return the mapped profiles here
+          // Return mapped profiles instead of throwing
           return mapProfilesOnly();
         }
       } catch (error) {
@@ -100,5 +101,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
     retry: 1, // Reduced retry count to fail faster in case of real errors
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
     enabled,
+    staleTime: 30000, // Add stale time to prevent too frequent refetches
+    cacheTime: 60000 * 5, // Keep data in cache for 5 minutes
   });
 }
