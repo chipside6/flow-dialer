@@ -65,6 +65,7 @@ export const Navbar = () => {
             >
               <Menu size={24} />
             </button>
+            {/* Hide the logo text in dashboard mode on mobile to prevent overlap */}
             <Link 
               to="/" 
               className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"
@@ -72,7 +73,7 @@ export const Navbar = () => {
               <span className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
                 <Phone size={18} />
               </span>
-              Flow Dialer
+              <span className="md:inline hidden">Flow Dialer</span>
             </Link>
           </div>
           

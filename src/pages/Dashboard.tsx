@@ -8,7 +8,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <div className="flex flex-1 w-full pt-16"> {/* This pt-16 creates space for the fixed navbar */}
+      <div className="flex flex-1 w-full"> {/* Removed pt-16 since it's now handled in the SidebarInset component */}
         <DashboardLayout>
           <DashboardContent />
         </DashboardLayout>

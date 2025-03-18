@@ -32,7 +32,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="flex flex-1 w-full">
       <Sidebar collapsible="offcanvas">
         <SidebarHeader>
-          <div className="flex items-center p-4">
+          <div className="flex items-center p-4 mt-14 md:mt-0"> {/* Added mt-14 for mobile to account for navbar height */}
             <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3">
               <Phone size={18} />
             </div>
