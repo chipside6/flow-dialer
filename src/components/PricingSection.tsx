@@ -21,50 +21,47 @@ export const PricingSection = () => {
           {pricingPlans.map((plan) => (
             <div 
               key={plan.id}
-              className={`
-                rounded-2xl p-8 border border-border/70 transition-all duration-300
-                ${plan.popular 
-                  ? 'bg-card shadow-lg relative scale-105 md:scale-110 z-10' 
-                  : 'bg-card/50 hover:shadow-md'}
-              `}
+              className="rounded-lg shadow-sm border border-border/70 bg-white overflow-hidden"
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-primary text-white text-xs font-medium rounded-full">
+                <div className="bg-primary py-3 text-center text-white text-sm font-medium">
                   Most Popular
                 </div>
               )}
               
-              <h3 className="text-xl font-semibold">{plan.name}</h3>
-              <p className="text-muted-foreground mt-2 text-sm">{plan.description}</p>
-              
-              <div className="mt-6 mb-6">
-                {plan.price === 0 ? (
-                  <span className="text-4xl font-bold">Free</span>
-                ) : (
-                  <>
-                    <span className="text-4xl font-bold">${plan.price}</span>
-                    <span className="text-muted-foreground">/month</span>
-                  </>
-                )}
-              </div>
-              
-              <Link to={plan.price === 0 ? "/signup" : "/billing"}>
-                <Button 
-                  className={`w-full rounded-full ${plan.popular ? '' : 'bg-primary/90 hover:bg-primary'}`}
-                >
-                  {plan.price === 0 ? 'Sign Up Free' : 'Get Started'}
-                </Button>
-              </Link>
-              
-              <div className="mt-8 space-y-4">
-                {plan.features.map((feature, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <div className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-                      <Check className="h-3 w-3 text-primary" />
+              <div className="p-6">
+                <h3 className="text-xl font-semibold">{plan.name}</h3>
+                <p className="text-muted-foreground mt-2 text-sm">{plan.description}</p>
+                
+                <div className="mt-6 mb-6">
+                  {plan.price === 0 ? (
+                    <span className="text-4xl font-bold">Free</span>
+                  ) : (
+                    <div className="flex items-end">
+                      <span className="text-4xl font-bold">${plan.price}</span>
+                      <span className="text-muted-foreground ml-1 mb-1">/month</span>
                     </div>
-                    <span className="text-sm">{feature}</span>
-                  </div>
-                ))}
+                  )}
+                </div>
+                
+                <Link to={plan.price === 0 ? "/signup" : "/billing"}>
+                  <Button 
+                    className="w-full bg-primary hover:bg-primary/90 text-white"
+                  >
+                    {plan.price === 0 ? 'Sign Up Free' : 'Get Started'}
+                  </Button>
+                </Link>
+                
+                <div className="mt-8 space-y-4">
+                  {plan.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-start gap-3">
+                      <div className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                        <Check className="h-3 w-3 text-primary" />
+                      </div>
+                      <span className="text-sm">{feature}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ))}
