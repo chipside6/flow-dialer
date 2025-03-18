@@ -1,0 +1,42 @@
+
+/* Dashboard specific styles */
+
+/* Ensure content doesn't overlap with fixed elements */
+main {
+  padding-top: 4rem;
+}
+
+/* Add some spacing to improve readability */
+.space-y-section {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+/* Fix z-index issues */
+.z-header {
+  z-index: 50;
+}
+
+.z-content {
+  z-index: 10;
+}
+
+.z-overlay {
+  z-index: 40;
+}
+
+/* Sidebar animation fixes */
+[data-sidebar="sidebar"] {
+  transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease !important;
+}
+
+/* Custom sidebar styling in dark mode */
+.dark [data-sidebar="sidebar"] {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+/* Improve mobile drawer appearance */
+[data-sidebar][data-mobile="true"] {
+  padding: 0 !important;
+}
