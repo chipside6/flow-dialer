@@ -42,13 +42,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     if (isMobile) {
       if (openMobile) {
         document.body.style.overflow = 'hidden';
+        document.body.classList.add('mobile-menu-open');
       } else {
         document.body.style.overflow = '';
+        document.body.classList.remove('mobile-menu-open');
       }
     }
     
     return () => {
       document.body.style.overflow = '';
+      document.body.classList.remove('mobile-menu-open');
     };
   }, [openMobile, isMobile]);
   
@@ -64,6 +67,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   // Add admin link for admin users
   const isAdmin = profile?.is_admin === true;
   
+  const handleMenuClick = () => {
+    console.log("Menu button clicked, current state:", openMobile);
+    setOpenMobile(!openMobile);
+  };
+  
   return (
     <div className="flex flex-1 w-full overflow-x-hidden">
       {/* Mobile menu button - always visible on mobile */}
@@ -72,8 +80,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <Button 
             variant="outline" 
             size="icon" 
-            className="bg-background rounded-full shadow-md" 
-            onClick={toggleSidebar}
+            className="bg-background rounded-full shadow-md mobile-menu-button" 
+            onClick={handleMenuClick}
+            aria-label="Open menu"
           >
             <Menu size={20} />
           </Button>
@@ -95,6 +104,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 size="icon" 
                 className="ml-auto" 
                 onClick={() => setOpenMobile(false)}
+                aria-label="Close menu"
               >
                 <X size={20} />
               </Button>

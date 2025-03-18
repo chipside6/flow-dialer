@@ -13,3 +13,17 @@ html, body, #root {
 *, *::before, *::after {
   box-sizing: border-box;
 }
+
+/* Fix for iOS specifically to prevent bouncing */
+html, body {
+  position: relative;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
+}
+
+/* Prevent horizontal overflow at the document level */
+body {
+  overflow-x: hidden !important;
+  width: 100vw;
+  max-width: 100vw;
+}
