@@ -1,19 +1,20 @@
+
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const plans = [
   {
-    name: "Free Trial",
+    name: "Free",
     price: 0,
-    description: "Perfect for getting started",
+    description: "Basic access with limitations",
     features: [
       "1 campaign only",
-      "50 contacts per campaign",
+      "Up to 50 contacts",
       "Basic call functionality",
       "View-only contact lists",
       "Community support",
-      "24-hour campaign duration"
+      "No credit card required"
     ]
   },
   {
@@ -111,7 +112,7 @@ export const PricingSection = () => {
                 <Button 
                   className={`w-full rounded-full ${plan.popular ? '' : 'bg-primary/90 hover:bg-primary'}`}
                 >
-                  {plan.price === 0 ? 'Start Free Trial' : 'Get Started'}
+                  {plan.price === 0 ? 'Sign Up Free' : 'Get Started'}
                 </Button>
               </Link>
               

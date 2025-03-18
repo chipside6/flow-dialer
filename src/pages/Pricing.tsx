@@ -15,7 +15,7 @@ const Pricing = () => {
               Transparent Pricing for Everyone
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Start with a free trial or choose a plan that fits your needs. All plans include 1000 contacts per campaign.
+              Start with our free tier or choose a premium plan that fits your needs. No trials - use the free tier with basic features as long as you want.
             </p>
           </div>
         </section>

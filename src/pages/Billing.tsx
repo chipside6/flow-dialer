@@ -14,16 +14,16 @@ import { supabase } from "@/integrations/supabase/client";
 const plans = [
   {
     id: "free",
-    name: "Free Trial",
+    name: "Free",
     price: 0,
-    description: "Perfect for getting started",
+    description: "Basic access with limitations",
     features: [
       "1 campaign only",
-      "50 contacts per campaign",
+      "Up to 50 contacts",
       "Basic call functionality",
       "View-only contact lists",
       "Community support",
-      "24-hour campaign duration"
+      "No credit card required"
     ]
   },
   {
