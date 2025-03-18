@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PaymentMethodSelector } from "./payment/PaymentMethodSelector";
+import { BillingDetailsForm } from "./payment/BillingDetailsForm";
+import { CreditCardForm } from "./payment/CreditCardForm";
+import { ACHDebitForm } from "./payment/ACHDebitForm";
 
 // Square Web Payments SDK types
 declare global {
@@ -58,6 +59,10 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
     }));
   };
 
+  const handlePaymentMethodChange = (value: 'credit' | 'ach') => {
+    setPaymentMethod(value);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -104,122 +109,22 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <Label htmlFor="paymentMethod">Payment Method</Label>
-            <Select
-              value={paymentMethod}
-              onValueChange={(value) => setPaymentMethod(value as 'credit' | 'ach')}
-            >
-              <SelectTrigger id="paymentMethod">
-                <SelectValue placeholder="Select payment method" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="credit">Credit Card</SelectItem>
-                <SelectItem value="ach">ACH Direct Debit</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <PaymentMethodSelector 
+            paymentMethod={paymentMethod}
+            onPaymentMethodChange={handlePaymentMethodChange}
+          />
 
-          <div className="space-y-1">
-            <Label htmlFor="name">Full Name</Label>
-            <Input 
-              id="name" 
-              name="name" 
-              value={billingDetails.name}
-              onChange={handleInputChange}
-              required 
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label htmlFor="email">Email</Label>
-            <Input 
-              id="email" 
-              name="email" 
-              type="email" 
-              value={billingDetails.email}
-              onChange={handleInputChange}
-              required 
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label htmlFor="address">Billing Address</Label>
-            <Input 
-              id="address" 
-              name="address" 
-              value={billingDetails.address}
-              onChange={handleInputChange}
-              required 
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <div className="space-y-1">
-              <Label htmlFor="city">City</Label>
-              <Input 
-                id="city" 
-                name="city" 
-                value={billingDetails.city}
-                onChange={handleInputChange}
-                required 
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="state">State</Label>
-              <Input 
-                id="state" 
-                name="state" 
-                value={billingDetails.state}
-                onChange={handleInputChange}
-                required 
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="zip">ZIP Code</Label>
-              <Input 
-                id="zip" 
-                name="zip" 
-                value={billingDetails.zip}
-                onChange={handleInputChange}
-                required 
-              />
-            </div>
-          </div>
+          <BillingDetailsForm 
+            billingDetails={billingDetails}
+            handleInputChange={handleInputChange}
+          />
 
           {paymentMethod === 'credit' && (
-            <div className="space-y-1">
-              <Label>Card Details</Label>
-              <div className="p-3 border rounded-md bg-gray-50">
-                <div className="text-sm text-gray-500">
-                  Demo Card Form (Actual Square form would render here)
-                </div>
-                <Input 
-                  placeholder="Card number" 
-                  className="mt-2"
-                  required
-                />
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <Input placeholder="MM/YY" required />
-                  <Input placeholder="CVV" required />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Your card will be charged ${amount.toFixed(2)} monthly.
-              </p>
-            </div>
+            <CreditCardForm amount={amount} />
           )}
 
           {paymentMethod === 'ach' && (
-            <div className="space-y-1">
-              <Label htmlFor="accountNumber">Account Number</Label>
-              <Input id="accountNumber" name="accountNumber" required />
-              <Label htmlFor="routingNumber" className="mt-2">Routing Number</Label>
-              <Input id="routingNumber" name="routingNumber" required />
-              <p className="text-xs text-muted-foreground mt-1">
-                Your account will be debited ${amount.toFixed(2)} monthly.
-              </p>
-            </div>
+            <ACHDebitForm amount={amount} />
           )}
         </form>
       </CardContent>
