@@ -83,12 +83,12 @@
   /* Tab improvements for mobile */
   [role="tablist"] {
     width: 100% !important;
-    gap: 3px !important;
+    gap: 8px !important;
   }
 
   [role="tab"] {
     font-size: 14px !important;
-    padding: 8px 4px !important;
+    padding: 8px 12px !important;
     white-space: normal !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -102,7 +102,9 @@
   [role="tab"] span {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    white-space: normal !important;
     max-width: 100% !important;
+    display: inline-block !important;
   }
   
   /* Fix for file input on mobile */

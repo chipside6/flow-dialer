@@ -85,20 +85,20 @@ const GreetingFiles = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`mb-4 ${isMobile ? 'w-full grid grid-cols-2 gap-3' : 'w-auto'}`}>
+          <TabsList className={`mb-4 ${isMobile ? 'w-full grid grid-cols-2 gap-4' : 'w-auto'}`}>
             <TabsTrigger 
               id="tab-trigger-files" 
               value="files" 
               className="px-4 py-2.5 min-h-[44px]"
             >
-              My Greetings
+              <span className="whitespace-normal">My Greetings</span>
             </TabsTrigger>
             <TabsTrigger 
               id="tab-trigger-upload" 
               value="upload" 
               className="px-4 py-2.5 min-h-[44px]"
             >
-              Add New Greeting
+              <span className="whitespace-normal">Add New Greeting</span>
             </TabsTrigger>
           </TabsList>
           
