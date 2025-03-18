@@ -5,18 +5,17 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Play, Pause } from "lucide-react";
 import { Campaign } from "@/hooks/useCampaigns";
+import { useCampaignContext } from "@/contexts/campaign/CampaignContext";
 
 interface CampaignDetailsProps {
   campaign: Campaign;
-  onStartCampaign: (campaignId: string) => void;
-  onPauseCampaign: (campaignId: string) => void;
 }
 
 export const CampaignDetails: React.FC<CampaignDetailsProps> = ({
-  campaign,
-  onStartCampaign,
-  onPauseCampaign
+  campaign
 }) => {
+  const { startCampaign, pauseCampaign } = useCampaignContext();
+
   return (
     <Card>
       <CardHeader className="bg-muted/40">
@@ -41,11 +40,11 @@ export const CampaignDetails: React.FC<CampaignDetailsProps> = ({
           </div>
           <div className="pt-2">
             {campaign.status === "running" ? (
-              <Button variant="outline" onClick={() => onPauseCampaign(campaign.id)}>
+              <Button variant="outline" onClick={() => pauseCampaign(campaign.id)}>
                 <Pause className="h-4 w-4 mr-2" /> Pause Campaign
               </Button>
             ) : campaign.status === "paused" || campaign.status === "pending" ? (
-              <Button variant="default" onClick={() => onStartCampaign(campaign.id)}>
+              <Button variant="default" onClick={() => startCampaign(campaign.id)}>
                 <Play className="h-4 w-4 mr-2" /> Start Campaign
               </Button>
             ) : null}

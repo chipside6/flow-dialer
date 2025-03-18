@@ -13,13 +13,7 @@ interface CampaignDashboardProps {
 
 // Inner component that uses the context
 const CampaignDashboardContent = () => {
-  const {
-    campaigns,
-    selectedCampaign,
-    setSelectedCampaign,
-    startCampaign,
-    pauseCampaign
-  } = useCampaignContext();
+  const { selectedCampaign } = useCampaignContext();
 
   return (
     <div className="space-y-6">
@@ -28,22 +22,13 @@ const CampaignDashboardContent = () => {
           <CardTitle>Active Campaigns</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <CampaignTable 
-            campaigns={campaigns}
-            onSelectCampaign={setSelectedCampaign}
-            onStartCampaign={startCampaign}
-            onPauseCampaign={pauseCampaign}
-          />
+          <CampaignTable />
         </CardContent>
       </Card>
 
       {selectedCampaign && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <CampaignDetails 
-            campaign={selectedCampaign}
-            onStartCampaign={startCampaign}
-            onPauseCampaign={pauseCampaign}
-          />
+          <CampaignDetails campaign={selectedCampaign} />
           <CampaignStats campaign={selectedCampaign} />
         </div>
       )}
