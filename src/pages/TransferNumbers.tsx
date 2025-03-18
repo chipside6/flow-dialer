@@ -20,24 +20,7 @@ interface TransferNumber {
 }
 
 const TransferNumbers = () => {
-  const [transferNumbers, setTransferNumbers] = useState<TransferNumber[]>([
-    {
-      id: "1",
-      name: "Sales Team",
-      number: "+1-555-123-4567",
-      description: "Transfer to sales department",
-      dateAdded: new Date(2023, 4, 15),
-      callCount: 45
-    },
-    {
-      id: "2",
-      name: "Customer Support",
-      number: "+1-555-987-6543",
-      description: "Transfer to support team for product issues",
-      dateAdded: new Date(2023, 5, 10),
-      callCount: 128
-    }
-  ]);
+  const [transferNumbers, setTransferNumbers] = useState<TransferNumber[]>([]);
   
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
