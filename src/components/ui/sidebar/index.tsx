@@ -1,5 +1,4 @@
 
-import * as React from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { SidebarContext, SidebarProvider, useSidebar } from "./sidebar-context"
@@ -88,4 +87,4 @@ export {
 }
 
 // Also export the context for advanced use cases
-export type { SidebarContext }
+export { SidebarContext }
