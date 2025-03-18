@@ -18,7 +18,7 @@ export function NavItem({ item, isActive, onClick }: NavItemProps) {
     <Link to={item.path} className="block w-full" onClick={onClick}>
       <Button
         variant={isActive ? "default" : "ghost"}
-        className={`w-full justify-start rounded-md py-2 mb-1 text-left ${
+        className={`w-full justify-start rounded-md py-2 mb-1 text-left sidebar-nav-button ${
           isActive 
             ? "bg-primary text-primary-foreground" 
             : "hover:bg-muted hover:text-primary text-foreground"

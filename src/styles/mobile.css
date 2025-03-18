@@ -135,6 +135,7 @@ body.menu-open {
   /* Make the sidebar appear cleaner on mobile */
   [data-sidebar][data-mobile="true"] {
     max-width: 100% !important;
+    width: 85% !important;
   }
   
   /* Customize the mobile sidebar style */
@@ -170,7 +171,18 @@ body.menu-open {
   
   /* Improve drawer components */
   [data-state="open"][data-side="left"] {
-    width: 100% !important;
+    width: 85% !important;
+  }
+
+  /* Ensure page content is visible when navigating to a page */
+  [data-sidebar="sidebar"][data-mobile="true"] {
+    z-index: 100;
+  }
+
+  /* Ensure the main content area is properly positioned */
+  [data-sidebar-inset] {
+    padding-top: 72px !important;
+    min-height: 100vh !important;
   }
 }
 
@@ -182,6 +194,12 @@ body.menu-open {
   
   [data-state="closed"] {
     animation: slideOut 0.3s ease;
+  }
+
+  /* Prevent sidebar from showing behind main content */
+  .main-content {
+    position: relative;
+    z-index: 1;
   }
 }
 
