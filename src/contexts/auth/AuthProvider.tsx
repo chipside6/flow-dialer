@@ -16,6 +16,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated, 
     isAdmin, 
     isAffiliate,
+    authError,
+    sessionChecked,
     setProfile,
     setIsAffiliate
   } = useAuthSession();
@@ -32,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Mark when initial auth check is complete
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && sessionChecked) {
       setInitialized(true);
       if (user) {
         console.log("Auth initialized - User authenticated:", user.email);
@@ -40,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("Auth initialized - No user authenticated");
       }
     }
-  }, [isLoading, user]);
+  }, [isLoading, user, sessionChecked]);
 
   const value: AuthContextType = {
     user,
@@ -50,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin,
     isAffiliate,
     initialized,
+    sessionChecked,
     signUp,
     signIn,
     signInWithGoogle,

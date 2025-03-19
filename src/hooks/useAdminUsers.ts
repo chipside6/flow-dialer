@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminPanelUser } from "@/components/admin/UserManagement";
+import { useAuth } from "@/contexts/auth";
 
 interface UseAdminUsersOptions {
   enabled?: boolean;
@@ -9,7 +10,8 @@ interface UseAdminUsersOptions {
 }
 
 export function useAdminUsers(options: UseAdminUsersOptions = {}) {
-  const { enabled = true, staleTime = 5000 } = options;
+  const { isAuthenticated, isAdmin, sessionChecked } = useAuth();
+  const { enabled = true, staleTime = 60000 } = options;
   
   return useQuery({
     queryKey: ["admin", "users"],
@@ -110,8 +112,9 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
     refetchOnMount: true,
     retry: 3,
     retryDelay: 1000,
-    enabled,
-    staleTime: 0, // No stale time to always fetch fresh data
+    // Only fetch data if user is authenticated, admin, and session has been checked
+    enabled: enabled && isAuthenticated && isAdmin && sessionChecked,
+    staleTime: staleTime, // Cache the data for 1 minute to reduce unnecessary requests
     gcTime: 60000 * 5,
   });
 }

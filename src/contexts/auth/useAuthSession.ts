@@ -13,6 +13,7 @@ export function useAuthSession() {
   const [isAffiliate, setIsAffiliate] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authError, setAuthError] = useState<Error | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   // Function to process user and profile data
   const processUserAndProfile = useCallback(async (sessionUser: User | null) => {
@@ -58,6 +59,7 @@ export function useAuthSession() {
       });
     } finally {
       setIsLoading(false);
+      setSessionChecked(true);
     }
   }, []);
 
@@ -78,6 +80,7 @@ export function useAuthSession() {
         console.error('Error checking auth session:', error);
         setAuthError(error);
         setIsLoading(false);
+        setSessionChecked(true);
         
         toast({
           title: "Session Error",
@@ -110,6 +113,8 @@ export function useAuthSession() {
               title: "Account updated", 
               description: "Your account information has been updated"
             });
+          } else if (event === 'TOKEN_REFRESHED') {
+            console.log("useAuthSession - Token refreshed");
           }
           
           await processUserAndProfile(session?.user || null);
@@ -136,6 +141,7 @@ export function useAuthSession() {
     isAdmin,
     isAffiliate,
     authError,
+    sessionChecked,
     setProfile,
     setIsAffiliate
   };
