@@ -1,14 +1,12 @@
-
 import React from 'react';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-  Outlet,
 } from 'react-router-dom';
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from "@/components/theme-provider"
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from '@/components/ui/toaster';
 
 // Import pages
@@ -50,7 +48,7 @@ function App() {
             <Route path="/404" element={<NotFound />} />
             
             {/* Protected Routes */}
-            <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
+            <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/campaigns" element={<Campaign />} />
               <Route path="/campaigns/new" element={<Campaign />} />
