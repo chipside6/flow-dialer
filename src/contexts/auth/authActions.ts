@@ -54,7 +54,7 @@ export const signInWithGoogleAction = async () => {
       if (error.message?.includes('provider is not enabled') || error.message?.includes('validation_failed')) {
         toast({
           title: "Google Sign-In Not Available",
-          description: "Google authentication has not been configured. Please sign in with email and password instead.",
+          description: "Google authentication has not been configured in the Supabase project. Please sign in with email and password instead.",
           variant: "destructive",
         });
       } else {
@@ -124,4 +124,3 @@ export const setAsAffiliateAction = async (userId: string) => {
     return { success: false, error };
   }
 };
-

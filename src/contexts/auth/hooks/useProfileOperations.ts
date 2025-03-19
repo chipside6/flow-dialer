@@ -2,9 +2,10 @@
 import { UserProfile } from '../types';
 import { updateUserProfileAction, setAsAffiliateAction } from '../authActions';
 import { toast } from '@/components/ui/use-toast';
+import { User } from '@supabase/supabase-js';
 
 export function useProfileOperations(
-  user: { id: string } | null, 
+  user: User | null, 
   setProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>,
   setIsAffiliate: React.Dispatch<React.SetStateAction<boolean>>
 ) {
