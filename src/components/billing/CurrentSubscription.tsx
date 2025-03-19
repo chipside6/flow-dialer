@@ -8,20 +8,25 @@ import { PricingPlan } from "@/data/pricingPlans";
 import { Loader2 } from "lucide-react";
 
 export const CurrentSubscription = () => {
-  const { isLoading, currentPlan, fetchCurrentSubscription, getPlanById } = useSubscription();
+  const { isLoading, currentPlan, subscription, fetchCurrentSubscription, getPlanById } = useSubscription();
   const [activePlan, setActivePlan] = useState<PricingPlan | null>(null);
 
   useEffect(() => {
     const loadSubscription = async () => {
-      const subscription = await fetchCurrentSubscription();
-      if (subscription && subscription.plan_id) {
-        const plan = getPlanById(subscription.plan_id);
-        if (plan) setActivePlan(plan);
-      }
+      await fetchCurrentSubscription();
     };
     
     loadSubscription();
   }, []);
+
+  useEffect(() => {
+    if (currentPlan) {
+      const plan = getPlanById(currentPlan);
+      if (plan) setActivePlan(plan);
+    } else {
+      setActivePlan(null);
+    }
+  }, [currentPlan]);
 
   if (isLoading) {
     return (
@@ -43,6 +48,11 @@ export const CurrentSubscription = () => {
       </Card>
     );
   }
+
+  // Calculate subscription end date for display
+  const endDate = subscription?.current_period_end 
+    ? new Date(subscription.current_period_end).toLocaleDateString() 
+    : 'Unknown';
 
   return (
     <Card className="mb-8">
@@ -71,6 +81,12 @@ export const CurrentSubscription = () => {
                 <li key={idx}>{feature}</li>
               ))}
             </ul>
+          </div>
+
+          <div className="pt-2 border-t">
+            <p className="text-sm text-muted-foreground">
+              Next billing date: {endDate}
+            </p>
           </div>
         </div>
       </CardContent>
