@@ -90,47 +90,45 @@ export function useAuthSession() {
       }
     };
 
-    // Subscribe to auth state changes
+    let subscription: { data: { subscription: { unsubscribe: () => void } } };
+
     const setupSubscription = async () => {
-      const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log("useAuthSession - Auth state changed:", event);
-        
-        // Show appropriate toasts based on event
-        if (event === 'SIGNED_IN') {
-          toast({
-            title: "Signed in successfully", 
-            description: "Welcome back!"
-          });
-        } else if (event === 'SIGNED_OUT') {
-          toast({
-            title: "Signed out", 
-            description: "You have been signed out successfully"
-          });
-        } else if (event === 'USER_UPDATED') {
-          toast({
-            title: "Account updated", 
-            description: "Your account information has been updated"
-          });
+      // Subscribe to auth changes
+      subscription = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          console.log("useAuthSession - Auth state changed:", event);
+          
+          if (event === 'SIGNED_IN') {
+            toast({
+              title: "Signed in successfully", 
+              description: "Welcome back!"
+            });
+          } else if (event === 'SIGNED_OUT') {
+            toast({
+              title: "Signed out", 
+              description: "You have been signed out successfully"
+            });
+          } else if (event === 'USER_UPDATED') {
+            toast({
+              title: "Account updated", 
+              description: "Your account information has been updated"
+            });
+          } else if (event === 'TOKEN_REFRESHED') {
+            console.log("useAuthSession - Token refreshed");
+          }
+          
+          await processUserAndProfile(session?.user || null);
         }
-        
-        await processUserAndProfile(session?.user || null);
-      });
-      
-      return data.subscription;
+      );
     };
 
-    let subscription: { unsubscribe: () => void };
-    
-    // Initial session check and setup subscription
-    checkSession().then(async () => {
-      const sub = await setupSubscription();
-      subscription = sub;
-    });
+    checkSession();
+    setupSubscription();
 
     // Cleanup subscription
     return () => {
       if (subscription) {
-        subscription.unsubscribe();
+        subscription.data.subscription.unsubscribe();
       }
     };
   }, [processUserAndProfile]);
