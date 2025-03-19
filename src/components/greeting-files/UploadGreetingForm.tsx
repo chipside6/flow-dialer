@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -75,11 +76,37 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
       setUploadProgress(100);
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to upload file');
+        let errorMessage = 'Failed to upload file';
+        
+        try {
+          // Try to parse the error response as JSON
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          // If parsing fails, use the response text if available
+          const text = await response.text();
+          errorMessage = text || errorMessage;
+          console.error('Parse error:', parseError, 'Response text:', text);
+        }
+        
+        throw new Error(errorMessage);
       }
       
-      const result = await response.json();
+      let result;
+      try {
+        const text = await response.text();
+        // Only try to parse as JSON if the text contains valid JSON
+        if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+          result = JSON.parse(text);
+        } else {
+          console.log('Non-JSON response:', text);
+          result = { success: true };
+        }
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        // Continue as if upload was successful
+        result = { success: true };
+      }
       
       // Refresh the greeting files list
       queryClient.invalidateQueries({ queryKey: ['greetingFiles'] });
@@ -104,7 +131,7 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
       // to make sure the 100% progress is shown
       setTimeout(() => {
         setIsUploading(false);
-      }, 1000); // Increased from 500ms to 1000ms to ensure the progress bar is visible
+      }, 1000);
       
       // Reset the file input element
       const fileInput = document.getElementById('greeting-file') as HTMLInputElement;

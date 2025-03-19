@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+
+import { useState, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -108,11 +109,37 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
       setUploadProgress(100);
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to upload file');
+        let errorMessage = 'Failed to upload file';
+        
+        try {
+          // Try to parse the error response as JSON
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          // If parsing fails, use the response text if available
+          const text = await response.text();
+          errorMessage = text || errorMessage;
+          console.error('Parse error:', parseError, 'Response text:', text);
+        }
+        
+        throw new Error(errorMessage);
       }
       
-      const result = await response.json();
+      let result;
+      try {
+        const text = await response.text();
+        // Only try to parse as JSON if the text contains valid JSON
+        if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+          result = JSON.parse(text);
+        } else {
+          console.log('Non-JSON response:', text);
+          result = { success: true };
+        }
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        // Continue as if upload was successful
+        result = { success: true };
+      }
       
       // Refresh the greeting files list
       queryClient.invalidateQueries({ queryKey: ['greetingFiles'] });
@@ -139,25 +166,25 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
       // Longer delay before resetting upload state to ensure 100% is shown
       setTimeout(() => {
         setIsUploading(false);
-      }, 1000); // Increased from 500ms to 1000ms
+      }, 1000);
     }
   };
 
   // Cleanup function to revoke object URL
-  useState(() => {
+  useEffect(() => {
     return () => {
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
       }
     };
-  });
+  }, [previewUrl]);
 
   // Create preview when audio blob is available
-  useState(() => {
+  useEffect(() => {
     if (audioBlob && !previewUrl) {
       handleCreatePreview();
     }
-  });
+  }, [audioBlob, previewUrl]);
 
   return (
     <div className="space-y-6">
