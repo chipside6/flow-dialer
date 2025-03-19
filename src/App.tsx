@@ -1,16 +1,13 @@
-
 import React from 'react';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-  Outlet,
 } from 'react-router-dom';
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from "@/components/theme-provider"
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from './contexts/auth';
 
 // Import pages
 import Index from './pages/Index';
@@ -39,39 +36,37 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider defaultTheme="dark" storageKey="autodial-theme">
-          <Router>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/404" element={<NotFound />} />
-              
-              {/* Protected Routes */}
-              <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/campaigns" element={<Campaign />} />
-                <Route path="/campaigns/new" element={<Campaign />} />
-                <Route path="/contact-lists" element={<ContactLists />} />
-                <Route path="/contacts/add" element={<AddContacts />} />
-                <Route path="/greeting-files" element={<GreetingFiles />} />
-                <Route path="/transfer-numbers" element={<TransferNumbers />} />
-                <Route path="/sip-providers" element={<SipProviders />} />
-                <Route path="/billing" element={<Billing />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/admin" element={<AdminPanel />} />
-              </Route>
-              
-              <Route path="*" element={<Navigate to="/404" replace />} />
-            </Routes>
-          </Router>
-          <Toaster />
-        </ThemeProvider>
-      </AuthProvider>
+      <ThemeProvider defaultTheme="dark" storageKey="autodial-theme">
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/404" element={<NotFound />} />
+            
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/campaigns" element={<Campaign />} />
+              <Route path="/campaigns/new" element={<Campaign />} />
+              <Route path="/contact-lists" element={<ContactLists />} />
+              <Route path="/contacts/add" element={<AddContacts />} />
+              <Route path="/greeting-files" element={<GreetingFiles />} />
+              <Route path="/transfer-numbers" element={<TransferNumbers />} />
+              <Route path="/sip-providers" element={<SipProviders />} />
+              <Route path="/billing" element={<Billing />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/admin" element={<AdminPanel />} />
+            </Route>
+            
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+        </Router>
+        <Toaster />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
