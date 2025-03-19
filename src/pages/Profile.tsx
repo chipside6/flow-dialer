@@ -4,11 +4,16 @@ import { Navbar } from "@/components/Navbar";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { useAuth } from "@/contexts/auth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const Profile = () => {
   const { user, profile, isAffiliate, isAdmin } = useAuth();
+  const { currentPlan, getPlanById } = useSubscription();
+  
+  const activePlan = currentPlan ? getPlanById(currentPlan) : null;
   
   const getInitials = (name: string) => {
     return name
@@ -38,16 +43,26 @@ const Profile = () => {
                 <p className="text-muted-foreground">
                   {user?.email}
                 </p>
-                <div className="flex gap-2 mt-2">
+                <div className="flex flex-wrap gap-2 mt-2">
                   {isAdmin && (
-                    <span className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs">
+                    <Badge className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs">
                       Admin
-                    </span>
+                    </Badge>
                   )}
                   {isAffiliate && (
-                    <span className="bg-yellow-500/10 text-yellow-600 px-2 py-1 rounded-md text-xs">
+                    <Badge className="bg-yellow-500/10 text-yellow-600 px-2 py-1 rounded-md text-xs">
                       Affiliate
-                    </span>
+                    </Badge>
+                  )}
+                  {activePlan && (
+                    <Badge className="bg-green-500/10 text-green-600 px-2 py-1 rounded-md text-xs">
+                      {activePlan.name} Plan
+                    </Badge>
+                  )}
+                  {!activePlan && (
+                    <Badge className="bg-gray-500/10 text-gray-600 px-2 py-1 rounded-md text-xs">
+                      Free Tier
+                    </Badge>
                   )}
                 </div>
               </div>
@@ -81,6 +96,12 @@ const Profile = () => {
                         {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
+                    {activePlan && (
+                      <div>
+                        <h3 className="font-medium text-sm text-muted-foreground">Current Plan</h3>
+                        <p className="text-sm">{activePlan.name} (${activePlan.price}/month)</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>

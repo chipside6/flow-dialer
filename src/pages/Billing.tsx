@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { SquarePaymentForm } from "@/components/SquarePaymentForm";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { AffiliateNotice } from "@/components/billing/AffiliateNotice";
 import { PlansSection } from "@/components/billing/PlansSection";
@@ -13,6 +13,9 @@ import { pricingPlans, PricingPlan } from "@/data/pricingPlans";
 import { CurrentSubscription } from "@/components/billing/CurrentSubscription";
 import { UpgradePlanSection } from "@/components/billing/UpgradePlanSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PaymentMethodsCard } from "@/components/profile/PaymentMethodsCard";
+import { ArrowLeft } from "lucide-react";
 
 const Billing = () => {
   const { toast } = useToast();
@@ -80,53 +83,70 @@ const Billing = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="py-32 px-6 md:px-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-6">
-              Subscription Management
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              {isAuthenticated 
-                ? "Manage your current subscription or upgrade to unlock more features."
-                : "Choose your plan and set up recurring payments to get started."}
-            </p>
-          </div>
+      {isAuthenticated ? (
+        <div className="flex flex-1 w-full">
+          <DashboardLayout>
+            <div className="container mx-auto py-8 space-y-8">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => navigate('/profile')}>
+                      <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <h1 className="text-3xl font-bold tracking-tight">Billing & Payments</h1>
+                  </div>
+                  <p className="text-muted-foreground ml-9">Manage your subscription and payment methods</p>
+                </div>
+              </div>
 
-          {isAuthenticated && !showPaymentForm && (
-            <Tabs defaultValue="current" className="w-full mb-16">
-              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-                <TabsTrigger value="current">Current Plan</TabsTrigger>
-                <TabsTrigger value="upgrade">Upgrade</TabsTrigger>
-              </TabsList>
-              <TabsContent value="current" className="mt-6">
-                <CurrentSubscription />
-              </TabsContent>
-              <TabsContent value="upgrade" className="mt-6">
-                <UpgradePlanSection />
-              </TabsContent>
-            </Tabs>
-          )}
+              {!showPaymentForm && (
+                <Tabs defaultValue="subscription" className="w-full mb-16">
+                  <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+                    <TabsTrigger value="subscription">Subscription</TabsTrigger>
+                    <TabsTrigger value="payment-methods">Payment Methods</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="subscription" className="mt-6 space-y-8">
+                    <CurrentSubscription />
+                    <UpgradePlanSection />
+                  </TabsContent>
+                  <TabsContent value="payment-methods" className="mt-6">
+                    <PaymentMethodsCard />
+                  </TabsContent>
+                </Tabs>
+              )}
 
-          {(!isAuthenticated || !user) && !showPaymentForm && (
-            <PlansSection plans={pricingPlans} onSelectPlan={handleSelectPlan} />
-          )}
-
-          {showPaymentForm && (
-            <div className="max-w-md mx-auto">
-              <Button variant="outline" onClick={handleBack} className="mb-6">
-                ← Back to Plans
-              </Button>
-              <SquarePaymentForm 
-                amount={selectedPlan?.price || 0}
-                planName={selectedPlan?.name || ""}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-              />
+              {showPaymentForm && (
+                <div className="max-w-md mx-auto">
+                  <Button variant="outline" onClick={handleBack} className="mb-6">
+                    ← Back to Plans
+                  </Button>
+                  <SquarePaymentForm 
+                    amount={selectedPlan?.price || 0}
+                    planName={selectedPlan?.name || ""}
+                    onSuccess={handlePaymentSuccess}
+                    onError={handlePaymentError}
+                  />
+                </div>
+              )}
             </div>
-          )}
+          </DashboardLayout>
         </div>
-      </main>
+      ) : (
+        <main className="py-32 px-6 md:px-10">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-6">
+                Subscription Management
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+                Choose your plan and set up recurring payments to get started.
+              </p>
+            </div>
+
+            <PlansSection plans={pricingPlans} onSelectPlan={handleSelectPlan} />
+          </div>
+        </main>
+      )}
     </div>
   );
 };
