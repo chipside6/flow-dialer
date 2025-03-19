@@ -10,11 +10,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { AffiliateNotice } from "@/components/billing/AffiliateNotice";
 import { PlansSection } from "@/components/billing/PlansSection";
 import { pricingPlans, PricingPlan } from "@/data/pricingPlans";
+import { CurrentSubscription } from "@/components/billing/CurrentSubscription";
+import { UpgradePlanSection } from "@/components/billing/UpgradePlanSection";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Billing = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isAffiliate, user } = useAuth();
+  const { isAffiliate, user, isAuthenticated } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   
@@ -81,16 +84,35 @@ const Billing = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-6">
-              Subscribe to a Plan
+              Subscription Management
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Choose your plan and set up recurring payments to get started.
+              {isAuthenticated 
+                ? "Manage your current subscription or upgrade to unlock more features."
+                : "Choose your plan and set up recurring payments to get started."}
             </p>
           </div>
 
-          {!showPaymentForm ? (
+          {isAuthenticated && !showPaymentForm && (
+            <Tabs defaultValue="current" className="w-full mb-16">
+              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+                <TabsTrigger value="current">Current Plan</TabsTrigger>
+                <TabsTrigger value="upgrade">Upgrade</TabsTrigger>
+              </TabsList>
+              <TabsContent value="current" className="mt-6">
+                <CurrentSubscription />
+              </TabsContent>
+              <TabsContent value="upgrade" className="mt-6">
+                <UpgradePlanSection />
+              </TabsContent>
+            </Tabs>
+          )}
+
+          {(!isAuthenticated || !user) && !showPaymentForm && (
             <PlansSection plans={pricingPlans} onSelectPlan={handleSelectPlan} />
-          ) : (
+          )}
+
+          {showPaymentForm && (
             <div className="max-w-md mx-auto">
               <Button variant="outline" onClick={handleBack} className="mb-6">
                 ← Back to Plans
