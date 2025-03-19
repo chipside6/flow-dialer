@@ -1,150 +1,74 @@
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
+import { ThemeProvider } from "@/components/theme-provider"
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Toaster } from '@/components/ui/toaster';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/auth";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { Navbar } from "@/components/Navbar";
-import Index from "./pages/Index";
-import Features from "./pages/Features";
-import Pricing from "./pages/Pricing";
-import Support from "./pages/Support";
-import SignUp from "./pages/SignUp";
-import Login from "./pages/Login";
-import Campaign from "./pages/Campaign";
-import GreetingFiles from "./pages/GreetingFiles";
-import ContactLists from "./pages/ContactLists";
-import TransferNumbers from "./pages/TransferNumbers";
-import SipProviders from "./pages/SipProviders";
-import Dashboard from "./pages/Dashboard";
-import Billing from "./pages/Billing";
-import AdminPanel from "./pages/AdminPanel";
-import Profile from "./pages/Profile";
-import NotFound from "./pages/NotFound";
+// Import pages
+import Index from './pages/Index';
+import Login from './pages/Login';
+import SignUp from './pages/SignUp';
+import Pricing from './pages/Pricing';
+import Features from './pages/Features';
+import Support from './pages/Support';
+import NotFound from './pages/NotFound';
+import Dashboard from './pages/Dashboard';
+import Campaign from './pages/Campaign';
+import ContactLists from './pages/ContactLists';
+import GreetingFiles from './pages/GreetingFiles';
+import TransferNumbers from './pages/TransferNumbers';
+import SipProviders from './pages/SipProviders';
+import Billing from './pages/Billing';
+import Profile from './pages/Profile';
+import AdminPanel from './pages/AdminPanel';
+import AddContacts from './pages/AddContacts';
 
-// Create a new QueryClient with better error handling
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes 
-    },
-    mutations: {
-      retry: 0,
-      onError: (error) => {
-        console.error("Mutation error:", error);
-      }
-    },
-  },
-});
+// Import components
+import ProtectedRoute from './components/ProtectedRoute';
 
-// Import the App.css for styling
-import "./App.css"; 
+const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <SidebarProvider defaultOpen>
-        <AuthProvider>
-          <BrowserRouter>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/login" element={<Login />} />
-              
-              {/* Protected routes */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/campaign" 
-                element={
-                  <ProtectedRoute>
-                    <Campaign />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/greetings" 
-                element={
-                  <ProtectedRoute>
-                    <GreetingFiles />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/contacts" 
-                element={
-                  <ProtectedRoute>
-                    <ContactLists />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/transfers" 
-                element={
-                  <ProtectedRoute>
-                    <TransferNumbers />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/sip-providers" 
-                element={
-                  <ProtectedRoute>
-                    <SipProviders />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/billing" 
-                element={
-                  <ProtectedRoute>
-                    <Billing />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/admin" 
-                element={
-                  <ProtectedRoute>
-                    <AdminPanel />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              {/* Catch-all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </SidebarProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark" storageKey="autodial-theme">
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/404" element={<NotFound />} />
+            
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/campaigns" element={<Campaign />} />
+              <Route path="/campaigns/new" element={<Campaign />} />
+              <Route path="/contact-lists" element={<ContactLists />} />
+              <Route path="/contacts/add" element={<AddContacts />} />
+              <Route path="/greeting-files" element={<GreetingFiles />} />
+              <Route path="/transfer-numbers" element={<TransferNumbers />} />
+              <Route path="/sip-providers" element={<SipProviders />} />
+              <Route path="/billing" element={<Billing />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/admin" element={<AdminPanel />} />
+            </Route>
+            
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+        </Router>
+        <Toaster />
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
