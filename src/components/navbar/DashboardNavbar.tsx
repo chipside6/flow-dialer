@@ -1,12 +1,23 @@
 
 import { Link } from 'react-router-dom';
-import { Menu, Phone } from 'lucide-react';
+import { Menu, Phone, User } from 'lucide-react';
+import { useAuth } from '@/contexts/auth';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import LogoutButton from '@/components/LogoutButton';
 
 interface DashboardNavbarProps {
   toggleSidebar: () => void;
 }
 
 export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
+  const { profile } = useAuth();
+  
   return (
     <header 
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm navbar-dashboard"
@@ -20,9 +31,8 @@ export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
           >
             <Menu size={24} />
           </button>
-          {/* Hide the logo text in dashboard mode on mobile to prevent overlap */}
           <Link 
-            to="/" 
+            to="/dashboard" 
             className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"
           >
             <span className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
@@ -33,7 +43,24 @@ export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
         </div>
         
         <div className="flex items-center gap-2">
-          {/* Dashboard actions could go here */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <User className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/profile">Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/billing">Billing</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <LogoutButton variant="ghost" className="w-full justify-start p-0" />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

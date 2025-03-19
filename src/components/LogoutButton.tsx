@@ -6,23 +6,23 @@ import { useNavigate } from "react-router-dom";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
   className?: string;
-  onClick?: () => void; // Add onClick prop
+  onClick?: () => void;
 }
 
-const LogoutButton = ({ variant = "outline", className, onClick }: LogoutButtonProps) => {
+const LogoutButton = ({ variant = "outline", size = "default", className, onClick }: LogoutButtonProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
   const handleLogout = async () => {
     await signOut();
     navigate("/");
-    // Call the onClick handler if provided
     if (onClick) onClick();
   };
   
   return (
-    <Button variant={variant} onClick={handleLogout} className={className}>
+    <Button variant={variant} size={size} onClick={handleLogout} className={className}>
       <LogOut className="h-4 w-4 mr-2" />
       Logout
     </Button>
