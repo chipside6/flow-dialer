@@ -1,14 +1,16 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useUploadProgress } from '@/hooks/useUploadProgress';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Loader2, Mic, Square, Upload } from 'lucide-react';
 import { AudioWaveform } from './AudioWaveform';
+import { RecordingControls } from './recording/RecordingControls';
+import { PreviewControls } from './recording/PreviewControls';
+import { RecordingStatus } from './recording/RecordingStatus';
+import { RecordingTips } from './recording/RecordingTips';
+import { UploadProgress } from './recording/UploadProgress';
+import { uploadRecording } from './recording/recorderService';
 
 interface RecordGreetingFormProps {
   userId: string | undefined;
@@ -82,64 +84,10 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
     setIsUploading(true);
     
     try {
-      // Create form data for the Edge Function
-      const formData = new FormData();
-      formData.append('file', audioBlob, 'recorded-greeting.webm');
-      
-      // Get the token for authorization
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        throw new Error('No active session');
-      }
-      
-      // Call the Edge Function to upload the file
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-greeting`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: formData,
-        }
-      );
+      await uploadRecording(audioBlob, userId);
       
       // Set progress to 100% when upload completes
       setUploadProgress(100);
-      
-      if (!response.ok) {
-        let errorMessage = 'Failed to upload file';
-        
-        try {
-          // Try to parse the error response as JSON
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-        } catch (parseError) {
-          // If parsing fails, use the response text if available
-          const text = await response.text();
-          errorMessage = text || errorMessage;
-          console.error('Parse error:', parseError, 'Response text:', text);
-        }
-        
-        throw new Error(errorMessage);
-      }
-      
-      let result;
-      try {
-        const text = await response.text();
-        // Only try to parse as JSON if the text contains valid JSON
-        if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
-          result = JSON.parse(text);
-        } else {
-          console.log('Non-JSON response:', text);
-          result = { success: true };
-        }
-      } catch (parseError) {
-        console.error('Error parsing response:', parseError);
-        // Continue as if upload was successful
-        result = { success: true };
-      }
       
       // Refresh the greeting files list
       queryClient.invalidateQueries({ queryKey: ['greetingFiles'] });
@@ -190,19 +138,11 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
     <div className="space-y-6">
       <div className="p-4 border border-dashed border-gray-300 bg-gray-50 rounded-md">
         <div className="text-center mb-4">
-          {isRecording ? (
-            <div className="text-destructive font-medium animate-pulse">
-              Recording in progress... {formattedDuration()}
-            </div>
-          ) : audioBlob ? (
-            <div className="text-green-600 font-medium">
-              Recording complete! {formattedDuration()}
-            </div>
-          ) : (
-            <div className="text-muted-foreground">
-              Click "Start Recording" to begin
-            </div>
-          )}
+          <RecordingStatus 
+            isRecording={isRecording} 
+            formattedDuration={formattedDuration} 
+            hasRecording={!!audioBlob} 
+          />
         </div>
 
         {previewUrl && (
@@ -216,87 +156,41 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
 
         <div className="flex justify-center gap-2">
           {!isRecording && !audioBlob && (
-            <Button 
-              onClick={startRecording}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              <Mic className="h-4 w-4 mr-2" />
-              Start Recording
-            </Button>
+            <RecordingControls
+              isRecording={false}
+              startRecording={startRecording}
+              stopRecording={stopRecording}
+              cancelRecording={cancelRecording}
+            />
           )}
 
           {isRecording && (
-            <>
-              <Button 
-                onClick={stopRecording}
-                variant="outline"
-              >
-                <Square className="h-4 w-4 mr-2" />
-                Stop Recording
-              </Button>
-              <Button 
-                onClick={cancelRecording}
-                variant="ghost"
-              >
-                Cancel
-              </Button>
-            </>
+            <RecordingControls
+              isRecording={true}
+              startRecording={startRecording}
+              stopRecording={stopRecording}
+              cancelRecording={cancelRecording}
+            />
           )}
 
           {audioBlob && !isRecording && (
-            <>
-              <Button
-                onClick={togglePreview}
-                variant="secondary"
-              >
-                {isPreviewPlaying ? 'Pause' : 'Play'} Preview
-              </Button>
-              <Button 
-                onClick={handleUpload}
-                disabled={isUploading}
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Recording
-                  </>
-                )}
-              </Button>
-              <Button 
-                onClick={cancelRecording}
-                variant="ghost"
-              >
-                Discard
-              </Button>
-            </>
+            <PreviewControls
+              isUploading={isUploading}
+              isPreviewPlaying={isPreviewPlaying}
+              togglePreview={togglePreview}
+              handleUpload={handleUpload}
+              cancelRecording={cancelRecording}
+            />
           )}
         </div>
 
-        {(isUploading || uploadProgress === 100) && (
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>{uploadProgress === 100 ? 'Upload complete!' : 'Uploading...'}</span>
-              <span>{uploadProgress}%</span>
-            </div>
-            <Progress value={uploadProgress} className="h-2" />
-          </div>
-        )}
+        <UploadProgress 
+          isUploading={isUploading} 
+          uploadProgress={uploadProgress}
+        />
       </div>
       
-      <div className="text-sm text-muted-foreground">
-        <p>Recording tips:</p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Find a quiet place with minimal background noise</li>
-          <li>Speak clearly at a consistent volume</li>
-          <li>Keep your greeting brief and professional</li>
-          <li>Test your microphone before recording your final version</li>
-        </ul>
-      </div>
+      <RecordingTips />
     </div>
   );
 };
