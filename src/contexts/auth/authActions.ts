@@ -39,18 +39,37 @@ export const signInUser = async (email: string, password: string) => {
 
 export const signInWithGoogleAction = async () => {
   console.log("authActions - Initiating Google sign in");
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${window.location.origin}/dashboard`,
-    }
-  });
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      }
+    });
 
-  if (error) {
+    if (error) {
+      console.error("authActions - Google sign in error:", error.message);
+      
+      // Check for specific error about provider not being enabled
+      if (error.message?.includes('provider is not enabled') || error.message?.includes('validation_failed')) {
+        toast({
+          title: "Google Sign-In Not Available",
+          description: "Google authentication has not been configured. Please sign in with email and password instead.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Authentication error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    }
+  } catch (error: any) {
     console.error("authActions - Google sign in error:", error.message);
     toast({
       title: "Authentication error",
-      description: error.message,
+      description: error.message || "Failed to initiate Google sign-in",
       variant: "destructive",
     });
   }
