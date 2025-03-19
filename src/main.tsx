@@ -1,12 +1,11 @@
 
-// Make sure this file is importing the same CSS files previously imported
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import './App.css'
 import { Toaster } from "@/components/ui/toaster"
-import { Toaster as Sonner } from "@/components/ui/sonner"
+import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/providers"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
@@ -18,7 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ThemeProvider defaultTheme="light" storageKey="flow-dialer-theme">
         <App />
         <Toaster />
-        <Sonner />
+        <SonnerToaster />
       </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>,
