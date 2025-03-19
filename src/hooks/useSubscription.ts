@@ -100,8 +100,7 @@ export const useSubscription = () => {
           status: 'active',
           current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
         }, { 
-          onConflict: 'user_id',
-          returning: 'representation'
+          onConflict: 'user_id'
         });
       
       if (error) {
@@ -116,7 +115,10 @@ export const useSubscription = () => {
       
       console.log("Subscription upgraded successfully:", data);
       setCurrentPlan(newPlanId);
-      setSubscription(data[0]);
+      
+      // Fetch the subscription again to get the full data
+      const updatedSubscription = await fetchCurrentSubscription();
+      setSubscription(updatedSubscription);
       
       toast({
         title: "Plan upgraded",
