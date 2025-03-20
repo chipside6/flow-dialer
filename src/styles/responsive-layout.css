@@ -75,6 +75,29 @@
     font-size: 1.75rem;
     line-height: 2rem;
   }
+  
+  /* Fix wizard component styling */
+  [role="tablist"] {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  [role="tablist"]::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
+  
+  [role="tabpanel"] {
+    padding: 16px 12px;
+  }
+  
+  /* Fix button text overflow issues */
+  button {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
 }
 
 /* Dashboard specific mobile improvements */
@@ -161,5 +184,21 @@
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
+  }
+  
+  /* Fix wizard footer content */
+  [role="dialog"] footer,
+  .card footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+  }
+  
+  /* Campaigns wizard fixes */
+  .card {
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
   }
 }

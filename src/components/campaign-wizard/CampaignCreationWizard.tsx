@@ -7,7 +7,7 @@ import { AudioStep } from "./AudioStep";
 import { TransfersStep } from "./TransfersStep";
 import { ScheduleStep } from "./ScheduleStep";
 import { ReviewStep } from "./ReviewStep";
-import { WizardContainer } from "./WizardContainer";
+import { WizardContainer } from "../WizardContainer";
 import { CampaignData } from "./types";
 import { useAuth } from "@/contexts/auth/useAuth";
 import { useCampaignForm } from "./hooks/useCampaignForm";
