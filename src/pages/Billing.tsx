@@ -12,7 +12,6 @@ import { pricingPlans, PricingPlan } from "@/data/pricingPlans";
 import { CurrentSubscription } from "@/components/billing/CurrentSubscription";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { PaymentMethodsCard } from "@/components/profile/PaymentMethodsCard";
 import { ArrowLeft, Check } from "lucide-react";
 import { CryptoPaymentForm } from "@/components/payment/CryptoPaymentForm";
 
@@ -101,15 +100,14 @@ const Billing = () => {
                     </Button>
                     <h1 className="text-3xl font-bold tracking-tight">Billing & Payments</h1>
                   </div>
-                  <p className="text-muted-foreground ml-9">Manage your plan and payment methods</p>
+                  <p className="text-muted-foreground ml-9">Manage your plan</p>
                 </div>
               </div>
 
               {!showPaymentForm && (
                 <Tabs defaultValue="plan" className="w-full mb-16">
-                  <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+                  <TabsList className="grid w-full max-w-md mx-auto grid-cols-1">
                     <TabsTrigger value="plan">Your Plan</TabsTrigger>
-                    <TabsTrigger value="payment-methods">Payment Methods</TabsTrigger>
                   </TabsList>
                   <TabsContent value="plan" className="mt-6 space-y-8">
                     <CurrentSubscription />
@@ -151,9 +149,6 @@ const Billing = () => {
                         ))}
                       </div>
                     </div>
-                  </TabsContent>
-                  <TabsContent value="payment-methods" className="mt-6">
-                    <PaymentMethodsCard />
                   </TabsContent>
                 </Tabs>
               )}

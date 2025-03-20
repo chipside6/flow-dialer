@@ -3,17 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { PaymentMethodSelector } from "./payment/PaymentMethodSelector";
 import { BillingDetailsForm } from "./payment/BillingDetailsForm";
-import { CreditCardForm } from "./payment/CreditCardForm";
-import { ACHDebitForm } from "./payment/ACHDebitForm";
-
-// Square Web Payments SDK types
-declare global {
-  interface Window {
-    Square: any;
-  }
-}
+import { CryptoPaymentForm } from "./payment/CryptoPaymentForm";
 
 type PaymentFormProps = {
   amount: number;
@@ -26,7 +17,6 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [cardPaymentReady, setCardPaymentReady] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'credit' | 'ach'>('credit');
   const [billingDetails, setBillingDetails] = useState({
     name: '',
     email: '',
@@ -36,14 +26,8 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
     zip: '',
   });
 
-  // Application ID from Square Developer Dashboard (this should be your sandbox application ID for testing)
-  // Note: Using dummy values as placeholders since these would be real credentials
-  const applicationId = 'sandbox-sq0idb-PLACEHOLDER-APP-ID';
-  const locationId = 'PLACEHOLDER-LOCATION-ID';
-
   useEffect(() => {
     // For demo purposes, we'll simulate the payment form being ready
-    // In a real implementation, we would load the Square SDK
     const timer = setTimeout(() => {
       setCardPaymentReady(true);
     }, 1000);
@@ -57,10 +41,6 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
       ...prev,
       [name]: value
     }));
-  };
-
-  const handlePaymentMethodChange = (value: 'credit' | 'ach') => {
-    setPaymentMethod(value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,7 +58,6 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
       });
       
       onSuccess({
-        paymentMethod,
         planName,
         amount,
         timestamp: new Date().toISOString(),
@@ -102,30 +81,21 @@ export const SquarePaymentForm = ({ amount, planName, onSuccess, onError }: Paym
       <CardHeader>
         <CardTitle>Subscribe to {planName}</CardTitle>
         <CardDescription>
-          {paymentMethod === 'credit' 
-            ? 'Enter your card details to set up recurring payment'
-            : 'Set up ACH direct debit for your subscription'}
+          Enter your details to set up cryptocurrency payment
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <PaymentMethodSelector 
-            paymentMethod={paymentMethod}
-            onPaymentMethodChange={handlePaymentMethodChange}
-          />
-
           <BillingDetailsForm 
             billingDetails={billingDetails}
             handleInputChange={handleInputChange}
           />
 
-          {paymentMethod === 'credit' && (
-            <CreditCardForm amount={amount} />
-          )}
-
-          {paymentMethod === 'ach' && (
-            <ACHDebitForm amount={amount} />
-          )}
+          <div className="p-3 border rounded-md bg-gray-50">
+            <p className="text-center text-sm text-gray-700">
+              Payment will be processed via cryptocurrency
+            </p>
+          </div>
         </form>
       </CardContent>
       <CardFooter>

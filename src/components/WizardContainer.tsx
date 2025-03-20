@@ -44,7 +44,7 @@ export const WizardContainer: React.FC<WizardContainerProps> = ({
             setStep={setStep} 
             isStepAvailable={isStepAvailable} 
           />
-          <div className="px-4 sm:px-6 pb-6">
+          <div className="px-4 sm:px-6 pb-6 overflow-x-auto">
             {children}
           </div>
         </Tabs>
