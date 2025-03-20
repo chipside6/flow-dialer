@@ -12,7 +12,6 @@ import { Loader2, Phone } from 'lucide-react';
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signUp, signInWithGoogle } = useAuth();
   const { toast } = useToast();
@@ -23,7 +22,7 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await signUp(email, password, { full_name: fullName });
+      const { error } = await signUp(email, password);
 
       if (error) {
         throw error;
@@ -77,16 +76,6 @@ const SignUp = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="Your full name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

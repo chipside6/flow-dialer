@@ -10,22 +10,22 @@ export const PricingSection = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight mb-6">
-            Simple, Transparent Pricing
+            Simple, One-Time Payment
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Start with our free tier or choose a premium plan that fits your needs. No trials - use the free tier with basic features as long as you want.
+            Start with our free tier or get lifetime access with a one-time payment. No subscriptions or recurring fees.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {pricingPlans.map((plan) => (
             <div 
               key={plan.id}
-              className="rounded-lg shadow-sm border border-border/70 bg-white overflow-hidden"
+              className={`rounded-lg shadow-sm border border-border/70 bg-white overflow-hidden ${plan.popular ? 'md:scale-105' : ''}`}
             >
               {plan.popular && (
                 <div className="bg-primary py-3 text-center text-white text-sm font-medium">
-                  Most Popular
+                  Best Value
                 </div>
               )}
               
@@ -39,7 +39,7 @@ export const PricingSection = () => {
                   ) : (
                     <div className="flex items-end">
                       <span className="text-4xl font-bold">${plan.price}</span>
-                      <span className="text-muted-foreground ml-1 mb-1">/month</span>
+                      <span className="text-muted-foreground ml-1 mb-1">one-time</span>
                     </div>
                   )}
                 </div>
@@ -48,7 +48,7 @@ export const PricingSection = () => {
                   <Button 
                     className="w-full bg-primary hover:bg-primary/90 text-white"
                   >
-                    {plan.price === 0 ? 'Sign Up Free' : 'Get Started'}
+                    {plan.price === 0 ? 'Sign Up Free' : 'Get Lifetime Access'}
                   </Button>
                 </Link>
                 
@@ -69,8 +69,8 @@ export const PricingSection = () => {
         
         <div className="mt-16 text-center">
           <p className="text-muted-foreground">
-            Need a custom plan for your specific requirements?{' '}
-            <a href="/contact" className="text-primary hover:underline">Contact our sales team</a>.
+            Need help with setup?{' '}
+            <a href="/contact" className="text-primary hover:underline">Contact our support team</a>.
           </p>
         </div>
       </div>

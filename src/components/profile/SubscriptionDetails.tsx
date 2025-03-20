@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { 
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, CreditCard, AlertTriangle } from "lucide-react";
+import { Loader2, CreditCard, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -22,34 +23,6 @@ export function SubscriptionDetails() {
   const [isCancelling, setIsCancelling] = React.useState(false);
   
   const activePlan = currentPlan ? getPlanById(currentPlan) : null;
-
-  const handleCancelSubscription = async () => {
-    setIsCancelling(true);
-    
-    try {
-      // For demo purposes, we'll just show a success message
-      // In a real app, this would call an API to cancel the subscription
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Subscription cancelled",
-        description: "Your subscription has been cancelled successfully.",
-      });
-      
-      // Refresh page to update UI
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-    } catch (error) {
-      toast({
-        title: "Error cancelling subscription",
-        description: "There was a problem cancelling your subscription.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsCancelling(false);
-    }
-  };
 
   const goToUpgradePage = () => {
     navigate('/billing');
@@ -69,47 +42,86 @@ export function SubscriptionDetails() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>No Active Subscription</CardTitle>
+          <CardTitle>Free Plan</CardTitle>
           <CardDescription>
-            You don't currently have an active subscription plan.
+            You're currently on the free plan with limited features.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-2 text-muted-foreground mb-4">
             <AlertTriangle className="h-5 w-5" />
-            <span>You're currently on the free tier with limited features.</span>
+            <span>Limited to 500 calls per month</span>
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={goToUpgradePage}>Upgrade Now</Button>
+          <Button onClick={goToUpgradePage}>Upgrade to Lifetime</Button>
         </CardFooter>
       </Card>
     );
   }
 
-  // Calculate the end date for display
-  const endDate = subscription?.current_period_end 
-    ? new Date(subscription.current_period_end).toLocaleDateString() 
-    : 'Unknown';
+  // If user has lifetime plan
+  if (activePlan.isLifetime) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>Lifetime Access</CardTitle>
+            <Badge variant="outline" className="bg-primary/10 text-primary">
+              Lifetime
+            </Badge>
+          </div>
+          <CardDescription>
+            You have unlimited access to all features forever
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xl font-semibold">{activePlan.name} Plan</h3>
+              <p className="text-muted-foreground">One-time payment of ${activePlan.price}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <h4 className="font-medium">Plan Features:</h4>
+              <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                {activePlan.features.map((feature, idx) => (
+                  <li key={idx}>{feature}</li>
+                ))}
+              </ul>
+            </div>
 
+            <div className="pt-4 border-t flex items-center gap-2 text-primary">
+              <CheckCircle2 className="h-5 w-5" />
+              <p className="font-medium">
+                Lifetime access activated
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // For free plan with more details
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Subscription</CardTitle>
-          <Badge variant="outline" className="bg-primary/10 text-primary">
-            Active
+          <CardTitle>Free Plan</CardTitle>
+          <Badge variant="outline" className="bg-muted/50 text-muted-foreground">
+            Limited
           </Badge>
         </div>
         <CardDescription>
-          Your current subscription plan and billing information
+          You're currently on the free plan with limited features
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div>
             <h3 className="text-xl font-semibold">{activePlan.name} Plan</h3>
-            <p className="text-muted-foreground">${activePlan.price}/month</p>
+            <p className="text-muted-foreground">Free access with limitations</p>
           </div>
           
           <div className="space-y-2">
@@ -122,57 +134,19 @@ export function SubscriptionDetails() {
           </div>
 
           <div className="pt-4 border-t">
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">Next billing date:</span> {endDate}
+            <p className="text-sm flex items-center gap-2 text-amber-500">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="font-medium">Limited to 500 calls per month</span>
             </p>
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
+      <CardFooter>
         <Button 
-          variant="outline" 
+          variant="default" 
           onClick={goToUpgradePage}>
-          Upgrade Plan
+          Upgrade to Lifetime
         </Button>
-        
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10">
-              Cancel Subscription
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Cancel Subscription</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to cancel your {activePlan.name} subscription? 
-                You'll lose access to premium features at the end of your current billing period.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" type="button" onClick={() => {
-                const closeButton = document.querySelector('button[aria-label="Close"]') as HTMLButtonElement;
-                if (closeButton) closeButton.click();
-              }}>
-                Keep Subscription
-              </Button>
-              <Button 
-                variant="destructive"
-                onClick={handleCancelSubscription}
-                disabled={isCancelling}
-              >
-                {isCancelling ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Cancelling...
-                  </>
-                ) : (
-                  "Yes, Cancel Subscription"
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </CardFooter>
     </Card>
   );

@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { SquarePaymentForm } from "@/components/SquarePaymentForm";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
@@ -11,11 +10,11 @@ import { AffiliateNotice } from "@/components/billing/AffiliateNotice";
 import { PlansSection } from "@/components/billing/PlansSection";
 import { pricingPlans, PricingPlan } from "@/data/pricingPlans";
 import { CurrentSubscription } from "@/components/billing/CurrentSubscription";
-import { UpgradePlanSection } from "@/components/billing/UpgradePlanSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PaymentMethodsCard } from "@/components/profile/PaymentMethodsCard";
 import { ArrowLeft } from "lucide-react";
+import { CryptoPaymentForm } from "@/components/payment/CryptoPaymentForm";
 
 const Billing = () => {
   const { toast } = useToast();
@@ -25,14 +24,24 @@ const Billing = () => {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   
   const handleSelectPlan = (plan: PricingPlan) => {
+    if (plan.id === "free") {
+      // Free plan doesn't need payment
+      toast({
+        title: "Free Plan Activated",
+        description: "You've been signed up for the free plan.",
+      });
+      navigate("/dashboard");
+      return;
+    }
+    
     setSelectedPlan(plan);
     setShowPaymentForm(true);
   };
   
   const handlePaymentSuccess = async (paymentDetails: any) => {
     toast({
-      title: "Subscription Activated",
-      description: `You're now subscribed to the ${selectedPlan?.name} plan!`,
+      title: "Lifetime Access Activated",
+      description: `You now have lifetime access to all features!`,
     });
     
     // In a real app, save subscription to database
@@ -43,25 +52,22 @@ const Billing = () => {
           plan_id: selectedPlan.id,
           plan_name: selectedPlan.name,
           status: 'active',
-          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          current_period_end: null // Null for lifetime plans
         });
       } catch (error) {
         console.error("Error saving subscription:", error);
       }
     }
+
+    // Send welcome email (this would be handled by a backend function in a real app)
+    if (user) {
+      console.log(`Sending welcome email to: ${user.email}`);
+      // In a real implementation, you would trigger an email send here
+    }
     
     setTimeout(() => {
       navigate("/dashboard");
     }, 2000);
-  };
-  
-  const handlePaymentError = (error: any) => {
-    console.error("Payment failed:", error);
-    toast({
-      title: "Payment Failed",
-      description: "There was an error processing your payment. Please try again.",
-      variant: "destructive",
-    });
   };
   
   const handleBack = () => {
@@ -95,19 +101,56 @@ const Billing = () => {
                     </Button>
                     <h1 className="text-3xl font-bold tracking-tight">Billing & Payments</h1>
                   </div>
-                  <p className="text-muted-foreground ml-9">Manage your subscription and payment methods</p>
+                  <p className="text-muted-foreground ml-9">Manage your plan and payment methods</p>
                 </div>
               </div>
 
               {!showPaymentForm && (
-                <Tabs defaultValue="subscription" className="w-full mb-16">
+                <Tabs defaultValue="plan" className="w-full mb-16">
                   <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-                    <TabsTrigger value="subscription">Subscription</TabsTrigger>
+                    <TabsTrigger value="plan">Your Plan</TabsTrigger>
                     <TabsTrigger value="payment-methods">Payment Methods</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="subscription" className="mt-6 space-y-8">
+                  <TabsContent value="plan" className="mt-6 space-y-8">
                     <CurrentSubscription />
-                    <UpgradePlanSection />
+                    
+                    <div id="upgrade-plans" className="mt-8">
+                      <h2 className="text-2xl font-bold mb-6">Get Lifetime Access</h2>
+                      <div className="grid grid-cols-1 gap-6 max-w-md mx-auto">
+                        {pricingPlans.filter(plan => plan.isLifetime).map((plan) => (
+                          <div
+                            key={plan.id}
+                            className="rounded-lg border border-border/70 p-6 transition-all duration-300 bg-card shadow-md"
+                          >
+                            <h3 className="text-xl font-semibold">{plan.name} Plan</h3>
+                            <p className="text-muted-foreground text-sm mt-1">{plan.description}</p>
+                            
+                            <div className="mt-4 mb-6">
+                              <span className="text-3xl font-bold">${plan.price}</span>
+                              <span className="text-muted-foreground"> one-time payment</span>
+                            </div>
+                            
+                            <div className="space-y-3 mb-6">
+                              {plan.features.map((feature, idx) => (
+                                <div key={idx} className="flex items-start gap-2">
+                                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                                    <Check className="h-3 w-3 text-primary" />
+                                  </div>
+                                  <span className="text-sm">{feature}</span>
+                                </div>
+                              ))}
+                            </div>
+                            
+                            <Button 
+                              className="w-full"
+                              onClick={() => handleSelectPlan(plan)}
+                            >
+                              Get Lifetime Access
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </TabsContent>
                   <TabsContent value="payment-methods" className="mt-6">
                     <PaymentMethodsCard />
@@ -120,11 +163,10 @@ const Billing = () => {
                   <Button variant="outline" onClick={handleBack} className="mb-6">
                     ← Back to Plans
                   </Button>
-                  <SquarePaymentForm 
-                    amount={selectedPlan?.price || 0}
-                    planName={selectedPlan?.name || ""}
-                    onSuccess={handlePaymentSuccess}
-                    onError={handlePaymentError}
+                  <CryptoPaymentForm 
+                    planPrice={selectedPlan?.price || 199}
+                    planName={selectedPlan?.name || "Lifetime"}
+                    onPaymentComplete={handlePaymentSuccess}
                   />
                 </div>
               )}
@@ -136,10 +178,10 @@ const Billing = () => {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-6">
-                Subscription Management
+                Get Lifetime Access
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-                Choose your plan and set up recurring payments to get started.
+                Pay once and use forever. No subscriptions, no recurring fees.
               </p>
             </div>
 

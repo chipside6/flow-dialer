@@ -7,6 +7,8 @@ export interface PricingPlan {
   description: string;
   features: string[];
   popular?: boolean;
+  isFree?: boolean;
+  isLifetime?: boolean;
 }
 
 // Shared pricing plans data
@@ -17,52 +19,21 @@ export const pricingPlans: PricingPlan[] = [
     price: 0,
     description: "Basic access with limitations",
     features: [
-      "500 calls only",
-      "Unlimited campaigns",
+      "500 calls monthly limit",
+      "Limited campaigns",
       "500 contacts per campaign",
       "Cannot modify contact lists once campaign starts",
       "View-only contact lists",
       "Community support",
       "No credit card required"
-    ]
-  },
-  {
-    id: "basic",
-    name: "Basic",
-    price: 49,
-    description: "Perfect for individual users",
-    features: [
-      "5,000 calls",
-      "Unlimited campaigns",
-      "1000 contacts per campaign",
-      "View-only contact lists",
-      "No editing of assigned campaign contacts",
-      "Basic contact management",
-      "Standard support"
-    ]
-  },
-  {
-    id: "professional",
-    name: "Professional",
-    price: 99,
-    description: "Ideal for professionals and small teams",
-    features: [
-      "10,000 calls",
-      "Unlimited campaigns",
-      "1000 contacts per campaign",
-      "View-only contact lists",
-      "Advanced contact management",
-      "Priority support",
-      "Team management features",
-      "Custom branding options"
     ],
-    popular: true
+    isFree: true
   },
   {
-    id: "enterprise",
-    name: "Enterprise",
-    price: 299,
-    description: "For organizations with advanced needs",
+    id: "lifetime",
+    name: "Lifetime",
+    price: 199,
+    description: "One-time payment for unlimited access",
     features: [
       "Unlimited calls",
       "Unlimited campaigns",
@@ -70,8 +41,11 @@ export const pricingPlans: PricingPlan[] = [
       "Call recording & transcription",
       "Advanced analytics",
       "Enhanced security features",
-      "Dedicated account manager",
-      "24/7 premium support"
-    ]
+      "Priority support",
+      "Custom branding options",
+      "Pay once, use forever"
+    ],
+    popular: true,
+    isLifetime: true
   }
 ];

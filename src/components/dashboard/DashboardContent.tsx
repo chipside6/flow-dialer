@@ -1,162 +1,102 @@
-import React, { useState, useEffect } from "react";
-import { DashboardHeader } from "./DashboardHeader";
-import { DashboardCards } from "./DashboardCards";
-import { EmptyCampaignState } from "./EmptyCampaignState";
-import { useCampaigns } from "@/hooks/useCampaigns";
-import BackgroundDialer from "@/components/BackgroundDialer";
-import CampaignDashboard from "@/components/CampaignDashboard";
-import { Phone, BarChart3, Loader2, AlertCircle } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/auth";
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
+import { LimitReachedDialog } from "@/components/LimitReachedDialog";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export const DashboardContent = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const { campaigns, isLoading, error } = useCampaigns();
-  const { toast } = useToast();
-  const [loadingProgress, setLoadingProgress] = useState(45);
-  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
-  
-  // Add timeout to prevent infinite loading state
-  useEffect(() => {
-    let progressInterval: NodeJS.Timeout;
-    
-    if (isLoading) {
-      // Start progress animation
-      progressInterval = setInterval(() => {
-        setLoadingProgress(prev => {
-          const newProgress = prev + Math.random() * 5;
-          return newProgress > 85 ? 85 : newProgress;
-        });
-      }, 800);
-      
-      // Add timeout to exit loading state if it takes too long
-      const timeout = setTimeout(() => {
-        if (isLoading) {
-          setLoadingTimedOut(true);
-          setLoadingProgress(100);
-          toast({
-            title: "Taking longer than expected",
-            description: "We're having trouble loading your campaigns. You can try refreshing the page.",
-            variant: "default",
-          });
-          clearInterval(progressInterval);
-        }
-      }, 10000); // 10 seconds timeout
-      
-      return () => {
-        clearTimeout(timeout);
-        clearInterval(progressInterval);
-      };
-    } else {
-      // Reset progress when loading completes
-      setLoadingProgress(100);
-      setTimeout(() => setLoadingProgress(45), 500);
-      clearInterval(progressInterval);
-    }
-    
-    return () => {
-      clearInterval(progressInterval);
-    };
-  }, [isLoading, toast]);
-
-  const handleRetry = () => {
-    window.location.reload();
-  };
-
-  const renderLoadingState = () => {
-    return (
-      <div className="space-y-8">
-        <div className="flex flex-col justify-center items-center h-64 rounded-lg border border-dashed p-8 text-center animate-fade-in">
-          <div className="mb-4">
-            <Loader2 className="h-10 w-10 text-primary animate-spin" />
-          </div>
-          <h3 className="text-xl font-medium mb-3">Preparing your dashboard</h3>
-          <p className="text-muted-foreground max-w-md mb-4">Loading your campaign data and analytics...</p>
-          <Progress value={loadingProgress} className="w-64 h-2" />
-        </div>
-      </div>
-    );
-  };
-  
-  const renderErrorState = () => {
-    return (
-      <div className="space-y-8">
-        <div className="flex flex-col justify-center items-center h-64 rounded-lg border border-dashed border-destructive p-8 text-center animate-fade-in">
-          <div className="mb-4 text-destructive">
-            <AlertCircle className="h-10 w-10" />
-          </div>
-          <h3 className="text-xl font-medium mb-3">Something went wrong</h3>
-          <p className="text-muted-foreground max-w-md mb-6">
-            We encountered an error while loading your campaigns.
-          </p>
-          <Button onClick={handleRetry} variant="outline">
-            Retry
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderContent = () => {
-    if (isLoading && !loadingTimedOut) {
-      return renderLoadingState();
-    }
-    
-    if (error) {
-      return renderErrorState();
-    }
-
-    switch (activeTab) {
-      case 'dialer':
-        return (
-          <div className="mt-4">
-            <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-xl border border-blue-100 dark:border-blue-900">
-              <div className="flex flex-col md:flex-row gap-4 items-center">
-                <div className="bg-primary/10 p-4 rounded-full">
-                  <Phone className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">Quick Dial Mode</h3>
-                  <p className="text-muted-foreground">Make calls directly from your campaign list without manual dialing.</p>
-                </div>
-              </div>
-            </div>
-            {campaigns.length > 0 ? (
-              <BackgroundDialer campaignId={campaigns[0]?.id} />
-            ) : (
-              <EmptyCampaignState />
-            )}
-          </div>
-        );
-      case 'campaigns':
-        return (
-          <div className="mt-4">
-            <div className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 p-6 rounded-xl border border-green-100 dark:border-green-900">
-              <div className="flex flex-col md:flex-row gap-4 items-center">
-                <div className="bg-green-500/10 p-4 rounded-full">
-                  <BarChart3 className="h-8 w-8 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">Campaign Management</h3>
-                  <p className="text-muted-foreground">View, edit and analyze all your active calling campaigns.</p>
-                </div>
-              </div>
-            </div>
-            <CampaignDashboard initialCampaigns={campaigns || []} />
-          </div>
-        );
-      case 'overview':
-      default:
-        return campaigns && campaigns.length > 0 ? <DashboardCards /> : <EmptyCampaignState />;
-    }
-  };
+  const { user, profile } = useAuth();
+  const { showLimitDialog, closeLimitDialog } = useSubscription();
 
   return (
-    <div className="space-y-4 dashboard-content-wrapper w-full max-w-full overflow-x-hidden content-with-fixed-header">
-      <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
-      {renderContent()}
-    </div>
+    <>
+      <div className="grid gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Welcome!</CardTitle>
+            <CardDescription>
+              {profile?.full_name ? `Hello, ${profile.full_name}` : user?.email ? `Hello, ${user.email}` : 'Welcome to the Dashboard'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>
+              This is your dashboard. You can manage your account, view analytics, and more.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Account Status</CardTitle>
+            <CardDescription>View your account details and subscription status.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {profile?.is_affiliate ? (
+              <div className="rounded-md bg-green-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-green-800">
+                      Affiliate Account
+                    </h3>
+                    <div className="mt-2 text-sm text-green-700">
+                      <p>Your account has been successfully upgraded to an affiliate account.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-md bg-blue-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-blue-800">
+                      Regular Account
+                    </h3>
+                    <div className="mt-2 text-sm text-blue-700">
+                      <p>You have a regular account. <Link to="/profile" className="font-medium text-blue-700 underline">Update your profile</Link> or <Link to="/billing" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link>.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Manage your account and campaigns.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2">
+            <Button asChild>
+              <Link to="/campaigns">Go to Campaigns</Link>
+            </Button>
+            <Button asChild>
+              <Link to="/profile">Edit Profile</Link>
+            </Button>
+            <Button asChild>
+              <Link to="/billing">Billing & Payments</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <LimitReachedDialog 
+        open={showLimitDialog} 
+        onClose={closeLimitDialog} 
+      />
+    </>
   );
 };
