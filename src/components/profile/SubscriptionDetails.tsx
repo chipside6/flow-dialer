@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { 
@@ -151,7 +150,10 @@ export function SubscriptionDetails() {
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" type="button" onClick={() => document.querySelector('button[aria-label="Close"]')?.click()}>
+              <Button variant="outline" type="button" onClick={() => {
+                const closeButton = document.querySelector('button[aria-label="Close"]') as HTMLButtonElement;
+                if (closeButton) closeButton.click();
+              }}>
                 Keep Subscription
               </Button>
               <Button 

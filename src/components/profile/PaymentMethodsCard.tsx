@@ -98,7 +98,8 @@ export function PaymentMethodsCard() {
       });
       
       // Close dialog
-      document.querySelector('button[aria-label="Close"]')?.click();
+      const closeButton = document.querySelector('button[aria-label="Close"]') as HTMLButtonElement;
+      if (closeButton) closeButton.click();
       
       // For demo purposes, we'll just keep the list empty
       // In a real app, you would update the payment methods list
