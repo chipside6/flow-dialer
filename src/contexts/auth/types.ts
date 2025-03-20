@@ -3,12 +3,13 @@ import { User } from '@supabase/supabase-js';
 
 export interface UserProfile {
   id: string;
-  full_name: string | null;
-  company_name: string | null;
-  is_admin: boolean | null;
-  is_affiliate: boolean | null;
-  created_at: string;
-  updated_at: string;
+  full_name?: string | null;
+  avatar_url?: string | null;
+  is_admin?: boolean;
+  is_affiliate?: boolean;
+  email?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface AuthContextType {
@@ -18,12 +19,11 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isAffiliate: boolean;
-  initialized: boolean; // Flag to indicate when the initial auth check is complete
-  sessionChecked: boolean; // Flag to indicate when the session has been checked
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  initialized: boolean;
+  sessionChecked: boolean;
   signUp: (email: string, password: string, metadata?: { full_name?: string }) => Promise<{ error: Error | null }>;
-  signInWithGoogle: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<{ error: Error | null }>;
-  setAsAffiliate?: (userId: string) => Promise<void>;
+  setAsAffiliate: (userId: string) => Promise<void>;
 }

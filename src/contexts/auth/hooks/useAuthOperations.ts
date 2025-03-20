@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { 
   signUpUser, 
   signInUser, 
-  signInWithGoogleAction, 
   signOutUser,
   updateUserProfileAction,
   setAsAffiliateAction
@@ -58,19 +57,6 @@ export function useAuthOperations() {
     }
   };
 
-  const signInWithGoogle = async () => {
-    try {
-      await signInWithGoogleAction();
-      // Note: Error handling is done in the signInWithGoogleAction function
-    } catch (error: any) {
-      toast({
-        title: "Google sign in failed",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-    }
-  };
-
   const signOut = async () => {
     try {
       const { success, error } = await signOutUser();
@@ -99,7 +85,6 @@ export function useAuthOperations() {
   return {
     signUp,
     signIn,
-    signInWithGoogle,
     signOut
   };
 }

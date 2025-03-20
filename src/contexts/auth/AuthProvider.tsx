@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   } = useAuthSession();
 
   // Auth operations hooks
-  const { signUp, signIn, signInWithGoogle, signOut } = useAuthOperations();
+  const { signUp, signIn, signOut } = useAuthOperations();
   
   // Profile operations hooks
   const { updateProfile, setAsAffiliate } = useProfileOperations(
@@ -55,7 +55,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionChecked,
     signUp,
     signIn,
-    signInWithGoogle,
     signOut,
     updateProfile,
     setAsAffiliate,

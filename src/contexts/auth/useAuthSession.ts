@@ -1,13 +1,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User } from '@supabase/supabase-js';
+import type { User, Session } from '@supabase/supabase-js';
 import { UserProfile } from './types';
 import { fetchUserProfile } from './authUtils';
 import { toast } from '@/components/ui/use-toast';
 
 export function useAuthSession() {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAffiliate, setIsAffiliate] = useState(false);
@@ -16,11 +17,12 @@ export function useAuthSession() {
   const [sessionChecked, setSessionChecked] = useState(false);
 
   // Function to process user and profile data
-  const processUserAndProfile = useCallback(async (sessionUser: User | null) => {
+  const processUserAndProfile = useCallback(async (sessionUser: User | null, currentSession: Session | null) => {
     try {
       if (sessionUser) {
         console.log("useAuthSession - Processing user:", sessionUser.email);
         setUser(sessionUser);
+        setSession(currentSession);
 
         // Fetch user profile
         const profileData = await fetchUserProfile(sessionUser.id);
@@ -41,6 +43,7 @@ export function useAuthSession() {
       } else {
         console.log("useAuthSession - No user detected, clearing state");
         setUser(null);
+        setSession(null);
         setProfile(null);
         setIsAffiliate(false);
         setIsAdmin(false);
@@ -64,7 +67,35 @@ export function useAuthSession() {
   }, []);
 
   useEffect(() => {
-    // Check active session on mount
+    // Set up auth state change listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        console.log("useAuthSession - Auth state changed:", event);
+        
+        if (event === 'SIGNED_IN') {
+          toast({
+            title: "Signed in successfully", 
+            description: "Welcome back!"
+          });
+        } else if (event === 'SIGNED_OUT') {
+          toast({
+            title: "Signed out", 
+            description: "You have been signed out successfully"
+          });
+        } else if (event === 'USER_UPDATED') {
+          toast({
+            title: "Account updated", 
+            description: "Your account information has been updated"
+          });
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log("useAuthSession - Token refreshed");
+        }
+        
+        await processUserAndProfile(currentSession?.user || null, currentSession);
+      }
+    );
+
+    // THEN check for existing session
     const checkSession = async () => {
       setIsLoading(true);
       try {
@@ -75,7 +106,7 @@ export function useAuthSession() {
           throw error;
         }
         
-        await processUserAndProfile(session?.user || null);
+        await processUserAndProfile(session?.user || null, session);
       } catch (error: any) {
         console.error('Error checking auth session:', error);
         setAuthError(error);
@@ -90,46 +121,11 @@ export function useAuthSession() {
       }
     };
 
-    let subscription: { data: { subscription: { unsubscribe: () => void } } };
-
-    const setupSubscription = async () => {
-      // Subscribe to auth changes
-      subscription = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          console.log("useAuthSession - Auth state changed:", event);
-          
-          if (event === 'SIGNED_IN') {
-            toast({
-              title: "Signed in successfully", 
-              description: "Welcome back!"
-            });
-          } else if (event === 'SIGNED_OUT') {
-            toast({
-              title: "Signed out", 
-              description: "You have been signed out successfully"
-            });
-          } else if (event === 'USER_UPDATED') {
-            toast({
-              title: "Account updated", 
-              description: "Your account information has been updated"
-            });
-          } else if (event === 'TOKEN_REFRESHED') {
-            console.log("useAuthSession - Token refreshed");
-          }
-          
-          await processUserAndProfile(session?.user || null);
-        }
-      );
-    };
-
     checkSession();
-    setupSubscription();
 
     // Cleanup subscription
     return () => {
-      if (subscription) {
-        subscription.data.subscription.unsubscribe();
-      }
+      subscription.unsubscribe();
     };
   }, [processUserAndProfile]);
 

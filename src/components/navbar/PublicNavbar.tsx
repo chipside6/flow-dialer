@@ -32,10 +32,10 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
             to={isAuthenticated ? "/dashboard" : "/"} 
             className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"
           >
-            <span className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+            <span className="min-w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
               <Phone size={18} />
             </span>
-            Flow Dialer
+            <span>Flow Dialer</span>
           </Link>
         </div>
         
