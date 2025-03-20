@@ -13,7 +13,7 @@ import { CurrentSubscription } from "@/components/billing/CurrentSubscription";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PaymentMethodsCard } from "@/components/profile/PaymentMethodsCard";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { CryptoPaymentForm } from "@/components/payment/CryptoPaymentForm";
 
 const Billing = () => {

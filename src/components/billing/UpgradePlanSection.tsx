@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,7 @@ import { Check, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const UpgradePlanSection = () => {
-  const { currentPlan, upgradePlan, isLoading } = useSubscription();
+  const { currentPlan, activateLifetimePlan, isLoading } = useSubscription();
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -26,7 +25,7 @@ export const UpgradePlanSection = () => {
 
   const handleUpgrade = async (plan: PricingPlan) => {
     setProcessingPlan(plan.id);
-    const result = await upgradePlan(plan.id);
+    const result = await activateLifetimePlan();
     setProcessingPlan(null);
     
     if (result.success) {
