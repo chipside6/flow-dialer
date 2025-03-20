@@ -8,6 +8,7 @@ export interface UserProfile {
   is_admin?: boolean;
   is_affiliate?: boolean;
   email?: string;
+  company_name?: string | null;
   created_at?: string;
   updated_at?: string;
 }
