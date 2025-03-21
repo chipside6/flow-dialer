@@ -33,4 +33,18 @@
   .fixed.top-4.left-4.z-50 {
     transition: all 0.3s ease;
   }
+  
+  /* Fix campaign title display */
+  h1.text-2xl.md\:text-3xl.font-bold {
+    max-width: 220px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ensure button text doesn't break */
+  button span, .button span {
+    white-space: nowrap;
+  }
 }

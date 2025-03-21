@@ -16,20 +16,20 @@ const CampaignDashboardContent = () => {
   const { selectedCampaign } = useCampaignContext();
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
-      <Card className="overflow-hidden">
+    <div className="space-y-6 w-full">
+      <Card className="w-full">
         <CardHeader className="bg-muted/40">
           <CardTitle>Active Campaigns</CardTitle>
         </CardHeader>
-        <CardContent className="p-0 overflow-x-auto">
-          <div className="table-container">
+        <CardContent className="p-0">
+          <div className="w-full overflow-x-auto">
             <CampaignTable />
           </div>
         </CardContent>
       </Card>
 
       {selectedCampaign && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-x-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           <CampaignDetails campaign={selectedCampaign} />
           <CampaignStats campaign={selectedCampaign} />
         </div>
