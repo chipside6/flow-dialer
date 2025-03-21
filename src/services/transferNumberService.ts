@@ -49,7 +49,7 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
 
 /**
  * Adds a new transfer number to the database
- * Fixed: Using more basic approach without .select() chaining
+ * Simplified version that focuses on reliable insertion
  */
 export const addTransferNumberToDatabase = async (
   userId: string, 
