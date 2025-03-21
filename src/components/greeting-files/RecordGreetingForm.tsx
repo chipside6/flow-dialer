@@ -27,7 +27,8 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
     audioBlob,
     audioUrl,
     isRecording,
-    recordingTime,
+    recordingDuration,
+    formattedDuration,
     startRecording,
     stopRecording,
     resetRecording,
@@ -46,7 +47,14 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
   }, [recordingError, toast]);
 
   const handleSubmit = async () => {
-    if (!audioBlob || !userId) return;
+    if (!audioBlob || !userId) {
+      toast({
+        title: 'Error',
+        description: 'No recording available or user not authenticated',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsUploading(true);
     setUploadProgress(0);
@@ -65,6 +73,7 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
       }, 300);
       
       // Upload recording to Supabase
+      console.log("Starting upload of recording, blob size:", audioBlob.size);
       await uploadRecording(audioBlob, userId);
       
       clearInterval(progressInterval);
@@ -106,7 +115,7 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
       {isRecording && (
         <RecordingStatus 
           status={recordingStatus} 
-          time={recordingTime} 
+          time={formattedDuration()} 
         />
       )}
       

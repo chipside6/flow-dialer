@@ -44,7 +44,7 @@ export function useGreetingFiles(userId: string | undefined) {
           throw error;
         }
         
-        console.log(`Successfully fetched ${data?.length || 0} greeting files`);
+        console.log(`Successfully fetched ${data?.length || 0} greeting files:`, data);
         return data || [];
       } catch (error) {
         console.error("Exception in greeting files query:", error);
@@ -52,11 +52,10 @@ export function useGreetingFiles(userId: string | undefined) {
       }
     },
     enabled: !!userId && initialized, // Only run query when userId is available and auth is initialized
-    staleTime: 5000, // 5 seconds - reduce this for more frequent refreshes
+    staleTime: 1000, // 1 second - reduce this for more frequent refreshes
     gcTime: 300000, // 5 minutes
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: false,
   });
 
   // Delete greeting file mutation
