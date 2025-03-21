@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Phone, User } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
@@ -17,10 +18,26 @@ interface DashboardNavbarProps {
 
 export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
   const { profile } = useAuth();
+  const [prevScrollPos, setPrevScrollPos] = useState(0);
+  const [visible, setVisible] = useState(true);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.scrollY;
+      
+      // Make header visible when scrolling up or at the top
+      // Hide it when scrolling down
+      setVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
+      setPrevScrollPos(currentScrollPos);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [prevScrollPos]);
   
   return (
     <header 
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm navbar-dashboard"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm navbar-dashboard ${!visible ? '-translate-y-full' : 'translate-y-0'}`}
       style={{ height: "60px" }}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between h-full">

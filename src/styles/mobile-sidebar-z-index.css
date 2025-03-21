@@ -22,5 +22,11 @@
   /* Fix the header z-index */
   header.navbar-dashboard {
     z-index: 90 !important;
+    transition: transform 0.3s ease-in-out !important;
+  }
+  
+  /* For smooth header appearance/disappearance */
+  header.navbar-dashboard.hidden {
+    transform: translateY(-100%) !important;
   }
 }

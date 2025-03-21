@@ -62,6 +62,12 @@
     overflow-x: hidden !important;
   }
   
+  /* When scrolling, we want to ensure the content is properly positioned */
+  body.is-scrolling [data-sidebar-inset] > div {
+    padding-top: 0 !important; 
+    transition: padding-top 0.3s ease-in-out;
+  }
+  
   /* Fix admin panel cards layout */
   .space-y-4 {
     width: 100%;
