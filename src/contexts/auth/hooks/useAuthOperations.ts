@@ -12,16 +12,26 @@ import { toast } from '@/components/ui/use-toast';
 export function useAuthOperations() {
   const signUp = async (email: string, password: string, metadata?: { full_name?: string }) => {
     try {
+      console.log("useAuthOperations - Signing up user:", email);
       const result = await signUpUser(email, password, metadata);
+      
       if (result.error) {
+        console.error("useAuthOperations - Signup error:", result.error.message);
         toast({
           title: "Signup failed",
           description: result.error.message,
           variant: "destructive",
         });
+      } else {
+        toast({
+          title: "Signup successful",
+          description: "Your account has been created successfully",
+        });
       }
+      
       return result;
     } catch (error: any) {
+      console.error("useAuthOperations - Unexpected signup error:", error);
       toast({
         title: "Unexpected error during signup",
         description: error.message || "Please try again later",
@@ -33,16 +43,21 @@ export function useAuthOperations() {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log("useAuthOperations - Signing in user:", email);
       const result = await signInUser(email, password);
+      
       if (result.error) {
+        console.error("useAuthOperations - Login error:", result.error.message);
         toast({
           title: "Login failed",
           description: result.error.message,
           variant: "destructive",
         });
       }
+      
       return result;
     } catch (error: any) {
+      console.error("useAuthOperations - Unexpected login error:", error);
       toast({
         title: "Unexpected error during login",
         description: error.message || "Please try again later",

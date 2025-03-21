@@ -13,18 +13,17 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, isAuthenticated, user } = useAuth();
+  const { signIn, isAuthenticated, user, sessionChecked } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
   // Redirect if already authenticated
   useEffect(() => {
-    console.log("Login - Auth state:", { isAuthenticated, user: user ? 'Authenticated' : 'Not authenticated' });
-    if (isAuthenticated && user) {
+    if (sessionChecked && isAuthenticated && user) {
       console.log("Login - User is already authenticated, redirecting to dashboard");
       navigate('/dashboard');
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, sessionChecked]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +37,13 @@ const Login = () => {
         throw error;
       }
       
-      console.log("Login - Sign in successful, redirecting to dashboard");
+      console.log("Login - Sign in successful");
+      toast({
+        title: "Login successful",
+        description: "You have been signed in successfully"
+      });
+      
+      // Use a small timeout to ensure state updates before redirection
       setTimeout(() => {
         navigate('/dashboard');
       }, 100);

@@ -62,6 +62,16 @@ export function useAuthSession() {
   useEffect(() => {
     let isMounted = true;
     
+    // Create a promise that resolves after the timeout to prevent UI from getting stuck
+    const timeoutPromise = new Promise<void>((resolve) => {
+      setTimeout(() => {
+        if (isMounted && isLoading) {
+          console.log("useAuthSession - Timeout reached while waiting for session");
+          resolve();
+        }
+      }, 2500); // Shorter timeout to ensure UI responsiveness
+    });
+    
     // Set up auth state change listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
@@ -70,20 +80,31 @@ export function useAuthSession() {
         console.log("useAuthSession - Auth state changed:", event);
         
         if (event === 'SIGNED_OUT') {
+          // Handle sign out without waiting for profile fetch
+          setUser(null);
+          setSession(null);
+          setProfile(null);
+          setIsAdmin(false);
+          setIsAffiliate(false);
+          setIsLoading(false);
+          setSessionChecked(true);
+          
           toast({
             title: "Signed out", 
             description: "You have been signed out successfully"
           });
-        } else if (event === 'USER_UPDATED') {
-          toast({
-            title: "Account updated", 
-            description: "Your account information has been updated"
-          });
-        } else if (event === 'TOKEN_REFRESHED') {
-          console.log("useAuthSession - Token refreshed");
+          return;
         }
         
-        await processUserAndProfile(currentSession?.user || null, currentSession);
+        try {
+          await processUserAndProfile(currentSession?.user || null, currentSession);
+        } catch (error) {
+          console.error("Error in auth state change handler:", error);
+          if (isMounted) {
+            setIsLoading(false);
+            setSessionChecked(true);
+          }
+        }
       }
     );
 
@@ -91,16 +112,26 @@ export function useAuthSession() {
     const checkSession = async () => {
       if (!isMounted) return;
       
-      setIsLoading(true);
       try {
         console.log("useAuthSession - Checking active session");
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await Promise.race([
+          supabase.auth.getSession(),
+          timeoutPromise.then(() => ({ data: { session: null }, error: new Error("Session check timed out") }))
+        ]);
         
         if (error) {
-          throw error;
+          console.error("Session check error:", error);
+          if (isMounted) {
+            setAuthError(error);
+            setIsLoading(false);
+            setSessionChecked(true);
+          }
+          return;
         }
         
-        await processUserAndProfile(session?.user || null, session);
+        if (isMounted) {
+          await processUserAndProfile(session?.user || null, session);
+        }
       } catch (error: any) {
         if (!isMounted) return;
         
@@ -108,31 +139,15 @@ export function useAuthSession() {
         setAuthError(error);
         setIsLoading(false);
         setSessionChecked(true);
-        
-        toast({
-          title: "Session Error",
-          description: error.message || "There was a problem retrieving your session",
-          variant: "destructive",
-        });
       }
     };
 
     checkSession();
 
-    // Ensure we set loading to false after a timeout to prevent UI from getting stuck
-    const timeout = setTimeout(() => {
-      if (isMounted && isLoading) {
-        console.log("useAuthSession - Timeout reached, forcing loading state to false");
-        setIsLoading(false);
-        setSessionChecked(true);
-      }
-    }, 3000);
-
-    // Cleanup subscription and timeout
+    // Clean up
     return () => {
       isMounted = false;
       subscription.unsubscribe();
-      clearTimeout(timeout);
     };
   }, [processUserAndProfile]);
 

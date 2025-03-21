@@ -10,31 +10,31 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, initialized } = useAuth();
+  const { isAuthenticated, isLoading, initialized, sessionChecked } = useAuth();
   const location = useLocation();
   const [timeoutReached, setTimeoutReached] = useState(false);
   const [authError, setAuthError] = useState(false);
   
   // Set a timeout to prevent getting stuck in the loading state
   useEffect(() => {
-    if (isLoading && !initialized) {
+    if (isLoading && !sessionChecked) {
       const timer = setTimeout(() => {
         setTimeoutReached(true);
         console.log('ProtectedRoute: Timeout reached while verifying authentication');
-      }, 2000); // Reduced from 3s to 2s for faster fallback
+      }, 1500); // Reduced to 1.5s for faster fallback
       
       return () => clearTimeout(timer);
     }
     
-    // If auth has been initialized but we're not authenticated, check for errors
-    if (initialized && !isAuthenticated && !isLoading) {
+    // If auth has been checked but we're not authenticated, show error after a short delay
+    if (sessionChecked && !isAuthenticated && !isLoading) {
       const errorTimer = setTimeout(() => {
         setAuthError(true);
-      }, 300); // Reduced from 500ms to 300ms
+      }, 200); // Shorter delay for better UX
       
       return () => clearTimeout(errorTimer);
     }
-  }, [isLoading, initialized, isAuthenticated]);
+  }, [isLoading, sessionChecked, isAuthenticated]);
 
   // Force redirect after a longer timeout if still loading
   useEffect(() => {
@@ -43,7 +43,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         console.log('ProtectedRoute: Force redirecting to login due to prolonged loading');
         setTimeoutReached(true);
       }
-    }, 5000); // 5 second absolute timeout
+    }, 3000); // 3 second absolute timeout (reduced from 5s)
     
     return () => clearTimeout(forceRedirectTimer);
   }, [isLoading]);
@@ -53,12 +53,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <>{children}</>;
   }
   
-  // If auth has been initialized or timeout reached, but user is not authenticated, redirect to login
-  if ((initialized && !isLoading) || timeoutReached) {
+  // If auth has been checked or timeout reached, but user is not authenticated, redirect to login
+  if ((sessionChecked && !isLoading) || timeoutReached) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
-  // If we've detected an auth error after initialization
+  // If we've detected an auth error after session check
   if (authError) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-background p-4">

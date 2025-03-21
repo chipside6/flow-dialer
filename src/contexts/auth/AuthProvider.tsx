@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Mark when initial auth check is complete
   useEffect(() => {
-    if (!isLoading && sessionChecked) {
+    if (sessionChecked) {
       setInitialized(true);
       if (user) {
         console.log("Auth initialized - User authenticated:", user.email);
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("Auth initialized - No user authenticated");
       }
     }
-  }, [isLoading, user, sessionChecked]);
+  }, [sessionChecked, user]);
 
   const value: AuthContextType = {
     user,
