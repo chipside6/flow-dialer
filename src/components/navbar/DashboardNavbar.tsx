@@ -20,7 +20,7 @@ export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
   
   return (
     <header 
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm navbar-dashboard"
+      className="fixed top-0 left-0 right-0 z-40 transition-all duration-300 ease-in-out px-4 py-3 bg-background border-b shadow-sm navbar-dashboard"
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
