@@ -35,8 +35,8 @@ const SipProviders = () => {
         />
         
         {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="spinner-container">
+            <div className="loading-spinner"></div>
           </div>
         ) : (
           <SipProviderTable 
