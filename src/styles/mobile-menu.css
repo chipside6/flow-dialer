@@ -98,10 +98,18 @@ body.mobile-menu-open {
     display: none !important;
   }
   
-  /* Ensure menu button is always visible */
+  /* Ensure menu button is always visible and properly sized */
   .mobile-menu-button {
     display: flex !important;
     z-index: 60;
+    width: 48px !important;
+    height: 48px !important;
+  }
+  
+  /* Menu icon size */
+  .mobile-menu-button svg {
+    width: 24px !important;
+    height: 24px !important;
   }
   
   /* Ensure content has proper top padding to account for navbar */

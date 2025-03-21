@@ -17,8 +17,8 @@
   button svg,
   .button svg,
   [class*="btn"] svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: 20px !important;
+    height: 20px !important;
     flex-shrink: 0 !important;
   }
   
@@ -37,6 +37,15 @@
   [class*="success"] {
     font-weight: 500 !important;
     padding: 12px 20px !important;
+  }
+  
+  /* Specific styles for mobile menu button */
+  .mobile-menu-button,
+  [data-mobile-menu-button="true"] {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
   }
   
   /* Full width buttons on very small screens */

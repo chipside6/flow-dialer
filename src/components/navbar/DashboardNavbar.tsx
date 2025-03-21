@@ -26,7 +26,7 @@ export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
         <div className="flex items-center gap-2">
           <button
             onClick={toggleSidebar}
-            className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted"
+            className="md:hidden p-2 flex items-center justify-center w-12 h-12 rounded-full hover:bg-muted"
             aria-label="Toggle sidebar"
           >
             <Menu size={24} />
@@ -45,8 +45,8 @@ export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="rounded-full w-12 h-12">
+                <User className="h-6 w-6" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

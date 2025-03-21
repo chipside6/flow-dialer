@@ -13,10 +13,10 @@ export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-background rounded-full shadow-md" 
+        className="bg-background rounded-full shadow-md w-12 h-12 flex items-center justify-center" 
         onClick={onClick}
       >
-        <Menu size={20} />
+        <Menu size={24} />
       </Button>
     </div>
   );
