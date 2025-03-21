@@ -24,21 +24,56 @@ export function useTransferNumbers() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const [error, setError] = useState<string | null>(null);
   
-  // Reset isLoading when component unmounts to prevent stale state
+  // Force reset loading state after 10 seconds to prevent UI from getting stuck
   useEffect(() => {
+    let timeoutId: number | undefined;
+    
+    if (isLoading) {
+      timeoutId = window.setTimeout(() => {
+        console.log("Loading timeout reached, resetting isLoading state");
+        setIsLoading(false);
+      }, 10000);
+    }
+    
     return () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+      // Reset states when unmounting
       setIsLoading(false);
       setIsSubmitting(false);
     };
-  }, []);
+  }, [isLoading]);
   
-  // Load transfer numbers on component mount or when lastRefresh changes
+  // Reset isSubmitting after 5 seconds to prevent it from getting stuck
+  useEffect(() => {
+    let submitTimeout: number | undefined;
+    
+    if (isSubmitting) {
+      submitTimeout = window.setTimeout(() => {
+        console.log("Submit timeout reached, resetting isSubmitting state");
+        setIsSubmitting(false);
+      }, 5000);
+    }
+    
+    return () => {
+      if (submitTimeout) {
+        window.clearTimeout(submitTimeout);
+      }
+    };
+  }, [isSubmitting]);
+  
+  // Load transfer numbers when user or lastRefresh changes
   useEffect(() => {
     if (user) {
+      console.log("User or refresh trigger changed, fetching transfer numbers");
       fetchTransferNumbers();
     } else {
+      setTransferNumbers([]);
       setIsLoading(false);
+      setError(null);
     }
   }, [user, lastRefresh]);
   
@@ -50,13 +85,18 @@ export function useTransferNumbers() {
     }
     
     try {
+      console.log("Setting isLoading to true");
       setIsLoading(true);
+      setError(null);
+      
       console.log("Fetching transfer numbers for user:", user.id);
       const formattedData = await fetchUserTransferNumbers(user.id);
+      
       console.log("Successfully fetched transfer numbers:", formattedData.length);
       setTransferNumbers(formattedData);
     } catch (error) {
       console.error("Error fetching transfer numbers:", error);
+      setError("Failed to load transfer numbers");
       toast({
         title: "Error loading transfer numbers",
         description: "Could not load your transfer numbers from the database",
@@ -65,6 +105,7 @@ export function useTransferNumbers() {
       // Reset state on error to prevent stuck states
       setTransferNumbers([]);
     } finally {
+      console.log("Setting isLoading to false");
       setIsLoading(false);
     }
   }, [user]);
@@ -93,19 +134,20 @@ export function useTransferNumbers() {
     try {
       console.log("Setting isSubmitting to true");
       setIsSubmitting(true);
-      console.log("Adding transfer number for user:", user.id);
+      
+      console.log("Adding transfer number for user:", user.id, {name, number});
       const newTransferNumber = await addTransferNumberToDatabase(user.id, name, number, description);
       
       if (newTransferNumber) {
         console.log("Successfully added transfer number:", newTransferNumber);
-        // Trigger a refresh instead of updating state directly
-        refreshTransferNumbers();
         
         toast({
           title: "Transfer number added",
           description: `${name} (${number}) has been added successfully`,
         });
         
+        // Trigger a refresh
+        refreshTransferNumbers();
         return newTransferNumber;
       }
       return null;
@@ -134,13 +176,14 @@ export function useTransferNumbers() {
       
       if (success) {
         console.log("Successfully deleted transfer number:", id);
-        // Trigger a refresh instead of direct state update
-        refreshTransferNumbers();
         
         toast({
           title: "Transfer number deleted",
           description: "The transfer number has been removed",
         });
+        
+        // Trigger a refresh
+        refreshTransferNumbers();
       }
       
       return success;
@@ -190,6 +233,7 @@ export function useTransferNumbers() {
     transferNumbers,
     isLoading,
     isSubmitting,
+    error,
     addTransferNumber,
     deleteTransferNumber,
     refreshTransferNumbers

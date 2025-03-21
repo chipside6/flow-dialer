@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,9 +20,40 @@ export const AddTransferNumberForm = ({
   const [description, setDescription] = useState("");
   const [localSubmitting, setLocalSubmitting] = useState(false);
   
-  const handleSubmit = async () => {
+  // Reset localSubmitting if it gets stuck
+  useEffect(() => {
+    let timer: number | undefined;
+    
+    if (localSubmitting) {
+      timer = window.setTimeout(() => {
+        console.log("Local submitting timeout reached, resetting state");
+        setLocalSubmitting(false);
+      }, 5000);
+    }
+    
+    return () => {
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [localSubmitting]);
+  
+  // Reset localSubmitting when parent isSubmitting changes
+  useEffect(() => {
+    if (!isSubmitting && localSubmitting) {
+      console.log("Parent isSubmitting is false, resetting localSubmitting");
+      setLocalSubmitting(false);
+    }
+  }, [isSubmitting]);
+  
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
     if (isSubmitting || localSubmitting) {
       console.log("Submission already in progress, ignoring click");
+      return;
+    }
+    
+    if (!name.trim() || !number.trim()) {
+      console.log("Missing required fields, not submitting");
       return;
     }
     
@@ -59,7 +90,7 @@ export const AddTransferNumberForm = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="transfer-name">Name</Label>
             <Input
@@ -68,6 +99,7 @@ export const AddTransferNumberForm = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={buttonDisabled}
+              required
             />
           </div>
           <div>
@@ -78,6 +110,8 @@ export const AddTransferNumberForm = ({
               value={number}
               onChange={(e) => setNumber(e.target.value)}
               disabled={buttonDisabled}
+              required
+              type="tel"
             />
           </div>
           <div>
@@ -91,8 +125,9 @@ export const AddTransferNumberForm = ({
             />
           </div>
           <Button 
-            onClick={handleSubmit} 
-            disabled={buttonDisabled}
+            type="submit"
+            disabled={buttonDisabled || !name.trim() || !number.trim()}
+            className="w-full sm:w-auto"
           >
             {buttonDisabled ? (
               <>
@@ -106,7 +141,7 @@ export const AddTransferNumberForm = ({
               </>
             )}
           </Button>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );

@@ -3,13 +3,14 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Loader2, PhoneForwarded, Trash, Calendar, Phone, RefreshCw } from "lucide-react";
+import { Loader2, PhoneForwarded, Trash, Calendar, Phone, RefreshCw, AlertTriangle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { TransferNumber } from "@/hooks/useTransferNumbers";
 
 interface TransferNumbersListProps {
   transferNumbers: TransferNumber[];
   isLoading: boolean;
+  error?: string | null;
   onDeleteTransferNumber: (id: string) => Promise<boolean>;
   onRefresh?: () => void;
 }
@@ -17,6 +18,7 @@ interface TransferNumbersListProps {
 export const TransferNumbersList = ({ 
   transferNumbers, 
   isLoading, 
+  error,
   onDeleteTransferNumber,
   onRefresh
 }: TransferNumbersListProps) => {
@@ -41,12 +43,20 @@ export const TransferNumbersList = ({
     }
   };
   
-  // Handle manual refresh
+  // Handle manual refresh with debounce to prevent multiple clicks
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  
   const handleRefresh = () => {
-    if (onRefresh) {
-      console.log("Manual refresh triggered");
-      onRefresh();
-    }
+    if (isRefreshing || !onRefresh) return;
+    
+    setIsRefreshing(true);
+    console.log("Manual refresh triggered");
+    onRefresh();
+    
+    // Reset refreshing state after a delay
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 2000);
   };
   
   return (
@@ -59,16 +69,18 @@ export const TransferNumbersList = ({
         {/* Add refresh button */}
         {onRefresh && (
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="sm" 
             onClick={handleRefresh} 
-            disabled={isLoading}
+            disabled={isLoading || isRefreshing}
+            className="ml-auto"
           >
-            {isLoading ? (
+            {isLoading || isRefreshing ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <RefreshCw className="h-4 w-4" />
             )}
+            <span className="ml-2 hidden md:inline">Refresh</span>
           </Button>
         )}
       </CardHeader>
@@ -77,6 +89,27 @@ export const TransferNumbersList = ({
           <div className="flex flex-col justify-center items-center py-10 space-y-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <span className="text-muted-foreground">Loading transfer numbers...</span>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col justify-center items-center py-10 space-y-2 text-destructive">
+            <AlertTriangle className="h-8 w-8" />
+            <span>{error}</span>
+            {onRefresh && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh} 
+                disabled={isRefreshing}
+                className="mt-2"
+              >
+                {isRefreshing ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Try Again
+              </Button>
+            )}
           </div>
         ) : transferNumbers.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
@@ -89,9 +122,9 @@ export const TransferNumbersList = ({
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Number</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Added</TableHead>
-                  <TableHead>Call Count</TableHead>
+                  <TableHead className="hidden md:table-cell">Description</TableHead>
+                  <TableHead className="hidden md:table-cell">Added</TableHead>
+                  <TableHead className="hidden md:table-cell">Call Count</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -105,14 +138,14 @@ export const TransferNumbersList = ({
                         {tn.number}
                       </div>
                     </TableCell>
-                    <TableCell>{tn.description}</TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">{tn.description}</TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <div className="flex items-center">
                         <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
                         {formatDistanceToNow(tn.dateAdded, { addSuffix: true })}
                       </div>
                     </TableCell>
-                    <TableCell>{tn.callCount}</TableCell>
+                    <TableCell className="hidden md:table-cell">{tn.callCount}</TableCell>
                     <TableCell>
                       <Button 
                         variant="ghost" 
