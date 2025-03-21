@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -9,15 +10,15 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import UpgradePage from './pages/UpgradePage';
 import { AuthProvider, useAuth } from './contexts/auth';
-import { Login } from './pages/Login';
-import { Signup } from './pages/Signup';
-import { ForgotPassword } from './pages/ForgotPassword';
-import { ResetPassword } from './pages/ResetPassword';
-import { VerifyEmail } from './pages/VerifyEmail';
-import { Layout } from './components/layout/Layout';
-import { SipProviderPage } from './pages/SipProviderPage';
-import { ContactListPage } from './pages/ContactListPage';
-import { BackgroundDialerPage } from './pages/BackgroundDialerPage';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
+import Layout from './components/layout/Layout';
+import SipProviderPage from './pages/SipProviderPage';
+import ContactListPage from './pages/ContactListPage';
+import BackgroundDialerPage from './pages/BackgroundDialerPage';
 import "./styles/globals.css";
 import "./styles/plan-card.css"; // Add this line to import plan card styles
 
