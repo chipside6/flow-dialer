@@ -11,6 +11,7 @@ import { CryptoPaymentForm } from '@/components/payment/CryptoPaymentForm';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const UpgradePage = () => {
   const { toast } = useToast();
@@ -19,23 +20,32 @@ const UpgradePage = () => {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const { activateLifetimePlan, fetchCurrentSubscription, isLoading: subscriptionLoading } = useSubscription();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   
   // Get only the lifetime plan
   const lifetimePlan = pricingPlans.find(plan => plan.isLifetime);
   
   // Check if user is authenticated on component mount
   useEffect(() => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to upgrade your plan",
-        variant: "destructive",
-      });
-      navigate("/login");
-    } else {
+    const checkAuth = async () => {
+      setPageLoading(true);
+      
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to upgrade your plan",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+      
       // Refresh subscription data when component mounts
-      fetchCurrentSubscription();
-    }
+      await fetchCurrentSubscription();
+      setPageLoading(false);
+    };
+    
+    checkAuth();
   }, [user, navigate, toast, fetchCurrentSubscription]);
   
   const handleSelectPlan = () => {
@@ -55,15 +65,25 @@ const UpgradePage = () => {
     try {
       setIsProcessing(true);
       
+      if (!lifetimePlan) {
+        toast({
+          title: "Plan not found",
+          description: "The lifetime plan does not exist",
+          variant: "destructive",
+        });
+        setIsProcessing(false);
+        return;
+      }
+      
       // Record the payment in the database
       const { error: paymentError } = await supabase
         .from('payments')
         .insert([{
           user_id: user.id,
-          amount: lifetimePlan?.price || 0,
+          amount: lifetimePlan.price || 0,
           payment_method: 'crypto',
           payment_details: paymentDetails,
-          plan_id: lifetimePlan?.id || ''
+          plan_id: lifetimePlan.id || ''
         }]);
         
       if (paymentError) {
@@ -80,7 +100,7 @@ const UpgradePage = () => {
         
         toast({
           title: "Lifetime Access Activated",
-          description: `You now have lifetime access to all features!`,
+          description: "You now have lifetime access to all features!",
         });
         
         setTimeout(() => {
@@ -109,6 +129,8 @@ const UpgradePage = () => {
     navigate(-1);
   };
   
+  const isLoading = pageLoading || subscriptionLoading;
+  
   // If we don't have the lifetime plan data yet
   if (!lifetimePlan) {
     return (
@@ -116,7 +138,7 @@ const UpgradePage = () => {
         <div className="container mx-auto py-8 flex justify-center items-center min-h-[60vh]">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-            <p>Loading plan information...</p>
+            <p>Plan information not found. Please try again later.</p>
           </div>
         </div>
       </DashboardLayout>
@@ -138,11 +160,11 @@ const UpgradePage = () => {
           </div>
         </div>
 
-        {subscriptionLoading || isProcessing ? (
+        {isLoading ? (
           <div className="flex justify-center items-center min-h-[40vh]">
             <div className="text-center">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-              <p>{isProcessing ? "Processing your payment..." : "Loading your subscription..."}</p>
+              <p>{isProcessing ? "Processing your payment..." : "Loading your subscription data..."}</p>
             </div>
           </div>
         ) : !showPaymentForm ? (
@@ -175,6 +197,7 @@ const UpgradePage = () => {
                 <Button 
                   className="w-full"
                   onClick={handleSelectPlan}
+                  disabled={isProcessing}
                 >
                   Get Lifetime Access
                 </Button>

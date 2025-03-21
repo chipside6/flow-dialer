@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -36,6 +36,15 @@ export const UpgradePlanSection = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="text-center p-8 bg-muted/20 rounded-lg">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+        <p>Loading subscription data...</p>
+      </div>
+    );
+  }
+
   if (upgradePlans.length === 0) {
     return (
       <div className="text-center p-8 bg-muted/20 rounded-lg">
@@ -71,7 +80,7 @@ export const UpgradePlanSection = () => {
             
             <div className="mt-4 mb-6">
               <span className="text-3xl font-bold">${plan.price}</span>
-              <span className="text-muted-foreground">/month</span>
+              <span className="text-muted-foreground">{plan.isLifetime ? " one-time payment" : "/month"}</span>
             </div>
             
             <div className="space-y-3 mb-6">

@@ -74,12 +74,19 @@ export const useSubscription = () => {
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'active')
-        .maybeSingle();
+        .single();
       
       if (error) {
-        console.error("Error fetching subscription:", error);
-        setCurrentPlan('free');
-        setSubscription(null);
+        if (error.code === 'PGRST116') {
+          // No subscription found
+          console.log("No subscription data found, defaulting to free plan");
+          setCurrentPlan('free');
+          setSubscription(null);
+        } else {
+          console.error("Error fetching subscription:", error);
+          setCurrentPlan('free');
+          setSubscription(null);
+        }
         setIsLoading(false);
         return null;
       }
@@ -92,7 +99,6 @@ export const useSubscription = () => {
         return data;
       }
       
-      console.log("No subscription data found, defaulting to free plan");
       setCurrentPlan('free');
       setSubscription(null);
       setIsLoading(false);
