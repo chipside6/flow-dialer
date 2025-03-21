@@ -49,7 +49,7 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
               <div className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                 <Check className="h-3 w-3 text-primary" />
               </div>
-              <span className="text-sm">{feature}</span>
+              <span className="text-sm text-center">{feature}</span>
             </div>
           ))}
         </div>
