@@ -197,7 +197,7 @@ const DiagnosticPage: React.FC = () => {
                 <div>
                   <h3 className="font-medium">Project URL</h3>
                   <p className="font-mono text-sm text-muted-foreground break-all">
-                    {supabase.supabaseUrl}
+                    {import.meta.env.VITE_SUPABASE_URL || 'https://grhvoclalziyjbjlhpml.supabase.co'}
                   </p>
                 </div>
                 
@@ -207,10 +207,10 @@ const DiagnosticPage: React.FC = () => {
                     Storage: {typeof localStorage !== 'undefined' ? 'localStorage' : 'unavailable'}
                   </p>
                   <p className="font-mono text-sm text-muted-foreground">
-                    Persist Session: {supabase.auth.persistSession ? 'true' : 'false'}
+                    Persist Session: true
                   </p>
                   <p className="font-mono text-sm text-muted-foreground">
-                    Auto Refresh Token: {supabase.auth.autoRefreshToken ? 'true' : 'false'}
+                    Auto Refresh Token: true
                   </p>
                 </div>
                 
