@@ -35,6 +35,9 @@ export const useDialerForm = () => {
         
         if (data && data.length > 0) {
           setFormData(prev => ({ ...prev, transferNumber: data[0].phone_number }));
+          console.log("Loaded transfer number:", data[0].phone_number);
+        } else {
+          console.log("No transfer numbers found for user");
         }
       } catch (error) {
         console.error("Error fetching transfer numbers:", error);

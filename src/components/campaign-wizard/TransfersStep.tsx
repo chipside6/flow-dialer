@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CampaignData } from "./types";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
+import { Loader2 } from "lucide-react";
 
 interface TransferNumber {
   id: string;
@@ -42,6 +43,7 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
         }
         
         if (data) {
+          console.log("Fetched transfer numbers:", data);
           setTransferNumbers(data);
         }
       } catch (error) {
@@ -70,7 +72,12 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
     <div className="space-y-4">
       <div>
         <Label htmlFor="transferNumber">Transfer Number</Label>
-        {transferNumbers.length > 0 ? (
+        {isLoading ? (
+          <div className="flex items-center mt-2">
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            <span className="text-sm text-muted-foreground">Loading transfer numbers...</span>
+          </div>
+        ) : transferNumbers.length > 0 ? (
           <Select
             value={campaign.transferNumber}
             onValueChange={handleSelectTransferNumber}

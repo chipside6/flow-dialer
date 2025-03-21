@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/use-toast";
-import { PhoneForwarded, Trash, Plus, Calendar, Phone } from "lucide-react";
+import { PhoneForwarded, Trash, Plus, Calendar, Phone, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,7 @@ const TransferNumbers = () => {
       
       try {
         setIsLoading(true);
+        console.log("Fetching transfer numbers for user:", user.id);
         const { data, error } = await supabase
           .from('transfer_numbers')
           .select('*')
@@ -51,6 +52,7 @@ const TransferNumbers = () => {
         }
         
         if (data) {
+          console.log("Fetched transfer numbers:", data);
           const formattedData = data.map(item => ({
             id: item.id,
             name: item.name,
@@ -74,7 +76,9 @@ const TransferNumbers = () => {
       }
     };
     
-    fetchTransferNumbers();
+    if (user) {
+      fetchTransferNumbers();
+    }
   }, [user]);
   
   const handleAddTransferNumber = async () => {
@@ -108,6 +112,7 @@ const TransferNumbers = () => {
     }
     
     try {
+      console.log("Adding transfer number for user:", user.id);
       // Insert the transfer number into the database
       const { data, error } = await supabase
         .from('transfer_numbers')
@@ -122,6 +127,8 @@ const TransferNumbers = () => {
       if (error) {
         throw error;
       }
+      
+      console.log("Added transfer number, response:", data);
       
       if (data && data.length > 0) {
         const newItem = data[0];
@@ -243,8 +250,9 @@ const TransferNumbers = () => {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-10 text-muted-foreground">
-              Loading transfer numbers...
+            <div className="flex justify-center items-center py-10">
+              <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+              <span className="text-muted-foreground">Loading transfer numbers...</span>
             </div>
           ) : transferNumbers.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground">
