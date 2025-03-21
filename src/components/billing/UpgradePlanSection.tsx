@@ -55,7 +55,7 @@ export const UpgradePlanSection = () => {
           <div
             key={plan.id}
             className={`
-              rounded-lg border border-border/70 p-6 transition-all duration-300 relative
+              rounded-lg border border-border/70 p-5 transition-all duration-300 relative h-full flex flex-col
               ${plan.popular ? 'bg-card shadow-lg' : 'bg-card/50 hover:shadow-md'}
             `}
           >
@@ -65,10 +65,12 @@ export const UpgradePlanSection = () => {
               </div>
             )}
             
-            <h3 className="text-xl font-semibold">{plan.name}</h3>
-            <p className="text-muted-foreground text-sm mt-1">{plan.description}</p>
+            <div className="mb-2">
+              <h3 className="text-xl font-semibold">{plan.name}</h3>
+              <p className="text-muted-foreground text-sm">{plan.description}</p>
+            </div>
             
-            <div className="mt-4 mb-6">
+            <div className="mb-4">
               {plan.price === 0 ? (
                 <>
                   <span className="text-3xl font-bold">${plan.price}</span>
@@ -77,10 +79,9 @@ export const UpgradePlanSection = () => {
               ) : (
                 <span className="text-3xl font-bold">${plan.price}</span>
               )}
-              {/* Plans are lifetime except free which has monthly limit */}
             </div>
             
-            <div className="space-y-3 mb-6">
+            <div className="space-y-2.5 mb-4 flex-grow">
               {plan.features.map((feature, idx) => (
                 <div key={idx} className="flex items-start gap-2">
                   <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 flex-shrink-0">
@@ -91,22 +92,24 @@ export const UpgradePlanSection = () => {
               ))}
             </div>
             
-            <Button 
-              className="w-full"
-              onClick={() => handleUpgrade(plan)}
-              disabled={isLoading || processingPlan === plan.id || currentPlan === plan.id}
-            >
-              {processingPlan === plan.id ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : currentPlan === plan.id ? (
-                "Current Plan"
-              ) : (
-                "Upgrade Now"
-              )}
-            </Button>
+            <div className="mt-auto">
+              <Button 
+                className="w-full"
+                onClick={() => handleUpgrade(plan)}
+                disabled={isLoading || processingPlan === plan.id || currentPlan === plan.id}
+              >
+                {processingPlan === plan.id ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : currentPlan === plan.id ? (
+                  "Current Plan"
+                ) : (
+                  "Upgrade Now"
+                )}
+              </Button>
+            </div>
           </div>
         ))}
       </div>

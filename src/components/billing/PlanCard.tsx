@@ -26,13 +26,13 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
         </div>
       )}
       
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle>{plan.name}</CardTitle>
         <CardDescription>{plan.description}</CardDescription>
       </CardHeader>
       
-      <CardContent>
-        <div className="mb-6">
+      <CardContent className="space-y-4">
+        <div className="mb-2">
           {plan.price === 0 ? (
             <>
               <span className="text-4xl font-bold">${plan.price}</span>
@@ -41,12 +41,11 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
           ) : (
             <span className="text-4xl font-bold">${plan.price}</span>
           )}
-          {/* Plans are lifetime except free which has monthly limit */}
         </div>
         
-        <div className="space-y-4">
+        <div className="space-y-3">
           {plan.features.map((feature, idx) => (
-            <div key={idx} className="flex items-start gap-3">
+            <div key={idx} className="flex items-start gap-2.5">
               <div className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                 <Check className="h-3 w-3 text-primary" />
               </div>
