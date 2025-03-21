@@ -112,7 +112,10 @@ export function useTransferNumbers() {
   
   // Add a new transfer number
   const addTransferNumber = async (name: string, number: string, description: string) => {
+    console.log("addTransferNumber called with:", { name, number, description });
+    
     if (!user) {
+      console.log("No user authenticated, showing toast");
       toast({
         title: "Authentication required",
         description: "Please sign in to add transfer numbers",
@@ -122,6 +125,7 @@ export function useTransferNumbers() {
     }
     
     if (!validateTransferNumberInput(name, number)) {
+      console.log("Input validation failed");
       return null;
     }
     
@@ -149,6 +153,13 @@ export function useTransferNumbers() {
         // Trigger a refresh
         refreshTransferNumbers();
         return newTransferNumber;
+      } else {
+        console.error("Failed to add transfer number - no result returned");
+        toast({
+          title: "Error adding transfer number",
+          description: "The server returned an empty response",
+          variant: "destructive",
+        });
       }
       return null;
     } catch (error) {

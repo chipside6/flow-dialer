@@ -47,6 +47,8 @@ export const AddTransferNumberForm = ({
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
+    console.log("Form submitted with values:", { name, number, description });
+    
     if (isSubmitting || localSubmitting) {
       console.log("Submission already in progress, ignoring click");
       return;
@@ -128,6 +130,12 @@ export const AddTransferNumberForm = ({
             type="submit"
             disabled={buttonDisabled || !name.trim() || !number.trim()}
             className="w-full sm:w-auto"
+            onClick={() => {
+              if (!buttonDisabled && name.trim() && number.trim()) {
+                console.log("Button clicked directly");
+                handleSubmit();
+              }
+            }}
           >
             {buttonDisabled ? (
               <>

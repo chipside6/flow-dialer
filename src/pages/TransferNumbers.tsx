@@ -62,8 +62,16 @@ const TransferNumbers = () => {
     console.log("handleAddTransferNumber called with:", { name, number, description });
     
     try {
+      console.log("Calling addTransferNumber...");
       const result = await addTransferNumber(name, number, description);
       console.log("addTransferNumber result:", result ? "success" : "failure");
+      
+      if (!result) {
+        console.log("No result from addTransferNumber, manually refreshing");
+        // Attempt a refresh even if the result is null
+        setTimeout(() => refreshTransferNumbers(), 500);
+      }
+      
       return result;
     } catch (error) {
       console.error("Error in handleAddTransferNumber:", error);
