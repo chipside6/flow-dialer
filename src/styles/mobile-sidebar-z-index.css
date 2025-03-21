@@ -42,10 +42,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding-left: 56px !important; /* Make sure all page titles have proper padding */
   }
   
   /* Ensure button text doesn't break */
   button span, .button span {
     white-space: nowrap;
+  }
+  
+  /* Fix z-index for all dashboard cards to prevent them from appearing above the sidebar button */
+  .card {
+    position: relative;
+    z-index: 1;
   }
 }

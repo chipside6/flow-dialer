@@ -7,7 +7,7 @@ import { AudioWaveform, ContactIcon, PhoneForwarded, Server, BarChart3 } from "l
 
 export const DashboardCards = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 dashboard-content">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
