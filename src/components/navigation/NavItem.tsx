@@ -16,20 +16,16 @@ export interface NavItemProps {
 export function NavItem({ item, isActive, onClick }: NavItemProps) {
   return (
     <Link to={item.path} className="block w-full" onClick={onClick}>
-      <Button
-        variant={isActive ? "default" : "ghost"}
-        className={`w-full justify-start rounded-md py-2 mb-1 text-left sidebar-nav-button ${
-          isActive 
-            ? "bg-primary text-primary-foreground" 
-            : "hover:bg-muted hover:text-primary text-foreground"
+      <div
+        className={`w-full flex items-center py-3 px-4 border-b border-gray-100 ${
+          isActive ? "bg-gray-50" : ""
         }`}
-        size="sm"
       >
-        <span className="flex items-center justify-center w-5 h-5 flex-shrink-0">
+        <span className="flex items-center justify-center w-6 h-6 mr-3">
           {item.icon}
         </span>
-        <span className="font-medium truncate">{item.name}</span>
-      </Button>
+        <span className="font-medium">{item.name}</span>
+      </div>
     </Link>
   );
 }

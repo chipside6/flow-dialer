@@ -50,19 +50,19 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader>
-        <div className="flex items-center p-4 mt-16 md:mt-0"> {/* Increased mt for mobile to avoid navbar overlap */}
-          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3">
-            <Phone size={18} />
+      <SidebarHeader className="bg-primary text-white">
+        <div className="flex items-center p-4 justify-between">
+          <div className="flex items-center">
+            <Home size={18} className="mr-2" />
+            <span className="font-semibold text-lg">Dashboard</span>
           </div>
-          <span className="font-semibold text-lg">Flow Dialer</span>
           
           {/* Close button for mobile */}
           {isMobile && (
             <Button 
               variant="ghost" 
               size="icon" 
-              className="ml-auto" 
+              className="text-white hover:bg-primary/80" 
               onClick={() => setOpenMobile(false)}
             >
               <X size={20} />
@@ -70,39 +70,37 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           )}
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-4 py-2">
-        <div className="bg-card rounded-lg border shadow-sm p-4 mb-4">
-          <nav className="space-y-2">
-            {navItems.map((item) => (
-              <SidebarNavItem 
-                key={item.path}
-                item={item}
-                onClick={handleItemClick}
-              />
-            ))}
-            
-            {/* Admin Panel Link */}
-            {isAdmin && (
-              <SidebarNavItem 
-                item={{
-                  name: "Admin Panel",
-                  path: "/admin",
-                  icon: <ShieldCheck className="h-5 w-5" />
-                }}
-                onClick={handleItemClick}
-              />
-            )}
-          </nav>
+      <SidebarContent className="px-0 py-0">
+        <nav className="w-full">
+          {navItems.map((item) => (
+            <SidebarNavItem 
+              key={item.path}
+              item={item}
+              onClick={handleItemClick}
+            />
+          ))}
+          
+          {/* Admin Panel Link */}
+          {isAdmin && (
+            <SidebarNavItem 
+              item={{
+                name: "Admin Panel",
+                path: "/admin",
+                icon: <ShieldCheck className="h-5 w-5" />
+              }}
+              onClick={handleItemClick}
+            />
+          )}
           
           {/* Logout button */}
-          <div className="mt-6 pt-4 border-t border-border">
+          <div className="border-t border-border mt-2 pt-2">
             <LogoutButton 
               variant="ghost" 
-              className="w-full justify-start py-3 text-left" 
+              className="w-full justify-start py-3 px-4 text-left" 
               onClick={handleItemClick}
             />
           </div>
-        </div>
+        </nav>
       </SidebarContent>
     </Sidebar>
   );

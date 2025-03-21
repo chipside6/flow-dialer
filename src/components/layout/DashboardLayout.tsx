@@ -11,8 +11,21 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, openMobile } = useSidebar();
   const isMobile = useIsMobile();
+  
+  // Add class to body when sidebar is open
+  React.useEffect(() => {
+    if (isMobile && openMobile) {
+      document.body.classList.add('mobile-menu-open');
+    } else {
+      document.body.classList.remove('mobile-menu-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+    };
+  }, [isMobile, openMobile]);
   
   return (
     <div className="flex flex-1 w-full overflow-x-hidden">

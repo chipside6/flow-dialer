@@ -4,7 +4,9 @@
 @media screen and (max-width: 768px) {
   /* Dashboard nav items */
   .sidebar-content button {
-    margin-bottom: 4px;
+    margin-bottom: 0;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   }
   
   /* Fix max-width for content areas */
@@ -21,5 +23,31 @@
     max-width: 100% !important;
     overflow-x: hidden !important;
     padding: 0 8px !important;
+  }
+  
+  /* Custom styles for the sidebar menu to match the design */
+  [data-sidebar="sidebar"] {
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  /* Customize the mobile sidebar header */
+  [data-sidebar="header"] {
+    padding: 0;
+    margin: 0;
+  }
+  
+  [data-sidebar="content"] {
+    padding: 0 !important;
+  }
+  
+  /* Remove rounded corners from nav items on mobile */
+  [data-sidebar="content"] a > div {
+    border-radius: 0 !important;
+  }
+  
+  /* Adjust vertical spacing between nav items */
+  [data-sidebar="content"] nav > a {
+    display: block;
+    padding: 0;
   }
 }

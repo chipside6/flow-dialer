@@ -1,0 +1,20 @@
+
+/* Mobile sidebar dialog fixes */
+
+@media (max-width: 768px) {
+  /* Fix SheetContent appearance on mobile */
+  [role="dialog"] {
+    background-color: white !important;
+    max-width: 100% !important;
+  }
+  
+  /* Fix drawer components */
+  [data-state="open"][data-side="left"] {
+    width: 85% !important;
+  }
+  
+  /* Prevent body scrolling when sidebar is open */
+  .mobile-menu-open {
+    overflow: hidden !important;
+  }
+}

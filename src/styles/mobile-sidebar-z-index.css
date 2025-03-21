@@ -1,0 +1,21 @@
+
+/* Mobile sidebar z-index management */
+
+@media (max-width: 768px) {
+  /* Ensure sidebar appears above other elements */
+  [data-sidebar][data-mobile="true"] {
+    z-index: 60 !important;
+  }
+  
+  /* Ensure content stays below the sidebar */
+  .main-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Make sure the sidebar overlay has proper z-index */
+  .SheetOverlay-root {
+    z-index: 59 !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+  }
+}
