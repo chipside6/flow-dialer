@@ -32,7 +32,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
-    padding-left: 56px !important; /* Add padding to prevent overlap with menu button */
   }
   
   /* Add proper spacing for fixed headers */
@@ -56,7 +55,6 @@
     width: 100% !important;
     max-width: 100vw !important;
     overflow-x: hidden !important;
-    padding-left: 56px !important; /* Add left padding to all dashboard content */
   }
   
   /* Fix admin panel cards layout */
@@ -112,10 +110,5 @@
   /* Apply extra padding to campaign content container on mobile */
   .campaign-content {
     padding-left: 56px !important; /* Increased padding to avoid icon overlap */
-  }
-  
-  /* Add general padding to all dashboard content in mobile view */
-  .dashboard-content {
-    padding-left: 56px !important; /* Ensure consistent padding on all pages */
   }
 }
