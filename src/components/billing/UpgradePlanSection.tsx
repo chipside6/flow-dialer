@@ -55,12 +55,12 @@ export const UpgradePlanSection = () => {
           <div
             key={plan.id}
             className={`
-              rounded-lg border border-border/70 p-6 transition-all duration-300
-              ${plan.popular ? 'bg-card shadow-lg relative' : 'bg-card/50 hover:shadow-md'}
+              rounded-lg border border-border/70 p-6 transition-all duration-300 relative
+              ${plan.popular ? 'bg-card shadow-lg' : 'bg-card/50 hover:shadow-md'}
             `}
           >
             {plan.popular && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full whitespace-nowrap z-10">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full whitespace-nowrap z-20">
                 Recommended
               </div>
             )}
@@ -83,7 +83,7 @@ export const UpgradePlanSection = () => {
             <div className="space-y-3 mb-6">
               {plan.features.map((feature, idx) => (
                 <div key={idx} className="flex items-start gap-2">
-                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 flex-shrink-0">
                     <Check className="h-3 w-3 text-primary" />
                   </div>
                   <span className="text-sm">{feature}</span>

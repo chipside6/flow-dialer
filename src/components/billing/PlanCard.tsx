@@ -21,7 +21,7 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
       `}
     >
       {plan.popular && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full whitespace-nowrap z-10">
+        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full whitespace-nowrap z-20">
           Most Popular
         </div>
       )}
