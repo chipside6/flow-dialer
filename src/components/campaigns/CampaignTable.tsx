@@ -5,10 +5,15 @@ import { CampaignItem } from "./CampaignItem";
 import { useCampaignContext } from "@/contexts/campaign/CampaignContext";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const CampaignTable: React.FC = () => {
   const { campaigns } = useCampaignContext();
+  const navigate = useNavigate();
+
+  const handleCreateCampaign = () => {
+    navigate('/campaign');
+  };
 
   return (
     <Table>
@@ -30,13 +35,11 @@ export const CampaignTable: React.FC = () => {
                   Create your first campaign to start making calls
                 </p>
                 <Button 
-                  asChild 
                   variant="success" 
                   className="gap-2 px-4 py-2.5 h-auto rounded-md"
+                  onClick={handleCreateCampaign}
                 >
-                  <Link to="/campaign">
-                    <PlusCircle className="h-4 w-4" /> <span>Create Campaign</span>
-                  </Link>
+                  <PlusCircle className="h-4 w-4" /> <span>Create Campaign</span>
                 </Button>
               </div>
             </TableCell>
