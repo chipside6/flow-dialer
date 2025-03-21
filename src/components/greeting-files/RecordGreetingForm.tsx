@@ -22,6 +22,8 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(null);
   
   const {
     audioBlob,
@@ -45,6 +47,36 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
       });
     }
   }, [recordingError, toast]);
+
+  useEffect(() => {
+    // Clean up audio on unmount
+    return () => {
+      if (previewAudio) {
+        previewAudio.pause();
+        previewAudio.src = '';
+      }
+    };
+  }, [previewAudio]);
+
+  const togglePreview = () => {
+    if (!audioUrl) return;
+
+    if (!previewAudio) {
+      const audio = new Audio(audioUrl);
+      audio.onended = () => setIsPreviewPlaying(false);
+      setPreviewAudio(audio);
+      audio.play();
+      setIsPreviewPlaying(true);
+    } else {
+      if (isPreviewPlaying) {
+        previewAudio.pause();
+        setIsPreviewPlaying(false);
+      } else {
+        previewAudio.play();
+        setIsPreviewPlaying(true);
+      }
+    }
+  };
 
   const handleSubmit = async () => {
     if (!audioBlob || !userId) {
@@ -116,6 +148,7 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
         <RecordingStatus 
           status={recordingStatus} 
           time={formattedDuration()} 
+          isRecording={isRecording}
         />
       )}
       
@@ -124,6 +157,10 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
         <PreviewControls 
           audioUrl={audioUrl} 
           onReset={resetRecording}
+          isPreviewPlaying={isPreviewPlaying}
+          togglePreview={togglePreview}
+          handleUpload={handleSubmit}
+          isUploading={isUploading}
         />
       ) : (
         <RecordingControls 
@@ -134,7 +171,7 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
       )}
       
       {/* Show upload button when audio is recorded */}
-      {audioBlob && !isUploading && (
+      {audioBlob && !isUploading && !audioUrl && (
         <Button 
           onClick={handleSubmit} 
           className="w-full mt-4"

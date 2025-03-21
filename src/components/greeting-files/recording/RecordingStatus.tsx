@@ -1,19 +1,23 @@
 
 interface RecordingStatusProps {
-  isRecording: boolean;
-  formattedDuration: () => string;
-  hasRecording: boolean;
+  status: string;
+  time: string;
+  isRecording?: boolean;
+  hasRecording?: boolean;
+  formattedDuration?: () => string;
 }
 
 export const RecordingStatus = ({
+  status,
+  time,
   isRecording,
-  formattedDuration,
   hasRecording,
+  formattedDuration,
 }: RecordingStatusProps) => {
   if (isRecording) {
     return (
       <div className="text-destructive font-medium animate-pulse">
-        Recording in progress... {formattedDuration()}
+        Recording in progress... {formattedDuration?.() || time}
       </div>
     );
   }
@@ -21,14 +25,14 @@ export const RecordingStatus = ({
   if (hasRecording) {
     return (
       <div className="text-green-600 font-medium">
-        Recording complete! {formattedDuration()}
+        Recording complete! {formattedDuration?.() || time}
       </div>
     );
   }
 
   return (
     <div className="text-muted-foreground">
-      Click "Start Recording" to begin
+      {status === 'recording' ? `Recording... ${time}` : 'Click "Start Recording" to begin'}
     </div>
   );
 };
