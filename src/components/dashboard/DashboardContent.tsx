@@ -32,7 +32,7 @@ export const DashboardContent = () => {
         <Card>
           <CardHeader>
             <CardTitle>Account Status</CardTitle>
-            <CardDescription>View your account details and subscription status.</CardDescription>
+            <CardDescription>View your subscription status.</CardDescription>
           </CardHeader>
           <CardContent>
             {profile?.is_affiliate ? (
