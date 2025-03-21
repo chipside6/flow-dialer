@@ -68,6 +68,7 @@
   [data-sidebar="content"] {
     max-height: calc(100vh - 100px);
     overflow-y: auto !important;
+    background-color: #ffffff !important;
   }
 
   /* Ensure the main content area is properly positioned */
@@ -81,7 +82,7 @@
 
   /* Fix any issues with dialog backgrounds */
   div[role="dialog"] {
-    background-color: rgba(0, 0, 0, 0.5) !important;
+    background-color: rgba(0, 0, 0, 0.7) !important;
   }
   
   /* Ensure the mobile menu button is visible and properly positioned */
@@ -95,18 +96,34 @@
   
   /* Force all overlay and background elements to have appropriate styling */
   .bg-background\/80 {
-    background-color: rgba(0, 0, 0, 0.5) !important;
+    background-color: rgba(0, 0, 0, 0.7) !important;
   }
   
   /* Ensure any fixed content has proper background */
   .fixed.z-50.h-full {
-    background-color: white !important;
+    background-color: #ffffff !important;
   }
   
   /* Ensure content divs have appropriate z-index to maintain layering */
   [data-mobile="true"] > div {
-    background-color: white !important;
+    background-color: #ffffff !important;
     z-index: 100 !important;
+  }
+  
+  /* Force solid backgrounds on all dialogs/sheets */
+  [role="dialog"] [data-state="open"] {
+    background-color: #ffffff !important;
+  }
+  
+  /* Ensure no element related to sidebar has transparency */
+  [data-mobile="true"] *,
+  [data-sidebar="sidebar"] * {
+    backdrop-filter: none !important;
+  }
+  
+  /* Add !important to all sheet content elements */
+  [data-state="open"] {
+    opacity: 1 !important;
   }
 }
 

@@ -38,20 +38,21 @@
     padding: 12px 16px;
   }
   
-  /* Completely remove any blur and set solid background on dialog */
+  /* SOLID BACKGROUNDS - NO TRANSPARENCY */
   div[role="dialog"] {
-    background-color: rgba(0, 0, 0, 0.5) !important;
+    background-color: rgba(0, 0, 0, 0.7) !important;
     backdrop-filter: none !important;
   }
   
-  /* Ensure mobile sidebar has solid white background */
+  /* Mobile sidebar solid background */
   div[role="dialog"] > div[data-mobile="true"] {
-    background-color: white !important;
+    background-color: #ffffff !important;
     opacity: 1 !important;
     backdrop-filter: none !important;
+    border: none !important;
   }
   
-  /* Remove all backdrop blur across the app */
+  /* Remove ALL blur effects everywhere */
   .backdrop-blur-sm,
   .backdrop-blur-md,
   .backdrop-blur-lg,
@@ -83,13 +84,31 @@
   
   /* SheetContent needs a solid background */
   div[data-sidebar="sidebar"][data-mobile="true"] {
-    background-color: white !important;
+    background-color: #ffffff !important;
     box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15) !important;
+    border: none !important;
   }
   
   /* Fixed positioning for mobile sidebar */
   .fixed.inset-y-0.z-50,
-  .fixed.z-50.h-full {
-    background-color: white !important;
+  .fixed.z-50.h-full,
+  .fixed.z-50 {
+    background-color: #ffffff !important;
+    border: none !important;
+  }
+  
+  /* Ensure no transparency in any dialog */
+  [role="dialog"] [data-state="open"] {
+    background-color: #ffffff !important;
+  }
+  
+  /* Fix all sheet/dialog containers */
+  .fixed.z-50 [data-mobile="true"] {
+    background-color: #ffffff !important;
+  }
+  
+  /* Force solid color on all sidebar elements */
+  [data-sidebar="sidebar"] * {
+    background-color: #ffffff;
   }
 }
