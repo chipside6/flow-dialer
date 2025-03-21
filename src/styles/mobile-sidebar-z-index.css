@@ -4,7 +4,7 @@
 @media (max-width: 768px) {
   /* Ensure sidebar appears above other elements */
   [data-sidebar][data-mobile="true"] {
-    z-index: 100 !important;
+    z-index: 60 !important;
   }
   
   /* Ensure content stays below the sidebar */
@@ -15,23 +15,7 @@
   
   /* Make sure the sidebar overlay has proper z-index */
   .SheetOverlay-root {
-    z-index: 99 !important;
+    z-index: 59 !important;
     background-color: rgba(0, 0, 0, 0.4) !important;
-  }
-  
-  /* Fix z-index for navbar to appear above content but below sidebar */
-  header.navbar-dashboard {
-    z-index: 49 !important;
-  }
-  
-  /* Adjust spacing for fixed header */
-  [data-sidebar-inset] {
-    padding-top: 70px !important;
-  }
-  
-  /* Ensure content doesn't overlap with header */
-  .dashboard-content-wrapper,
-  .content-area {
-    padding-top: 70px !important;
   }
 }
