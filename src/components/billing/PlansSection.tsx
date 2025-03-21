@@ -40,10 +40,10 @@ export const PlansSection = ({ plans, onSelectPlan }: PlansSectionProps) => {
           <CardContent>
             <div className="mb-6">
               {plan.price === 0 ? (
-                <span className="text-4xl font-bold">Free</span>
+                <span className="text-5xl font-bold">Free</span>
               ) : (
                 <div className="flex items-end">
-                  <span className="text-4xl font-bold">${plan.price}</span>
+                  <span className="text-6xl font-bold">${plan.price}</span>
                   <span className="text-muted-foreground ml-1 mb-1">one-time</span>
                 </div>
               )}

@@ -30,6 +30,7 @@ export const UpgradePlanSection = () => {
     setProcessingPlan(plan.id);
     
     try {
+      // Call the subscription service to activate the lifetime plan
       const result = await activateLifetimePlan();
       
       if (result.success) {
@@ -39,6 +40,7 @@ export const UpgradePlanSection = () => {
           variant: "default",
         });
         
+        // Redirect to dashboard after successful activation
         setTimeout(() => {
           navigate("/dashboard");
         }, 2000);
@@ -110,7 +112,7 @@ export const UpgradePlanSection = () => {
                   {plan.name}
                 </h3>
                 <div className="mb-4">
-                  <span className="text-5xl font-bold">${plan.price}</span>
+                  <span className="text-6xl font-bold">${plan.price}</span>
                   <span className="text-muted-foreground ml-2">one-time</span>
                 </div>
                 <p className="text-muted-foreground">{plan.description}</p>
