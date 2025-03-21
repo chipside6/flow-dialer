@@ -73,6 +73,12 @@ export function useTransferNumbers() {
       return null;
     }
     
+    // Prevent multiple submissions
+    if (isSubmitting) {
+      console.log("Already submitting, ignoring additional request");
+      return null;
+    }
+    
     try {
       console.log("Setting isSubmitting to true");
       setIsSubmitting(true);
@@ -81,6 +87,7 @@ export function useTransferNumbers() {
       
       if (newTransferNumber) {
         console.log("Successfully added transfer number:", newTransferNumber);
+        // Update state with the new transfer number
         setTransferNumbers(prevNumbers => [newTransferNumber, ...prevNumbers]);
         
         toast({
@@ -101,7 +108,10 @@ export function useTransferNumbers() {
       return null;
     } finally {
       console.log("Setting isSubmitting to false");
-      setIsSubmitting(false);
+      setTimeout(() => {
+        setIsSubmitting(false);
+        console.log("isSubmitting set to false after delay");
+      }, 100);
     }
   };
   

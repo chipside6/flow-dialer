@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,19 +17,39 @@ export const AddTransferNumberForm = ({
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [description, setDescription] = useState("");
+  const [localSubmitting, setLocalSubmitting] = useState(false);
+  
+  // Keep local submitting state in sync with parent
+  useEffect(() => {
+    if (!isSubmitting && localSubmitting) {
+      setLocalSubmitting(false);
+    }
+  }, [isSubmitting]);
   
   const handleSubmit = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || localSubmitting) {
+      console.log("Submission already in progress, ignoring click");
+      return;
+    }
     
     console.log("Form submitted, isSubmitting:", isSubmitting);
-    const result = await onAddTransferNumber(name, number, description);
-    if (result) {
-      // Clear the form after successful submission
-      setName("");
-      setNumber("");
-      setDescription("");
+    setLocalSubmitting(true);
+    
+    try {
+      const result = await onAddTransferNumber(name, number, description);
+      if (result) {
+        // Clear the form after successful submission
+        setName("");
+        setNumber("");
+        setDescription("");
+      }
+    } catch (error) {
+      console.error("Error in form submission:", error);
     }
   };
+  
+  // Use either parent or local submitting state
+  const buttonDisabled = isSubmitting || localSubmitting;
   
   return (
     <Card className="mb-8">
@@ -49,7 +68,7 @@ export const AddTransferNumberForm = ({
               placeholder="Enter a name for this transfer destination"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={isSubmitting}
+              disabled={buttonDisabled}
             />
           </div>
           <div>
@@ -59,7 +78,7 @@ export const AddTransferNumberForm = ({
               placeholder="Enter the phone number (e.g., +1-555-123-4567)"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
-              disabled={isSubmitting}
+              disabled={buttonDisabled}
             />
           </div>
           <div>
@@ -69,14 +88,14 @@ export const AddTransferNumberForm = ({
               placeholder="Enter a description for this transfer number"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              disabled={isSubmitting}
+              disabled={buttonDisabled}
             />
           </div>
           <Button 
             onClick={handleSubmit} 
-            disabled={isSubmitting}
+            disabled={buttonDisabled}
           >
-            {isSubmitting ? (
+            {buttonDisabled ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Adding...

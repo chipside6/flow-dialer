@@ -18,6 +18,27 @@ export const TransferNumbersList = ({
   isLoading, 
   onDeleteTransferNumber 
 }: TransferNumbersListProps) => {
+  // Track which items are being deleted
+  const [deletingIds, setDeletingIds] = React.useState<Set<string>>(new Set());
+  
+  const handleDelete = async (id: string) => {
+    if (deletingIds.has(id)) return;
+    
+    setDeletingIds(prev => new Set([...prev, id]));
+    
+    try {
+      await onDeleteTransferNumber(id);
+    } catch (error) {
+      console.error("Error when deleting:", error);
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set([...prev]);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
+  };
+  
   return (
     <Card>
       <CardHeader>
@@ -67,8 +88,17 @@ export const TransferNumbersList = ({
                   </TableCell>
                   <TableCell>{tn.callCount}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" onClick={() => onDeleteTransferNumber(tn.id)}>
-                      <Trash className="h-4 w-4 text-destructive" />
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDelete(tn.id)} 
+                      disabled={deletingIds.has(tn.id)}
+                    >
+                      {deletingIds.has(tn.id) ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-destructive" />
+                      ) : (
+                        <Trash className="h-4 w-4 text-destructive" />
+                      )}
                     </Button>
                   </TableCell>
                 </TableRow>
