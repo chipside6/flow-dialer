@@ -80,7 +80,7 @@ const SipProviders = () => {
     <DashboardLayout>
       <div className="container-fluid">
         <div className="mb-6">
-          <h1 className={`text-3xl font-bold ${isMobile ? 'pl-2' : ''}`}>SIP Providers</h1>
+          <h1 className={`text-3xl font-bold ${isMobile ? 'pl-10' : ''}`}>SIP Providers</h1>
         </div>
         
         <SipProviderForm 

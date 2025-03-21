@@ -20,6 +20,7 @@
   /* Prevent content from being hidden under fixed elements */
   .dashboard-content > div:first-child {
     padding-top: 8px;
+    padding-left: 40px; /* Ensure content doesn't overlap with sidebar button */
   }
   
   /* Better spacing for headings */
@@ -27,6 +28,7 @@
   .dashboard-content h2 {
     text-align: center;
     margin-bottom: 1rem;
+    padding-left: 40px; /* Prevent overlap with sidebar button */
   }
   
   /* Fix button alignment */

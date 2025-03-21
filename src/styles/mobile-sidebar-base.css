@@ -35,8 +35,17 @@
   }
   
   /* Ensure that campaign content is not hidden by the mobile button */
-  .campaign-content, 
-  .dashboard-content {
+  .campaign-content {
     padding-left: 64px !important;
+  }
+  
+  /* Make sure dashboard content has proper padding */
+  .dashboard-content {
+    padding-left: 56px !important;
+  }
+  
+  /* Fix potential z-index issues with sidebar button */
+  .mobile-sidebar-button {
+    z-index: 50 !important;
   }
 }
