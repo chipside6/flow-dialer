@@ -9,17 +9,23 @@ interface SidebarNavItemProps {
     path: string;
     icon: React.ReactNode;
   };
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent) => void;
 }
 
 export const SidebarNavItem = ({ item, onClick }: SidebarNavItemProps) => {
   const location = useLocation();
   const isActive = location.pathname === item.path;
   
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      onClick(e);
+    }
+  };
+  
   return (
     <Link
       to={item.path}
-      onClick={onClick}
+      onClick={handleClick}
       className={cn(
         "flex items-center px-4 py-3 rounded-md text-foreground hover:bg-muted transition-colors",
         isActive 

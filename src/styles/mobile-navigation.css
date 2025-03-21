@@ -47,12 +47,16 @@
   }
   
   /* Mobile sidebar solid background - IMPORTANT FIXES */
-  div[role="dialog"] > div[data-mobile="true"] {
+  div[role="dialog"] > div[data-mobile="true"],
+  [data-radix-dialog-content] {
     background-color: #ffffff !important;
     opacity: 1 !important;
     backdrop-filter: none !important;
     border: none !important;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2) !important;
+    visibility: visible !important;
+    display: flex !important;
+    z-index: 9999 !important;
   }
   
   /* Remove ALL blur effects everywhere */
@@ -132,5 +136,21 @@
   /* Force proper z-index on all sidebar components */
   [data-sidebar="sidebar"][data-state="open"] {
     z-index: 100 !important;
+  }
+  
+  /* Fix dialog content display */
+  [data-radix-dialog-content] {
+    display: flex !important;
+    flex-direction: column !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Ensure sheet content is properly displayed */
+  .fixed.z-50.h-full {
+    display: flex !important;
+    flex-direction: column !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }

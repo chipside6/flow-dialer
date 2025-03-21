@@ -49,7 +49,16 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   const isAdmin = profile?.is_admin === true;
   
   return (
-    <Sidebar collapsible="offcanvas" style={isMobile ? { backgroundColor: '#ffffff', opacity: 1 } : {}}>
+    <Sidebar 
+      collapsible="offcanvas" 
+      style={{
+        backgroundColor: '#ffffff', 
+        opacity: 1,
+        visibility: 'visible',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
       <SidebarHeader>
         <div className="flex items-center p-4 mt-4 md:mt-0" style={{ backgroundColor: '#ffffff' }}>
           <div className="w-14 h-14 bg-[#8B5CF6] rounded-full flex items-center justify-center text-white mr-3">
@@ -63,21 +72,28 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
               variant="ghost" 
               size="icon" 
               className="ml-auto" 
-              onClick={() => setOpenMobile(false)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOpenMobile(false);
+              }}
             >
               <X size={20} />
             </Button>
           )}
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-4 py-2" style={{ backgroundColor: '#ffffff' }}>
+      <SidebarContent className="px-4 py-2" style={{ backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column' }}>
         <div className="rounded-lg p-2 mb-4" style={{ backgroundColor: '#ffffff' }}>
           <nav className="space-y-2" style={{ backgroundColor: '#ffffff' }}>
             {navItems.map((item) => (
               <SidebarNavItem 
                 key={item.path}
                 item={item}
-                onClick={handleItemClick}
+                onClick={(e) => {
+                  e && e.stopPropagation();
+                  handleItemClick();
+                }}
               />
             ))}
             
