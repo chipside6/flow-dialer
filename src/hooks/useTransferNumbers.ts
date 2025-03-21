@@ -42,7 +42,9 @@ export function useTransferNumbers() {
     
     try {
       setIsLoading(true);
+      console.log("Fetching transfer numbers for user:", user.id);
       const formattedData = await fetchUserTransferNumbers(user.id);
+      console.log("Successfully fetched transfer numbers:", formattedData.length);
       setTransferNumbers(formattedData);
     } catch (error) {
       console.error("Error fetching transfer numbers:", error);
@@ -73,10 +75,12 @@ export function useTransferNumbers() {
     
     try {
       setIsSubmitting(true);
+      console.log("Adding transfer number for user:", user.id);
       const newTransferNumber = await addTransferNumberToDatabase(user.id, name, number, description);
       
       if (newTransferNumber) {
-        setTransferNumbers([newTransferNumber, ...transferNumbers]);
+        console.log("Successfully added transfer number:", newTransferNumber);
+        setTransferNumbers(prevNumbers => [newTransferNumber, ...prevNumbers]);
         
         toast({
           title: "Transfer number added",
@@ -104,9 +108,11 @@ export function useTransferNumbers() {
     if (!user) return false;
     
     try {
+      console.log("Deleting transfer number:", id);
       const success = await deleteTransferNumberFromDatabase(user.id, id);
       
       if (success) {
+        console.log("Successfully deleted transfer number:", id);
         setTransferNumbers(transferNumbers.filter(tn => tn.id !== id));
         
         toast({
