@@ -12,10 +12,8 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Profile schema validation
+// Profile schema validation with only email now
 const profileFormSchema = z.object({
-  full_name: z.string().min(1, "Full name is required").max(100),
-  company_name: z.string().optional(),
   email: z.string().email("Invalid email address").min(1, "Email is required"),
 });
 
@@ -28,8 +26,6 @@ export function ProfileInformationForm() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      full_name: profile?.full_name || "",
-      company_name: profile?.company_name || "",
       email: user?.email || "",
     },
   });
@@ -37,14 +33,6 @@ export function ProfileInformationForm() {
   const onSubmit = async (data: ProfileFormValues) => {
     try {
       setIsUpdating(true);
-      
-      // Update profile in Supabase
-      const { error } = await updateProfile({
-        full_name: data.full_name,
-        company_name: data.company_name,
-      });
-
-      if (error) throw error;
       
       // If email has changed, update it in auth
       if (data.email !== user?.email) {
@@ -58,12 +46,12 @@ export function ProfileInformationForm() {
           title: "Verification email sent",
           description: "Please check your email to verify your new address.",
         });
+      } else {
+        toast({
+          title: "No changes detected",
+          description: "Your email address remains the same.",
+        });
       }
-
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated.",
-      });
     } catch (error: any) {
       toast({
         title: "Error updating profile",
@@ -86,37 +74,6 @@ export function ProfileInformationForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="full_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} className="max-w-full" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="company_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Company Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} className="max-w-full" />
-                  </FormControl>
-                  <FormDescription className="text-xs">
-                    Optional: Enter your company or organization name
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
             <FormField
               control={form.control}
               name="email"
@@ -142,7 +99,7 @@ export function ProfileInformationForm() {
                   Updating...
                 </>
               ) : (
-                "Update Profile"
+                "Update Email"
               )}
             </Button>
           </CardFooter>
