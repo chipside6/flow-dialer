@@ -1,7 +1,7 @@
 
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
-import { addTransferNumberToDatabase } from "@/services/transferNumberService";
+import { addTransferNumber } from "@/services/customBackendService";
 import { useTransferNumberValidation } from "./useTransferNumberValidation";
 import { logSupabaseOperation, OperationType } from "@/utils/supabaseDebug";
 
@@ -13,7 +13,7 @@ export function useAddTransferNumber(
   const { validateTransferNumberInput } = useTransferNumberValidation();
 
   // Add a new transfer number
-  const addTransferNumber = async (name: string, number: string, description: string) => {
+  const addTransferNumberHandler = async (name: string, number: string, description: string) => {
     console.log("addTransferNumber hook called with:", { name, number, description });
     
     try {
@@ -45,19 +45,9 @@ export function useAddTransferNumber(
       
       console.log("Adding transfer number for user:", user.id, {cleanName, cleanNumber, cleanDesc});
       
-      // Log the operation start
-      logSupabaseOperation({
-        operation: OperationType.WRITE,
-        table: 'transfer_numbers',
-        user_id: user.id,
-        success: true,
-        auth_status: "AUTHENTICATED",
-        data: { name: cleanName, number: cleanNumber }
-      });
-      
       try {
-        // Make the database call with explicit error handling
-        const newTransferNumber = await addTransferNumberToDatabase(
+        // Make the API call to the custom backend
+        const newTransferNumber = await addTransferNumber(
           user.id, 
           cleanName, 
           cleanNumber, 
@@ -76,11 +66,11 @@ export function useAddTransferNumber(
         refreshTransferNumbers();
         
         return newTransferNumber;
-      } catch (dbError) {
-        console.error("Database operation error:", dbError);
+      } catch (apiError) {
+        console.error("API operation error:", apiError);
         toast({
           title: "Error adding transfer number",
-          description: "There was a problem saving your transfer number to the database",
+          description: "There was a problem saving your transfer number to the backend server",
           variant: "destructive",
         });
         return null;
@@ -105,6 +95,6 @@ export function useAddTransferNumber(
   };
 
   return {
-    addTransferNumber
+    addTransferNumber: addTransferNumberHandler
   };
 }

@@ -1,18 +1,18 @@
 
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
-import { deleteTransferNumberFromDatabase } from "@/services/transferNumberService";
+import { deleteTransferNumber } from "@/services/customBackendService";
 
 export function useDeleteTransferNumber(refreshTransferNumbers: () => void) {
   const { user } = useAuth();
 
   // Delete a transfer number
-  const deleteTransferNumber = async (id: string) => {
+  const deleteTransferNumberHandler = async (id: string) => {
     if (!user) return false;
     
     try {
       console.log("Deleting transfer number:", id);
-      const success = await deleteTransferNumberFromDatabase(user.id, id);
+      const success = await deleteTransferNumber(user.id, id);
       
       if (success) {
         console.log("Successfully deleted transfer number:", id);
@@ -39,6 +39,6 @@ export function useDeleteTransferNumber(refreshTransferNumbers: () => void) {
   };
 
   return {
-    deleteTransferNumber
+    deleteTransferNumber: deleteTransferNumberHandler
   };
 }

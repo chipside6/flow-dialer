@@ -2,7 +2,7 @@
 import { useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
-import { fetchUserTransferNumbers } from "@/services/transferNumberService";
+import { fetchUserTransferNumbers } from "@/services/customBackendService";
 
 export function useFetchTransferNumbers(
   setTransferNumbers: (numbers: any[]) => void,
@@ -11,7 +11,7 @@ export function useFetchTransferNumbers(
 ) {
   const { user } = useAuth();
 
-  // Fetch transfer numbers from the database - using useCallback to prevent recreation
+  // Fetch transfer numbers from the custom backend - using useCallback to prevent recreation
   const fetchTransferNumbers = useCallback(async () => {
     if (!user) {
       setIsLoading(false);
@@ -33,7 +33,7 @@ export function useFetchTransferNumbers(
       setError("Failed to load transfer numbers");
       toast({
         title: "Error loading transfer numbers",
-        description: "Could not load your transfer numbers from the database",
+        description: "Could not load your transfer numbers from the backend server",
         variant: "destructive"
       });
       // Reset state on error to prevent stuck states
