@@ -37,10 +37,7 @@ export const pricingPlans: PricingPlan[] = [
     features: [
       "Unlimited calls",
       "Unlimited campaigns",
-      "Edit or change assigned contact lists",
-      "Call recording & transcription",
       "Advanced analytics",
-      "Enhanced security features",
       "Priority support",
       "Custom branding options",
       "Pay once, use forever"
