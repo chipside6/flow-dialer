@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Sidebar, SidebarContent, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 import { 
@@ -52,11 +53,11 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
       <SidebarHeader className="bg-[#9b87f5] text-white">
         <div className="flex items-center p-4 justify-between">
           <div className="flex items-center">
-            <Home size={18} className="mr-2" />
-            <span className="font-semibold text-lg">Dashboard</span>
+            <Phone size={18} className="mr-2" />
+            <span className="font-semibold text-lg">DialerApp</span>
           </div>
           
-          {/* Close button for mobile */}
+          {/* Close button for mobile - Only show one close button */}
           {isMobile && (
             <Button 
               variant="ghost" 
