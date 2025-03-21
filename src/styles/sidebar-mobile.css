@@ -5,7 +5,7 @@
   /* Make the sidebar appear cleaner on mobile */
   [data-sidebar][data-mobile="true"] {
     max-width: 100% !important;
-    width: 90% !important;
+    width: 85% !important;
     z-index: 60 !important; /* Increase z-index to ensure it appears above everything */
   }
   
@@ -28,17 +28,18 @@
   
   /* Active menu item styling */
   [data-sidebar="content"] a.bg-primary {
-    background-color: rgba(124, 58, 237, 1) !important;
+    background-color: #8B5CF6 !important;
+    color: white !important;
   }
   
   /* Improve header logo appearance */
   [data-sidebar="header"] .w-14 {
-    background-color: rgba(124, 58, 237, 1) !important;
+    background-color: #8B5CF6 !important;
   }
   
   /* Logout button styling */
   [data-sidebar="content"] .border-t button {
-    color: rgba(124, 58, 237, 1) !important;
+    color: #8B5CF6 !important;
     font-weight: 500;
   }
   

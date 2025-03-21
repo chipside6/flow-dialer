@@ -7,14 +7,15 @@
     display: flex;
     align-items: center;
     padding: 12px 16px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
     border-radius: 8px;
     transition: background-color 0.2s;
   }
   
   /* Active state for sidebar items */
   [data-sidebar="content"] a.bg-primary {
-    background-color: rgba(124, 58, 237, 1) !important;
+    background-color: #8B5CF6 !important;
+    color: white !important;
   }
   
   /* Icon styling in sidebar items */
@@ -22,30 +23,39 @@
     margin-right: 12px;
     width: 20px;
     height: 20px;
-  }
-  
-  /* Dashboard active item */
-  [data-sidebar="content"] a:first-child {
-    background-color: rgba(124, 58, 237, 1);
-    color: white;
+    flex-shrink: 0;
   }
   
   /* Logout button design */
   [data-sidebar="content"] .border-t button {
-    color: rgba(124, 58, 237, 1) !important;
+    color: #8B5CF6 !important;
     font-weight: 500;
     display: flex;
     align-items: center;
     width: 100%;
-  }
-  
-  /* Logout icon rotation */
-  [data-sidebar="content"] .border-t button svg {
-    transform: rotate(90deg);
+    margin-top: 8px;
+    padding: 12px 16px;
   }
   
   /* Fix content positioning */
   [data-sidebar-inset] {
     padding-top: 60px;
+  }
+  
+  /* Fix spacing for logout button */
+  [data-sidebar="content"] .border-t {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+  
+  /* Ensure consistent icon spacing */
+  [data-sidebar="content"] button svg {
+    margin-right: 12px !important;
+    flex-shrink: 0;
+  }
+  
+  /* Fix logout icon rotation - make it consistent with the design */
+  [data-sidebar="content"] .border-t button svg {
+    transform: rotate(0deg);
   }
 }

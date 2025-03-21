@@ -22,10 +22,12 @@ export const SidebarNavItem = ({ item, onClick }: SidebarNavItemProps) => {
       onClick={onClick}
       className={cn(
         "flex items-center px-4 py-3 rounded-md text-foreground hover:bg-muted transition-colors",
-        isActive ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-accent"
+        isActive 
+          ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+          : "hover:bg-accent"
       )}
     >
-      <span className="mr-3">{item.icon}</span>
+      <span className="mr-3 flex-shrink-0">{item.icon}</span>
       <span className="font-medium">{item.name}</span>
     </Link>
   );

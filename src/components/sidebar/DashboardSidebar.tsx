@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   X,
   User, 
-  LogOut
 } from "lucide-react";
 import { SidebarNavItem } from "@/components/sidebar/SidebarNavItem";
 import LogoutButton from "@/components/LogoutButton";
@@ -53,7 +52,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     <Sidebar collapsible="offcanvas">
       <SidebarHeader>
         <div className="flex items-center p-4 mt-4 md:mt-0">
-          <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white mr-3">
+          <div className="w-14 h-14 bg-[#8B5CF6] rounded-full flex items-center justify-center text-white mr-3">
             <Phone size={24} />
           </div>
           <span className="font-semibold text-xl">Flow Dialer</span>
@@ -99,7 +98,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           <div className="mt-6 pt-4 border-t border-border">
             <LogoutButton 
               variant="ghost" 
-              className="w-full justify-start py-3 text-violet-500 font-medium" 
+              className="w-full justify-start py-3 text-primary font-medium" 
               onClick={handleItemClick}
             />
           </div>
