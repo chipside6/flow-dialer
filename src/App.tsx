@@ -107,6 +107,14 @@ const App = () => (
               } 
             />
             <Route 
+              path="/upgrade" 
+              element={
+                <ProtectedRoute>
+                  <Billing />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/profile" 
               element={
                 <ProtectedRoute>
