@@ -9,6 +9,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CampaignData } from "@/components/campaign-wizard/types";
 import { useAuth } from "@/contexts/auth/useAuth";
 import { Campaign } from "@/hooks/useCampaigns";
+import { v4 as uuidv4 } from 'uuid';
 
 const CampaignPage = () => {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
@@ -18,7 +19,7 @@ const CampaignPage = () => {
   const handleCreateCampaign = (newCampaign: CampaignData) => {
     // Ensure the campaign has a user_id property and matches the Campaign type
     const campaignWithRequiredFields: Campaign = {
-      id: newCampaign.id,
+      id: newCampaign.id || uuidv4(),
       title: newCampaign.title,
       status: (newCampaign.status as Campaign["status"]) || "pending",
       progress: newCampaign.progress || 0,
@@ -49,7 +50,7 @@ const CampaignPage = () => {
                 <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                   <h1 className="text-3xl font-bold">Campaigns</h1>
                   <Button 
-                    className="bg-green-600 hover:bg-green-700"
+                    variant="success"
                     onClick={() => setShowCreateWizard(true)}
                   >
                     <PlusCircle className="h-4 w-4 mr-2" />
