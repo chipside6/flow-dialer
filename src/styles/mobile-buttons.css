@@ -2,52 +2,39 @@
 /* Mobile button styles */
 
 @media screen and (max-width: 768px) {
-  /* Improve touch targets on mobile */
-  button, a {
-    min-height: 44px;
-    min-width: 44px;
+  /* Fix spacing between button text and icons */
+  button, 
+  .button,
+  [class*="btn"] {
+    gap: 8px !important;
+    padding: 10px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
   
-  /* Fix button overflow issues */
-  button {
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
+  /* Fix icon sizing and alignment */
+  button svg,
+  .button svg,
+  [class*="btn"] svg {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
   }
   
-  /* Larger touch targets */
-  [role="button"], 
+  /* Improve touch targets */
   button,
-  .clickable {
-    padding: 8px !important;
-  }
-
-  /* Improve spacing between icon and text in buttons */
-  button svg + span,
-  button span + svg {
-    margin-left: 6px;
-  }
-
-  button svg:first-child:not(:only-child) {
-    margin-right: 0;
-  }
-
-  button span:first-child:not(:only-child) {
-    margin-left: 0;
+  .button,
+  [class*="btn"],
+  a[role="button"] {
+    min-height: 42px !important;
+    font-size: 14px !important;
   }
   
-  /* Ensure buttons don't cause overflow */
-  .button-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-width: 100%;
-    justify-content: center;
-  }
-
-  /* Ensure refresh button doesn't cause overflow */
-  .flex.justify-between.items-center {
-    flex-wrap: wrap;
-    gap: 12px;
+  /* Full width buttons on very small screens */
+  @media screen and (max-width: 480px) {
+    .sm\:w-auto {
+      width: 100% !important;
+    }
   }
 }

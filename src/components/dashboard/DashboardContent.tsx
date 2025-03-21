@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth";
@@ -80,6 +81,9 @@ export const DashboardContent = () => {
             <CardDescription>Manage your account and campaigns.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
+            <Button asChild variant="success">
+              <Link to="/campaign">Create a Campaign</Link>
+            </Button>
             <Button asChild>
               <Link to="/campaigns">Go to Campaigns</Link>
             </Button>
@@ -87,7 +91,7 @@ export const DashboardContent = () => {
               <Link to="/profile">Edit Profile</Link>
             </Button>
             <Button asChild>
-              <Link to="/billing">Billing & Payments</Link>
+              <Link to="/billing">Upgrade to Lifetime</Link>
             </Button>
           </CardContent>
         </Card>
