@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { SipProvider } from "@/types/sipProviders";
 import { SipProviderActions } from "./types";
 import { 
@@ -55,7 +54,7 @@ export const useSipProviderActions = (
         const newProvider: SipProvider = {
           id: newProviderData.id,
           ...providerData,
-          dateAdded: new Date(),
+          dateAdded: new Date(newProviderData.created_at),
           isActive: true
         };
         

@@ -44,19 +44,10 @@ export const useSipProvidersState = (): SipProviderState => {
 
   return {
     providers,
+    setProviders,
     editingProvider,
+    setEditingProvider,
     isLoading,
     error,
-  };
-};
-
-// Export a setter function for updating provider state from actions
-export const createSetProviders = (
-  setProviders: React.Dispatch<React.SetStateAction<SipProvider[]>>,
-  setEditingProvider: React.Dispatch<React.SetStateAction<SipProvider | null>>
-) => {
-  return {
-    setProviders,
-    setEditingProvider
   };
 };

@@ -16,7 +16,9 @@ export interface SipProviderApiResponse {
 
 export interface SipProviderState {
   providers: SipProvider[];
+  setProviders: React.Dispatch<React.SetStateAction<SipProvider[]>>;
   editingProvider: SipProvider | null;
+  setEditingProvider: React.Dispatch<React.SetStateAction<SipProvider | null>>;
   isLoading: boolean;
   error: Error | null;
 }
@@ -29,4 +31,4 @@ export interface SipProviderActions {
   toggleProviderStatus: (id: string) => Promise<void>;
 }
 
-export type UseSipProvidersReturn = SipProviderState & SipProviderActions;
+export type UseSipProvidersReturn = Omit<SipProviderState, 'setProviders' | 'setEditingProvider'> & SipProviderActions;
