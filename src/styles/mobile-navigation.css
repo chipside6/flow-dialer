@@ -40,12 +40,18 @@
   
   /* Force a solid white background on the Sheet component */
   div[role="dialog"] {
-    background-color: white !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
   }
   
   div[role="dialog"] > div[data-mobile="true"] {
     background-color: white !important;
     opacity: 1 !important;
+    backdrop-filter: none !important;
+  }
+  
+  /* Remove any backdrop blur */
+  .backdrop-blur-sm {
+    backdrop-filter: none !important;
   }
   
   /* Fix content positioning */

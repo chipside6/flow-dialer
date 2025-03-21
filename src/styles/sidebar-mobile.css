@@ -7,6 +7,7 @@
     max-width: 100% !important;
     width: 85% !important;
     z-index: 60 !important; /* Increase z-index to ensure it appears above everything */
+    background-color: #ffffff !important;
   }
   
   /* Customize the mobile sidebar style - FIX TRANSPARENCY */
@@ -20,6 +21,7 @@
   [role="dialog"] [data-mobile="true"] {
     background-color: #ffffff !important;
     opacity: 1 !important;
+    backdrop-filter: none !important;
   }
   
   /* Give sidebar items more spacing */
@@ -89,6 +91,23 @@
     left: 16px !important;
     z-index: 50 !important;
     display: flex !important;
+  }
+  
+  /* Remove any blur effect from the sidebar */
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg {
+    backdrop-filter: none !important;
+  }
+  
+  /* Override any background opacity */
+  .bg-background\/80 {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  /* Force solid backgrounds */
+  .fixed.z-50.h-full {
+    background-color: white !important;
   }
 }
 
