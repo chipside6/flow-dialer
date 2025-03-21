@@ -78,10 +78,10 @@
     max-width: 100vw !important;
     overflow-x: hidden !important;
   }
-  
-  /* Fix overflow issues on mobile */
-  .mobile-menu-open {
-    overflow: hidden !important;
+
+  /* Fix any issues with dialog backgrounds */
+  div[role="dialog"] {
+    background-color: rgba(0, 0, 0, 0.5) !important;
   }
   
   /* Ensure the mobile menu button is visible and properly positioned */
@@ -93,21 +93,20 @@
     display: flex !important;
   }
   
-  /* Remove any blur effect from the sidebar */
-  .backdrop-blur-sm,
-  .backdrop-blur-md,
-  .backdrop-blur-lg {
-    backdrop-filter: none !important;
-  }
-  
-  /* Override any background opacity */
+  /* Force all overlay and background elements to have appropriate styling */
   .bg-background\/80 {
-    background-color: rgba(0, 0, 0, 0.4) !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
   }
   
-  /* Force solid backgrounds */
+  /* Ensure any fixed content has proper background */
   .fixed.z-50.h-full {
     background-color: white !important;
+  }
+  
+  /* Ensure content divs have appropriate z-index to maintain layering */
+  [data-mobile="true"] > div {
+    background-color: white !important;
+    z-index: 100 !important;
   }
 }
 
