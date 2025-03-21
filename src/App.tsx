@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/auth';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import UpgradePage from './pages/UpgradePage';
+import { AuthProvider } from '@/contexts/auth/AuthProvider';
 
 // Pages that should be imported from the correct locations
 import Dashboard from '@/pages/Dashboard';
@@ -112,7 +113,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </React.StrictMode>
   );
 }
