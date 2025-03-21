@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 
@@ -8,20 +8,6 @@ interface MobileSidebarButtonProps {
 }
 
 export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
-  const [visible, setVisible] = useState(true);
-  const [prevScrollPos, setPrevScrollPos] = useState(0);
-  
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollPos = window.scrollY;
-      setVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
-      setPrevScrollPos(currentScrollPos);
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [prevScrollPos]);
-  
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -29,14 +15,14 @@ export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
   };
   
   return (
-    <div className={`fixed top-2 left-2 z-90 transition-all duration-300 ${!visible ? '-translate-y-full' : 'translate-y-0'}`}>
+    <div className="fixed top-4 left-4 z-50">
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-background rounded-full shadow-md w-10 h-10 flex items-center justify-center" 
+        className="bg-background rounded-full shadow-md w-12 h-12 flex items-center justify-center" 
         onClick={handleClick}
       >
-        <Menu size={20} />
+        <Menu size={24} />
       </Button>
     </div>
   );
