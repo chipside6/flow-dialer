@@ -7,14 +7,12 @@ import { UploadGreetingForm } from '@/components/greeting-files/UploadGreetingFo
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const GreetingFiles = () => {
   const { user, isLoading: authLoading, initialized } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('files');
   const [timeoutReached, setTimeoutReached] = useState(false);
   const [showError, setShowError] = useState(false);
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     console.log("GreetingFiles page - Auth state:", { 
@@ -79,29 +77,25 @@ const GreetingFiles = () => {
 
   return (
     <DashboardLayout>
-      <div className="container px-0 sm:px-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 px-4 sm:px-0">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-0">Greeting Audio Files</h1>
+      <div className="container">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold">Greeting Audio Files</h1>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`mb-4 ${isMobile ? 'w-full grid grid-cols-2' : 'w-auto'}`}>
-            <TabsTrigger id="tab-trigger-files" value="files" className="flex-1 md:flex-none">
-              My Greetings
-            </TabsTrigger>
-            <TabsTrigger id="tab-trigger-upload" value="upload" className="flex-1 md:flex-none">
-              Add New Greeting
-            </TabsTrigger>
+          <TabsList className="mb-4 w-full md:w-auto">
+            <TabsTrigger id="tab-trigger-files" value="files" className="flex-1 md:flex-none">My Greetings</TabsTrigger>
+            <TabsTrigger id="tab-trigger-upload" value="upload" className="flex-1 md:flex-none">Add New Greeting</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="files" className="px-4 sm:px-0">
+          <TabsContent value="files">
             <GreetingFilesList 
               userId={user?.id}
               onUploadClick={goToUploadTab}
             />
           </TabsContent>
           
-          <TabsContent value="upload" className="px-4 sm:px-0">
+          <TabsContent value="upload">
             <UploadGreetingForm userId={user?.id} />
           </TabsContent>
         </Tabs>

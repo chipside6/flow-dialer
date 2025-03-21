@@ -1,29 +1,28 @@
 
 import { Button } from '@/components/ui/button';
-import { Mic, Square, X } from 'lucide-react';
+import { Mic, Square } from 'lucide-react';
 
 interface RecordingControlsProps {
   isRecording: boolean;
-  onStartRecording: () => Promise<void> | void;
-  onStopRecording: () => void;
-  cancelRecording?: () => void;
-  // Remove redundant props that do the same thing as onStartRecording/onStopRecording
+  startRecording: () => void;
+  stopRecording: () => void;
+  cancelRecording: () => void;
 }
 
 export const RecordingControls = ({
   isRecording,
-  onStartRecording,
-  onStopRecording,
+  startRecording,
+  stopRecording,
   cancelRecording,
 }: RecordingControlsProps) => {
   if (!isRecording) {
     return (
       <div className="flex justify-center gap-2">
         <Button 
-          onClick={onStartRecording}
+          onClick={startRecording}
           className="bg-red-600 hover:bg-red-700"
         >
-          <Mic className="h-4 w-4 mr-1" /> <span>Start Recording</span>
+          <Mic className="h-4 w-4" /> <span>Start Recording</span>
         </Button>
       </div>
     );
@@ -32,19 +31,17 @@ export const RecordingControls = ({
   return (
     <div className="flex justify-center gap-2">
       <Button 
-        onClick={onStopRecording}
+        onClick={stopRecording}
         variant="outline"
       >
-        <Square className="h-4 w-4 mr-1" /> <span>Stop Recording</span>
+        <Square className="h-4 w-4" /> <span>Stop Recording</span>
       </Button>
-      {cancelRecording && (
-        <Button 
-          onClick={cancelRecording}
-          variant="ghost"
-        >
-          <X className="h-4 w-4 mr-1" /> <span>Cancel</span>
-        </Button>
-      )}
+      <Button 
+        onClick={cancelRecording}
+        variant="ghost"
+      >
+        <span>Cancel</span>
+      </Button>
     </div>
   );
 };

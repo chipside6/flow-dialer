@@ -5,7 +5,6 @@ import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
-import { SidebarProvider } from "@/components/ui/sidebar";
 
 const DashboardFallback = () => (
   <div className="w-full h-96 flex items-center justify-center">
@@ -16,18 +15,16 @@ const DashboardFallback = () => (
 
 const Dashboard = () => {
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen bg-background flex flex-col w-full">
-        <Navbar />
-        <div className="flex flex-1 w-full max-w-full overflow-hidden">
-          <DashboardLayout>
-            <Suspense fallback={<DashboardFallback />}>
-              <DashboardContent />
-            </Suspense>
-          </DashboardLayout>
-        </div>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
+      <div className="flex flex-1 w-full max-w-full overflow-hidden">
+        <DashboardLayout>
+          <Suspense fallback={<DashboardFallback />}>
+            <DashboardContent />
+          </Suspense>
+        </DashboardLayout>
       </div>
-    </SidebarProvider>
+    </div>
   );
 };
 

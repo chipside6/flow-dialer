@@ -6,7 +6,6 @@ import { WizardStepTabs } from "./WizardStepTabs";
 import { WizardNavigation } from "./WizardNavigation";
 import { CampaignData, WizardStep } from "./types";
 import { getStepAvailability } from "./utils/formValidation";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WizardContainerProps {
   title: string;
@@ -32,7 +31,6 @@ export const WizardContainer: React.FC<WizardContainerProps> = ({
   children
 }) => {
   const isStepAvailable = getStepAvailability(campaign);
-  const isMobile = useIsMobile();
 
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-md">
@@ -41,14 +39,12 @@ export const WizardContainer: React.FC<WizardContainerProps> = ({
       </CardHeader>
       <CardContent className="p-0">
         <Tabs value={step} className="w-full">
-          <div className={`${isMobile ? 'overflow-x-auto scrollbar-none' : ''}`}>
-            <WizardStepTabs 
-              currentStep={step} 
-              setStep={setStep} 
-              isStepAvailable={isStepAvailable} 
-            />
-          </div>
-          <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
+          <WizardStepTabs 
+            currentStep={step} 
+            setStep={setStep} 
+            isStepAvailable={isStepAvailable} 
+          />
+          <div className="p-6">
             {children}
           </div>
         </Tabs>

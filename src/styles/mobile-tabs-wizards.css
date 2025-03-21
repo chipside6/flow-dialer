@@ -8,8 +8,6 @@
     overflow-x: auto;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
-    display: flex !important;
-    padding: 0 4px !important;
   }
   
   [role="tablist"]::-webkit-scrollbar {
@@ -17,7 +15,7 @@
   }
   
   [role="tabpanel"] {
-    padding: 20px 16px !important;
+    padding: 16px 12px;
   }
   
   /* Fix for scrollable tabs on mobile */
@@ -36,33 +34,5 @@
     max-width: 100%;
     width: 100%;
     overflow: hidden;
-    border-radius: 12px !important;
-  }
-  
-  /* Better tab button styling */
-  [role="tab"] {
-    white-space: nowrap;
-    font-size: 14px !important;
-    padding: 10px 14px !important;
-  }
-  
-  /* Wizard header styling */
-  .card-header {
-    padding: 16px !important;
-  }
-  
-  /* Improve spacing in tab panels */
-  [role="tabpanel"] > div {
-    margin-bottom: 16px !important;
-  }
-  
-  /* Fix wizard navigation buttons */
-  .wizard-navigation {
-    width: 100%;
-    justify-content: space-between !important;
-  }
-  
-  .wizard-navigation button {
-    flex: 1;
   }
 }

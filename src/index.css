@@ -135,34 +135,3 @@
   font-display: swap;
   src: url('https://applesocial.s3.amazonaws.com/assets/styles/fonts/sanfrancisco/sanfranciscodisplay-regular-webfont.woff');
 }
-
-/* Mobile content positioning */
-@media (max-width: 768px) {
-  /* Add padding for all page headers to avoid overlap with sidebar button */
-  h1, h2 {
-    padding-left: 32px;
-  }
-  
-  /* Center content on pages */
-  .container, 
-  .container-fluid,
-  [data-sidebar-inset] > div {
-    text-align: center;
-  }
-  
-  /* Fix card centering on mobile */
-  .card {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  /* Fix for greeting files page */
-  .tabs-content {
-    text-align: left;
-  }
-  
-  /* Extra space between mobile sidebar button and content */
-  .mobile-sidebar-button + * {
-    margin-left: 16px;
-  }
-}

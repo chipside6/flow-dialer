@@ -1,79 +1,49 @@
 
 import { Button } from '@/components/ui/button';
-import { Upload, Loader2, Play, Pause, X } from 'lucide-react';
-import { useState } from 'react';
+import { Upload, Loader2 } from 'lucide-react';
 
 interface PreviewControlsProps {
-  audioUrl: string;
-  onReset: () => void;
-  isUploading?: boolean;
-  isPreviewPlaying?: boolean;
-  togglePreview?: () => void;
-  handleUpload?: () => void;
-  cancelRecording?: () => void;
+  isUploading: boolean;
+  isPreviewPlaying: boolean;
+  togglePreview: () => void;
+  handleUpload: () => void;
+  cancelRecording: () => void;
 }
 
 export const PreviewControls = ({
-  audioUrl,
-  onReset,
-  isUploading = false,
-  isPreviewPlaying = false,
+  isUploading,
+  isPreviewPlaying,
   togglePreview,
   handleUpload,
   cancelRecording,
 }: PreviewControlsProps) => {
-  const [isPlaying, setIsPlaying] = useState(isPreviewPlaying);
-  const [audio] = useState(new Audio(audioUrl));
-  
-  const toggleAudio = () => {
-    if (togglePreview) {
-      togglePreview();
-      return;
-    }
-    
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
   return (
     <div className="flex justify-center gap-2">
       <Button
-        onClick={toggleAudio}
+        onClick={togglePreview}
         variant="secondary"
       >
-        {isPlaying ? (
-          <><Pause className="h-4 w-4 mr-1" /> <span>Pause</span></>
+        <span>{isPreviewPlaying ? 'Pause' : 'Play'} Preview</span>
+      </Button>
+      <Button 
+        onClick={handleUpload}
+        disabled={isUploading}
+      >
+        {isUploading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" /> <span>Uploading...</span>
+          </>
         ) : (
-          <><Play className="h-4 w-4 mr-1" /> <span>Play</span></>
+          <>
+            <Upload className="h-4 w-4" /> <span>Upload Recording</span>
+          </>
         )}
       </Button>
-      
-      {handleUpload && (
-        <Button 
-          onClick={handleUpload}
-          disabled={isUploading}
-        >
-          {isUploading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-1" /> <span>Uploading...</span>
-            </>
-          ) : (
-            <>
-              <Upload className="h-4 w-4 mr-1" /> <span>Upload</span>
-            </>
-          )}
-        </Button>
-      )}
-      
       <Button 
-        onClick={cancelRecording || onReset}
+        onClick={cancelRecording}
         variant="ghost"
       >
-        <X className="h-4 w-4 mr-1" /> <span>Discard</span>
+        <span>Discard</span>
       </Button>
     </div>
   );

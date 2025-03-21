@@ -12,8 +12,8 @@
 /* Add container styles for consistent padding */
 .container-fluid {
   width: 100%;
-  padding-right: 1.25rem;
-  padding-left: 1.25rem;
+  padding-right: 1rem;
+  padding-left: 1rem;
   margin-right: auto;
   margin-left: auto;
   box-sizing: border-box;
@@ -37,22 +37,4 @@ body, html {
 [data-sidebar-inset] {
   max-width: 100vw;
   overflow-x: hidden;
-}
-
-/* Better box shadows for cards */
-.card {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-}
-
-/* Better focus states for buttons */
-button:focus, a:focus {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-@media (max-width: 768px) {
-  .container-fluid {
-    padding-right: 1rem;
-    padding-left: 1rem;
-  }
 }

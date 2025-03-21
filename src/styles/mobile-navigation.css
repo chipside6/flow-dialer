@@ -12,8 +12,8 @@
   /* Fix max-width for content areas */
   .max-w-6xl {
     max-width: 100% !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
     box-sizing: border-box !important;
   }
   
@@ -22,19 +22,18 @@
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
-    padding: 0 12px !important;
+    padding: 0 8px !important;
   }
   
   /* Custom styles for the sidebar menu to match the design */
   [data-sidebar="sidebar"] {
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
   }
   
   /* Customize the mobile sidebar header */
   [data-sidebar="header"] {
-    padding: 16px !important;
+    padding: 0;
     margin: 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
   
   [data-sidebar="content"] {
@@ -44,39 +43,11 @@
   /* Remove rounded corners from nav items on mobile */
   [data-sidebar="content"] a > div {
     border-radius: 0 !important;
-    padding: 14px 16px !important;
   }
   
   /* Adjust vertical spacing between nav items */
   [data-sidebar="content"] nav > a {
     display: block;
     padding: 0;
-  }
-  
-  /* Improved bottom navigation styles */
-  .mobile-bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    z-index: 40;
-    display: flex;
-    justify-content: space-around;
-    padding: 8px 0;
-  }
-  
-  /* Better looking bottom nav buttons */
-  .mobile-bottom-nav button {
-    flex-direction: column;
-    padding: 8px !important;
-    min-height: auto !important;
-    border-radius: 8px !important;
-  }
-  
-  /* Add padding to bottom of page to account for bottom nav if present */
-  .has-bottom-nav {
-    padding-bottom: 64px !important;
   }
 }
