@@ -27,8 +27,16 @@
   .button,
   [class*="btn"],
   a[role="button"] {
-    min-height: 42px !important;
-    font-size: 14px !important;
+    min-height: 44px !important;
+    font-size: 15px !important;
+  }
+
+  /* Make action buttons more visible */
+  button[variant="success"],
+  .button[variant="success"],
+  [class*="success"] {
+    font-weight: 500 !important;
+    padding: 12px 20px !important;
   }
   
   /* Full width buttons on very small screens */

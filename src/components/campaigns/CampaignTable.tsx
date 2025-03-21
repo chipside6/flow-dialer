@@ -36,10 +36,11 @@ export const CampaignTable: React.FC = () => {
                 </p>
                 <Button 
                   variant="success" 
-                  className="gap-2 px-4 py-2.5 h-auto rounded-md"
+                  className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium"
                   onClick={handleCreateCampaign}
+                  size="lg"
                 >
-                  <PlusCircle className="h-4 w-4" /> <span>Create Campaign</span>
+                  <PlusCircle className="h-5 w-5" /> <span>Create Campaign</span>
                 </Button>
               </div>
             </TableCell>
