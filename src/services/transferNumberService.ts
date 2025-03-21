@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { TransferNumber } from "@/types/transferNumber";
 
@@ -48,7 +49,7 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
 
 /**
  * Adds a new transfer number to the database
- * Ultra-simplified version that focuses only on insertion
+ * Simplified version that focuses only on insertion
  */
 export const addTransferNumberToDatabase = async (
   userId: string, 
@@ -89,8 +90,8 @@ export const addTransferNumberToDatabase = async (
     // Return a success object without trying to fetch the record
     return {
       id: 'pending', // Temporary ID until refresh
-      name: name,
-      number: number,
+      name,
+      number,
       description: description || "No description provided",
       dateAdded: new Date(),
       callCount: 0

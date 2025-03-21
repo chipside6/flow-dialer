@@ -55,16 +55,15 @@ export function useAddTransferNumber(
         data: { name: cleanName, number: cleanNumber }
       });
       
-      // Make the database call without a timeout
-      const newTransferNumber = await addTransferNumberToDatabase(
-        user.id, 
-        cleanName, 
-        cleanNumber, 
-        cleanDesc
-      );
-      
-      // Show success toast regardless of whether we could fetch the new record
-      if (newTransferNumber) {
+      try {
+        // Make the database call with explicit error handling
+        const newTransferNumber = await addTransferNumberToDatabase(
+          user.id, 
+          cleanName, 
+          cleanNumber, 
+          cleanDesc
+        );
+        
         console.log("Successfully processed transfer number addition:", newTransferNumber);
         
         toast({
@@ -77,15 +76,15 @@ export function useAddTransferNumber(
         refreshTransferNumbers();
         
         return newTransferNumber;
-      } else {
-        console.error("Failed to add transfer number - no result returned");
+      } catch (dbError) {
+        console.error("Database operation error:", dbError);
         toast({
           title: "Error adding transfer number",
-          description: "There was a problem saving your transfer number",
+          description: "There was a problem saving your transfer number to the database",
           variant: "destructive",
         });
+        return null;
       }
-      return null;
     } catch (error) {
       console.error("Error adding transfer number:", error);
       toast({
@@ -95,11 +94,13 @@ export function useAddTransferNumber(
       });
       return null;
     } finally {
-      // Set submitting state to false immediately
-      if (setIsSubmitting) {
-        console.log("Setting isSubmitting to false");
-        setIsSubmitting(false);
-      }
+      // Set submitting state to false after a short delay to ensure UI has time to update
+      setTimeout(() => {
+        if (setIsSubmitting) {
+          console.log("Setting isSubmitting to false");
+          setIsSubmitting(false);
+        }
+      }, 500);
     }
   };
 
