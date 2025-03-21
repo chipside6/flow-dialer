@@ -1,0 +1,36 @@
+
+/* Mobile sidebar transitions and animations */
+
+@media (max-width: 768px) {
+  /* Transitions for sidebar */
+  [data-sidebar="sidebar"][data-mobile="true"] {
+    left: -100% !important;
+    transition: transform 0.3s ease, left 0.3s ease !important;
+  }
+  
+  /* Animation for opening state */
+  [data-state="open"] {
+    animation: slideIn 0.3s ease;
+    visibility: visible !important;
+    display: flex !important;
+    background-color: #ffffff !important;
+  }
+  
+  /* Animation for closing state */
+  [data-state="closed"] {
+    animation: slideOut 0.3s ease;
+    display: flex !important;
+    opacity: 0;
+  }
+}
+
+/* Animation keyframes */
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}

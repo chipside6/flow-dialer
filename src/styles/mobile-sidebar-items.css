@@ -1,0 +1,37 @@
+
+/* Mobile sidebar items styling */
+
+@media (max-width: 768px) {
+  /* Navigation items styling */
+  [data-sidebar="content"] a {
+    margin-bottom: 4px;
+    border-radius: 8px;
+    background-color: transparent !important;
+  }
+  
+  /* Active navigation item */
+  [data-sidebar="content"] a.bg-primary {
+    background-color: #8B5CF6 !important;
+    color: white !important;
+  }
+  
+  /* Improve header logo appearance */
+  [data-sidebar="header"] .w-14 {
+    background-color: #8B5CF6 !important;
+  }
+  
+  /* Logout button styling */
+  [data-sidebar="content"] .border-t button {
+    color: #8B5CF6 !important;
+    font-weight: 500;
+    background-color: transparent !important;
+  }
+  
+  /* Fix the state issue - when open, show properly */
+  [data-sidebar="sidebar"][data-mobile="true"][data-state="open"] {
+    left: 0 !important;
+    transform: translateX(0) !important;
+    display: flex !important;
+    z-index: 999 !important;
+  }
+}
