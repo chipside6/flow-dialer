@@ -1,12 +1,14 @@
+
 import '@testing-library/jest-dom';
 
 // Set up any global mocks or configurations here
 jest.setTimeout(10000);
 
 // Mock window.setTimeout and other browser APIs
-global.setTimeout = jest.fn((cb) => {
-  return 123 as unknown as NodeJS.Timeout;
-});
+const originalSetTimeout = global.setTimeout;
+global.setTimeout = jest.fn((cb, ms) => {
+  return originalSetTimeout(cb, 0) as unknown as NodeJS.Timeout;
+}) as unknown as typeof global.setTimeout;
 
 global.clearTimeout = jest.fn();
 
