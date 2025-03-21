@@ -11,7 +11,8 @@ import {
   Server, 
   ShieldCheck,
   X,
-  User
+  User,
+  Crown
 } from "lucide-react";
 import { SidebarNavItem } from "@/components/sidebar/SidebarNavItem";
 import LogoutButton from "@/components/LogoutButton";
@@ -44,6 +45,9 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5" /> },
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
   ];
+  
+  // Check if user is on free plan (no subscription or specifically on free plan)
+  const isFreePlan = !profile?.subscription_plan || profile?.subscription_plan === 'free';
   
   return (
     <Sidebar collapsible="offcanvas">
@@ -79,6 +83,20 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
               onClick={handleItemClick}
             />
           ))}
+          
+          {/* Upgrade link - only show for free users */}
+          {isFreePlan && (
+            <SidebarNavItem 
+              item={{
+                name: "Upgrade Account",
+                path: "/upgrade",
+                icon: <Crown className="h-5 w-5 text-yellow-500" />
+              }}
+              onClick={handleItemClick}
+              className="mt-2 font-medium text-primary"
+              highlightStyle={true}
+            />
+          )}
           
           {/* Admin Panel Link */}
           {profile?.is_admin === true && (

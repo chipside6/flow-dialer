@@ -2,12 +2,14 @@
 import { useState, useRef, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 
+export type RecordingStatusType = 'idle' | 'recording' | 'complete' | 'error';
+
 export function useAudioRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
-  const [recordingStatus, setRecordingStatus] = useState('idle');
+  const [recordingStatus, setRecordingStatus] = useState<RecordingStatusType>('idle');
   const [error, setError] = useState<Error | null>(null);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -62,6 +64,7 @@ export function useAudioRecorder() {
           // Create audio URL for playback
           const url = URL.createObjectURL(blob);
           setAudioUrl(url);
+          setRecordingStatus('complete');
         }
         
         // Clean up
@@ -74,8 +77,6 @@ export function useAudioRecorder() {
           window.clearInterval(timerRef.current);
           timerRef.current = null;
         }
-        
-        setRecordingStatus('inactive');
       };
       
       // Start recording

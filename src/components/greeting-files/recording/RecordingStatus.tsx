@@ -1,6 +1,8 @@
 
+import { RecordingStatusType } from '@/hooks/useAudioRecorder';
+
 interface RecordingStatusProps {
-  status?: 'idle' | 'recording' | 'complete' | 'error';
+  status?: RecordingStatusType;
   time?: string;
   isRecording?: boolean;
   hasRecording?: boolean;
