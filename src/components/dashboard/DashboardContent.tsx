@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 import { LimitReachedDialog } from "@/components/LimitReachedDialog";
 import { useSubscription } from "@/hooks/useSubscription";
+import CampaignDashboard from "@/components/CampaignDashboard";
 
 export const DashboardContent = () => {
   const { user, profile } = useAuth();
@@ -24,7 +25,7 @@ export const DashboardContent = () => {
           </CardHeader>
           <CardContent>
             <p>
-              This is your dashboard. You can manage your campaign, view analytics, and more.
+              This is your dashboard. You can manage your campaigns, view analytics, and more.
             </p>
           </CardContent>
         </Card>
@@ -78,17 +79,19 @@ export const DashboardContent = () => {
             <CardDescription>Manage your account and campaigns.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <Button asChild variant="success">
+            <Button asChild variant="outline">
               <Link to="/campaign">Create a Campaign</Link>
             </Button>
-            <Button asChild>
-              <Link to="/campaigns">Go to Campaigns</Link>
+            <Button asChild variant="outline">
+              <Link to="/campaign">Go to Campaigns</Link>
             </Button>
-            <Button asChild>
+            <Button asChild variant="outline">
               <Link to="/profile">Edit Profile</Link>
             </Button>
           </CardContent>
         </Card>
+        
+        <CampaignDashboard />
       </div>
       
       <LimitReachedDialog 

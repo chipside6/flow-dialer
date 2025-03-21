@@ -16,7 +16,7 @@ const DashboardFallback = () => (
 
 const Dashboard = () => {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen bg-background flex flex-col w-full">
         <Navbar />
         <div className="flex flex-1 w-full max-w-full overflow-hidden">
