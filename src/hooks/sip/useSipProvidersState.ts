@@ -14,32 +14,47 @@ export const useSipProvidersState = (): SipProviderState => {
   const { user } = useAuth();
 
   useEffect(() => {
+    let isMounted = true;
     const loadProviders = async () => {
       if (!user) {
-        setProviders([]);
-        setIsLoading(false);
+        if (isMounted) {
+          setProviders([]);
+          setIsLoading(false);
+        }
         return;
       }
 
       try {
-        setIsLoading(true);
+        if (isMounted) setIsLoading(true);
         const data = await fetchSipProviders(user.id);
         const transformedData = transformProviderData(data);
-        setProviders(transformedData);
+        
+        if (isMounted) {
+          setProviders(transformedData);
+          setError(null);
+        }
       } catch (err: any) {
         console.error("Error fetching SIP providers:", err);
-        setError(err);
-        toast({
-          title: "Error loading providers",
-          description: err.message,
-          variant: "destructive"
-        });
+        if (isMounted) {
+          setError(err);
+          toast({
+            title: "Error loading providers",
+            description: err.message,
+            variant: "destructive"
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadProviders();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   return {

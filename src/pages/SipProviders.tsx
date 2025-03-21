@@ -6,6 +6,7 @@ import { useSipProviders } from "@/hooks/useSipProviders";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SipProviders = () => {
   const {
@@ -35,8 +36,8 @@ const SipProviders = () => {
         />
         
         {isLoading ? (
-          <div className="spinner-container">
-            <div className="loading-spinner"></div>
+          <div className="flex justify-center items-center min-h-[200px] w-full">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
           <SipProviderTable 
