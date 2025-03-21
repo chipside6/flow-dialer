@@ -13,7 +13,7 @@ import UpgradePage from './pages/UpgradePage';
 // Pages that should be imported from the correct locations
 import Dashboard from '@/pages/Dashboard';
 import Campaign from '@/pages/Campaign';
-import Contacts from '@/pages/ContactsPage';
+import ContactLists from '@/pages/ContactLists'; // Fixed import path
 import Greetings from '@/pages/GreetingFiles';
 import Transfers from '@/pages/TransferNumbers';
 import SipProviders from '@/pages/SipProviders';
@@ -85,7 +85,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/contacts",
-    element: <ProtectedRoute><Contacts /></ProtectedRoute>,
+    element: <ProtectedRoute><ContactLists /></ProtectedRoute>,
   },
   {
     path: "/transfers",
