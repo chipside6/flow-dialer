@@ -44,13 +44,13 @@ const UpgradePage = () => {
       // Record the payment in the database
       const { error: paymentError } = await supabase
         .from('payments')
-        .insert({
+        .insert([{
           user_id: user.id,
           amount: lifetimePlan.price,
           payment_method: 'crypto',
           payment_details: paymentDetails,
           plan_id: lifetimePlan.id
-        });
+        }]);
         
       if (paymentError) throw paymentError;
       
