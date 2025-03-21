@@ -59,26 +59,27 @@ export function useAuthOperations() {
 
   const signOut = async () => {
     try {
+      console.log("useAuthOperations - Signing out");
       const { success, error } = await signOutUser();
-      if (success) {
-        toast({
-          title: "Logged out successfully",
-          description: "You have been signed out",
-        });
-        window.location.href = '/';
-      } else if (error) {
+      
+      if (error) {
+        console.error("useAuthOperations - Sign out error:", error);
         toast({
           title: "Error signing out",
           description: error.message,
           variant: "destructive",
         });
       }
+      
+      return { success, error };
     } catch (error: any) {
+      console.error("useAuthOperations - Unexpected error during sign out:", error);
       toast({
         title: "Error signing out",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
+      return { success: false, error };
     }
   };
 
