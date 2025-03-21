@@ -14,9 +14,9 @@ export const DashboardContent = () => {
 
   return (
     <>
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle>Welcome!</CardTitle>
             <CardDescription>
               {profile?.full_name ? `Hello, ${profile.full_name}` : user?.email ? `Hello, ${user.email}` : 'Welcome to the Dashboard'}

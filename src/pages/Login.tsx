@@ -37,11 +37,6 @@ const Login = () => {
       if (error) {
         throw error;
       }
-
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
       
       console.log("Login - Sign in successful, redirecting to dashboard");
       setTimeout(() => {

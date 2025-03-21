@@ -40,11 +40,6 @@ export function useAuthOperations() {
           description: result.error.message,
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Login successful",
-          description: "Welcome back!",
-        });
       }
       return result;
     } catch (error: any) {

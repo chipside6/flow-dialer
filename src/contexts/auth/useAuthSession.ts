@@ -72,12 +72,7 @@ export function useAuthSession() {
       async (event, currentSession) => {
         console.log("useAuthSession - Auth state changed:", event);
         
-        if (event === 'SIGNED_IN') {
-          toast({
-            title: "Signed in successfully", 
-            description: "Welcome back!"
-          });
-        } else if (event === 'SIGNED_OUT') {
+        if (event === 'SIGNED_OUT') {
           toast({
             title: "Signed out", 
             description: "You have been signed out successfully"
