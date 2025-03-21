@@ -29,8 +29,14 @@
     color: white !important;
   }
   
-  /* Ensure only one close button is displayed */
-  [data-sidebar="header"] .flex.items-center.p-4.justify-between button {
-    margin-left: auto !important;
+  /* Hide the default Radix close button in mobile sidebar */
+  [data-sidebar][data-mobile="true"] .SheetPrimitive-Close {
+    display: none !important;
+  }
+  
+  /* Ensure that campaign content is not hidden by the mobile button */
+  .campaign-content, 
+  .dashboard-content {
+    padding-left: 64px !important;
   }
 }

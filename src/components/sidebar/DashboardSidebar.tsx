@@ -45,9 +45,6 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
   ];
   
-  // Add admin link for admin users
-  const isAdmin = profile?.is_admin === true;
-  
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="bg-[#9b87f5] text-white">
@@ -84,7 +81,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           ))}
           
           {/* Admin Panel Link */}
-          {isAdmin && (
+          {profile?.is_admin === true && (
             <SidebarNavItem 
               item={{
                 name: "Admin Panel",

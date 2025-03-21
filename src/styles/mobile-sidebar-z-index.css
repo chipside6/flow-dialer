@@ -29,9 +29,10 @@
     display: none !important;
   }
   
-  /* Fixed button styles */
-  .fixed.top-4.left-4.z-50 {
+  /* Fixed button styles - lower z-index to prevent content overlap */
+  .fixed.top-4.left-4.z-40 {
     transition: all 0.3s ease;
+    z-index: 40 !important;
   }
   
   /* Fix campaign title display */
