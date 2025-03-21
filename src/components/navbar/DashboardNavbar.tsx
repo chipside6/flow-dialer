@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import LogoutButton from '@/components/LogoutButton';
+import { UpgradeButton } from './UpgradeButton';
 
 interface DashboardNavbarProps {
   toggleSidebar: () => void;
@@ -43,6 +44,7 @@ export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
         </div>
         
         <div className="flex items-center gap-2">
+          <UpgradeButton />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full w-12 h-12">

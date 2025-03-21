@@ -1,10 +1,11 @@
 
 import { NavLinks } from './NavLinks';
-import { X } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import LogoutButton from '@/components/LogoutButton';
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface MobileMenuProps {
 
 export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   const { isAuthenticated } = useAuth();
+  const { currentPlan, isLoading: isSubscriptionLoading } = useSubscription();
   
   if (!isOpen) return null;
   
@@ -37,6 +39,15 @@ export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
         <div className="flex flex-col gap-3 mt-4">
           {isAuthenticated ? (
             <>
+              {/* Show upgrade button for free users */}
+              {!isSubscriptionLoading && currentPlan === 'free' && (
+                <Button asChild variant="outline" size="lg" className="flex items-center border-primary text-primary">
+                  <Link to="/billing" onClick={onClose}>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Upgrade to Lifetime
+                  </Link>
+                </Button>
+              )}
               <Button asChild variant="default" size="lg">
                 <Link to="/dashboard" onClick={onClose}>Dashboard</Link>
               </Button>

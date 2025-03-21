@@ -11,13 +11,16 @@ import {
   Server, 
   ShieldCheck,
   X,
-  User
+  User,
+  Sparkles
 } from "lucide-react";
 import { SidebarNavItem } from "@/components/sidebar/SidebarNavItem";
 import LogoutButton from "@/components/LogoutButton";
 import { useAuth } from "@/contexts/auth";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Link } from "react-router-dom";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface DashboardSidebarProps {
   onCloseMobile?: () => void;
@@ -27,6 +30,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   const { profile } = useAuth();
   const { setOpenMobile } = useSidebar();
   const isMobile = useIsMobile();
+  const { currentPlan, isLoading: isSubscriptionLoading } = useSubscription();
   
   const handleItemClick = () => {
     if (isMobile) {
@@ -90,6 +94,20 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
               }}
               onClick={handleItemClick}
             />
+          )}
+          
+          {/* Upgrade Link - only show for free users */}
+          {!isSubscriptionLoading && currentPlan === 'free' && (
+            <Link 
+              to="/billing" 
+              className="flex items-center py-3 px-4 text-sm font-medium hover:bg-accent/50 text-primary"
+              onClick={handleItemClick}
+            >
+              <div className="flex items-center w-full">
+                <Sparkles className="h-5 w-5 mr-3" />
+                <span>Upgrade to Lifetime</span>
+              </div>
+            </Link>
           )}
           
           {/* Logout button */}

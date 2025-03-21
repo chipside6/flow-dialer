@@ -1,12 +1,13 @@
 
 import { Link } from 'react-router-dom';
-import { Menu, Phone } from 'lucide-react';
+import { Menu, Phone, Sparkles } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { NavLinks } from './NavLinks';
 import { MobileMenu } from './MobileMenu';
 import { Dispatch, SetStateAction } from 'react';
 import { useAuth } from '@/contexts/auth';
 import LogoutButton from '@/components/LogoutButton';
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface PublicNavbarProps {
   isScrolled: boolean;
@@ -16,6 +17,7 @@ interface PublicNavbarProps {
 
 export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen }: PublicNavbarProps) => {
   const { isAuthenticated, user } = useAuth();
+  const { currentPlan, isLoading: isSubscriptionLoading } = useSubscription();
   
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 py-4 ${isScrolled ? 'bg-background/80 backdrop-blur-sm shadow-sm border-b' : 'border-transparent'}`}>
@@ -48,6 +50,20 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
+              {/* Show upgrade button for free users */}
+              {!isSubscriptionLoading && currentPlan === 'free' && (
+                <Button 
+                  asChild 
+                  variant="outline" 
+                  size="sm" 
+                  className="hidden md:flex items-center border-primary text-primary hover:bg-primary/10"
+                >
+                  <Link to="/billing">
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    Upgrade
+                  </Link>
+                </Button>
+              )}
               <Button variant="ghost" asChild className="hidden md:flex">
                 <Link to="/dashboard">Dashboard</Link>
               </Button>
