@@ -16,7 +16,13 @@ export function useAddTransferNumber(
     console.log("addTransferNumber hook called with:", { name, number, description });
     
     try {
-      // Clean input data first
+      // Set submitting state at the beginning
+      if (setIsSubmitting) {
+        console.log("Setting isSubmitting to true");
+        setIsSubmitting(true);
+      }
+      
+      // Clean input data
       const cleanName = name.trim();
       const cleanNumber = number.trim();
       const cleanDesc = description ? description.trim() : "";
@@ -36,20 +42,16 @@ export function useAddTransferNumber(
         return null;
       }
       
-      // Prevent multiple submissions
-      if (setIsSubmitting) {
-        console.log("Setting isSubmitting to true");
-        setIsSubmitting(true);
-      }
-      
       console.log("Adding transfer number for user:", user.id, {cleanName, cleanNumber, cleanDesc});
       
-      const newTransferNumber = await addTransferNumberToDatabase(
-        user.id, 
-        cleanName, 
-        cleanNumber, 
-        cleanDesc
-      );
+      // Use a timeout to ensure database operation completes
+      const newTransferNumber = await Promise.race([
+        addTransferNumberToDatabase(user.id, cleanName, cleanNumber, cleanDesc),
+        new Promise(resolve => setTimeout(() => {
+          console.log("Database operation timeout reached");
+          resolve(null);
+        }, 8000))
+      ]);
       
       if (newTransferNumber) {
         console.log("Successfully added transfer number:", newTransferNumber);

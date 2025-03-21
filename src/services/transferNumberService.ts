@@ -76,11 +76,13 @@ export const addTransferNumberToDatabase = async (
     
     console.log(`[TransferNumberService] Insert data:`, insertData);
     
+    // IMPORTANT FIX: Simplify the query to ensure it completes properly
     const startTime = Date.now();
     const { data, error } = await supabase
       .from('transfer_numbers')
       .insert(insertData)
-      .select();
+      .select('*')
+      .single();
     
     const queryTime = Date.now() - startTime;
     console.log(`[TransferNumberService] Insert query completed in ${queryTime}ms`);
@@ -92,15 +94,14 @@ export const addTransferNumberToDatabase = async (
     
     console.log(`[TransferNumberService] Database response after adding transfer number:`, data);
     
-    if (data && data.length > 0) {
-      const newItem = data[0];
+    if (data) {
       return {
-        id: newItem.id,
-        name: newItem.name,
-        number: newItem.phone_number,
-        description: newItem.description || "No description provided",
-        dateAdded: new Date(newItem.created_at),
-        callCount: newItem.call_count !== null ? Number(newItem.call_count) : 0
+        id: data.id,
+        name: data.name,
+        number: data.phone_number,
+        description: data.description || "No description provided",
+        dateAdded: new Date(data.created_at),
+        callCount: data.call_count !== null ? Number(data.call_count) : 0
       };
     }
     

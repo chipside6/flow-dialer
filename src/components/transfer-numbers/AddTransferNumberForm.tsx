@@ -31,6 +31,7 @@ export const AddTransferNumberForm = ({
   }, [isSubmitting, localSubmitting]);
   
   const handleSubmit = async (e: React.FormEvent) => {
+    // Prevent default browser form submission which can cause issues
     e.preventDefault();
     console.log("Form submit event captured and prevented default");
     
@@ -45,6 +46,7 @@ export const AddTransferNumberForm = ({
       isMobile
     });
     
+    // Don't submit if already submitting or if required fields are empty
     if (isSubmitting || localSubmitting) {
       console.log("Submission already in progress, ignoring submission");
       return;
@@ -55,14 +57,17 @@ export const AddTransferNumberForm = ({
       return;
     }
     
+    // Set local submitting state to prevent multiple submissions
     console.log("Starting form submission, setting localSubmitting");
     setLocalSubmitting(true);
     
     try {
+      // FIX: Make direct function call with the trimmed values
       console.log("Calling onAddTransferNumber directly with:", trimmedName, trimmedNumber, trimmedDescription);
       const result = await onAddTransferNumber(trimmedName, trimmedNumber, trimmedDescription);
       console.log("Submission result:", result);
       
+      // Only clear form if submission was successful
       if (result) {
         console.log("Success! Clearing form fields");
         setName("");
@@ -72,13 +77,14 @@ export const AddTransferNumberForm = ({
     } catch (error) {
       console.error("Error in form submission:", error);
     } finally {
+      // Always reset local submitting state
       console.log("Setting localSubmitting to false in finally block");
       setLocalSubmitting(false);
     }
   };
   
-  // Use either parent or local submitting state
-  const buttonDisabled = isSubmitting || localSubmitting;
+  // Determine if button should be disabled
+  const buttonDisabled = isSubmitting || localSubmitting || !name.trim() || !number.trim();
   
   return (
     <Card className="mb-8">
@@ -132,10 +138,10 @@ export const AddTransferNumberForm = ({
           </div>
           <Button 
             type="submit"
-            disabled={buttonDisabled || !name.trim() || !number.trim()}
+            disabled={buttonDisabled}
             className="w-full sm:w-auto mt-4"
           >
-            {buttonDisabled ? (
+            {isSubmitting || localSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Adding...
