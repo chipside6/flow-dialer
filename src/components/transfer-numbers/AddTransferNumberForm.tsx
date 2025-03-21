@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,24 +20,19 @@ export const AddTransferNumberForm = ({
   const [description, setDescription] = useState("");
   const [localSubmitting, setLocalSubmitting] = useState(false);
   
-  // Keep local submitting state in sync with parent
-  useEffect(() => {
-    if (!isSubmitting && localSubmitting) {
-      setLocalSubmitting(false);
-    }
-  }, [isSubmitting]);
-  
   const handleSubmit = async () => {
     if (isSubmitting || localSubmitting) {
       console.log("Submission already in progress, ignoring click");
       return;
     }
     
-    console.log("Form submitted, isSubmitting:", isSubmitting);
+    console.log("Form submitted, setting localSubmitting to true");
     setLocalSubmitting(true);
     
     try {
       const result = await onAddTransferNumber(name, number, description);
+      console.log("Submission result:", result ? "success" : "failure");
+      
       if (result) {
         // Clear the form after successful submission
         setName("");
@@ -45,6 +41,9 @@ export const AddTransferNumberForm = ({
       }
     } catch (error) {
       console.error("Error in form submission:", error);
+    } finally {
+      console.log("Setting localSubmitting to false");
+      setLocalSubmitting(false);
     }
   };
   

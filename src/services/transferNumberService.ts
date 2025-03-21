@@ -21,7 +21,7 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
     }
     
     if (data) {
-      console.log("Fetched transfer numbers:", data.length);
+      console.log("Fetched transfer numbers successfully, count:", data.length);
       return data.map(item => ({
         id: item.id,
         name: item.name,
@@ -67,7 +67,7 @@ export const addTransferNumberToDatabase = async (
       throw error;
     }
     
-    console.log("Added transfer number, response:", data);
+    console.log("Database response after adding transfer number:", data);
     
     if (data && data.length > 0) {
       const newItem = data[0];
@@ -81,6 +81,7 @@ export const addTransferNumberToDatabase = async (
       };
     }
     
+    console.warn("No data returned after adding transfer number");
     return null;
   } catch (error) {
     console.error("Error in addTransferNumberToDatabase:", error);

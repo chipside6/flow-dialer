@@ -107,11 +107,9 @@ export function useTransferNumbers() {
       });
       return null;
     } finally {
+      // Ensure isSubmitting is always reset
       console.log("Setting isSubmitting to false");
-      setTimeout(() => {
-        setIsSubmitting(false);
-        console.log("isSubmitting set to false after delay");
-      }, 100);
+      setIsSubmitting(false);
     }
   };
   
