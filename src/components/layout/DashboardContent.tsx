@@ -11,8 +11,10 @@ export const DashboardContent = ({ children }: DashboardContentProps) => {
   const isMobile = useIsMobile();
   
   return (
-    <SidebarInset className={`p-4 md:p-6 bg-background/50 dark:bg-background/10 min-h-screen ${isMobile ? 'pt-8 pl-16' : 'pt-20 md:pt-6'} overflow-hidden w-full`}>
-      <div className="max-w-6xl mx-auto w-full overflow-hidden px-1 sm:px-4">
+    <SidebarInset className={`p-0 sm:p-4 md:p-6 bg-background/50 dark:bg-background/10 min-h-screen ${
+      isMobile ? 'pt-4' : 'pt-6'
+    } overflow-hidden w-full`}>
+      <div className={`mx-auto w-full overflow-hidden ${isMobile ? 'px-0' : 'max-w-6xl px-4'}`}>
         {children}
       </div>
     </SidebarInset>
