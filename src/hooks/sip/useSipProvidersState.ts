@@ -14,38 +14,48 @@ export const useSipProvidersState = (): SipProviderState => {
   const { user } = useAuth();
 
   useEffect(() => {
+    console.log("useSipProvidersState effect running, user:", !!user);
     let isMounted = true;
+    
     const loadProviders = async () => {
-      if (!user) {
-        if (isMounted) {
-          setProviders([]);
-          setIsLoading(false);
-        }
-        return;
-      }
-
       try {
-        if (isMounted) setIsLoading(true);
+        if (!user) {
+          console.log("No user, clearing providers");
+          if (isMounted) {
+            setProviders([]);
+            setError(null);
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        if (isMounted) {
+          console.log("Setting loading to true");
+          setIsLoading(true);
+        }
+        
+        console.log("Fetching providers for user:", user.id);
         const data = await fetchSipProviders(user.id);
         const transformedData = transformProviderData(data);
+        console.log("Providers fetched:", transformedData.length);
         
         if (isMounted) {
+          console.log("Setting providers and clearing error");
           setProviders(transformedData);
           setError(null);
+          setIsLoading(false);
         }
       } catch (err: any) {
         console.error("Error fetching SIP providers:", err);
         if (isMounted) {
+          console.log("Setting error and clearing loading");
           setError(err);
+          setIsLoading(false);
           toast({
             title: "Error loading providers",
-            description: err.message,
+            description: err.message || "Failed to load SIP providers",
             variant: "destructive"
           });
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
         }
       }
     };
@@ -53,9 +63,13 @@ export const useSipProvidersState = (): SipProviderState => {
     loadProviders();
 
     return () => {
+      console.log("Cleanup effect in useSipProvidersState");
       isMounted = false;
     };
   }, [user]);
+
+  // Log current state for debugging
+  console.log("useSipProvidersState - isLoading:", isLoading, "providers:", providers.length);
 
   return {
     providers,

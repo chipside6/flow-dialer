@@ -4,16 +4,28 @@ import { SipProvider } from "@/types/sipProviders";
 import { SipProviderApiResponse } from "./types";
 
 export const fetchSipProviders = async (userId: string) => {
+  console.log("Fetching SIP providers for user:", userId);
+  
   const { data, error } = await supabase
     .from('sip_providers')
     .select('*')
     .eq('user_id', userId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase error fetching providers:", error);
+    throw new Error(error.message || "Failed to fetch SIP providers");
+  }
+  
+  console.log("Providers fetched successfully:", data?.length || 0);
   return data as SipProviderApiResponse[];
 };
 
 export const transformProviderData = (apiData: SipProviderApiResponse[]): SipProvider[] => {
+  if (!apiData || !Array.isArray(apiData)) {
+    console.warn("Invalid API data received:", apiData);
+    return [];
+  }
+  
   return apiData.map((provider) => ({
     id: provider.id,
     name: provider.name,
@@ -31,6 +43,8 @@ export const addSipProvider = async (
   userId: string,
   providerData: Omit<SipProvider, 'id' | 'dateAdded' | 'isActive'>
 ) => {
+  console.log("Adding new SIP provider for user:", userId);
+  
   const { data, error } = await supabase
     .from('sip_providers')
     .insert({
@@ -45,7 +59,16 @@ export const addSipProvider = async (
     })
     .select();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase error adding provider:", error);
+    throw new Error(error.message || "Failed to add SIP provider");
+  }
+  
+  if (!data || data.length === 0) {
+    throw new Error("No data returned after adding provider");
+  }
+  
+  console.log("Provider added successfully:", data[0].id);
   return data[0] as SipProviderApiResponse;
 };
 
@@ -53,6 +76,8 @@ export const updateSipProvider = async (
   providerId: string,
   providerData: Omit<SipProvider, 'id' | 'dateAdded' | 'isActive'>
 ) => {
+  console.log("Updating SIP provider:", providerId);
+  
   const { error } = await supabase
     .from('sip_providers')
     .update({
@@ -65,23 +90,42 @@ export const updateSipProvider = async (
     })
     .eq('id', providerId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase error updating provider:", error);
+    throw new Error(error.message || "Failed to update SIP provider");
+  }
+  
+  console.log("Provider updated successfully");
 };
 
 export const deleteSipProvider = async (providerId: string) => {
+  console.log("Deleting SIP provider:", providerId);
+  
   const { error } = await supabase
     .from('sip_providers')
     .delete()
     .eq('id', providerId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase error deleting provider:", error);
+    throw new Error(error.message || "Failed to delete SIP provider");
+  }
+  
+  console.log("Provider deleted successfully");
 };
 
 export const updateProviderStatus = async (providerId: string, status: boolean) => {
+  console.log("Updating provider status:", providerId, "to", status);
+  
   const { error } = await supabase
     .from('sip_providers')
     .update({ active: status })
     .eq('id', providerId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase error updating provider status:", error);
+    throw new Error(error.message || "Failed to update provider status");
+  }
+  
+  console.log("Provider status updated successfully");
 };

@@ -69,7 +69,7 @@ export const useSipProviderActions = (
       console.error("Error saving SIP provider:", err);
       toast({
         title: "Error saving provider",
-        description: err.message,
+        description: err.message || "Failed to save SIP provider",
         variant: "destructive"
       });
     } finally {
@@ -98,7 +98,7 @@ export const useSipProviderActions = (
       console.error("Error deleting SIP provider:", err);
       toast({
         title: "Error deleting provider",
-        description: err.message,
+        description: err.message || "Failed to delete SIP provider",
         variant: "destructive"
       });
     }
@@ -127,7 +127,7 @@ export const useSipProviderActions = (
       console.error("Error toggling provider status:", err);
       toast({
         title: "Error updating provider",
-        description: err.message,
+        description: err.message || "Failed to update provider status",
         variant: "destructive"
       });
     }
