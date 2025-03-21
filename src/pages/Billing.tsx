@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -123,7 +124,7 @@ const Billing = () => {
                             <p className="text-muted-foreground text-sm mt-1">{plan.description}</p>
                             
                             <div className="mt-4 mb-6">
-                              <span className="text-5xl font-bold">${plan.price}</span>
+                              <span className="text-3xl font-bold">${plan.price}</span>
                               <span className="text-muted-foreground"> one-time payment</span>
                             </div>
                             

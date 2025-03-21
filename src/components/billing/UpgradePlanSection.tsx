@@ -6,13 +6,11 @@ import { PricingPlan, pricingPlans } from "@/data/pricingPlans";
 import { Check, Loader2, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/components/ui/use-toast";
 
 export const UpgradePlanSection = () => {
   const { currentPlan, activateLifetimePlan, isLoading, callCount } = useSubscription();
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   // Only show lifetime plan
   const getUpgradePlans = () => {
@@ -27,42 +25,14 @@ export const UpgradePlanSection = () => {
   const callUsagePercentage = Math.min(100, ((callCount || 0) / maxFreeCalls) * 100);
 
   const handleUpgrade = async (plan: PricingPlan) => {
-    console.log("Upgrade button clicked for plan:", plan.id);
     setProcessingPlan(plan.id);
+    const result = await activateLifetimePlan();
+    setProcessingPlan(null);
     
-    try {
-      // Call the subscription service to activate the lifetime plan
-      console.log("Attempting to activate lifetime plan");
-      const result = await activateLifetimePlan();
-      console.log("Activation result:", result);
-      
-      if (result.success) {
-        toast({
-          title: "Success!",
-          description: "Your lifetime plan has been activated.",
-          variant: "default",
-        });
-        
-        // Redirect to dashboard after successful activation
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 2000);
-      } else {
-        toast({
-          title: "Something went wrong",
-          description: "Please try again or contact support.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error activating plan:", error);
-      toast({
-        title: "Error",
-        description: "Failed to activate the plan. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setProcessingPlan(null);
+    if (result.success) {
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     }
   };
 
@@ -115,7 +85,7 @@ export const UpgradePlanSection = () => {
                   {plan.name}
                 </h3>
                 <div className="mb-4">
-                  <span className="text-6xl font-bold">${plan.price}</span>
+                  <span className="text-4xl font-bold">${plan.price}</span>
                   <span className="text-muted-foreground ml-2">one-time</span>
                 </div>
                 <p className="text-muted-foreground">{plan.description}</p>
@@ -124,7 +94,7 @@ export const UpgradePlanSection = () => {
                   <Button 
                     className="w-full py-6 text-base"
                     onClick={() => handleUpgrade(plan)}
-                    type="button"
+                    disabled={isLoading || processingPlan === plan.id || currentPlan === plan.id}
                   >
                     {processingPlan === plan.id ? (
                       <>
