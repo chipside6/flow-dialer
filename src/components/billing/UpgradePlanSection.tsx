@@ -11,14 +11,9 @@ export const UpgradePlanSection = () => {
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Filter to only show plans that are upgrades (higher price than current plan)
+  // Only show lifetime plan
   const getUpgradePlans = () => {
-    if (!currentPlan) return pricingPlans;
-    
-    const currentPlanData = pricingPlans.find(plan => plan.id === currentPlan);
-    if (!currentPlanData) return pricingPlans;
-    
-    return pricingPlans.filter(plan => plan.price > currentPlanData.price);
+    return pricingPlans.filter(plan => plan.id === "lifetime");
   };
 
   const upgradePlans = getUpgradePlans();
@@ -50,7 +45,7 @@ export const UpgradePlanSection = () => {
     <div id="upgrade-plans" className="mt-8">
       <h2 className="text-2xl font-bold mb-6 text-left">Upgrade Your Plan</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
         {upgradePlans.map((plan) => (
           <div
             key={plan.id}
@@ -86,25 +81,22 @@ export const UpgradePlanSection = () => {
             </div>
             
             <div className="mt-auto">
-              {/* Don't show button for free plan */}
-              {plan.id !== "free" && (
-                <Button 
-                  className="w-full"
-                  onClick={() => handleUpgrade(plan)}
-                  disabled={isLoading || processingPlan === plan.id || currentPlan === plan.id}
-                >
-                  {processingPlan === plan.id ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : currentPlan === plan.id ? (
-                    "Current Plan"
-                  ) : (
-                    "Upgrade Now"
-                  )}
-                </Button>
-              )}
+              <Button 
+                className="w-full"
+                onClick={() => handleUpgrade(plan)}
+                disabled={isLoading || processingPlan === plan.id || currentPlan === plan.id}
+              >
+                {processingPlan === plan.id ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : currentPlan === plan.id ? (
+                  "Current Plan"
+                ) : (
+                  "Upgrade Now"
+                )}
+              </Button>
             </div>
           </div>
         ))}
