@@ -21,10 +21,10 @@ export const useSipProvidersState = (): SipProviderState => {
     const loadProviders = async () => {
       if (!mounted.current) return;
       
-      setIsLoading(true);
-      setError(null);
-      
       try {
+        setIsLoading(true);
+        setError(null);
+        
         if (!user) {
           console.log("No user, clearing providers");
           if (mounted.current) {
@@ -74,9 +74,6 @@ export const useSipProvidersState = (): SipProviderState => {
       mounted.current = false;
     };
   }, [user]);
-
-  // Log current state for debugging
-  console.log("useSipProvidersState - isLoading:", isLoading, "providers:", providers?.length);
 
   return {
     providers,
