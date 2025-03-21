@@ -99,9 +99,16 @@
   
   /* Make sure campaign title doesn't overflow */
   .campaign-content h1 {
-    max-width: 150px;
+    max-width: 220px;
+    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding-left: 56px !important; /* Add more left padding to prevent overlap with menu button */
+  }
+  
+  /* Apply extra padding to campaign content container on mobile */
+  .campaign-content {
+    padding-left: 56px !important; /* Increased padding to avoid icon overlap */
   }
 }
