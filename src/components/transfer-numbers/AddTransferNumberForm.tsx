@@ -42,7 +42,7 @@ export const AddTransferNumberForm = ({
       console.log("Parent isSubmitting is false, resetting localSubmitting");
       setLocalSubmitting(false);
     }
-  }, [isSubmitting]);
+  }, [isSubmitting, localSubmitting]);
   
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -63,7 +63,7 @@ export const AddTransferNumberForm = ({
     setLocalSubmitting(true);
     
     try {
-      const result = await onAddTransferNumber(name, number, description);
+      const result = await onAddTransferNumber(name.trim(), number.trim(), description.trim());
       console.log("Submission result:", result ? "success" : "failure");
       
       if (result) {
@@ -130,12 +130,6 @@ export const AddTransferNumberForm = ({
             type="submit"
             disabled={buttonDisabled || !name.trim() || !number.trim()}
             className="w-full sm:w-auto"
-            onClick={() => {
-              if (!buttonDisabled && name.trim() && number.trim()) {
-                console.log("Button clicked directly");
-                handleSubmit();
-              }
-            }}
           >
             {buttonDisabled ? (
               <>

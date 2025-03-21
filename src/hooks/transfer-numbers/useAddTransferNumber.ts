@@ -37,7 +37,7 @@ export function useAddTransferNumber(
     }
     
     try {
-      console.log("Adding transfer number for user:", user.id, {name, number});
+      console.log("Adding transfer number for user:", user.id, {name, number, description});
       const newTransferNumber = await addTransferNumberToDatabase(user.id, name, number, description);
       
       if (newTransferNumber) {
