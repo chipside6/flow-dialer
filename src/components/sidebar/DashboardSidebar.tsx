@@ -49,9 +49,9 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   const isAdmin = profile?.is_admin === true;
   
   return (
-    <Sidebar collapsible="offcanvas">
+    <Sidebar collapsible="offcanvas" style={isMobile ? { backgroundColor: '#ffffff', opacity: 1 } : {}}>
       <SidebarHeader>
-        <div className="flex items-center p-4 mt-4 md:mt-0">
+        <div className="flex items-center p-4 mt-4 md:mt-0" style={{ backgroundColor: '#ffffff' }}>
           <div className="w-14 h-14 bg-[#8B5CF6] rounded-full flex items-center justify-center text-white mr-3">
             <Phone size={24} />
           </div>
@@ -70,9 +70,9 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           )}
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-4 py-2">
-        <div className="rounded-lg p-2 mb-4">
-          <nav className="space-y-2">
+      <SidebarContent className="px-4 py-2" style={{ backgroundColor: '#ffffff' }}>
+        <div className="rounded-lg p-2 mb-4" style={{ backgroundColor: '#ffffff' }}>
+          <nav className="space-y-2" style={{ backgroundColor: '#ffffff' }}>
             {navItems.map((item) => (
               <SidebarNavItem 
                 key={item.path}
@@ -95,7 +95,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           </nav>
           
           {/* Logout button */}
-          <div className="mt-6 pt-4 border-t border-border">
+          <div className="mt-6 pt-4 border-t border-border" style={{ backgroundColor: '#ffffff' }}>
             <LogoutButton 
               variant="ghost" 
               className="w-full justify-start py-3 text-primary font-medium" 

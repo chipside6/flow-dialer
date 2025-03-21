@@ -63,6 +63,7 @@ const SheetContent = React.forwardRef<
           side === "bottom" && "bottom-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
           className
         )}
+        style={{ backgroundColor: 'white', opacity: 1 }}
         {...props}
       >
         {children}

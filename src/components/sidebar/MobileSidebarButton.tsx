@@ -16,7 +16,7 @@ export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
         className="bg-white rounded-full shadow-md w-12 h-12 flex items-center justify-center mobile-sidebar-button" 
         onClick={onClick}
         aria-label="Open Menu"
-        style={{ backgroundColor: 'white' }} // Inline style for extra safety
+        style={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)' }} // Enhanced shadow
       >
         <Menu size={24} />
       </Button>

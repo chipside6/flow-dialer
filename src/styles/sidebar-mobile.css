@@ -8,6 +8,9 @@
     width: 85% !important;
     z-index: 60 !important; /* Increase z-index to ensure it appears above everything */
     background-color: #ffffff !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   /* Customize the mobile sidebar style - FIX TRANSPARENCY */
@@ -15,6 +18,9 @@
     background-color: #ffffff !important;
     border-radius: 0 !important;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.15) !important;
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   /* SheetContent needs opacity fix too */
@@ -22,18 +28,24 @@
     background-color: #ffffff !important;
     opacity: 1 !important;
     backdrop-filter: none !important;
+    visibility: visible !important;
+    display: flex !important;
   }
   
   /* Give sidebar items more spacing */
   [data-sidebar="sidebar"] [data-sidebar="content"] {
     padding-top: 8px;
     background-color: #ffffff !important; /* Ensure content area is also solid */
+    display: flex !important;
+    flex-direction: column !important;
+    opacity: 1 !important;
   }
   
   /* Fix item spacing and appearance */
   [data-sidebar="content"] a {
     margin-bottom: 4px;
     border-radius: 8px;
+    background-color: transparent !important; /* Allow hover states to work */
   }
   
   /* Active menu item styling */
@@ -51,17 +63,21 @@
   [data-sidebar="content"] .border-t button {
     color: #8B5CF6 !important;
     font-weight: 500;
+    background-color: transparent !important;
   }
   
-  /* Ensure page content is visible when navigating to a page */
-  [data-sidebar="sidebar"][data-mobile="true"] {
-    z-index: 100;
-    left: -100%;
-    transition: left 0.3s ease;
+  /* Fix the state issue - when open, show properly */
+  [data-sidebar="sidebar"][data-mobile="true"][data-state="open"] {
+    left: 0 !important;
+    transform: translateX(0) !important;
+    display: flex !important;
+    z-index: 999 !important;
   }
 
-  [data-sidebar="sidebar"][data-mobile="true"][data-state="open"] {
-    left: 0;
+  /* Ensure the sidebar is displayed initially off-screen but still visible */
+  [data-sidebar="sidebar"][data-mobile="true"] {
+    left: -100% !important;
+    transition: transform 0.3s ease, left 0.3s ease !important;
   }
 
   /* Ensure all navigation items are visible and scrollable */
@@ -69,6 +85,8 @@
     max-height: calc(100vh - 100px);
     overflow-y: auto !important;
     background-color: #ffffff !important;
+    display: flex !important;
+    opacity: 1 !important;
   }
 
   /* Ensure the main content area is properly positioned */
@@ -113,6 +131,17 @@
   /* Force solid backgrounds on all dialogs/sheets */
   [role="dialog"] [data-state="open"] {
     background-color: #ffffff !important;
+    visibility: visible !important;
+    display: flex !important;
+  }
+  
+  /* Fix for the actual dialog content */
+  [data-state="open"][data-side="left"] {
+    background-color: #ffffff !important;
+    visibility: visible !important;
+    display: flex !important;
+    left: 0 !important;
+    transform: translateX(0) !important;
   }
   
   /* Ensure no element related to sidebar has transparency */
@@ -121,9 +150,21 @@
     backdrop-filter: none !important;
   }
   
-  /* Add !important to all sheet content elements */
+  /* Fix any z-index or display issues */
   [data-state="open"] {
     opacity: 1 !important;
+    display: flex !important;
+    visibility: visible !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Critical fix: make sure sheet content is fully visible */
+  div[data-radix-dialog-content] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 9999 !important;
+    background-color: #ffffff !important;
   }
 }
 
@@ -133,10 +174,14 @@
     animation: slideIn 0.3s ease;
     visibility: visible !important;
     display: flex !important;
+    background-color: #ffffff !important;
   }
   
   [data-state="closed"] {
     animation: slideOut 0.3s ease;
+    /* Don't hide immediately after animation starts */
+    display: flex !important;
+    opacity: 0;
   }
 
   /* Mobile sidebar button adjustment */

@@ -11,6 +11,7 @@
     border-radius: 8px;
     transition: background-color 0.2s;
     color: #333333;
+    background-color: transparent !important; /* Allow hover states to work */
   }
   
   /* Active state for sidebar items */
@@ -36,6 +37,7 @@
     width: 100%;
     margin-top: 8px;
     padding: 12px 16px;
+    background-color: transparent !important; /* Allow hover states to work */
   }
   
   /* SOLID BACKGROUNDS - NO TRANSPARENCY */
@@ -44,12 +46,13 @@
     backdrop-filter: none !important;
   }
   
-  /* Mobile sidebar solid background */
+  /* Mobile sidebar solid background - IMPORTANT FIXES */
   div[role="dialog"] > div[data-mobile="true"] {
     background-color: #ffffff !important;
     opacity: 1 !important;
     backdrop-filter: none !important;
     border: none !important;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2) !important;
   }
   
   /* Remove ALL blur effects everywhere */
@@ -69,6 +72,7 @@
   [data-sidebar="content"] .border-t {
     margin-top: 12px;
     padding-top: 12px;
+    background-color: #ffffff !important;
   }
   
   /* Ensure consistent icon spacing */
@@ -87,6 +91,9 @@
     background-color: #ffffff !important;
     box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15) !important;
     border: none !important;
+    position: fixed !important;
+    display: flex !important;
+    z-index: 100 !important;
   }
   
   /* Fixed positioning for mobile sidebar */
@@ -107,8 +114,23 @@
     background-color: #ffffff !important;
   }
   
+  /* SheetContent with open state */
+  [data-state="open"][data-side="left"] {
+    background-color: #ffffff !important;
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+    display: flex !important;
+    visibility: visible !important;
+  }
+  
   /* Force solid color on all sidebar elements */
+  [data-sidebar="sidebar"],
   [data-sidebar="sidebar"] * {
-    background-color: #ffffff;
+    background-color: #ffffff !important;
+  }
+  
+  /* Force proper z-index on all sidebar components */
+  [data-sidebar="sidebar"][data-state="open"] {
+    z-index: 100 !important;
   }
 }
