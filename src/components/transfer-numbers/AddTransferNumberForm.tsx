@@ -78,9 +78,8 @@ export const AddTransferNumberForm = ({
     } catch (error) {
       console.error("Error in form submission:", error);
     } finally {
-      // Always reset local submitting state
-      console.log("Setting localSubmitting to false in finally block");
-      setLocalSubmitting(false);
+      // We leave resetting localSubmitting to the effect hook
+      // which will trigger when parent isSubmitting becomes false
     }
   };
   

@@ -55,7 +55,7 @@ export function useAddTransferNumber(
         data: { name: cleanName, number: cleanNumber }
       });
       
-      // Make the database call without the race timeout
+      // Make the database call
       const newTransferNumber = await addTransferNumberToDatabase(
         user.id, 
         cleanName, 
@@ -63,19 +63,20 @@ export function useAddTransferNumber(
         cleanDesc
       );
       
+      // Show success toast regardless of whether we could fetch the new record
+      // as long as the insert operation succeeded
       if (newTransferNumber) {
-        console.log("Successfully added transfer number:", newTransferNumber);
+        console.log("Successfully processed transfer number addition:", newTransferNumber);
         
         toast({
           title: "Transfer number added",
           description: `${cleanName} (${cleanNumber}) has been added successfully`,
         });
         
-        // Trigger a refresh
-        if (refreshTransferNumbers) {
-          console.log("Refreshing transfer numbers list");
-          refreshTransferNumbers();
-        }
+        // Always trigger a refresh to ensure the UI updates
+        console.log("Refreshing transfer numbers list");
+        refreshTransferNumbers();
+        
         return newTransferNumber;
       } else {
         console.error("Failed to add transfer number - no result returned");
@@ -95,11 +96,13 @@ export function useAddTransferNumber(
       });
       return null;
     } finally {
-      // Ensure isSubmitting is always reset
-      if (setIsSubmitting) {
-        console.log("Setting isSubmitting to false");
-        setIsSubmitting(false);
-      }
+      // Short delay before resetting the submitting state to improve UX
+      setTimeout(() => {
+        if (setIsSubmitting) {
+          console.log("Setting isSubmitting to false");
+          setIsSubmitting(false);
+        }
+      }, 500);
     }
   };
 
