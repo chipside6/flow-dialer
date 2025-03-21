@@ -23,7 +23,13 @@ export interface SubscriptionState {
 export interface SubscriptionActions {
   closeLimitDialog: () => void;
   fetchCurrentSubscription: () => Promise<Subscription | null>;
-  activateLifetimePlan: () => Promise<{ success: boolean; plan?: PricingPlan }>;
+  activateLifetimePlan: () => Promise<{ 
+    success: boolean; 
+    plan?: PricingPlan;
+    error?: { 
+      message: string 
+    };
+  }>;
   getPlanById: (planId: string) => PricingPlan | undefined;
 }
 

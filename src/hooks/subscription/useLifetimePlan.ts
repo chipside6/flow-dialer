@@ -11,14 +11,14 @@ export const useLifetimePlan = (
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const activateLifetimePlan = async (): Promise<{ success: boolean; plan?: PricingPlan }> => {
+  const activateLifetimePlan = async (): Promise<{ success: boolean; plan?: PricingPlan; error?: { message: string } }> => {
     if (!userId) {
       toast({
         title: "Authentication required",
         description: "Please sign in to upgrade to lifetime access",
         variant: "destructive",
       });
-      return { success: false };
+      return { success: false, error: { message: "Authentication required" } };
     }
     
     try {
@@ -33,7 +33,7 @@ export const useLifetimePlan = (
           description: "The lifetime plan does not exist",
           variant: "destructive",
         });
-        return { success: false };
+        return { success: false, error: { message: "Lifetime plan not found" } };
       }
       
       const success = await createLifetimeSubscription(userId, lifetimePlan);
@@ -44,7 +44,7 @@ export const useLifetimePlan = (
           description: "There was a problem upgrading to the lifetime plan. Please try again.",
           variant: "destructive",
         });
-        return { success: false };
+        return { success: false, error: { message: "Failed to create lifetime subscription" } };
       }
       
       // Fetch the updated subscription to ensure data is current
@@ -56,14 +56,14 @@ export const useLifetimePlan = (
       });
       
       return { success: true, plan: lifetimePlan };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in activateLifetimePlan:", error);
       toast({
         title: "Activation failed",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-      return { success: false };
+      return { success: false, error: { message: error.message || "An unexpected error occurred" } };
     } finally {
       setIsProcessing(false);
     }
