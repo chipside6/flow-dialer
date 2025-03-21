@@ -7,15 +7,15 @@ import {
   Sidebar, 
   SidebarContent, 
   SidebarHeader,
-  SidebarInset
+  SidebarInset,
+  useSidebar
 } from "@/components/ui/sidebar";
 import { DashboardNav } from "@/components/DashboardNav";
 import { Phone } from "lucide-react";
-import { useSidebar } from "@/components/ui/sidebar";
 
 const NotFound = () => {
   const location = useLocation();
-  const { isOpen } = useSidebar();
+  const { open } = useSidebar();
   const isDashboard = location.pathname.includes('/dashboard') || 
                       location.pathname.includes('/campaign') || 
                       location.pathname.includes('/campaigns') || // Added campaigns (plural)
@@ -49,7 +49,7 @@ const NotFound = () => {
               </div>
             </SidebarHeader>
             <SidebarContent>
-              <DashboardNav isCollapsed={!isOpen} />
+              <DashboardNav isCollapsed={!open} />
             </SidebarContent>
           </Sidebar>
           <SidebarInset className="p-6">
