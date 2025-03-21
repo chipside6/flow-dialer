@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
@@ -23,18 +23,27 @@ export function useTransferNumbers() {
   const [transferNumbers, setTransferNumbers] = useState<TransferNumber[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
   
-  // Load transfer numbers on component mount
+  // Reset isLoading when component unmounts to prevent stale state
+  useEffect(() => {
+    return () => {
+      setIsLoading(false);
+      setIsSubmitting(false);
+    };
+  }, []);
+  
+  // Load transfer numbers on component mount or when lastRefresh changes
   useEffect(() => {
     if (user) {
       fetchTransferNumbers();
     } else {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, lastRefresh]);
   
-  // Fetch transfer numbers from the database
-  const fetchTransferNumbers = async () => {
+  // Fetch transfer numbers from the database - using useCallback to prevent recreation
+  const fetchTransferNumbers = useCallback(async () => {
     if (!user) {
       setIsLoading(false);
       return;
@@ -53,10 +62,12 @@ export function useTransferNumbers() {
         description: "Could not load your transfer numbers from the database",
         variant: "destructive"
       });
+      // Reset state on error to prevent stuck states
+      setTransferNumbers([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
   
   // Add a new transfer number
   const addTransferNumber = async (name: string, number: string, description: string) => {
@@ -87,8 +98,8 @@ export function useTransferNumbers() {
       
       if (newTransferNumber) {
         console.log("Successfully added transfer number:", newTransferNumber);
-        // Update state with the new transfer number
-        setTransferNumbers(prevNumbers => [newTransferNumber, ...prevNumbers]);
+        // Trigger a refresh instead of updating state directly
+        refreshTransferNumbers();
         
         toast({
           title: "Transfer number added",
@@ -123,7 +134,8 @@ export function useTransferNumbers() {
       
       if (success) {
         console.log("Successfully deleted transfer number:", id);
-        setTransferNumbers(prevNumbers => prevNumbers.filter(tn => tn.id !== id));
+        // Trigger a refresh instead of direct state update
+        refreshTransferNumbers();
         
         toast({
           title: "Transfer number deleted",
@@ -141,6 +153,12 @@ export function useTransferNumbers() {
       });
       return false;
     }
+  };
+  
+  // Function to trigger a refresh without additional API calls
+  const refreshTransferNumbers = () => {
+    console.log("Refreshing transfer numbers");
+    setLastRefresh(Date.now());
   };
   
   // Validate input for transfer number
@@ -174,6 +192,6 @@ export function useTransferNumbers() {
     isSubmitting,
     addTransferNumber,
     deleteTransferNumber,
-    refreshTransferNumbers: fetchTransferNumbers
+    refreshTransferNumbers
   };
 }

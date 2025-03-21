@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useTransferNumbers } from "@/hooks/useTransferNumbers";
 import { AddTransferNumberForm } from "@/components/transfer-numbers/AddTransferNumberForm";
@@ -22,13 +22,17 @@ const TransferNumbers = () => {
     isSubmitting 
   });
   
-  // Refresh the list when the page loads
+  // Force refresh the list when the page loads
   useEffect(() => {
     console.log("TransferNumbers page mounted, refreshing data");
-    refreshTransferNumbers();
+    // Small timeout to ensure component is fully mounted
+    const timer = setTimeout(() => {
+      refreshTransferNumbers();
+    }, 100);
     
     // Clean-up
     return () => {
+      clearTimeout(timer);
       console.log("TransferNumbers page unmounted");
     };
   }, []);
@@ -39,12 +43,9 @@ const TransferNumbers = () => {
     
     try {
       const result = await addTransferNumber(name, number, description);
-      console.log("addTransferNumber result:", result);
+      console.log("addTransferNumber result:", result ? "success" : "failure");
       
-      if (result) {
-        console.log("Successfully added transfer number, refreshing list");
-        refreshTransferNumbers();
-      }
+      // No need to call refreshTransferNumbers here as it's now handled in the hook
       
       return result;
     } catch (error) {
@@ -56,6 +57,12 @@ const TransferNumbers = () => {
       });
       return null;
     }
+  };
+  
+  // Force a refresh when manually requested
+  const handleManualRefresh = () => {
+    console.log("Manual refresh requested from UI");
+    refreshTransferNumbers();
   };
   
   return (
@@ -73,6 +80,7 @@ const TransferNumbers = () => {
         transferNumbers={transferNumbers}
         isLoading={isLoading}
         onDeleteTransferNumber={deleteTransferNumber}
+        onRefresh={handleManualRefresh}
       />
     </DashboardLayout>
   );
