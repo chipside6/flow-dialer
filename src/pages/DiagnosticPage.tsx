@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { SupabaseStatus } from "@/components/diagnostic/SupabaseStatus";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,9 +14,15 @@ import { toast } from "@/components/ui/use-toast";
 const DiagnosticPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, signOut } = useAuth();
+  const [isLoading, setIsLoading] = useState<{[key: string]: boolean}>({
+    database: false,
+    auth: false,
+    signOut: false
+  });
   
   const testDatabaseConnection = async () => {
     try {
+      setIsLoading(prev => ({ ...prev, database: true }));
       // Test with a simple query
       const startTime = Date.now();
       const { data, error } = await supabase.from('profiles').select('count').limit(1);
@@ -63,11 +69,14 @@ const DiagnosticPage: React.FC = () => {
         description: err.message,
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(prev => ({ ...prev, database: false }));
     }
   };
   
   const testAuthConnection = async () => {
     try {
+      setIsLoading(prev => ({ ...prev, auth: true }));
       const startTime = Date.now();
       const { data, error } = await supabase.auth.getSession();
       const endTime = Date.now();
@@ -104,6 +113,28 @@ const DiagnosticPage: React.FC = () => {
         description: err.message,
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(prev => ({ ...prev, auth: false }));
+    }
+  };
+  
+  const handleSignOut = async () => {
+    try {
+      setIsLoading(prev => ({ ...prev, signOut: true }));
+      await signOut();
+      toast({
+        title: "Signed Out",
+        description: "You have been signed out successfully"
+      });
+    } catch (err: any) {
+      console.error("Error signing out:", err);
+      toast({
+        title: "Error Signing Out",
+        description: err.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(prev => ({ ...prev, signOut: false }));
     }
   };
   
@@ -139,8 +170,9 @@ const DiagnosticPage: React.FC = () => {
                 onClick={testDatabaseConnection} 
                 className="w-full"
                 variant="outline"
+                disabled={isLoading.database}
               >
-                Test Connection
+                {isLoading.database ? "Testing..." : "Test Connection"}
               </Button>
             </CardContent>
           </Card>
@@ -157,8 +189,9 @@ const DiagnosticPage: React.FC = () => {
                 onClick={testAuthConnection} 
                 className="w-full"
                 variant="outline"
+                disabled={isLoading.auth}
               >
-                Check Auth Status
+                {isLoading.auth ? "Checking..." : "Check Auth Status"}
               </Button>
             </CardContent>
           </Card>
@@ -172,11 +205,12 @@ const DiagnosticPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <Button 
-                onClick={() => signOut()} 
+                onClick={handleSignOut} 
                 className="w-full"
                 variant="outline"
+                disabled={isLoading.signOut}
               >
-                Sign Out and Reset
+                {isLoading.signOut ? "Signing Out..." : "Sign Out and Reset"}
               </Button>
             </CardContent>
           </Card>
