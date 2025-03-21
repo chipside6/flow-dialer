@@ -15,7 +15,7 @@ import { usePaymentProcessing } from '@/hooks/payment/usePaymentProcessing';
 export const UpgradeContainer: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const { fetchCurrentSubscription, isLoading: subscriptionLoading } = useSubscription();
   const { isProcessing, handlePaymentSuccess } = usePaymentProcessing();
@@ -29,7 +29,8 @@ export const UpgradeContainer: React.FC = () => {
     const checkAuth = async () => {
       setPageLoading(true);
       
-      if (!user) {
+      if (!isAuthenticated || !user) {
+        console.log("User not authenticated, redirecting to login");
         toast({
           title: "Authentication required",
           description: "Please sign in to upgrade your plan",
@@ -39,19 +40,31 @@ export const UpgradeContainer: React.FC = () => {
         return;
       }
       
+      console.log("User authenticated, fetching subscription data");
       // Refresh subscription data when component mounts
       await fetchCurrentSubscription();
       setPageLoading(false);
     };
     
     checkAuth();
-  }, [user, navigate, toast, fetchCurrentSubscription]);
+  }, [user, isAuthenticated, navigate, toast, fetchCurrentSubscription]);
   
   const handleSelectPlan = () => {
+    if (!isAuthenticated || !user) {
+      console.log("User not authenticated when selecting plan, redirecting to login");
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to upgrade your plan",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
     setShowPaymentForm(true);
   };
   
   const handlePaymentComplete = async (paymentDetails: any) => {
+    console.log("Payment completed, processing payment data", paymentDetails);
     await handlePaymentSuccess(paymentDetails, lifetimePlan);
   };
   

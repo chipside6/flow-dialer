@@ -37,27 +37,34 @@ export const usePaymentProcessing = () => {
         return;
       }
       
-      // Record the payment in the database
-      const { error: paymentError } = await supabase
+      console.log("Recording payment in database for user:", user.id);
+      // Record the payment in the database with better error handling
+      const { data: paymentData, error: paymentError } = await supabase
         .from('payments')
         .insert([{
           user_id: user.id,
           amount: lifetimePlan.price || 0,
           payment_method: 'crypto',
           payment_details: paymentDetails,
-          plan_id: lifetimePlan.id || ''
-        }]);
+          plan_id: lifetimePlan.id || '',
+          status: 'completed'
+        }])
+        .select();
         
       if (paymentError) {
         console.error("Error recording payment:", paymentError);
-        throw paymentError;
+        throw new Error(`Failed to record payment: ${paymentError.message}`);
       }
       
+      console.log("Payment recorded successfully:", paymentData);
+      
       // Activate the lifetime plan
+      console.log("Activating lifetime plan for user:", user.id);
       const result = await activateLifetimePlan();
       
       if (result.success) {
         // Refresh subscription data after successful activation
+        console.log("Lifetime plan activated, refreshing subscription data");
         await fetchCurrentSubscription();
         
         toast({
@@ -65,11 +72,12 @@ export const usePaymentProcessing = () => {
           description: "You now have lifetime access to all features!",
         });
         
+        // Delay navigation to ensure data is properly saved
         setTimeout(() => {
           navigate("/dashboard");
         }, 2000);
       } else {
-        throw new Error("Failed to activate lifetime plan");
+        throw new Error(result.error?.message || "Failed to activate lifetime plan");
       }
     } catch (error: any) {
       console.error("Error processing payment:", error);
