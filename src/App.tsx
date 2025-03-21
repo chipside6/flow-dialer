@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   createBrowserRouter,
@@ -9,7 +10,6 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import UpgradePage from './pages/UpgradePage';
 import { AuthProvider } from '@/contexts/auth/AuthProvider';
-import { SidebarProvider } from '@/components/ui/sidebar';
 
 // Pages that should be imported from the correct locations
 import Dashboard from '@/pages/Dashboard';
@@ -37,60 +37,44 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <PublicLayout><LandingPage /></PublicLayout>,
+    children: [
+      {
+        path: "/features",
+        element: <Features />,
+      },
+      {
+        path: "/pricing",
+        element: <Pricing />,
+      },
+      {
+        path: "/support",
+        element: <Support />,
+      },
+      {
+        path: "/login",
+        element: <LoginPage />,
+      },
+      {
+        path: "/signup",
+        element: <SignUpPage />,
+      },
+      {
+        path: "/unauthorized",
+        element: <UnauthorizedPage />,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
+    ],
   },
-  {
-    path: "/features",
-    element: <PublicLayout><Features /></PublicLayout>,
-  },
-  {
-    path: "/pricing",
-    element: <PublicLayout><Pricing /></PublicLayout>,
-  },
-  {
-    path: "/support",
-    element: <PublicLayout><Support /></PublicLayout>,
-  },
-  {
-    path: "/login",
-    element: <PublicLayout><LoginPage /></PublicLayout>,
-  },
-  {
-    path: "/signup",
-    element: <PublicLayout><SignUpPage /></PublicLayout>,
-  },
-  {
-    path: "/unauthorized",
-    element: <PublicLayout><UnauthorizedPage /></PublicLayout>,
-  },
-  {
-    path: "*",
-    element: <PublicLayout><NotFound /></PublicLayout>,
-  },
-  
-  // Dashboard routes with SidebarProvider
   {
     path: "/dashboard",
-    element: (
-      <ProtectedRoute>
-        <SidebarProvider>
-          <DashboardLayout>
-            <Dashboard />
-          </DashboardLayout>
-        </SidebarProvider>
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
   },
   {
     path: "/campaign",
-    element: (
-      <ProtectedRoute>
-        <SidebarProvider>
-          <DashboardLayout>
-            <Campaign />
-          </DashboardLayout>
-        </SidebarProvider>
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Campaign /></ProtectedRoute>,
   },
   {
     path: "/campaigns",
@@ -98,87 +82,31 @@ const router = createBrowserRouter([
   },
   {
     path: "/greetings",
-    element: (
-      <ProtectedRoute>
-        <SidebarProvider>
-          <DashboardLayout>
-            <Greetings />
-          </DashboardLayout>
-        </SidebarProvider>
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Greetings /></ProtectedRoute>,
   },
   {
     path: "/contacts",
-    element: (
-      <ProtectedRoute>
-        <SidebarProvider>
-          <DashboardLayout>
-            <ContactLists />
-          </DashboardLayout>
-        </SidebarProvider>
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><ContactLists /></ProtectedRoute>,
   },
   {
     path: "/transfers",
-    element: (
-      <ProtectedRoute>
-        <SidebarProvider>
-          <DashboardLayout>
-            <Transfers />
-          </DashboardLayout>
-        </SidebarProvider>
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Transfers /></ProtectedRoute>,
   },
   {
     path: "/sip-providers",
-    element: (
-      <ProtectedRoute>
-        <SidebarProvider>
-          <DashboardLayout>
-            <SipProviders />
-          </DashboardLayout>
-        </SidebarProvider>
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><SipProviders /></ProtectedRoute>,
   },
   {
     path: "/profile",
-    element: (
-      <ProtectedRoute>
-        <SidebarProvider>
-          <DashboardLayout>
-            <Profile />
-          </DashboardLayout>
-        </SidebarProvider>
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><Profile /></ProtectedRoute>,
   },
   {
     path: "/admin",
-    element: (
-      <ProtectedRoute>
-        <SidebarProvider>
-          <DashboardLayout>
-            <AdminPanel />
-          </DashboardLayout>
-        </SidebarProvider>
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><AdminPanel /></ProtectedRoute>,
   },
   {
     path: "/upgrade",
-    element: (
-      <ProtectedRoute>
-        <SidebarProvider>
-          <DashboardLayout>
-            <UpgradePage />
-          </DashboardLayout>
-        </SidebarProvider>
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><UpgradePage /></ProtectedRoute>,
   },
 ]);
 
