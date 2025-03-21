@@ -1,6 +1,6 @@
 
 import { NavLinks } from './NavLinks';
-import { X } from 'lucide-react';
+import { X, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
@@ -40,7 +40,7 @@ export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
               <Button asChild variant="default" size="lg" className="w-full">
                 <Link to="/dashboard" onClick={onClose}>Dashboard</Link>
               </Button>
-              <LogoutButton variant="outline" size="lg" className="w-full" onClick={onClose} />
+              <LogoutButton variant="outline" size="lg" className="w-full" onClick={onClose} position="left" />
             </>
           ) : (
             <>
@@ -48,7 +48,10 @@ export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
                 <Link to="/signup" onClick={onClose}>Get Started</Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="w-full">
-                <Link to="/login" onClick={onClose}>Log In</Link>
+                <Link to="/login" onClick={onClose} className="flex items-center">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  <span>Log In</span>
+                </Link>
               </Button>
             </>
           )}
