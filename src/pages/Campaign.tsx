@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
@@ -10,11 +10,22 @@ import { CampaignData } from "@/components/campaign-wizard/types";
 import { useAuth } from "@/contexts/auth/useAuth";
 import { Campaign } from "@/hooks/useCampaigns";
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation } from "react-router-dom";
 
 const CampaignPage = () => {
+  const location = useLocation();
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const { user } = useAuth();
+  
+  // Check for state passed from navigation to determine if we should show the wizard
+  useEffect(() => {
+    if (location.state && location.state.showCreateWizard) {
+      setShowCreateWizard(true);
+      // Clean up the state after using it
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
   
   const handleCreateCampaign = (newCampaign: CampaignData) => {
     // Ensure the campaign has a user_id property and matches the Campaign type

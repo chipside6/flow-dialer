@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { CampaignItem } from "./CampaignItem";
@@ -12,7 +11,11 @@ export const CampaignTable: React.FC = () => {
   const navigate = useNavigate();
 
   const handleCreateCampaign = () => {
+    // This should navigate to the campaign creation view
     navigate('/campaign');
+    // Set showCreateWizard to true in the Campaign page state
+    const campaignPageState = { showCreateWizard: true };
+    navigate('/campaign', { state: campaignPageState });
   };
 
   return (

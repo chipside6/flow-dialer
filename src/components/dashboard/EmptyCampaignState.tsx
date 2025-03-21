@@ -1,11 +1,18 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Phone, PlusCircle } from "lucide-react";
 
 export const EmptyCampaignState = () => {
+  const navigate = useNavigate();
+  
+  const handleCreateCampaign = () => {
+    // Navigate to campaign page with state to show wizard
+    navigate('/campaign', { state: { showCreateWizard: true } });
+  };
+
   return (
     <Card className="border-dashed border-2 border-border overflow-hidden">
       <CardContent className="p-0">
@@ -37,17 +44,16 @@ export const EmptyCampaignState = () => {
                 Create your first campaign to start making automated calls. Our platform helps you reach more people efficiently with personalized messages.
               </p>
               <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:space-x-3 mt-6">
-                <Link to="/campaign">
-                  <Button className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Create First Campaign
-                  </Button>
-                </Link>
-                <Link to="/features">
-                  <Button variant="outline" className="w-full sm:w-auto">
-                    Learn about campaigns
-                  </Button>
-                </Link>
+                <Button 
+                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+                  onClick={handleCreateCampaign}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Create First Campaign
+                </Button>
+                <Button variant="outline" className="w-full sm:w-auto" onClick={() => navigate('/features')}>
+                  Learn about campaigns
+                </Button>
               </div>
             </div>
           </div>
