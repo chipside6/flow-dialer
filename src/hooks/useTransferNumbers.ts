@@ -3,6 +3,11 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
+import { fetchUserTransferNumbers } from "@/services/transferNumberService";
+import { 
+  addTransferNumberToDatabase, 
+  deleteTransferNumberFromDatabase 
+} from "@/services/transferNumberService";
 
 export interface TransferNumber {
   id: string;
@@ -18,6 +23,13 @@ export function useTransferNumbers() {
   const [transferNumbers, setTransferNumbers] = useState<TransferNumber[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Load transfer numbers on component mount
+  useEffect(() => {
+    if (user) {
+      fetchTransferNumbers();
+    }
+  }, [user]);
+  
   // Fetch transfer numbers from the database
   const fetchTransferNumbers = async () => {
     if (!user) {
@@ -27,30 +39,8 @@ export function useTransferNumbers() {
     
     try {
       setIsLoading(true);
-      console.log("Fetching transfer numbers for user:", user.id);
-      const { data, error } = await supabase
-        .from('transfer_numbers')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        throw error;
-      }
-      
-      if (data) {
-        console.log("Fetched transfer numbers:", data);
-        const formattedData = data.map(item => ({
-          id: item.id,
-          name: item.name,
-          number: item.phone_number,
-          description: item.description || "No description provided",
-          dateAdded: new Date(item.created_at),
-          callCount: 0 // This would come from a different table in a real implementation
-        }));
-        
-        setTransferNumbers(formattedData);
-      }
+      const formattedData = await fetchUserTransferNumbers(user.id);
+      setTransferNumbers(formattedData);
     } catch (error) {
       console.error("Error fetching transfer numbers:", error);
       toast({
@@ -63,13 +53,6 @@ export function useTransferNumbers() {
     }
   };
   
-  // Load transfer numbers on component mount
-  useEffect(() => {
-    if (user) {
-      fetchTransferNumbers();
-    }
-  }, [user]);
-  
   // Add a new transfer number
   const addTransferNumber = async (name: string, number: string, description: string) => {
     if (!user) {
@@ -81,56 +64,14 @@ export function useTransferNumbers() {
       return null;
     }
     
-    if (!name || !number) {
-      toast({
-        title: "Missing information",
-        description: "Please provide both a name and a number",
-        variant: "destructive",
-      });
-      return null;
-    }
-    
-    // Basic validation for phone number format
-    const phoneRegex = /^\+?[0-9\s\-()]+$/;
-    if (!phoneRegex.test(number)) {
-      toast({
-        title: "Invalid phone number",
-        description: "Please enter a valid phone number",
-        variant: "destructive",
-      });
+    if (!validateTransferNumberInput(name, number)) {
       return null;
     }
     
     try {
-      console.log("Adding transfer number for user:", user.id);
-      // Insert the transfer number into the database
-      const { data, error } = await supabase
-        .from('transfer_numbers')
-        .insert({
-          user_id: user.id,
-          name: name,
-          phone_number: number,
-          description: description || null
-        })
-        .select();
+      const newTransferNumber = await addTransferNumberToDatabase(user.id, name, number, description);
       
-      if (error) {
-        throw error;
-      }
-      
-      console.log("Added transfer number, response:", data);
-      
-      if (data && data.length > 0) {
-        const newItem = data[0];
-        const newTransferNumber: TransferNumber = {
-          id: newItem.id,
-          name: newItem.name,
-          number: newItem.phone_number,
-          description: newItem.description || "No description provided",
-          dateAdded: new Date(newItem.created_at),
-          callCount: 0
-        };
-        
+      if (newTransferNumber) {
         setTransferNumbers([newTransferNumber, ...transferNumbers]);
         
         toast({
@@ -157,24 +98,18 @@ export function useTransferNumbers() {
     if (!user) return false;
     
     try {
-      const { error } = await supabase
-        .from('transfer_numbers')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+      const success = await deleteTransferNumberFromDatabase(user.id, id);
       
-      if (error) {
-        throw error;
+      if (success) {
+        setTransferNumbers(transferNumbers.filter(tn => tn.id !== id));
+        
+        toast({
+          title: "Transfer number deleted",
+          description: "The transfer number has been removed",
+        });
       }
       
-      setTransferNumbers(transferNumbers.filter(tn => tn.id !== id));
-      
-      toast({
-        title: "Transfer number deleted",
-        description: "The transfer number has been removed",
-      });
-      
-      return true;
+      return success;
     } catch (error) {
       console.error("Error deleting transfer number:", error);
       toast({
@@ -184,6 +119,31 @@ export function useTransferNumbers() {
       });
       return false;
     }
+  };
+  
+  // Validate input for transfer number
+  const validateTransferNumberInput = (name: string, number: string) => {
+    if (!name || !number) {
+      toast({
+        title: "Missing information",
+        description: "Please provide both a name and a number",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    // Basic validation for phone number format
+    const phoneRegex = /^\+?[0-9\s\-()]+$/;
+    if (!phoneRegex.test(number)) {
+      toast({
+        title: "Invalid phone number",
+        description: "Please enter a valid phone number",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    return true;
   };
   
   return {
