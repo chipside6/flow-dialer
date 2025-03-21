@@ -19,7 +19,7 @@ import Layout from './components/layout/Layout';
 import SipProviders from './pages/SipProviders';
 import ContactLists from './pages/ContactLists';
 import BackgroundDialer from './pages/BackgroundDialer';
-import "./styles/globals.css";
+import "./index.css"; // Use index.css which already exists
 import "./styles/plan-card.css"; // Add this line to import plan card styles
 
 function AppRouter() {
