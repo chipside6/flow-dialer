@@ -48,13 +48,8 @@ const LogoutButton = ({ variant = "outline", size = "default", className, onClic
   };
   
   return (
-    <Button 
-      variant={variant} 
-      size={size} 
-      onClick={handleLogout} 
-      className={className}
-    >
-      <LogOut className="h-5 w-5 mr-2" /> <span>Logout</span>
+    <Button variant={variant} size={size} onClick={handleLogout} className={className}>
+      <LogOut className="h-4 w-4 mr-2" /> <span>Logout</span>
     </Button>
   );
 };

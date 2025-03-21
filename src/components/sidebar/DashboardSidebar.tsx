@@ -11,7 +11,7 @@ import {
   Server, 
   ShieldCheck,
   X,
-  User, 
+  User
 } from "lucide-react";
 import { SidebarNavItem } from "@/components/sidebar/SidebarNavItem";
 import LogoutButton from "@/components/LogoutButton";
@@ -49,22 +49,13 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   const isAdmin = profile?.is_admin === true;
   
   return (
-    <Sidebar 
-      collapsible="offcanvas" 
-      style={{
-        backgroundColor: '#ffffff', 
-        opacity: 1,
-        visibility: 'visible',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-    >
+    <Sidebar collapsible="offcanvas">
       <SidebarHeader>
-        <div className="flex items-center p-4 mt-4 md:mt-0" style={{ backgroundColor: '#ffffff' }}>
-          <div className="w-14 h-14 bg-[#8B5CF6] rounded-full flex items-center justify-center text-white mr-3">
-            <Phone size={24} />
+        <div className="flex items-center p-4 mt-16 md:mt-0"> {/* Increased mt for mobile to avoid navbar overlap */}
+          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3">
+            <Phone size={18} />
           </div>
-          <span className="font-semibold text-xl">Flow Dialer</span>
+          <span className="font-semibold text-lg">Flow Dialer</span>
           
           {/* Close button for mobile */}
           {isMobile && (
@@ -72,28 +63,21 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
               variant="ghost" 
               size="icon" 
               className="ml-auto" 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setOpenMobile(false);
-              }}
+              onClick={() => setOpenMobile(false)}
             >
               <X size={20} />
             </Button>
           )}
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-4 py-2" style={{ backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column' }}>
-        <div className="rounded-lg p-2 mb-4" style={{ backgroundColor: '#ffffff' }}>
-          <nav className="space-y-2" style={{ backgroundColor: '#ffffff' }}>
+      <SidebarContent className="px-4 py-2">
+        <div className="bg-card rounded-lg border shadow-sm p-4 mb-4">
+          <nav className="space-y-2">
             {navItems.map((item) => (
               <SidebarNavItem 
                 key={item.path}
                 item={item}
-                onClick={(e) => {
-                  e && e.stopPropagation();
-                  handleItemClick();
-                }}
+                onClick={handleItemClick}
               />
             ))}
             
@@ -111,10 +95,10 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           </nav>
           
           {/* Logout button */}
-          <div className="mt-6 pt-4 border-t border-border" style={{ backgroundColor: '#ffffff' }}>
+          <div className="mt-6 pt-4 border-t border-border">
             <LogoutButton 
               variant="ghost" 
-              className="w-full justify-start py-3 text-primary font-medium" 
+              className="w-full justify-start py-3 text-left" 
               onClick={handleItemClick}
             />
           </div>

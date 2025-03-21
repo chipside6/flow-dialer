@@ -2,155 +2,24 @@
 /* Mobile navigation styles */
 
 @media screen and (max-width: 768px) {
-  /* Dashboard sidebar items */
-  [data-sidebar="content"] a {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-    color: #333333;
-    background-color: transparent !important; /* Allow hover states to work */
+  /* Dashboard nav items */
+  .sidebar-content button {
+    margin-bottom: 4px;
   }
   
-  /* Active state for sidebar items */
-  [data-sidebar="content"] a.bg-primary {
-    background-color: #8B5CF6 !important;
-    color: white !important;
+  /* Fix max-width for content areas */
+  .max-w-6xl {
+    max-width: 100% !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    box-sizing: border-box !important;
   }
   
-  /* Icon styling in sidebar items */
-  [data-sidebar="content"] a svg {
-    margin-right: 12px;
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-  }
-  
-  /* Logout button design */
-  [data-sidebar="content"] .border-t button {
-    color: #8B5CF6 !important;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    margin-top: 8px;
-    padding: 12px 16px;
-    background-color: transparent !important; /* Allow hover states to work */
-  }
-  
-  /* SOLID BACKGROUNDS - NO TRANSPARENCY */
-  div[role="dialog"] {
-    background-color: rgba(0, 0, 0, 0.7) !important;
-    backdrop-filter: none !important;
-  }
-  
-  /* Mobile sidebar solid background - IMPORTANT FIXES */
-  div[role="dialog"] > div[data-mobile="true"],
-  [data-radix-dialog-content] {
-    background-color: #ffffff !important;
-    opacity: 1 !important;
-    backdrop-filter: none !important;
-    border: none !important;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2) !important;
-    visibility: visible !important;
-    display: flex !important;
-    z-index: 9999 !important;
-  }
-  
-  /* Remove ALL blur effects everywhere */
-  .backdrop-blur-sm,
-  .backdrop-blur-md,
-  .backdrop-blur-lg,
-  .backdrop-blur {
-    backdrop-filter: none !important;
-  }
-  
-  /* Fix content positioning */
-  [data-sidebar-inset] {
-    padding-top: 60px;
-  }
-  
-  /* Fix spacing for logout button */
-  [data-sidebar="content"] .border-t {
-    margin-top: 12px;
-    padding-top: 12px;
-    background-color: #ffffff !important;
-  }
-  
-  /* Ensure consistent icon spacing */
-  [data-sidebar="content"] button svg {
-    margin-right: 12px !important;
-    flex-shrink: 0;
-  }
-  
-  /* Fix logout icon rotation - make it consistent with the design */
-  [data-sidebar="content"] .border-t button svg {
-    transform: rotate(0deg);
-  }
-  
-  /* SheetContent needs a solid background */
-  div[data-sidebar="sidebar"][data-mobile="true"] {
-    background-color: #ffffff !important;
-    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15) !important;
-    border: none !important;
-    position: fixed !important;
-    display: flex !important;
-    z-index: 100 !important;
-  }
-  
-  /* Fixed positioning for mobile sidebar */
-  .fixed.inset-y-0.z-50,
-  .fixed.z-50.h-full,
-  .fixed.z-50 {
-    background-color: #ffffff !important;
-    border: none !important;
-  }
-  
-  /* Ensure no transparency in any dialog */
-  [role="dialog"] [data-state="open"] {
-    background-color: #ffffff !important;
-  }
-  
-  /* Fix all sheet/dialog containers */
-  .fixed.z-50 [data-mobile="true"] {
-    background-color: #ffffff !important;
-  }
-  
-  /* SheetContent with open state */
-  [data-state="open"][data-side="left"] {
-    background-color: #ffffff !important;
-    opacity: 1 !important;
-    transform: translateX(0) !important;
-    display: flex !important;
-    visibility: visible !important;
-  }
-  
-  /* Force solid color on all sidebar elements */
-  [data-sidebar="sidebar"],
-  [data-sidebar="sidebar"] * {
-    background-color: #ffffff !important;
-  }
-  
-  /* Force proper z-index on all sidebar components */
-  [data-sidebar="sidebar"][data-state="open"] {
-    z-index: 100 !important;
-  }
-  
-  /* Fix dialog content display */
-  [data-radix-dialog-content] {
-    display: flex !important;
-    flex-direction: column !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  /* Ensure sheet content is properly displayed */
-  .fixed.z-50.h-full {
-    display: flex !important;
-    flex-direction: column !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+  /* Fix for main content container */
+  .max-w-6xl.mx-auto.w-full {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    padding: 0 8px !important;
   }
 }
