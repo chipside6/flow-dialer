@@ -202,7 +202,7 @@ const Sidebar = React.forwardRef<
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
-            side={side}
+            side={side as "left" | "right"} // Explicitly cast the side prop to the allowed values
           >
             <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>

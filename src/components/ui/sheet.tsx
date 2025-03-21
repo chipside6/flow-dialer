@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { cva } from "class-variance-authority"
@@ -11,15 +12,12 @@ const SheetTrigger = SheetPrimitive.Trigger
 
 const SheetClose = SheetPrimitive.Close
 
+// Remove className from SheetPortal props as it's not supported by Radix Dialog Portal
 const SheetPortal = ({
-  className,
   children,
   ...props
-}: {
-  className?: string
-  children: React.ReactNode
-} & SheetPrimitive.DialogPortalProps) => (
-  <SheetPrimitive.Portal className={cn(className)} {...props}>
+}: SheetPrimitive.DialogPortalProps) => (
+  <SheetPrimitive.Portal {...props}>
     {children}
   </SheetPrimitive.Portal>
 )
@@ -40,18 +38,21 @@ const SheetOverlay = React.forwardRef<
 ))
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
+interface SheetContentProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> {
+  hideOverlay?: boolean;
+  side?: "top" | "right" | "bottom" | "left";
+}
+
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> & {
-    hideOverlay?: boolean; // Add hideOverlay option
-  }
+  SheetContentProps
 >(
   (
     { className, children, hideOverlay = false, side = "right", ...props },
     ref
   ) => (
-    <SheetPortal hideOverlay={hideOverlay}>
-      <SheetOverlay />
+    <SheetPortal>
+      {!hideOverlay && <SheetOverlay />}
       <SheetPrimitive.Content
         ref={ref}
         className={cn(
