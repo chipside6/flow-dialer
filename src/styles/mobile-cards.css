@@ -4,14 +4,14 @@
 @media screen and (max-width: 768px) {
   /* Improve card styling on mobile */
   .bg-card {
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
   }
   
   /* Better card spacing */
-  .bg-card {
+  .bg-card, .card {
     padding: 16px !important;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
   
   /* Fix card overflow */
@@ -19,6 +19,7 @@
     width: 100%;
     max-width: 100%;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
   
   /* Fix table overflow on mobile */
@@ -53,7 +54,30 @@
   .card footer {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px;
+    gap: 10px;
+    padding: 16px;
+  }
+
+  /* Style audio element to be more mobile-friendly */
+  audio {
+    width: 100%;
+    height: 40px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+  }
+
+  /* Improve audio controls on small screens */
+  audio::-webkit-media-controls-panel {
+    background-color: #f3f4f6;
+  }
+
+  /* Fix card content spacing */
+  .card-content {
+    padding: 16px !important;
+  }
+
+  /* Greeting cards specific styling */
+  .grid-cols-1 .card {
+    margin-bottom: 16px;
   }
 }

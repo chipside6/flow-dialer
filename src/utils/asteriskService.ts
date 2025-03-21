@@ -1,4 +1,9 @@
-import { toast } from "@/components/ui/use-toast";
+
+import { 
+  createDialerError, 
+  DialerErrorType, 
+  handleDialerError 
+} from "@/utils/errorHandlingUtils";
 
 interface DialContactsOptions {
   contactListId: string;
@@ -34,7 +39,7 @@ export const asteriskService = {
           transferNumber,
           sipProviderId,
           greetingFile,
-          maxConcurrentCalls: maxConcurrentCalls || 3  // Changed from 1 to 3
+          maxConcurrentCalls: maxConcurrentCalls || 3
         }),
       });
       
@@ -49,11 +54,11 @@ export const asteriskService = {
       };
     } catch (error) {
       console.error("Error starting dialing job:", error);
-      toast({
-        title: "Connection Error",
-        description: "Could not connect to Asterisk server. Please check your server configuration.",
-        variant: "destructive",
-      });
+      handleDialerError(createDialerError(
+        DialerErrorType.CONNECTION,
+        "Could not connect to Asterisk server. Please check your server configuration.",
+        error
+      ));
       
       // Return a fallback job ID to prevent UI errors
       return {
@@ -82,11 +87,11 @@ export const asteriskService = {
       return { success: data.success };
     } catch (error) {
       console.error("Error stopping dialing job:", error);
-      toast({
-        title: "Connection Error",
-        description: "Could not connect to Asterisk server to stop dialing.",
-        variant: "destructive",
-      });
+      handleDialerError(createDialerError(
+        DialerErrorType.CONNECTION,
+        "Could not connect to Asterisk server to stop dialing.",
+        error
+      ));
       
       return { success: false };
     }
@@ -115,11 +120,11 @@ export const asteriskService = {
       return await response.json();
     } catch (error) {
       console.error("Error getting dialing status:", error);
-      toast({
-        title: "Connection Error",
-        description: "Could not retrieve status from Asterisk server.",
-        variant: "destructive",
-      });
+      handleDialerError(createDialerError(
+        DialerErrorType.CONNECTION,
+        "Could not retrieve status from Asterisk server.",
+        error
+      ));
       
       // Return fallback status to prevent UI errors
       return {

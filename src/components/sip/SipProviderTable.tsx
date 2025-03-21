@@ -28,10 +28,10 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
           Your SIP Providers
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0 sm:p-6">
+      <CardContent className="overflow-x-auto">
         {providers.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
-            No SIP providers configured yet. Add your first provider using the form above.
+            No SIP providers configured yet. Add your first provider.
           </div>
         ) : (
           <div className="w-full overflow-x-auto">

@@ -1,45 +1,8 @@
 
-/* Import refactored CSS files */
+/* Dashboard specific styles */
+
+/* Import the refactored CSS files */
+@import './dashboard-layout.css';
 @import './dashboard-sidebar.css';
 @import './dashboard-z-index.css';
-@import './dashboard-layout.css';
 
-/* General dashboard styles */
-.dashboard-content {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-/* Make sure all content is centered */
-@media screen and (max-width: 768px) {
-  .dashboard-content {
-    padding: 0 8px;
-  }
-  
-  /* Prevent content from being hidden under fixed elements */
-  .dashboard-content > div:first-child {
-    padding-top: 8px;
-    padding-left: 40px; /* Ensure content doesn't overlap with sidebar button */
-  }
-  
-  /* Better spacing for headings */
-  .dashboard-content h1,
-  .dashboard-content h2 {
-    text-align: center;
-    margin-bottom: 1rem;
-    padding-left: 40px; /* Prevent overlap with sidebar button */
-  }
-  
-  /* Fix button alignment */
-  .dashboard-content .flex.justify-between {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  /* Center buttons */
-  .dashboard-content .flex.justify-between > button,
-  .dashboard-content .flex.justify-between > a {
-    margin: 0 auto;
-  }
-}

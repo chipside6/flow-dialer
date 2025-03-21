@@ -1,16 +1,16 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/components/ui/use-toast';
-import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { useUploadProgress } from '@/hooks/useUploadProgress';
-import { AudioWaveform } from './AudioWaveform';
+import { Button } from '@/components/ui/button';
 import { RecordingControls } from './recording/RecordingControls';
 import { PreviewControls } from './recording/PreviewControls';
 import { RecordingStatus } from './recording/RecordingStatus';
 import { RecordingTips } from './recording/RecordingTips';
-import { UploadProgress } from './recording/UploadProgress';
+import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { uploadRecording } from './recording/recorderService';
+import { UploadProgress } from './recording/UploadProgress';
+import { useToast } from '@/components/ui/use-toast';
+import { Loader2 } from 'lucide-react';
 
 interface RecordGreetingFormProps {
   userId: string | undefined;
@@ -20,177 +20,179 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
-  const { uploadProgress, setUploadProgress } = useUploadProgress(isUploading);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
-  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
-
+  const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(null);
+  
   const {
-    isRecording,
     audioBlob,
+    audioUrl,
+    isRecording,
+    recordingDuration,
     formattedDuration,
     startRecording,
     stopRecording,
-    cancelRecording
+    resetRecording,
+    recordingStatus,
+    error: recordingError,
   } = useAudioRecorder();
 
-  // Create a temporary object URL for preview
-  const handleCreatePreview = () => {
-    if (audioBlob) {
-      // Revoke old URL if exists
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-      
-      // Create new URL
-      const url = URL.createObjectURL(audioBlob);
-      setPreviewUrl(url);
-      
-      // Create audio element for preview
-      if (!previewAudioRef.current) {
-        previewAudioRef.current = new Audio(url);
-        previewAudioRef.current.onended = () => setIsPreviewPlaying(false);
-      } else {
-        previewAudioRef.current.src = url;
-      }
+  useEffect(() => {
+    if (recordingError) {
+      toast({
+        title: 'Recording error',
+        description: recordingError.message,
+        variant: 'destructive',
+      });
     }
-  };
+  }, [recordingError, toast]);
 
-  // Toggle preview playback
+  useEffect(() => {
+    // Clean up audio on unmount
+    return () => {
+      if (previewAudio) {
+        previewAudio.pause();
+        previewAudio.src = '';
+      }
+    };
+  }, [previewAudio]);
+
   const togglePreview = () => {
-    if (!previewAudioRef.current || !previewUrl) return;
-    
-    if (isPreviewPlaying) {
-      previewAudioRef.current.pause();
-      setIsPreviewPlaying(false);
+    if (!audioUrl) return;
+
+    if (!previewAudio) {
+      const audio = new Audio(audioUrl);
+      audio.onended = () => setIsPreviewPlaying(false);
+      setPreviewAudio(audio);
+      audio.play();
+      setIsPreviewPlaying(true);
     } else {
-      previewAudioRef.current.play()
-        .then(() => setIsPreviewPlaying(true))
-        .catch(error => {
-          console.error('Preview playback error:', error);
-          toast({
-            title: 'Playback error',
-            description: 'Could not play the recording. Please try again.',
-            variant: 'destructive',
-          });
-        });
+      if (isPreviewPlaying) {
+        previewAudio.pause();
+        setIsPreviewPlaying(false);
+      } else {
+        previewAudio.play();
+        setIsPreviewPlaying(true);
+      }
     }
   };
 
-  // Upload the recorded audio
-  const handleUpload = async () => {
-    if (!audioBlob || !userId) return;
+  const handleSubmit = async () => {
+    if (!audioBlob || !userId) {
+      toast({
+        title: 'Error',
+        description: 'No recording available or user not authenticated',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsUploading(true);
+    setUploadProgress(0);
+    setUploadError(null);
     
     try {
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 300);
+      
+      // Upload recording to Supabase
+      console.log("Starting upload of recording, blob size:", audioBlob.size);
       await uploadRecording(audioBlob, userId);
       
-      // Set progress to 100% when upload completes
+      clearInterval(progressInterval);
       setUploadProgress(100);
       
-      // Refresh the greeting files list
-      queryClient.invalidateQueries({ queryKey: ['greetingFiles'] });
+      // Refetch greeting files after upload
+      queryClient.invalidateQueries({ queryKey: ['greetingFiles', userId] });
       
       toast({
         title: 'Recording uploaded',
-        description: 'Your greeting recording has been uploaded successfully.',
+        description: 'Your recorded greeting has been uploaded successfully.',
       });
       
-      // Reset the state
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-      setPreviewUrl(null);
+      // Reset the form after a short delay to show 100% progress
+      setTimeout(() => {
+        resetRecording();
+        setIsUploading(false);
+        setUploadProgress(0);
+      }, 1500);
       
     } catch (error: any) {
       console.error('Upload error:', error);
+      setUploadError(error.message || 'Failed to upload recording');
       toast({
         title: 'Upload failed',
-        description: error.message,
+        description: error.message || 'Failed to upload recording',
         variant: 'destructive',
       });
-    } finally {
-      // Longer delay before resetting upload state to ensure 100% is shown
-      setTimeout(() => {
-        setIsUploading(false);
-      }, 1000);
+      setIsUploading(false);
     }
   };
 
-  // Cleanup function to revoke object URL
-  useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
-  }, [previewUrl]);
-
-  // Create preview when audio blob is available
-  useEffect(() => {
-    if (audioBlob && !previewUrl) {
-      handleCreatePreview();
-    }
-  }, [audioBlob, previewUrl]);
-
   return (
-    <div className="space-y-6">
-      <div className="p-4 border border-dashed border-gray-300 bg-gray-50 rounded-md">
-        <div className="text-center mb-4">
-          <RecordingStatus 
-            isRecording={isRecording} 
-            formattedDuration={formattedDuration} 
-            hasRecording={!!audioBlob} 
-          />
-        </div>
-
-        {previewUrl && (
-          <div className="my-4">
-            <AudioWaveform 
-              audioUrl={previewUrl} 
-              isPlaying={isPreviewPlaying}
-            />
-          </div>
-        )}
-
-        <div className="flex justify-center gap-2">
-          {!isRecording && !audioBlob && (
-            <RecordingControls
-              isRecording={false}
-              startRecording={startRecording}
-              stopRecording={stopRecording}
-              cancelRecording={cancelRecording}
-            />
-          )}
-
-          {isRecording && (
-            <RecordingControls
-              isRecording={true}
-              startRecording={startRecording}
-              stopRecording={stopRecording}
-              cancelRecording={cancelRecording}
-            />
-          )}
-
-          {audioBlob && !isRecording && (
-            <PreviewControls
-              isUploading={isUploading}
-              isPreviewPlaying={isPreviewPlaying}
-              togglePreview={togglePreview}
-              handleUpload={handleUpload}
-              cancelRecording={cancelRecording}
-            />
-          )}
-        </div>
-
-        <UploadProgress 
-          isUploading={isUploading} 
-          uploadProgress={uploadProgress}
-        />
-      </div>
+    <div className="space-y-4">
+      {/* Only show tips when not recording and no audio blob exists */}
+      {!isRecording && !audioBlob && <RecordingTips />}
       
-      <RecordingTips />
+      {/* Show recording status */}
+      <RecordingStatus 
+        status={recordingStatus}
+        time={formattedDuration()}
+        isRecording={isRecording}
+        hasRecording={!!audioBlob}
+      />
+      
+      {/* Show controls for recording or previewing */}
+      {audioBlob && audioUrl ? (
+        <PreviewControls 
+          audioUrl={audioUrl} 
+          onReset={resetRecording}
+          isPreviewPlaying={isPreviewPlaying}
+          togglePreview={togglePreview}
+          handleUpload={handleSubmit}
+          isUploading={isUploading}
+        />
+      ) : (
+        <RecordingControls 
+          isRecording={isRecording}
+          onStartRecording={startRecording}
+          onStopRecording={stopRecording}
+        />
+      )}
+      
+      {/* Show upload button when audio is recorded */}
+      {audioBlob && !isUploading && !audioUrl && (
+        <Button 
+          onClick={handleSubmit} 
+          className="w-full mt-4"
+        >
+          Save Recording
+        </Button>
+      )}
+      
+      {/* Show uploading state */}
+      {isUploading && (
+        <Button disabled className="w-full mt-4">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Uploading...
+        </Button>
+      )}
+      
+      {/* Show upload progress */}
+      <UploadProgress 
+        isUploading={isUploading} 
+        uploadProgress={uploadProgress}
+        error={uploadError}
+      />
     </div>
   );
 };

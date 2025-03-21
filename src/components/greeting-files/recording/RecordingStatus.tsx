@@ -1,34 +1,45 @@
 
 interface RecordingStatusProps {
-  isRecording: boolean;
-  formattedDuration: () => string;
-  hasRecording: boolean;
+  status?: 'idle' | 'recording' | 'complete' | 'error';
+  time?: string;
+  isRecording?: boolean;
+  hasRecording?: boolean;
+  formattedDuration?: () => string;
 }
 
 export const RecordingStatus = ({
-  isRecording,
+  status = 'idle',
+  time = '00:00',
+  isRecording = false,
+  hasRecording = false,
   formattedDuration,
-  hasRecording,
 }: RecordingStatusProps) => {
+  // Use isRecording prop as the primary indicator
   if (isRecording) {
     return (
       <div className="text-destructive font-medium animate-pulse">
-        Recording in progress... {formattedDuration()}
+        Recording in progress... {formattedDuration?.() || time}
       </div>
     );
   }
 
+  // Use hasRecording as secondary indicator
   if (hasRecording) {
     return (
       <div className="text-green-600 font-medium">
-        Recording complete! {formattedDuration()}
+        Recording complete! {formattedDuration?.() || time}
       </div>
     );
   }
 
+  // Default state - show different messages based on status
   return (
     <div className="text-muted-foreground">
-      Click "Start Recording" to begin
+      {status === 'recording' 
+        ? `Recording... ${time}` 
+        : status === 'complete'
+          ? `Recording ready. ${time}` 
+          : 'Click "Start Recording" to begin'}
     </div>
   );
 };

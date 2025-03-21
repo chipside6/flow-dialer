@@ -35,7 +35,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* DashboardSidebar contains its own header on mobile */}
       <DashboardSidebar />
       <DashboardContent>
-        {children}
+        {/* Add extra padding-top for mobile to avoid overlap with sidebar button */}
+        <div className={isMobile ? "pt-12 sm:pt-0" : ""}>
+          {children}
+        </div>
       </DashboardContent>
     </div>
   );
