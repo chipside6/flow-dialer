@@ -22,6 +22,7 @@ import UpgradePage from "./pages/UpgradePage";
 import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import DiagnosticPage from "./pages/DiagnosticPage";
 
 // Import the App.css for styling
 import "./App.css"; 
@@ -128,6 +129,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AdminPanel />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/diagnostics" 
+              element={
+                <ProtectedRoute>
+                  <DiagnosticPage />
                 </ProtectedRoute>
               } 
             />

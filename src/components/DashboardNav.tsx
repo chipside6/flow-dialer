@@ -1,81 +1,107 @@
-
-import React from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link, useLocation } from "react-router-dom";
-import { 
-  AudioWaveform, 
-  ContactIcon, 
-  PhoneForwarded, 
-  Server, 
-  BarChart3, 
-  Home, 
-  ShieldCheck,
-  User,
-  CreditCard
-} from "lucide-react";
 import { useAuth } from "@/contexts/auth";
-import { NavItem } from "@/components/navigation/NavItem";
-import { AffiliateStatus } from "@/components/navigation/AffiliateStatus";
-import { useSubscription } from "@/hooks/useSubscription";
+import {
+  BarChart3,
+  Phone,
+  FileAudio,
+  Users,
+  PhoneForwarded,
+  Server,
+  CreditCard,
+  Settings,
+  ShieldCheck,
+  Activity
+} from "lucide-react";
 
-export function DashboardNav() {
-  const location = useLocation();
-  const { profile } = useAuth();
-  const { currentPlan } = useSubscription();
-  
-  const navItems = [
-    { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },
-    { 
-      name: "Campaigns", 
-      path: "/campaign", 
-      icon: <BarChart3 className="h-5 w-5" />,
-      // Handle both campaign and campaigns route paths
-      isActive: (pathname: string) => pathname === "/campaign" || pathname === "/campaigns"
+interface DashboardNavProps {
+  isCollapsed: boolean;
+}
+
+export function DashboardNav({ isCollapsed }: DashboardNavProps) {
+  const { pathname } = useLocation();
+  const { isAdmin } = useAuth();
+
+  const routes = [
+    {
+      href: "/dashboard",
+      label: "Overview",
+      icon: BarChart3,
     },
-    { name: "Greeting Files", path: "/greetings", icon: <AudioWaveform className="h-5 w-5" /> },
-    { name: "Contact Lists", path: "/contacts", icon: <ContactIcon className="h-5 w-5" /> },
-    { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
-    { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5" /> },
-    { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
+    {
+      href: "/campaign",
+      label: "Campaigns",
+      icon: Phone,
+    },
+    {
+      href: "/greetings",
+      label: "Greetings",
+      icon: FileAudio,
+    },
+    {
+      href: "/contacts",
+      label: "Contacts",
+      icon: Users,
+    },
+    {
+      href: "/transfers",
+      label: "Transfers",
+      icon: PhoneForwarded,
+    },
+    {
+      href: "/sip-providers",
+      label: "SIP Providers",
+      icon: Server,
+    },
+    {
+      href: "/billing",
+      label: "Billing",
+      icon: CreditCard,
+    },
+    {
+      href: "/profile",
+      label: "Settings",
+      icon: Settings,
+    },
+    {
+      href: "/diagnostics",
+      label: "Diagnostics",
+      icon: Activity,
+    }
   ];
-  
-  // Show upgrade link for free users
-  if (currentPlan === 'free' || !currentPlan) {
-    navItems.push({
-      name: "Upgrade",
-      path: "/upgrade",
-      icon: <CreditCard className="h-5 w-5" />
+
+  // Add admin route if user is admin
+  if (isAdmin) {
+    routes.push({
+      href: "/admin",
+      label: "Admin Panel",
+      icon: ShieldCheck,
     });
   }
-  
-  // Admin link for admin users
-  const isAdmin = profile?.is_admin === true;
-  
+
   return (
-    <div className="bg-card rounded-lg border p-4">
-      <nav className="space-y-2">
-        {navItems.map((item) => (
-          <NavItem 
-            key={item.path} 
-            item={item} 
-            isActive={item.isActive ? item.isActive(location.pathname) : location.pathname === item.path}
-          />
+    <ScrollArea className="h-full py-4">
+      <div className="flex flex-col gap-2 px-2">
+        {routes.map((route) => (
+          <Button
+            key={route.href}
+            variant={pathname === route.href ? "secondary" : "ghost"}
+            size={isCollapsed ? "icon" : "default"}
+            className={cn(
+              "justify-start",
+              isCollapsed && "h-10 w-10 p-0"
+            )}
+            asChild
+          >
+            <Link to={route.href}>
+              <route.icon className={cn("h-5 w-5", !isCollapsed && "mr-2")} />
+              {!isCollapsed && <span>{route.label}</span>}
+            </Link>
+          </Button>
         ))}
-        
-        {/* Admin Panel Link */}
-        {isAdmin && (
-          <NavItem 
-            item={{
-              name: "Admin Panel",
-              path: "/admin",
-              icon: <ShieldCheck className="h-5 w-5" />
-            }}
-            isActive={location.pathname === "/admin"}
-          />
-        )}
-        
-        {/* Affiliate Status Badge */}
-        {profile?.is_affiliate && <AffiliateStatus />}
-      </nav>
-    </div>
+      </div>
+    </ScrollArea>
   );
 }
