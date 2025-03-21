@@ -52,14 +52,23 @@ export const AddTransferNumberForm = ({
       console.log("Form submit event captured");
     }
     
-    console.log("Form submitted with values:", { name, number, description });
+    const trimmedName = name.trim();
+    const trimmedNumber = number.trim();
+    const trimmedDescription = description.trim();
+    
+    console.log("Form submitted with values:", { 
+      name: trimmedName, 
+      number: trimmedNumber, 
+      description: trimmedDescription,
+      isMobile
+    });
     
     if (isSubmitting || localSubmitting) {
       console.log("Submission already in progress, ignoring click");
       return;
     }
     
-    if (!name.trim() || !number.trim()) {
+    if (!trimmedName || !trimmedNumber) {
       console.log("Missing required fields, not submitting");
       return;
     }
@@ -68,8 +77,8 @@ export const AddTransferNumberForm = ({
     setLocalSubmitting(true);
     
     try {
-      console.log("Calling onAddTransferNumber with:", name.trim(), number.trim(), description.trim());
-      const result = await onAddTransferNumber(name.trim(), number.trim(), description.trim());
+      console.log("Calling onAddTransferNumber with:", trimmedName, trimmedNumber, trimmedDescription);
+      const result = await onAddTransferNumber(trimmedName, trimmedNumber, trimmedDescription);
       console.log("Submission result:", result ? "success" : "failure");
       
       if (result) {
@@ -143,13 +152,6 @@ export const AddTransferNumberForm = ({
             type="submit"
             disabled={buttonDisabled || !name.trim() || !number.trim()}
             className="w-full sm:w-auto mt-4"
-            onClick={() => {
-              console.log("Button clicked, name:", name, "number:", number);
-              if (!buttonDisabled && name.trim() && number.trim()) {
-                console.log("Button click will trigger form submission");
-                handleSubmit();
-              }
-            }}
           >
             {buttonDisabled ? (
               <>
@@ -167,4 +169,4 @@ export const AddTransferNumberForm = ({
       </CardContent>
     </Card>
   );
-};
+}

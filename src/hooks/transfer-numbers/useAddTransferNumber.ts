@@ -15,6 +15,11 @@ export function useAddTransferNumber(
   const addTransferNumber = async (name: string, number: string, description: string) => {
     console.log("addTransferNumber hook called with:", { name, number, description });
     
+    // Clean input data first
+    const cleanName = name.trim();
+    const cleanNumber = number.trim();
+    const cleanDesc = description ? description.trim() : "";
+    
     if (!user) {
       console.log("No user authenticated, showing toast");
       toast({
@@ -25,7 +30,7 @@ export function useAddTransferNumber(
       return null;
     }
     
-    if (!validateTransferNumberInput(name, number)) {
+    if (!validateTransferNumberInput(cleanName, cleanNumber)) {
       console.log("Input validation failed");
       return null;
     }
@@ -37,12 +42,7 @@ export function useAddTransferNumber(
     }
     
     try {
-      console.log("Adding transfer number for user:", user.id, {name, number, description});
-      
-      // Make sure we're passing clean data to the service
-      const cleanName = name.trim();
-      const cleanNumber = number.trim();
-      const cleanDesc = description ? description.trim() : "";
+      console.log("Adding transfer number for user:", user.id, {cleanName, cleanNumber, cleanDesc});
       
       const newTransferNumber = await addTransferNumberToDatabase(
         user.id, 
@@ -60,7 +60,10 @@ export function useAddTransferNumber(
         });
         
         // Trigger a refresh
-        refreshTransferNumbers();
+        if (refreshTransferNumbers) {
+          console.log("Refreshing transfer numbers list");
+          refreshTransferNumbers();
+        }
         return newTransferNumber;
       } else {
         console.error("Failed to add transfer number - no result returned");
