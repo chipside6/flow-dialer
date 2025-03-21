@@ -26,7 +26,7 @@
 }
 
 .plan-card-amount {
-  @apply text-3xl font-bold;
+  @apply text-4xl font-bold; /* Increased from text-3xl to text-4xl */
 }
 
 .plan-card-period {
