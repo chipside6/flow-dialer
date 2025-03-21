@@ -1,12 +1,12 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Server, Plus, Edit, Eye, EyeOff } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { SipProvider } from "@/types/sipProviders";
+import { FormField } from "./FormField";
+import { PasswordField } from "./PasswordField";
+import { FormActions } from "./FormActions";
 
 interface SipProviderFormProps {
   onSubmit: (provider: Omit<SipProvider, 'id' | 'dateAdded' | 'isActive'>) => void;
@@ -25,7 +25,6 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   const [username, setUsername] = useState(editingProvider?.username || "");
   const [password, setPassword] = useState(editingProvider?.password || "");
   const [description, setDescription] = useState(editingProvider?.description || "");
-  const [showPassword, setShowPassword] = useState(false);
   
   const handleSubmit = () => {
     if (!name || !host || !username || !password) {
@@ -63,105 +62,64 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
       <CardContent>
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="w-full">
-              <Label htmlFor="provider-name">Provider Name*</Label>
-              <Input
-                id="provider-name"
-                placeholder="E.g., Twilio, Vonage, etc."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="w-full">
-              <Label htmlFor="provider-host">Host/Server*</Label>
-              <Input
-                id="provider-host"
-                placeholder="E.g., sip.provider.com"
-                value={host}
-                onChange={(e) => setHost(e.target.value)}
-                className="w-full"
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="w-full">
-              <Label htmlFor="provider-username">Username/Account ID*</Label>
-              <Input
-                id="provider-username"
-                placeholder="Enter SIP username or account ID"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="w-full">
-              <Label htmlFor="provider-port">Port</Label>
-              <Input
-                id="provider-port"
-                placeholder="Default: 5060"
-                value={port}
-                onChange={(e) => setPort(e.target.value)}
-                className="w-full"
-              />
-            </div>
-          </div>
-          
-          <div className="w-full">
-            <Label htmlFor="provider-password">Password/API Key*</Label>
-            <div className="relative w-full">
-              <Input
-                id="provider-password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter SIP password or API key"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pr-10"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-          
-          <div className="w-full">
-            <Label htmlFor="provider-description">Description</Label>
-            <Input
-              id="provider-description"
-              placeholder="Enter a description for this SIP provider"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full"
+            <FormField
+              id="provider-name"
+              label="Provider Name"
+              placeholder="E.g., Twilio, Vonage, etc."
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+            <FormField
+              id="provider-host"
+              label="Host/Server"
+              placeholder="E.g., sip.provider.com"
+              value={host}
+              onChange={(e) => setHost(e.target.value)}
+              required
             />
           </div>
           
-          <div className="flex space-x-2">
-            <Button onClick={handleSubmit}>
-              {editingProvider ? (
-                <>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Update Provider
-                </>
-              ) : (
-                <>
-                  <Server className="mr-2 h-4 w-4" />
-                  Add Provider
-                </>
-              )}
-            </Button>
-            {editingProvider && (
-              <Button variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              id="provider-username"
+              label="Username/Account ID"
+              placeholder="Enter SIP username or account ID"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+            <FormField
+              id="provider-port"
+              label="Port"
+              placeholder="Default: 5060"
+              value={port}
+              onChange={(e) => setPort(e.target.value)}
+            />
           </div>
+          
+          <PasswordField
+            id="provider-password"
+            label="Password/API Key"
+            placeholder="Enter SIP password or API key"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          
+          <FormField
+            id="provider-description"
+            label="Description"
+            placeholder="Enter a description for this SIP provider"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          
+          <FormActions 
+            onSubmit={handleSubmit}
+            onCancel={onCancel}
+            isEditing={!!editingProvider}
+          />
         </div>
       </CardContent>
     </Card>
