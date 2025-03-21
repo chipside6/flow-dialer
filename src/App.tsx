@@ -48,6 +48,7 @@ function AppRouter() {
       <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
       <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
       <Route path="/billing" element={isAuthenticated ? <UpgradePage /> : <Navigate to="/login" />} />
+      <Route path="/upgrade" element={<Navigate to="/billing" replace />} /> {/* Add redirect from /upgrade to /billing */}
       <Route path="/sip-providers" element={isAuthenticated ? <SipProviders /> : <Navigate to="/login" />} />
       <Route path="/contact-lists" element={isAuthenticated ? <ContactLists /> : <Navigate to="/login" />} />
       <Route path="/background-dialer" element={isAuthenticated ? <BackgroundDialer /> : <Navigate to="/login" />} />
