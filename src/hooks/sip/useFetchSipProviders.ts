@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import { SipProvider } from "@/types/sipProviders";
 import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
+import { fetchSipProviders } from "@/services/customBackendService";
 
 export const useFetchSipProviders = () => {
   const [providers, setProviders] = useState<SipProvider[]>([]);
@@ -21,27 +21,8 @@ export const useFetchSipProviders = () => {
 
       try {
         setIsLoading(true);
-        const { data, error } = await supabase
-          .from('sip_providers')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-
-        // Transform data to match SipProvider interface
-        const transformedData = (data || []).map((provider: any) => ({
-          id: provider.id,
-          name: provider.name,
-          host: provider.host,
-          port: provider.port.toString(),
-          username: provider.username,
-          password: provider.password,
-          description: provider.description || "",
-          dateAdded: new Date(provider.created_at),
-          isActive: provider.active
-        }));
-        
-        setProviders(transformedData);
+        const data = await fetchSipProviders(user.id);
+        setProviders(data);
       } catch (err: any) {
         console.error("Error fetching SIP providers:", err);
         setError(err);

@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { createLifetimeSubscription, getPlanById } from "./subscriptionApi";
+import { createLifetimeSubscription, getPlanById } from "@/services/subscriptionService";
 import { PricingPlan } from "@/data/pricingPlans";
 
 export const useLifetimePlan = (

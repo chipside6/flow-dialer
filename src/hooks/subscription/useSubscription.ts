@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth";
-import { fetchSubscription, getPlanById } from "./subscriptionApi";
+import { fetchSubscription, getPlanById } from "@/services/subscriptionService";
 import { useSubscriptionLimit } from "./useSubscriptionLimit";
 import { useLifetimePlan } from "./useLifetimePlan";
 import { Subscription, UseSubscriptionReturn } from "./types";

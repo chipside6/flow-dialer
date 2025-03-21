@@ -1,6 +1,22 @@
 
 import React, { createContext } from 'react';
-import { AuthContextType } from './types';
+import { User, UserProfile } from '@/services/authService';
+
+export interface AuthContextType {
+  user: User | null;
+  profile: UserProfile | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  isAffiliate: boolean;
+  initialized: boolean;
+  sessionChecked: boolean;
+  signUp: (email: string, password: string, metadata?: { full_name?: string }) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signOut: () => Promise<{ success: boolean; error: any } | void>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<{ error: Error | null }>;
+  setAsAffiliate: (userId: string) => Promise<void>;
+}
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

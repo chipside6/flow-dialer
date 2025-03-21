@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { SipProvider } from "@/types/sipProviders";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
+import { addSipProvider, updateSipProvider } from "@/services/customBackendService";
 
 export const useAddUpdateProvider = (
   providers: SipProvider[],
@@ -29,75 +29,21 @@ export const useAddUpdateProvider = (
       const isNewProvider = !provider.id;
       console.log(`${isNewProvider ? 'Adding' : 'Updating'} SIP provider:`, provider);
       
+      let result;
       if (isNewProvider) {
         // For INSERT operations
-        const { data, error } = await supabase
-          .from('sip_providers')
-          .insert({
-            name: provider.name,
-            host: provider.host,
-            port: parseInt(provider.port),
-            username: provider.username,
-            password: provider.password,
-            user_id: user.id,
-            active: provider.isActive || false,
-            // Note: description is not in the schema
-          })
-          .select();
+        result = await addSipProvider(provider, user.id);
         
-        if (error) {
-          console.error("Error inserting SIP provider:", error);
-          throw error;
-        }
-        
-        console.log("SIP provider inserted, response:", data);
-        
-        if (data && data.length > 0) {
-          // Convert the returned data to match our SipProvider type
-          const newProvider: SipProvider = {
-            id: data[0].id,
-            name: data[0].name,
-            host: data[0].host,
-            port: data[0].port.toString(),
-            username: data[0].username,
-            password: data[0].password,
-            description: "", // Add empty description as it's required by type
-            dateAdded: new Date(data[0].created_at),
-            isActive: data[0].active
-          };
-          
-          setProviders(prevProviders => [...prevProviders, newProvider]);
-        }
+        // Add the new provider to the state
+        setProviders(prevProviders => [...prevProviders, result]);
       } else {
         // For UPDATE operations
-        const { data, error } = await supabase
-          .from('sip_providers')
-          .update({
-            name: provider.name,
-            host: provider.host,
-            port: parseInt(provider.port),
-            username: provider.username,
-            password: provider.password,
-            active: provider.isActive,
-            // Note: description is not in the schema
-          })
-          .eq('id', provider.id)
-          .eq('user_id', user.id)
-          .select();
-        
-        if (error) {
-          console.error("Error updating SIP provider:", error);
-          throw error;
-        }
-        
-        console.log("SIP provider updated, response:", data);
+        result = await updateSipProvider(provider, user.id);
         
         // Update the provider in the list
-        const updatedProviders = providers.map(p => 
+        setProviders(providers.map(p => 
           p.id === provider.id ? { ...provider } : p
-        );
-        
-        setProviders(updatedProviders);
+        ));
       }
       
       toast({

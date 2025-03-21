@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { fetchUserCallCount } from "./subscriptionApi";
+import { fetchUserCallCount } from "@/services/subscriptionService";
 
 export const useSubscriptionLimit = (
   userId: string | undefined, 
