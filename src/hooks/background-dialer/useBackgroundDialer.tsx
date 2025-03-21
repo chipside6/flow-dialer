@@ -17,19 +17,19 @@ export const useBackgroundDialer = (campaignId: string) => {
     isLoadingLists 
   } = useFetchDialerResources();
   
-  // Get dialer status hooks (need to declare this first to fix the dependency order)
-  const { dialStatus, setDialStatus } = useDialerStatus(null, false);
+  // Get initial dialer status
+  const initialStatus = useDialerStatus(null, false);
   
-  // Get dialer action handlers (now using the already declared setDialStatus)
+  // Get dialer action handlers (using the already declared status hook)
   const {
     isDialing,
     currentJobId,
     startDialing,
     stopDialing
-  } = useDialerActions(formData, setDialStatus);
+  } = useDialerActions(formData, initialStatus.setDialStatus);
   
-  // Reattach the status hook with real values
-  const statusHook = useDialerStatus(currentJobId, isDialing);
+  // Now use the real dialer status with the job ID from actions
+  const { dialStatus } = useDialerStatus(currentJobId, isDialing);
   
   // Start dialing wrapper to include campaign ID
   const handleStartDialing = () => {
@@ -50,7 +50,7 @@ export const useBackgroundDialer = (campaignId: string) => {
     // Dialing state
     isDialing,
     currentJobId,
-    dialStatus: statusHook.dialStatus,
+    dialStatus,
     
     // Actions
     startDialing: handleStartDialing,

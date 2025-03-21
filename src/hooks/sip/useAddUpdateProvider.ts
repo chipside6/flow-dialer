@@ -27,46 +27,58 @@ export const useAddUpdateProvider = (
     
     try {
       const isNewProvider = !provider.id;
-      const endpoint = isNewProvider ? 'insert' : 'update';
-      const match = isNewProvider ? undefined : { id: provider.id };
       
-      const { data, error } = await supabase
-        .from('sip_providers')
-        [endpoint]({
-          name: provider.name,
-          host: provider.host,
-          port: parseInt(provider.port),
-          username: provider.username,
-          password: provider.password,
-          user_id: user.id,
-          active: provider.isActive,
-          // Don't try to save description since it's not in the schema
-        })
-        .match(match)
-        .select();
-      
-      if (error) throw error;
-      
-      toast({
-        title: isNewProvider ? "Provider Added" : "Provider Updated",
-        description: `${provider.name} has been ${isNewProvider ? 'added' : 'updated'} successfully.`,
-      });
-      
-      if (isNewProvider && data) {
-        // Convert the returned data to match our SipProvider type
-        const newProviders = [...providers, {
-          id: data[0].id as string,
-          name: data[0].name,
-          host: data[0].host,
-          port: data[0].port.toString(),
-          username: data[0].username,
-          password: data[0].password,
-          dateAdded: new Date(data[0].created_at),
-          isActive: data[0].active
-        }];
+      if (isNewProvider) {
+        // For INSERT operations
+        const { data, error } = await supabase
+          .from('sip_providers')
+          .insert({
+            name: provider.name,
+            host: provider.host,
+            port: parseInt(provider.port),
+            username: provider.username,
+            password: provider.password,
+            user_id: user.id,
+            active: provider.isActive,
+            // Note: description is not in the schema
+          })
+          .select();
         
-        setProviders(newProviders);
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          // Convert the returned data to match our SipProvider type
+          const newProvider: SipProvider = {
+            id: data[0].id,
+            name: data[0].name,
+            host: data[0].host,
+            port: data[0].port.toString(),
+            username: data[0].username,
+            password: data[0].password,
+            description: "", // Add empty description as it's required by type
+            dateAdded: new Date(data[0].created_at),
+            isActive: data[0].active
+          };
+          
+          setProviders([...providers, newProvider]);
+        }
       } else {
+        // For UPDATE operations
+        const { error } = await supabase
+          .from('sip_providers')
+          .update({
+            name: provider.name,
+            host: provider.host,
+            port: parseInt(provider.port),
+            username: provider.username,
+            password: provider.password,
+            active: provider.isActive,
+            // Note: description is not in the schema
+          })
+          .eq('id', provider.id);
+        
+        if (error) throw error;
+        
         // Update the provider in the list
         const updatedProviders = providers.map(p => 
           p.id === provider.id ? { ...provider } : p
@@ -74,6 +86,11 @@ export const useAddUpdateProvider = (
         
         setProviders(updatedProviders);
       }
+      
+      toast({
+        title: isNewProvider ? "Provider Added" : "Provider Updated",
+        description: `${provider.name} has been ${isNewProvider ? 'added' : 'updated'} successfully.`,
+      });
       
       // Reset the editing state
       setEditingProvider(null);
