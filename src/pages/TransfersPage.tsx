@@ -1,6 +1,6 @@
 
 import React from 'react';
-import TransferNumbers from '../pages/TransferNumbers';
+import TransferNumbers from './TransferNumbers';
 
 const TransfersPage = () => {
   return <TransferNumbers />;
