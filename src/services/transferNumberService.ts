@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TransferNumber } from "@/types/transferNumber";
 
@@ -49,6 +48,7 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
 
 /**
  * Adds a new transfer number to the database
+ * FIXED: Simplified operation and improved error handling
  */
 export const addTransferNumberToDatabase = async (
   userId: string, 
@@ -63,45 +63,41 @@ export const addTransferNumberToDatabase = async (
   });
   
   try {
-    // Insert the transfer number into the database
-    console.log(`[TransferNumberService] Executing insert query`);
-    
+    // Create the data object
     const insertData = {
       user_id: userId,
-      name: name,
+      name,
       phone_number: number,
       description: description || null,
       call_count: 0
     };
     
-    console.log(`[TransferNumberService] Insert data:`, insertData);
+    console.log(`[TransferNumberService] Insert data:`, JSON.stringify(insertData));
     
-    // IMPORTANT FIX: Simplify the query to ensure it completes properly
-    const startTime = Date.now();
+    // Execute a simpler insert query without using .single()
     const { data, error } = await supabase
       .from('transfer_numbers')
       .insert(insertData)
-      .select('*')
-      .single();
-    
-    const queryTime = Date.now() - startTime;
-    console.log(`[TransferNumberService] Insert query completed in ${queryTime}ms`);
+      .select();
     
     if (error) {
       console.error(`[TransferNumberService] Database error when adding transfer number:`, error);
       throw error;
     }
     
-    console.log(`[TransferNumberService] Database response after adding transfer number:`, data);
+    console.log(`[TransferNumberService] Insert response:`, data);
     
-    if (data) {
+    if (data && data.length > 0) {
+      const newTransferNumber = data[0];
+      console.log(`[TransferNumberService] Successfully created transfer number:`, newTransferNumber);
+      
       return {
-        id: data.id,
-        name: data.name,
-        number: data.phone_number,
-        description: data.description || "No description provided",
-        dateAdded: new Date(data.created_at),
-        callCount: data.call_count !== null ? Number(data.call_count) : 0
+        id: newTransferNumber.id,
+        name: newTransferNumber.name,
+        number: newTransferNumber.phone_number,
+        description: newTransferNumber.description || "No description provided",
+        dateAdded: new Date(newTransferNumber.created_at),
+        callCount: newTransferNumber.call_count !== null ? Number(newTransferNumber.call_count) : 0
       };
     }
     

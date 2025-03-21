@@ -31,13 +31,25 @@ export const AddTransferNumberForm = ({
   }, [isSubmitting, localSubmitting]);
   
   const handleSubmit = async (e: React.FormEvent) => {
-    // Prevent default browser form submission which can cause issues
+    // Prevent default form submission
     e.preventDefault();
     console.log("Form submit event captured and prevented default");
+    
+    // Check if already submitting
+    if (isSubmitting || localSubmitting) {
+      console.log("Submission already in progress, ignoring submission");
+      return;
+    }
     
     const trimmedName = name.trim();
     const trimmedNumber = number.trim();
     const trimmedDescription = description.trim();
+    
+    // Validate input
+    if (!trimmedName || !trimmedNumber) {
+      console.log("Missing required fields, not submitting");
+      return;
+    }
     
     console.log("Form values prepared for submission:", { 
       name: trimmedName, 
@@ -46,25 +58,14 @@ export const AddTransferNumberForm = ({
       isMobile
     });
     
-    // Don't submit if already submitting or if required fields are empty
-    if (isSubmitting || localSubmitting) {
-      console.log("Submission already in progress, ignoring submission");
-      return;
-    }
-    
-    if (!trimmedName || !trimmedNumber) {
-      console.log("Missing required fields, not submitting");
-      return;
-    }
-    
-    // Set local submitting state to prevent multiple submissions
+    // Set local submitting state
     console.log("Starting form submission, setting localSubmitting");
     setLocalSubmitting(true);
     
     try {
-      // FIX: Make direct function call with the trimmed values
       console.log("Calling onAddTransferNumber directly with:", trimmedName, trimmedNumber, trimmedDescription);
       const result = await onAddTransferNumber(trimmedName, trimmedNumber, trimmedDescription);
+      
       console.log("Submission result:", result);
       
       // Only clear form if submission was successful
@@ -84,7 +85,8 @@ export const AddTransferNumberForm = ({
   };
   
   // Determine if button should be disabled
-  const buttonDisabled = isSubmitting || localSubmitting || !name.trim() || !number.trim();
+  const isSubmittingNow = isSubmitting || localSubmitting;
+  const buttonDisabled = isSubmittingNow || !name.trim() || !number.trim();
   
   return (
     <Card className="mb-8">
@@ -107,7 +109,7 @@ export const AddTransferNumberForm = ({
               placeholder="Enter a name for this transfer destination"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={buttonDisabled}
+              disabled={isSubmittingNow}
               required
               className="mb-0"
             />
@@ -119,7 +121,7 @@ export const AddTransferNumberForm = ({
               placeholder="Enter the phone number (e.g., +1-555-123-4567)"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
-              disabled={buttonDisabled}
+              disabled={isSubmittingNow}
               required
               type="tel"
               className="mb-0"
@@ -132,7 +134,7 @@ export const AddTransferNumberForm = ({
               placeholder="Enter a description for this transfer number"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              disabled={buttonDisabled}
+              disabled={isSubmittingNow}
               className="mb-0"
             />
           </div>
@@ -141,7 +143,7 @@ export const AddTransferNumberForm = ({
             disabled={buttonDisabled}
             className="w-full sm:w-auto mt-4"
           >
-            {isSubmitting || localSubmitting ? (
+            {isSubmittingNow ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Adding...

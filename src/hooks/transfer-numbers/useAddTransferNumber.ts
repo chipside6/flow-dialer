@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
 import { addTransferNumberToDatabase } from "@/services/transferNumberService";
 import { useTransferNumberValidation } from "./useTransferNumberValidation";
+import { logSupabaseOperation, OperationType } from "@/utils/supabaseDebug";
 
 export function useAddTransferNumber(
   setIsSubmitting: (submitting: boolean) => void,
@@ -44,14 +45,23 @@ export function useAddTransferNumber(
       
       console.log("Adding transfer number for user:", user.id, {cleanName, cleanNumber, cleanDesc});
       
-      // Use a timeout to ensure database operation completes
-      const newTransferNumber = await Promise.race([
-        addTransferNumberToDatabase(user.id, cleanName, cleanNumber, cleanDesc),
-        new Promise(resolve => setTimeout(() => {
-          console.log("Database operation timeout reached");
-          resolve(null);
-        }, 8000))
-      ]);
+      // Log the operation start
+      logSupabaseOperation({
+        operation: OperationType.WRITE,
+        table: 'transfer_numbers',
+        user_id: user.id,
+        success: true,
+        auth_status: "AUTHENTICATED",
+        data: { name: cleanName, number: cleanNumber }
+      });
+      
+      // Make the database call without the race timeout
+      const newTransferNumber = await addTransferNumberToDatabase(
+        user.id, 
+        cleanName, 
+        cleanNumber, 
+        cleanDesc
+      );
       
       if (newTransferNumber) {
         console.log("Successfully added transfer number:", newTransferNumber);
@@ -71,7 +81,7 @@ export function useAddTransferNumber(
         console.error("Failed to add transfer number - no result returned");
         toast({
           title: "Error adding transfer number",
-          description: "The server returned an empty response",
+          description: "There was a problem saving your transfer number",
           variant: "destructive",
         });
       }
