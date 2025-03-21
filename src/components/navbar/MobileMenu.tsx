@@ -18,7 +18,7 @@ export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto mobile-menu">
-      <div className="px-6 py-4 border-b flex items-center justify-between">
+      <div className="px-6 py-4 border-b flex items-center justify-between bg-muted/10">
         <h2 className="text-xl font-bold">Menu</h2>
         <button
           onClick={onClose}
@@ -30,24 +30,24 @@ export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
       </div>
       
       <nav className="px-6 py-8 flex flex-col gap-8">
-        <div className="flex flex-col gap-8 text-xl">
+        <div className="flex flex-col gap-6 text-xl">
           <NavLinks mobile onClick={onClose} />
         </div>
         
-        <div className="flex flex-col gap-3 mt-4">
+        <div className="flex flex-col gap-4 mt-6">
           {isAuthenticated ? (
             <>
-              <Button asChild variant="default" size="lg">
+              <Button asChild variant="default" size="lg" className="w-full">
                 <Link to="/dashboard" onClick={onClose}>Dashboard</Link>
               </Button>
-              <LogoutButton variant="outline" size="lg" onClick={onClose} />
+              <LogoutButton variant="outline" size="lg" className="w-full" onClick={onClose} />
             </>
           ) : (
             <>
-              <Button asChild variant="default" size="lg">
+              <Button asChild variant="default" size="lg" className="w-full">
                 <Link to="/signup" onClick={onClose}>Get Started</Link>
               </Button>
-              <Button asChild variant="outline" size="lg">
+              <Button asChild variant="outline" size="lg" className="w-full">
                 <Link to="/login" onClick={onClose}>Log In</Link>
               </Button>
             </>

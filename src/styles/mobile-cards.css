@@ -4,14 +4,14 @@
 @media screen and (max-width: 768px) {
   /* Improve card styling on mobile */
   .bg-card {
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
   }
   
   /* Better card spacing */
   .bg-card {
     padding: 16px !important;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
   
   /* Fix card overflow */
@@ -19,6 +19,7 @@
     width: 100%;
     max-width: 100%;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
   
   /* Fix table overflow on mobile */
@@ -53,7 +54,7 @@
   .card footer {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px;
+    gap: 10px;
+    padding: 16px;
   }
 }
