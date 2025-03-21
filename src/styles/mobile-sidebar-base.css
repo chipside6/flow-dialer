@@ -22,4 +22,10 @@
   .SheetContent-root {
     position: fixed !important;
   }
+  
+  /* Style the sidebar header to match the purple design */
+  [data-sidebar="header"].bg-\[\#9b87f5\] {
+    background-color: #9b87f5 !important;
+    color: white !important;
+  }
 }

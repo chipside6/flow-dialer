@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Sidebar, SidebarContent, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 import { 
@@ -50,7 +49,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="bg-primary text-white">
+      <SidebarHeader className="bg-[#9b87f5] text-white">
         <div className="flex items-center p-4 justify-between">
           <div className="flex items-center">
             <Home size={18} className="mr-2" />
