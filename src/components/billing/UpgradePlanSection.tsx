@@ -86,24 +86,25 @@ export const UpgradePlanSection = () => {
             </div>
             
             <div className="mt-auto">
-              <Button 
-                className="w-full"
-                onClick={() => handleUpgrade(plan)}
-                disabled={isLoading || processingPlan === plan.id || currentPlan === plan.id}
-              >
-                {processingPlan === plan.id ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : currentPlan === plan.id ? (
-                  "Current Plan"
-                ) : plan.id === "free" && currentPlan ? (
-                  "Current Plan"
-                ) : (
-                  "Upgrade Now"
-                )}
-              </Button>
+              {/* Don't show button for free plan */}
+              {plan.id !== "free" && (
+                <Button 
+                  className="w-full"
+                  onClick={() => handleUpgrade(plan)}
+                  disabled={isLoading || processingPlan === plan.id || currentPlan === plan.id}
+                >
+                  {processingPlan === plan.id ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : currentPlan === plan.id ? (
+                    "Current Plan"
+                  ) : (
+                    "Upgrade Now"
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         ))}
