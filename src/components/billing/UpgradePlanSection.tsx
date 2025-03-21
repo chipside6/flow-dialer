@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -130,7 +131,7 @@ export const UpgradePlanSection = () => {
                   {plan.name}
                 </h3>
                 <div className="mb-4">
-                  <span className="text-7xl font-bold">${plan.price}</span>
+                  <span className="text-8xl font-bold">${plan.price}</span>
                   <span className="text-muted-foreground ml-2">one-time</span>
                 </div>
                 <p className="text-muted-foreground">{plan.description}</p>
