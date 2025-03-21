@@ -62,10 +62,7 @@ export const DashboardContent = () => {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-blue-800">
-                      Regular Account
-                    </h3>
-                    <div className="mt-2 text-sm text-blue-700">
+                    <div className="text-sm text-blue-700">
                       <p>You have a regular account. <Link to="/billing" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link>.</p>
                     </div>
                   </div>
