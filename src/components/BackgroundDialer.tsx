@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Loader2 } from "lucide-react";
 import DialerForm from "./background-dialer/DialerForm";
 import DialerStatusDisplay from "./background-dialer/DialerStatusDisplay";
-import { useBackgroundDialer } from "./background-dialer/useBackgroundDialer";
+import { useBackgroundDialer } from "@/hooks/background-dialer/useBackgroundDialer";
 
 interface BackgroundDialerProps {
   campaignId: string;

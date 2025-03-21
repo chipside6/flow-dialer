@@ -1,49 +1,90 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DialStatus, DialerFormData } from "@/components/background-dialer/types";
 import { asteriskService } from "@/utils/asteriskService";
-import { 
-  createDialerError, 
-  DialerErrorType, 
-  handleDialerError, 
-  tryCatchWithErrorHandling 
-} from "@/utils/errorHandlingUtils";
+import { toast } from "@/components/ui/use-toast";
+import { usePollingInterval } from "@/hooks/usePollingInterval";
 
 export const useDialerActions = (
   formData: DialerFormData,
-  setDialStatus: React.Dispatch<React.SetStateAction<DialStatus>>
+  campaignId: string
 ) => {
   const [isDialing, setIsDialing] = useState<boolean>(false);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [dialStatus, setDialStatus] = useState<DialStatus>({
+    status: 'idle',
+    totalCalls: 0,
+    completedCalls: 0,
+    answeredCalls: 0,
+    failedCalls: 0
+  });
+  
+  // Poll for status updates when a job is running
+  usePollingInterval(
+    async () => {
+      if (!currentJobId) return;
+      
+      try {
+        const status = await asteriskService.getDialingStatus(currentJobId);
+        
+        setDialStatus({
+          ...status,
+          status: status.status === 'running' ? 'running' : 
+                  status.status === 'completed' ? 'completed' : 
+                  status.status === 'failed' ? 'failed' : 'stopped'
+        });
+        
+        if (status.status === 'completed' || status.status === 'failed') {
+          setIsDialing(false);
+          
+          if (status.status === 'completed') {
+            toast({
+              title: "Dialing Complete",
+              description: `Successfully completed dialing campaign with ${status.answeredCalls} answered calls.`,
+            });
+          } else {
+            toast({
+              title: "Dialing Failed",
+              description: "There was an issue with the dialing operation.",
+              variant: "destructive",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error polling for status:", error);
+        toast({
+          title: "Status Update Failed",
+          description: "Could not get the latest dialing status.",
+          variant: "destructive",
+        });
+      }
+    },
+    {
+      enabled: Boolean(currentJobId && isDialing),
+      interval: 3000,
+    }
+  );
   
   const startDialing = async (campaignId: string) => {
     if (!formData.sipProviderId || !formData.contactListId) {
-      handleDialerError(createDialerError(
-        DialerErrorType.CONFIGURATION,
-        "Please select a SIP provider and contact list before starting.",
-        null
-      ));
+      toast({
+        title: "Incomplete Configuration",
+        description: "Please select a SIP provider and contact list before starting.",
+        variant: "destructive",
+      });
       return;
     }
     
-    const response = await tryCatchWithErrorHandling(
-      async () => {
-        const result = await asteriskService.startDialing({
-          contactListId: formData.contactListId,
-          campaignId,
-          transferNumber: formData.transferNumber,
-          sipProviderId: formData.sipProviderId,
-          greetingFile: formData.greetingFile,
-          maxConcurrentCalls: formData.maxConcurrentCalls ? parseInt(formData.maxConcurrentCalls) : undefined
-        });
-        
-        return result;
-      },
-      "There was an error starting the dialing process.",
-      DialerErrorType.SERVER
-    );
+    try {
+      const response = await asteriskService.startDialing({
+        contactListId: formData.contactListId,
+        campaignId,
+        transferNumber: formData.transferNumber,
+        sipProviderId: formData.sipProviderId,
+        greetingFile: formData.greetingFile,
+        maxConcurrentCalls: formData.maxConcurrentCalls ? parseInt(formData.maxConcurrentCalls) : undefined
+      });
       
-    if (response) {
       setCurrentJobId(response.jobId);
       setIsDialing(true);
       setDialStatus({
@@ -54,44 +95,49 @@ export const useDialerActions = (
         failedCalls: 0
       });
       
-      handleDialerError(createDialerError(
-        DialerErrorType.UNKNOWN,
-        "The system is now dialing your contact list in the background.",
-        null
-      ));
+      toast({
+        title: "Dialing Started",
+        description: "The system is now dialing your contact list in the background.",
+      });
+    } catch (error) {
+      console.error("Error starting dialing:", error);
+      toast({
+        title: "Failed to Start Dialing",
+        description: "There was an error starting the dialing process.",
+        variant: "destructive",
+      });
     }
   };
   
   const stopDialing = async () => {
     if (!currentJobId) return;
     
-    const success = await tryCatchWithErrorHandling(
-      async () => {
-        await asteriskService.stopDialing(currentJobId);
-        return true;
-      },
-      "There was an error stopping the dialing process.",
-      DialerErrorType.SERVER
-    );
-    
-    if (success) {
+    try {
+      await asteriskService.stopDialing(currentJobId);
       setIsDialing(false);
-      setDialStatus(prev => ({
-        ...prev,
+      setDialStatus({
+        ...dialStatus,
         status: 'stopped'
-      }));
+      });
       
-      handleDialerError(createDialerError(
-        DialerErrorType.UNKNOWN,
-        "The dialing operation has been stopped.",
-        null
-      ));
+      toast({
+        title: "Dialing Stopped",
+        description: "The dialing operation has been stopped.",
+      });
+    } catch (error) {
+      console.error("Error stopping dialing:", error);
+      toast({
+        title: "Failed to Stop Dialing",
+        description: "There was an error stopping the dialing process.",
+        variant: "destructive",
+      });
     }
   };
   
   return {
     isDialing,
     currentJobId,
+    dialStatus,
     startDialing,
     stopDialing
   };
