@@ -98,6 +98,20 @@
     white-space: nowrap;
     overflow: hidden;
   }
+
+  /* Improve spacing between icon and text in buttons */
+  button svg + span,
+  button span + svg {
+    margin-left: 6px;
+  }
+
+  button svg:first-child:not(:only-child) {
+    margin-right: 0;
+  }
+
+  button span:first-child:not(:only-child) {
+    margin-left: 0;
+  }
 }
 
 /* Dashboard specific mobile improvements */

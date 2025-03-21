@@ -30,9 +30,8 @@ export const CampaignTable: React.FC = () => {
                   Create your first campaign to start making calls
                 </p>
                 <Link to="/campaign">
-                  <Button variant="success" className="gap-2.5 px-4 py-2.5 h-auto rounded-md">
-                    <PlusCircle className="h-4 w-4" />
-                    Create Campaign
+                  <Button variant="success" className="gap-2 px-4 py-2.5 h-auto rounded-md">
+                    <PlusCircle className="h-4 w-4" /> <span>Create Campaign</span>
                   </Button>
                 </Link>
               </div>

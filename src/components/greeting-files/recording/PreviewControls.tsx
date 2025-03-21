@@ -23,7 +23,7 @@ export const PreviewControls = ({
         onClick={togglePreview}
         variant="secondary"
       >
-        {isPreviewPlaying ? 'Pause' : 'Play'} Preview
+        <span>{isPreviewPlaying ? 'Pause' : 'Play'} Preview</span>
       </Button>
       <Button 
         onClick={handleUpload}
@@ -31,13 +31,11 @@ export const PreviewControls = ({
       >
         {isUploading ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            Uploading...
+            <Loader2 className="h-4 w-4 animate-spin" /> <span>Uploading...</span>
           </>
         ) : (
           <>
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Recording
+            <Upload className="h-4 w-4" /> <span>Upload Recording</span>
           </>
         )}
       </Button>
@@ -45,7 +43,7 @@ export const PreviewControls = ({
         onClick={cancelRecording}
         variant="ghost"
       >
-        Discard
+        <span>Discard</span>
       </Button>
     </div>
   );

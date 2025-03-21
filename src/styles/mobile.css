@@ -38,4 +38,14 @@
     max-width: 100%;
     overflow: hidden;
   }
+
+  /* Fix button icon spacing */
+  button svg {
+    flex-shrink: 0;
+  }
+
+  /* Adjust spacing between icon and text */
+  .inline-flex.items-center.gap-2 {
+    gap: 8px !important;
+  }
 }

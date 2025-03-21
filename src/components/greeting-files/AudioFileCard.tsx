@@ -59,13 +59,11 @@ export const AudioFileCard = ({
           >
             {isActiveAudio && isPlaying ? (
               <>
-                <Pause className="h-4 w-4 mr-2" />
-                Pause
+                <Pause className="h-4 w-4" /> <span>Pause</span>
               </>
             ) : (
               <>
-                <Play className="h-4 w-4 mr-2" />
-                Play
+                <Play className="h-4 w-4" /> <span>Play</span>
               </>
             )}
           </Button>

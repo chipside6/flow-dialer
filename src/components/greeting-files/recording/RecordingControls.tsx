@@ -22,8 +22,7 @@ export const RecordingControls = ({
           onClick={startRecording}
           className="bg-red-600 hover:bg-red-700"
         >
-          <Mic className="h-4 w-4 mr-2" />
-          Start Recording
+          <Mic className="h-4 w-4" /> <span>Start Recording</span>
         </Button>
       </div>
     );
@@ -35,14 +34,13 @@ export const RecordingControls = ({
         onClick={stopRecording}
         variant="outline"
       >
-        <Square className="h-4 w-4 mr-2" />
-        Stop Recording
+        <Square className="h-4 w-4" /> <span>Stop Recording</span>
       </Button>
       <Button 
         onClick={cancelRecording}
         variant="ghost"
       >
-        Cancel
+        <span>Cancel</span>
       </Button>
     </div>
   );
