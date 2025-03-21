@@ -9,6 +9,7 @@ export interface UserProfile {
   is_affiliate?: boolean;
   email?: string;
   company_name?: string | null;
+  subscription_plan?: string | null;
   created_at?: string;
   updated_at?: string;
 }

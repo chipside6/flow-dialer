@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   createBrowserRouter,
@@ -5,60 +6,48 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useAuth } from '@/contexts/auth';
-import PublicLayout from '@/components/layout/PublicLayout';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import LandingPage from '@/pages/LandingPage';
-import LoginPage from '@/pages/LoginPage';
-import SignUpPage from '@/pages/SignUpPage';
-import DashboardPage from '@/pages/DashboardPage';
-import CampaignPage from '@/pages/CampaignPage';
-import GreetingsPage from '@/pages/GreetingsPage';
-import ContactsPage from '@/pages/ContactsPage';
-import TransfersPage from '@/pages/TransfersPage';
-import SipProvidersPage from '@/pages/SipProvidersPage';
-import ProfilePage from '@/pages/ProfilePage';
-import AdminPanelPage from '@/pages/AdminPanelPage';
-import FeaturesPage from '@/pages/FeaturesPage';
-import PricingPage from '@/pages/PricingPage';
-import SupportPage from '@/pages/SupportPage';
-import NotFoundPage from '@/pages/NotFoundPage';
-import UnauthorizedPage from '@/pages/UnauthorizedPage';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import UpgradePage from './pages/UpgradePage';
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading, initialized } = useAuth();
-  
-  if (!initialized) {
-    return <div>Loading...</div>;
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
+// Pages that should be imported from the correct locations
+import Dashboard from '@/pages/Dashboard';
+import Campaign from '@/pages/Campaign';
+import Contacts from '@/pages/ContactsPage';
+import Greetings from '@/pages/GreetingFiles';
+import Transfers from '@/pages/TransferNumbers';
+import SipProviders from '@/pages/SipProviders';
+import Profile from '@/pages/Profile';
+import AdminPanel from '@/pages/AdminPanel';
+import LandingPage from '@/pages/Index';
+import LoginPage from '@/pages/Login';
+import SignUpPage from '@/pages/SignUp';
+import Features from '@/pages/Features';
+import Pricing from '@/pages/Pricing';
+import Support from '@/pages/Support';
+import NotFound from '@/pages/NotFound';
+import UnauthorizedPage from '@/pages/NotFound'; // Using NotFound as fallback for Unauthorized
+
+const PublicLayout = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <PublicLayout />,
+    element: <PublicLayout><LandingPage /></PublicLayout>,
     children: [
       {
-        path: "/",
-        element: <LandingPage />,
-      },
-      {
         path: "/features",
-        element: <FeaturesPage />,
+        element: <Features />,
       },
       {
         path: "/pricing",
-        element: <PricingPage />,
+        element: <Pricing />,
       },
       {
         path: "/support",
-        element: <SupportPage />,
+        element: <Support />,
       },
       {
         path: "/login",
@@ -74,54 +63,49 @@ const router = createBrowserRouter([
       },
       {
         path: "*",
-        element: <NotFoundPage />,
+        element: <NotFound />,
       },
     ],
   },
   {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: "/dashboard",
-        element: <DashboardLayout><DashboardPage /></DashboardLayout>,
-      },
-      {
-        path: "/campaign",
-        element: <DashboardLayout><CampaignPage /></DashboardLayout>,
-      },
-      {
-        path: "/campaigns",
-        element: <Navigate to="/campaign" replace />,
-      },
-      {
-        path: "/greetings",
-        element: <DashboardLayout><GreetingsPage /></DashboardLayout>,
-      },
-      {
-        path: "/contacts",
-        element: <DashboardLayout><ContactsPage /></DashboardLayout>,
-      },
-      {
-        path: "/transfers",
-        element: <DashboardLayout><TransfersPage /></DashboardLayout>,
-      },
-      {
-        path: "/sip-providers",
-        element: <DashboardLayout><SipProvidersPage /></DashboardLayout>,
-      },
-      {
-        path: "/profile",
-        element: <DashboardLayout><ProfilePage /></DashboardLayout>,
-      },
-      {
-        path: "/admin",
-        element: <DashboardLayout><AdminPanelPage /></DashboardLayout>,
-      },
-      {
-        path: "/upgrade",
-        element: <DashboardLayout><UpgradePage /></DashboardLayout>,
-      },
-    ],
+    path: "/dashboard",
+    element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
+  },
+  {
+    path: "/campaign",
+    element: <ProtectedRoute><Campaign /></ProtectedRoute>,
+  },
+  {
+    path: "/campaigns",
+    element: <Navigate to="/campaign" replace />,
+  },
+  {
+    path: "/greetings",
+    element: <ProtectedRoute><Greetings /></ProtectedRoute>,
+  },
+  {
+    path: "/contacts",
+    element: <ProtectedRoute><Contacts /></ProtectedRoute>,
+  },
+  {
+    path: "/transfers",
+    element: <ProtectedRoute><Transfers /></ProtectedRoute>,
+  },
+  {
+    path: "/sip-providers",
+    element: <ProtectedRoute><SipProviders /></ProtectedRoute>,
+  },
+  {
+    path: "/profile",
+    element: <ProtectedRoute><Profile /></ProtectedRoute>,
+  },
+  {
+    path: "/admin",
+    element: <ProtectedRoute><AdminPanel /></ProtectedRoute>,
+  },
+  {
+    path: "/upgrade",
+    element: <ProtectedRoute><UpgradePage /></ProtectedRoute>,
   },
 ]);
 
