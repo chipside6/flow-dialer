@@ -26,10 +26,12 @@ const SipProviders = () => {
   const isMobile = useIsMobile();
   
   useEffect(() => {
-    console.log("SipProviders render - loading:", isLoading, "providers:", providers);
+    console.log("SipProviders component - loading:", isLoading, "providers:", providers?.length);
   }, [isLoading, providers]);
   
   const renderContent = () => {
+    console.log("Rendering content - isLoading:", isLoading, "error:", !!error, "providers:", providers?.length);
+    
     if (error) {
       return (
         <Alert variant="destructive" className="mb-6">

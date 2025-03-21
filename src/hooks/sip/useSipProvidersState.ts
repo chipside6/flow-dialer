@@ -9,12 +9,16 @@ import { useAuth } from "@/contexts/auth";
 export const useSipProvidersState = (): SipProviderState => {
   const [providers, setProviders] = useState<SipProvider[]>([]);
   const [editingProvider, setEditingProvider] = useState<SipProvider | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);  // Initialize as false, not true
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
   const mounted = useRef(true);
 
   useEffect(() => {
+    // Clear the state when the component mounts to avoid stale data
+    setProviders([]);
+    setError(null);
+    
     console.log("useSipProvidersState effect running, user:", !!user);
     mounted.current = true;
     
@@ -22,15 +26,14 @@ export const useSipProvidersState = (): SipProviderState => {
       if (!mounted.current) return;
       
       try {
+        // Set loading to true before fetching
         setIsLoading(true);
         setError(null);
         
         if (!user) {
           console.log("No user, clearing providers");
-          if (mounted.current) {
-            setProviders([]);
-            setIsLoading(false);
-          }
+          setProviders([]);
+          setIsLoading(false);
           return;
         }
         
@@ -38,9 +41,10 @@ export const useSipProvidersState = (): SipProviderState => {
         const data = await fetchSipProviders(user.id);
         console.log("Raw data from API:", data);
         
+        // Guard against component unmounting during fetch
         if (!mounted.current) return;
         
-        // If no data was returned, set an empty array (this is a valid state)
+        // Process the data
         if (!data || data.length === 0) {
           console.log("No providers found, setting empty array");
           setProviders([]);
@@ -49,10 +53,13 @@ export const useSipProvidersState = (): SipProviderState => {
           console.log("Transformed providers:", transformedData);
           setProviders(transformedData);
         }
+        
+        // Clear any existing errors
+        setError(null);
       } catch (err: any) {
         console.error("Error fetching SIP providers:", err);
         if (mounted.current) {
-          setError(err);
+          setError(err instanceof Error ? err : new Error(err.message || "Unknown error"));
           toast({
             title: "Error loading providers",
             description: err.message || "Failed to load SIP providers",
@@ -60,20 +67,34 @@ export const useSipProvidersState = (): SipProviderState => {
           });
         }
       } finally {
-        // Always set loading to false when done if component is still mounted
+        // Always set loading to false if component is still mounted
         if (mounted.current) {
+          console.log("Setting isLoading to false");
           setIsLoading(false);
         }
       }
     };
 
-    loadProviders();
+    // Only load if user is available
+    if (user) {
+      loadProviders();
+    } else {
+      // Clear loading state if no user
+      setIsLoading(false);
+    }
 
     return () => {
       console.log("Cleanup effect in useSipProvidersState");
       mounted.current = false;
     };
   }, [user]);
+
+  // Additional debug log to help diagnose issues
+  console.log("useSipProvidersState current state:", { 
+    isLoading, 
+    providersCount: providers.length, 
+    hasError: !!error 
+  });
 
   return {
     providers,
