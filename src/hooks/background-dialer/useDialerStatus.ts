@@ -1,0 +1,64 @@
+
+import { useState, useEffect } from "react";
+import { DialStatus } from "@/components/background-dialer/types";
+import { toast } from "@/components/ui/use-toast";
+import { asteriskService } from "@/utils/asteriskService";
+
+export const useDialerStatus = (currentJobId: string | null, isDialing: boolean) => {
+  const [dialStatus, setDialStatus] = useState<DialStatus>({
+    status: 'idle',
+    totalCalls: 0,
+    completedCalls: 0,
+    answeredCalls: 0,
+    failedCalls: 0
+  });
+  
+  // Poll for status updates when a job is running
+  useEffect(() => {
+    let intervalId: number | undefined;
+    
+    if (currentJobId && isDialing) {
+      intervalId = window.setInterval(async () => {
+        try {
+          const status = await asteriskService.getDialingStatus(currentJobId);
+          
+          setDialStatus({
+            ...status,
+            status: status.status === 'running' ? 'running' : 
+                  status.status === 'completed' ? 'completed' : 
+                  status.status === 'failed' ? 'failed' : 'stopped'
+          });
+          
+          if (status.status === 'completed' || status.status === 'failed') {
+            // Let the parent hook know to stop dialing if needed
+            if (status.status === 'completed') {
+              toast({
+                title: "Dialing Complete",
+                description: `Successfully completed dialing campaign with ${status.answeredCalls} answered calls.`,
+              });
+            } else {
+              toast({
+                title: "Dialing Failed",
+                description: "There was an issue with the dialing operation.",
+                variant: "destructive",
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error polling for status:", error);
+          toast({
+            title: "Status Update Failed",
+            description: "Could not get the latest dialing status.",
+            variant: "destructive",
+          });
+        }
+      }, 3000);
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [currentJobId, isDialing]);
+  
+  return { dialStatus, setDialStatus };
+};

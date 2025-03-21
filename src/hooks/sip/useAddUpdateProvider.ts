@@ -5,6 +5,8 @@ import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
 
+type ProviderInput = Omit<SipProvider, "id" | "dateAdded" | "isActive">;
+
 export const useAddUpdateProvider = (
   providers: SipProvider[],
   setProviders: React.Dispatch<React.SetStateAction<SipProvider[]>>,
@@ -12,85 +14,84 @@ export const useAddUpdateProvider = (
 ) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
-
-  const handleAddProvider = async (providerData: Omit<SipProvider, 'id' | 'dateAdded' | 'isActive'>) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "You must be logged in to add a provider",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  
+  const handleAddProvider = async (provider: ProviderInput) => {
     try {
       setIsSubmitting(true);
       
-      // Check if we're editing an existing provider
-      const existingProvider = providers.find(p => p.id === providerData.id);
+      if (!user) {
+        throw new Error("You must be logged in to add a provider");
+      }
       
-      if (existingProvider) {
+      // Check if we're updating (if provider has an id) or adding new
+      const isUpdating = 'id' in provider && provider.id;
+      
+      if (isUpdating) {
         // Update existing provider
         const { error } = await supabase
           .from('sip_providers')
           .update({
-            name: providerData.name,
-            host: providerData.host,
-            port: parseInt(providerData.port),
-            username: providerData.username,
-            password: providerData.password,
-            description: providerData.description
+            name: provider.name,
+            host: provider.host,
+            port: parseInt(provider.port),
+            username: provider.username,
+            password: provider.password,
+            description: provider.description
           })
-          .eq('id', existingProvider.id);
+          .eq('id', (provider as SipProvider).id);
 
         if (error) throw error;
 
         // Update local state
-        setProviders(providers.map(provider => 
-          provider.id === existingProvider.id 
-            ? {
-                ...provider,
-                ...providerData,
-              }
-            : provider
+        setProviders(providers.map(p => 
+          p.id === (provider as SipProvider).id ? { ...p, ...provider } : p
         ));
         
         toast({
           title: "Provider updated",
-          description: `${providerData.name} has been updated successfully`,
+          description: `${provider.name} has been updated successfully`,
         });
       } else {
         // Add new provider
         const { data, error } = await supabase
           .from('sip_providers')
           .insert({
-            name: providerData.name,
-            host: providerData.host,
-            port: parseInt(providerData.port),
-            username: providerData.username,
-            password: providerData.password,
-            description: providerData.description,
-            active: true,
-            user_id: user.id
+            name: provider.name,
+            host: provider.host,
+            port: parseInt(provider.port),
+            username: provider.username,
+            password: provider.password,
+            description: provider.description,
+            user_id: user.id,
+            active: true
           })
-          .select();
+          .select('*')
+          .single();
 
         if (error) throw error;
 
         const newProvider: SipProvider = {
-          id: data[0].id,
-          ...providerData,
-          dateAdded: new Date(),
-          isActive: true
+          id: data.id,
+          name: data.name,
+          host: data.host,
+          port: data.port.toString(),
+          username: data.username,
+          password: data.password,
+          description: data.description || "",
+          dateAdded: new Date(data.created_at),
+          isActive: data.active
         };
         
         setProviders([...providers, newProvider]);
         
         toast({
           title: "Provider added",
-          description: `${providerData.name} has been added successfully`,
+          description: `${provider.name} has been added successfully`,
         });
       }
+      
+      // Clear editing state
+      setEditingProvider(null);
     } catch (err: any) {
       console.error("Error saving SIP provider:", err);
       toast({
@@ -100,9 +101,8 @@ export const useAddUpdateProvider = (
       });
     } finally {
       setIsSubmitting(false);
-      setEditingProvider(null);
     }
   };
-
+  
   return { handleAddProvider, isSubmitting };
 };
