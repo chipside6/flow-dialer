@@ -1,0 +1,59 @@
+
+/* Mobile card and component styling */
+
+@media screen and (max-width: 768px) {
+  /* Improve card styling on mobile */
+  .bg-card {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  /* Better card spacing */
+  .bg-card {
+    padding: 16px !important;
+    margin-bottom: 16px;
+  }
+  
+  /* Fix card overflow */
+  .card {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Fix table overflow on mobile */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+  
+  /* Improve table display on small screens */
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Campaign page specific fixes */
+  .campaign-table-container {
+    max-width: calc(100vw - 32px);
+    overflow-x: auto;
+  }
+  
+  /* Ensure the buttons in admin header fit */
+  .rounded-md.border {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  /* Fix wizard footer content */
+  [role="dialog"] footer,
+  .card footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+  }
+}

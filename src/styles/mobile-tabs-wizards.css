@@ -1,0 +1,38 @@
+
+/* Mobile tabs and wizard styles */
+
+@media screen and (max-width: 768px) {
+  /* Fix wizard component styling */
+  [role="tablist"] {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  [role="tablist"]::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
+  
+  [role="tabpanel"] {
+    padding: 16px 12px;
+  }
+  
+  /* Fix for scrollable tabs on mobile */
+  .tab-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .tab-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+  
+  /* Campaigns wizard fixes */
+  .card {
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+}

@@ -5,6 +5,13 @@
 @import './mobile-menu.css';
 @import './responsive-layout.css';
 @import './sidebar-mobile.css';
+@import './mobile-buttons.css';
+@import './mobile-forms.css';
+@import './mobile-layout.css';
+@import './mobile-cards.css';
+@import './mobile-typography.css';
+@import './mobile-tabs-wizards.css';
+@import './mobile-navigation.css';
 
 /* Fix profile page layout specifically */
 @media (max-width: 768px) {
@@ -18,27 +25,6 @@
     padding: 0 8px;
   }
   
-  /* Fix input overflow on mobile */
-  input, select, textarea {
-    max-width: 100%;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  /* Prevent form overflow */
-  form {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-  
-  /* Fix card overflow */
-  .card {
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
-  }
-
   /* Fix button icon spacing */
   button svg {
     flex-shrink: 0;

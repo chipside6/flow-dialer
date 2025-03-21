@@ -1,0 +1,31 @@
+
+/* Mobile form element styles */
+
+@media screen and (max-width: 768px) {
+  /* Better spacing for forms on mobile */
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents iOS zoom */
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    max-width: 100%; /* Ensure inputs don't overflow */
+  }
+  
+  /* More spacing around forms */
+  form > div {
+    margin-bottom: 16px;
+  }
+  
+  /* Fix input overflow on mobile */
+  input, select, textarea {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Prevent form overflow */
+  form {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}

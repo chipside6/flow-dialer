@@ -1,0 +1,15 @@
+
+/* Mobile typography styles */
+
+@media screen and (max-width: 768px) {
+  /* Improve readability of headings */
+  h1 {
+    font-size: 24px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  h2 {
+    font-size: 20px !important;
+    margin-bottom: 12px !important;
+  }
+}

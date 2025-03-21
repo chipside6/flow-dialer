@@ -1,0 +1,25 @@
+
+/* Mobile navigation styles */
+
+@media screen and (max-width: 768px) {
+  /* Dashboard nav items */
+  .sidebar-content button {
+    margin-bottom: 4px;
+  }
+  
+  /* Fix max-width for content areas */
+  .max-w-6xl {
+    max-width: 100% !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Fix for main content container */
+  .max-w-6xl.mx-auto.w-full {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    padding: 0 8px !important;
+  }
+}
