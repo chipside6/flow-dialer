@@ -18,4 +18,14 @@
     z-index: 59 !important;
     background-color: rgba(0, 0, 0, 0.4) !important;
   }
+  
+  /* Hide any duplicate headers when sidebar is open */
+  body.mobile-menu-open .navbar-dashboard {
+    display: none !important;
+  }
+  
+  /* Ensure the mobile sidebar button doesn't show when sidebar is open */
+  body.mobile-menu-open .mobile-sidebar-button {
+    display: none !important;
+  }
 }

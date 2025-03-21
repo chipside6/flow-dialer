@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Phone } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardNavbar } from './navbar/DashboardNavbar';
@@ -20,8 +19,9 @@ export const Navbar = () => {
                       location.pathname.includes('/transfers') ||
                       location.pathname.includes('/sip-providers') ||
                       location.pathname.includes('/admin') ||
-                      location.pathname.includes('/profile');
-
+                      location.pathname.includes('/profile') ||
+                      location.pathname.includes('/billing'); // Add billing path
+  
   // Only use the sidebar hook when in dashboard mode
   const sidebar = isDashboard ? useSidebar() : { toggleSidebar: () => {}, openMobile: false, setOpenMobile: () => {} };
   const { toggleSidebar, openMobile, setOpenMobile } = sidebar;
@@ -66,8 +66,13 @@ export const Navbar = () => {
     };
   }, [isDashboard, openMobile]);
 
+  // For dashboard routes, only render DashboardNavbar if we're not on mobile
+  // This prevents duplicate headers when the sidebar with its own header is open
   if (isDashboard) {
-    // Use the existing DashboardNavbar which already handles the sidebar
+    // For dashboard routes, don't show navbar on mobile as the sidebar has its own header
+    if (isMobile) {
+      return null; // Don't render the navbar on mobile for dashboard routes
+    }
     return <DashboardNavbar toggleSidebar={toggleSidebar} />;
   }
 

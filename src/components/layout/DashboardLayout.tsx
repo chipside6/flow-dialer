@@ -29,9 +29,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   
   return (
     <div className="flex flex-1 w-full overflow-x-hidden">
-      {/* Mobile menu button - always visible on mobile */}
-      {isMobile && <MobileSidebarButton onClick={toggleSidebar} />}
+      {/* Mobile menu button - only show when sidebar is not open */}
+      {isMobile && !openMobile && <MobileSidebarButton onClick={toggleSidebar} />}
       
+      {/* DashboardSidebar contains its own header on mobile */}
       <DashboardSidebar />
       <DashboardContent>
         {children}
