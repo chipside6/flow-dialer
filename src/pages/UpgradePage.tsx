@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Billing } from '../pages/Billing';
+import Billing from '../pages/Billing';
 
 const UpgradePage = () => {
   return <Billing />;

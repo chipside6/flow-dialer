@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ContactLists } from '../pages/ContactLists';
+import ContactLists from '../pages/ContactLists';
 
 const ContactsPage = () => {
   return <ContactLists />;

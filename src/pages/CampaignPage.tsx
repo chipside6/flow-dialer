@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Campaign } from '../pages/Campaign';
+import Campaign from '../pages/Campaign';
 
 const CampaignPage = () => {
   return <Campaign />;

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { GreetingFiles } from '../pages/GreetingFiles';
+import GreetingFiles from '../pages/GreetingFiles';
 
 const GreetingsPage = () => {
   return <GreetingFiles />;
