@@ -34,11 +34,14 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
       <CardContent>
         <div className="mb-6">
           {plan.price === 0 ? (
-            <span className="text-4xl font-bold">${plan.price}</span>
+            <>
+              <span className="text-4xl font-bold">${plan.price}</span>
+              <span className="text-sm text-muted-foreground ml-1">(500 calls/month)</span>
+            </>
           ) : (
             <span className="text-4xl font-bold">${plan.price}</span>
           )}
-          {/* Removed "/month" text for all plans */}
+          {/* Plans are lifetime except free which has monthly limit */}
         </div>
         
         <div className="space-y-4">
