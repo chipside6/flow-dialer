@@ -19,18 +19,21 @@ const LogoutButton = ({ variant = "outline", size = "default", className, onClic
   const handleLogout = async () => {
     try {
       console.log("LogoutButton - Initiating logout");
-      await signOut();
+      const result = await signOut();
       
       // Optional callback if provided
       if (onClick) onClick();
       
-      // Force redirect to home page
-      navigate("/");
-      
-      toast({
-        title: "Logged out successfully",
-        description: "You have been signed out of your account",
-      });
+      // Only navigate if we don't have an error
+      if (!result?.error) {
+        // Force redirect to home page
+        navigate("/");
+        
+        toast({
+          title: "Logged out successfully",
+          description: "You have been signed out of your account",
+        });
+      }
     } catch (error: any) {
       console.error("LogoutButton - Error during logout:", error);
       toast({

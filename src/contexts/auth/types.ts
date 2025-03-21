@@ -24,7 +24,7 @@ export interface AuthContextType {
   sessionChecked: boolean;
   signUp: (email: string, password: string, metadata?: { full_name?: string }) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signOut: () => Promise<void>;
+  signOut: () => Promise<{ success: boolean; error: any } | void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<{ error: Error | null }>;
   setAsAffiliate: (userId: string) => Promise<void>;
 }
