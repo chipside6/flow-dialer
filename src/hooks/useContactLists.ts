@@ -29,6 +29,8 @@ export const useContactLists = () => {
 
       try {
         setIsLoading(true);
+        console.log("Fetching contact lists for user:", user.id);
+        
         const { data, error } = await supabase
           .from('contact_lists')
           .select(`
@@ -37,8 +39,13 @@ export const useContactLists = () => {
           `)
           .eq('user_id', user.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
 
+        console.log("Contact lists data from DB:", data);
+        
         // Transform data to match ContactList interface
         const transformedData = (data || []).map((list: any) => ({
           id: list.id,
@@ -49,6 +56,7 @@ export const useContactLists = () => {
           lastModified: new Date(list.updated_at)
         }));
         
+        console.log("Transformed contact lists:", transformedData);
         setLists(transformedData);
       } catch (err: any) {
         console.error("Error fetching contact lists:", err);
@@ -77,6 +85,8 @@ export const useContactLists = () => {
     }
 
     try {
+      console.log("Creating contact list:", data, "for user:", user.id);
+      
       const { data: newList, error } = await supabase
         .from('contact_lists')
         .insert({
@@ -87,8 +97,13 @@ export const useContactLists = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
 
+      console.log("New contact list created:", newList);
+      
       const formattedList: ContactList = {
         id: newList.id,
         name: newList.name,
@@ -98,7 +113,7 @@ export const useContactLists = () => {
         lastModified: new Date(newList.updated_at)
       };
 
-      setLists([...lists, formattedList]);
+      setLists(prevLists => [...prevLists, formattedList]);
       
       toast({
         title: "Contact list created",
@@ -118,19 +133,37 @@ export const useContactLists = () => {
   };
 
   const deleteContactList = async (id: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to delete a contact list",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
     try {
+      console.log("Deleting contact list:", id);
+      
       const { error } = await supabase
         .from('contact_lists')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
 
       setLists(lists.filter(list => list.id !== id));
+      
       toast({
         title: "Contact list deleted",
         description: "The contact list has been removed",
       });
+      
+      return true;
     } catch (err: any) {
       console.error("Error deleting contact list:", err);
       toast({
@@ -138,6 +171,7 @@ export const useContactLists = () => {
         description: err.message,
         variant: "destructive"
       });
+      return false;
     }
   };
 

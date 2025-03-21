@@ -33,11 +33,17 @@ const CreateContactListForm: React.FC<CreateContactListFormProps> = ({ onListCre
   const { isSubmitting } = form.formState;
 
   const onSubmit = async (data: FormValues) => {
-    await onListCreated({
+    console.log("Form submitted:", data);
+    
+    const result = await onListCreated({
       name: data.name,
       description: data.description || ""
     });
-    form.reset();
+    
+    if (result) {
+      console.log("Contact list created successfully:", result);
+      form.reset();
+    }
   };
 
   return (

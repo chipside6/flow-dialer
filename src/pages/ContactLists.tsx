@@ -6,9 +6,14 @@ import ContactListsDisplay from "@/components/contact-lists/ContactListsDisplay"
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useContactLists } from "@/hooks/useContactLists";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/auth";
 
 const ContactLists = () => {
+  const { user } = useAuth();
   const { lists, isLoading, createContactList, deleteContactList } = useContactLists();
+  
+  console.log("Contact Lists page render - user:", user?.id);
+  console.log("Contact Lists page render - lists:", lists);
   
   return (
     <DashboardLayout>
