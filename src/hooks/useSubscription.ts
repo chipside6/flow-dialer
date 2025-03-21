@@ -14,12 +14,14 @@ export const useSubscription = () => {
   const [callCount, setCallCount] = useState<number>(0);
   const [showLimitDialog, setShowLimitDialog] = useState(false);
 
-  // Fetch subscription data on component mount and when user changes
+  // Fetch subscription data when component mounts and when user changes
   useEffect(() => {
     if (user) {
+      console.log("User authenticated, fetching subscription data");
       fetchCurrentSubscription();
       fetchCallCount();
     } else {
+      console.log("No user authenticated, resetting subscription state");
       setIsLoading(false);
       setCurrentPlan(null);
       setSubscription(null);
@@ -62,6 +64,8 @@ export const useSubscription = () => {
     try {
       console.log("Fetching subscription for user:", user.id);
       setIsLoading(true);
+      
+      // Check for active subscription in the database
       const { data, error } = await supabase
         .from('subscriptions')
         .select('*')
@@ -72,9 +76,12 @@ export const useSubscription = () => {
       if (error) {
         if (error.code !== 'PGRST116') { // Not found error code
           console.error("Error fetching subscription:", error);
+        } else {
+          console.log("No active subscription found, setting to free plan");
         }
         setCurrentPlan('free');
         setSubscription(null);
+        setIsLoading(false);
         return null;
       }
       
@@ -82,17 +89,19 @@ export const useSubscription = () => {
         console.log("Found active subscription:", data);
         setCurrentPlan(data.plan_id);
         setSubscription(data);
+        setIsLoading(false);
         return data;
       }
       
+      console.log("No subscription data found, defaulting to free plan");
       setCurrentPlan('free');
       setSubscription(null);
+      setIsLoading(false);
       return null;
     } catch (error) {
       console.error("Error in fetchCurrentSubscription:", error);
-      return null;
-    } finally {
       setIsLoading(false);
+      return null;
     }
   };
 
@@ -118,6 +127,7 @@ export const useSubscription = () => {
           description: "The lifetime plan does not exist",
           variant: "destructive",
         });
+        setIsLoading(false);
         return { success: false };
       }
       
@@ -143,15 +153,15 @@ export const useSubscription = () => {
           description: "There was a problem upgrading to the lifetime plan. Please try again.",
           variant: "destructive",
         });
+        setIsLoading(false);
         return { success: false };
       }
       
-      console.log("Lifetime plan activated successfully:", data);
+      console.log("Lifetime plan activated successfully");
       setCurrentPlan("lifetime");
       
-      // Fetch the subscription again to get the full data
+      // Fetch the updated subscription
       const updatedSubscription = await fetchCurrentSubscription();
-      setSubscription(updatedSubscription);
       
       return { success: true, plan: lifetimePlan };
     } catch (error) {
@@ -161,9 +171,8 @@ export const useSubscription = () => {
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-      return { success: false };
-    } finally {
       setIsLoading(false);
+      return { success: false };
     }
   };
 

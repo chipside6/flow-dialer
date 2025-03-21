@@ -17,7 +17,7 @@ const UpgradePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showPaymentForm, setShowPaymentForm] = React.useState(false);
-  const { activateLifetimePlan } = useSubscription();
+  const { activateLifetimePlan, fetchCurrentSubscription } = useSubscription();
   
   // Get only the lifetime plan
   const lifetimePlan = pricingPlans.find(plan => plan.isLifetime);
@@ -25,6 +25,18 @@ const UpgradePage = () => {
   if (!lifetimePlan) {
     return <div>Plan not found</div>;
   }
+  
+  // Check if user is authenticated on component mount
+  React.useEffect(() => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to upgrade your plan",
+        variant: "destructive",
+      });
+      navigate("/login");
+    }
+  }, [user, navigate, toast]);
   
   const handleSelectPlan = () => {
     setShowPaymentForm(true);
@@ -58,6 +70,9 @@ const UpgradePage = () => {
       const result = await activateLifetimePlan();
       
       if (result.success) {
+        // Refresh subscription data after successful activation
+        await fetchCurrentSubscription();
+        
         toast({
           title: "Lifetime Access Activated",
           description: `You now have lifetime access to all features!`,
