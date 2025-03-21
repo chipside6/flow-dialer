@@ -4,6 +4,7 @@ import { SipProviderForm } from "@/components/sip/SipProviderForm";
 import { SipProviderTable } from "@/components/sip/SipProviderTable";
 import { useSipProviders } from "@/hooks/useSipProviders";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SipProviders = () => {
   const {
@@ -16,11 +17,13 @@ const SipProviders = () => {
     toggleProviderStatus
   } = useSipProviders();
   
+  const isMobile = useIsMobile();
+  
   return (
     <DashboardLayout>
       <div className="container-fluid">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">SIP Providers</h1>
+          <h1 className={`text-3xl font-bold ${isMobile ? 'pl-2' : ''}`}>SIP Providers</h1>
         </div>
         
         <SipProviderForm 

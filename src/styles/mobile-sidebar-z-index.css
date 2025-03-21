@@ -48,4 +48,14 @@
   button span, .button span {
     white-space: nowrap;
   }
+  
+  /* Additional margin for page headings to avoid mobile menu button overlap */
+  .container-fluid h1 {
+    margin-left: 8px;
+  }
+  
+  /* Fix SIP provider card headers */
+  .card .flex.items-center {
+    padding-left: 8px;
+  }
 }
