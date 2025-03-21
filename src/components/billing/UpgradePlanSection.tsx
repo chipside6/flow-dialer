@@ -27,11 +27,14 @@ export const UpgradePlanSection = () => {
   const callUsagePercentage = Math.min(100, ((callCount || 0) / maxFreeCalls) * 100);
 
   const handleUpgrade = async (plan: PricingPlan) => {
+    console.log("Upgrade button clicked for plan:", plan.id);
     setProcessingPlan(plan.id);
     
     try {
       // Call the subscription service to activate the lifetime plan
+      console.log("Attempting to activate lifetime plan");
       const result = await activateLifetimePlan();
+      console.log("Activation result:", result);
       
       if (result.success) {
         toast({
@@ -121,7 +124,7 @@ export const UpgradePlanSection = () => {
                   <Button 
                     className="w-full py-6 text-base"
                     onClick={() => handleUpgrade(plan)}
-                    disabled={isLoading || processingPlan === plan.id || currentPlan === plan.id}
+                    type="button"
                   >
                     {processingPlan === plan.id ? (
                       <>
