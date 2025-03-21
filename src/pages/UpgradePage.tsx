@@ -11,7 +11,7 @@ export default function UpgradePage() {
   
   return (
     <div className="container max-w-5xl py-8 space-y-8">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 justify-start w-full">
         <Button
           variant="ghost"
           size="icon"
@@ -23,13 +23,13 @@ export default function UpgradePage() {
             <span className="sr-only">Back to Dashboard</span>
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight truncate">Upgrade Your Account</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-left">Upgrade Your Account</h1>
       </div>
       
       <div className="space-y-6">
         <div className="rounded-lg border bg-card p-6 shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Current Plan: {profile?.subscription_plan || 'Free'}</h2>
-          <p className="text-muted-foreground mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-left">Current Plan: {profile?.subscription_plan || 'Free'}</h2>
+          <p className="text-muted-foreground mb-6 text-left">
             Upgrade to our Lifetime plan to unlock all features and benefits with no recurring costs.
           </p>
           
