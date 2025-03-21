@@ -43,11 +43,11 @@ export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-background rounded-full shadow-lg w-10 h-10 flex items-center justify-center mobile-sidebar-button border border-gray-200" 
+        className="bg-background rounded-full shadow-lg w-12 h-12 flex items-center justify-center mobile-sidebar-button border border-gray-200" 
         onClick={handleClick}
         aria-label="Open sidebar"
       >
-        <Menu size={20} />
+        <Menu size={24} />
       </Button>
     </div>
   );
