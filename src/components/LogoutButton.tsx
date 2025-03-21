@@ -24,9 +24,12 @@ const LogoutButton = ({ variant = "outline", size = "default", className, onClic
       // Optional callback if provided
       if (onClick) onClick();
       
-      // Only navigate if we don't have an error
-      if (!result?.error) {
-        // Force redirect to home page
+      // Check if result is defined and has an error property
+      if (result && 'error' in result && result.error) {
+        // If there's an error, we already show a toast in the useAuthOperations hook
+        console.error("LogoutButton - Error from signOut:", result.error);
+      } else {
+        // No error, proceed with navigation and success toast
         navigate("/");
         
         toast({
