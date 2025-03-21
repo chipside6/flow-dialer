@@ -24,7 +24,7 @@ export const DashboardContent = () => {
           </CardHeader>
           <CardContent>
             <p>
-              This is your dashboard. You can manage your account, view analytics, and more.
+              This is your dashboard. You can manage your campaign, view analytics, and more.
             </p>
           </CardContent>
         </Card>
