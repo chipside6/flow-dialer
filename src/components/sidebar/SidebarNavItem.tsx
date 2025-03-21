@@ -10,11 +10,9 @@ interface SidebarNavItemProps {
     icon: React.ReactNode;
   };
   onClick?: () => void;
-  className?: string;
-  highlightStyle?: boolean;
 }
 
-export const SidebarNavItem = ({ item, onClick, className, highlightStyle }: SidebarNavItemProps) => {
+export const SidebarNavItem = ({ item, onClick }: SidebarNavItemProps) => {
   const location = useLocation();
   const isActive = location.pathname === item.path;
   
@@ -24,8 +22,6 @@ export const SidebarNavItem = ({ item, onClick, className, highlightStyle }: Sid
       item={item} 
       isActive={isActive}
       onClick={onClick}
-      className={className}
-      highlightStyle={highlightStyle}
     />
   );
 };

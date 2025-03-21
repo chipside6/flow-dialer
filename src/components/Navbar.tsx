@@ -20,11 +20,11 @@ export const Navbar = () => {
                       location.pathname.includes('/sip-providers') ||
                       location.pathname.includes('/admin') ||
                       location.pathname.includes('/profile') ||
-                      location.pathname.includes('/billing');
+                      location.pathname.includes('/billing'); // Add billing path
   
-  // Use the sidebar hook directly, handling the case where sidebar might not be available
-  const sidebarContext = isDashboard ? useSidebar() : { toggleSidebar: () => {}, openMobile: false, setOpenMobile: () => {} };
-  const { toggleSidebar } = sidebarContext;
+  // Only use the sidebar hook when in dashboard mode
+  const sidebar = isDashboard ? useSidebar() : { toggleSidebar: () => {}, openMobile: false, setOpenMobile: () => {} };
+  const { toggleSidebar, openMobile, setOpenMobile } = sidebar;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,12 +53,25 @@ export const Navbar = () => {
     };
   }, [isMobileMenuOpen]);
 
+  // Make sure we handle the sidebar's openMobile state
+  useEffect(() => {
+    if (isDashboard && openMobile) {
+      document.body.classList.add('mobile-menu-open');
+    } else {
+      document.body.classList.remove('mobile-menu-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+    };
+  }, [isDashboard, openMobile]);
+
   // For dashboard routes, only render DashboardNavbar if we're not on mobile
   // This prevents duplicate headers when the sidebar with its own header is open
   if (isDashboard) {
     // For dashboard routes, don't show navbar on mobile as the sidebar has its own header
-    if (isMobile && sidebarContext.openMobile) {
-      return null; // Don't render the navbar on mobile for dashboard routes when sidebar is open
+    if (isMobile) {
+      return null; // Don't render the navbar on mobile for dashboard routes
     }
     return <DashboardNavbar toggleSidebar={toggleSidebar} />;
   }
