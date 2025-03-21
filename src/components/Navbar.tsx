@@ -19,7 +19,8 @@ export const Navbar = () => {
                       location.pathname.includes('/contacts') ||
                       location.pathname.includes('/transfers') ||
                       location.pathname.includes('/sip-providers') ||
-                      location.pathname.includes('/admin');
+                      location.pathname.includes('/admin') ||
+                      location.pathname.includes('/profile');
 
   // Only use the sidebar hook when in dashboard mode
   const sidebar = isDashboard ? useSidebar() : { toggleSidebar: () => {}, openMobile: false, setOpenMobile: () => {} };
@@ -66,6 +67,7 @@ export const Navbar = () => {
   }, [isDashboard, openMobile]);
 
   if (isDashboard) {
+    // Use the existing DashboardNavbar which already handles the sidebar
     return <DashboardNavbar toggleSidebar={toggleSidebar} />;
   }
 

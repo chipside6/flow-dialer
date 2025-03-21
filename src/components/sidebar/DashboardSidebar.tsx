@@ -54,16 +54,19 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
         <div className="flex items-center p-4 justify-between">
           <div className="flex items-center">
             <Phone size={18} className="mr-2" />
-            <span className="font-semibold text-lg">DialerApp</span>
+            <span className="font-semibold text-lg">Flow Dialer</span>
           </div>
           
-          {/* Close button for mobile - Only show one close button */}
+          {/* Only show close button for mobile */}
           {isMobile && (
             <Button 
               variant="ghost" 
               size="icon" 
               className="text-white hover:bg-primary/80" 
-              onClick={() => setOpenMobile(false)}
+              onClick={() => {
+                setOpenMobile(false);
+                if (onCloseMobile) onCloseMobile();
+              }}
             >
               <X size={20} />
             </Button>

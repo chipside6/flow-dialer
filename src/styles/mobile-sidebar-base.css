@@ -1,5 +1,4 @@
 
-
 /* Mobile sidebar base styles */
 
 @media (max-width: 768px) {
@@ -29,5 +28,9 @@
     background-color: #9b87f5 !important;
     color: white !important;
   }
+  
+  /* Ensure only one close button is displayed */
+  [data-sidebar="header"] .flex.items-center.p-4.justify-between button {
+    margin-left: auto !important;
+  }
 }
-
