@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuth } from "@/contexts/auth";
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
 import { LimitReachedDialog } from "@/components/LimitReachedDialog";
 import { useSubscription } from "@/hooks/useSubscription";
 
@@ -31,7 +32,7 @@ export const DashboardContent = () => {
         <Card>
           <CardHeader>
             <CardTitle>Account Status</CardTitle>
-            <CardDescription>View your subscription status</CardDescription>
+            <CardDescription>View your subscription status.</CardDescription>
           </CardHeader>
           <CardContent>
             {profile?.is_affiliate ? (

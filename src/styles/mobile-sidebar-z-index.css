@@ -18,14 +18,4 @@
     z-index: 59 !important;
     background-color: rgba(0, 0, 0, 0.4) !important;
   }
-  
-  /* Fix navbar z-index */
-  .navbar-dashboard {
-    z-index: 40 !important;
-  }
-  
-  /* Fix dropdown menus z-index to ensure they appear above the navbar */
-  .DropdownMenuContent-root {
-    z-index: 70 !important; 
-  }
 }
