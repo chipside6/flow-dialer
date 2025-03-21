@@ -9,15 +9,18 @@ import {
   BarChart3, 
   Home, 
   ShieldCheck,
-  User
+  User,
+  CreditCard
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { NavItem } from "@/components/navigation/NavItem";
 import { AffiliateStatus } from "@/components/navigation/AffiliateStatus";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export function DashboardNav() {
   const location = useLocation();
   const { profile } = useAuth();
+  const { currentPlan } = useSubscription();
   
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },
@@ -34,6 +37,15 @@ export function DashboardNav() {
     { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5" /> },
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
   ];
+  
+  // Show upgrade link for free users
+  if (currentPlan === 'free' || !currentPlan) {
+    navItems.push({
+      name: "Upgrade",
+      path: "/upgrade",
+      icon: <CreditCard className="h-5 w-5" />
+    });
+  }
   
   // Admin link for admin users
   const isAdmin = profile?.is_admin === true;

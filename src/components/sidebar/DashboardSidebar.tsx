@@ -11,11 +11,13 @@ import {
   Server, 
   ShieldCheck,
   X,
-  User
+  User,
+  CreditCard
 } from "lucide-react";
 import { SidebarNavItem } from "@/components/sidebar/SidebarNavItem";
 import LogoutButton from "@/components/LogoutButton";
 import { useAuth } from "@/contexts/auth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -25,6 +27,7 @@ interface DashboardSidebarProps {
 
 export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   const { profile } = useAuth();
+  const { currentPlan } = useSubscription();
   const { setOpenMobile } = useSidebar();
   const isMobile = useIsMobile();
   
@@ -44,6 +47,15 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5" /> },
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
   ];
+  
+  // Show upgrade link for free users
+  if (currentPlan === 'free' || !currentPlan) {
+    navItems.push({
+      name: "Upgrade",
+      path: "/upgrade",
+      icon: <CreditCard className="h-5 w-5" />
+    });
+  }
   
   return (
     <Sidebar collapsible="offcanvas">
