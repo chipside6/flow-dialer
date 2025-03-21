@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -108,8 +107,8 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
         result = { success: true };
       }
       
-      // Refresh the greeting files list
-      queryClient.invalidateQueries({ queryKey: ['greetingFiles'] });
+      // Refresh the greeting files list - specify the user ID in the query key
+      queryClient.invalidateQueries({ queryKey: ['greetingFiles', userId] });
       
       toast({
         title: 'File uploaded',
