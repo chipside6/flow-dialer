@@ -21,7 +21,13 @@ export function DashboardNav() {
   
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },
-    { name: "Campaigns", path: "/campaign", icon: <BarChart3 className="h-5 w-5" /> },
+    { 
+      name: "Campaigns", 
+      path: "/campaign", 
+      icon: <BarChart3 className="h-5 w-5" />,
+      // Handle both campaign and campaigns route paths
+      isActive: (pathname: string) => pathname === "/campaign" || pathname === "/campaigns"
+    },
     { name: "Greeting Files", path: "/greetings", icon: <AudioWaveform className="h-5 w-5" /> },
     { name: "Contact Lists", path: "/contacts", icon: <ContactIcon className="h-5 w-5" /> },
     { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
@@ -39,7 +45,7 @@ export function DashboardNav() {
           <NavItem 
             key={item.path} 
             item={item} 
-            isActive={location.pathname === item.path} 
+            isActive={item.isActive ? item.isActive(location.pathname) : location.pathname === item.path}
           />
         ))}
         

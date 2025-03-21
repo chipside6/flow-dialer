@@ -1,5 +1,5 @@
 
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
@@ -16,10 +16,14 @@ const NotFound = () => {
   const location = useLocation();
   const isDashboard = location.pathname.includes('/dashboard') || 
                       location.pathname.includes('/campaign') || 
+                      location.pathname.includes('/campaigns') || // Added campaigns (plural)
                       location.pathname.includes('/greetings') ||
                       location.pathname.includes('/contacts') ||
                       location.pathname.includes('/transfers') ||
-                      location.pathname.includes('/sip-providers');
+                      location.pathname.includes('/sip-providers') ||
+                      location.pathname.includes('/admin') ||
+                      location.pathname.includes('/profile') ||
+                      location.pathname.includes('/billing');
 
   useEffect(() => {
     console.error(
@@ -55,7 +59,7 @@ const NotFound = () => {
                   The page you're looking for doesn't exist or has been moved.
                 </p>
                 <Button asChild size="lg" className="rounded-full px-8">
-                  <a href="/dashboard">Return to Dashboard</a>
+                  <Link to="/dashboard">Return to Dashboard</Link>
                 </Button>
               </div>
             </div>
@@ -76,7 +80,7 @@ const NotFound = () => {
             The page you're looking for doesn't exist or has been moved.
           </p>
           <Button asChild size="lg" className="rounded-full px-8">
-            <a href="/">Return Home</a>
+            <Link to="/">Return Home</Link>
           </Button>
         </div>
       </div>

@@ -57,6 +57,15 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            {/* Add campaigns route (plural) as an alias to campaign */}
+            <Route 
+              path="/campaigns" 
+              element={
+                <ProtectedRoute>
+                  <Campaign />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/greetings" 
               element={
