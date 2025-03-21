@@ -15,33 +15,33 @@ export function useAddTransferNumber(
   const addTransferNumber = async (name: string, number: string, description: string) => {
     console.log("addTransferNumber hook called with:", { name, number, description });
     
-    // Clean input data first
-    const cleanName = name.trim();
-    const cleanNumber = number.trim();
-    const cleanDesc = description ? description.trim() : "";
-    
-    if (!user) {
-      console.log("No user authenticated, showing toast");
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to add transfer numbers",
-        variant: "destructive",
-      });
-      return null;
-    }
-    
-    if (!validateTransferNumberInput(cleanName, cleanNumber)) {
-      console.log("Input validation failed");
-      return null;
-    }
-    
-    // Prevent multiple submissions
-    if (setIsSubmitting) {
-      console.log("Setting isSubmitting to true");
-      setIsSubmitting(true);
-    }
-    
     try {
+      // Clean input data first
+      const cleanName = name.trim();
+      const cleanNumber = number.trim();
+      const cleanDesc = description ? description.trim() : "";
+      
+      if (!user) {
+        console.log("No user authenticated, showing toast");
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to add transfer numbers",
+          variant: "destructive",
+        });
+        return null;
+      }
+      
+      if (!validateTransferNumberInput(cleanName, cleanNumber)) {
+        console.log("Input validation failed");
+        return null;
+      }
+      
+      // Prevent multiple submissions
+      if (setIsSubmitting) {
+        console.log("Setting isSubmitting to true");
+        setIsSubmitting(true);
+      }
+      
       console.log("Adding transfer number for user:", user.id, {cleanName, cleanNumber, cleanDesc});
       
       const newTransferNumber = await addTransferNumberToDatabase(

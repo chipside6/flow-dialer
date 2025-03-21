@@ -66,16 +66,20 @@ export const addTransferNumberToDatabase = async (
     // Insert the transfer number into the database
     console.log(`[TransferNumberService] Executing insert query`);
     
+    const insertData = {
+      user_id: userId,
+      name: name,
+      phone_number: number,
+      description: description || null,
+      call_count: 0
+    };
+    
+    console.log(`[TransferNumberService] Insert data:`, insertData);
+    
     const startTime = Date.now();
     const { data, error } = await supabase
       .from('transfer_numbers')
-      .insert({
-        user_id: userId,
-        name: name,
-        phone_number: number,
-        description: description || null,
-        call_count: 0
-      })
+      .insert(insertData)
       .select();
     
     const queryTime = Date.now() - startTime;

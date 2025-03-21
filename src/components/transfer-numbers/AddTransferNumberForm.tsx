@@ -22,22 +22,6 @@ export const AddTransferNumberForm = ({
   const [localSubmitting, setLocalSubmitting] = useState(false);
   const isMobile = useIsMobile();
   
-  // Reset localSubmitting if it gets stuck
-  useEffect(() => {
-    let timer: number | undefined;
-    
-    if (localSubmitting) {
-      timer = window.setTimeout(() => {
-        console.log("Local submitting timeout reached, resetting state");
-        setLocalSubmitting(false);
-      }, 5000);
-    }
-    
-    return () => {
-      if (timer) window.clearTimeout(timer);
-    };
-  }, [localSubmitting]);
-  
   // Reset localSubmitting when parent isSubmitting changes
   useEffect(() => {
     if (!isSubmitting && localSubmitting) {
@@ -46,17 +30,15 @@ export const AddTransferNumberForm = ({
     }
   }, [isSubmitting, localSubmitting]);
   
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
-      console.log("Form submit event captured");
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form submit event captured and prevented default");
     
     const trimmedName = name.trim();
     const trimmedNumber = number.trim();
     const trimmedDescription = description.trim();
     
-    console.log("Form submitted with values:", { 
+    console.log("Form values prepared for submission:", { 
       name: trimmedName, 
       number: trimmedNumber, 
       description: trimmedDescription,
@@ -64,7 +46,7 @@ export const AddTransferNumberForm = ({
     });
     
     if (isSubmitting || localSubmitting) {
-      console.log("Submission already in progress, ignoring click");
+      console.log("Submission already in progress, ignoring submission");
       return;
     }
     
@@ -73,16 +55,16 @@ export const AddTransferNumberForm = ({
       return;
     }
     
-    console.log("Form submission starting, setting localSubmitting to true");
+    console.log("Starting form submission, setting localSubmitting");
     setLocalSubmitting(true);
     
     try {
-      console.log("Calling onAddTransferNumber with:", trimmedName, trimmedNumber, trimmedDescription);
+      console.log("Calling onAddTransferNumber directly with:", trimmedName, trimmedNumber, trimmedDescription);
       const result = await onAddTransferNumber(trimmedName, trimmedNumber, trimmedDescription);
-      console.log("Submission result:", result ? "success" : "failure");
+      console.log("Submission result:", result);
       
       if (result) {
-        // Clear the form after successful submission
+        console.log("Success! Clearing form fields");
         setName("");
         setNumber("");
         setDescription("");
@@ -90,7 +72,7 @@ export const AddTransferNumberForm = ({
     } catch (error) {
       console.error("Error in form submission:", error);
     } finally {
-      console.log("Setting localSubmitting to false");
+      console.log("Setting localSubmitting to false in finally block");
       setLocalSubmitting(false);
     }
   };
@@ -121,7 +103,7 @@ export const AddTransferNumberForm = ({
               onChange={(e) => setName(e.target.value)}
               disabled={buttonDisabled}
               required
-              className="mb-0" // Override default mobile margin
+              className="mb-0"
             />
           </div>
           <div>
@@ -134,7 +116,7 @@ export const AddTransferNumberForm = ({
               disabled={buttonDisabled}
               required
               type="tel"
-              className="mb-0" // Override default mobile margin
+              className="mb-0"
             />
           </div>
           <div>
@@ -145,7 +127,7 @@ export const AddTransferNumberForm = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               disabled={buttonDisabled}
-              className="mb-0" // Override default mobile margin
+              className="mb-0"
             />
           </div>
           <Button 
