@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { TransferNumber } from "@/hooks/useTransferNumbers";
+import { TransferNumber } from "@/types/transferNumber";
 
 /**
  * Fetches all transfer numbers for a specific user from the database
