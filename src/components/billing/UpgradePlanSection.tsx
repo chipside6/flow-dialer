@@ -71,14 +71,7 @@ export const UpgradePlanSection = () => {
             </div>
             
             <div className="mb-4">
-              {plan.price === 0 ? (
-                <>
-                  <span className="text-3xl font-bold">${plan.price}</span>
-                  <span className="text-sm text-muted-foreground ml-1">(500 calls/month)</span>
-                </>
-              ) : (
-                <span className="text-3xl font-bold">${plan.price}</span>
-              )}
+              <span className="text-3xl font-bold">${plan.price}</span>
             </div>
             
             <div className="space-y-2.5 mb-4 flex-grow">

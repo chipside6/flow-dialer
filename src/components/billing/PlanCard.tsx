@@ -34,10 +34,7 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
       <CardContent className="space-y-4">
         <div className="mb-2">
           {plan.price === 0 ? (
-            <>
-              <span className="text-4xl font-bold">${plan.price}</span>
-              <span className="text-sm text-muted-foreground ml-1">(500 calls/month)</span>
-            </>
+            <span className="text-4xl font-bold">${plan.price}</span>
           ) : (
             <span className="text-4xl font-bold">${plan.price}</span>
           )}
