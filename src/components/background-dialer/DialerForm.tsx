@@ -76,28 +76,14 @@ const DialerForm: React.FC<DialerFormProps> = ({
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="transfer-number">Transfer Number (Optional)</Label>
-          <Input
-            id="transfer-number"
-            placeholder="Enter transfer destination"
-            value={formData.transferNumber}
-            onChange={(e) => onChange("transferNumber", e.target.value)}
-          />
-        </div>
-        
-        <div>
-          <Label htmlFor="concurrent-calls">Max Concurrent Calls</Label>
-          <Input
-            id="concurrent-calls"
-            type="number"
-            value="1"
-            disabled={true}
-            className="bg-gray-100 cursor-not-allowed"
-          />
-          <p className="text-xs text-muted-foreground mt-1">Fixed at 1 concurrent call</p>
-        </div>
+      <div>
+        <Label htmlFor="transfer-number">Transfer Number (Optional)</Label>
+        <Input
+          id="transfer-number"
+          placeholder="Enter transfer destination"
+          value={formData.transferNumber}
+          onChange={(e) => onChange("transferNumber", e.target.value)}
+        />
       </div>
       
       <div>
