@@ -54,9 +54,6 @@ export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
                 <Link to="/profile">Profile</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/billing">Billing</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
                 <LogoutButton variant="ghost" className="w-full justify-start p-0" />
               </DropdownMenuItem>
             </DropdownMenuContent>
