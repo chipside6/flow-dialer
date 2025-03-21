@@ -6,18 +6,25 @@ import { SipProviderApiResponse } from "./types";
 export const fetchSipProviders = async (userId: string) => {
   console.log("Fetching SIP providers for user:", userId);
   
-  const { data, error } = await supabase
-    .from('sip_providers')
-    .select('*')
-    .eq('user_id', userId);
+  try {
+    const { data, error } = await supabase
+      .from('sip_providers')
+      .select('*')
+      .eq('user_id', userId);
 
-  if (error) {
-    console.error("Supabase error fetching providers:", error);
-    throw new Error(error.message || "Failed to fetch SIP providers");
+    if (error) {
+      console.error("Supabase error fetching providers:", error);
+      throw new Error(error.message || "Failed to fetch SIP providers");
+    }
+    
+    console.log("Providers fetched successfully:", data?.length || 0, data);
+    
+    // Return an empty array if no data was found
+    return data || [];
+  } catch (error: any) {
+    console.error("Error in fetchSipProviders:", error);
+    throw error;
   }
-  
-  console.log("Providers fetched successfully:", data?.length || 0);
-  return data as SipProviderApiResponse[];
 };
 
 export const transformProviderData = (apiData: SipProviderApiResponse[]): SipProvider[] => {

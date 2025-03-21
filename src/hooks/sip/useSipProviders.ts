@@ -13,6 +13,8 @@ export const useSipProviders = (): UseSipProvidersReturn => {
     error 
   } = useSipProvidersState();
   
+  console.log("useSipProviders - providers:", providers?.length, "isLoading:", isLoading);
+  
   const actions = useSipProviderActions(
     providers,
     setProviders,

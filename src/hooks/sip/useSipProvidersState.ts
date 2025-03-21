@@ -18,44 +18,52 @@ export const useSipProvidersState = (): SipProviderState => {
     let isMounted = true;
     
     const loadProviders = async () => {
+      // Set loading state at the beginning
+      if (isMounted) {
+        setIsLoading(true);
+        setError(null);
+      }
+      
       try {
         if (!user) {
           console.log("No user, clearing providers");
           if (isMounted) {
             setProviders([]);
-            setError(null);
             setIsLoading(false);
           }
           return;
         }
-
-        if (isMounted) {
-          console.log("Setting loading to true");
-          setIsLoading(true);
-        }
         
         console.log("Fetching providers for user:", user.id);
         const data = await fetchSipProviders(user.id);
-        const transformedData = transformProviderData(data);
-        console.log("Providers fetched:", transformedData.length);
+        console.log("Raw data from API:", data);
         
-        if (isMounted) {
-          console.log("Setting providers and clearing error");
+        if (!isMounted) return;
+        
+        if (!data || data.length === 0) {
+          console.log("No providers found, setting empty array");
+          setProviders([]);
+        } else {
+          const transformedData = transformProviderData(data);
+          console.log("Transformed providers:", transformedData);
           setProviders(transformedData);
-          setError(null);
-          setIsLoading(false);
         }
+        
+        setError(null);
       } catch (err: any) {
         console.error("Error fetching SIP providers:", err);
         if (isMounted) {
-          console.log("Setting error and clearing loading");
           setError(err);
-          setIsLoading(false);
           toast({
             title: "Error loading providers",
             description: err.message || "Failed to load SIP providers",
             variant: "destructive"
           });
+        }
+      } finally {
+        // Always set loading to false when done
+        if (isMounted) {
+          setIsLoading(false);
         }
       }
     };
@@ -69,7 +77,7 @@ export const useSipProvidersState = (): SipProviderState => {
   }, [user]);
 
   // Log current state for debugging
-  console.log("useSipProvidersState - isLoading:", isLoading, "providers:", providers.length);
+  console.log("useSipProvidersState - isLoading:", isLoading, "providers:", providers?.length);
 
   return {
     providers,
