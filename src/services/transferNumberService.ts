@@ -73,7 +73,8 @@ export const addTransferNumberToDatabase = async (
         user_id: userId,
         name: name,
         phone_number: number,
-        description: description || null
+        description: description || null,
+        call_count: 0
       })
       .select();
     

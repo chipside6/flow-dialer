@@ -337,6 +337,7 @@ export type Database = {
       }
       transfer_numbers: {
         Row: {
+          call_count: number | null
           created_at: string
           description: string | null
           id: string
@@ -346,6 +347,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          call_count?: number | null
           created_at?: string
           description?: string | null
           id?: string
@@ -355,6 +357,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          call_count?: number | null
           created_at?: string
           description?: string | null
           id?: string
