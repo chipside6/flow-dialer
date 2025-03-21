@@ -23,7 +23,7 @@ export default function UpgradePage() {
             <span className="sr-only">Back to Dashboard</span>
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">Upgrade Your Account</h1>
+        <h1 className="text-3xl font-bold tracking-tight truncate">Upgrade Your Account</h1>
       </div>
       
       <div className="space-y-6">

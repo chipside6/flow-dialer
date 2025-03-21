@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/hooks/useSubscription";
 import { PricingPlan, pricingPlans } from "@/data/pricingPlans";
 import { Check, Loader2 } from "lucide-react";
@@ -70,8 +69,12 @@ export const UpgradePlanSection = () => {
             <p className="text-muted-foreground text-sm mt-1">{plan.description}</p>
             
             <div className="mt-4 mb-6">
-              <span className="text-3xl font-bold">${plan.price}</span>
-              <span className="text-muted-foreground">/month</span>
+              {plan.price === 0 ? (
+                <span className="text-3xl font-bold">${plan.price}</span>
+              ) : (
+                <span className="text-3xl font-bold">${plan.price}</span>
+              )}
+              {/* Removed "/month" text from all plans */}
             </div>
             
             <div className="space-y-3 mb-6">
