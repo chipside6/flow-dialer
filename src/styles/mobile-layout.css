@@ -39,28 +39,12 @@
     padding-top: 60px !important;
   }
 
-  /* Ensure all page content has proper left padding to avoid overlap with sidebar button */
-  .main-content, 
-  .page-content,
-  .dashboard-page, 
-  .content-container,
-  .campaign-page,
-  .profile-page,
-  .billing-page,
-  .admin-page,
-  .contacts-page,
-  .greetings-page,
-  .transfers-page,
-  .sip-page,
-  div[data-sidebar-inset] > div {
-    padding-left: 56px !important;
-  }
-
   /* Ensure main content doesn't cause overflow */
   [data-sidebar-inset] > div {
     max-width: 100% !important;
     width: 100% !important;
     overflow-x: hidden;
+    padding-left: 8px !important;
     padding-right: 8px !important;
   }
   
@@ -102,27 +86,29 @@
     transition: opacity 0.3s ease, transform 0.3s ease;
   }
   
+  .mobile-sidebar-button-hidden {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+  }
+  
   /* Fix campaign header spacing and layout */
   .flex.flex-wrap.justify-between.items-center {
     gap: 8px !important;
   }
   
-  /* Global fix for all headings to prevent overlap with mobile sidebar button */
-  h1, .page-title, .section-title {
-    padding-left: 56px !important;
-  }
-
-  /* Apply extra padding to all content containers */
-  .card-header,
-  .dashboard-card-content,
-  .page-header,
-  .tab-content,
-  .form-section {
-    padding-left: 56px !important;
+  /* Make sure campaign title doesn't overflow */
+  .campaign-content h1 {
+    max-width: 220px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-left: 56px !important; /* Add more left padding to prevent overlap with menu button */
   }
   
-  /* Ensure all tables have proper spacing */
-  table, .table-container {
-    padding-left: 56px !important;
+  /* Apply extra padding to campaign content container on mobile */
+  .campaign-content {
+    padding-left: 56px !important; /* Increased padding to avoid icon overlap */
   }
 }
