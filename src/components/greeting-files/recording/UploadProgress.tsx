@@ -1,6 +1,7 @@
 
 import { Progress } from '@/components/ui/progress';
 import { AlertCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface UploadProgressProps {
   isUploading: boolean;
@@ -13,7 +14,27 @@ export const UploadProgress = ({
   uploadProgress, 
   error 
 }: UploadProgressProps) => {
-  if (!isUploading && uploadProgress === 0 && !error) {
+  const [showLoader, setShowLoader] = useState(false);
+  
+  // Only show the loader after a brief delay to prevent flashing for quick uploads
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (isUploading) {
+      timeoutId = setTimeout(() => {
+        setShowLoader(true);
+      }, 300);
+    } else {
+      setShowLoader(false);
+    }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isUploading]);
+  
+  // Don't show anything if not uploading and no progress or error
+  if (!showLoader && uploadProgress === 0 && !error) {
     return null;
   }
 

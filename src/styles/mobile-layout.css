@@ -78,4 +78,15 @@
     padding-left: 4px !important;
     padding-right: 4px !important;
   }
+  
+  /* Mobile sidebar button transition styles */
+  .mobile-sidebar-button-container {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  .mobile-sidebar-button-hidden {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+  }
 }
