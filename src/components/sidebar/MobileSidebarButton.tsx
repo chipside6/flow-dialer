@@ -13,7 +13,7 @@ export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-background rounded-full shadow-md w-12 h-12 flex items-center justify-center" 
+        className="bg-background rounded-full shadow-md w-12 h-12 flex items-center justify-center mobile-sidebar-button" 
         onClick={onClick}
       >
         <Menu size={24} />
