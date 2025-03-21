@@ -1,59 +1,68 @@
 
 import React from "react";
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface ContactList {
-  id: string;
-  name: string;
-  description: string;
-  contactCount: number;
-  dateCreated: Date;
-  lastModified: Date;
-}
+import { Trash } from "lucide-react";
+import { ContactList } from "@/hooks/useContactLists";
+import { format } from "date-fns";
 
 interface ContactListsDisplayProps {
   lists: ContactList[];
+  onDelete: (id: string) => void;
 }
 
-const ContactListsDisplay = ({ lists }: ContactListsDisplayProps) => {
-  if (lists.length === 0) {
-    return null;
-  }
-  
+const ContactListsDisplay: React.FC<ContactListsDisplayProps> = ({ lists, onDelete }) => {
   return (
-    <Card>
+    <Card className="mt-6">
       <CardHeader>
-        <CardTitle className="text-xl">Your Contact Lists</CardTitle>
+        <CardTitle>Your Contact Lists</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {lists.map((list) => (
-            <Card key={list.id} className="border border-border/40">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-medium">{list.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {list.description}
-                    </p>
-                    <p className="text-sm mt-2">
-                      <span className="text-muted-foreground">Contacts:</span> {list.contactCount}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      Add Contacts
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-destructive">
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Contacts</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Last Modified</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {lists.map(list => (
+              <TableRow key={list.id}>
+                <TableCell className="font-medium">{list.name}</TableCell>
+                <TableCell>{list.description}</TableCell>
+                <TableCell>{list.contactCount}</TableCell>
+                <TableCell>{format(list.dateCreated, 'PP')}</TableCell>
+                <TableCell>{format(list.lastModified, 'PP')}</TableCell>
+                <TableCell className="text-right">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => onDelete(list.id)}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );

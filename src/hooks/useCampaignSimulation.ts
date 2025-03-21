@@ -2,9 +2,12 @@
 import { useState, useEffect } from "react";
 import { Campaign } from "@/hooks/useCampaigns";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/auth";
 
 export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   
@@ -13,7 +16,30 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
     setCampaigns(initialCampaigns);
   }, [initialCampaigns]);
 
-  const startCampaign = (campaignId: string) => {
+  const startCampaign = async (campaignId: string) => {
+    // Update campaign status in Supabase
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('campaigns')
+          .update({ 
+            status: 'running'
+          })
+          .eq('id', campaignId)
+          .eq('user_id', user.id);
+          
+        if (error) throw error;
+      } catch (err) {
+        console.error("Failed to update campaign status:", err);
+        toast({
+          title: "Error starting campaign",
+          description: "Failed to update campaign status",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
     setCampaigns(prev => 
       prev.map(campaign => {
         if (campaign.id === campaignId) {
@@ -36,7 +62,30 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
     });
   };
 
-  const pauseCampaign = (campaignId: string) => {
+  const pauseCampaign = async (campaignId: string) => {
+    // Update campaign status in Supabase
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('campaigns')
+          .update({ 
+            status: 'paused'
+          })
+          .eq('id', campaignId)
+          .eq('user_id', user.id);
+          
+        if (error) throw error;
+      } catch (err) {
+        console.error("Failed to update campaign status:", err);
+        toast({
+          title: "Error pausing campaign",
+          description: "Failed to update campaign status",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
     setCampaigns(prev => 
       prev.map(campaign => {
         if (campaign.id === campaignId) {
@@ -61,7 +110,7 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
     if (!campaign || campaign.status !== "running") return;
 
     // Create a random interval (between 2-4 seconds) to simulate calls being made
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       setCampaigns(prev => {
         const updatedCampaigns = prev.map(c => {
           if (c.id === campaignId && c.status === "running") {
@@ -86,6 +135,24 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
             // Update selected campaign if it's the same one
             if (selectedCampaign?.id === campaignId) {
               setSelectedCampaign(updatedCampaign);
+            }
+            
+            // Update campaign in Supabase
+            if (user) {
+              supabase
+                .from('campaigns')
+                .update({ 
+                  progress: Math.round(newProgress),
+                  answered_calls: newAnswered,
+                  transferred_calls: newTransferred,
+                  failed_calls: newFailed,
+                  status: newStatus
+                })
+                .eq('id', campaignId)
+                .eq('user_id', user.id)
+                .then(({ error }) => {
+                  if (error) console.error("Failed to update campaign progress:", error);
+                });
             }
             
             return updatedCampaign;

@@ -1,89 +1,93 @@
 
-import React, { useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/components/ui/use-toast";
-import { UserPlus } from "lucide-react";
+import { ContactList } from "@/hooks/useContactLists";
+
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional()
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface CreateContactListFormProps {
-  onListCreated: (list: {
-    id: string;
-    name: string;
-    description: string;
-    contactCount: number;
-    dateCreated: Date;
-    lastModified: Date;
-  }) => void;
+  onListCreated: (data: Omit<ContactList, 'id' | 'contactCount' | 'dateCreated' | 'lastModified'>) => Promise<ContactList | null>;
 }
 
-const CreateContactListForm = ({ onListCreated }: CreateContactListFormProps) => {
-  const [newListName, setNewListName] = useState("");
-  const [newListDescription, setNewListDescription] = useState("");
-  
-  const handleCreateList = () => {
-    if (!newListName) {
-      toast({
-        title: "Missing information",
-        description: "Please provide a name for your contact list",
-        variant: "destructive",
-      });
-      return;
+const CreateContactListForm: React.FC<CreateContactListFormProps> = ({ onListCreated }) => {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      description: ""
     }
-    
-    const newList = {
-      id: Date.now().toString(),
-      name: newListName,
-      description: newListDescription || "No description provided",
-      contactCount: 0,
-      dateCreated: new Date(),
-      lastModified: new Date()
-    };
-    
-    onListCreated(newList);
-    setNewListName("");
-    setNewListDescription("");
-    
-    toast({
-      title: "List created",
-      description: `${newListName} has been created successfully`,
+  });
+
+  const { isSubmitting } = form.formState;
+
+  const onSubmit = async (data: FormValues) => {
+    await onListCreated({
+      name: data.name,
+      description: data.description || ""
     });
+    form.reset();
   };
 
   return (
-    <Card className="mb-8">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center text-xl">
-          <UserPlus className="mr-2 h-5 w-5" />
-          Create New Contact List
-        </CardTitle>
+        <CardTitle>Create New Contact List</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="list-name" className="text-sm font-medium leading-none mb-2 block">List Name</label>
-            <Input
-              id="list-name"
-              placeholder="Enter a name for your contact list"
-              value={newListName}
-              onChange={(e) => setNewListName(e.target.value)}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>List Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="My Contact List" />
+                  </FormControl>
+                  <FormDescription>
+                    A descriptive name for your contact list
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div>
-            <label htmlFor="list-description" className="text-sm font-medium leading-none mb-2 block">Description</label>
-            <Textarea
-              id="list-description"
-              placeholder="Describe the purpose of this list"
-              value={newListDescription}
-              onChange={(e) => setNewListDescription(e.target.value)}
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      {...field}
+                      placeholder="Enter a description for this list" 
+                      rows={3}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <Button onClick={handleCreateList} className="bg-purple-500 hover:bg-purple-600">
-            <UserPlus className="mr-2 h-4 w-4" />
-            Create List
-          </Button>
-        </div>
+            
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Contact List"}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

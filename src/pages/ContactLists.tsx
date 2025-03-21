@@ -1,25 +1,14 @@
 
-import React, { useState } from "react";
+import React from "react";
 import CreateContactListForm from "@/components/contact-lists/CreateContactListForm";
 import EmptyContactListsState from "@/components/contact-lists/EmptyContactListsState";
 import ContactListsDisplay from "@/components/contact-lists/ContactListsDisplay";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-
-interface ContactList {
-  id: string;
-  name: string;
-  description: string;
-  contactCount: number;
-  dateCreated: Date;
-  lastModified: Date;
-}
+import { useContactLists } from "@/hooks/useContactLists";
+import { Loader2 } from "lucide-react";
 
 const ContactLists = () => {
-  const [lists, setLists] = useState<ContactList[]>([]);
-  
-  const handleListCreated = (newList: ContactList) => {
-    setLists([...lists, newList]);
-  };
+  const { lists, isLoading, createContactList, deleteContactList } = useContactLists();
   
   return (
     <DashboardLayout>
@@ -28,12 +17,16 @@ const ContactLists = () => {
           <h1 className="text-3xl font-bold">Contact Lists</h1>
         </div>
         
-        <CreateContactListForm onListCreated={handleListCreated} />
+        <CreateContactListForm onListCreated={createContactList} />
         
-        {lists.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : lists.length === 0 ? (
           <EmptyContactListsState />
         ) : (
-          <ContactListsDisplay lists={lists} />
+          <ContactListsDisplay lists={lists} onDelete={deleteContactList} />
         )}
       </div>
     </DashboardLayout>

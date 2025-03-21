@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Phone, PhoneOff, Play, Pause, Settings, AlertCircle } from "lucide-react";
+import { Phone, PhoneOff, Play, Pause, AlertCircle } from "lucide-react";
 import { asteriskService } from "@/utils/asteriskService";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/auth";
 
 interface SipProvider {
   id: string;
@@ -25,21 +28,16 @@ interface BackgroundDialerProps {
 }
 
 const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
-  // Mock data - in a real application, these would come from API calls
-  const [sipProviders, setSipProviders] = useState<SipProvider[]>([
-    { id: "1", name: "Twilio SIP" },
-    { id: "2", name: "Vonage API" }
-  ]);
-  
-  const [contactLists, setContactLists] = useState<ContactList[]>([
-    { id: "1", name: "Main Customer List", contactCount: 250 },
-    { id: "2", name: "VIP Customers", contactCount: 50 }
-  ]);
+  const { user } = useAuth();
+  const [sipProviders, setSipProviders] = useState<SipProvider[]>([]);
+  const [contactLists, setContactLists] = useState<ContactList[]>([]);
+  const [isLoadingProviders, setIsLoadingProviders] = useState(true);
+  const [isLoadingLists, setIsLoadingLists] = useState(true);
   
   const [selectedSipProvider, setSelectedSipProvider] = useState<string>("");
   const [selectedContactList, setSelectedContactList] = useState<string>("");
   const [transferNumber, setTransferNumber] = useState<string>("");
-  const [maxConcurrentCalls, setMaxConcurrentCalls] = useState<string>("3");  // Changed from "1" to "3"
+  const [maxConcurrentCalls, setMaxConcurrentCalls] = useState<string>("3");
   const [greetingFile, setGreetingFile] = useState<string>("greeting.wav");
   
   const [isDialing, setIsDialing] = useState<boolean>(false);
@@ -57,6 +55,79 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
     answeredCalls: 0,
     failedCalls: 0
   });
+
+  // Fetch SIP providers and contact lists
+  useEffect(() => {
+    const fetchProviders = async () => {
+      if (!user) {
+        setSipProviders([]);
+        setIsLoadingProviders(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('sip_providers')
+          .select('id, name')
+          .eq('user_id', user.id)
+          .eq('active', true);
+
+        if (error) throw error;
+        
+        setSipProviders(data || []);
+      } catch (err) {
+        console.error("Error fetching SIP providers:", err);
+        toast({
+          title: "Error loading SIP providers",
+          description: "Could not load your SIP providers",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoadingProviders(false);
+      }
+    };
+
+    const fetchContactLists = async () => {
+      if (!user) {
+        setContactLists([]);
+        setIsLoadingLists(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('contact_lists')
+          .select(`
+            id, 
+            name,
+            contact_list_items:contact_list_items(count)
+          `)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+        
+        const transformedData = (data || []).map(list => ({
+          id: list.id,
+          name: list.name,
+          contactCount: list.contact_list_items?.length || 0
+        }));
+        
+        setContactLists(transformedData);
+      } catch (err) {
+        console.error("Error fetching contact lists:", err);
+        toast({
+          title: "Error loading contact lists",
+          description: "Could not load your contact lists",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoadingLists(false);
+      }
+    };
+
+    fetchProviders();
+    fetchContactLists();
+  }, [user]);
   
   // Poll for status updates when a job is running
   useEffect(() => {
@@ -199,15 +270,19 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
                   value={selectedSipProvider}
                   onValueChange={setSelectedSipProvider}
                 >
-                  <SelectTrigger id="sip-provider">
-                    <SelectValue placeholder="Select a SIP provider" />
+                  <SelectTrigger id="sip-provider" disabled={isLoadingProviders}>
+                    <SelectValue placeholder={isLoadingProviders ? "Loading..." : "Select a SIP provider"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {sipProviders.map(provider => (
-                      <SelectItem key={provider.id} value={provider.id}>
-                        {provider.name}
-                      </SelectItem>
-                    ))}
+                    {sipProviders.length === 0 ? (
+                      <SelectItem value="none" disabled>No SIP providers available</SelectItem>
+                    ) : (
+                      sipProviders.map(provider => (
+                        <SelectItem key={provider.id} value={provider.id}>
+                          {provider.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -218,15 +293,19 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
                   value={selectedContactList}
                   onValueChange={setSelectedContactList}
                 >
-                  <SelectTrigger id="contact-list">
-                    <SelectValue placeholder="Select a contact list" />
+                  <SelectTrigger id="contact-list" disabled={isLoadingLists}>
+                    <SelectValue placeholder={isLoadingLists ? "Loading..." : "Select a contact list"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {contactLists.map(list => (
-                      <SelectItem key={list.id} value={list.id}>
-                        {list.name} ({list.contactCount} contacts)
-                      </SelectItem>
-                    ))}
+                    {contactLists.length === 0 ? (
+                      <SelectItem value="none" disabled>No contact lists available</SelectItem>
+                    ) : (
+                      contactLists.map(list => (
+                        <SelectItem key={list.id} value={list.id}>
+                          {list.name} ({list.contactCount} contacts)
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -250,7 +329,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
                   type="number"
                   min="1"
                   max="50"
-                  placeholder="3"  // Changed from "1" to "3"
+                  placeholder="3"
                   value={maxConcurrentCalls}
                   onChange={(e) => setMaxConcurrentCalls(e.target.value)}
                 />
@@ -268,7 +347,11 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
             </div>
             
             <div className="flex justify-end space-x-2">
-              <Button onClick={startDialing} className="bg-green-600 hover:bg-green-700">
+              <Button 
+                onClick={startDialing} 
+                className="bg-green-600 hover:bg-green-700"
+                disabled={isLoadingProviders || isLoadingLists || sipProviders.length === 0 || contactLists.length === 0}
+              >
                 <Play className="mr-2 h-4 w-4" />
                 Start Dialing
               </Button>

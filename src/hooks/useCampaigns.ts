@@ -21,24 +21,10 @@ export const useCampaigns = () => {
   const { toast } = useToast();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     let isMounted = true;
-    let timeoutId: NodeJS.Timeout;
-    const maxRetries = 2;
-    
-    // Force exit loading state after 8 seconds
-    const loadingTimeout = setTimeout(() => {
-      if (isMounted && isLoading) {
-        console.log("Loading timeout reached, forcing exit of loading state");
-        setIsLoading(false);
-        if (!campaigns.length) {
-          setCampaigns([]);
-        }
-      }
-    }, 8000);
     
     const fetchCampaigns = async () => {
       try {
@@ -80,10 +66,6 @@ export const useCampaigns = () => {
           setCampaigns(transformedData);
           setIsLoading(false);
           setError(null);
-          setRetryCount(0); // Reset retry count on success
-          
-          // Clear timeout since we've successfully loaded
-          clearTimeout(loadingTimeout);
         }
       } catch (error: any) {
         console.error('Error fetching campaigns:', error.message);
@@ -91,30 +73,13 @@ export const useCampaigns = () => {
         // If component is still mounted, update state
         if (isMounted) {
           setError(error);
+          setIsLoading(false);
           
-          // Only show toast for certain errors or after retries
-          if (retryCount >= maxRetries) {
-            toast({
-              title: "Error loading campaigns",
-              description: error.message,
-              variant: "destructive"
-            });
-          }
-          
-          // Always exit loading state on error after a short delay
-          setTimeout(() => {
-            if (isMounted) {
-              setIsLoading(false);
-              // Return empty array on error
-              setCampaigns([]);
-            }
-          }, 1000);
-          
-          // Retry logic
-          if (retryCount < maxRetries) {
-            setRetryCount(prev => prev + 1);
-            timeoutId = setTimeout(fetchCampaigns, 2000); // Retry after 2 seconds
-          }
+          toast({
+            title: "Error loading campaigns",
+            description: error.message,
+            variant: "destructive"
+          });
         }
       }
     };
@@ -124,10 +89,8 @@ export const useCampaigns = () => {
     // Cleanup function
     return () => {
       isMounted = false;
-      clearTimeout(timeoutId);
-      clearTimeout(loadingTimeout);
     };
-  }, [user, toast, retryCount]);
+  }, [user, toast]);
 
   return { campaigns, isLoading, error };
 };
