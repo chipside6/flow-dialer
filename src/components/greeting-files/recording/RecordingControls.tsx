@@ -7,8 +7,7 @@ interface RecordingControlsProps {
   onStartRecording: () => Promise<void> | void;
   onStopRecording: () => void;
   cancelRecording?: () => void;
-  startRecording?: () => void;
-  stopRecording?: () => void;
+  // Remove redundant props that do the same thing as onStartRecording/onStopRecording
 }
 
 export const RecordingControls = ({
@@ -16,30 +15,12 @@ export const RecordingControls = ({
   onStartRecording,
   onStopRecording,
   cancelRecording,
-  startRecording,
-  stopRecording,
 }: RecordingControlsProps) => {
-  const handleStartRecording = () => {
-    if (startRecording) {
-      startRecording();
-    } else {
-      onStartRecording();
-    }
-  };
-
-  const handleStopRecording = () => {
-    if (stopRecording) {
-      stopRecording();
-    } else {
-      onStopRecording();
-    }
-  };
-
   if (!isRecording) {
     return (
       <div className="flex justify-center gap-2">
         <Button 
-          onClick={handleStartRecording}
+          onClick={onStartRecording}
           className="bg-red-600 hover:bg-red-700"
         >
           <Mic className="h-4 w-4 mr-1" /> <span>Start Recording</span>
@@ -51,7 +32,7 @@ export const RecordingControls = ({
   return (
     <div className="flex justify-center gap-2">
       <Button 
-        onClick={handleStopRecording}
+        onClick={onStopRecording}
         variant="outline"
       >
         <Square className="h-4 w-4 mr-1" /> <span>Stop Recording</span>

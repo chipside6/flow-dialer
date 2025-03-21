@@ -143,14 +143,13 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
       {/* Only show tips when not recording and no audio blob exists */}
       {!isRecording && !audioBlob && <RecordingTips />}
       
-      {/* Show recording status when recording */}
-      {isRecording && (
-        <RecordingStatus 
-          status={recordingStatus} 
-          time={formattedDuration()} 
-          isRecording={isRecording}
-        />
-      )}
+      {/* Show recording status */}
+      <RecordingStatus 
+        status={recordingStatus}
+        time={formattedDuration()}
+        isRecording={isRecording}
+        hasRecording={!!audioBlob}
+      />
       
       {/* Show controls for recording or previewing */}
       {audioBlob && audioUrl ? (

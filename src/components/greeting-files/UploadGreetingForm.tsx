@@ -14,7 +14,7 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
   const [activeTab, setActiveTab] = useState<string>('upload');
 
   return (
-    <Card>
+    <Card className="shadow-md">
       <CardHeader>
         <CardTitle>Add a new greeting file</CardTitle>
         <CardDescription>
@@ -24,11 +24,11 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="upload">
+            <TabsTrigger value="upload" id="upload-tab">
               <Upload className="h-4 w-4 mr-2" />
               Upload File
             </TabsTrigger>
-            <TabsTrigger value="record">
+            <TabsTrigger value="record" id="record-tab">
               <Mic className="h-4 w-4 mr-2" />
               Record Audio
             </TabsTrigger>
