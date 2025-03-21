@@ -27,6 +27,7 @@ export const useAddUpdateProvider = (
     
     try {
       const isNewProvider = !provider.id;
+      console.log(`${isNewProvider ? 'Adding' : 'Updating'} SIP provider:`, provider);
       
       if (isNewProvider) {
         // For INSERT operations
@@ -39,12 +40,17 @@ export const useAddUpdateProvider = (
             username: provider.username,
             password: provider.password,
             user_id: user.id,
-            active: provider.isActive,
+            active: provider.isActive || false,
             // Note: description is not in the schema
           })
           .select();
         
-        if (error) throw error;
+        if (error) {
+          console.error("Error inserting SIP provider:", error);
+          throw error;
+        }
+        
+        console.log("SIP provider inserted, response:", data);
         
         if (data && data.length > 0) {
           // Convert the returned data to match our SipProvider type
@@ -60,11 +66,11 @@ export const useAddUpdateProvider = (
             isActive: data[0].active
           };
           
-          setProviders([...providers, newProvider]);
+          setProviders(prevProviders => [...prevProviders, newProvider]);
         }
       } else {
         // For UPDATE operations
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('sip_providers')
           .update({
             name: provider.name,
@@ -75,9 +81,16 @@ export const useAddUpdateProvider = (
             active: provider.isActive,
             // Note: description is not in the schema
           })
-          .eq('id', provider.id);
+          .eq('id', provider.id)
+          .eq('user_id', user.id)
+          .select();
         
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating SIP provider:", error);
+          throw error;
+        }
+        
+        console.log("SIP provider updated, response:", data);
         
         // Update the provider in the list
         const updatedProviders = providers.map(p => 

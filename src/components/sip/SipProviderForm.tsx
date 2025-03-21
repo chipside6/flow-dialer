@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
@@ -9,7 +9,7 @@ import { PasswordField } from "./PasswordField";
 import { FormActions } from "./FormActions";
 
 interface SipProviderFormProps {
-  onSubmit: (provider: Omit<SipProvider, 'id' | 'dateAdded' | 'isActive'>) => void;
+  onSubmit: (provider: SipProvider) => void;
   editingProvider: SipProvider | null;
   onCancel: () => void;
 }
@@ -26,6 +26,18 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   const [password, setPassword] = useState(editingProvider?.password || "");
   const [description, setDescription] = useState(editingProvider?.description || "");
   
+  // Update form when editingProvider changes
+  useEffect(() => {
+    if (editingProvider) {
+      setName(editingProvider.name);
+      setHost(editingProvider.host);
+      setPort(editingProvider.port);
+      setUsername(editingProvider.username);
+      setPassword(editingProvider.password);
+      setDescription(editingProvider.description);
+    }
+  }, [editingProvider]);
+  
   const handleSubmit = () => {
     if (!name || !host || !username || !password) {
       toast({
@@ -36,13 +48,18 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
       return;
     }
     
+    console.log("Submitting SIP provider form:", { name, host, port, username, password });
+    
     onSubmit({
+      id: editingProvider?.id,
       name,
       host,
       port,
       username,
       password,
-      description: description || "No description provided"
+      description: description || "No description provided",
+      dateAdded: editingProvider?.dateAdded || new Date(),
+      isActive: editingProvider?.isActive || false
     });
   };
   

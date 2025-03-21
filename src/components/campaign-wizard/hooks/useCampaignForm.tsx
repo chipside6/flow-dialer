@@ -63,9 +63,11 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     };
     
     try {
+      console.log("Attempting to save campaign:", newCampaign);
+      
       // Save to Supabase
       if (authUser) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('campaigns')
           .insert({
             title: newCampaign.title,
@@ -80,9 +82,17 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
             contact_list_id: newCampaign.contactListId || null,
             transfer_number: newCampaign.transferNumber || null,
             greeting_file_url: newCampaign.greetingFileId || null
-          });
+          })
+          .select();
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error saving campaign to Supabase:", error);
+          throw error;
+        }
+        
+        console.log("Campaign saved successfully. Supabase response:", data);
+      } else {
+        console.warn("No authenticated user found. Campaign will only be saved locally.");
       }
       
       onComplete(newCampaign);
