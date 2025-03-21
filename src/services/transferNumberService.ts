@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TransferNumber } from "@/types/transferNumber";
 
@@ -49,7 +48,7 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
 
 /**
  * Adds a new transfer number to the database
- * Simplified version that focuses on reliable insertion
+ * Ultra-simplified version that focuses only on insertion
  */
 export const addTransferNumberToDatabase = async (
   userId: string, 
@@ -75,51 +74,21 @@ export const addTransferNumberToDatabase = async (
     
     console.log(`[TransferNumberService] Insert data:`, JSON.stringify(insertData));
     
-    // First, perform the insert without selecting
-    const { error: insertError } = await supabase
+    // Perform only the insert operation
+    const { error } = await supabase
       .from('transfer_numbers')
       .insert(insertData);
     
-    if (insertError) {
-      console.error(`[TransferNumberService] Database error when inserting transfer number:`, insertError);
-      throw insertError;
+    if (error) {
+      console.error(`[TransferNumberService] Database error when inserting transfer number:`, error);
+      throw error;
     }
     
-    console.log(`[TransferNumberService] Insert successful, now fetching the inserted record`);
+    console.log(`[TransferNumberService] Insert successful`);
     
-    // Then fetch the newly inserted record in a separate query
-    const { data, error: fetchError } = await supabase
-      .from('transfer_numbers')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('name', name)
-      .eq('phone_number', number)
-      .order('created_at', { ascending: false })
-      .limit(1);
-    
-    if (fetchError) {
-      console.error(`[TransferNumberService] Database error when fetching new transfer number:`, fetchError);
-      // Don't throw here, we can still return success since insert worked
-    }
-    
-    if (data && data.length > 0) {
-      const newTransferNumber = data[0];
-      console.log(`[TransferNumberService] Successfully fetched new transfer number:`, newTransferNumber);
-      
-      return {
-        id: newTransferNumber.id,
-        name: newTransferNumber.name,
-        number: newTransferNumber.phone_number,
-        description: newTransferNumber.description || "No description provided",
-        dateAdded: new Date(newTransferNumber.created_at),
-        callCount: newTransferNumber.call_count !== null ? Number(newTransferNumber.call_count) : 0
-      };
-    }
-    
-    // If we can't fetch the newly created record, still return a success object
-    console.log(`[TransferNumberService] Could not fetch newly created record, returning basic success object`);
+    // Return a success object without trying to fetch the record
     return {
-      id: 'pending',
+      id: 'pending', // Temporary ID until refresh
       name: name,
       number: number,
       description: description || "No description provided",

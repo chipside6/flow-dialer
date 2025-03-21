@@ -55,24 +55,15 @@ export function useAddTransferNumber(
         data: { name: cleanName, number: cleanNumber }
       });
       
-      // Make the database call with a timeout to prevent hanging
-      const dbPromise = addTransferNumberToDatabase(
+      // Make the database call without a timeout
+      const newTransferNumber = await addTransferNumberToDatabase(
         user.id, 
         cleanName, 
         cleanNumber, 
         cleanDesc
       );
       
-      // Wait for the database operation with a 5-second timeout
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Database operation timed out")), 5000);
-      });
-      
-      // Race between the database operation and the timeout
-      const newTransferNumber = await Promise.race([dbPromise, timeoutPromise]) as any;
-      
       // Show success toast regardless of whether we could fetch the new record
-      // as long as the insert operation succeeded
       if (newTransferNumber) {
         console.log("Successfully processed transfer number addition:", newTransferNumber);
         
@@ -104,7 +95,7 @@ export function useAddTransferNumber(
       });
       return null;
     } finally {
-      // Set submitting state to false immediately to ensure UI updates
+      // Set submitting state to false immediately
       if (setIsSubmitting) {
         console.log("Setting isSubmitting to false");
         setIsSubmitting(false);
