@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   createBrowserRouter,
@@ -67,6 +66,8 @@ const router = createBrowserRouter([
     path: "*",
     element: <PublicLayout><NotFound /></PublicLayout>,
   },
+  
+  // Dashboard routes with SidebarProvider
   {
     path: "/dashboard",
     element: (
