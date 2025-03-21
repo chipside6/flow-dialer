@@ -38,3 +38,18 @@ body, html {
   max-width: 100vw;
   overflow-x: hidden;
 }
+
+/* Center content */
+.center-content {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Ensure forms are centered */
+form {
+  margin: 0 auto;
+  max-width: 100%;
+}
+
