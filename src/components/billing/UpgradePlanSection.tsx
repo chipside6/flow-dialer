@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -92,7 +91,7 @@ export const UpgradePlanSection = () => {
       </div>
     );
   }
-
+  
   return (
     <div id="upgrade-plans" className="mt-8">
       <h2 className="text-2xl font-bold mb-6 text-left">Upgrade Your Plan</h2>
@@ -131,7 +130,7 @@ export const UpgradePlanSection = () => {
                   {plan.name}
                 </h3>
                 <div className="mb-4">
-                  <span className="text-8xl font-bold">${plan.price}</span>
+                  <span className="text-9xl font-bold leading-tight">${plan.price}</span>
                   <span className="text-muted-foreground ml-2">one-time</span>
                 </div>
                 <p className="text-muted-foreground">{plan.description}</p>
