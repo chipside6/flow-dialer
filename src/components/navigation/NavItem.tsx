@@ -1,31 +1,37 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
-export interface NavItemProps {
+interface NavItemProps {
   item: {
     name: string;
     path: string;
     icon: React.ReactNode;
   };
-  isActive: boolean;
+  isActive?: boolean;
   onClick?: () => void;
+  className?: string;
+  highlightStyle?: boolean;
 }
 
-export function NavItem({ item, isActive, onClick }: NavItemProps) {
+export const NavItem = ({ item, isActive, onClick, className, highlightStyle }: NavItemProps) => {
   return (
-    <Link to={item.path} className="block w-full" onClick={onClick}>
+    <Link
+      to={item.path}
+      onClick={onClick}
+      className={cn(className, "block")}
+    >
       <div
-        className={`w-full flex items-center py-3 px-4 border-b border-gray-100 ${
-          isActive ? "bg-gray-50" : ""
-        }`}
+        className={cn(
+          "flex items-center py-2 px-4 gap-3 hover:bg-gray-50 text-sm",
+          isActive && "bg-gray-50 font-medium",
+          highlightStyle && "bg-primary/10 hover:bg-primary/20 border-l-4 border-primary"
+        )}
       >
-        <span className="flex items-center justify-center w-6 h-6 mr-3">
-          {item.icon}
-        </span>
-        <span className="font-medium">{item.name}</span>
+        <span>{item.icon}</span>
+        <span>{item.name}</span>
       </div>
     </Link>
   );
-}
+};
