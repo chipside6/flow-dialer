@@ -19,6 +19,7 @@ import Layout from './components/layout/Layout';
 import SipProviders from './pages/SipProviders';
 import ContactLists from './pages/ContactLists';
 import BackgroundDialer from './pages/BackgroundDialer';
+import NotFound from './pages/NotFound';
 import "./index.css"; // Use index.css which already exists
 import "./styles/plan-card.css"; // Add this line to import plan card styles
 
@@ -52,7 +53,7 @@ function AppRouter() {
       <Route path="/background-dialer" element={isAuthenticated ? <BackgroundDialer /> : <Navigate to="/login" />} />
 
       {/* Catch-all route for 404 Not Found */}
-      <Route path="*" element={<h1 className="text-center text-4xl font-bold">404 Not Found</h1>} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
