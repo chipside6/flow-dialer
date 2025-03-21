@@ -92,12 +92,11 @@ const DialerForm: React.FC<DialerFormProps> = ({
           <Input
             id="concurrent-calls"
             type="number"
-            min="1"
-            max="50"
-            placeholder="3"
-            value={formData.maxConcurrentCalls}
-            onChange={(e) => onChange("maxConcurrentCalls", e.target.value)}
+            value="1"
+            disabled={true}
+            className="bg-gray-100 cursor-not-allowed"
           />
+          <p className="text-xs text-muted-foreground mt-1">Fixed at 1 concurrent call</p>
         </div>
       </div>
       

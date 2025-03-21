@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { DialerFormData } from "@/components/background-dialer/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +9,7 @@ export const useDialerForm = () => {
     sipProviderId: "",
     contactListId: "",
     transferNumber: "",
-    maxConcurrentCalls: "3",
+    maxConcurrentCalls: "1", // Set to fixed value of 1
     greetingFile: "greeting.wav"
   });
   const [isLoadingTransferNumbers, setIsLoadingTransferNumbers] = useState(false);
@@ -34,7 +33,12 @@ export const useDialerForm = () => {
         }
         
         if (data && data.length > 0) {
-          setFormData(prev => ({ ...prev, transferNumber: data[0].phone_number }));
+          // Keep max concurrent calls as 1 even when loading saved data
+          setFormData(prev => ({ 
+            ...prev, 
+            transferNumber: data[0].phone_number,
+            maxConcurrentCalls: "1" // Ensure it's always 1
+          }));
           console.log("Loaded transfer number:", data[0].phone_number);
         } else {
           console.log("No transfer numbers found for user");
@@ -50,6 +54,11 @@ export const useDialerForm = () => {
   }, [user]);
   
   const handleFormChange = (field: keyof DialerFormData, value: string) => {
+    // For maxConcurrentCalls, always keep it as "1" regardless of user input
+    if (field === "maxConcurrentCalls") {
+      return; // Prevent any changes to this field
+    }
+    
     setFormData(prev => ({ ...prev, [field]: value }));
   };
   

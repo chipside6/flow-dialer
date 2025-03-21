@@ -82,7 +82,7 @@ export const useDialerActions = (
         transferNumber: formData.transferNumber,
         sipProviderId: formData.sipProviderId,
         greetingFile: formData.greetingFile,
-        maxConcurrentCalls: formData.maxConcurrentCalls ? parseInt(formData.maxConcurrentCalls) : undefined
+        maxConcurrentCalls: 1 // Force this to be 1 regardless of user input
       });
       
       setCurrentJobId(response.jobId);
