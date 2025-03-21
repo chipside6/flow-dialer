@@ -11,14 +11,14 @@ import Profile from './pages/Profile';
 import UpgradePage from './pages/UpgradePage';
 import { AuthProvider, useAuth } from './contexts/auth';
 import Login from './pages/Login';
-import Signup from './pages/Signup';
+import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import Layout from './components/layout/Layout';
-import SipProviderPage from './pages/SipProviderPage';
-import ContactListPage from './pages/ContactListPage';
-import BackgroundDialerPage from './pages/BackgroundDialerPage';
+import SipProviders from './pages/SipProviders';
+import ContactLists from './pages/ContactLists';
+import BackgroundDialer from './pages/BackgroundDialer';
 import "./styles/globals.css";
 import "./styles/plan-card.css"; // Add this line to import plan card styles
 
@@ -37,7 +37,7 @@ function AppRouter() {
   return (
     <Routes>
       <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" />} />
-      <Route path="/signup" element={!isAuthenticated ? <Signup /> : <Navigate to="/dashboard" />} />
+      <Route path="/signup" element={!isAuthenticated ? <SignUp /> : <Navigate to="/dashboard" />} />
       <Route path="/forgot-password" element={!isAuthenticated ? <ForgotPassword /> : <Navigate to="/dashboard" />} />
       <Route path="/reset-password" element={!isAuthenticated ? <ResetPassword /> : <Navigate to="/dashboard" />} />
       <Route path="/verify-email" element={!isAuthenticated ? <VerifyEmail /> : <Navigate to="/dashboard" />} />
@@ -47,9 +47,9 @@ function AppRouter() {
       <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
       <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
       <Route path="/billing" element={isAuthenticated ? <UpgradePage /> : <Navigate to="/login" />} />
-      <Route path="/sip-providers" element={isAuthenticated ? <SipProviderPage /> : <Navigate to="/login" />} />
-      <Route path="/contact-lists" element={isAuthenticated ? <ContactListPage /> : <Navigate to="/login" />} />
-      <Route path="/background-dialer" element={isAuthenticated ? <BackgroundDialerPage /> : <Navigate to="/login" />} />
+      <Route path="/sip-providers" element={isAuthenticated ? <SipProviders /> : <Navigate to="/login" />} />
+      <Route path="/contact-lists" element={isAuthenticated ? <ContactLists /> : <Navigate to="/login" />} />
+      <Route path="/background-dialer" element={isAuthenticated ? <BackgroundDialer /> : <Navigate to="/login" />} />
 
       {/* Catch-all route for 404 Not Found */}
       <Route path="*" element={<h1 className="text-center text-4xl font-bold">404 Not Found</h1>} />
