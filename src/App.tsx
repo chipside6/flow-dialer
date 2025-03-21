@@ -21,7 +21,8 @@ import ContactLists from './pages/ContactLists';
 import BackgroundDialer from './pages/BackgroundDialer';
 import NotFound from './pages/NotFound';
 import "./index.css"; // Use index.css which already exists
-import "./styles/plan-card.css"; // Add this line to import plan card styles
+import "./styles/plan-card.css"; // Add plan card styles
+import "./styles/sidebar-mobile.css"; // Add sidebar mobile styles
 
 function AppRouter() {
   const { isAuthenticated, isLoading, sessionChecked } = useAuth();

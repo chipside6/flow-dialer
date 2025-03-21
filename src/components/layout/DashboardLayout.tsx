@@ -11,7 +11,7 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { toggleSidebar, openMobile } = useSidebar();
+  const { toggleSidebar, openMobile, setOpenMobile } = useSidebar();
   const isMobile = useIsMobile();
   
   // Add class to body when sidebar is open
