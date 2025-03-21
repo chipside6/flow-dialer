@@ -98,6 +98,8 @@ export const UpgradePlanSection = () => {
                   </>
                 ) : currentPlan === plan.id ? (
                   "Current Plan"
+                ) : plan.id === "free" && currentPlan ? (
+                  "Current Plan"
                 ) : (
                   "Upgrade Now"
                 )}

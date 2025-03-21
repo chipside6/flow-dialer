@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PricingPlan } from "@/data/pricingPlans";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface PlanCardProps {
   plan: PricingPlan;
@@ -11,6 +12,9 @@ interface PlanCardProps {
 }
 
 export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
+  const { currentPlan } = useSubscription();
+  const isCurrentPlan = currentPlan === plan.id;
+  
   return (
     <Card 
       className={`
@@ -56,8 +60,9 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
         <Button 
           className={`w-full rounded-full ${plan.popular ? '' : 'bg-primary/90 hover:bg-primary'}`}
           onClick={() => onSelect(plan)}
+          disabled={isCurrentPlan}
         >
-          Subscribe Now
+          {isCurrentPlan ? "Current Plan" : "Subscribe Now"}
         </Button>
       </CardFooter>
     </Card>
