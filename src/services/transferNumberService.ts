@@ -14,11 +14,12 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
     .order('created_at', { ascending: false });
   
   if (error) {
+    console.error("Database error when fetching transfer numbers:", error);
     throw error;
   }
   
   if (data) {
-    console.log("Fetched transfer numbers:", data);
+    console.log("Fetched transfer numbers:", data.length);
     return data.map(item => ({
       id: item.id,
       name: item.name,
@@ -55,6 +56,7 @@ export const addTransferNumberToDatabase = async (
     .select();
   
   if (error) {
+    console.error("Database error when adding transfer number:", error);
     throw error;
   }
   
@@ -89,6 +91,7 @@ export const deleteTransferNumberFromDatabase = async (
     .eq('user_id', userId);
   
   if (error) {
+    console.error("Database error when deleting transfer number:", error);
     throw error;
   }
   

@@ -9,6 +9,7 @@ const TransferNumbers = () => {
   const { 
     transferNumbers, 
     isLoading, 
+    isSubmitting,
     addTransferNumber, 
     deleteTransferNumber 
   } = useTransferNumbers();
@@ -19,7 +20,10 @@ const TransferNumbers = () => {
         <h1 className="text-3xl font-bold">Transfer Numbers</h1>
       </div>
       
-      <AddTransferNumberForm onAddTransferNumber={addTransferNumber} />
+      <AddTransferNumberForm 
+        onAddTransferNumber={addTransferNumber} 
+        isSubmitting={isSubmitting}
+      />
       
       <TransferNumbersList 
         transferNumbers={transferNumbers}

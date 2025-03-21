@@ -8,14 +8,20 @@ import { PhoneForwarded, Plus } from "lucide-react";
 
 interface AddTransferNumberFormProps {
   onAddTransferNumber: (name: string, number: string, description: string) => Promise<any>;
+  isSubmitting?: boolean;
 }
 
-export const AddTransferNumberForm = ({ onAddTransferNumber }: AddTransferNumberFormProps) => {
+export const AddTransferNumberForm = ({ 
+  onAddTransferNumber, 
+  isSubmitting = false 
+}: AddTransferNumberFormProps) => {
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [description, setDescription] = useState("");
   
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+    
     const result = await onAddTransferNumber(name, number, description);
     if (result) {
       // Clear the form after successful submission
@@ -42,6 +48,7 @@ export const AddTransferNumberForm = ({ onAddTransferNumber }: AddTransferNumber
               placeholder="Enter a name for this transfer destination"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -51,6 +58,7 @@ export const AddTransferNumberForm = ({ onAddTransferNumber }: AddTransferNumber
               placeholder="Enter the phone number (e.g., +1-555-123-4567)"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -60,11 +68,15 @@ export const AddTransferNumberForm = ({ onAddTransferNumber }: AddTransferNumber
               placeholder="Enter a description for this transfer number"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
-          <Button onClick={handleSubmit}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting}
+          >
             <PhoneForwarded className="mr-2 h-4 w-4" />
-            Add Transfer Number
+            {isSubmitting ? "Adding..." : "Add Transfer Number"}
           </Button>
         </div>
       </CardContent>

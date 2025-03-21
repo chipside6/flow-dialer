@@ -22,11 +22,14 @@ export function useTransferNumbers() {
   const { user } = useAuth();
   const [transferNumbers, setTransferNumbers] = useState<TransferNumber[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Load transfer numbers on component mount
   useEffect(() => {
     if (user) {
       fetchTransferNumbers();
+    } else {
+      setIsLoading(false);
     }
   }, [user]);
   
@@ -69,6 +72,7 @@ export function useTransferNumbers() {
     }
     
     try {
+      setIsSubmitting(true);
       const newTransferNumber = await addTransferNumberToDatabase(user.id, name, number, description);
       
       if (newTransferNumber) {
@@ -90,6 +94,8 @@ export function useTransferNumbers() {
         variant: "destructive",
       });
       return null;
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -149,6 +155,7 @@ export function useTransferNumbers() {
   return {
     transferNumbers,
     isLoading,
+    isSubmitting,
     addTransferNumber,
     deleteTransferNumber,
     refreshTransferNumbers: fetchTransferNumbers
