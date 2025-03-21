@@ -1,0 +1,10 @@
+
+.clip-ribbon {
+  position: absolute;
+  top: 20px;
+  right: -35px;
+  transform: rotate(45deg);
+  width: 150px;
+  text-align: center;
+  letter-spacing: 1px;
+}
