@@ -18,6 +18,7 @@ import TransferNumbers from "./pages/TransferNumbers";
 import SipProviders from "./pages/SipProviders";
 import Dashboard from "./pages/Dashboard";
 import Billing from "./pages/Billing";
+import UpgradePage from "./pages/UpgradePage";
 import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -110,7 +111,7 @@ const App = () => (
               path="/upgrade" 
               element={
                 <ProtectedRoute>
-                  <Billing />
+                  <UpgradePage />
                 </ProtectedRoute>
               } 
             />
