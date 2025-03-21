@@ -60,12 +60,12 @@ export const UpgradePlanSection = () => {
             `}
           >
             {plan.popular && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full whitespace-nowrap z-10">
+              <div className="absolute -top-2.5 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full whitespace-nowrap z-10">
                 Recommended
               </div>
             )}
             
-            <div className="mb-2 mt-3">
+            <div className="mb-2 mt-4">
               <h3 className="text-xl font-semibold">{plan.name}</h3>
               <p className="text-muted-foreground text-sm">{plan.description}</p>
             </div>
