@@ -4,6 +4,8 @@ import { toast } from "@/components/ui/use-toast";
 export interface User {
   id: string;
   email: string;
+  created_at?: string;
+  last_sign_in_at?: string;
 }
 
 export interface UserProfile {

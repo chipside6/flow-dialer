@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { AuthContext } from './AuthContext';
-import { AuthContextType } from './types';
+import { AuthContext, AuthContextType } from './AuthContext';
 import { getStoredSession, fetchUserProfile, signUp as signUpService, signIn as signInService, signOut as signOutService, updateUserProfile, setUserAsAffiliate, User, UserProfile } from '@/services/authService';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
