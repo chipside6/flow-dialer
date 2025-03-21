@@ -13,7 +13,7 @@ export function useAddTransferNumber(
 
   // Add a new transfer number
   const addTransferNumber = async (name: string, number: string, description: string) => {
-    console.log("addTransferNumber called with:", { name, number, description });
+    console.log("addTransferNumber hook called with:", { name, number, description });
     
     if (!user) {
       console.log("No user authenticated, showing toast");
@@ -38,14 +38,25 @@ export function useAddTransferNumber(
     
     try {
       console.log("Adding transfer number for user:", user.id, {name, number, description});
-      const newTransferNumber = await addTransferNumberToDatabase(user.id, name, number, description);
+      
+      // Make sure we're passing clean data to the service
+      const cleanName = name.trim();
+      const cleanNumber = number.trim();
+      const cleanDesc = description ? description.trim() : "";
+      
+      const newTransferNumber = await addTransferNumberToDatabase(
+        user.id, 
+        cleanName, 
+        cleanNumber, 
+        cleanDesc
+      );
       
       if (newTransferNumber) {
         console.log("Successfully added transfer number:", newTransferNumber);
         
         toast({
           title: "Transfer number added",
-          description: `${name} (${number}) has been added successfully`,
+          description: `${cleanName} (${cleanNumber}) has been added successfully`,
         });
         
         // Trigger a refresh

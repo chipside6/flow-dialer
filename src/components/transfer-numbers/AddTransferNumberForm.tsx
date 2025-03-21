@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PhoneForwarded, Plus, Loader2 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AddTransferNumberFormProps {
   onAddTransferNumber: (name: string, number: string, description: string) => Promise<any>;
@@ -19,6 +20,7 @@ export const AddTransferNumberForm = ({
   const [number, setNumber] = useState("");
   const [description, setDescription] = useState("");
   const [localSubmitting, setLocalSubmitting] = useState(false);
+  const isMobile = useIsMobile();
   
   // Reset localSubmitting if it gets stuck
   useEffect(() => {
@@ -45,7 +47,10 @@ export const AddTransferNumberForm = ({
   }, [isSubmitting, localSubmitting]);
   
   const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      console.log("Form submit event captured");
+    }
     
     console.log("Form submitted with values:", { name, number, description });
     
@@ -59,10 +64,11 @@ export const AddTransferNumberForm = ({
       return;
     }
     
-    console.log("Form submitted, setting localSubmitting to true");
+    console.log("Form submission starting, setting localSubmitting to true");
     setLocalSubmitting(true);
     
     try {
+      console.log("Calling onAddTransferNumber with:", name.trim(), number.trim(), description.trim());
       const result = await onAddTransferNumber(name.trim(), number.trim(), description.trim());
       console.log("Submission result:", result ? "success" : "failure");
       
@@ -92,7 +98,11 @@ export const AddTransferNumberForm = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form 
+          onSubmit={handleSubmit} 
+          className="space-y-4"
+          data-mobile={isMobile ? "true" : "false"}
+        >
           <div>
             <Label htmlFor="transfer-name">Name</Label>
             <Input
@@ -102,6 +112,7 @@ export const AddTransferNumberForm = ({
               onChange={(e) => setName(e.target.value)}
               disabled={buttonDisabled}
               required
+              className="mb-0" // Override default mobile margin
             />
           </div>
           <div>
@@ -114,6 +125,7 @@ export const AddTransferNumberForm = ({
               disabled={buttonDisabled}
               required
               type="tel"
+              className="mb-0" // Override default mobile margin
             />
           </div>
           <div>
@@ -124,12 +136,20 @@ export const AddTransferNumberForm = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               disabled={buttonDisabled}
+              className="mb-0" // Override default mobile margin
             />
           </div>
           <Button 
             type="submit"
             disabled={buttonDisabled || !name.trim() || !number.trim()}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto mt-4"
+            onClick={() => {
+              console.log("Button clicked, name:", name, "number:", number);
+              if (!buttonDisabled && name.trim() && number.trim()) {
+                console.log("Button click will trigger form submission");
+                handleSubmit();
+              }
+            }}
           >
             {buttonDisabled ? (
               <>

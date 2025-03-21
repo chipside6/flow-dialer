@@ -35,7 +35,7 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
         number: item.phone_number,
         description: item.description || "No description provided",
         dateAdded: new Date(item.created_at),
-        callCount: item.call_count || 0
+        callCount: item.call_count !== null ? item.call_count : 0
       }));
     }
     
@@ -96,7 +96,7 @@ export const addTransferNumberToDatabase = async (
         number: newItem.phone_number,
         description: newItem.description || "No description provided",
         dateAdded: new Date(newItem.created_at),
-        callCount: newItem.call_count || 0
+        callCount: newItem.call_count !== null ? newItem.call_count : 0
       };
     }
     
