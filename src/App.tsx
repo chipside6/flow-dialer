@@ -1,136 +1,135 @@
-import React from 'react';
-import {
-  createBrowserRouter,
-  RouterProvider,
-  Navigate,
-} from "react-router-dom";
-import { useAuth } from '@/contexts/auth';
-import PublicLayout from '@/components/layout/PublicLayout';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import LandingPage from '@/pages/LandingPage';
-import LoginPage from '@/pages/LoginPage';
-import SignUpPage from '@/pages/SignUpPage';
-import DashboardPage from '@/pages/DashboardPage';
-import CampaignPage from '@/pages/CampaignPage';
-import GreetingsPage from '@/pages/GreetingsPage';
-import ContactsPage from '@/pages/ContactsPage';
-import TransfersPage from '@/pages/TransfersPage';
-import SipProvidersPage from '@/pages/SipProvidersPage';
-import ProfilePage from '@/pages/ProfilePage';
-import AdminPanelPage from '@/pages/AdminPanelPage';
-import FeaturesPage from '@/pages/FeaturesPage';
-import PricingPage from '@/pages/PricingPage';
-import SupportPage from '@/pages/SupportPage';
-import NotFoundPage from '@/pages/NotFoundPage';
-import UnauthorizedPage from '@/pages/UnauthorizedPage';
-import UpgradePage from './pages/UpgradePage';
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading, initialized } = useAuth();
-  
-  if (!initialized) {
-    return <div>Loading...</div>;
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-};
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/contexts/auth";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import Index from "./pages/Index";
+import Features from "./pages/Features";
+import Pricing from "./pages/Pricing";
+import Support from "./pages/Support";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
+import Campaign from "./pages/Campaign";
+import GreetingFiles from "./pages/GreetingFiles";
+import ContactLists from "./pages/ContactLists";
+import TransferNumbers from "./pages/TransferNumbers";
+import SipProviders from "./pages/SipProviders";
+import Dashboard from "./pages/Dashboard";
+import Billing from "./pages/Billing";
+import AdminPanel from "./pages/AdminPanel";
+import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <PublicLayout />,
-    children: [
-      {
-        path: "/",
-        element: <LandingPage />,
-      },
-      {
-        path: "/features",
-        element: <FeaturesPage />,
-      },
-      {
-        path: "/pricing",
-        element: <PricingPage />,
-      },
-      {
-        path: "/support",
-        element: <SupportPage />,
-      },
-      {
-        path: "/login",
-        element: <LoginPage />,
-      },
-      {
-        path: "/signup",
-        element: <SignUpPage />,
-      },
-      {
-        path: "/unauthorized",
-        element: <UnauthorizedPage />,
-      },
-      {
-        path: "*",
-        element: <NotFoundPage />,
-      },
-    ],
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: "/dashboard",
-        element: <DashboardLayout><DashboardPage /></DashboardLayout>,
-      },
-      {
-        path: "/campaign",
-        element: <DashboardLayout><CampaignPage /></DashboardLayout>,
-      },
-      {
-        path: "/campaigns",
-        element: <Navigate to="/campaign" replace />,
-      },
-      {
-        path: "/greetings",
-        element: <DashboardLayout><GreetingsPage /></DashboardLayout>,
-      },
-      {
-        path: "/contacts",
-        element: <DashboardLayout><ContactsPage /></DashboardLayout>,
-      },
-      {
-        path: "/transfers",
-        element: <DashboardLayout><TransfersPage /></DashboardLayout>,
-      },
-      {
-        path: "/sip-providers",
-        element: <DashboardLayout><SipProvidersPage /></DashboardLayout>,
-      },
-      {
-        path: "/profile",
-        element: <DashboardLayout><ProfilePage /></DashboardLayout>,
-      },
-      {
-        path: "/admin",
-        element: <DashboardLayout><AdminPanelPage /></DashboardLayout>,
-      },
-      {
-        path: "/upgrade",
-        element: <DashboardLayout><UpgradePage /></DashboardLayout>,
-      },
-    ],
-  },
-]);
+// Import the App.css for styling
+import "./App.css"; 
 
-function App() {
-  return (
-    <React.StrictMode>
-      <RouterProvider router={router} />
-    </React.StrictMode>
-  );
-}
+const App = () => (
+  <TooltipProvider>
+    <SidebarProvider defaultOpen>
+      <AuthProvider>
+        <BrowserRouter>
+          <Sonner />
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
+            
+            {/* Protected routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/campaign" 
+              element={
+                <ProtectedRoute>
+                  <Campaign />
+                </ProtectedRoute>
+              } 
+            />
+            {/* Add campaigns route (plural) as an alias to campaign */}
+            <Route 
+              path="/campaigns" 
+              element={
+                <ProtectedRoute>
+                  <Campaign />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/greetings" 
+              element={
+                <ProtectedRoute>
+                  <GreetingFiles />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/contacts" 
+              element={
+                <ProtectedRoute>
+                  <ContactLists />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/transfers" 
+              element={
+                <ProtectedRoute>
+                  <TransferNumbers />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/sip-providers" 
+              element={
+                <ProtectedRoute>
+                  <SipProviders />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/billing" 
+              element={
+                <ProtectedRoute>
+                  <Billing />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute>
+                  <AdminPanel />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </SidebarProvider>
+  </TooltipProvider>
+);
 
 export default App;
