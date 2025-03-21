@@ -14,11 +14,6 @@ export const UpgradePlanSection = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Reset processing state on component mount
-  useEffect(() => {
-    setProcessingPlan(null);
-  }, []);
-
   // Only show lifetime plan
   const getUpgradePlans = () => {
     return pricingPlans.filter(plan => plan.id === "lifetime");
@@ -32,11 +27,6 @@ export const UpgradePlanSection = () => {
   const callUsagePercentage = Math.min(100, ((callCount || 0) / maxFreeCalls) * 100);
 
   const handleUpgrade = async (plan: PricingPlan) => {
-    // If already processing, prevent multiple clicks
-    if (processingPlan) {
-      return;
-    }
-    
     console.log("Upgrade button clicked for plan:", plan.id);
     setProcessingPlan(plan.id);
     
@@ -63,8 +53,6 @@ export const UpgradePlanSection = () => {
           description: "Please try again or contact support.",
           variant: "destructive",
         });
-        // Make sure to reset processing state
-        setProcessingPlan(null);
       }
     } catch (error) {
       console.error("Error activating plan:", error);
@@ -73,11 +61,7 @@ export const UpgradePlanSection = () => {
         description: "Failed to activate the plan. Please try again.",
         variant: "destructive",
       });
-      // Make sure to reset processing state on error
-      setProcessingPlan(null);
     } finally {
-      // This should reset the processing state
-      // but let's keep the previous reset calls for safety
       setProcessingPlan(null);
     }
   };
@@ -92,7 +76,7 @@ export const UpgradePlanSection = () => {
       </div>
     );
   }
-  
+
   return (
     <div id="upgrade-plans" className="mt-8">
       <h2 className="text-2xl font-bold mb-6 text-left">Upgrade Your Plan</h2>
@@ -131,8 +115,8 @@ export const UpgradePlanSection = () => {
                   {plan.name}
                 </h3>
                 <div className="mb-4">
-                  <span className="text-[12rem] font-bold leading-none tracking-tight">${plan.price}</span>
-                  <span className="text-muted-foreground ml-2 text-xl">one-time</span>
+                  <span className="text-6xl font-bold">${plan.price}</span>
+                  <span className="text-muted-foreground ml-2">one-time</span>
                 </div>
                 <p className="text-muted-foreground">{plan.description}</p>
                 
