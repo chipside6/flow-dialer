@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { SipProvider } from "@/types/sipProviders";
 import { SipProviderApiResponse } from "./types";
@@ -23,7 +22,7 @@ export const fetchSipProviders = async (userId: string) => {
     return data || [];
   } catch (error: any) {
     console.error("Error in fetchSipProviders:", error);
-    throw error;
+    throw new Error(error.message || "Failed to fetch SIP providers");
   }
 };
 

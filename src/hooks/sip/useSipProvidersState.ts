@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SipProvider } from "@/types/sipProviders";
 import { SipProviderState } from "./types";
 import { fetchSipProviders, transformProviderData } from "./sipProviderService";
@@ -12,22 +12,22 @@ export const useSipProvidersState = (): SipProviderState => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
+  const mounted = useRef(true);
 
   useEffect(() => {
     console.log("useSipProvidersState effect running, user:", !!user);
-    let isMounted = true;
+    mounted.current = true;
     
     const loadProviders = async () => {
-      // Set loading state at the beginning
-      if (isMounted) {
-        setIsLoading(true);
-        setError(null);
-      }
+      if (!mounted.current) return;
+      
+      setIsLoading(true);
+      setError(null);
       
       try {
         if (!user) {
           console.log("No user, clearing providers");
-          if (isMounted) {
+          if (mounted.current) {
             setProviders([]);
             setIsLoading(false);
           }
@@ -38,8 +38,9 @@ export const useSipProvidersState = (): SipProviderState => {
         const data = await fetchSipProviders(user.id);
         console.log("Raw data from API:", data);
         
-        if (!isMounted) return;
+        if (!mounted.current) return;
         
+        // If no data was returned, set an empty array (this is a valid state)
         if (!data || data.length === 0) {
           console.log("No providers found, setting empty array");
           setProviders([]);
@@ -48,11 +49,9 @@ export const useSipProvidersState = (): SipProviderState => {
           console.log("Transformed providers:", transformedData);
           setProviders(transformedData);
         }
-        
-        setError(null);
       } catch (err: any) {
         console.error("Error fetching SIP providers:", err);
-        if (isMounted) {
+        if (mounted.current) {
           setError(err);
           toast({
             title: "Error loading providers",
@@ -61,8 +60,8 @@ export const useSipProvidersState = (): SipProviderState => {
           });
         }
       } finally {
-        // Always set loading to false when done
-        if (isMounted) {
+        // Always set loading to false when done if component is still mounted
+        if (mounted.current) {
           setIsLoading(false);
         }
       }
@@ -72,7 +71,7 @@ export const useSipProvidersState = (): SipProviderState => {
 
     return () => {
       console.log("Cleanup effect in useSipProvidersState");
-      isMounted = false;
+      mounted.current = false;
     };
   }, [user]);
 

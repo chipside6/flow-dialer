@@ -51,8 +51,9 @@ const SipProviders = () => {
         {isLoading ? (
           <div className="flex justify-center items-center min-h-[200px] w-full">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-2">Loading SIP providers...</span>
           </div>
-        ) : providers?.length === 0 ? (
+        ) : providers && providers.length === 0 ? (
           <div className="flex flex-col justify-center items-center min-h-[200px] w-full border rounded-lg p-8 text-center">
             <ServerOff className="w-12 h-12 mb-4 text-muted-foreground" />
             <h3 className="text-xl font-medium mb-2">No SIP Providers Added Yet</h3>
