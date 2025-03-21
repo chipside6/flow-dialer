@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Menu, Phone } from 'lucide-react';
+import { Menu, Phone, LogIn } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { NavLinks } from './NavLinks';
 import { MobileMenu } from './MobileMenu';

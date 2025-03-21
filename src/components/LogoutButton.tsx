@@ -10,9 +10,16 @@ interface LogoutButtonProps {
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   onClick?: () => void;
+  position?: "left" | "right";
 }
 
-const LogoutButton = ({ variant = "outline", size = "default", className, onClick }: LogoutButtonProps) => {
+const LogoutButton = ({ 
+  variant = "outline", 
+  size = "default", 
+  className = "", 
+  onClick,
+  position = "right"
+}: LogoutButtonProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   
@@ -47,8 +54,10 @@ const LogoutButton = ({ variant = "outline", size = "default", className, onClic
     }
   };
   
+  const buttonClasses = `${className} ${position === "left" ? "justify-start" : "justify-center"}`;
+  
   return (
-    <Button variant={variant} size={size} onClick={handleLogout} className={className}>
+    <Button variant={variant} size={size} onClick={handleLogout} className={buttonClasses}>
       <LogOut className="h-4 w-4 mr-2" /> <span>Logout</span>
     </Button>
   );
