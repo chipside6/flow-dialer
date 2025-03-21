@@ -1,9 +1,13 @@
 
 import { useState, useEffect } from "react";
 import { SipProvider, ContactList } from "@/components/background-dialer/types";
-import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
+import { 
+  createDialerError, 
+  DialerErrorType, 
+  handleDialerError 
+} from "@/utils/errorHandlingUtils";
 
 export const useFetchDialerResources = () => {
   const { user } = useAuth();
@@ -33,11 +37,11 @@ export const useFetchDialerResources = () => {
         setSipProviders(data || []);
       } catch (err) {
         console.error("Error fetching SIP providers:", err);
-        toast({
-          title: "Error loading SIP providers",
-          description: "Could not load your SIP providers",
-          variant: "destructive"
-        });
+        handleDialerError(createDialerError(
+          DialerErrorType.PROVIDER,
+          "Could not load your SIP providers",
+          err
+        ));
       } finally {
         setIsLoadingProviders(false);
       }
@@ -71,11 +75,11 @@ export const useFetchDialerResources = () => {
         setContactLists(transformedData);
       } catch (err) {
         console.error("Error fetching contact lists:", err);
-        toast({
-          title: "Error loading contact lists",
-          description: "Could not load your contact lists",
-          variant: "destructive"
-        });
+        handleDialerError(createDialerError(
+          DialerErrorType.CONTACT_LIST,
+          "Could not load your contact lists",
+          err
+        ));
       } finally {
         setIsLoadingLists(false);
       }
