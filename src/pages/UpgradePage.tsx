@@ -1,11 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { pricingPlans } from '@/data/pricingPlans';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, ArrowLeft } from 'lucide-react';
+import { Check, ArrowLeft, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { CryptoPaymentForm } from '@/components/payment/CryptoPaymentForm';
 import { useToast } from '@/components/ui/use-toast';
@@ -16,18 +16,15 @@ const UpgradePage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [showPaymentForm, setShowPaymentForm] = React.useState(false);
-  const { activateLifetimePlan, fetchCurrentSubscription } = useSubscription();
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const { activateLifetimePlan, fetchCurrentSubscription, isLoading: subscriptionLoading } = useSubscription();
+  const [isProcessing, setIsProcessing] = useState(false);
   
   // Get only the lifetime plan
   const lifetimePlan = pricingPlans.find(plan => plan.isLifetime);
   
-  if (!lifetimePlan) {
-    return <div>Plan not found</div>;
-  }
-  
   // Check if user is authenticated on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -35,8 +32,11 @@ const UpgradePage = () => {
         variant: "destructive",
       });
       navigate("/login");
+    } else {
+      // Refresh subscription data when component mounts
+      fetchCurrentSubscription();
     }
-  }, [user, navigate, toast]);
+  }, [user, navigate, toast, fetchCurrentSubscription]);
   
   const handleSelectPlan = () => {
     setShowPaymentForm(true);
@@ -53,18 +53,23 @@ const UpgradePage = () => {
     }
 
     try {
+      setIsProcessing(true);
+      
       // Record the payment in the database
       const { error: paymentError } = await supabase
         .from('payments')
         .insert([{
           user_id: user.id,
-          amount: lifetimePlan.price,
+          amount: lifetimePlan?.price || 0,
           payment_method: 'crypto',
           payment_details: paymentDetails,
-          plan_id: lifetimePlan.id
+          plan_id: lifetimePlan?.id || ''
         }]);
         
-      if (paymentError) throw paymentError;
+      if (paymentError) {
+        console.error("Error recording payment:", paymentError);
+        throw paymentError;
+      }
       
       // Activate the lifetime plan
       const result = await activateLifetimePlan();
@@ -91,6 +96,8 @@ const UpgradePage = () => {
         description: error.message || "There was a problem processing your payment",
         variant: "destructive"
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
   
@@ -101,6 +108,20 @@ const UpgradePage = () => {
   const handleNavigateBack = () => {
     navigate(-1);
   };
+  
+  // If we don't have the lifetime plan data yet
+  if (!lifetimePlan) {
+    return (
+      <DashboardLayout>
+        <div className="container mx-auto py-8 flex justify-center items-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+            <p>Loading plan information...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
   
   return (
     <DashboardLayout>
@@ -117,7 +138,14 @@ const UpgradePage = () => {
           </div>
         </div>
 
-        {!showPaymentForm ? (
+        {subscriptionLoading || isProcessing ? (
+          <div className="flex justify-center items-center min-h-[40vh]">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+              <p>{isProcessing ? "Processing your payment..." : "Loading your subscription..."}</p>
+            </div>
+          </div>
+        ) : !showPaymentForm ? (
           <div className="grid grid-cols-1 gap-6 max-w-md mx-auto">
             <Card className="rounded-lg border border-border/70 p-6 transition-all duration-300 bg-card shadow-md">
               <CardHeader className="p-0 pb-4">

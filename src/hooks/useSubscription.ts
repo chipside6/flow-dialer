@@ -59,7 +59,10 @@ export const useSubscription = () => {
   };
 
   const fetchCurrentSubscription = async () => {
-    if (!user) return null;
+    if (!user) {
+      setIsLoading(false);
+      return null;
+    }
     
     try {
       console.log("Fetching subscription for user:", user.id);
@@ -71,14 +74,10 @@ export const useSubscription = () => {
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
       
       if (error) {
-        if (error.code !== 'PGRST116') { // Not found error code
-          console.error("Error fetching subscription:", error);
-        } else {
-          console.log("No active subscription found, setting to free plan");
-        }
+        console.error("Error fetching subscription:", error);
         setCurrentPlan('free');
         setSubscription(null);
         setIsLoading(false);
@@ -100,6 +99,8 @@ export const useSubscription = () => {
       return null;
     } catch (error) {
       console.error("Error in fetchCurrentSubscription:", error);
+      setCurrentPlan('free');
+      setSubscription(null);
       setIsLoading(false);
       return null;
     }
@@ -160,9 +161,15 @@ export const useSubscription = () => {
       console.log("Lifetime plan activated successfully");
       setCurrentPlan("lifetime");
       
-      // Fetch the updated subscription
-      const updatedSubscription = await fetchCurrentSubscription();
+      // Fetch the updated subscription to ensure data is current
+      await fetchCurrentSubscription();
       
+      toast({
+        title: "Plan upgraded",
+        description: "You have successfully upgraded to the Lifetime plan!",
+      });
+      
+      setIsLoading(false);
       return { success: true, plan: lifetimePlan };
     } catch (error) {
       console.error("Error in activateLifetimePlan:", error);
