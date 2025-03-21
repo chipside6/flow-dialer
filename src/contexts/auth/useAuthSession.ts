@@ -53,13 +53,6 @@ export function useAuthSession() {
     } catch (error: any) {
       console.error('Error processing user session:', error);
       setAuthError(error);
-      
-      // Still mark as not loading, but with error state
-      toast({
-        title: "Authentication Error",
-        description: "There was a problem checking your authentication status. Some features may be limited.",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
       setSessionChecked(true);
@@ -67,9 +60,13 @@ export function useAuthSession() {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+    
     // Set up auth state change listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        if (!isMounted) return;
+        
         console.log("useAuthSession - Auth state changed:", event);
         
         if (event === 'SIGNED_OUT') {
@@ -92,6 +89,8 @@ export function useAuthSession() {
 
     // THEN check for existing session
     const checkSession = async () => {
+      if (!isMounted) return;
+      
       setIsLoading(true);
       try {
         console.log("useAuthSession - Checking active session");
@@ -103,6 +102,8 @@ export function useAuthSession() {
         
         await processUserAndProfile(session?.user || null, session);
       } catch (error: any) {
+        if (!isMounted) return;
+        
         console.error('Error checking auth session:', error);
         setAuthError(error);
         setIsLoading(false);
@@ -118,9 +119,20 @@ export function useAuthSession() {
 
     checkSession();
 
-    // Cleanup subscription
+    // Ensure we set loading to false after a timeout to prevent UI from getting stuck
+    const timeout = setTimeout(() => {
+      if (isMounted && isLoading) {
+        console.log("useAuthSession - Timeout reached, forcing loading state to false");
+        setIsLoading(false);
+        setSessionChecked(true);
+      }
+    }, 3000);
+
+    // Cleanup subscription and timeout
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
+      clearTimeout(timeout);
     };
   }, [processUserAndProfile]);
 

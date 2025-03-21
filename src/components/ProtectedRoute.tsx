@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       const timer = setTimeout(() => {
         setTimeoutReached(true);
         console.log('ProtectedRoute: Timeout reached while verifying authentication');
-      }, 3000); // 3 second timeout
+      }, 2000); // Reduced from 3s to 2s for faster fallback
       
       return () => clearTimeout(timer);
     }
@@ -30,11 +30,23 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     if (initialized && !isAuthenticated && !isLoading) {
       const errorTimer = setTimeout(() => {
         setAuthError(true);
-      }, 500);
+      }, 300); // Reduced from 500ms to 300ms
       
       return () => clearTimeout(errorTimer);
     }
   }, [isLoading, initialized, isAuthenticated]);
+
+  // Force redirect after a longer timeout if still loading
+  useEffect(() => {
+    const forceRedirectTimer = setTimeout(() => {
+      if (isLoading) {
+        console.log('ProtectedRoute: Force redirecting to login due to prolonged loading');
+        setTimeoutReached(true);
+      }
+    }, 5000); // 5 second absolute timeout
+    
+    return () => clearTimeout(forceRedirectTimer);
+  }, [isLoading]);
 
   // If authentication check is complete and user is authenticated, render children
   if (isAuthenticated) {
