@@ -9,15 +9,23 @@
     z-index: 60 !important; /* Increase z-index to ensure it appears above everything */
   }
   
-  /* Customize the mobile sidebar style */
+  /* Customize the mobile sidebar style - FIX TRANSPARENCY */
   [data-sidebar="sidebar"] {
-    background-color: white;
+    background-color: #ffffff !important;
     border-radius: 0 !important;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  /* SheetContent needs opacity fix too */
+  [role="dialog"] [data-mobile="true"] {
+    background-color: #ffffff !important;
+    opacity: 1 !important;
   }
   
   /* Give sidebar items more spacing */
   [data-sidebar="sidebar"] [data-sidebar="content"] {
     padding-top: 8px;
+    background-color: #ffffff !important; /* Ensure content area is also solid */
   }
   
   /* Fix item spacing and appearance */
@@ -100,6 +108,11 @@
   .mobile-sidebar-button {
     background-color: white !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  /* Fix for SheetContent - ensure no transparency */
+  .fixed.inset-y-0.z-50 {
+    background-color: #ffffff !important;
   }
 }
 

@@ -10,6 +10,7 @@
     margin-bottom: 8px;
     border-radius: 8px;
     transition: background-color 0.2s;
+    color: #333333;
   }
   
   /* Active state for sidebar items */
@@ -37,6 +38,16 @@
     padding: 12px 16px;
   }
   
+  /* Force a solid white background on the Sheet component */
+  div[role="dialog"] {
+    background-color: white !important;
+  }
+  
+  div[role="dialog"] > div[data-mobile="true"] {
+    background-color: white !important;
+    opacity: 1 !important;
+  }
+  
   /* Fix content positioning */
   [data-sidebar-inset] {
     padding-top: 60px;
@@ -57,5 +68,16 @@
   /* Fix logout icon rotation - make it consistent with the design */
   [data-sidebar="content"] .border-t button svg {
     transform: rotate(0deg);
+  }
+  
+  /* Ensure the Sheet component is not transparent */
+  [role="dialog"] {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+  }
+  
+  /* Add specific styling for SheetContent */
+  div[data-sidebar="sidebar"][data-mobile="true"] {
+    background-color: white !important;
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15) !important;
   }
 }
