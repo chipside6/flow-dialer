@@ -4,16 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PhoneForwarded, Plus } from "lucide-react";
+import { PhoneForwarded, Plus, Loader2 } from "lucide-react";
 
 interface AddTransferNumberFormProps {
   onAddTransferNumber: (name: string, number: string, description: string) => Promise<any>;
-  isSubmitting?: boolean;
+  isSubmitting: boolean;
 }
 
 export const AddTransferNumberForm = ({ 
   onAddTransferNumber, 
-  isSubmitting = false 
+  isSubmitting 
 }: AddTransferNumberFormProps) => {
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
@@ -22,6 +22,7 @@ export const AddTransferNumberForm = ({
   const handleSubmit = async () => {
     if (isSubmitting) return;
     
+    console.log("Form submitted, isSubmitting:", isSubmitting);
     const result = await onAddTransferNumber(name, number, description);
     if (result) {
       // Clear the form after successful submission
@@ -75,8 +76,17 @@ export const AddTransferNumberForm = ({
             onClick={handleSubmit} 
             disabled={isSubmitting}
           >
-            <PhoneForwarded className="mr-2 h-4 w-4" />
-            {isSubmitting ? "Adding..." : "Add Transfer Number"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              <>
+                <PhoneForwarded className="mr-2 h-4 w-4" />
+                Add Transfer Number
+              </>
+            )}
           </Button>
         </div>
       </CardContent>

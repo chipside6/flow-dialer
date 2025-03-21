@@ -74,6 +74,7 @@ export function useTransferNumbers() {
     }
     
     try {
+      console.log("Setting isSubmitting to true");
       setIsSubmitting(true);
       console.log("Adding transfer number for user:", user.id);
       const newTransferNumber = await addTransferNumberToDatabase(user.id, name, number, description);
@@ -99,6 +100,7 @@ export function useTransferNumbers() {
       });
       return null;
     } finally {
+      console.log("Setting isSubmitting to false");
       setIsSubmitting(false);
     }
   };
@@ -113,7 +115,7 @@ export function useTransferNumbers() {
       
       if (success) {
         console.log("Successfully deleted transfer number:", id);
-        setTransferNumbers(transferNumbers.filter(tn => tn.id !== id));
+        setTransferNumbers(prevNumbers => prevNumbers.filter(tn => tn.id !== id));
         
         toast({
           title: "Transfer number deleted",

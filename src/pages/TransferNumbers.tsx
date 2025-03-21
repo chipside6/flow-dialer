@@ -14,6 +14,12 @@ const TransferNumbers = () => {
     deleteTransferNumber 
   } = useTransferNumbers();
   
+  console.log("TransferNumbers page render state:", { 
+    transferNumbersCount: transferNumbers.length, 
+    isLoading, 
+    isSubmitting 
+  });
+  
   return (
     <DashboardLayout>
       <div className="mb-6">
