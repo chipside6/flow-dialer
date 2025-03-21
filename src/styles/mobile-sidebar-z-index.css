@@ -29,7 +29,7 @@
     display: none !important;
   }
   
-  /* Fixed button styles - lower z-index to prevent content overlap */
+  /* Fixed button styles - to avoid overlap, position it appropriately */
   .fixed.top-4.left-4.z-40 {
     transition: all 0.3s ease;
     z-index: 40 !important;
@@ -37,7 +37,8 @@
   
   /* Fix campaign title display */
   h1.text-2xl.md\:text-3xl.font-bold {
-    max-width: 220px;
+    padding-left: 56px !important;
+    max-width: calc(100% - 56px);
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -47,5 +48,21 @@
   /* Ensure button text doesn't break */
   button span, .button span {
     white-space: nowrap;
+  }
+  
+  /* Adjust all card headers to prevent overlap */
+  .card-header, [class*="CardHeader-root"] {
+    padding-left: 56px !important;
+  }
+  
+  /* Prevent the mobile sidebar button from overlapping with specific content */
+  .dashboard-cards .card,
+  .campaign-item,
+  .greeting-file-card,
+  .contact-list-item,
+  .transfer-number-card,
+  .sip-provider-card {
+    margin-left: 48px !important;
+    width: calc(100% - 48px) !important;
   }
 }
