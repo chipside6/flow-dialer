@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Billing from '../pages/Billing';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { pricingPlans } from '@/data/pricingPlans';
@@ -10,10 +9,13 @@ import { Check, ArrowLeft } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { CryptoPaymentForm } from '@/components/payment/CryptoPaymentForm';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/auth';
 
 const UpgradePage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [showPaymentForm, setShowPaymentForm] = React.useState(false);
   const { activateLifetimePlan } = useSubscription();
   
@@ -29,17 +31,51 @@ const UpgradePage = () => {
   };
   
   const handlePaymentSuccess = async (paymentDetails: any) => {
-    const result = await activateLifetimePlan();
-    
-    if (result.success) {
+    if (!user) {
       toast({
-        title: "Lifetime Access Activated",
-        description: `You now have lifetime access to all features!`,
+        title: "Authentication required",
+        description: "You must be logged in to upgrade your plan",
+        variant: "destructive",
       });
+      return;
+    }
+
+    try {
+      // Record the payment in the database
+      const { error: paymentError } = await supabase
+        .from('payments')
+        .insert({
+          user_id: user.id,
+          amount: lifetimePlan.price,
+          payment_method: 'crypto',
+          payment_details: paymentDetails,
+          plan_id: lifetimePlan.id
+        });
+        
+      if (paymentError) throw paymentError;
       
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
+      // Activate the lifetime plan
+      const result = await activateLifetimePlan();
+      
+      if (result.success) {
+        toast({
+          title: "Lifetime Access Activated",
+          description: `You now have lifetime access to all features!`,
+        });
+        
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+      } else {
+        throw new Error("Failed to activate lifetime plan");
+      }
+    } catch (error: any) {
+      console.error("Error processing payment:", error);
+      toast({
+        title: "Error upgrading plan",
+        description: error.message || "There was a problem processing your payment",
+        variant: "destructive"
+      });
     }
   };
   

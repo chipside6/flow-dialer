@@ -31,7 +31,6 @@ export const useSubscription = () => {
     if (!user) return 0;
     
     try {
-      // In a real app, this would fetch from campaigns or a dedicated calls table
       const { data, error } = await supabase
         .from('campaigns')
         .select('total_calls')
@@ -153,11 +152,6 @@ export const useSubscription = () => {
       // Fetch the subscription again to get the full data
       const updatedSubscription = await fetchCurrentSubscription();
       setSubscription(updatedSubscription);
-      
-      toast({
-        title: "Lifetime access activated",
-        description: "You now have unlimited access to all features forever!",
-      });
       
       return { success: true, plan: lifetimePlan };
     } catch (error) {
