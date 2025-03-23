@@ -10,7 +10,7 @@ export interface AuthContextType {
   isAdmin: boolean;
   error: Error | null;
   sessionChecked: boolean;
-  initialized: boolean;
+  initialized: boolean; // Add this flag to track complete initialization
   setProfile: (profile: UserProfile | null) => void;
   signOut: () => Promise<{ success: boolean; error: any | null }>;
   updateProfile: (profile: UserProfile | null) => void;

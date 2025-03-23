@@ -9,11 +9,11 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, sessionChecked, error } = useAuth();
+  const { isAuthenticated, isLoading, sessionChecked, initialized, error } = useAuth();
   const location = useLocation();
   
   // If we're still loading and haven't checked session, show loading indicator
-  if (isLoading && !sessionChecked) {
+  if (isLoading && !initialized) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
@@ -48,7 +48,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
   
   // If session is checked and user is not authenticated, redirect to login
-  if (sessionChecked) {
+  if (initialized || sessionChecked) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
