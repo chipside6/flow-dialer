@@ -40,10 +40,10 @@ const GreetingFiles = () => {
   };
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="w-full">
       <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="files">My Files</TabsTrigger>
           <TabsTrigger value="record">Record New</TabsTrigger>

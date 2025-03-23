@@ -1,6 +1,6 @@
 
 import React from 'react';
-import GreetingFiles from '../pages/GreetingFiles';
+import GreetingFiles from './GreetingFiles';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Navbar } from '@/components/Navbar';
 
