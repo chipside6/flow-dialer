@@ -6,12 +6,14 @@ import { Navbar } from '@/components/Navbar';
 
 const GreetingsPage = () => {
   return (
-    <>
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <DashboardLayout>
-        <GreetingFiles />
-      </DashboardLayout>
-    </>
+      <div className="flex flex-1 w-full max-w-full overflow-hidden">
+        <DashboardLayout>
+          <GreetingFiles />
+        </DashboardLayout>
+      </div>
+    </div>
   );
 };
 
