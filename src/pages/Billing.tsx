@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { AffiliateNotice } from "@/components/billing/AffiliateNotice";
 import { PlansSection } from "@/components/billing/PlansSection";
 import { pricingPlans, PricingPlan } from "@/data/pricingPlans";
 import { CurrentSubscription } from "@/components/billing/CurrentSubscription";
@@ -18,7 +17,7 @@ import { CryptoPaymentForm } from "@/components/payment/CryptoPaymentForm";
 const Billing = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isAffiliate, user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   
@@ -72,18 +71,6 @@ const Billing = () => {
   const handleBack = () => {
     setShowPaymentForm(false);
   };
-
-  // If user is an affiliate, show a message and redirect to dashboard
-  if (isAffiliate) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="py-32 px-6 md:px-10">
-          <AffiliateNotice />
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">

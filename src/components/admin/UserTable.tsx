@@ -16,11 +16,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface UserTableProps {
   users: AdminPanelUser[];
-  toggleAffiliate: (userId: string, isAffiliate: boolean) => void;
   isLoading: boolean;
 }
 
-export function UserTable({ users, toggleAffiliate, isLoading }: UserTableProps) {
+export function UserTable({ users, isLoading }: UserTableProps) {
   console.log("UserTable - Rendering with users:", users?.length || 0, "isLoading:", isLoading);
   
   if (isLoading) {
@@ -55,7 +54,6 @@ export function UserTable({ users, toggleAffiliate, isLoading }: UserTableProps)
               <TableHead>Email</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -72,26 +70,10 @@ export function UserTable({ users, toggleAffiliate, isLoading }: UserTableProps)
                   {user.profile?.is_admin && (
                     <Badge variant="secondary" className="mr-1">Admin</Badge>
                   )}
-                  {user.profile?.is_affiliate ? (
-                    <Badge variant="default" className="bg-green-600">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Affiliate
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-muted-foreground">
-                      <XCircle className="h-3 w-3 mr-1" />
-                      Standard
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant={user.profile?.is_affiliate ? "destructive" : "default"}
-                    size="sm"
-                    onClick={() => toggleAffiliate(user.id, !!user.profile?.is_affiliate)}
-                  >
-                    {user.profile?.is_affiliate ? "Remove Affiliate" : "Make Affiliate"}
-                  </Button>
+                  <Badge variant="outline" className="text-muted-foreground">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Standard
+                  </Badge>
                 </TableCell>
               </TableRow>
             ))}

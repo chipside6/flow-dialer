@@ -4,8 +4,7 @@ import {
   signUpUser, 
   signInUser, 
   signOutUser,
-  updateUserProfileAction,
-  setAsAffiliateAction
+  updateUserProfileAction
 } from '../authActions';
 import { toast } from '@/components/ui/use-toast';
 

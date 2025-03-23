@@ -1,13 +1,12 @@
 
 import { UserProfile } from '../types';
-import { updateUserProfileAction, setAsAffiliateAction } from '../authActions';
+import { updateUserProfileAction } from '../authActions';
 import { toast } from '@/components/ui/use-toast';
 import { User } from '@supabase/supabase-js';
 
 export function useProfileOperations(
   user: User | null, 
-  setProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>,
-  setIsAffiliate: React.Dispatch<React.SetStateAction<boolean>>
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>
 ) {
   const updateProfile = async (data: Partial<UserProfile>) => {
     if (!user) {
@@ -40,44 +39,8 @@ export function useProfileOperations(
       return { error };
     }
   };
-  
-  const setAsAffiliate = async (userId: string) => {
-    try {
-      const { success, error } = await setAsAffiliateAction(userId);
-      
-      if (error) {
-        toast({
-          title: "Affiliate status update failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // If updating the current user, update the state
-      if (success && user && user.id === userId) {
-        setIsAffiliate(true);
-        setProfile(prevProfile => ({
-          ...prevProfile,
-          is_affiliate: true
-        } as UserProfile));
-        
-        toast({
-          title: "Affiliate status updated",
-          description: "You are now an affiliate",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Affiliate status update failed",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-    }
-  };
 
   return {
-    updateProfile,
-    setAsAffiliate
+    updateProfile
   };
 }
