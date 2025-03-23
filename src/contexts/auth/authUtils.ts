@@ -33,7 +33,8 @@ export const fetchUserProfile = async (userId: string) => {
     
     // Safely check if avatar_url exists in the data and assign it
     if ('avatar_url' in data && data.avatar_url) {
-      userProfile.avatar_url = data.avatar_url;
+      // Add type assertion to confirm avatar_url is a string
+      userProfile.avatar_url = data.avatar_url as string;
     }
 
     // If we don't have an email in the profile data, try to get it from auth.users
