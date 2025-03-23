@@ -19,32 +19,34 @@ export const fetchUserProfile = async (userId: string) => {
     
     console.log("authUtils - Profile retrieved successfully:", data);
     
-    // Ensure the data has the required 'email' field
-    if (!data.email) {
-      console.error("authUtils - Profile data missing required email field");
-      // Try to fetch the email from the users table if it's not in the profile
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('email')
-        .eq('id', userId)
-        .single();
-        
-      if (userError || !userData) {
-        console.error("authUtils - Could not find email for user:", userError?.message);
-        return null;
+    // Create a properly typed UserProfile object
+    const userProfile: UserProfile = {
+      id: data.id,
+      email: data.email || '', // Use empty string as fallback
+      full_name: data.full_name,
+      avatar_url: data.avatar_url,
+      company_name: data.company_name,
+      is_admin: data.is_admin || false,
+      is_affiliate: data.is_affiliate || false
+    };
+
+    // If we don't have an email in the profile data, try to get it from auth.users
+    if (!userProfile.email) {
+      console.log("authUtils - No email found in profile, getting from auth user");
+      const { data: userData } = await supabase.auth.getUser();
+      
+      if (userData?.user) {
+        userProfile.email = userData.user.email || '';
       }
-      
-      // Combine the profile data with the email from the users table
-      const profileWithEmail = {
-        ...data,
-        email: userData.email
-      };
-      
-      return profileWithEmail as UserProfile;
     }
     
-    // If email is already present, return the data as is
-    return data as UserProfile;
+    // Validate that we have an email
+    if (!userProfile.email) {
+      console.error("authUtils - Could not retrieve email for user profile");
+      return null;
+    }
+    
+    return userProfile;
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return null;
