@@ -1,9 +1,11 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from './types';
 
-export const fetchUserProfile = async (userId: string) => {
+export async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
   try {
     console.log("Fetching user profile for:", userId);
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -20,64 +22,60 @@ export const fetchUserProfile = async (userId: string) => {
       return null;
     }
     
-    console.log("Profile retrieved successfully");
-    
-    // Create a properly typed UserProfile object
-    // Map the profile data to our UserProfile type, accounting for fields that may not be in the database
-    const userProfile: UserProfile = {
+    // Create a UserProfile object with all required fields
+    const profile: UserProfile = {
       id: data.id,
-      // Use data from auth.user for email if needed
-      email: '', // We'll get email from the auth user object instead
+      email: '', // This will be set by the AuthProvider
       full_name: data.full_name || '',
-      avatar_url: null, // This field isn't in the database schema
+      avatar_url: data.avatar_url || '',
       company_name: data.company_name || '',
       is_admin: !!data.is_admin,
-      is_affiliate: !!data.is_affiliate
+      is_affiliate: !!data.is_affiliate,
+      created_at: data.created_at || '',
+      updated_at: data.updated_at || ''
     };
     
-    return userProfile;
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
+    return profile;
+  } catch (error: any) {
+    console.error("Error in fetchUserProfile:", error.message);
     return null;
   }
-};
+}
 
-export const updateUserProfile = async (userId: string, data: Partial<UserProfile>) => {
+export async function updateUserProfile(userId: string, data: Partial<UserProfile>): Promise<boolean> {
   try {
-    // Only keep fields that exist in the profiles table
-    const profileData = {
-      full_name: data.full_name,
-      company_name: data.company_name,
-      is_admin: data.is_admin,
-      is_affiliate: data.is_affiliate
-    };
-    
     const { error } = await supabase
       .from('profiles')
-      .update(profileData)
+      .update(data)
       .eq('id', userId);
     
-    if (error) throw error;
+    if (error) {
+      console.error("Error updating profile:", error.message);
+      return false;
+    }
     
     return true;
-  } catch (error) {
-    console.error('Error updating profile:', error);
+  } catch (error: any) {
+    console.error("Error in updateUserProfile:", error.message);
     return false;
   }
-};
+}
 
-export const setUserAsAffiliate = async (userId: string) => {
+export async function setUserAsAffiliate(userId: string): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('profiles')
       .update({ is_affiliate: true })
       .eq('id', userId);
-    
-    if (error) throw error;
+      
+    if (error) {
+      console.error("Error setting affiliate status:", error.message);
+      return false;
+    }
     
     return true;
-  } catch (error) {
-    console.error('Error setting affiliate status:', error);
+  } catch (error: any) {
+    console.error("Error in setUserAsAffiliate:", error.message);
     return false;
   }
-};
+}
