@@ -12,7 +12,15 @@ import { Button } from "@/components/ui/button";
 
 const ContactLists = () => {
   const { user } = useAuth();
-  const { lists, isLoading, error, createContactList, deleteContactList } = useContactLists();
+  const { 
+    lists, 
+    isLoading, 
+    error, 
+    createContactList, 
+    deleteContactList,
+    uploadContactsWithNewList,
+    refreshLists
+  } = useContactLists();
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   
   // Add an effect to handle persistently stuck loading states
@@ -34,7 +42,7 @@ const ContactLists = () => {
   
   // Handle manual refresh
   const handleRefresh = () => {
-    window.location.reload();
+    refreshLists();
   };
   
   console.log("Contact Lists page render - user:", user?.id);
@@ -48,7 +56,7 @@ const ContactLists = () => {
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold">Contact Lists</h1>
           
-          {loadingTimeout && (
+          {loadingTimeout ? (
             <Button 
               variant="outline" 
               onClick={handleRefresh}
@@ -57,10 +65,23 @@ const ContactLists = () => {
               <RefreshCw className="h-4 w-4" />
               Refresh
             </Button>
+          ) : (
+            <Button 
+              variant="ghost" 
+              onClick={handleRefresh}
+              className="flex items-center gap-2"
+              size="sm"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh Lists
+            </Button>
           )}
         </div>
         
-        <CreateContactListForm onListCreated={createContactList} />
+        <CreateContactListForm 
+          onListCreated={createContactList} 
+          onFileUpload={uploadContactsWithNewList}
+        />
         
         {isLoading && !loadingTimeout ? (
           <div className="flex justify-center items-center py-12">
