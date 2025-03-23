@@ -50,7 +50,7 @@ const CampaignPage = () => {
       <Navbar />
       <div className="flex flex-1 w-full">
         <DashboardLayout>
-          <div className="max-w-6xl mx-auto w-full px-2 md:px-4 pt-14 md:pt-4 campaign-content overflow-hidden">
+          <div className="max-w-6xl mx-auto w-full px-2 md:px-4 pt-14 md:pt-4 campaign-content">
             {showCreateWizard ? (
               <CampaignCreationWizard 
                 onComplete={handleCreateCampaign}
@@ -59,7 +59,7 @@ const CampaignPage = () => {
             ) : (
               <>
                 <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-                  <h1 className="text-2xl md:text-3xl font-bold truncate max-w-[220px] md:max-w-full">Campaigns</h1>
+                  <h1 className="text-2xl md:text-3xl font-bold">Campaigns</h1>
                   <Button 
                     variant="success"
                     onClick={() => setShowCreateWizard(true)}
@@ -69,7 +69,7 @@ const CampaignPage = () => {
                     Create Campaign
                   </Button>
                 </div>
-                <div className="w-full overflow-hidden">
+                <div className="w-full">
                   <CampaignDashboard initialCampaigns={campaigns} />
                 </div>
               </>

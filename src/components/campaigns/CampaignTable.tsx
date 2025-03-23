@@ -30,18 +30,18 @@ export const CampaignTable: React.FC = () => {
         {campaigns.length === 0 ? (
           <TableRow>
             <TableCell colSpan={4} className="text-center py-8">
-              <div className="flex flex-col items-center justify-center space-y-4 max-w-md mx-auto px-4">
+              <div className="flex flex-col items-center justify-center space-y-4 mx-auto px-4">
                 <p className="text-muted-foreground">No campaigns found</p>
-                <p className="text-sm text-muted-foreground mb-4 break-normal">
+                <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto">
                   Create your first campaign to start making calls
                 </p>
                 <Button 
                   variant="success" 
-                  className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium whitespace-nowrap"
+                  className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium"
                   onClick={handleCreateCampaign}
                   size="lg"
                 >
-                  <PlusCircle className="h-5 w-5" /> <span>Create Campaign</span>
+                  <PlusCircle className="h-5 w-5" /> Create Campaign
                 </Button>
               </div>
             </TableCell>

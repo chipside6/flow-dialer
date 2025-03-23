@@ -104,12 +104,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding-left: 60px !important; /* Add more left padding to prevent overlap with menu button */
-  }
-  
-  /* Apply extra padding to campaign content container on mobile */
-  .campaign-content {
-    padding-left: 60px !important; /* Increased padding to avoid icon overlap */
   }
 
   /* Fix campaign table text overflow */
@@ -145,5 +139,41 @@
     overflow-wrap: break-word;
     word-wrap: break-word;
     hyphens: auto;
+  }
+}
+
+/* Web view specific fixes */
+@media screen and (min-width: 769px) {
+  /* Ensure buttons in tables don't overflow */
+  .table-row-action button {
+    white-space: nowrap;
+  }
+  
+  /* Fix campaign table empty state in web view */
+  tbody td div.flex.flex-col {
+    max-width: 100%;
+  }
+  
+  tbody td p {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+  
+  /* Prevent button text overflow */
+  button {
+    white-space: nowrap;
+  }
+  
+  /* Fix campaign table cell content */
+  tbody td {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Fix empty state message container */
+  tbody td div.flex.flex-col.items-center.justify-center {
+    max-width: 400px;
+    margin: 0 auto;
   }
 }
