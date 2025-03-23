@@ -1,0 +1,7 @@
+
+/* Fixes for Radix UI components */
+
+/* Fix for Select dropdown visibility */
+[data-radix-popper] {
+  z-index: 1000 !important;
+}

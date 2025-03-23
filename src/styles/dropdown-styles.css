@@ -1,0 +1,71 @@
+
+/* Dropdown and select component styling */
+
+/* Fix for select dropdowns */
+[data-radix-select-trigger] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+[data-radix-select-trigger] [data-radix-select-value] {
+  flex-grow: 1;
+  text-align: left;
+}
+
+[data-radix-select-trigger] [data-radix-select-icon] {
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+  opacity: 0.7;
+}
+
+/* Ensure Radix Select content is visible and properly styled */
+[data-radix-popper] {
+  z-index: 1000 !important;
+}
+
+[data-radix-select-content] {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden !important;
+  max-height: 300px !important;
+  min-width: 100% !important;
+}
+
+.dark [data-radix-select-content] {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+[data-radix-select-viewport] {
+  padding: 0.5rem !important;
+}
+
+[data-radix-select-item] {
+  cursor: pointer !important;
+  padding: 0.5rem 1rem !important;
+  transition: background-color 0.2s !important;
+  border-radius: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+[data-radix-select-item]:hover {
+  background-color: #f1f5f9 !important;
+}
+
+.dark [data-radix-select-item]:hover {
+  background-color: #374151 !important;
+}
+
+[data-radix-select-item][data-highlighted] {
+  background-color: #e2e8f0 !important;
+  color: #000 !important;
+}
+
+.dark [data-radix-select-item][data-highlighted] {
+  background-color: #4b5563 !important;
+  color: #fff !important;
+}
