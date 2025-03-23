@@ -33,7 +33,7 @@ export interface GreetingFile {
   user_id: string;
   filename: string;
   url: string;
-  file_path?: string;
+  file_path: string;
   file_type?: string;
   file_size?: number;
   duration_seconds?: number | null;

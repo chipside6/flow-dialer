@@ -48,7 +48,13 @@ export function useGreetingFiles() {
         }
         
         console.log("Greeting files fetched:", data?.length || 0);
-        return data || [];
+        // Ensure each record has a file_path property, even if it's empty string
+        const processedData = data?.map(file => ({
+          ...file,
+          file_path: file.file_path || ''
+        })) || [];
+        
+        return processedData;
       } catch (error) {
         console.error("Network or unexpected error fetching greeting files:", error);
         throw new Error("Failed to fetch greeting files. Please check your network connection.");

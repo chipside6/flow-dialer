@@ -76,7 +76,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
       <TabsContent value="audio">
         <AudioStep 
           campaign={campaign}
-          greetingFiles={greetingFiles}
+          greetingFiles={greetingFiles as GreetingFile[]}
           onSelectChange={handleSelectChange}
         />
       </TabsContent>
@@ -97,7 +97,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
         <ReviewStep 
           campaign={campaign}
           contactLists={contactLists}
-          greetingFiles={greetingFiles}
+          greetingFiles={greetingFiles as GreetingFile[]}
         />
       </TabsContent>
     </WizardContainer>
