@@ -1,35 +1,40 @@
-
 import React from "react";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CampaignData } from "./types";
 import { GreetingFile } from "@/hooks/useGreetingFiles";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AudioStepProps {
   campaign: CampaignData;
   greetingFiles: GreetingFile[];
-  onSelectChange: (name: string, value: string) => void;
+  onSelectChange: (field: string, value: string) => void;
 }
 
 export const AudioStep = ({ campaign, greetingFiles, onSelectChange }: AudioStepProps) => {
   return (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="greetingFileId">Select Greeting Audio</Label>
-        <Select
-          value={campaign.greetingFileId}
-          onValueChange={(value) => onSelectChange("greetingFileId", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a greeting audio file" />
-          </SelectTrigger>
-          <SelectContent>
-            {greetingFiles.map(file => (
-              <SelectItem key={file.id} value={file.id}>{file.filename}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Audio Selection</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4">
+          <div className="grid grid-cols-3 items-center gap-4">
+            <label htmlFor="greetingFile">Greeting Audio:</label>
+            <Select onValueChange={(value) => onSelectChange("greetingFileId", value)} defaultValue={campaign.greetingFileId}>
+              <SelectTrigger className="col-span-2">
+                <SelectValue placeholder="Select a greeting audio" />
+              </SelectTrigger>
+              <SelectContent>
+                {greetingFiles.map((file) => (
+                  <SelectItem key={file.id} value={file.id}>
+                    {file.filename}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

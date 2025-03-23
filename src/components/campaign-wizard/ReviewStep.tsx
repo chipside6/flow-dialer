@@ -1,7 +1,8 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CampaignData, ContactList, GreetingFile } from "./types";
+import { CampaignData, ContactList } from "./types";
+import { GreetingFile } from "@/hooks/useGreetingFiles";
 
 interface ReviewStepProps {
   campaign: CampaignData;
@@ -28,7 +29,7 @@ export const ReviewStep = ({ campaign, contactLists, greetingFiles }: ReviewStep
           </div>
           <div>
             <h3 className="font-medium">Greeting Audio</h3>
-            <p>{greetingFiles.find(file => file.id === campaign.greetingFileId)?.name || "None selected"}</p>
+            <p>{greetingFiles.find(file => file.id === campaign.greetingFileId)?.filename || "None selected"}</p>
           </div>
           <div>
             <h3 className="font-medium">Transfer Number</h3>
