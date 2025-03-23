@@ -1,12 +1,11 @@
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/auth';
 import { Loader2, Phone, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,7 +16,11 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Get the intended destination from location state, or default to dashboard
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +28,8 @@ const Login = () => {
     setErrorMessage(null);
 
     try {
+      console.log("Attempting to sign in with:", email);
+      
       // Use Supabase directly for authentication
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -32,15 +37,19 @@ const Login = () => {
       });
 
       if (error) {
+        console.error("Login error:", error);
         throw error;
       }
 
+      console.log("Login successful, user:", data.user);
+      
       toast({
         title: "Login successful",
         description: "You've been successfully logged in",
       });
 
-      navigate('/dashboard');
+      // Navigate to the intended destination
+      navigate(from, { replace: true });
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage(error.message || "Failed to login");

@@ -1,15 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
-import { AuthContext, AuthContextType } from './AuthContext';
-import { User, UserProfile, Session } from './types';
-import { 
-  getStoredSession, 
-  signUp as signUpService, 
-  signIn as signInService, 
-  signOut as signOutService,
-  fetchUserProfile,
-  updateUserProfile as updateUserProfileService,
-  setUserAsAffiliate as setUserAsAffiliateService
-} from '@/services/auth';
+import { AuthContext } from './AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import type { User, UserProfile } from './types';
+import { fetchUserProfile } from './authUtils';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -17,176 +11,121 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAffiliate, setIsAffiliate] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
 
-  // Effect to check for existing session
   useEffect(() => {
+    console.log("Checking for existing session");
+    
+    // Set up auth state change listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          setUser(session.user);
+          
+          // Fetch profile data
+          const userProfile = await fetchUserProfile(session.user.id);
+          if (userProfile) {
+            setProfile(userProfile);
+            setIsAdmin(!!userProfile.is_admin);
+            setIsAffiliate(!!userProfile.is_affiliate);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setProfile(null);
+          setIsAdmin(false);
+          setIsAffiliate(false);
+        }
+        
+        setIsLoading(false);
+        setSessionChecked(true);
+      }
+    );
+    
+    // THEN check for existing session
     const checkSession = async () => {
       try {
-        console.log("Checking for existing session");
         setIsLoading(true);
         
-        const storedSession = getStoredSession();
+        // Get current user session
+        const { data, error: sessionError } = await supabase.auth.getSession();
         
-        if (storedSession) {
-          console.log("Found stored session for user:", storedSession.user.email);
-          setUser(storedSession.user);
+        if (sessionError) {
+          console.error('Error checking session:', sessionError);
+          setError(sessionError instanceof Error ? sessionError : new Error('Unknown error during session check'));
+          setIsLoading(false);
+          setSessionChecked(true);
+          return;
+        }
+        
+        if (data.session?.user) {
+          console.log("Found active session for user:", data.session.user.email);
+          setUser(data.session.user);
           
           // Fetch user profile
-          const userProfile = await fetchUserProfile(storedSession.user.id);
-          
+          const userProfile = await fetchUserProfile(data.session.user.id);
           if (userProfile) {
             setProfile(userProfile);
             setIsAdmin(!!userProfile.is_admin);
             setIsAffiliate(!!userProfile.is_affiliate);
           }
         } else {
-          console.log("No stored session found");
+          console.log("No active session found");
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
           setIsAffiliate(false);
         }
       } catch (error) {
-        console.error("Error checking session:", error);
-        setUser(null);
-        setProfile(null);
+        console.error('Error checking session:', error);
+        setError(error instanceof Error ? error : new Error('Unknown error during session check'));
       } finally {
         setIsLoading(false);
         setSessionChecked(true);
-        setInitialized(true);
       }
     };
     
     checkSession();
+    
+    // Clean up subscription
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Sign up a new user
-  const signUp = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      const result = await signUpService(email, password);
-      
-      // Update local state if session is returned from signup
-      if (!result.error && result.session) {
-        setUser(result.session.user);
-        
-        // Try to fetch user profile
-        const userProfile = await fetchUserProfile(result.session.user.id);
-        
-        if (userProfile) {
-          setProfile(userProfile);
-          setIsAdmin(!!userProfile.is_admin);
-          setIsAffiliate(!!userProfile.is_affiliate);
-        }
-      }
-      
-      return result;
-    } finally {
-      setIsLoading(false);
+  // Handler for updating the profile
+  const updateProfile = (newProfile: UserProfile | null) => {
+    setProfile(newProfile);
+    if (newProfile) {
+      setIsAdmin(!!newProfile.is_admin);
+      setIsAffiliate(!!newProfile.is_affiliate);
+    }
+  };
+  
+  // Handler for updating affiliate status
+  const updateIsAffiliate = (status: boolean) => {
+    setIsAffiliate(status);
+    if (profile) {
+      setProfile({
+        ...profile,
+        is_affiliate: status
+      });
     }
   };
 
-  // Sign in an existing user
-  const signIn = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      const result = await signInService(email, password);
-      
-      if (!result.error && result.session) {
-        setUser(result.session.user);
-        
-        // Fetch user profile
-        const userProfile = await fetchUserProfile(result.session.user.id);
-        
-        if (userProfile) {
-          setProfile(userProfile);
-          setIsAdmin(!!userProfile.is_admin);
-          setIsAffiliate(!!userProfile.is_affiliate);
-        }
-      }
-      
-      return result;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Sign out the current user
-  const signOut = async () => {
-    try {
-      setIsLoading(true);
-      const result = await signOutService();
-      
-      // Regardless of API result, clear local state
-      setUser(null);
-      setProfile(null);
-      setIsAdmin(false);
-      setIsAffiliate(false);
-      
-      return result;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Update user profile
-  const updateProfileHandler = async (data: Partial<UserProfile>) => {
-    if (!user) {
-      return { error: new Error('No user authenticated') };
-    }
-    
-    try {
-      const success = await updateUserProfileService(user.id, data);
-      
-      if (success) {
-        // Update local profile state
-        setProfile(prevProfile => ({
-          ...prevProfile,
-          ...data
-        } as UserProfile));
-        
-        return { error: null };
-      }
-      
-      return { error: new Error('Failed to update profile') };
-    } catch (error: any) {
-      return { error: new Error(error.message) };
-    }
-  };
-
-  // Set a user as an affiliate
-  const setAsAffiliateHandler = async (userId: string) => {
-    try {
-      const success = await setUserAsAffiliateService(userId);
-      
-      if (success && user && user.id === userId) {
-        setIsAffiliate(true);
-        setProfile(prevProfile => ({
-          ...prevProfile,
-          is_affiliate: true
-        } as UserProfile));
-      }
-    } catch (error: any) {
-      console.error('Error setting affiliate status:', error);
-    }
-  };
-
-  const value: AuthContextType = {
+  const value = {
     user,
     profile,
     isLoading,
     isAuthenticated: !!user,
     isAdmin,
     isAffiliate,
-    initialized,
+    error,
     sessionChecked,
-    signUp,
-    signIn,
-    signOut,
-    updateProfile: updateProfileHandler,
-    setAsAffiliate: setAsAffiliateHandler,
+    setProfile: updateProfile,
+    setIsAffiliate: updateIsAffiliate
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
