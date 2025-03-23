@@ -1,169 +1,48 @@
-import React, { useState } from 'react';
-import { DatabaseIcon, UserIcon, RefreshCw } from "lucide-react";
-import { DiagnosticCard } from "./DiagnosticCard";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/auth";
-import { logSupabaseOperation, OperationType } from "@/utils/supabaseDebug";
-import { toast } from "@/components/ui/use-toast";
 
-export const DiagnosticActions: React.FC = () => {
-  const { user, isAuthenticated, signOut } = useAuth();
-  const [isLoading, setIsLoading] = useState<{[key: string]: boolean}>({
-    database: false,
-    auth: false,
-    signOut: false
-  });
-  
-  const testDatabaseConnection = async () => {
-    try {
-      setIsLoading(prev => ({ ...prev, database: true }));
-      // Test with a simple query
-      const startTime = Date.now();
-      const { data, error } = await supabase.from('profiles').select('count').limit(1);
-      const endTime = Date.now();
-      
-      if (error) {
-        logSupabaseOperation({
-          operation: OperationType.READ,
-          table: "profiles",
-          user_id: user?.id || null,
-          auth_status: isAuthenticated ? "AUTHENTICATED" : "UNAUTHENTICATED",
-          success: false,
-          error
-        });
-        
-        toast({
-          title: "Database Connection Failed",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      logSupabaseOperation({
-        operation: OperationType.READ,
-        table: "profiles",
-        user_id: user?.id || null,
-        auth_status: isAuthenticated ? "AUTHENTICATED" : "UNAUTHENTICATED",
-        success: true,
-        data: {
-          responseTime: `${endTime - startTime}ms`,
-          result: data
-        }
-      });
-      
-      toast({
-        title: "Database Connection Successful",
-        description: `Response time: ${endTime - startTime}ms`,
-      });
-    } catch (err: any) {
-      console.error("Error testing database connection:", err);
-      toast({
-        title: "Error Testing Connection",
-        description: err.message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(prev => ({ ...prev, database: false }));
-    }
-  };
-  
-  const testAuthConnection = async () => {
-    try {
-      setIsLoading(prev => ({ ...prev, auth: true }));
-      const startTime = Date.now();
-      const { data, error } = await supabase.auth.getSession();
-      const endTime = Date.now();
-      
-      logSupabaseOperation({
-        operation: OperationType.AUTH,
-        user_id: user?.id || null,
-        auth_status: data.session ? "AUTHENTICATED" : "UNAUTHENTICATED",
-        success: !error,
-        error: error || null,
-        data: {
-          responseTime: `${endTime - startTime}ms`,
-          hasSession: !!data.session
-        }
-      });
-      
-      if (error) {
-        toast({
-          title: "Auth Check Failed",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      toast({
-        title: `Auth Status: ${data.session ? "Active Session" : "No Session"}`,
-        description: `Response time: ${endTime - startTime}ms`,
-      });
-    } catch (err: any) {
-      console.error("Error testing auth connection:", err);
-      toast({
-        title: "Error Testing Auth",
-        description: err.message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(prev => ({ ...prev, auth: false }));
-    }
-  };
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { RotateCcw, LogOut } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/auth";
+import { useNavigate } from "react-router-dom";
+
+export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
   const handleSignOut = async () => {
     try {
-      setIsLoading(prev => ({ ...prev, signOut: true }));
-      const result = await signOut();
-      if (result.success) {
+      const { success, error } = await signOut();
+      
+      if (success) {
         toast({
-          title: "Signed Out",
-          description: "You have been signed out successfully"
+          title: "Signed out successfully",
+          description: "You have been logged out of your account"
         });
+        navigate('/login');
       } else {
-        throw result.error || new Error("Failed to sign out");
+        throw error;
       }
-    } catch (err: any) {
-      console.error("Error signing out:", err);
+    } catch (error: any) {
       toast({
-        title: "Error Signing Out",
-        description: err.message,
-        variant: "destructive"
+        variant: "destructive",
+        title: "Error signing out",
+        description: error.message || "An error occurred while signing out"
       });
-    } finally {
-      setIsLoading(prev => ({ ...prev, signOut: false }));
     }
   };
   
   return (
-    <div className="grid gap-6 md:grid-cols-3">
-      <DiagnosticCard
-        title="Database Connection"
-        icon={DatabaseIcon}
-        onClick={testDatabaseConnection}
-        isLoading={isLoading.database}
-        loadingText="Testing..."
-        actionText="Test Connection"
-      />
-      
-      <DiagnosticCard
-        title="Authentication Status"
-        icon={UserIcon}
-        onClick={testAuthConnection}
-        isLoading={isLoading.auth}
-        loadingText="Checking..."
-        actionText="Check Auth Status"
-      />
-      
-      <DiagnosticCard
-        title="Reset Session"
-        icon={RefreshCw}
-        onClick={handleSignOut}
-        isLoading={isLoading.signOut}
-        loadingText="Signing Out..."
-        actionText="Sign Out and Reset"
-      />
+    <div className="flex flex-col md:flex-row gap-2 mt-4">
+      <Button variant="outline" onClick={onRefresh} className="flex items-center">
+        <RotateCcw className="h-4 w-4 mr-2" />
+        Refresh Status
+      </Button>
+      <Button variant="outline" onClick={handleSignOut} className="flex items-center">
+        <LogOut className="h-4 w-4 mr-2" />
+        Sign Out
+      </Button>
     </div>
   );
 };

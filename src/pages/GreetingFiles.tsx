@@ -1,111 +1,53 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/auth';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GreetingFilesList } from '@/components/greeting-files/GreetingFilesList';
+import { RecordGreetingForm } from '@/components/greeting-files/RecordGreetingForm';
 import { UploadGreetingForm } from '@/components/greeting-files/UploadGreetingForm';
-import { Loader2 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useGreetingFiles } from '@/hooks/useGreetingFiles';
+import { EmptyGreetingsState } from '@/components/greeting-files/EmptyGreetingsState';
+import { useAuth } from '@/contexts/auth';
 
 const GreetingFiles = () => {
-  const { user, isLoading: authLoading, sessionChecked } = useAuth();
-  const [activeTab, setActiveTab] = useState<string>('files');
-  const [timeoutReached, setTimeoutReached] = useState(false);
-  const [showError, setShowError] = useState(false);
-  const isMobile = useIsMobile();
+  const { isAuthenticated, sessionChecked } = useAuth();
+  const { greetingFiles, isLoading, error, refreshGreetingFiles } = useGreetingFiles();
+  const [activeTab, setActiveTab] = useState('files');
 
-  useEffect(() => {
-    console.log("GreetingFiles page - Auth state:", { 
-      userId: user?.id, 
-      isLoading: authLoading,
-      sessionChecked
-    });
-
-    // Set a timeout to force UI to render even if auth check takes too long
-    const timer = setTimeout(() => {
-      setTimeoutReached(true);
-    }, 2000); // 2 second timeout
-    
-    // If auth initialization is complete but no user after a delay, show error
-    if (sessionChecked && !user && !authLoading) {
-      const errorTimer = setTimeout(() => {
-        setShowError(true);
-      }, 1000);
-      
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(errorTimer);
-      };
-    }
-
-    return () => clearTimeout(timer);
-  }, [user, authLoading, sessionChecked]);
-
-  // Helper function to switch to upload tab
-  const goToUploadTab = () => {
-    setActiveTab('upload');
-    document.getElementById('tab-trigger-upload')?.click();
-  };
-
-  // Show loading state only if auth is loading AND timeout hasn't been reached
-  if (authLoading && !user && !timeoutReached) {
-    return (
-      <div className="container mx-auto py-6 flex justify-center items-center h-40">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+  if (!isAuthenticated) {
+    return <p>Please log in to manage your greeting files.</p>;
   }
 
-  // Show auth error if we've detected one
-  if (showError && !user && sessionChecked) {
-    return (
-      <div className="container mx-auto py-6">
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>
-            Please log in to access your greeting files.
-          </AlertDescription>
-        </Alert>
-        <button 
-          onClick={() => window.location.href = '/login'} 
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md mt-2 hover:bg-primary/90 transition-colors"
-        >
-          Log in
-        </button>
-      </div>
-    );
+  if (!sessionChecked) {
+    return <p>Loading...</p>;
   }
 
   return (
-    <DashboardLayout>
-      <div className="container px-0 sm:px-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 px-4 sm:px-0">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-0">Greeting Audio Files</h1>
-        </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`mb-4 ${isMobile ? 'w-full grid grid-cols-2' : 'w-auto'}`}>
-            <TabsTrigger id="tab-trigger-files" value="files" className="flex-1 md:flex-none">
-              My Greetings
-            </TabsTrigger>
-            <TabsTrigger id="tab-trigger-upload" value="upload" className="flex-1 md:flex-none">
-              Add New Greeting
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="files" className="px-4 sm:px-0">
-            <GreetingFilesList 
-              userId={user?.id}
-              onUploadClick={goToUploadTab}
-            />
-          </TabsContent>
-          
-          <TabsContent value="upload" className="px-4 sm:px-0">
-            <UploadGreetingForm userId={user?.id} />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </DashboardLayout>
+    <div className="container mx-auto py-10">
+      <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="files">My Files</TabsTrigger>
+          <TabsTrigger value="record">Record New</TabsTrigger>
+          <TabsTrigger value="upload">Upload File</TabsTrigger>
+        </TabsList>
+        <TabsContent value="files">
+          {isLoading && <p>Loading greeting files...</p>}
+          {error && <p>Error: {error.message}</p>}
+          {!isLoading && !error && greetingFiles.length === 0 && (
+            <EmptyGreetingsState onRefresh={refreshGreetingFiles} />
+          )}
+          {!isLoading && !error && greetingFiles.length > 0 && (
+            <GreetingFilesList greetingFiles={greetingFiles} refreshGreetingFiles={refreshGreetingFiles} />
+          )}
+        </TabsContent>
+        <TabsContent value="record">
+          <RecordGreetingForm refreshGreetingFiles={refreshGreetingFiles} />
+        </TabsContent>
+        <TabsContent value="upload">
+          <UploadGreetingForm refreshGreetingFiles={refreshGreetingFiles} />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
