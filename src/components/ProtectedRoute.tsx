@@ -12,8 +12,16 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, sessionChecked, initialized, error } = useAuth();
   const location = useLocation();
   
-  // If we're still loading and haven't checked session, show loading indicator
-  if (isLoading && !initialized) {
+  console.log("Protected Route State:", { 
+    isAuthenticated, 
+    isLoading, 
+    sessionChecked, 
+    initialized, 
+    error 
+  });
+  
+  // If we're still initializing and haven't completed auth check
+  if ((isLoading || !initialized) && !error) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
@@ -47,12 +55,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <>{children}</>;
   }
   
-  // If session is checked and user is not authenticated, redirect to login
-  if (initialized || sessionChecked) {
+  // If initialization is complete and user is not authenticated, redirect to login
+  if (initialized && !isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
-  // Fallback loading state
+  // Fallback loading state (should rarely reach here)
   return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
       <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
