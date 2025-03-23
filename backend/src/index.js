@@ -1,20 +1,13 @@
 
+// Import required packages
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
-// Load environment variables
+// Load environment variables from .env file
 dotenv.config();
 
-// Initialize express app
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Import routes
+// Import route modules
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profiles');
 const transferNumberRoutes = require('./routes/transferNumbers');
@@ -24,7 +17,15 @@ const campaignRoutes = require('./routes/campaigns');
 const contactListRoutes = require('./routes/contactLists');
 const subscriptionRoutes = require('./routes/subscriptions');
 
-// Routes
+// Initialize Express application
+const app = express();
+const PORT = process.env.PORT || 3001; // Default port is 3001
+
+// Middleware setup
+app.use(cors()); // Enable Cross-Origin Resource Sharing (CORS)
+app.use(express.json()); // Parse incoming JSON requests
+
+// Use the route modules
 app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/transfer-numbers', transferNumberRoutes);
@@ -41,14 +42,15 @@ app.get('/api/health', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error(err.stack); // Log the error stack for debugging
   res.status(500).json({
     error: true,
     message: err.message || 'Something went wrong on the server'
   });
 });
 
-// Start server
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
