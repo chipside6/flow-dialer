@@ -7,9 +7,14 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Import Routes
-const authRoutes = require('./routes/auth');
-const campaignRoutes = require('./routes/campaigns');
-const subscriptionRoutes = require('./routes/subscriptions');
+const authRoutes = require('../routes/auth');
+const campaignRoutes = require('../routes/campaigns');
+const contactListRoutes = require('../routes/contactLists');
+const greetingFileRoutes = require('../routes/greetingFiles');
+const profileRoutes = require('../routes/profiles');
+const sipProviderRoutes = require('../routes/sipProviders');
+const subscriptionRoutes = require('../routes/subscriptions');
+const transferNumberRoutes = require('../routes/transferNumbers');
 
 // Initialize express app
 const app = express();
@@ -20,9 +25,14 @@ app.use(cors());
 app.use(express.json());  // Parse incoming JSON requests
 
 // Routes
-app.use('/api/auth', authRoutes);  // Auth Routes
-app.use('/api/campaigns', campaignRoutes);  // Campaign Routes
-app.use('/api/subscriptions', subscriptionRoutes);  // Subscription Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/campaigns', campaignRoutes);
+app.use('/api/contact-lists', contactListRoutes);
+app.use('/api/greeting-files', greetingFileRoutes);
+app.use('/api/profiles', profileRoutes);
+app.use('/api/sip-providers', sipProviderRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/transfer-numbers', transferNumberRoutes);
 
 // Health Check Route
 app.get('/api/health', (req, res) => {
@@ -42,4 +52,3 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
