@@ -27,7 +27,15 @@ export interface ContactList {
   name: string;
 }
 
+// Updated to match the interface in useGreetingFiles.ts
 export interface GreetingFile {
   id: string;
-  name: string;
+  user_id: string;
+  filename: string;
+  url: string;
+  file_path?: string;
+  file_type?: string;
+  file_size?: number;
+  duration_seconds?: number | null;
+  created_at: string;
 }

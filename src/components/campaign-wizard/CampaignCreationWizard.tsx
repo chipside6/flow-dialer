@@ -12,7 +12,7 @@ import { CampaignData } from "./types";
 import { useAuth } from "@/contexts/auth/useAuth";
 import { useCampaignForm } from "./hooks/useCampaignForm";
 import { useFormValidation } from "./utils/formValidation";
-import { useGreetingFiles } from "@/hooks/useGreetingFiles";
+import { useGreetingFiles, GreetingFile } from "@/hooks/useGreetingFiles";
 
 interface CampaignCreationWizardProps {
   onComplete: (campaign: CampaignData) => void;
