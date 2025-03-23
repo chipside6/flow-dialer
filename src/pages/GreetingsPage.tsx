@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Navbar } from '@/components/Navbar';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Suspense } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Navbar } from "@/components/Navbar";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
 import GreetingFiles from './GreetingFiles';
 
 const GreetingsFallback = () => (
