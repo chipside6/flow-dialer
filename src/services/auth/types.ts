@@ -23,7 +23,7 @@ export const API_URL = 'http://localhost:5000/api';
 export interface UserProfile {
   id: string;
   full_name?: string;
-  avatar_url?: string;
+  avatar_url?: string | null; // Update to allow null values
   email: string;
   company_name?: string;
   is_admin?: boolean;

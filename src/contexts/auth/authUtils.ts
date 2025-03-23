@@ -25,7 +25,7 @@ export const fetchUserProfile = async (userId: string) => {
       id: data.id,
       email: '', // Initialize with empty string, we'll try to get this below
       full_name: data.full_name || '',
-      avatar_url: data.avatar_url || '',
+      avatar_url: data.avatar_url || null, // Use null as fallback if property doesn't exist
       company_name: data.company_name || '',
       is_admin: !!data.is_admin,
       is_affiliate: !!data.is_affiliate
