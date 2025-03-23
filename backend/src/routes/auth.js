@@ -9,7 +9,7 @@ const router = express.Router();
 // User signup
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, metadata } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: true, message: 'Email and password are required' });
@@ -29,6 +29,10 @@ router.post('/signup', async (req, res) => {
     // Insert user
     const userId = Date.now().toString();
     await pool.query('INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)', [userId, email, passwordHash]);
+
+    // Create a profile record too
+    const fullName = metadata?.full_name || null;
+    await pool.query('INSERT INTO profiles (id, email, full_name) VALUES (?, ?, ?)', [userId, email, fullName]);
 
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {

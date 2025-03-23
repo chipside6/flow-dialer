@@ -11,7 +11,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+// Configure CORS to accept requests from the frontend
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite's default port
+  credentials: true
+}));
 app.use(express.json());  // Parse incoming JSON requests
 
 // Import Routes

@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/use-toast";
 
 export interface User {
@@ -26,7 +25,8 @@ export interface Session {
 }
 
 // Define API URL - this will be used across all services
-export const API_URL = 'http://localhost:3001/api';
+// Change from localhost:3001 to localhost:5000 to match the port in backend/src/index.js
+export const API_URL = 'http://localhost:5000/api';
 
 // Storage key for local session data
 const SESSION_STORAGE_KEY = 'user_session';
@@ -72,12 +72,12 @@ export const signUp = async (email: string, password: string, metadata?: { full_
       })
     });
     
-    const data = await response.json();
-    
     if (!response.ok) {
+      const data = await response.json();
       throw new Error(data.message || 'Failed to sign up');
     }
     
+    const data = await response.json();
     return { error: null };
   } catch (error: any) {
     console.error("Sign up error:", error.message);
