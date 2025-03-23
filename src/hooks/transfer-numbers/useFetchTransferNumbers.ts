@@ -8,7 +8,7 @@ import { toast } from "@/components/ui/use-toast";
 interface UseFetchTransferNumbersState {
   setTransferNumbers: (transferNumbers: TransferNumber[]) => void;
   setIsLoading: (isLoading: boolean) => void;
-  setError: (error: Error | null) => void;
+  setError: (error: string | null) => void;  // Changed to accept string instead of Error
 }
 
 export const useFetchTransferNumbers = ({
@@ -34,7 +34,7 @@ export const useFetchTransferNumbers = ({
       setTransferNumbers(data);
     } catch (err: any) {
       console.error("Error fetching transfer numbers:", err);
-      setError(new Error(err.message || "Failed to load transfer numbers"));
+      setError(err.message || "Failed to load transfer numbers");
       toast({
         title: "Error loading transfer numbers",
         description: err.message || "Failed to load transfer numbers",

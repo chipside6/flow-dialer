@@ -50,9 +50,10 @@ export function useTransferNumbersState() {
   }, [isSubmitting]);
 
   // Function to trigger a refresh without additional API calls
-  const refreshTransferNumbers = () => {
+  const refreshTransferNumbers = async () => {
     console.log("Refreshing transfer numbers");
     setLastRefresh(Date.now());
+    return Promise.resolve();  // Return a resolved promise
   };
 
   return {

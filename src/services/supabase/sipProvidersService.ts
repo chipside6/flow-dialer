@@ -27,7 +27,8 @@ export const fetchSipProviders = async (userId: string) => {
       port: item.port.toString(),
       username: item.username,
       password: item.password,
-      description: item.description || "", // Handle potential undefined
+      // Handle missing description field in the database
+      description: "", // Default to empty string as description doesn't exist in the database
       dateAdded: new Date(item.created_at),
       isActive: item.active
     }));
@@ -53,7 +54,7 @@ export const addSipProvider = async (provider: any, userId: string) => {
         port: parseInt(provider.port),
         username: provider.username,
         password: provider.password,
-        description: provider.description || null,
+        // We don't store description as it doesn't exist in the database
         active: provider.isActive || false
       })
       .select()
@@ -72,7 +73,7 @@ export const addSipProvider = async (provider: any, userId: string) => {
       port: data.port.toString(),
       username: data.username,
       password: data.password,
-      description: data.description || "", // Handle potential undefined
+      description: "", // Default to empty string as description doesn't exist in the database
       dateAdded: new Date(data.created_at),
       isActive: data.active
     };
@@ -97,7 +98,7 @@ export const updateSipProvider = async (provider: any, userId: string) => {
         port: parseInt(provider.port),
         username: provider.username,
         password: provider.password,
-        description: provider.description || null,
+        // We don't update description as it doesn't exist in the database
         active: provider.isActive || false
       })
       .eq('id', provider.id)
@@ -118,7 +119,7 @@ export const updateSipProvider = async (provider: any, userId: string) => {
       port: data.port.toString(),
       username: data.username,
       password: data.password,
-      description: data.description || "", // Handle potential undefined
+      description: "", // Default to empty string as description doesn't exist in the database
       dateAdded: new Date(data.created_at),
       isActive: data.active
     };

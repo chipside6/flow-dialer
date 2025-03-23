@@ -28,16 +28,20 @@ export function useTransferNumbers() {
   const { fetchTransferNumbers } = useFetchTransferNumbers({
     setTransferNumbers,
     setIsLoading,
-    setError
+    setError: (err: Error) => setError(err.message) // Convert Error to string
   });
   
   const { addTransferNumber } = useAddTransferNumber(
     setIsSubmitting,
-    refreshTransferNumbers
+    async () => {
+      await refreshTransferNumbers(); // Return Promise
+    }
   );
   
   const { handleDeleteTransferNumber } = useDeleteTransferNumber(
-    refreshTransferNumbers
+    async () => {
+      await refreshTransferNumbers(); // Return Promise
+    }
   );
   
   // Load transfer numbers when user or lastRefresh changes
