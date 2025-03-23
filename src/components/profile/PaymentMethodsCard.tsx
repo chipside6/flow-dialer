@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   Card, 
@@ -31,7 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/auth";
 
-// Sample type for payment methods
+// Type for payment methods
 type PaymentMethod = {
   id: string;
   type: "card";
@@ -46,7 +47,7 @@ export function PaymentMethodsCard() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
 
@@ -58,23 +59,34 @@ export function PaymentMethodsCard() {
     cvc: "",
   });
 
-  // Simulate loading payment methods
+  // Load payment methods
   React.useEffect(() => {
     const loadPaymentMethods = async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!user) {
+        setPaymentMethods([]);
+        setIsLoading(false);
+        return;
+      }
       
-      // For demo purposes, we'll show empty state
-      setPaymentMethods([]);
-      setIsLoading(false);
+      setIsLoading(true);
+      try {
+        // Load payment methods from API
+        // This is where you would fetch real payment methods from your backend
+        setPaymentMethods([]);
+      } catch (error) {
+        console.error("Error loading payment methods:", error);
+        toast({
+          title: "Error loading payment methods",
+          description: "Failed to load your payment methods. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
     
-    if (user) {
-      loadPaymentMethods();
-    } else {
-      setIsLoading(false);
-    }
-  }, [user]);
+    loadPaymentMethods();
+  }, [user, toast]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -86,10 +98,8 @@ export function PaymentMethodsCard() {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call to save payment method
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Here you would add a real API call to save the payment method
       
-      // Show success message
       toast({
         title: editingMethod ? "Payment method updated" : "Payment method added",
         description: editingMethod 
@@ -101,8 +111,6 @@ export function PaymentMethodsCard() {
       const closeButton = document.querySelector('button[aria-label="Close"]') as HTMLButtonElement;
       if (closeButton) closeButton.click();
       
-      // For demo purposes, we'll just keep the list empty
-      // In a real app, you would update the payment methods list
     } catch (error) {
       toast({
         title: "Error saving payment method",
@@ -122,35 +130,48 @@ export function PaymentMethodsCard() {
   };
 
   const handleDeletePaymentMethod = async (id: string) => {
-    // Simulate API call to delete payment method
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Show success message
-    toast({
-      title: "Payment method removed",
-      description: "Your payment method has been removed successfully.",
-    });
-    
-    // Update local state by removing the deleted method
-    setPaymentMethods(prev => prev.filter(method => method.id !== id));
+    try {
+      // Here you would add a real API call to delete the payment method
+      
+      toast({
+        title: "Payment method removed",
+        description: "Your payment method has been removed successfully.",
+      });
+      
+      // Update local state by removing the deleted method
+      setPaymentMethods(prev => prev.filter(method => method.id !== id));
+    } catch (error) {
+      toast({
+        title: "Error removing payment method",
+        description: "There was a problem removing your payment method.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSetDefault = async (id: string) => {
-    // Simulate API call to set default payment method
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Update local state by setting the selected method as default
-    setPaymentMethods(prev => 
-      prev.map(method => ({
-        ...method,
-        isDefault: method.id === id
-      }))
-    );
-    
-    toast({
-      title: "Default payment method updated",
-      description: "Your default payment method has been updated.",
-    });
+    try {
+      // Here you would add a real API call to set the default payment method
+      
+      // Update local state
+      setPaymentMethods(prev => 
+        prev.map(method => ({
+          ...method,
+          isDefault: method.id === id
+        }))
+      );
+      
+      toast({
+        title: "Default payment method updated",
+        description: "Your default payment method has been updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error updating default payment method",
+        description: "There was a problem updating your default payment method.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

@@ -43,24 +43,32 @@ const ContactListsDisplay: React.FC<ContactListsDisplayProps> = ({ lists, onDele
             </TableRow>
           </TableHeader>
           <TableBody>
-            {lists.map(list => (
-              <TableRow key={list.id}>
-                <TableCell className="font-medium">{list.name}</TableCell>
-                <TableCell>{list.description}</TableCell>
-                <TableCell>{list.contactCount}</TableCell>
-                <TableCell>{format(list.dateCreated, 'PP')}</TableCell>
-                <TableCell>{format(list.lastModified, 'PP')}</TableCell>
-                <TableCell className="text-right">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => onDelete(list.id)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+            {lists.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-6">
+                  No contact lists found. Create your first list to get started.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              lists.map(list => (
+                <TableRow key={list.id}>
+                  <TableCell className="font-medium">{list.name}</TableCell>
+                  <TableCell>{list.description}</TableCell>
+                  <TableCell>{list.contactCount}</TableCell>
+                  <TableCell>{format(list.dateCreated, 'PP')}</TableCell>
+                  <TableCell>{format(list.lastModified, 'PP')}</TableCell>
+                  <TableCell className="text-right">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => onDelete(list.id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </CardContent>

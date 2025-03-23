@@ -1,7 +1,7 @@
 
 import React from "react";
 
-// This component is now empty since we're removing the affiliate functionality
+// This component is intentionally empty since we've removed the affiliate functionality
 export const AffiliateNotice = () => {
   return null;
 };
