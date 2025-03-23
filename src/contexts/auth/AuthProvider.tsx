@@ -1,7 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { AuthContext, AuthContextType } from './AuthContext';
-import { getStoredSession, fetchUserProfile, signUp as signUpService, signIn as signInService, signOut as signOutService, updateUserProfile, setUserAsAffiliate, User, UserProfile, Session } from '@/services/authService';
+import { 
+  getStoredSession, 
+  fetchUserProfile, 
+  signUp as signUpService, 
+  signIn as signInService, 
+  signOut as signOutService, 
+  updateUserProfile, 
+  setUserAsAffiliate,
+  User, 
+  UserProfile, 
+  Session 
+} from '@/services/auth';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
