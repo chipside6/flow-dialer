@@ -10,6 +10,10 @@ export interface GreetingFile {
   user_id: string;
   filename: string;
   url: string;
+  file_path?: string;
+  file_type?: string;
+  file_size?: number;
+  duration_seconds?: number | null;
   created_at: string;
 }
 
@@ -109,9 +113,9 @@ export function useGreetingFiles() {
     },
   });
 
-  // Simplified function to refresh greeting files
-  const refreshGreetingFiles = () => {
-    return refetch();
+  // Create a wrapper for refetch that returns a Promise<void> for compatibility
+  const refreshGreetingFiles = async (): Promise<void> => {
+    await refetch();
   };
 
   return { 

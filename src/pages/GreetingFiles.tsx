@@ -5,7 +5,6 @@ import { GreetingFilesList } from '@/components/greeting-files/GreetingFilesList
 import { RecordGreetingForm } from '@/components/greeting-files/RecordGreetingForm';
 import { UploadGreetingForm } from '@/components/greeting-files/UploadGreetingForm';
 import { useGreetingFiles } from '@/hooks/useGreetingFiles';
-import { EmptyGreetingsState } from '@/components/greeting-files/EmptyGreetingsState';
 import { useAuth } from '@/contexts/auth';
 import { LoadingState } from '@/components/upgrade/LoadingState';
 
@@ -35,6 +34,11 @@ const GreetingFiles = () => {
     setActiveTab('upload');
   };
 
+  // Create a wrapper function to handle the correct typing
+  const handleRefreshGreetingFiles = async () => {
+    await refreshGreetingFiles();
+  };
+
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
@@ -52,18 +56,18 @@ const GreetingFiles = () => {
             isLoading={isLoading}
             error={error}
             isError={isError}
-            refreshGreetingFiles={refreshGreetingFiles} 
+            refreshGreetingFiles={handleRefreshGreetingFiles} 
             deleteGreetingFile={deleteGreetingFile}
             onUploadClick={handleUploadClick}
           />
         </TabsContent>
         
         <TabsContent value="record">
-          <RecordGreetingForm userId={user.id} refreshGreetingFiles={refreshGreetingFiles} />
+          <RecordGreetingForm userId={user.id} refreshGreetingFiles={handleRefreshGreetingFiles} />
         </TabsContent>
         
         <TabsContent value="upload">
-          <UploadGreetingForm userId={user.id} refreshGreetingFiles={refreshGreetingFiles} />
+          <UploadGreetingForm userId={user.id} refreshGreetingFiles={handleRefreshGreetingFiles} />
         </TabsContent>
       </Tabs>
     </div>

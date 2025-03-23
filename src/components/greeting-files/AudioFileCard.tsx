@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileAudio, Loader2, Pause, Play, Trash2 } from 'lucide-react';
-import { AudioWaveform } from './AudioWaveform';
 
 interface AudioFileCardProps {
   file: {
@@ -28,26 +27,28 @@ export const AudioFileCard = ({
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   
   // Create audio element when the component mounts
-  useState(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const audio = new Audio(file.url);
       setAudioElement(audio);
       
-      audio.addEventListener('ended', () => {
+      const handleEnded = () => {
         if (isActiveAudio) {
           onPlayToggle(file.url); // This will set isPlaying to false
         }
-      });
+      };
+      
+      audio.addEventListener('ended', handleEnded);
       
       return () => {
         audio.pause();
-        audio.removeEventListener('ended', () => {});
+        audio.removeEventListener('ended', handleEnded);
       };
     }
-  });
+  }, [file.url, isActiveAudio, onPlayToggle]);
   
   // Keep audio state in sync with component props
-  useState(() => {
+  useEffect(() => {
     if (audioElement) {
       if (isActiveAudio && isPlaying) {
         audioElement.play().catch(err => console.error("Error playing audio:", err));
