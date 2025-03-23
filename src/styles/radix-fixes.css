@@ -5,3 +5,28 @@
 [data-radix-popper] {
   z-index: 1000 !important;
 }
+
+/* Ensure proper background colors for select dropdowns */
+[data-radix-select-content] {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+.dark [data-radix-select-content] {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+/* Make sure select items are clearly visible */
+[data-radix-select-item] {
+  background-color: transparent !important;
+}
+
+[data-radix-select-item]:hover {
+  background-color: #f1f5f9 !important;
+}
+
+.dark [data-radix-select-item]:hover {
+  background-color: #374151 !important;
+}

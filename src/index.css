@@ -6,3 +6,5 @@
 @import './styles/dropdown-styles.css';
 @import './styles/responsive.css';
 @import './styles/radix-fixes.css';
+@import './styles/mobile-forms.css';
+@import './styles/mobile-tabs-wizards.css';

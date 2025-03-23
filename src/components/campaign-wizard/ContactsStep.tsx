@@ -23,13 +23,13 @@ export const ContactsStep = ({ campaign, contactLists, onSelectChange, isLoading
         ) : (
           <div className="relative">
             <Select
-              value={campaign.contactListId}
+              value={campaign.contactListId || ""}
               onValueChange={(value) => onSelectChange("contactListId", value)}
             >
               <SelectTrigger id="contactListId" className="w-full bg-white dark:bg-gray-800">
                 <SelectValue placeholder="Select a contact list" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md z-50">
+              <SelectContent position="popper" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md">
                 {contactLists.length === 0 ? (
                   <SelectItem value="empty" disabled>No contact lists available</SelectItem>
                 ) : (
