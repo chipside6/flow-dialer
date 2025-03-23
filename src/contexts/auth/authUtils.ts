@@ -28,7 +28,7 @@ export const fetchUserProfile = async (userId: string) => {
       id: data.id,
       email: data.email || '',
       full_name: data.full_name || '',
-      avatar_url: data.avatar_url,
+      avatar_url: data.avatar_url || null,
       company_name: data.company_name || '',
       is_admin: !!data.is_admin,
       is_affiliate: !!data.is_affiliate

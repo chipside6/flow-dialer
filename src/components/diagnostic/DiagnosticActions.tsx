@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DatabaseIcon, UserIcon, RefreshCw } from "lucide-react";
 import { DiagnosticCard } from "./DiagnosticCard";
@@ -116,11 +115,15 @@ export const DiagnosticActions: React.FC = () => {
   const handleSignOut = async () => {
     try {
       setIsLoading(prev => ({ ...prev, signOut: true }));
-      await signOut();
-      toast({
-        title: "Signed Out",
-        description: "You have been signed out successfully"
-      });
+      const result = await signOut();
+      if (result.success) {
+        toast({
+          title: "Signed Out",
+          description: "You have been signed out successfully"
+        });
+      } else {
+        throw result.error || new Error("Failed to sign out");
+      }
     } catch (err: any) {
       console.error("Error signing out:", err);
       toast({

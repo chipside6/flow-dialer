@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/auth';
 export function useGreetingFiles(userId: string | undefined) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { initialized } = useAuth();
+  const { sessionChecked } = useAuth();
   
   // Fetch greeting files
   const greetingFilesQuery = useQuery({
@@ -51,7 +51,7 @@ export function useGreetingFiles(userId: string | undefined) {
         throw error;
       }
     },
-    enabled: !!userId && initialized, // Only run query when userId is available and auth is initialized
+    enabled: !!userId && sessionChecked, // Only run query when userId is available and auth is checked
     staleTime: 1000, // 1 second - reduce this for more frequent refreshes
     gcTime: 300000, // 5 minutes
     refetchOnWindowFocus: true,

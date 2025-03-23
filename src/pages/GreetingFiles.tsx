@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,7 +9,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const GreetingFiles = () => {
-  const { user, isLoading: authLoading, initialized } = useAuth();
+  const { user, isLoading: authLoading, sessionChecked } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('files');
   const [timeoutReached, setTimeoutReached] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -20,7 +19,7 @@ const GreetingFiles = () => {
     console.log("GreetingFiles page - Auth state:", { 
       userId: user?.id, 
       isLoading: authLoading,
-      initialized
+      sessionChecked
     });
 
     // Set a timeout to force UI to render even if auth check takes too long
@@ -29,7 +28,7 @@ const GreetingFiles = () => {
     }, 2000); // 2 second timeout
     
     // If auth initialization is complete but no user after a delay, show error
-    if (initialized && !user && !authLoading) {
+    if (sessionChecked && !user && !authLoading) {
       const errorTimer = setTimeout(() => {
         setShowError(true);
       }, 1000);
@@ -41,7 +40,7 @@ const GreetingFiles = () => {
     }
 
     return () => clearTimeout(timer);
-  }, [user, authLoading, initialized]);
+  }, [user, authLoading, sessionChecked]);
 
   // Helper function to switch to upload tab
   const goToUploadTab = () => {
@@ -59,7 +58,7 @@ const GreetingFiles = () => {
   }
 
   // Show auth error if we've detected one
-  if (showError && !user && initialized) {
+  if (showError && !user && sessionChecked) {
     return (
       <div className="container mx-auto py-6">
         <Alert variant="destructive" className="mb-4">

@@ -4,6 +4,7 @@ import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, UserProfile } from './types';
 import { fetchUserProfile } from './authUtils';
+import { signOutUser } from './authActions';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -13,6 +14,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAffiliate, setIsAffiliate] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     console.log("Checking for existing session");
@@ -23,7 +25,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Auth state changed:', event);
         
         if (event === 'SIGNED_IN' && session?.user) {
-          setUser(session.user);
+          // Convert Supabase User to our User type
+          const appUser: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            created_at: session.user.created_at,
+            last_sign_in_at: session.user.last_sign_in_at
+          };
+          
+          setUser(appUser);
           
           // Fetch profile data
           const userProfile = await fetchUserProfile(session.user.id);
@@ -41,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         setIsLoading(false);
         setSessionChecked(true);
+        setInitialized(true);
       }
     );
     
@@ -57,12 +68,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setError(sessionError instanceof Error ? sessionError : new Error('Unknown error during session check'));
           setIsLoading(false);
           setSessionChecked(true);
+          setInitialized(true);
           return;
         }
         
         if (data.session?.user) {
           console.log("Found active session for user:", data.session.user.email);
-          setUser(data.session.user);
+          
+          // Convert Supabase User to our User type
+          const appUser: User = {
+            id: data.session.user.id,
+            email: data.session.user.email || '',
+            created_at: data.session.user.created_at,
+            last_sign_in_at: data.session.user.last_sign_in_at
+          };
+          
+          setUser(appUser);
           
           // Fetch user profile
           const userProfile = await fetchUserProfile(data.session.user.id);
@@ -84,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } finally {
         setIsLoading(false);
         setSessionChecked(true);
+        setInitialized(true);
       }
     };
     
@@ -114,6 +136,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     }
   };
+  
+  // Handler for signing out
+  const signOut = async () => {
+    return await signOutUser();
+  };
 
   const value = {
     user,
@@ -124,8 +151,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAffiliate,
     error,
     sessionChecked,
+    initialized,
     setProfile: updateProfile,
-    setIsAffiliate: updateIsAffiliate
+    updateProfile,
+    setIsAffiliate: updateIsAffiliate,
+    signOut
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
