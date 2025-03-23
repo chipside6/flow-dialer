@@ -12,14 +12,25 @@ const GreetingFiles = () => {
   const { user, sessionChecked } = useAuth();
   const { greetingFiles, isLoading, error, isError, refreshGreetingFiles, deleteGreetingFile } = useGreetingFiles();
   const [activeTab, setActiveTab] = useState('files');
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Set initialized flag after initial render to prevent infinite loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialized(true);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
-  // If session check isn't completed yet, show a simple loading state
-  if (!sessionChecked) {
+  // If we've been waiting too long and session check isn't completed yet,
+  // just show the UI anyway instead of getting stuck
+  if (!sessionChecked && !isInitialized) {
     return <LoadingState message="Checking authentication..." />;
   }
 
-  // Once session is checked but user isn't logged in
-  if (!user) {
+  // Handle the auth state - even if session isn't checked yet, we can proceed after timeout
+  if (sessionChecked && !user) {
     return (
       <div className="container mx-auto py-10">
         <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
@@ -65,11 +76,11 @@ const GreetingFiles = () => {
         </TabsContent>
         
         <TabsContent value="record">
-          <RecordGreetingForm userId={user.id} refreshGreetingFiles={handleRefreshGreetingFiles} />
+          <RecordGreetingForm userId={user?.id} refreshGreetingFiles={handleRefreshGreetingFiles} />
         </TabsContent>
         
         <TabsContent value="upload">
-          <UploadGreetingForm userId={user.id} refreshGreetingFiles={handleRefreshGreetingFiles} />
+          <UploadGreetingForm userId={user?.id} refreshGreetingFiles={handleRefreshGreetingFiles} />
         </TabsContent>
       </Tabs>
     </div>

@@ -30,7 +30,10 @@ export function useGreetingFiles() {
   } = useQuery({
     queryKey: ['greetingFiles', user?.id],
     queryFn: async () => {
-      if (!user) throw new Error("User not authenticated");
+      if (!user) {
+        console.log("No user detected, returning empty array");
+        return [];
+      }
       
       console.log("Fetching greeting files for user:", user.id);
       const { data, error } = await supabase
@@ -46,7 +49,12 @@ export function useGreetingFiles() {
       console.log("Greeting files fetched:", data?.length || 0);
       return data || [];
     },
-    enabled: !!user,
+    // Important: Setting a shorter staleTime and adding retry configuration
+    staleTime: 60 * 1000, // 1 minute
+    retry: 1,
+    retryDelay: 1000,
+    // We want this to run even if user is null (will return empty array)
+    enabled: true,
   });
 
   // Mutation for deleting greeting files

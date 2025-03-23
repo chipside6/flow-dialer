@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileAudio, Loader2, Pause, Play, Trash2 } from 'lucide-react';
@@ -24,13 +24,17 @@ export const AudioFileCard = ({
   onDelete
 }: AudioFileCardProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [isAudioLoaded, setIsAudioLoaded] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   // Create audio element when the component mounts
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const audio = new Audio(file.url);
-      setAudioElement(audio);
+      
+      const handleCanPlay = () => {
+        setIsAudioLoaded(true);
+      };
       
       const handleEnded = () => {
         if (isActiveAudio) {
@@ -38,25 +42,40 @@ export const AudioFileCard = ({
         }
       };
       
+      audio.addEventListener('canplay', handleCanPlay);
       audio.addEventListener('ended', handleEnded);
+      
+      // Store the audio element in ref for later use
+      audioRef.current = audio;
+      
+      // Start loading the audio (this will eventually trigger canplay)
+      audio.load();
       
       return () => {
         audio.pause();
+        audio.removeEventListener('canplay', handleCanPlay);
         audio.removeEventListener('ended', handleEnded);
+        audioRef.current = null;
       };
     }
   }, [file.url, isActiveAudio, onPlayToggle]);
   
   // Keep audio state in sync with component props
   useEffect(() => {
-    if (audioElement) {
+    const audio = audioRef.current;
+    if (audio) {
       if (isActiveAudio && isPlaying) {
-        audioElement.play().catch(err => console.error("Error playing audio:", err));
-      } else {
-        audioElement.pause();
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            console.error("Error playing audio:", err);
+          });
+        }
+      } else if (audio) {
+        audio.pause();
       }
     }
-  }, [isActiveAudio, isPlaying, audioElement]);
+  }, [isActiveAudio, isPlaying]);
   
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -92,8 +111,13 @@ export const AudioFileCard = ({
             variant="outline"
             size="sm"
             onClick={() => onPlayToggle(file.url)}
+            disabled={!isAudioLoaded && isActiveAudio}
           >
-            {isActiveAudio && isPlaying ? (
+            {!isAudioLoaded && isActiveAudio ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" /> <span>Loading</span>
+              </>
+            ) : isActiveAudio && isPlaying ? (
               <>
                 <Pause className="h-4 w-4 mr-1" /> <span>Pause</span>
               </>
