@@ -16,16 +16,13 @@ const GreetingsFallback = () => (
 const GreetingsPage = () => {
   return (
     <div className="min-h-screen bg-background">
-      <div className="min-h-screen bg-background flex flex-col w-full">
-        <Navbar />
-        <div className="flex flex-1 w-full max-w-full overflow-hidden">
-          <DashboardLayout>
-            <Suspense fallback={<GreetingsFallback />}>
-              <GreetingFiles />
-            </Suspense>
-          </DashboardLayout>
+      <Navbar />
+      <DashboardLayout>
+        <div className="container mx-auto py-6">
+          {/* Removed the Suspense wrapper that was causing loading to get stuck */}
+          <GreetingFiles />
         </div>
-      </div>
+      </DashboardLayout>
     </div>
   );
 };
