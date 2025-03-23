@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PhoneForwarded, Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { TransferFormInputs } from "./TransferFormInputs";
+import { TransferFormButton } from "./TransferFormButton";
 
 interface AddTransferNumberFormProps {
   onAddTransferNumber: (name: string, number: string, description: string) => Promise<any>;
@@ -98,59 +97,20 @@ export const AddTransferNumberForm = ({
           className="space-y-4"
           data-mobile={isMobile ? "true" : "false"}
         >
-          <div>
-            <Label htmlFor="transfer-name">Name</Label>
-            <Input
-              id="transfer-name"
-              placeholder="Enter a name for this transfer destination"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={isSubmittingNow}
-              required
-              className="mb-0"
-            />
-          </div>
-          <div>
-            <Label htmlFor="transfer-number">Phone Number</Label>
-            <Input
-              id="transfer-number"
-              placeholder="Enter the phone number (e.g., +1-555-123-4567)"
-              value={number}
-              onChange={(e) => setNumber(e.target.value)}
-              disabled={isSubmittingNow}
-              required
-              type="tel"
-              className="mb-0"
-            />
-          </div>
-          <div>
-            <Label htmlFor="transfer-description">Description</Label>
-            <Input
-              id="transfer-description"
-              placeholder="Enter a description for this transfer number"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={isSubmittingNow}
-              className="mb-0"
-            />
-          </div>
-          <Button 
-            type="submit"
-            disabled={buttonDisabled}
-            className="w-full sm:w-auto mt-4"
-          >
-            {isSubmittingNow ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Adding...
-              </>
-            ) : (
-              <>
-                <PhoneForwarded className="mr-2 h-4 w-4" />
-                Add Transfer Number
-              </>
-            )}
-          </Button>
+          <TransferFormInputs 
+            name={name}
+            setName={setName}
+            number={number}
+            setNumber={setNumber}
+            description={description}
+            setDescription={setDescription}
+            isSubmitting={isSubmittingNow}
+          />
+          
+          <TransferFormButton 
+            isSubmitting={isSubmittingNow}
+            isDisabled={buttonDisabled}
+          />
         </form>
       </CardContent>
     </Card>
