@@ -1,7 +1,8 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileAudio, Loader2, Pause, Play, Trash2 } from 'lucide-react';
+import { FileAudio, Loader2, Pause, Play, Trash2, RefreshCw } from 'lucide-react';
 
 interface AudioFileCardProps {
   file: {
@@ -25,15 +26,23 @@ export const AudioFileCard = ({
 }: AudioFileCardProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   // Create audio element when the component mounts
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const audio = new Audio(file.url);
+      const audio = new Audio();
       
       const handleCanPlay = () => {
         setIsAudioLoaded(true);
+        setLoadError(null);
+      };
+      
+      const handleError = (e: ErrorEvent) => {
+        console.error("Error loading audio:", e);
+        setLoadError("Failed to load audio file");
+        setIsAudioLoaded(false);
       };
       
       const handleEnded = () => {
@@ -44,17 +53,25 @@ export const AudioFileCard = ({
       
       audio.addEventListener('canplay', handleCanPlay);
       audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('error', handleError as EventListener);
       
       // Store the audio element in ref for later use
       audioRef.current = audio;
       
-      // Start loading the audio (this will eventually trigger canplay)
-      audio.load();
+      // Set the source and start loading the audio
+      try {
+        audio.src = file.url;
+        audio.load();
+      } catch (err) {
+        console.error("Error setting audio source:", err);
+        setLoadError("Failed to load audio file");
+      }
       
       return () => {
         audio.pause();
         audio.removeEventListener('canplay', handleCanPlay);
         audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError as EventListener);
         audioRef.current = null;
       };
     }
@@ -69,6 +86,7 @@ export const AudioFileCard = ({
         if (playPromise !== undefined) {
           playPromise.catch(err => {
             console.error("Error playing audio:", err);
+            setLoadError("Failed to play audio");
           });
         }
       } else if (audio) {
@@ -81,8 +99,17 @@ export const AudioFileCard = ({
     setIsDeleting(true);
     try {
       await onDelete(file.id);
+    } catch (error) {
+      console.error("Error deleting file:", error);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const retryLoadAudio = () => {
+    if (audioRef.current) {
+      setLoadError(null);
+      audioRef.current.load();
     }
   };
 
@@ -99,11 +126,26 @@ export const AudioFileCard = ({
       <CardContent>
         {isActiveAudio && (
           <div className="aspect-square flex items-center justify-center p-0 pb-2">
-            <audio 
-              src={file.url} 
-              controls
-              className="w-full max-w-full" 
-            />
+            {loadError ? (
+              <div className="w-full text-center py-4">
+                <p className="text-destructive text-sm mb-2">{loadError}</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={retryLoadAudio}
+                  className="mx-auto"
+                >
+                  <RefreshCw className="h-4 w-4 mr-1" /> Retry
+                </Button>
+              </div>
+            ) : (
+              <audio 
+                src={file.url} 
+                controls
+                className="w-full max-w-full" 
+                onError={() => setLoadError("Failed to load audio file")}
+              />
+            )}
           </div>
         )}
         <div className="flex justify-between items-center mt-2">
@@ -111,9 +153,9 @@ export const AudioFileCard = ({
             variant="outline"
             size="sm"
             onClick={() => onPlayToggle(file.url)}
-            disabled={!isAudioLoaded && isActiveAudio}
+            disabled={(!isAudioLoaded && isActiveAudio) || !!loadError}
           >
-            {!isAudioLoaded && isActiveAudio ? (
+            {!isAudioLoaded && isActiveAudio && !loadError ? (
               <>
                 <Loader2 className="h-4 w-4 mr-1 animate-spin" /> <span>Loading</span>
               </>

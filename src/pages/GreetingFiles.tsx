@@ -7,6 +7,9 @@ import { UploadGreetingForm } from '@/components/greeting-files/UploadGreetingFo
 import { useGreetingFiles } from '@/hooks/useGreetingFiles';
 import { useAuth } from '@/contexts/auth';
 import { LoadingState } from '@/components/upgrade/LoadingState';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const GreetingFiles = () => {
   const { user, sessionChecked } = useAuth();
@@ -35,6 +38,30 @@ const GreetingFiles = () => {
       <div className="container mx-auto py-10">
         <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
         <p className="text-muted-foreground">Please log in to manage your greeting files.</p>
+      </div>
+    );
+  }
+
+  // Display network error prominently at the top if there's an issue
+  if (isError && error instanceof Error && error.message.includes('network')) {
+    return (
+      <div className="w-full">
+        <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Network Error</AlertTitle>
+          <AlertDescription>
+            Unable to load greeting files due to a network issue. Please check your connection and try again.
+          </AlertDescription>
+          <Button 
+            variant="outline" 
+            className="mt-2" 
+            onClick={() => refreshGreetingFiles()}
+            size="sm"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" /> Try Again
+          </Button>
+        </Alert>
       </div>
     );
   }
