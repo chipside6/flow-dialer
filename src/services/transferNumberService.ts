@@ -49,7 +49,6 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
 
 /**
  * Adds a new transfer number to the database
- * Simplified version that focuses only on insertion
  */
 export const addTransferNumberToDatabase = async (
   userId: string, 
@@ -75,27 +74,33 @@ export const addTransferNumberToDatabase = async (
     
     console.log(`[TransferNumberService] Insert data:`, JSON.stringify(insertData));
     
-    // Perform only the insert operation
-    const { error } = await supabase
+    // Perform the insert operation
+    const { data, error } = await supabase
       .from('transfer_numbers')
-      .insert(insertData);
+      .insert(insertData)
+      .select()
+      .single();
     
     if (error) {
       console.error(`[TransferNumberService] Database error when inserting transfer number:`, error);
       throw error;
     }
     
-    console.log(`[TransferNumberService] Insert successful`);
+    if (data) {
+      console.log(`[TransferNumberService] Insert successful, returned data:`, data);
+      
+      return {
+        id: data.id,
+        name: data.name,
+        number: data.phone_number,
+        description: data.description || "No description provided",
+        dateAdded: new Date(data.created_at),
+        callCount: data.call_count !== null ? Number(data.call_count) : 0
+      };
+    }
     
-    // Return a success object without trying to fetch the record
-    return {
-      id: 'pending', // Temporary ID until refresh
-      name,
-      number,
-      description: description || "No description provided",
-      dateAdded: new Date(),
-      callCount: 0
-    };
+    console.log(`[TransferNumberService] Insert successful but no data returned`);
+    return null;
   } catch (error) {
     console.error(`[TransferNumberService] Error in addTransferNumberToDatabase:`, error);
     throw error;

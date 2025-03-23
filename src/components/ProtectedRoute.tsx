@@ -17,7 +17,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     isLoading, 
     sessionChecked, 
     initialized, 
-    error 
+    error,
+    path: location.pathname
   });
   
   // If we're still initializing and haven't completed auth check
@@ -57,6 +58,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   
   // If initialization is complete and user is not authenticated, redirect to login
   if (initialized && !isAuthenticated) {
+    console.log("User not authenticated, redirecting to login");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
