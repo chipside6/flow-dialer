@@ -10,7 +10,20 @@ export interface GreetingFile {
   user_id: string;
   filename: string;
   url: string;
-  file_path: string; // Added this field to match what's in the database
+  file_path: string; // This is required in our interface
+  file_type?: string;
+  file_size?: number;
+  duration_seconds?: number | null;
+  created_at: string;
+}
+
+// Define an interface for the raw database response
+interface DbGreetingFile {
+  id: string;
+  user_id: string;
+  filename: string;
+  url: string;
+  file_path?: string; // This might be missing in some records
   file_type?: string;
   file_size?: number;
   duration_seconds?: number | null;
@@ -48,11 +61,12 @@ export function useGreetingFiles() {
         }
         
         console.log("Greeting files fetched:", data?.length || 0);
-        // Ensure each record has a file_path property, even if it's empty string
-        const processedData = data?.map(file => ({
+        
+        // Transform the data to ensure each record has a file_path property
+        const processedData: GreetingFile[] = (data as DbGreetingFile[] || []).map(file => ({
           ...file,
           file_path: file.file_path || ''
-        })) || [];
+        }));
         
         return processedData;
       } catch (error) {
@@ -99,9 +113,12 @@ export function useGreetingFiles() {
           throw error;
         }
         
+        // Cast fileData to our DbGreetingFile type to handle optional file_path
+        const typedFileData = fileData as DbGreetingFile;
+        
         // Try to delete from storage if we have a file path
-        if (fileData && fileData.file_path) {
-          const filePath = fileData.file_path;
+        if (typedFileData && typedFileData.file_path) {
+          const filePath = typedFileData.file_path;
           const { error: storageError } = await supabase.storage
             .from('voice-app-uploads')
             .remove([filePath]);
