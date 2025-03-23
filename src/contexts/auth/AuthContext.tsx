@@ -8,12 +8,10 @@ export interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  isAffiliate: boolean;
   error: Error | null;
   sessionChecked: boolean;
   initialized: boolean;
   setProfile: (profile: UserProfile | null) => void;
-  setIsAffiliate: (isAffiliate: boolean) => void;
   signOut: () => Promise<{ success: boolean; error: any | null }>;
   updateProfile: (profile: UserProfile | null) => void;
 }

@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 
 const Profile = () => {
-  const { user, profile, isAffiliate, isAdmin } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const { currentPlan, getPlanById } = useSubscription();
   
   const activePlan = currentPlan ? getPlanById(currentPlan) : null;
@@ -47,11 +47,6 @@ const Profile = () => {
                   {isAdmin && (
                     <Badge className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs">
                       Admin
-                    </Badge>
-                  )}
-                  {isAffiliate && (
-                    <Badge className="bg-yellow-500/10 text-yellow-600 px-2 py-1 rounded-md text-xs">
-                      Affiliate
                     </Badge>
                   )}
                   {activePlan && (

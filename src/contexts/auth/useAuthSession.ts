@@ -11,7 +11,6 @@ export function useAuthSession() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAffiliate, setIsAffiliate] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authError, setAuthError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -31,13 +30,11 @@ export function useAuthSession() {
           console.log("useAuthSession - Profile data:", profileData);
           setProfile(profileData);
           
-          // Check roles
-          setIsAffiliate(!!profileData.is_affiliate);
+          // Check admin role
           setIsAdmin(!!profileData.is_admin);
         } else {
           console.log("useAuthSession - No profile found for user");
           setProfile(null);
-          setIsAffiliate(false);
           setIsAdmin(false);
         }
       } else {
@@ -45,7 +42,6 @@ export function useAuthSession() {
         setUser(null);
         setSession(null);
         setProfile(null);
-        setIsAffiliate(false);
         setIsAdmin(false);
       }
       
@@ -85,7 +81,6 @@ export function useAuthSession() {
           setSession(null);
           setProfile(null);
           setIsAdmin(false);
-          setIsAffiliate(false);
           setIsLoading(false);
           setSessionChecked(true);
           
@@ -157,10 +152,8 @@ export function useAuthSession() {
     isLoading,
     isAuthenticated: !!user,
     isAdmin,
-    isAffiliate,
     authError,
     sessionChecked,
-    setProfile,
-    setIsAffiliate
+    setProfile
   };
 }

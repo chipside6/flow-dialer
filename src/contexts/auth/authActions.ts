@@ -1,7 +1,8 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { UserProfile } from './types';
-import { fetchUserProfile, updateUserProfile, setUserAsAffiliate } from './authUtils';
+import { fetchUserProfile, updateUserProfile } from './authUtils';
 
 export const signUpUser = async (email: string, password: string) => {
   try {
@@ -69,16 +70,5 @@ export const updateUserProfileAction = async (userId: string, data: Partial<User
   } catch (error: any) {
     console.error('Error updating profile:', error);
     return { error: new Error(error.message) };
-  }
-};
-
-export const setAsAffiliateAction = async (userId: string) => {
-  try {
-    console.log("authActions - Setting user as affiliate:", userId);
-    const success = await setUserAsAffiliate(userId);
-    return { success, error: null };
-  } catch (error: any) {
-    console.error('Error setting affiliate status:', error);
-    return { success: false, error };
   }
 };

@@ -11,7 +11,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAffiliate, setIsAffiliate] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -45,13 +44,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             setProfile(updatedProfile);
             setIsAdmin(!!updatedProfile.is_admin);
-            setIsAffiliate(!!updatedProfile.is_affiliate);
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
-          setIsAffiliate(false);
         }
         
         setIsLoading(false);
@@ -100,14 +97,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             setProfile(updatedProfile);
             setIsAdmin(!!updatedProfile.is_admin);
-            setIsAffiliate(!!updatedProfile.is_affiliate);
           }
         } else {
           console.log("No active session found");
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
-          setIsAffiliate(false);
         }
       } catch (error) {
         console.error('Error checking session:', error);
@@ -132,18 +127,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(newProfile);
     if (newProfile) {
       setIsAdmin(!!newProfile.is_admin);
-      setIsAffiliate(!!newProfile.is_affiliate);
-    }
-  };
-  
-  // Handler for updating affiliate status
-  const updateIsAffiliate = (status: boolean) => {
-    setIsAffiliate(status);
-    if (profile) {
-      setProfile({
-        ...profile,
-        is_affiliate: status
-      });
     }
   };
   
@@ -158,13 +141,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     isAuthenticated: !!user,
     isAdmin,
-    isAffiliate,
     error,
     sessionChecked,
     initialized,
     setProfile: updateProfile,
     updateProfile,
-    setIsAffiliate: updateIsAffiliate,
     signOut
   };
 
