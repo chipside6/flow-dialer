@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/auth';
 import { Loader2, Phone, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +15,6 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -27,51 +26,31 @@ const SignUp = () => {
     try {
       console.log("Attempting to sign up with email:", email);
       
-      // Try custom backend first
-      try {
-        const { error, session } = await signUp(email, password);
+      // Use Supabase directly for signup
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-        if (error) {
-          throw error;
-        }
+      if (error) {
+        throw error;
+      }
 
-        console.log("Signup successful, session:", session);
+      toast({
+        title: "Account created",
+        description: "Your account has been created successfully with Supabase.",
+      });
+
+      // Check if email confirmation is required
+      if (data.session) {
+        // User is already confirmed and logged in
+        navigate('/dashboard');
+      } else {
+        // User needs to confirm email
         toast({
-          title: "Account created",
-          description: "Your account has been created successfully.",
+          title: "Email verification required",
+          description: "Please check your email to verify your account before logging in.",
         });
-
-        // If session was returned, user is already logged in, redirect to dashboard
-        if (session) {
-          navigate('/dashboard');
-        } else {
-          // Otherwise navigate to login
-          navigate('/login');
-        }
-        return;
-      } catch (error: any) {
-        console.log("Custom backend signup failed, trying Supabase directly:", error.message);
-        
-        // If it's not a network error, rethrow it
-        if (!error.message.includes("NetworkError")) {
-          throw error;
-        }
-        
-        // Try Supabase directly as backup
-        const { error: supabaseError } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-
-        if (supabaseError) {
-          throw supabaseError;
-        }
-
-        toast({
-          title: "Account created",
-          description: "Your account has been created successfully with Supabase.",
-        });
-
         navigate('/login');
       }
     } catch (error: any) {

@@ -1,64 +1,79 @@
 
 import { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, initialized, sessionChecked } = useAuth();
-  const location = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [timeoutReached, setTimeoutReached] = useState(false);
   const [authError, setAuthError] = useState(false);
+  const location = useLocation();
   
-  // Set a timeout to prevent getting stuck in the loading state
+  // Check user authentication status
   useEffect(() => {
-    if (isLoading && !sessionChecked) {
-      const timer = setTimeout(() => {
-        setTimeoutReached(true);
-        console.log('ProtectedRoute: Timeout reached while verifying authentication');
-      }, 1500); // Reduced to 1.5s for faster fallback
-      
-      return () => clearTimeout(timer);
-    }
-    
-    // If auth has been checked but we're not authenticated, show error after a short delay
-    if (sessionChecked && !isAuthenticated && !isLoading) {
-      const errorTimer = setTimeout(() => {
+    const checkAuth = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Auth check error:", error);
+          setIsAuthenticated(false);
+          setAuthError(true);
+        } else {
+          setIsAuthenticated(!!data.session);
+        }
+      } catch (err) {
+        console.error("Failed to check authentication:", err);
+        setIsAuthenticated(false);
         setAuthError(true);
-      }, 200); // Shorter delay for better UX
-      
-      return () => clearTimeout(errorTimer);
-    }
-  }, [isLoading, sessionChecked, isAuthenticated]);
-
-  // Force redirect after a longer timeout if still loading
-  useEffect(() => {
-    const forceRedirectTimer = setTimeout(() => {
-      if (isLoading) {
-        console.log('ProtectedRoute: Force redirecting to login due to prolonged loading');
-        setTimeoutReached(true);
+      } finally {
+        setIsLoading(false);
       }
-    }, 3000); // 3 second absolute timeout (reduced from 5s)
+    };
     
-    return () => clearTimeout(forceRedirectTimer);
-  }, [isLoading]);
+    checkAuth();
+    
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setIsAuthenticated(!!session);
+        setIsLoading(false);
+      }
+    );
+    
+    // Set a timeout to prevent getting stuck in the loading state
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        setTimeoutReached(true);
+        setIsLoading(false);
+        console.log('ProtectedRoute: Timeout reached while verifying authentication');
+      }
+    }, 1500);
+    
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timer);
+    };
+  }, []);
 
-  // If authentication check is complete and user is authenticated, render children
-  if (isAuthenticated) {
-    return <>{children}</>;
+  // If we're still loading and haven't reached timeout, show loading indicator
+  if (isLoading && !timeoutReached) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+        <span className="text-xl font-medium">Verifying authentication...</span>
+      </div>
+    );
   }
   
-  // If auth has been checked or timeout reached, but user is not authenticated, redirect to login
-  if ((sessionChecked && !isLoading) || timeoutReached) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-  
-  // If we've detected an auth error after session check
+  // If we've detected an auth error
   if (authError) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-background p-4">
@@ -78,13 +93,13 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
   
-  // Show loading state while authentication is being checked (before timeout)
-  return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
-      <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-      <span className="text-xl font-medium">Verifying authentication...</span>
-    </div>
-  );
+  // If user is authenticated, render children
+  if (isAuthenticated) {
+    return <>{children}</>;
+  }
+  
+  // If user is not authenticated, redirect to login
+  return <Navigate to="/login" state={{ from: location }} replace />;
 };
 
 export default ProtectedRoute;
