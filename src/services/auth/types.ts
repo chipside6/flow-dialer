@@ -27,5 +27,5 @@ export interface Session {
 }
 
 // Define API URL - this will be used across all services
-// Make sure this matches your backend URL and port exactly
+// Updated to port 5000 instead of 3001 to match the backend server
 export const API_URL = 'http://localhost:5000/api';
