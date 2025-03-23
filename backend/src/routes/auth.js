@@ -26,15 +26,34 @@ router.post('/signup', async (req, res) => {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Insert user
+    // Generate a unique ID for the user
     const userId = Date.now().toString();
+    
+    // Insert user
     await pool.query('INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)', [userId, email, passwordHash]);
 
     // Create a profile record too
     const fullName = metadata?.full_name || null;
     await pool.query('INSERT INTO profiles (id, email, full_name) VALUES (?, ?, ?)', [userId, email, fullName]);
 
-    res.status(201).json({ message: 'User created successfully' });
+    // Create JWT token for immediate login after signup
+    const token = jwt.sign({ userId }, process.env.JWT_SECRET || 'your-secret-key', { expiresIn: '7d' });
+    
+    // Calculate expiry date for the session
+    const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days in seconds
+
+    // Return user session just like login does
+    res.status(201).json({
+      message: 'User created successfully',
+      session: {
+        user: {
+          id: userId,
+          email,
+        },
+        expires_at: expiresAt,
+        token
+      }
+    });
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ error: true, message: 'Error creating user account' });
@@ -85,6 +104,13 @@ router.post('/login', async (req, res) => {
     console.error('Error during login:', error);
     res.status(500).json({ error: true, message: 'Error during login process' });
   }
+});
+
+// Add a logout endpoint
+router.post('/logout', (req, res) => {
+  // In a token-based system, backend logout is minimal
+  // The client should handle removing the token
+  res.status(200).json({ message: 'Logged out successfully' });
 });
 
 module.exports = router;

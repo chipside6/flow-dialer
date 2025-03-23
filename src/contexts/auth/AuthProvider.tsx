@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AuthContext, AuthContextType } from './AuthContext';
-import { getStoredSession, fetchUserProfile, signUp as signUpService, signIn as signInService, signOut as signOutService, updateUserProfile, setUserAsAffiliate, User, UserProfile } from '@/services/authService';
+import { getStoredSession, fetchUserProfile, signUp as signUpService, signIn as signInService, signOut as signOutService, updateUserProfile, setUserAsAffiliate, User, UserProfile, Session } from '@/services/authService';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -58,7 +58,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string, metadata?: { full_name?: string }) => {
     try {
       setIsLoading(true);
-      return await signUpService(email, password, metadata);
+      const result = await signUpService(email, password, metadata);
+      
+      // Update local state if session is returned from signup
+      if (!result.error && result.session) {
+        setUser(result.session.user);
+        
+        // Try to fetch user profile
+        const userProfile = await fetchUserProfile(result.session.user.id);
+        
+        if (userProfile) {
+          setProfile(userProfile);
+          setIsAdmin(!!userProfile.is_admin);
+          setIsAffiliate(!!userProfile.is_affiliate);
+        }
+      }
+      
+      return result;
     } finally {
       setIsLoading(false);
     }

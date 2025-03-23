@@ -1,6 +1,6 @@
 
 import React, { createContext } from 'react';
-import { User, UserProfile } from '@/services/authService';
+import { User, UserProfile, Session } from '@/services/authService';
 
 export interface AuthContextType {
   user: User | null;
@@ -11,8 +11,8 @@ export interface AuthContextType {
   isAffiliate: boolean;
   initialized: boolean;
   sessionChecked: boolean;
-  signUp: (email: string, password: string, metadata?: { full_name?: string }) => Promise<{ error: Error | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, metadata?: { full_name?: string }) => Promise<{ error: Error | null, session?: Session }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null, session?: Session }>;
   signOut: () => Promise<{ success: boolean; error: any } | void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<{ error: Error | null }>;
   setAsAffiliate: (userId: string) => Promise<void>;

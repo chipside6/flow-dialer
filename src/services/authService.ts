@@ -23,10 +23,10 @@ export interface UserProfile {
 export interface Session {
   user: User;
   expires_at: number;
+  token?: string;
 }
 
 // Define API URL - this will be used across all services
-// Change from localhost:3001 to localhost:5000 to match the port in backend/src/index.js
 export const API_URL = 'http://localhost:5000/api';
 
 // Storage key for local session data
@@ -57,7 +57,7 @@ export const clearSession = (): void => {
 };
 
 // Sign up a new user
-export const signUp = async (email: string, password: string, metadata?: { full_name?: string }): Promise<{ error: Error | null }> => {
+export const signUp = async (email: string, password: string, metadata?: { full_name?: string }): Promise<{ error: Error | null, session?: Session }> => {
   try {
     console.log("Signing up new user:", email);
     
@@ -73,12 +73,19 @@ export const signUp = async (email: string, password: string, metadata?: { full_
       })
     });
     
+    const data = await response.json();
+    
     if (!response.ok) {
-      const data = await response.json();
       throw new Error(data.message || 'Failed to sign up');
     }
     
-    const data = await response.json();
+    // Check if session data is returned on signup
+    if (data.session) {
+      // Store the session just like we do with login
+      storeSession(data.session);
+      return { error: null, session: data.session };
+    }
+    
     return { error: null };
   } catch (error: any) {
     console.error("Sign up error:", error.message);
@@ -134,7 +141,7 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.user.id}`
+          'Authorization': `Bearer ${session.token || ''}`
         }
       });
     }
@@ -166,7 +173,7 @@ export const fetchUserProfile = async (userId: string): Promise<UserProfile | nu
     
     const response = await fetch(`${API_URL}/profiles/${userId}`, {
       headers: {
-        'Authorization': `Bearer ${session.user.id}`
+        'Authorization': `Bearer ${session.token || ''}`
       }
     });
     
