@@ -5,7 +5,7 @@ import { SipProviderTable } from "@/components/sip/SipProviderTable";
 import { useSipProviders } from "@/hooks/useSipProviders";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Loader2, AlertCircle, WifiOff } from "lucide-react";
+import { Loader2, AlertCircle, WifiOff, RefreshCw } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +15,7 @@ const SipProviders = () => {
     editingProvider,
     isLoading,
     error,
+    refetch,
     handleAddProvider,
     handleEditProvider,
     handleCancelEdit,
@@ -23,11 +24,6 @@ const SipProviders = () => {
   } = useSipProviders();
   
   const isMobile = useIsMobile();
-  
-  const handleRetry = () => {
-    // Force page refresh to retry loading
-    window.location.reload();
-  };
   
   const isNetworkError = error && 
     (error.message.includes("NetworkError") || 
@@ -50,7 +46,11 @@ const SipProviders = () => {
         
         {error && (
           <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
+            {isNetworkError ? (
+              <WifiOff className="h-4 w-4" />
+            ) : (
+              <AlertCircle className="h-4 w-4" />
+            )}
             <AlertTitle>
               {isNetworkError ? "Network Error" : "Error loading providers"}
             </AlertTitle>
@@ -64,20 +64,11 @@ const SipProviders = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={handleRetry}
+                  onClick={refetch}
                   className="mt-2"
                 >
-                  {isNetworkError ? (
-                    <>
-                      <WifiOff className="mr-2 h-4 w-4" />
-                      Retry Connection
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="mr-2 h-4 w-4" />
-                      Retry
-                    </>
-                  )}
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Retry Connection
                 </Button>
               </div>
             </AlertDescription>

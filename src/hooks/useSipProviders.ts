@@ -6,7 +6,7 @@ import { useDeleteProvider } from "./sip/useDeleteProvider";
 import { useToggleProviderStatus } from "./sip/useToggleProviderStatus";
 
 export const useSipProviders = () => {
-  const { providers, setProviders, isLoading, error } = useFetchSipProviders();
+  const { providers, setProviders, isLoading, error, refetch } = useFetchSipProviders();
   const { editingProvider, handleEditProvider, handleCancelEdit, setEditingProvider } = useProviderState();
   const { isSubmitting, addOrUpdateProvider } = useAddUpdateProvider(providers, setProviders, setEditingProvider);
   const { handleDeleteProvider } = useDeleteProvider(providers, setProviders);
@@ -20,6 +20,7 @@ export const useSipProviders = () => {
     error,
     
     // Actions
+    refetch,
     handleAddProvider: addOrUpdateProvider,
     handleEditProvider,
     handleCancelEdit,
