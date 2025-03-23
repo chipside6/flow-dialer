@@ -76,8 +76,8 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
               ...userProfile,
               id: user.id,
               user_id: user.id,
-              is_admin: userProfile.is_admin ?? false,
-              is_affiliate: userProfile.is_affiliate ?? false
+              is_admin: userProfile.is_admin ?? false
+              // Removed is_affiliate property
             }
           };
         });

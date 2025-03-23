@@ -56,8 +56,8 @@ export function UsersDataFetcher() {
 
   // Calculate stats - providing defaults for when data isn't available
   const userCount = users?.length ?? 0;
-  const affiliateCount = users?.filter(user => user.profile?.is_affiliate)?.length ?? 0;
-
+  // Remove the affiliateCount calculation that was using is_affiliate
+  
   // Force rendering content after a reasonable timeout, even if still loading
   const [forceRender, setForceRender] = React.useState(false);
   
@@ -141,7 +141,7 @@ export function UsersDataFetcher() {
           <>
             <AdminHeader 
               userCount={userCount} 
-              affiliateCount={affiliateCount} 
+              // Remove the affiliateCount prop since we're no longer tracking affiliates
             />
             
             <UserManagement 
