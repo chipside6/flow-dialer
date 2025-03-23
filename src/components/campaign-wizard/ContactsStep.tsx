@@ -26,11 +26,13 @@ export const ContactsStep = ({ campaign, contactLists, onSelectChange, isLoading
             value={campaign.contactListId}
             onValueChange={(value) => onSelectChange("contactListId", value)}
           >
-            <SelectTrigger className="bg-background flex items-center justify-between">
-              <SelectValue placeholder="Select a contact list" />
-              <ChevronDown className="h-4 w-4 opacity-70 ml-2 flex-shrink-0" />
+            <SelectTrigger id="contactListId" className="w-full bg-white dark:bg-gray-800 mt-1 border border-gray-300 dark:border-gray-700">
+              <div className="flex items-center justify-between w-full">
+                <SelectValue placeholder="Select a contact list" />
+                <ChevronDown className="h-4 w-4 ml-2 opacity-70 flex-shrink-0" />
+              </div>
             </SelectTrigger>
-            <SelectContent className="bg-popover z-50">
+            <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 z-50">
               {contactLists.length === 0 ? (
                 <SelectItem value="empty" disabled>No contact lists available</SelectItem>
               ) : (
