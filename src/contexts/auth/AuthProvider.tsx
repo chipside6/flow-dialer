@@ -38,9 +38,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Fetch profile data
           const userProfile = await fetchUserProfile(session.user.id);
           if (userProfile) {
-            setProfile(userProfile);
-            setIsAdmin(!!userProfile.is_admin);
-            setIsAffiliate(!!userProfile.is_affiliate);
+            // Make sure to set the email from the auth user
+            const updatedProfile = {
+              ...userProfile,
+              email: session.user.email || ''
+            };
+            setProfile(updatedProfile);
+            setIsAdmin(!!updatedProfile.is_admin);
+            setIsAffiliate(!!updatedProfile.is_affiliate);
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
@@ -88,9 +93,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Fetch user profile
           const userProfile = await fetchUserProfile(data.session.user.id);
           if (userProfile) {
-            setProfile(userProfile);
-            setIsAdmin(!!userProfile.is_admin);
-            setIsAffiliate(!!userProfile.is_affiliate);
+            // Make sure to set the email from the auth user
+            const updatedProfile = {
+              ...userProfile,
+              email: data.session.user.email || ''
+            };
+            setProfile(updatedProfile);
+            setIsAdmin(!!updatedProfile.is_admin);
+            setIsAffiliate(!!updatedProfile.is_affiliate);
           }
         } else {
           console.log("No active session found");

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from './types';
 
@@ -24,11 +23,13 @@ export const fetchUserProfile = async (userId: string) => {
     console.log("Profile retrieved successfully");
     
     // Create a properly typed UserProfile object
+    // Map the profile data to our UserProfile type, accounting for fields that may not be in the database
     const userProfile: UserProfile = {
       id: data.id,
-      email: data.email || '',
+      // Use data from auth.user for email if needed
+      email: '', // We'll get email from the auth user object instead
       full_name: data.full_name || '',
-      avatar_url: data.avatar_url || null,
+      avatar_url: null, // This field isn't in the database schema
       company_name: data.company_name || '',
       is_admin: !!data.is_admin,
       is_affiliate: !!data.is_affiliate
@@ -43,9 +44,17 @@ export const fetchUserProfile = async (userId: string) => {
 
 export const updateUserProfile = async (userId: string, data: Partial<UserProfile>) => {
   try {
+    // Only keep fields that exist in the profiles table
+    const profileData = {
+      full_name: data.full_name,
+      company_name: data.company_name,
+      is_admin: data.is_admin,
+      is_affiliate: data.is_affiliate
+    };
+    
     const { error } = await supabase
       .from('profiles')
-      .update(data)
+      .update(profileData)
       .eq('id', userId);
     
     if (error) throw error;
