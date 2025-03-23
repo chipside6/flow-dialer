@@ -1,9 +1,10 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { addTransferNumberToDatabase } from "@/services/transferNumberService";
 import { TransferNumber } from "@/types/transferNumber";
+import { useTransferNumberValidation } from "./useTransferNumberValidation";
 
 export function useAddTransferNumber(
   setIsSubmitting: (isSubmitting: boolean) => void,
@@ -11,6 +12,7 @@ export function useAddTransferNumber(
 ) {
   const { user } = useAuth();
   const [error, setError] = useState<Error | null>(null);
+  const { validateTransferNumberInput } = useTransferNumberValidation();
 
   const addTransferNumber = async (
     name: string,
@@ -25,6 +27,11 @@ export function useAddTransferNumber(
         description: "You need to be logged in to add transfer numbers",
         variant: "destructive"
       });
+      return null;
+    }
+    
+    // Validate the input first
+    if (!validateTransferNumberInput(name, number)) {
       return null;
     }
     
@@ -48,8 +55,12 @@ export function useAddTransferNumber(
         refreshTransferNumbers();
         return result;
       } else {
-        // No error but no result either
         console.log("No result returned from addTransferNumberToDatabase");
+        toast({
+          title: "Error adding transfer number",
+          description: "The transfer number could not be added. Please try again.",
+          variant: "destructive"
+        });
         refreshTransferNumbers();
         return null;
       }

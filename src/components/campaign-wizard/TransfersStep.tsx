@@ -1,18 +1,12 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CampaignData } from "./types";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
 import { Loader2 } from "lucide-react";
-
-interface TransferNumber {
-  id: string;
-  name: string;
-  phone_number: string;
-}
+import { useTransferNumbers } from "@/hooks/useTransferNumbers";
 
 interface TransfersStepProps {
   campaign: CampaignData;
@@ -21,40 +15,10 @@ interface TransfersStepProps {
 
 export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
   const { user } = useAuth();
-  const [transferNumbers, setTransferNumbers] = useState<TransferNumber[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchTransferNumbers = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('transfer_numbers')
-          .select('id, name, phone_number')
-          .eq('user_id', user.id);
-        
-        if (error) {
-          throw error;
-        }
-        
-        if (data) {
-          console.log("Fetched transfer numbers:", data);
-          setTransferNumbers(data);
-        }
-      } catch (error) {
-        console.error("Error fetching transfer numbers:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchTransferNumbers();
-  }, [user]);
+  const { 
+    transferNumbers, 
+    isLoading 
+  } = useTransferNumbers();
 
   const handleSelectTransferNumber = (value: string) => {
     // Create a synthetic event object to pass to onChange
@@ -87,8 +51,8 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
             </SelectTrigger>
             <SelectContent>
               {transferNumbers.map((tn) => (
-                <SelectItem key={tn.id} value={tn.phone_number}>
-                  {tn.name} ({tn.phone_number})
+                <SelectItem key={tn.id} value={tn.number}>
+                  {tn.name} ({tn.number})
                 </SelectItem>
               ))}
             </SelectContent>
