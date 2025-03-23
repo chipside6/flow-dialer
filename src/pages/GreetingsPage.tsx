@@ -16,18 +16,20 @@ const GreetingsFallback = () => (
 
 const GreetingsPage = () => {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-background flex flex-col w-full">
-        <Navbar />
-        <div className="flex flex-1 w-full max-w-full overflow-hidden">
-          <DashboardLayout>
-            <Suspense fallback={<GreetingsFallback />}>
-              <GreetingFiles />
-            </Suspense>
-          </DashboardLayout>
+    <div className="min-h-screen bg-background">
+      <SidebarProvider>
+        <div className="min-h-screen bg-background flex flex-col w-full">
+          <Navbar />
+          <div className="flex flex-1 w-full max-w-full overflow-hidden">
+            <DashboardLayout>
+              <Suspense fallback={<GreetingsFallback />}>
+                <GreetingFiles />
+              </Suspense>
+            </DashboardLayout>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </div>
   );
 };
 
