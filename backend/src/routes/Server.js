@@ -1,11 +1,12 @@
+
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 5000;
 
 // Import routes
-const campaignsRouter = require('./src/routes/campaigns');
-const contactListsRouter = require('./src/routes/contactLists');
-const subscriptionsRouter = require('./src/routes/subscriptions');
+const campaignsRouter = require('./campaigns');
+const contactListsRouter = require('./contactLists');
+const subscriptionsRouter = require('./subscriptions');
 
 // Middleware for parsing JSON
 app.use(express.json());
