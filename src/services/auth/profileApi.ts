@@ -14,22 +14,27 @@ export const fetchUserProfile = async (userId: string): Promise<UserProfile | nu
       return null;
     }
     
+    console.log("Making profile request to:", `${API_URL}/profiles/${userId}`);
     const response = await fetch(`${API_URL}/profiles/${userId}`, {
       headers: {
         'Authorization': `Bearer ${session.token || ''}`
-      }
+      },
+      // Add these options to help with CORS and network issues
+      mode: 'cors',
+      credentials: 'same-origin'
     });
     
     if (!response.ok) {
-      throw new Error('Failed to fetch user profile');
+      console.error("Profile fetch error:", response.status);
+      throw new Error(`Failed to fetch user profile (${response.status})`);
     }
     
     const data = await response.json();
     console.log("Profile retrieved successfully:", data);
     
     return data as UserProfile;
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
+  } catch (error: any) {
+    console.error('Error fetching user profile:', error.message);
     return null;
   }
 };
@@ -45,17 +50,22 @@ export const updateUserProfile = async (userId: string, data: Partial<UserProfil
       return false;
     }
     
+    console.log("Making profile update request to:", `${API_URL}/profiles/${userId}`);
     const response = await fetch(`${API_URL}/profiles/${userId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.user.id}`
+        'Authorization': `Bearer ${session.token || ''}`
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      // Add these options to help with CORS and network issues
+      mode: 'cors',
+      credentials: 'same-origin'
     });
     
     if (!response.ok) {
-      throw new Error('Failed to update user profile');
+      console.error("Profile update error:", response.status);
+      throw new Error(`Failed to update user profile (${response.status})`);
     }
     
     console.log("Profile updated successfully");
@@ -88,15 +98,20 @@ export const setUserAsAffiliate = async (userId: string): Promise<boolean> => {
       return false;
     }
     
+    console.log("Making affiliate request to:", `${API_URL}/profiles/${userId}/affiliate`);
     const response = await fetch(`${API_URL}/profiles/${userId}/affiliate`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${session.user.id}`
-      }
+        'Authorization': `Bearer ${session.token || ''}`
+      },
+      // Add these options to help with CORS and network issues
+      mode: 'cors',
+      credentials: 'same-origin'
     });
     
     if (!response.ok) {
-      throw new Error('Failed to set user as affiliate');
+      console.error("Affiliate status update error:", response.status);
+      throw new Error(`Failed to set user as affiliate (${response.status})`);
     }
     
     console.log("User set as affiliate successfully");

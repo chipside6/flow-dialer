@@ -1,12 +1,15 @@
 
 import { toast } from "@/components/ui/use-toast";
 import { User, Session, API_URL } from './types';
-import { storeSession, clearSession } from './session';
+import { storeSession, clearSession, getStoredSession } from './session';
 
 // Sign up a new user
 export const signUp = async (email: string, password: string, metadata?: { full_name?: string }): Promise<{ error: Error | null, session?: Session }> => {
   try {
     console.log("Signing up new user:", email);
+    
+    // Add more detailed error logging
+    console.log("Making signup request to:", `${API_URL}/auth/signup`);
     
     const response = await fetch(`${API_URL}/auth/signup`, {
       method: 'POST',
@@ -17,18 +20,25 @@ export const signUp = async (email: string, password: string, metadata?: { full_
         email,
         password,
         metadata
-      })
+      }),
+      // Add these options to help with CORS and network issues
+      mode: 'cors',
+      credentials: 'same-origin'
     });
     
-    const data = await response.json();
-    
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to sign up');
+      const errorText = await response.text();
+      console.error("Signup response not OK:", response.status, errorText);
+      throw new Error(errorText || `Server responded with status: ${response.status}`);
     }
+    
+    const data = await response.json();
+    console.log("Signup successful, received data:", data);
     
     // Check if session data is returned on signup
     if (data.session) {
-      // Store the session just like we do with login
+      console.log("Session data received, storing session");
+      // Store the session
       storeSession(data.session);
       return { error: null, session: data.session };
     }
@@ -36,7 +46,7 @@ export const signUp = async (email: string, password: string, metadata?: { full_
     return { error: null };
   } catch (error: any) {
     console.error("Sign up error:", error.message);
-    return { error: new Error(error.message) };
+    return { error: new Error(error.message || 'Network error occurred during signup') };
   }
 };
 
@@ -44,6 +54,7 @@ export const signUp = async (email: string, password: string, metadata?: { full_
 export const signIn = async (email: string, password: string): Promise<{ error: Error | null, session?: Session }> => {
   try {
     console.log("Signing in user:", email);
+    console.log("Making login request to:", `${API_URL}/auth/login`);
     
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
@@ -53,17 +64,23 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
       body: JSON.stringify({
         email,
         password
-      })
+      }),
+      // Add these options to help with CORS and network issues
+      mode: 'cors',
+      credentials: 'same-origin'
     });
     
-    const data = await response.json();
-    
     if (!response.ok) {
-      throw new Error(data.message || 'Invalid login credentials');
+      const errorText = await response.text();
+      console.error("Login response not OK:", response.status, errorText);
+      throw new Error(errorText || `Invalid login credentials (${response.status})`);
     }
     
+    const data = await response.json();
+    console.log("Login successful, received data:", data);
+    
     if (!data.session) {
-      throw new Error('Invalid response format from server');
+      throw new Error('Invalid response format from server - no session data');
     }
     
     // Store the session
@@ -72,7 +89,7 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
     return { error: null, session: data.session };
   } catch (error: any) {
     console.error("Sign in error:", error.message);
-    return { error: new Error(error.message) };
+    return { error: new Error(error.message || 'Network error occurred during login') };
   }
 };
 
@@ -83,13 +100,17 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     const session = getStoredSession();
     
     if (session) {
+      console.log("Making logout request to:", `${API_URL}/auth/logout`);
       // Call the logout endpoint
       await fetch(`${API_URL}/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.token || ''}`
-        }
+        },
+        // Add these options to help with CORS and network issues
+        mode: 'cors',
+        credentials: 'same-origin'
       });
     }
     
@@ -103,8 +124,6 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     // Still clear the session even if API call fails
     clearSession();
     
-    return { success: false, error: new Error(error.message) };
+    return { success: false, error: new Error(error.message || 'Error during sign out') };
   }
 };
-
-import { getStoredSession } from './session';
