@@ -1,68 +1,50 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { SipProvider } from "@/types/sipProviders";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
-import { fetchSipProviders } from "@/services/api/sipProvidersService";
-import { 
-  DialerErrorType, 
-  createDialerError, 
-  handleDialerError 
-} from "@/utils/errorHandlingUtils";
+import { fetchSipProviders } from "@/services/supabase/sipProvidersService";
 
 export const useFetchSipProviders = () => {
   const [providers, setProviders] = useState<SipProvider[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
   const { user } = useAuth();
 
-  const fetchProviders = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (!user) {
       setProviders([]);
       setIsLoading(false);
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
     try {
-      setIsLoading(true);
-      setError(null);
       const data = await fetchSipProviders(user.id);
       setProviders(data);
     } catch (err: any) {
       console.error("Error fetching SIP providers:", err);
-      setError(err);
-      
-      // Determine error type
-      const isNetworkError = !navigator.onLine || 
-                           err.message.includes("NetworkError") || 
-                           err.message.includes("network") || 
-                           err.message.includes("fetch") ||
-                           err.message.includes("Failed to fetch");
-      
-      // Handle network error with appropriate error type
-      handleDialerError(
-        createDialerError(
-          isNetworkError ? DialerErrorType.CONNECTION : DialerErrorType.SERVER,
-          isNetworkError 
-            ? "Unable to connect to the server. Please check your internet connection."
-            : err.message || "An error occurred while loading SIP providers"
-        )
-      );
+      setError(new Error(err.message || "Failed to load SIP providers"));
+      toast({
+        title: "Error loading providers",
+        description: "Could not load your SIP providers. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [user, retryCount]);
+  }, [user]);
 
-  // Initial fetch and refetch when user or retryCount changes
-  useEffect(() => {
-    fetchProviders();
-  }, [fetchProviders]);
-
-  // Function to manually retry fetching providers
   const refetch = useCallback(() => {
-    setRetryCount(count => count + 1);
-  }, []);
+    return fetchData();
+  }, [fetchData]);
+
+  // Fetch on mount
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return { providers, setProviders, isLoading, error, refetch };
 };

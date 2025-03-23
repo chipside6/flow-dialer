@@ -1,63 +1,54 @@
-
 import { useState } from "react";
-import { toast } from "@/components/ui/use-toast";
 import { SipProvider } from "@/types/sipProviders";
+import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
-import { addSipProvider, updateSipProvider } from "@/services/api/sipProvidersService";
+import { addSipProvider, updateSipProvider } from "@/services/supabase/sipProvidersService";
 
 export const useAddUpdateProvider = (
   providers: SipProvider[],
   setProviders: React.Dispatch<React.SetStateAction<SipProvider[]>>,
   setEditingProvider: React.Dispatch<React.SetStateAction<SipProvider | null>>
 ) => {
-  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
   
   const addOrUpdateProvider = async (provider: SipProvider) => {
     if (!user) {
       toast({
-        title: "Authentication Required",
-        description: "You must be logged in to manage SIP providers.",
+        title: "Authentication required",
+        description: "You must be logged in to add or update a provider",
         variant: "destructive",
       });
       return;
     }
     
     setIsSubmitting(true);
-    
     try {
-      const isNewProvider = !provider.id;
-      console.log(`${isNewProvider ? 'Adding' : 'Updating'} SIP provider:`, provider);
-      
-      let result;
-      if (isNewProvider) {
-        // For INSERT operations
-        result = await addSipProvider(provider, user.id);
-        
-        // Add the new provider to the state
-        setProviders(prevProviders => [...prevProviders, result]);
+      if (provider.id === 'new') {
+        // Adding a new provider
+        const newProvider = await addSipProvider(provider, user.id);
+        setProviders([...providers, newProvider]);
+        toast({
+          title: "Provider added",
+          description: "The SIP provider has been added successfully",
+        });
       } else {
-        // For UPDATE operations
-        result = await updateSipProvider(provider, user.id);
-        
-        // Update the provider in the list
-        setProviders(providers.map(p => 
-          p.id === provider.id ? { ...provider } : p
-        ));
+        // Updating an existing provider
+        const updatedProvider = await updateSipProvider(provider, user.id);
+        setProviders(
+          providers.map(p => (p.id === provider.id ? updatedProvider : p))
+        );
+        toast({
+          title: "Provider updated",
+          description: "The SIP provider has been updated successfully",
+        });
       }
-      
-      toast({
-        title: isNewProvider ? "Provider Added" : "Provider Updated",
-        description: `${provider.name} has been ${isNewProvider ? 'added' : 'updated'} successfully.`,
-      });
-      
-      // Reset the editing state
       setEditingProvider(null);
-    } catch (error: any) {
-      console.error("Error saving SIP provider:", error);
+    } catch (err: any) {
+      console.error("Error adding/updating SIP provider:", err);
       toast({
-        title: "Error Saving Provider",
-        description: error.message || "There was an error saving your SIP provider.",
+        title: "Error",
+        description: err.message,
         variant: "destructive",
       });
     } finally {

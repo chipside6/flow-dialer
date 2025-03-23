@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { SipProvider } from "@/types/sipProviders";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
-import { deleteSipProvider } from "@/services/api/sipProvidersService";
+import { deleteSipProvider } from "@/services/supabase/sipProvidersService";
 
 export const useDeleteProvider = (
   providers: SipProvider[],

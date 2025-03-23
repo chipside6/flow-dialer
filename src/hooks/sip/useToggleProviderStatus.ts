@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { SipProvider } from "@/types/sipProviders";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
-import { toggleSipProviderStatus } from "@/services/customBackendService";
+import { toggleSipProviderStatus } from "@/services/supabase/sipProvidersService";
 
 export const useToggleProviderStatus = (
   providers: SipProvider[],
@@ -12,41 +11,33 @@ export const useToggleProviderStatus = (
   const [isToggling, setIsToggling] = useState(false);
   const { user } = useAuth();
   
-  const toggleProviderStatus = async (id: string) => {
+  const toggleProviderStatus = async (id: string, currentStatus: boolean) => {
     if (!user) {
       toast({
         title: "Authentication required",
-        description: "You must be logged in to update a provider",
+        description: "You must be logged in to toggle a provider's status",
         variant: "destructive",
       });
       return;
     }
     
-    const provider = providers.find(p => p.id === id);
-    if (!provider) return;
-
-    const newStatus = !provider.isActive;
-
     try {
       setIsToggling(true);
-      const success = await toggleSipProviderStatus(id, newStatus, user.id);
+      const success = await toggleSipProviderStatus(id, !currentStatus, user.id);
 
       if (success) {
-        setProviders(providers.map(p => 
-          p.id === id 
-            ? { ...p, isActive: newStatus }
-            : p
+        setProviders(providers.map(provider =>
+          provider.id === id ? { ...provider, isActive: !currentStatus } : provider
         ));
-        
         toast({
-          title: newStatus ? "Provider activated" : "Provider deactivated",
-          description: `${provider.name} has been ${newStatus ? "activated" : "deactivated"}`,
+          title: "Provider status updated",
+          description: `SIP provider status has been toggled to ${!currentStatus ? 'active' : 'inactive'}`,
         });
       }
     } catch (err: any) {
-      console.error("Error toggling provider status:", err);
+      console.error("Error toggling SIP provider status:", err);
       toast({
-        title: "Error updating provider",
+        title: "Error toggling provider status",
         description: err.message,
         variant: "destructive"
       });
@@ -54,6 +45,6 @@ export const useToggleProviderStatus = (
       setIsToggling(false);
     }
   };
-
+  
   return { toggleProviderStatus, isToggling };
 };

@@ -1,3 +1,3 @@
 
-// Re-export all service modules for backward compatibility
-export * from './api';
+// Re-export all service modules converted to use Supabase
+export * from './supabase';
