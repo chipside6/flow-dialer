@@ -22,12 +22,14 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       return null;
     }
     
+    console.log("Profile data from DB:", data);
+    
     // Create a UserProfile object with all required fields
     const profile: UserProfile = {
       id: data.id,
       email: '', // This will be set by the AuthProvider
       full_name: data.full_name || '',
-      avatar_url: data.avatar_url || null,
+      avatar_url: null, // Set to null since it doesn't exist in the database
       company_name: data.company_name || '',
       is_admin: !!data.is_admin,
       is_affiliate: !!data.is_affiliate
