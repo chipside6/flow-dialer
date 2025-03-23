@@ -18,7 +18,7 @@ const GreetingsPage = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <DashboardLayout>
-        <div className="container mx-auto py-6">
+        <div className="w-full">
           {/* Removed the Suspense wrapper that was causing loading to get stuck */}
           <GreetingFiles />
         </div>
