@@ -1,7 +1,8 @@
-import { User, UserProfile } from '@/services/authService';
 
-// Re-export the User and UserProfile types
-export type { User, UserProfile };
+import { UserProfile as ServiceUserProfile, User as ServiceUser, Session as ServiceSession } from '@/services/auth/types';
 
-// We'll use the AuthContextType from AuthContext.tsx
-// This file now just serves as a re-export location
+// Re-export the types with clear names to avoid circular dependency
+export type User = ServiceUser;
+export type UserProfile = ServiceUserProfile;
+export type Session = ServiceSession;
+

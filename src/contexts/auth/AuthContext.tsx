@@ -1,6 +1,6 @@
 
 import React, { createContext } from 'react';
-import { User, UserProfile, Session } from '@/services/authService';
+import { User, UserProfile, Session } from './types';
 
 export interface AuthContextType {
   user: User | null;

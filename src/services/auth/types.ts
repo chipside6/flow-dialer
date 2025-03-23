@@ -1,11 +1,23 @@
 
-import { User, Session } from '@/contexts/auth/types';
+// Define types locally to avoid circular dependencies
 
-// Update API URL to match the backend port (5000 instead of 3001)
+// Base user interface
+export interface User {
+  id: string;
+  email: string;
+}
+
+// Session interface for authentication
+export interface Session {
+  user: User;
+  token?: string;
+  expires_at?: number;
+}
+
+// API URL config
 export const API_URL = 'http://localhost:5000/api';
 
-export type { User, Session };
-
+// User profile interface
 export interface UserProfile {
   id: string;
   full_name?: string;

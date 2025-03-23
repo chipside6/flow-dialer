@@ -1,17 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { AuthContext, AuthContextType } from './AuthContext';
+import { User, UserProfile, Session } from './types';
 import { 
   getStoredSession, 
-  fetchUserProfile, 
   signUp as signUpService, 
   signIn as signInService, 
-  signOut as signOutService, 
-  updateUserProfile, 
-  setUserAsAffiliate,
-  User, 
-  UserProfile, 
-  Session 
+  signOut as signOutService,
+  fetchUserProfile,
+  updateUserProfile as updateUserProfileService,
+  setUserAsAffiliate as setUserAsAffiliateService
 } from '@/services/auth';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -65,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkSession();
   }, []);
 
-  // Sign up a new user - remove metadata parameter
+  // Sign up a new user
   const signUp = async (email: string, password: string) => {
     try {
       setIsLoading(true);
@@ -141,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     try {
-      const success = await updateUserProfile(user.id, data);
+      const success = await updateUserProfileService(user.id, data);
       
       if (success) {
         // Update local profile state
@@ -162,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Set a user as an affiliate
   const setAsAffiliateHandler = async (userId: string) => {
     try {
-      const success = await setUserAsAffiliate(userId);
+      const success = await setUserAsAffiliateService(userId);
       
       if (success && user && user.id === userId) {
         setIsAffiliate(true);

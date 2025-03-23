@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { UserProfile } from './types';
+import { UserProfile } from '@/services/auth/types';
 
 export const fetchUserProfile = async (userId: string) => {
   try {
@@ -18,6 +18,32 @@ export const fetchUserProfile = async (userId: string) => {
     }
     
     console.log("authUtils - Profile retrieved successfully:", data);
+    
+    // Ensure the data has the required 'email' field
+    if (!data.email) {
+      console.error("authUtils - Profile data missing required email field");
+      // Try to fetch the email from the users table if it's not in the profile
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('email')
+        .eq('id', userId)
+        .single();
+        
+      if (userError || !userData) {
+        console.error("authUtils - Could not find email for user:", userError?.message);
+        return null;
+      }
+      
+      // Combine the profile data with the email from the users table
+      const profileWithEmail = {
+        ...data,
+        email: userData.email
+      };
+      
+      return profileWithEmail as UserProfile;
+    }
+    
+    // If email is already present, return the data as is
     return data as UserProfile;
   } catch (error) {
     console.error('Error fetching user profile:', error);
