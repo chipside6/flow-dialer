@@ -31,7 +31,9 @@ export function useAddTransferNumber(
     }
     
     // Validate the input first
-    if (!validateTransferNumberInput(name, number)) {
+    const validationResult = validateTransferNumberInput(name, number);
+    if (!validationResult) {
+      console.log("Validation failed for transfer number");
       return null;
     }
     
@@ -39,6 +41,8 @@ export function useAddTransferNumber(
     setError(null);
     
     try {
+      console.log("Calling addTransferNumberToDatabase with:", { user: user.id, name, number, description });
+      
       const result = await addTransferNumberToDatabase(
         user.id,
         name,
@@ -47,6 +51,7 @@ export function useAddTransferNumber(
       );
       
       if (result) {
+        console.log("Successfully added transfer number:", result);
         toast({
           title: "Transfer number added",
           description: `${name} has been added to your transfer numbers`

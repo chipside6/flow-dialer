@@ -1,29 +1,40 @@
 
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 export function useTransferNumberValidation() {
-  // Validate input for transfer number
-  const validateTransferNumberInput = (name: string, number: string) => {
-    if (!name || !number) {
+  const validateTransferNumberInput = (name: string, number: string): boolean => {
+    // Check if name is provided
+    if (!name || name.trim() === "") {
       toast({
-        title: "Missing information",
-        description: "Please provide both a name and a number",
-        variant: "destructive",
+        title: "Name required",
+        description: "Please provide a name for the transfer number",
+        variant: "destructive"
       });
       return false;
     }
-    
-    // Basic validation for phone number format
-    const phoneRegex = /^\+?[0-9\s\-()]+$/;
-    if (!phoneRegex.test(number)) {
+
+    // Check if number is provided
+    if (!number || number.trim() === "") {
+      toast({
+        title: "Number required",
+        description: "Please provide a phone number",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    // Simple phone number format validation
+    // Allow for international format with + and -, and spaces
+    const phoneRegex = /^[+]?[\d\s-()]{7,20}$/;
+    if (!phoneRegex.test(number.trim())) {
       toast({
         title: "Invalid phone number",
-        description: "Please enter a valid phone number",
-        variant: "destructive",
+        description: "Please enter a valid phone number (e.g. +1 555-123-4567)",
+        variant: "destructive"
       });
       return false;
     }
-    
+
     return true;
   };
 

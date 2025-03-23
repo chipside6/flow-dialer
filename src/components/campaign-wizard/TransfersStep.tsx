@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -41,12 +41,12 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             <span className="text-sm text-muted-foreground">Loading transfer numbers...</span>
           </div>
-        ) : transferNumbers.length > 0 ? (
+        ) : transferNumbers && transferNumbers.length > 0 ? (
           <Select
             value={campaign.transferNumber}
             onValueChange={handleSelectTransferNumber}
           >
-            <SelectTrigger id="transferNumber">
+            <SelectTrigger id="transferNumber" className="w-full">
               <SelectValue placeholder="Select a transfer number" />
             </SelectTrigger>
             <SelectContent>
@@ -64,6 +64,7 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
             value={campaign.transferNumber}
             onChange={onChange}
             placeholder="Enter a phone number for transfers (e.g., +1 555-123-4567)"
+            className="w-full"
           />
         )}
         <p className="text-sm text-muted-foreground mt-1">

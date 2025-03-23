@@ -78,7 +78,7 @@ export const addTransferNumberToDatabase = async (
     const { data, error } = await supabase
       .from('transfer_numbers')
       .insert(insertData)
-      .select()
+      .select('*')
       .single();
     
     if (error) {
