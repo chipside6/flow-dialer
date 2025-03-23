@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/auth/useAuth";
 import { useCampaignForm } from "./hooks/useCampaignForm";
 import { useFormValidation } from "./utils/formValidation";
 import { useGreetingFiles, GreetingFile } from "@/hooks/useGreetingFiles";
+import { useContactLists } from "@/hooks/useContactLists";
 
 interface CampaignCreationWizardProps {
   onComplete: (campaign: CampaignData) => void;
@@ -23,6 +24,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
   const { user } = useAuth();
   const { validateStep, getNextStep, getPreviousStep } = useFormValidation();
   const { greetingFiles } = useGreetingFiles();
+  const { lists: contactLists, isLoading: isLoadingLists } = useContactLists();
   
   const {
     campaign,
@@ -33,12 +35,6 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
     handleSelectChange,
     handleComplete
   } = useCampaignForm(onComplete, user);
-
-  // Mock data for selections
-  const contactLists = [
-    { id: "list-1", name: "Main Customer List (250 contacts)" },
-    { id: "list-2", name: "VIP Customers (50 contacts)" }
-  ];
 
   const handleNext = () => {
     if (validateStep(step, campaign)) {
@@ -70,6 +66,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
           campaign={campaign}
           contactLists={contactLists}
           onSelectChange={handleSelectChange}
+          isLoading={isLoadingLists}
         />
       </TabsContent>
       

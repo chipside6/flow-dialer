@@ -11,12 +11,13 @@ import { useAuth } from "@/contexts/auth/useAuth";
 import { Campaign } from "@/hooks/useCampaigns";
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from "react-router-dom";
+import { useCampaigns } from "@/hooks/useCampaigns";
 
 const CampaignPage = () => {
   const location = useLocation();
   const [showCreateWizard, setShowCreateWizard] = useState(false);
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const { user } = useAuth();
+  const { campaigns, isLoading, refreshCampaigns } = useCampaigns();
   
   // Check for state passed from navigation to determine if we should show the wizard
   useEffect(() => {
@@ -27,7 +28,7 @@ const CampaignPage = () => {
     }
   }, [location.state]);
   
-  const handleCreateCampaign = (newCampaign: CampaignData) => {
+  const handleCreateCampaign = async (newCampaign: CampaignData) => {
     // Ensure the campaign has a user_id property and matches the Campaign type
     const campaignWithRequiredFields: Campaign = {
       id: newCampaign.id || uuidv4(),
@@ -41,8 +42,10 @@ const CampaignPage = () => {
       user_id: user?.id || ''
     };
     
-    setCampaigns([...campaigns, campaignWithRequiredFields]);
     setShowCreateWizard(false);
+    
+    // Refresh campaigns to show the newly created one
+    await refreshCampaigns();
   };
   
   return (
