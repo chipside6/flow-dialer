@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
 import { deleteTransferNumberFromDatabase } from "@/services/transferNumberService";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useDeleteTransferNumber(
   refreshTransferNumbers: () => void
@@ -14,10 +15,12 @@ export function useDeleteTransferNumber(
   const deleteTransferNumber = async (transferNumberId: string): Promise<boolean> => {
     console.log(`Deleting transfer number with ID: ${transferNumberId}`);
     
-    if (!user) {
+    // Check authentication first
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session || !user) {
       toast({
         title: "Authentication required",
-        description: "You need to be logged in to delete transfer numbers",
+        description: "You need to be logged in to delete transfer numbers. Please log in and try again.",
         variant: "destructive"
       });
       return false;
@@ -43,13 +46,22 @@ export function useDeleteTransferNumber(
       } else {
         throw new Error("Failed to delete transfer number");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error deleting transfer number:", err);
       setError(err instanceof Error ? err : new Error("Failed to delete transfer number"));
       
+      let errorMessage = "There was an error deleting your transfer number. Please try again.";
+      
+      // Handle specific error cases
+      if (err.message?.includes("Authentication required")) {
+        errorMessage = "Please log in to delete transfer numbers";
+      } else if (err.code === "PGRST301") {
+        errorMessage = "Permission denied. You don't have permission to delete this record.";
+      }
+      
       toast({
         title: "Error deleting transfer number",
-        description: "There was an error deleting your transfer number. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
       

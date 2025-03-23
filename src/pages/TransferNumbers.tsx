@@ -7,9 +7,11 @@ import { TransferNumbersList } from "@/components/transfer-numbers/TransferNumbe
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tryCatchWithErrorHandling, DialerErrorType } from "@/utils/errorHandlingUtils";
+import { useAuth } from "@/contexts/auth";
+import { useNavigate } from "react-router-dom";
 
 const TransferNumbers = () => {
   const { 
@@ -22,6 +24,8 @@ const TransferNumbers = () => {
     refreshTransferNumbers
   } = useTransferNumbers();
   
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const navigate = useNavigate();
   const [initialLoad, setInitialLoad] = useState(true);
   const { toast } = useToast();
   
@@ -30,13 +34,21 @@ const TransferNumbers = () => {
     isLoading,
     isSubmitting,
     initialLoad,
-    error
+    error,
+    isAuthenticated: !!user,
+    isAuthLoading
   });
   
   // Handle initial data loading with better error handling
   useEffect(() => {
     const loadData = async () => {
       console.log("TransferNumbers page mounted, loading data");
+      
+      if (!user && !isAuthLoading) {
+        console.log("No authenticated user, showing login prompt");
+        setInitialLoad(false);
+        return;
+      }
       
       await tryCatchWithErrorHandling(
         async () => {
@@ -58,11 +70,20 @@ const TransferNumbers = () => {
     return () => {
       console.log("TransferNumbers page unmounted");
     };
-  }, []);
+  }, [user, isAuthLoading]);
   
   // Handler for adding a transfer number with improved error handling
   const handleAddTransferNumber = async (name: string, number: string, description: string) => {
     console.log("handleAddTransferNumber called with:", { name, number, description });
+    
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You need to be logged in to add transfer numbers",
+        variant: "destructive"
+      });
+      return null;
+    }
     
     const result = await tryCatchWithErrorHandling(
       async () => {
@@ -85,6 +106,15 @@ const TransferNumbers = () => {
   const handleManualRefresh = async () => {
     console.log("Manual refresh requested from UI");
     
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You need to be logged in to view transfer numbers",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     await tryCatchWithErrorHandling(
       async () => {
         await refreshTransferNumbers();
@@ -96,6 +126,35 @@ const TransferNumbers = () => {
       },
       "Failed to refresh transfer numbers",
       DialerErrorType.SERVER
+    );
+  };
+  
+  // Handle login navigation
+  const handleLoginClick = () => {
+    navigate('/login', { state: { returnTo: '/transfers' } });
+  };
+  
+  // Render authentication required state
+  const renderAuthRequired = () => {
+    if (user || isAuthLoading) return null;
+    
+    return (
+      <Alert variant="warning" className="mb-6">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Authentication Required</AlertTitle>
+        <AlertDescription className="mb-2">
+          You need to be logged in to view and manage transfer numbers.
+        </AlertDescription>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleLoginClick} 
+          className="mt-2"
+        >
+          <LogIn className="h-4 w-4 mr-2" />
+          Log In
+        </Button>
+      </Alert>
     );
   };
   
@@ -123,6 +182,18 @@ const TransferNumbers = () => {
   
   // Content to display based on loading state
   const renderContent = () => {
+    // During auth loading, show a dedicated loading state
+    if (isAuthLoading) {
+      return (
+        <LoadingState message="Checking authentication, please wait..." />
+      );
+    }
+    
+    // If not authenticated, only show the auth required alert
+    if (!user) {
+      return renderAuthRequired();
+    }
+    
     // During initial load, show a dedicated loading state
     if (initialLoad && isLoading) {
       return (

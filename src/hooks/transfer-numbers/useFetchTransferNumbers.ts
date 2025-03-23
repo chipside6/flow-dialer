@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
 import { fetchUserTransferNumbers } from "@/services/transferNumberService";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useFetchTransferNumbers(
   setTransferNumbers: (numbers: any[]) => void,
@@ -13,8 +14,13 @@ export function useFetchTransferNumbers(
 
   // Fetch transfer numbers from Supabase
   const fetchTransferNumbers = useCallback(async () => {
-    if (!user) {
+    // Check authentication first
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session || !user) {
+      console.log("No authenticated session found, not fetching transfer numbers");
+      setTransferNumbers([]);
       setIsLoading(false);
+      setError("Please log in to access your transfer numbers");
       return;
     }
     
@@ -28,14 +34,25 @@ export function useFetchTransferNumbers(
       
       console.log("Successfully fetched transfer numbers:", formattedData.length);
       setTransferNumbers(formattedData);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching transfer numbers:", error);
-      setError("Failed to load transfer numbers");
+      
+      let errorMessage = "Failed to load transfer numbers";
+      
+      // Handle specific error cases
+      if (error.message?.includes("Authentication required")) {
+        errorMessage = "Please log in to access your transfer numbers";
+      } else if (error.code === "PGRST301") {
+        errorMessage = "Permission denied. You don't have access to these records.";
+      }
+      
+      setError(errorMessage);
       toast({
         title: "Error loading transfer numbers",
-        description: "Could not load your transfer numbers. Please try again later.",
+        description: errorMessage,
         variant: "destructive"
       });
+      
       // Reset state on error to prevent stuck states
       setTransferNumbers([]);
     } finally {

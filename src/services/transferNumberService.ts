@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { TransferNumber } from "@/types/transferNumber";
+import { toast } from "@/components/ui/use-toast";
 
 /**
  * Fetches all transfer numbers for a specific user from the database
@@ -8,7 +9,19 @@ import { TransferNumber } from "@/types/transferNumber";
 export const fetchUserTransferNumbers = async (userId: string): Promise<TransferNumber[]> => {
   console.log(`[TransferNumberService] Fetching transfer numbers for user: ${userId}`);
   
+  if (!userId) {
+    console.error('[TransferNumberService] No user ID provided');
+    throw new Error('User ID is required to fetch transfer numbers');
+  }
+  
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('[TransferNumberService] No active session');
+      throw new Error('Authentication required to fetch transfer numbers');
+    }
+    
     console.log(`[TransferNumberService] Executing supabase query`);
     
     const startTime = Date.now();
@@ -62,7 +75,19 @@ export const addTransferNumberToDatabase = async (
     description: description ? "provided" : "empty"
   });
   
+  if (!userId) {
+    console.error('[TransferNumberService] No user ID provided');
+    throw new Error('User ID is required to add transfer numbers');
+  }
+  
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('[TransferNumberService] No active session');
+      throw new Error('Authentication required to add transfer numbers');
+    }
+    
     // Create the data object
     const insertData = {
       user_id: userId,
@@ -116,7 +141,19 @@ export const deleteTransferNumberFromDatabase = async (
 ): Promise<boolean> => {
   console.log(`[TransferNumberService] Deleting transfer number ${transferNumberId} for user ${userId}`);
   
+  if (!userId || !transferNumberId) {
+    console.error('[TransferNumberService] Missing user ID or transfer number ID');
+    throw new Error('User ID and transfer number ID are required for deletion');
+  }
+  
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('[TransferNumberService] No active session');
+      throw new Error('Authentication required to delete transfer numbers');
+    }
+    
     console.log(`[TransferNumberService] Executing delete query`);
     
     const startTime = Date.now();
