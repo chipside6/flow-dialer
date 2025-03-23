@@ -1,14 +1,15 @@
 
 import { apiFetch } from './apiConfig';
+import { TransferNumber } from '@/types/transferNumber';
 
 /**
  * Fetches all transfer numbers for a specific user
  */
-export const fetchUserTransferNumbers = async (userId: string) => {
+export const fetchUserTransferNumbers = async (userId: string): Promise<TransferNumber[]> => {
   console.log(`[TransferNumbersService] Fetching transfer numbers for user: ${userId}`);
   
   try {
-    const data = await apiFetch(`transfer-numbers?userId=${userId}`);
+    const data = await apiFetch<any[]>(`transfer-numbers?userId=${userId}`);
     console.log(`[TransferNumbersService] Fetched ${data.length} transfer numbers successfully`);
     
     return data.map(item => ({
@@ -33,7 +34,7 @@ export const addTransferNumber = async (
   name: string, 
   number: string, 
   description: string
-) => {
+): Promise<TransferNumber> => {
   console.log(`[TransferNumbersService] Adding transfer number for user: ${userId}`, {
     name,
     number,
@@ -41,7 +42,7 @@ export const addTransferNumber = async (
   });
   
   try {
-    const data = await apiFetch('transfer-numbers', {
+    const data = await apiFetch<any>('transfer-numbers', {
       method: 'POST',
       body: JSON.stringify({
         user_id: userId,
@@ -55,7 +56,7 @@ export const addTransferNumber = async (
     console.log(`[TransferNumbersService] Insert successful:`, data);
     
     return {
-      id: data.id || 'pending',
+      id: data?.id || 'pending',
       name,
       number,
       description: description || "No description provided",
@@ -74,11 +75,11 @@ export const addTransferNumber = async (
 export const deleteTransferNumber = async (
   userId: string, 
   transferNumberId: string
-) => {
+): Promise<boolean> => {
   console.log(`[TransferNumbersService] Deleting transfer number ${transferNumberId} for user ${userId}`);
   
   try {
-    await apiFetch(`transfer-numbers/${transferNumberId}?userId=${userId}`, {
+    await apiFetch<any>(`transfer-numbers/${transferNumberId}?userId=${userId}`, {
       method: 'DELETE'
     });
     

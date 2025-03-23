@@ -1,12 +1,12 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useDeleteTransferNumber } from '@/hooks/transfer-numbers/useDeleteTransferNumber';
-import { deleteTransferNumberFromDatabase } from '@/services/transferNumberService';
+import { deleteTransferNumber } from '@/services/supabase/transferNumbersService';
 import { toast } from '@/components/ui/use-toast';
 
 // Mock dependencies
-jest.mock('@/services/transferNumberService', () => ({
-  deleteTransferNumberFromDatabase: jest.fn(),
+jest.mock('@/services/supabase/transferNumbersService', () => ({
+  deleteTransferNumber: jest.fn(),
 }));
 
 jest.mock('@/components/ui/use-toast', () => ({
@@ -20,22 +20,22 @@ jest.mock('@/contexts/auth', () => ({
 }));
 
 describe('useDeleteTransferNumber', () => {
-  const mockRefreshTransferNumbers = jest.fn();
+  const mockRefreshTransferNumbers = jest.fn().mockResolvedValue(undefined);
   
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test('should delete transfer number successfully', async () => {
-    (deleteTransferNumberFromDatabase as jest.Mock).mockResolvedValueOnce(true);
+    (deleteTransferNumber as jest.Mock).mockResolvedValueOnce(true);
     
     const { result } = renderHook(() => 
       useDeleteTransferNumber(mockRefreshTransferNumbers)
     );
     
-    const success = await result.current.deleteTransferNumber('test-id');
+    const success = await result.current.handleDeleteTransferNumber('test-id');
     
-    expect(deleteTransferNumberFromDatabase).toHaveBeenCalledWith('test-user-id', 'test-id');
+    expect(deleteTransferNumber).toHaveBeenCalledWith('test-user-id', 'test-id');
     expect(mockRefreshTransferNumbers).toHaveBeenCalled();
     expect(toast).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -47,13 +47,13 @@ describe('useDeleteTransferNumber', () => {
 
   test('should handle error when deleting transfer number', async () => {
     const error = new Error('Failed to delete');
-    (deleteTransferNumberFromDatabase as jest.Mock).mockRejectedValueOnce(error);
+    (deleteTransferNumber as jest.Mock).mockRejectedValueOnce(error);
     
     const { result } = renderHook(() => 
       useDeleteTransferNumber(mockRefreshTransferNumbers)
     );
     
-    const success = await result.current.deleteTransferNumber('test-id');
+    const success = await result.current.handleDeleteTransferNumber('test-id');
     
     expect(toast).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -78,9 +78,9 @@ describe('useDeleteTransferNumber', () => {
       useDeleteTransferNumber(mockRefreshTransferNumbers)
     );
     
-    const success = await result.current.deleteTransferNumber('test-id');
+    const success = await result.current.handleDeleteTransferNumber('test-id');
     
-    expect(deleteTransferNumberFromDatabase).not.toHaveBeenCalled();
+    expect(deleteTransferNumber).not.toHaveBeenCalled();
     expect(success).toBe(false);
   });
 });

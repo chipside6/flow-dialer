@@ -25,18 +25,18 @@ export function useTransferNumbers() {
     refreshTransferNumbers
   } = useTransferNumbersState();
   
-  const { fetchTransferNumbers } = useFetchTransferNumbers(
+  const { fetchTransferNumbers } = useFetchTransferNumbers({
     setTransferNumbers,
     setIsLoading,
     setError
-  );
+  });
   
   const { addTransferNumber } = useAddTransferNumber(
     setIsSubmitting,
     refreshTransferNumbers
   );
   
-  const { deleteTransferNumber } = useDeleteTransferNumber(
+  const { handleDeleteTransferNumber } = useDeleteTransferNumber(
     refreshTransferNumbers
   );
   
@@ -58,7 +58,7 @@ export function useTransferNumbers() {
     isSubmitting,
     error,
     addTransferNumber,
-    deleteTransferNumber,
+    deleteTransferNumber: handleDeleteTransferNumber,
     refreshTransferNumbers
   };
 }

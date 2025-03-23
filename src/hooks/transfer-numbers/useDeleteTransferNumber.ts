@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
@@ -16,7 +17,7 @@ export const useDeleteTransferNumber = (
         description: "You must be logged in to delete a transfer number",
         variant: "destructive",
       });
-      return;
+      return false;
     }
     
     try {
@@ -29,6 +30,7 @@ export const useDeleteTransferNumber = (
       });
       
       await refreshTransferNumbers();
+      return true;
     } catch (err: any) {
       console.error("Error deleting transfer number:", err);
       toast({
@@ -36,6 +38,7 @@ export const useDeleteTransferNumber = (
         description: err.message,
         variant: "destructive"
       });
+      return false;
     } finally {
       setIsDeleting(false);
     }

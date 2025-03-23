@@ -27,7 +27,7 @@ export const fetchSipProviders = async (userId: string) => {
       port: item.port.toString(),
       username: item.username,
       password: item.password,
-      description: item.description || "",
+      description: item.description || "", // Handle potential undefined
       dateAdded: new Date(item.created_at),
       isActive: item.active
     }));
@@ -72,7 +72,7 @@ export const addSipProvider = async (provider: any, userId: string) => {
       port: data.port.toString(),
       username: data.username,
       password: data.password,
-      description: data.description || "",
+      description: data.description || "", // Handle potential undefined
       dateAdded: new Date(data.created_at),
       isActive: data.active
     };
@@ -118,7 +118,7 @@ export const updateSipProvider = async (provider: any, userId: string) => {
       port: data.port.toString(),
       username: data.username,
       password: data.password,
-      description: data.description || "",
+      description: data.description || "", // Handle potential undefined
       dateAdded: new Date(data.created_at),
       isActive: data.active
     };

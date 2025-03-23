@@ -85,7 +85,12 @@ const SipProviders = () => {
               providers={providers}
               onEdit={handleEditProvider}
               onDelete={handleDeleteProvider}
-              onToggleStatus={toggleProviderStatus}
+              onToggleStatus={(id) => {
+                const provider = providers.find(p => p.id === id);
+                if (provider) {
+                  toggleProviderStatus(id, provider.isActive);
+                }
+              }}
             />
           )
         )}

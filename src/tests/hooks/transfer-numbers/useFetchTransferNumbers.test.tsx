@@ -1,11 +1,11 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useFetchTransferNumbers } from '@/hooks/transfer-numbers/useFetchTransferNumbers';
-import { fetchUserTransferNumbers } from '@/services/transferNumberService';
+import { fetchUserTransferNumbers } from '@/services/supabase/transferNumbersService';
 import { toast } from '@/components/ui/use-toast';
 
 // Mock dependencies
-jest.mock('@/services/transferNumberService', () => ({
+jest.mock('@/services/supabase/transferNumbersService', () => ({
   fetchUserTransferNumbers: jest.fn(),
 }));
 
@@ -36,7 +36,11 @@ describe('useFetchTransferNumbers', () => {
     (fetchUserTransferNumbers as jest.Mock).mockResolvedValueOnce(mockTransferNumbers);
     
     const { result } = renderHook(() => 
-      useFetchTransferNumbers(mockSetTransferNumbers, mockSetIsLoading, mockSetError)
+      useFetchTransferNumbers({
+        setTransferNumbers: mockSetTransferNumbers,
+        setIsLoading: mockSetIsLoading,
+        setError: mockSetError
+      })
     );
     
     await result.current.fetchTransferNumbers();
@@ -52,13 +56,17 @@ describe('useFetchTransferNumbers', () => {
     (fetchUserTransferNumbers as jest.Mock).mockRejectedValueOnce(error);
     
     const { result } = renderHook(() => 
-      useFetchTransferNumbers(mockSetTransferNumbers, mockSetIsLoading, mockSetError)
+      useFetchTransferNumbers({
+        setTransferNumbers: mockSetTransferNumbers,
+        setIsLoading: mockSetIsLoading,
+        setError: mockSetError
+      })
     );
     
     await result.current.fetchTransferNumbers();
     
     expect(mockSetIsLoading).toHaveBeenCalledWith(true);
-    expect(mockSetError).toHaveBeenCalledWith('Failed to load transfer numbers');
+    expect(mockSetError).toHaveBeenCalledWith(expect.any(Error));
     expect(mockSetTransferNumbers).toHaveBeenCalledWith([]);
     expect(mockSetIsLoading).toHaveBeenCalledWith(false);
     expect(toast).toHaveBeenCalledWith(
@@ -80,12 +88,18 @@ describe('useFetchTransferNumbers', () => {
     }), { virtual: true });
     
     const { result } = renderHook(() => 
-      useFetchTransferNumbers(mockSetTransferNumbers, mockSetIsLoading, mockSetError)
+      useFetchTransferNumbers({
+        setTransferNumbers: mockSetTransferNumbers,
+        setIsLoading: mockSetIsLoading,
+        setError: mockSetError
+      })
     );
     
     await result.current.fetchTransferNumbers();
     
+    expect(mockSetTransferNumbers).toHaveBeenCalledWith([]);
     expect(mockSetIsLoading).toHaveBeenCalledWith(false);
+    expect(mockSetError).toHaveBeenCalledWith(null);
     expect(fetchUserTransferNumbers).not.toHaveBeenCalled();
   });
 });

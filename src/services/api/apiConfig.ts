@@ -45,7 +45,8 @@ export const apiFetch = async <T>(
 
     // For responses that should return JSON
     if (response.headers.get('content-type')?.includes('application/json')) {
-      return await response.json();
+      const data = await response.json();
+      return data as T;
     }
 
     return {} as T;

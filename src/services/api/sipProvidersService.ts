@@ -1,14 +1,15 @@
 
 import { apiFetch } from './apiConfig';
+import { SipProvider } from '@/types/sipProviders';
 
 /**
  * Fetches all SIP providers for a specific user
  */
-export const fetchSipProviders = async (userId: string) => {
+export const fetchSipProviders = async (userId: string): Promise<SipProvider[]> => {
   console.log(`[SipProvidersService] Fetching SIP providers for user: ${userId}`);
   
   try {
-    const data = await apiFetch(`sip-providers?userId=${userId}`);
+    const data = await apiFetch<any[]>(`sip-providers?userId=${userId}`);
     console.log(`[SipProvidersService] Fetched ${data.length} SIP providers successfully`);
     
     return data.map(item => ({
@@ -18,9 +19,9 @@ export const fetchSipProviders = async (userId: string) => {
       port: item.port.toString(),
       username: item.username,
       password: item.password,
-      description: item.description || "",
-      dateAdded: new Date(item.created_at),
-      isActive: item.active
+      description: item.description || "No description provided",
+      dateAdded: new Date(item.created_at || item.dateAdded),
+      isActive: item.active || item.isActive || false
     }));
   } catch (error) {
     console.error(`[SipProvidersService] Error in fetchSipProviders:`, error);
