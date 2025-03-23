@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
@@ -18,17 +18,28 @@ export const useContactLists = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const fetchContactLists = async () => {
+      // If there's a previous request in progress, abort it
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      // Create a new abort controller for this request
+      abortControllerRef.current = new AbortController();
+      
       if (!user) {
         setLists([]);
         setIsLoading(false);
+        setError(null);
         return;
       }
 
       try {
         setIsLoading(true);
+        setError(null);
         console.log("Fetching contact lists for user:", user.id);
         
         const { data, error } = await supabase
@@ -59,19 +70,39 @@ export const useContactLists = () => {
         console.log("Transformed contact lists:", transformedData);
         setLists(transformedData);
       } catch (err: any) {
-        console.error("Error fetching contact lists:", err);
-        setError(err);
-        toast({
-          title: "Error loading contact lists",
-          description: err.message,
-          variant: "destructive"
-        });
+        // Only set error if this request wasn't aborted
+        if (err.name !== 'AbortError') {
+          console.error("Error fetching contact lists:", err);
+          setError(err);
+          toast({
+            title: "Error loading contact lists",
+            description: err.message,
+            variant: "destructive"
+          });
+        }
       } finally {
+        // Set loading to false regardless
         setIsLoading(false);
       }
     };
 
     fetchContactLists();
+    
+    // Safety timeout to ensure isLoading state doesn't get stuck
+    const safetyTimeout = setTimeout(() => {
+      if (isLoading) {
+        console.log("Safety timeout reached, resetting loading state");
+        setIsLoading(false);
+      }
+    }, 15000);
+
+    return () => {
+      // Clean up abort controller
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      clearTimeout(safetyTimeout);
+    };
   }, [user]);
 
   const createContactList = async (data: Omit<ContactList, 'id' | 'contactCount' | 'dateCreated' | 'lastModified'>) => {
@@ -115,20 +146,10 @@ export const useContactLists = () => {
 
       setLists(prevLists => [...prevLists, formattedList]);
       
-      toast({
-        title: "Contact list created",
-        description: `${data.name} has been created successfully`,
-      });
-
       return formattedList;
     } catch (err: any) {
       console.error("Error creating contact list:", err);
-      toast({
-        title: "Error creating contact list",
-        description: err.message,
-        variant: "destructive"
-      });
-      return null;
+      throw err;
     }
   };
 
