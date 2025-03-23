@@ -20,14 +20,33 @@ router.get('/', authenticateToken, async (req, res) => {
 
 // Create a new campaign
 router.post('/', authenticateToken, async (req, res) => {
-  // Implementation
-  res.status(501).json({ message: 'Not implemented yet' });
+  try {
+    const userId = req.user.id;  // Assuming the user ID is attached to the request after authentication
+    const { name, description } = req.body;  // Assuming campaign data is sent in the request body
+    const campaignId = uuidv4();  // Generate a unique campaign ID
+
+    // Insert new campaign into the database
+    await pool.query('INSERT INTO campaigns (id, user_id, name, description) VALUES (?, ?, ?, ?)', 
+      [campaignId, userId, name, description]);
+
+    res.status(201).json({ message: 'Campaign created successfully', campaignId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to create campaign' });
+  }
 });
 
 // Get total call count for a user
 router.get('/call-count/:userId', authenticateToken, async (req, res) => {
-  // Implementation
-  res.status(501).json({ message: 'Not implemented yet' });
+  try {
+    const { userId } = req.params;
+    const [result] = await pool.query('SELECT COUNT(*) AS callCount FROM calls WHERE user_id = ?', [userId]);
+    const callCount = result[0].callCount;
+    res.status(200).json({ callCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch call count' });
+  }
 });
 
 module.exports = router;
