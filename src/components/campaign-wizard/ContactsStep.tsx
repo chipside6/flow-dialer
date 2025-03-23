@@ -5,7 +5,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CampaignData } from "./types";
 import { ContactList } from "@/hooks/useContactLists";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown } from "lucide-react";
 
 interface ContactsStepProps {
   campaign: CampaignData;
@@ -26,10 +25,10 @@ export const ContactsStep = ({ campaign, contactLists, onSelectChange, isLoading
             value={campaign.contactListId}
             onValueChange={(value) => onSelectChange("contactListId", value)}
           >
-            <SelectTrigger id="contactListId" className="w-full mt-1 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <SelectTrigger id="contactListId" className="w-full mt-1">
               <SelectValue placeholder="Select a contact list" />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
+            <SelectContent>
               {contactLists.length === 0 ? (
                 <SelectItem value="empty" disabled>No contact lists available</SelectItem>
               ) : (
