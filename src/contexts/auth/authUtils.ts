@@ -27,12 +27,10 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       id: data.id,
       email: '', // This will be set by the AuthProvider
       full_name: data.full_name || '',
-      avatar_url: data.avatar_url || '',
+      avatar_url: data.avatar_url || null,
       company_name: data.company_name || '',
       is_admin: !!data.is_admin,
-      is_affiliate: !!data.is_affiliate,
-      created_at: data.created_at || '',
-      updated_at: data.updated_at || ''
+      is_affiliate: !!data.is_affiliate
     };
     
     return profile;
