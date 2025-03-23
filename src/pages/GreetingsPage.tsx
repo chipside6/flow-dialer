@@ -1,8 +1,17 @@
 
 import React from 'react';
-import GreetingFiles from './GreetingFiles';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Navbar } from '@/components/Navbar';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
+import GreetingFiles from './GreetingFiles';
+
+const GreetingsFallback = () => (
+  <div className="w-full h-96 flex items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+    <span className="text-lg">Loading greeting files...</span>
+  </div>
+);
 
 const GreetingsPage = () => {
   return (
@@ -10,7 +19,9 @@ const GreetingsPage = () => {
       <Navbar />
       <div className="flex flex-1 w-full max-w-full overflow-hidden">
         <DashboardLayout>
-          <GreetingFiles />
+          <Suspense fallback={<GreetingsFallback />}>
+            <GreetingFiles />
+          </Suspense>
         </DashboardLayout>
       </div>
     </div>
