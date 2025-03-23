@@ -28,3 +28,19 @@
   max-width: calc(100% - 8px);
 }
 
+/* Active navigation highlighting */
+.active-nav-item {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+
+.dark .active-nav-item {
+  background-color: hsl(var(--primary) / 0.2);
+  color: hsl(var(--primary-foreground));
+}
+
+/* Improve hover state for navigation items */
+[data-sidebar="content"] a:hover > div {
+  background-color: hsl(var(--muted) / 0.5);
+}
+

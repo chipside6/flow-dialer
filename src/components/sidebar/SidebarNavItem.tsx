@@ -14,7 +14,10 @@ interface SidebarNavItemProps {
 
 export const SidebarNavItem = ({ item, onClick }: SidebarNavItemProps) => {
   const location = useLocation();
-  const isActive = location.pathname === item.path;
+  // Check if current path starts with item path for nested routes
+  // For example, /campaign/new should highlight the Campaign nav item
+  const isActive = location.pathname === item.path || 
+                  (item.path !== '/' && location.pathname.startsWith(item.path));
   
   return (
     <NavItem 
