@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { CampaignData, WizardStep } from "../types";
@@ -18,7 +17,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     transferNumber: "",
     schedule: {
       startDate: new Date().toISOString().split("T")[0],
-      maxConcurrentCalls: 5
+      maxConcurrentCalls: 1 // Fixed value of 1
     }
   });
 
@@ -32,6 +31,12 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
 
   const handleScheduleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    // If attempting to change maxConcurrentCalls, keep it as 1
+    if (name === "maxConcurrentCalls") {
+      return;
+    }
+    
     setCampaign(prev => ({
       ...prev,
       schedule: {
@@ -52,6 +57,10 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     // Format campaign data for submission
     const newCampaign = {
       ...campaign,
+      schedule: {
+        ...campaign.schedule,
+        maxConcurrentCalls: 1 // Ensure it's always 1
+      },
       status: "pending" as const,
       progress: 0,
       totalCalls: 0, // This will be calculated based on the selected list

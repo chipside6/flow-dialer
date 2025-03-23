@@ -39,8 +39,7 @@ export const ReviewStep = ({ campaign, contactLists, greetingFiles }: ReviewStep
         <div>
           <h3 className="font-medium">Schedule</h3>
           <p>
-            Start Date: {campaign.schedule.startDate}<br />
-            Max concurrent calls: {campaign.schedule.maxConcurrentCalls}
+            Start Date: {campaign.schedule.startDate}
           </p>
           <p className="text-sm text-muted-foreground mt-1">
             The campaign will run until all contacts have been called.

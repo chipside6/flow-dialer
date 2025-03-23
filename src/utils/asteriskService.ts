@@ -22,7 +22,7 @@ export const asteriskService = {
    * Start dialing a contact list in the background via Asterisk
    */
   startDialing: async (options: DialContactsOptions): Promise<{ jobId: string }> => {
-    const { contactListId, campaignId, transferNumber, sipProviderId, greetingFile, maxConcurrentCalls } = options;
+    const { contactListId, campaignId, transferNumber, sipProviderId, greetingFile } = options;
     
     console.log("Starting dial job with options:", options);
     
@@ -39,7 +39,7 @@ export const asteriskService = {
           transferNumber,
           sipProviderId,
           greetingFile,
-          maxConcurrentCalls: maxConcurrentCalls || 3
+          maxConcurrentCalls: 1 // Fixed at 1
         }),
       });
       

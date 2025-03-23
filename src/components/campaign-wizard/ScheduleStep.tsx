@@ -27,22 +27,6 @@ export const ScheduleStep = ({ campaign, onChange }: ScheduleStepProps) => {
         </p>
       </div>
       
-      <div>
-        <Label htmlFor="maxConcurrentCalls">Max Concurrent Calls</Label>
-        <Input
-          id="maxConcurrentCalls"
-          name="maxConcurrentCalls"
-          type="number"
-          min={1}
-          max={50}
-          value={campaign.schedule.maxConcurrentCalls}
-          onChange={onChange}
-        />
-        <p className="text-sm text-muted-foreground mt-1">
-          Maximum number of simultaneous calls (1-50)
-        </p>
-      </div>
-      
       <div className="p-4 bg-muted rounded-lg">
         <p className="text-sm">
           <strong>Note:</strong> The campaign will run continuously until all contacts have been called.
