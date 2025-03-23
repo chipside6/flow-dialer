@@ -10,11 +10,9 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  isAffiliate: boolean;
   error: Error | null;
   sessionChecked: boolean;
   setProfile: (profile: UserProfile | null) => void;
-  setIsAffiliate: (isAffiliate: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,7 +30,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAffiliate, setIsAffiliate] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
 
@@ -57,14 +54,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (userProfile) {
             setProfile(userProfile);
             setIsAdmin(!!userProfile.is_admin);
-            setIsAffiliate(!!userProfile.is_affiliate);
           }
         } else {
           // No active session
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
-          setIsAffiliate(false);
         }
       } catch (error) {
         console.error('Error checking session:', error);
@@ -90,13 +85,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (userProfile) {
             setProfile(userProfile);
             setIsAdmin(!!userProfile.is_admin);
-            setIsAffiliate(!!userProfile.is_affiliate);
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
-          setIsAffiliate(false);
         }
         
         setIsLoading(false);
@@ -116,11 +109,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     isAuthenticated: !!user,
     isAdmin,
-    isAffiliate,
     error,
     sessionChecked,
-    setProfile,
-    setIsAffiliate
+    setProfile
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
