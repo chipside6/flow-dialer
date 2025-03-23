@@ -32,11 +32,12 @@ export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
     e.preventDefault();
     e.stopPropagation();
     onClick();
+    console.log("Mobile sidebar button clicked");
   };
   
   return (
     <div 
-      className={`fixed top-5 left-4 z-40 transition-all duration-300 ${
+      className={`fixed top-5 left-4 z-50 transition-all duration-300 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-16'
       }`}
     >

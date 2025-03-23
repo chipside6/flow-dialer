@@ -4,7 +4,7 @@
 @media (max-width: 768px) {
   /* Ensure sidebar appears above other elements */
   [data-sidebar][data-mobile="true"] {
-    z-index: 60 !important;
+    z-index: 70 !important;
   }
   
   /* Ensure content stays below the sidebar */
@@ -15,7 +15,7 @@
   
   /* Make sure the sidebar overlay has proper z-index */
   .SheetOverlay-root {
-    z-index: 59 !important;
+    z-index: 69 !important;
     background-color: rgba(0, 0, 0, 0.4) !important;
   }
   
@@ -31,9 +31,10 @@
   
   /* Fixed button styles - proper z-index to prevent content overlap */
   .fixed.top-4.left-4.z-40,
-  .fixed.top-5.left-4.z-40 {
+  .fixed.top-5.left-4.z-40,
+  .fixed.top-5.left-4.z-50 {
     transition: all 0.3s ease;
-    z-index: 40 !important;
+    z-index: 60 !important;
   }
   
   /* Fix campaign title display */
@@ -58,5 +59,12 @@
   /* Fix SIP provider card headers */
   .card .flex.items-center {
     padding-left: 8px;
+  }
+  
+  /* Ensure mobile sidebar button is visible */
+  .mobile-sidebar-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }

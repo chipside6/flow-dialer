@@ -12,7 +12,7 @@ import Support from "./pages/Support";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Campaign from "./pages/Campaign";
-import GreetingFiles from "./pages/GreetingFiles";
+import GreetingsPage from "./pages/GreetingsPage";
 import ContactLists from "./pages/ContactLists";
 import TransferNumbers from "./pages/TransferNumbers";
 import SipProviders from "./pages/SipProviders";
@@ -72,7 +72,7 @@ const App = () => (
               path="/greetings" 
               element={
                 <ProtectedRoute>
-                  <GreetingFiles />
+                  <GreetingsPage />
                 </ProtectedRoute>
               } 
             />
