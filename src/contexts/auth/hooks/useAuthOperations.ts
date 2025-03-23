@@ -10,10 +10,10 @@ import {
 import { toast } from '@/components/ui/use-toast';
 
 export function useAuthOperations() {
-  const signUp = async (email: string, password: string, metadata?: { full_name?: string }) => {
+  const signUp = async (email: string, password: string) => {
     try {
       console.log("useAuthOperations - Signing up user:", email);
-      const result = await signUpUser(email, password, metadata);
+      const result = await signUpUser(email, password);
       
       if (result.error) {
         console.error("useAuthOperations - Signup error:", result.error.message);

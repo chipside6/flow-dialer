@@ -1,18 +1,14 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { UserProfile } from './types';
 import { fetchUserProfile, updateUserProfile, setUserAsAffiliate } from './authUtils';
 
-export const signUpUser = async (email: string, password: string, metadata?: { full_name?: string }) => {
+export const signUpUser = async (email: string, password: string) => {
   try {
     console.log("authActions - Signing up new user:", email);
     const { error } = await supabase.auth.signUp({
       email,
-      password,
-      options: {
-        data: metadata
-      }
+      password
     });
     
     return { error: error ? new Error(error.message) : null };

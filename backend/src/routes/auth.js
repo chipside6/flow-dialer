@@ -1,4 +1,3 @@
-
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -9,7 +8,7 @@ const router = express.Router();
 // User signup
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password, metadata } = req.body;
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: true, message: 'Email and password are required' });
@@ -33,8 +32,7 @@ router.post('/signup', async (req, res) => {
     await pool.query('INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)', [userId, email, passwordHash]);
 
     // Create a profile record too
-    const fullName = metadata?.full_name || null;
-    await pool.query('INSERT INTO profiles (id, email, full_name) VALUES (?, ?, ?)', [userId, email, fullName]);
+    await pool.query('INSERT INTO profiles (id, email) VALUES (?, ?)', [userId, email]);
 
     // Create JWT token for immediate login after signup
     const token = jwt.sign({ userId }, process.env.JWT_SECRET || 'your-secret-key', { expiresIn: '7d' });

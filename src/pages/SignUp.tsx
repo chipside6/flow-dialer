@@ -11,7 +11,6 @@ import { Loader2, Phone } from 'lucide-react';
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
   const { toast } = useToast();
@@ -22,7 +21,7 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      const { error, session } = await signUp(email, password, { full_name: fullName });
+      const { error, session } = await signUp(email, password);
 
       if (error) {
         throw error;
@@ -78,16 +77,6 @@ const SignUp = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name (Optional)</Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="Your full name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
               />
             </div>
             <div className="space-y-2">

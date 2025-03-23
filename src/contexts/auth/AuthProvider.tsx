@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AuthContext, AuthContextType } from './AuthContext';
 import { 
@@ -64,11 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkSession();
   }, []);
 
-  // Sign up a new user
-  const signUp = async (email: string, password: string, metadata?: { full_name?: string }) => {
+  // Sign up a new user - remove metadata parameter
+  const signUp = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const result = await signUpService(email, password, metadata);
+      const result = await signUpService(email, password);
       
       // Update local state if session is returned from signup
       if (!result.error && result.session) {

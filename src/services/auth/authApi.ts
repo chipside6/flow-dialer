@@ -1,10 +1,9 @@
-
 import { toast } from "@/components/ui/use-toast";
 import { User, Session, API_URL } from './types';
 import { storeSession, clearSession, getStoredSession } from './session';
 
 // Sign up a new user
-export const signUp = async (email: string, password: string, metadata?: { full_name?: string }): Promise<{ error: Error | null, session?: Session }> => {
+export const signUp = async (email: string, password: string): Promise<{ error: Error | null, session?: Session }> => {
   try {
     console.log("Signing up new user:", email);
     
@@ -18,8 +17,7 @@ export const signUp = async (email: string, password: string, metadata?: { full_
       },
       body: JSON.stringify({
         email,
-        password,
-        metadata
+        password
       }),
       // Add these options to help with CORS and network issues
       mode: 'cors',
