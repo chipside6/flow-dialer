@@ -7,14 +7,14 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Import Routes
-const authRoutes = require('../routes/auth');
-const campaignRoutes = require('../routes/campaigns');
-const contactListRoutes = require('../routes/contactLists');
-const greetingFileRoutes = require('../routes/greetingFiles');
-const profileRoutes = require('../routes/profiles');
-const sipProviderRoutes = require('../routes/sipProviders');
-const subscriptionRoutes = require('../routes/subscriptions');
-const transferNumberRoutes = require('../routes/transferNumbers');
+const authRoutes = require('./routes/auth');
+const campaignRoutes = require('./routes/campaigns');
+const contactListRoutes = require('./routes/contactLists');
+const greetingFileRoutes = require('./routes/greetingFiles');
+const profileRoutes = require('./routes/profiles');
+const sipProviderRoutes = require('./routes/sipProviders');
+const subscriptionRoutes = require('./routes/subscriptions');
+const transferNumberRoutes = require('./routes/transferNumbers');
 
 // Initialize express app
 const app = express();
@@ -52,3 +52,4 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
