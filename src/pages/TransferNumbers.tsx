@@ -2,16 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useTransferNumbers } from "@/hooks/useTransferNumbers";
-import { AddTransferNumberForm } from "@/components/transfer-numbers/AddTransferNumberForm";
-import { TransferNumbersList } from "@/components/transfer-numbers/TransferNumbersList";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertTriangle, RefreshCw, LogIn } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { tryCatchWithErrorHandling, DialerErrorType } from "@/utils/errorHandlingUtils";
 import { useAuth } from "@/contexts/auth";
-import { useNavigate } from "react-router-dom";
+import { TransferNumbersHeader } from "@/components/transfer-numbers/TransferNumbersHeader";
+import { AuthRequiredAlert } from "@/components/transfer-numbers/AuthRequiredAlert";
+import { TransferNumbersContent } from "@/components/transfer-numbers/TransferNumbersContent";
 
 const TransferNumbers = () => {
   const { 
@@ -25,7 +22,6 @@ const TransferNumbers = () => {
   } = useTransferNumbers();
   
   const { user, isLoading: isAuthLoading } = useAuth();
-  const navigate = useNavigate();
   const [initialLoad, setInitialLoad] = useState(true);
   const { toast } = useToast();
   
@@ -129,108 +125,34 @@ const TransferNumbers = () => {
     );
   };
   
-  // Handle login navigation
-  const handleLoginClick = () => {
-    navigate('/login', { state: { returnTo: '/transfers' } });
-  };
-  
-  // Render authentication required state
-  const renderAuthRequired = () => {
-    if (user || isAuthLoading) return null;
-    
+  // Render authentication loading state
+  if (isAuthLoading) {
     return (
-      <Alert variant="warning" className="mb-6">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Authentication Required</AlertTitle>
-        <AlertDescription className="mb-2">
-          You need to be logged in to view and manage transfer numbers.
-        </AlertDescription>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleLoginClick} 
-          className="mt-2"
-        >
-          <LogIn className="h-4 w-4 mr-2" />
-          Log In
-        </Button>
-      </Alert>
-    );
-  };
-  
-  // Render error state
-  const renderError = () => {
-    if (!error) return null;
-    
-    return (
-      <Alert variant="destructive" className="mb-6">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Error loading transfer numbers</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleManualRefresh} 
-          className="mt-2"
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Try Again
-        </Button>
-      </Alert>
-    );
-  };
-  
-  // Content to display based on loading state
-  const renderContent = () => {
-    // During auth loading, show a dedicated loading state
-    if (isAuthLoading) {
-      return (
+      <DashboardLayout>
+        <TransferNumbersHeader />
         <LoadingState message="Checking authentication, please wait..." />
-      );
-    }
-    
-    // If not authenticated, only show the auth required alert
-    if (!user) {
-      return renderAuthRequired();
-    }
-    
-    // During initial load, show a dedicated loading state
-    if (initialLoad && isLoading) {
-      return (
-        <LoadingState message="Loading your transfer numbers, please wait..." />
-      );
-    }
-    
-    return (
-      <>
-        {renderError()}
-        
-        <AddTransferNumberForm 
-          onAddTransferNumber={handleAddTransferNumber} 
-          isSubmitting={isSubmitting}
-        />
-        
-        <TransferNumbersList 
-          transferNumbers={transferNumbers}
-          isLoading={isLoading && !initialLoad}
-          error={error}
-          onDeleteTransferNumber={deleteTransferNumber}
-          onRefresh={handleManualRefresh}
-        />
-      </>
+      </DashboardLayout>
     );
-  };
+  }
   
   return (
     <DashboardLayout>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Transfer Numbers</h1>
-        <p className="text-muted-foreground mt-2">
-          Add and manage transfer numbers for your call campaigns.
-        </p>
-      </div>
+      <TransferNumbersHeader />
       
-      {renderContent()}
+      <AuthRequiredAlert isVisible={!user} />
+      
+      {user && (
+        <TransferNumbersContent
+          transferNumbers={transferNumbers}
+          isLoading={isLoading}
+          isSubmitting={isSubmitting}
+          error={error}
+          isInitialLoad={initialLoad}
+          addTransferNumber={handleAddTransferNumber}
+          deleteTransferNumber={deleteTransferNumber}
+          onRefresh={handleManualRefresh}
+        />
+      )}
     </DashboardLayout>
   );
 };
