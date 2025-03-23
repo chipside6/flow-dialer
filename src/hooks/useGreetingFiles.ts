@@ -3,106 +3,102 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+export interface GreetingFile {
+  id: string;
+  user_id: string;
+  filename: string;
+  url: string;
+  created_at: string;
+}
 
 export function useGreetingFiles() {
-  const { user, sessionChecked } = useAuth();
-  const [greetingFiles, setGreetingFiles] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchGreetingFiles = async () => {
-      if (!user || !sessionChecked) {
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('greeting_files')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (error) {
-          console.error("Error fetching greeting files:", error);
-          if (isMounted) {
-            setError(error);
-            toast({
-              title: "Error fetching greeting files",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
-        } else {
-          if (isMounted) {
-            setGreetingFiles(data || []);
-            setError(null);
-          }
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchGreetingFiles();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user, sessionChecked, toast]);
-
-  const refreshGreetingFiles = async () => {
-    if (!user || !sessionChecked) {
-      return;
-    }
-
-    setIsLoading(true);
-    try {
+  // Use React Query to fetch greeting files
+  const { 
+    data: greetingFiles = [], 
+    isLoading, 
+    error, 
+    refetch 
+  } = useQuery({
+    queryKey: ['greetingFiles', user?.id],
+    queryFn: async () => {
+      if (!user) throw new Error("User not authenticated");
+      
+      console.log("Fetching greeting files for user:", user.id);
       const { data, error } = await supabase
         .from('greeting_files')
         .select('*')
         .eq('user_id', user.id);
 
       if (error) {
-        console.error("Error refreshing greeting files:", error);
-        setError(error);
-        toast({
-          title: "Error refreshing greeting files",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        setGreetingFiles(data || []);
-        setError(null);
+        console.error("Error fetching greeting files:", error);
+        throw error;
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      
+      console.log("Greeting files fetched:", data?.length || 0);
+      return data || [];
+    },
+    enabled: !!user,
+  });
 
-  // Add deleteGreetingFile mutation
+  // Mutation for deleting greeting files
   const deleteGreetingFile = useMutation({
     mutationFn: async (fileId: string) => {
       if (!user) throw new Error("User not authenticated");
       
+      console.log("Deleting greeting file:", fileId);
+      
+      // First, get the file details to find the storage path
+      const { data: fileData, error: fetchError } = await supabase
+        .from('greeting_files')
+        .select('*')
+        .eq('id', fileId)
+        .eq('user_id', user.id)
+        .single();
+      
+      if (fetchError) {
+        console.error("Error fetching file details:", fetchError);
+        throw fetchError;
+      }
+      
+      // Delete the record from the database
       const { error } = await supabase
         .from('greeting_files')
         .delete()
         .eq('id', fileId)
         .eq('user_id', user.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting file from database:", error);
+        throw error;
+      }
+      
+      // Try to delete from storage if we have a file path
+      // This is a best-effort attempt; we don't throw if it fails
+      if (fileData.file_path) {
+        const { error: storageError } = await supabase.storage
+          .from('voice-app-uploads')
+          .remove([fileData.file_path]);
+          
+        if (storageError) {
+          console.warn("Could not delete file from storage:", storageError);
+          // Don't throw here, consider the deletion successful if DB entry is gone
+        }
+      }
+      
       return fileId;
     },
     onSuccess: () => {
-      refreshGreetingFiles();
+      // Invalidate and refetch greeting files
+      queryClient.invalidateQueries({ queryKey: ['greetingFiles', user?.id] });
+      toast({
+        title: "File deleted",
+        description: "Greeting file has been successfully deleted.",
+      });
     },
     onError: (error: any) => {
       toast({
@@ -112,6 +108,11 @@ export function useGreetingFiles() {
       });
     },
   });
+
+  // Simplified function to refresh greeting files
+  const refreshGreetingFiles = () => {
+    return refetch();
+  };
 
   return { 
     greetingFiles, 

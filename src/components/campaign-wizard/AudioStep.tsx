@@ -2,7 +2,8 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CampaignData, GreetingFile } from "./types";
+import { CampaignData } from "./types";
+import { GreetingFile } from "@/hooks/useGreetingFiles";
 
 interface AudioStepProps {
   campaign: CampaignData;
@@ -24,7 +25,7 @@ export const AudioStep = ({ campaign, greetingFiles, onSelectChange }: AudioStep
           </SelectTrigger>
           <SelectContent>
             {greetingFiles.map(file => (
-              <SelectItem key={file.id} value={file.id}>{file.name}</SelectItem>
+              <SelectItem key={file.id} value={file.id}>{file.filename}</SelectItem>
             ))}
           </SelectContent>
         </Select>

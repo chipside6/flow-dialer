@@ -7,18 +7,24 @@ import { UploadGreetingForm } from '@/components/greeting-files/UploadGreetingFo
 import { useGreetingFiles } from '@/hooks/useGreetingFiles';
 import { EmptyGreetingsState } from '@/components/greeting-files/EmptyGreetingsState';
 import { useAuth } from '@/contexts/auth';
+import { LoadingState } from '@/components/upgrade/LoadingState';
 
 const GreetingFiles = () => {
-  const { isAuthenticated, sessionChecked, user } = useAuth();
+  const { user, sessionChecked } = useAuth();
   const { greetingFiles, isLoading, error, isError, refreshGreetingFiles, deleteGreetingFile } = useGreetingFiles();
   const [activeTab, setActiveTab] = useState('files');
 
-  if (!isAuthenticated) {
-    return <p>Please log in to manage your greeting files.</p>;
+  if (!sessionChecked) {
+    return <LoadingState message="Checking authentication..." />;
   }
 
-  if (!sessionChecked) {
-    return <p>Loading...</p>;
+  if (!user) {
+    return (
+      <div className="container mx-auto py-10">
+        <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
+        <p className="text-muted-foreground">Please log in to manage your greeting files.</p>
+      </div>
+    );
   }
 
   const handleTabChange = (value: string) => {
@@ -39,29 +45,25 @@ const GreetingFiles = () => {
           <TabsTrigger value="record">Record New</TabsTrigger>
           <TabsTrigger value="upload">Upload File</TabsTrigger>
         </TabsList>
+        
         <TabsContent value="files">
-          {isLoading && <p>Loading greeting files...</p>}
-          {error && <p>Error: {error.message}</p>}
-          {!isLoading && !error && greetingFiles.length === 0 && (
-            <EmptyGreetingsState onUploadClick={handleUploadClick} onRefresh={refreshGreetingFiles} />
-          )}
-          {!isLoading && !error && greetingFiles.length > 0 && (
-            <GreetingFilesList 
-              greetingFiles={greetingFiles} 
-              isLoading={isLoading}
-              error={error}
-              isError={isError}
-              refreshGreetingFiles={refreshGreetingFiles} 
-              deleteGreetingFile={deleteGreetingFile}
-              onUploadClick={handleUploadClick}
-            />
-          )}
+          <GreetingFilesList 
+            greetingFiles={greetingFiles} 
+            isLoading={isLoading}
+            error={error}
+            isError={isError}
+            refreshGreetingFiles={refreshGreetingFiles} 
+            deleteGreetingFile={deleteGreetingFile}
+            onUploadClick={handleUploadClick}
+          />
         </TabsContent>
+        
         <TabsContent value="record">
-          <RecordGreetingForm userId={user?.id} refreshGreetingFiles={refreshGreetingFiles} />
+          <RecordGreetingForm userId={user.id} refreshGreetingFiles={refreshGreetingFiles} />
         </TabsContent>
+        
         <TabsContent value="upload">
-          <UploadGreetingForm userId={user?.id} refreshGreetingFiles={refreshGreetingFiles} />
+          <UploadGreetingForm userId={user.id} refreshGreetingFiles={refreshGreetingFiles} />
         </TabsContent>
       </Tabs>
     </div>

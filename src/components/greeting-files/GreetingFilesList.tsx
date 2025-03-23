@@ -9,6 +9,8 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Trash } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { AudioFileCard } from './AudioFileCard';
+import { LoadingState } from '@/components/upgrade/LoadingState';
 
 interface GreetingFilesListProps {
   greetingFiles: any[];
@@ -30,21 +32,12 @@ export const GreetingFilesList = ({
   onUploadClick
 }: GreetingFilesListProps) => {
   const { toast } = useToast();
-  const [greeting, setGreeting] = useState('');
+  const [currentAudio, setCurrentAudio] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const isMobile = useIsMobile();
 
   if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Skeleton className="h-48" />
-        {!isMobile && (
-          <>
-            <Skeleton className="h-48" />
-            <Skeleton className="h-48" />
-          </>
-        )}
-      </div>
-    );
+    return <LoadingState message="Loading greeting files..." />;
   }
 
   if (isError) {
@@ -55,72 +48,51 @@ export const GreetingFilesList = ({
         <AlertDescription>
           {error?.message || "Failed to load greeting files"}
         </AlertDescription>
+        <Button 
+          variant="outline" 
+          className="mt-2" 
+          onClick={() => refreshGreetingFiles()}
+        >
+          Try Again
+        </Button>
       </Alert>
     );
   }
 
   if (greetingFiles.length === 0) {
-    return <EmptyGreetingsState onUploadClick={onUploadClick} />;
+    return <EmptyGreetingsState onUploadClick={onUploadClick} onRefresh={refreshGreetingFiles} />;
   }
 
   const handleDelete = async (fileId: string) => {
     try {
       await deleteGreetingFile.mutateAsync(fileId);
-      toast({
-        title: "File deleted",
-        description: "Greeting file has been successfully deleted.",
-      });
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error deleting file",
-        description: error.message || "Failed to delete the greeting file.",
-      });
+      console.error("Error in delete handler:", error);
     }
   };
 
-  const handlePlay = async (fileUrl: string) => {
-    try {
-      // Simple implementation to play the audio
-      const audio = new Audio(fileUrl);
-      await audio.play();
-      setGreeting(fileUrl);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error playing file",
-        description: error.message || "Failed to play the greeting file.",
-      });
+  const handlePlayToggle = (url: string) => {
+    if (currentAudio === url && isPlaying) {
+      // Pause the current audio
+      setIsPlaying(false);
+    } else {
+      // Play the selected audio
+      setCurrentAudio(url);
+      setIsPlaying(true);
     }
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {greetingFiles.map((file) => (
-        <Card key={file.id} className="overflow-hidden">
-          <CardContent className="p-4">
-            <div className="aspect-square flex items-center justify-center p-0 pb-2">
-              <audio 
-                src={file.url} 
-                controls={greeting === file.url || isMobile} 
-                className="w-full max-w-full" 
-              />
-            </div>
-            <div className="w-full truncate text-sm font-medium mt-2">
-              {file.filename}
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between items-center bg-muted/10 p-3">
-            <Button variant="outline" size="sm" onClick={() => handlePlay(file.url)} className="h-8">
-              <Play className="h-3 w-3 mr-1" />
-              <span className="text-xs">Play</span>
-            </Button>
-            <Button variant="destructive" size="sm" onClick={() => handleDelete(file.id)} className="h-8">
-              <Trash className="h-3 w-3 mr-1" />
-              <span className="text-xs">Delete</span>
-            </Button>
-          </CardFooter>
-        </Card>
+        <AudioFileCard 
+          key={file.id}
+          file={file}
+          isPlaying={isPlaying && currentAudio === file.url}
+          isActiveAudio={currentAudio === file.url}
+          onPlayToggle={handlePlayToggle}
+          onDelete={handleDelete}
+        />
       ))}
     </div>
   );
