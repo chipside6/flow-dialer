@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/auth';
 import { Loader2, Phone, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
@@ -27,34 +27,55 @@ const SignUp = () => {
     try {
       console.log("Attempting to sign up with email:", email);
       
-      const { error, session } = await signUp(email, password);
+      // Try custom backend first
+      try {
+        const { error, session } = await signUp(email, password);
 
-      if (error) {
-        console.error("Signup error:", error.message);
-        setErrorMessage(error.message);
+        if (error) {
+          throw error;
+        }
+
+        console.log("Signup successful, session:", session);
         toast({
-          title: "Signup failed",
-          description: error.message,
-          variant: "destructive",
+          title: "Account created",
+          description: "Your account has been created successfully.",
         });
+
+        // If session was returned, user is already logged in, redirect to dashboard
+        if (session) {
+          navigate('/dashboard');
+        } else {
+          // Otherwise navigate to login
+          navigate('/login');
+        }
         return;
-      }
+      } catch (error: any) {
+        console.log("Custom backend signup failed, trying Supabase directly:", error.message);
+        
+        // If it's not a network error, rethrow it
+        if (!error.message.includes("NetworkError")) {
+          throw error;
+        }
+        
+        // Try Supabase directly as backup
+        const { error: supabaseError } = await supabase.auth.signUp({
+          email,
+          password,
+        });
 
-      console.log("Signup successful, session:", session);
-      toast({
-        title: "Account created",
-        description: "Your account has been created successfully.",
-      });
+        if (supabaseError) {
+          throw supabaseError;
+        }
 
-      // If session was returned, user is already logged in, redirect to dashboard
-      if (session) {
-        navigate('/dashboard');
-      } else {
-        // Otherwise navigate to login
+        toast({
+          title: "Account created",
+          description: "Your account has been created successfully with Supabase.",
+        });
+
         navigate('/login');
       }
     } catch (error: any) {
-      console.error("Unexpected signup error:", error);
+      console.error("Signup error:", error);
       setErrorMessage(error.message || "An unexpected error occurred");
       toast({
         title: "Signup failed",

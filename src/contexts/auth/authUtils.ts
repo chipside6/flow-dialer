@@ -19,25 +19,25 @@ export const fetchUserProfile = async (userId: string) => {
     
     console.log("authUtils - Profile retrieved successfully:", data);
     
-    // Create a properly typed UserProfile object
+    // Create a properly typed UserProfile object with what we have from the profile data
+    // Only include properties that we know exist in the data
     const userProfile: UserProfile = {
       id: data.id,
-      email: data.email || '', // Use empty string as fallback
-      full_name: data.full_name,
-      avatar_url: data.avatar_url,
-      company_name: data.company_name,
-      is_admin: data.is_admin || false,
-      is_affiliate: data.is_affiliate || false
+      email: '', // Initialize with empty string, we'll try to get this below
+      full_name: data.full_name || '',
+      avatar_url: data.avatar_url || '',
+      company_name: data.company_name || '',
+      is_admin: !!data.is_admin,
+      is_affiliate: !!data.is_affiliate
     };
 
     // If we don't have an email in the profile data, try to get it from auth.users
-    if (!userProfile.email) {
-      console.log("authUtils - No email found in profile, getting from auth user");
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (userData?.user) {
-        userProfile.email = userData.user.email || '';
-      }
+    console.log("authUtils - Getting email from auth user");
+    const { data: userData } = await supabase.auth.getUser();
+    
+    if (userData?.user) {
+      userProfile.email = userData.user.email || '';
+      console.log("authUtils - Got email from auth user:", userProfile.email);
     }
     
     // Validate that we have an email
