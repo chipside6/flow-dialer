@@ -7,10 +7,11 @@ import { RecordGreetingForm } from './RecordGreetingForm';
 import { UploadForm } from './upload/UploadForm';
 
 interface UploadGreetingFormProps {
-  userId: string | undefined;
+  userId?: string;
+  refreshGreetingFiles?: () => Promise<void>;
 }
 
-export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
+export const UploadGreetingForm = ({ userId, refreshGreetingFiles }: UploadGreetingFormProps) => {
   const [activeTab, setActiveTab] = useState<string>('upload');
 
   return (
@@ -35,11 +36,11 @@ export const UploadGreetingForm = ({ userId }: UploadGreetingFormProps) => {
           </TabsList>
           
           <TabsContent value="upload" className="space-y-4">
-            <UploadForm userId={userId} />
+            <UploadForm userId={userId} refreshGreetingFiles={refreshGreetingFiles} />
           </TabsContent>
           
           <TabsContent value="record">
-            <RecordGreetingForm userId={userId} />
+            <RecordGreetingForm userId={userId} refreshGreetingFiles={refreshGreetingFiles} />
           </TabsContent>
         </Tabs>
       </CardContent>

@@ -5,11 +5,18 @@ import { FileAudio, Plus } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EmptyGreetingsStateProps {
-  onUploadClick: () => void;
+  onRefresh?: () => void;
+  onUploadClick?: () => void;
 }
 
-export const EmptyGreetingsState = ({ onUploadClick }: EmptyGreetingsStateProps) => {
+export const EmptyGreetingsState = ({ onRefresh, onUploadClick }: EmptyGreetingsStateProps) => {
   const isMobile = useIsMobile();
+  
+  const handleUploadClick = () => {
+    if (onUploadClick) {
+      onUploadClick();
+    }
+  };
   
   return (
     <Card>
@@ -21,7 +28,7 @@ export const EmptyGreetingsState = ({ onUploadClick }: EmptyGreetingsStateProps)
         <CardDescription className="text-center mb-6 max-w-xs">
           Upload greeting audio files to use in your campaigns
         </CardDescription>
-        <Button onClick={onUploadClick} className={isMobile ? "w-full" : ""}>
+        <Button onClick={handleUploadClick} className={isMobile ? "w-full" : ""}>
           <Plus className="h-4 w-4 mr-2" />
           Upload your first greeting
         </Button>

@@ -5,24 +5,33 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyGreetingsState } from './EmptyGreetingsState';
-import { useGreetingFiles } from '@/hooks/useGreetingFiles';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Trash } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GreetingFilesListProps {
-  userId?: string;
-  onUploadClick: () => void;
+  greetingFiles: any[];
+  isLoading: boolean;
+  error: Error | null;
+  isError: boolean;
+  refreshGreetingFiles: () => Promise<void>;
+  deleteGreetingFile: any;
+  onUploadClick?: () => void;
 }
 
-export const GreetingFilesList = ({ userId, onUploadClick }: GreetingFilesListProps) => {
+export const GreetingFilesList = ({ 
+  greetingFiles, 
+  isLoading, 
+  error, 
+  isError,
+  refreshGreetingFiles,
+  deleteGreetingFile,
+  onUploadClick
+}: GreetingFilesListProps) => {
   const { toast } = useToast();
   const [greeting, setGreeting] = useState('');
   const isMobile = useIsMobile();
-  
-  // Get greeting files
-  const { greetingFiles, isLoading, isError, error, deleteGreetingFile } = useGreetingFiles(userId);
 
   if (isLoading) {
     return (

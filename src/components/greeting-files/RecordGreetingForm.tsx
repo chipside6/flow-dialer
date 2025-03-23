@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -11,13 +10,16 @@ import { uploadRecording } from './recording/recorderService';
 import { UploadProgress } from './recording/UploadProgress';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/auth';
 
 interface RecordGreetingFormProps {
-  userId: string | undefined;
+  userId?: string;
+  refreshGreetingFiles?: () => Promise<void>;
 }
 
-export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
+export const RecordGreetingForm = ({ userId, refreshGreetingFiles }: RecordGreetingFormProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -79,7 +81,9 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
   };
 
   const handleSubmit = async () => {
-    if (!audioBlob || !userId) {
+    const effectiveUserId = userId || (user ? user.id : null);
+    
+    if (!audioBlob || !effectiveUserId) {
       toast({
         title: 'Error',
         description: 'No recording available or user not authenticated',
@@ -106,13 +110,17 @@ export const RecordGreetingForm = ({ userId }: RecordGreetingFormProps) => {
       
       // Upload recording to Supabase
       console.log("Starting upload of recording, blob size:", audioBlob.size);
-      await uploadRecording(audioBlob, userId);
+      await uploadRecording(audioBlob, effectiveUserId);
       
       clearInterval(progressInterval);
       setUploadProgress(100);
       
       // Refetch greeting files after upload
-      queryClient.invalidateQueries({ queryKey: ['greetingFiles', userId] });
+      if (refreshGreetingFiles) {
+        await refreshGreetingFiles();
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['greetingFiles', effectiveUserId] });
+      }
       
       toast({
         title: 'Recording uploaded',

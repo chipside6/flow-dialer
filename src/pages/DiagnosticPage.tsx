@@ -10,6 +10,11 @@ import { ConnectionInfo } from "@/components/diagnostic/ConnectionInfo";
 const DiagnosticPage: React.FC = () => {
   const navigate = useNavigate();
   
+  const handleRefresh = () => {
+    // Refresh diagnostic data
+    window.location.reload();
+  };
+  
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8 space-y-6">
@@ -29,7 +34,7 @@ const DiagnosticPage: React.FC = () => {
           </Button>
         </div>
         
-        <DiagnosticActions />
+        <DiagnosticActions onRefresh={handleRefresh} />
         
         <SupabaseStatus />
         
