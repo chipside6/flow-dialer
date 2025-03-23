@@ -8,8 +8,14 @@ const router = express.Router();
 
 // Get all campaigns for a user
 router.get('/', authenticateToken, async (req, res) => {
-  // Implementation similar to other routes
-  res.status(501).json({ message: 'Not implemented yet' });
+  try {
+    const userId = req.user.id;  // Assuming the user ID is attached to the request after authentication
+    const [campaigns] = await pool.query('SELECT * FROM campaigns WHERE user_id = ?', [userId]);
+    res.status(200).json(campaigns);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch campaigns' });
+  }
 });
 
 // Create a new campaign
