@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GreetingFilesList } from '@/components/greeting-files/GreetingFilesList';
 import { RecordGreetingForm } from '@/components/greeting-files/RecordGreetingForm';
@@ -13,10 +13,12 @@ const GreetingFiles = () => {
   const { greetingFiles, isLoading, error, isError, refreshGreetingFiles, deleteGreetingFile } = useGreetingFiles();
   const [activeTab, setActiveTab] = useState('files');
 
+  // If session check isn't completed yet, show a simple loading state
   if (!sessionChecked) {
     return <LoadingState message="Checking authentication..." />;
   }
 
+  // Once session is checked but user isn't logged in
   if (!user) {
     return (
       <div className="container mx-auto py-10">
