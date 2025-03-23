@@ -65,10 +65,22 @@ router.post('/login', async (req, res) => {
     }
 
     // Create JWT token
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key', { expiresIn: '7d' });
 
-    // Return user session
-    res.status(200).json({ session: { user: { id: user.id, email: user.email }, token } });
+    // Calculate expiry date for the session
+    const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days in seconds
+
+    // Return user session matching the expected format in authService.ts
+    res.status(200).json({
+      session: {
+        user: {
+          id: user.id,
+          email: user.email,
+        },
+        expires_at: expiresAt,
+        token
+      }
+    });
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ error: true, message: 'Error during login process' });

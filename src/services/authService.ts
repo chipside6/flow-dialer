@@ -1,3 +1,4 @@
+
 import { toast } from "@/components/ui/use-toast";
 
 export interface User {
@@ -105,6 +106,10 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
     
     if (!response.ok) {
       throw new Error(data.message || 'Invalid login credentials');
+    }
+    
+    if (!data.session) {
+      throw new Error('Invalid response format from server');
     }
     
     // Store the session
