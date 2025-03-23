@@ -1,31 +1,17 @@
 
-// Auth service types
+import { User, Session } from '@/contexts/auth/types';
 
-export interface User {
-  id: string;
-  email: string;
-  created_at?: string;
-  last_sign_in_at?: string;
-}
+// Update API URL to match the backend port (5000 instead of 3001)
+export const API_URL = 'http://localhost:5000/api';
+
+export type { User, Session };
 
 export interface UserProfile {
   id: string;
-  full_name?: string | null;
-  avatar_url?: string | null;
+  full_name?: string;
+  avatar_url?: string;
+  email: string;
+  company_name?: string;
   is_admin?: boolean;
   is_affiliate?: boolean;
-  email?: string;
-  company_name?: string | null;
-  created_at?: string;
-  updated_at?: string;
 }
-
-export interface Session {
-  user: User;
-  expires_at: number;
-  token?: string;
-}
-
-// Define API URL - this will be used across all services
-// Updated to port 5000 instead of 3001 to match the backend server
-export const API_URL = 'http://localhost:5000/api';

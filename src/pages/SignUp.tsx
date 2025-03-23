@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,12 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/auth';
-import { Loader2, Phone } from 'lucide-react';
+import { Loader2, Phone, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -19,14 +22,25 @@ const SignUp = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage(null);
 
     try {
+      console.log("Attempting to sign up with email:", email);
+      
       const { error, session } = await signUp(email, password);
 
       if (error) {
-        throw error;
+        console.error("Signup error:", error.message);
+        setErrorMessage(error.message);
+        toast({
+          title: "Signup failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
       }
 
+      console.log("Signup successful, session:", session);
       toast({
         title: "Account created",
         description: "Your account has been created successfully.",
@@ -40,9 +54,11 @@ const SignUp = () => {
         navigate('/login');
       }
     } catch (error: any) {
+      console.error("Unexpected signup error:", error);
+      setErrorMessage(error.message || "An unexpected error occurred");
       toast({
         title: "Signup failed",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
@@ -67,6 +83,12 @@ const SignUp = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {errorMessage && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

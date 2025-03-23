@@ -6,9 +6,11 @@ import { storeSession, clearSession, getStoredSession } from './session';
 export const signUp = async (email: string, password: string): Promise<{ error: Error | null, session?: Session }> => {
   try {
     console.log("Signing up new user:", email);
-    
-    // Add more detailed error logging
     console.log("Making signup request to:", `${API_URL}/auth/signup`);
+    
+    // Add more detailed error logging and better network error handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
     const response = await fetch(`${API_URL}/auth/signup`, {
       method: 'POST',
@@ -19,15 +21,20 @@ export const signUp = async (email: string, password: string): Promise<{ error: 
         email,
         password
       }),
-      // Add these options to help with CORS and network issues
+      // Ensure correct CORS options
       mode: 'cors',
-      credentials: 'same-origin'
+      credentials: 'include',
+      signal: controller.signal
     });
     
+    clearTimeout(timeoutId);
+    
+    console.log("Signup response status:", response.status);
+    
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Signup response not OK:", response.status, errorText);
-      throw new Error(errorText || `Server responded with status: ${response.status}`);
+      const errorData = await response.text();
+      console.error("Signup failed:", response.status, errorData);
+      throw new Error(errorData || `Server responded with status: ${response.status}`);
     }
     
     const data = await response.json();
@@ -43,7 +50,15 @@ export const signUp = async (email: string, password: string): Promise<{ error: 
     
     return { error: null };
   } catch (error: any) {
-    console.error("Sign up error:", error.message);
+    console.error("Sign up error:", error);
+    
+    // Provide more helpful error messages based on error type
+    if (error.name === 'AbortError') {
+      return { error: new Error('Network request timed out. Please check your internet connection and try again.') };
+    } else if (error.message === 'Failed to fetch') {
+      return { error: new Error('Could not connect to the server. Please make sure the backend server is running at http://localhost:5000.') };
+    }
+    
     return { error: new Error(error.message || 'Network error occurred during signup') };
   }
 };
@@ -54,6 +69,10 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
     console.log("Signing in user:", email);
     console.log("Making login request to:", `${API_URL}/auth/login`);
     
+    // Add timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: {
@@ -63,15 +82,20 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
         email,
         password
       }),
-      // Add these options to help with CORS and network issues
+      // Ensure correct CORS options
       mode: 'cors',
-      credentials: 'same-origin'
+      credentials: 'include',
+      signal: controller.signal
     });
     
+    clearTimeout(timeoutId);
+    
+    console.log("Login response status:", response.status);
+    
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Login response not OK:", response.status, errorText);
-      throw new Error(errorText || `Invalid login credentials (${response.status})`);
+      const errorData = await response.text();
+      console.error("Login failed:", response.status, errorData);
+      throw new Error(errorData || `Invalid login credentials (${response.status})`);
     }
     
     const data = await response.json();
@@ -86,7 +110,15 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
     
     return { error: null, session: data.session };
   } catch (error: any) {
-    console.error("Sign in error:", error.message);
+    console.error("Sign in error:", error);
+    
+    // Provide more helpful error messages based on error type
+    if (error.name === 'AbortError') {
+      return { error: new Error('Network request timed out. Please check your internet connection and try again.') };
+    } else if (error.message === 'Failed to fetch') {
+      return { error: new Error('Could not connect to the server. Please make sure the backend server is running at http://localhost:5000.') };
+    }
+    
     return { error: new Error(error.message || 'Network error occurred during login') };
   }
 };

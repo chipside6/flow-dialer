@@ -12,10 +12,12 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-// Configure CORS to accept requests from the frontend
+// Updated CORS configuration to allow credentials and proper origin
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite's default port
-  credentials: true
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Allow both localhost and 127.0.0.1
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());  // Parse incoming JSON requests
 
@@ -43,6 +45,9 @@ app.use('/api/transfer-numbers', transferNumberRoutes);
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
+
+// Add a route to debug CORS issues
+app.options('*', cors());
 
 // Error handling middleware
 app.use((err, req, res, next) => {
