@@ -21,7 +21,7 @@ const authenticateToken = (req, res, next) => {
       });
     }
     
-    // Add user ID to request
+    // Add user ID to request in both formats for compatibility
     req.userId = decoded.userId;
     req.user = { id: decoded.userId }; // For backward compatibility
     next();
