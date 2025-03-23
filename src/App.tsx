@@ -29,9 +29,9 @@ import "./App.css";
 
 const App = () => (
   <TooltipProvider>
-    <SidebarProvider defaultOpen>
-      <AuthProvider>
-        <BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <SidebarProvider defaultOpen>
           <Sonner />
           <Routes>
             {/* Public routes */}
@@ -144,9 +144,9 @@ const App = () => (
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </SidebarProvider>
+        </SidebarProvider>
+      </BrowserRouter>
+    </AuthProvider>
   </TooltipProvider>
 );
 
