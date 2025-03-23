@@ -82,7 +82,7 @@ serve(async (req) => {
 
     // Upload the file to storage
     const { data, error } = await supabase.storage
-      .from('greetings')
+      .from('voice-app-uploads')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true,
@@ -95,7 +95,7 @@ serve(async (req) => {
 
     // Get the public URL for the uploaded file
     const { data: { publicUrl } } = supabase.storage
-      .from('greetings')
+      .from('voice-app-uploads')
       .getPublicUrl(filePath);
 
     console.log(`File uploaded successfully. Public URL: ${publicUrl}`);
@@ -107,6 +107,7 @@ serve(async (req) => {
         user_id: user.id,
         filename: file.name,
         url: publicUrl,
+        file_path: filePath
       })
       .select()
       .single();

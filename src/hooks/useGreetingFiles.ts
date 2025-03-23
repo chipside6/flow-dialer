@@ -30,7 +30,6 @@ export function useGreetingFiles() {
   } = useQuery({
     queryKey: ['greetingFiles', user?.id],
     queryFn: async () => {
-      // Improved error handling for when there is no user
       if (!user) {
         console.log("No user detected, returning empty array");
         return [];
@@ -95,8 +94,8 @@ export function useGreetingFiles() {
         }
         
         // Try to delete from storage if we have a file path
-        if (fileData && 'file_path' in fileData && fileData.file_path) {
-          const filePath = fileData.file_path as string; // Explicitly cast to string
+        if (fileData && fileData.file_path) {
+          const filePath = fileData.file_path as string;
           const { error: storageError } = await supabase.storage
             .from('voice-app-uploads')
             .remove([filePath]);

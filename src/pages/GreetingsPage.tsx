@@ -13,7 +13,7 @@ const GreetingsFallback = () => (
   </div>
 );
 
-// Changed from destructured { error } to direct error parameter
+// Fix: Changed from destructured { error } to directly using the error parameter
 const ErrorFallback = (error: Error) => (
   <div className="w-full h-96 flex flex-col items-center justify-center">
     <div className="bg-destructive text-destructive-foreground px-4 py-2 rounded-md mb-4">

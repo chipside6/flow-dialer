@@ -65,8 +65,20 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
     setError(null);
     
     try {
-      // Upload to Supabase Storage
-      const filePath = `greeting-files/${effectiveUserId}/${Date.now()}-${selectedFile.name}`;
+      // Create a FormData instance for the file upload
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      
+      // Get the auth token
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+      
+      // Upload directly to the Supabase storage
+      const filePath = `${effectiveUserId}/${Date.now()}-${selectedFile.name}`;
       
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('voice-app-uploads')

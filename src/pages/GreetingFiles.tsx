@@ -37,21 +37,27 @@ const GreetingFiles = () => {
     return (
       <div className="container mx-auto py-10">
         <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
-        <p className="text-muted-foreground">Please log in to manage your greeting files.</p>
+        <Alert variant="warning" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Authentication required</AlertTitle>
+          <AlertDescription>
+            Please log in to manage your greeting files.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   // Display network error prominently at the top if there's an issue
-  if (isError && error instanceof Error && error.message.includes('network')) {
+  if (isError && error instanceof Error) {
     return (
       <div className="w-full">
         <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Network Error</AlertTitle>
+          <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            Unable to load greeting files due to a network issue. Please check your connection and try again.
+            {error.message || "Failed to load greeting files"}
           </AlertDescription>
           <Button 
             variant="outline" 
