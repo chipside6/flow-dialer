@@ -95,7 +95,7 @@ export function useGreetingFiles() {
         
         // Try to delete from storage if we have a file path
         if (fileData && fileData.file_path) {
-          const filePath = fileData.file_path as string;
+          const filePath = fileData.file_path;
           const { error: storageError } = await supabase.storage
             .from('voice-app-uploads')
             .remove([filePath]);

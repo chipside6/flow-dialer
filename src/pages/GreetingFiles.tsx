@@ -37,7 +37,7 @@ const GreetingFiles = () => {
     return (
       <div className="container mx-auto py-10">
         <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
-        <Alert variant="warning" className="mb-4">
+        <Alert className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Authentication required</AlertTitle>
           <AlertDescription>
