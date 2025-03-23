@@ -9,7 +9,7 @@ const router = express.Router();
 // Get all contact lists for a user
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;  // Get user ID from the authenticated user
+    const userId = req.userId;  // Get user ID from the authenticated user
     const [contactLists] = await pool.query('SELECT * FROM contact_lists WHERE user_id = ?', [userId]);
     res.status(200).json(contactLists);
   } catch (error) {
@@ -21,7 +21,7 @@ router.get('/', authenticateToken, async (req, res) => {
 // Create a new contact list
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;  // Get user ID from the authenticated user
+    const userId = req.userId;  // Get user ID from the authenticated user
     const { name, description } = req.body;  // Contact list data from request body
     const listId = uuidv4();  // Generate a unique list ID
 

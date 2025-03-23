@@ -23,6 +23,7 @@ const authenticateToken = (req, res, next) => {
     
     // Add user ID to request
     req.userId = decoded.userId;
+    req.user = { id: decoded.userId }; // For backward compatibility
     next();
   });
 };

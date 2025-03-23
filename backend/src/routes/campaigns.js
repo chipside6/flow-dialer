@@ -9,7 +9,7 @@ const router = express.Router();
 // Get all campaigns for a user
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;  // Get user ID from the authenticated user
+    const userId = req.userId;  // Get user ID from the authenticated user
     const [campaigns] = await pool.query('SELECT * FROM campaigns WHERE user_id = ?', [userId]);
     res.status(200).json(campaigns);
   } catch (error) {
@@ -21,7 +21,7 @@ router.get('/', authenticateToken, async (req, res) => {
 // Create a new campaign
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;  // Get user ID from the authenticated user
+    const userId = req.userId;  // Get user ID from the authenticated user
     const { name, description } = req.body;  // Campaign data from request body
     const campaignId = uuidv4();  // Generate a unique campaign ID
 

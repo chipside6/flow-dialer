@@ -9,7 +9,7 @@ const router = express.Router();
 // Get all subscriptions for a user
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;  // Get user ID from the authenticated user
+    const userId = req.userId;  // Get user ID from the authenticated user
     const [subscriptions] = await pool.query('SELECT * FROM subscriptions WHERE user_id = ?', [userId]);
     res.status(200).json(subscriptions);
   } catch (error) {
@@ -21,7 +21,7 @@ router.get('/', authenticateToken, async (req, res) => {
 // Create or update a subscription
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;  // Get user ID from the authenticated user
+    const userId = req.userId;  // Get user ID from the authenticated user
     const { plan, startDate, endDate } = req.body;  // Subscription data from request body
 
     // Check if the user already has an active subscription
