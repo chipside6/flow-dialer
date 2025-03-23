@@ -26,9 +26,19 @@ export const useFetchSipProviders = () => {
       } catch (err: any) {
         console.error("Error fetching SIP providers:", err);
         setError(err);
+        
+        // Improved error message based on error type
+        const errorMessage = err.message || "An unexpected error occurred";
+        const isNetworkError = errorMessage.includes("NetworkError") || 
+                               errorMessage.includes("network") || 
+                               errorMessage.includes("fetch") ||
+                               !navigator.onLine;
+        
         toast({
           title: "Error loading providers",
-          description: err.message,
+          description: isNetworkError 
+            ? "Network connection error. Please check your internet connection and try again."
+            : errorMessage,
           variant: "destructive"
         });
       } finally {
