@@ -25,11 +25,16 @@ export const fetchUserProfile = async (userId: string) => {
       id: data.id,
       email: '', // Initialize with empty string, we'll try to get this below
       full_name: data.full_name || '',
-      avatar_url: data.avatar_url || null, // Use null as fallback if property doesn't exist
+      avatar_url: null, // Initialize as null, we'll check if it exists below
       company_name: data.company_name || '',
       is_admin: !!data.is_admin,
       is_affiliate: !!data.is_affiliate
     };
+    
+    // Safely check if avatar_url exists in the data and assign it
+    if ('avatar_url' in data && data.avatar_url) {
+      userProfile.avatar_url = data.avatar_url;
+    }
 
     // If we don't have an email in the profile data, try to get it from auth.users
     console.log("authUtils - Getting email from auth user");
