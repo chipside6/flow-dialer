@@ -111,4 +111,39 @@
   .campaign-content {
     padding-left: 60px !important; /* Increased padding to avoid icon overlap */
   }
+
+  /* Fix campaign table text overflow */
+  .table-cell-content {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+  }
+  
+  /* Ensure buttons don't cause horizontal overflow */
+  button span {
+    white-space: normal !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Fix the campaign table empty state */
+  tbody td {
+    max-width: 100vw;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+  
+  /* Make sure the empty campaign message doesn't overflow */
+  tbody div.flex.flex-col {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  tbody p {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
 }

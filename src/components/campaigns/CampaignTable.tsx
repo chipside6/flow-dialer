@@ -1,10 +1,11 @@
+
 import React from "react";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { CampaignItem } from "./CampaignItem";
 import { useCampaignContext } from "@/contexts/campaign/CampaignContext";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const CampaignTable: React.FC = () => {
   const { campaigns } = useCampaignContext();
@@ -12,10 +13,7 @@ export const CampaignTable: React.FC = () => {
 
   const handleCreateCampaign = () => {
     // This should navigate to the campaign creation view
-    navigate('/campaign');
-    // Set showCreateWizard to true in the Campaign page state
-    const campaignPageState = { showCreateWizard: true };
-    navigate('/campaign', { state: campaignPageState });
+    navigate('/campaign', { state: { showCreateWizard: true } });
   };
 
   return (
@@ -32,14 +30,14 @@ export const CampaignTable: React.FC = () => {
         {campaigns.length === 0 ? (
           <TableRow>
             <TableCell colSpan={4} className="text-center py-8">
-              <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="flex flex-col items-center justify-center space-y-4 max-w-md mx-auto px-4">
                 <p className="text-muted-foreground">No campaigns found</p>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-muted-foreground mb-4 break-normal">
                   Create your first campaign to start making calls
                 </p>
                 <Button 
                   variant="success" 
-                  className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium"
+                  className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium whitespace-nowrap"
                   onClick={handleCreateCampaign}
                   size="lg"
                 >

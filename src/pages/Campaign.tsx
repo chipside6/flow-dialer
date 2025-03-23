@@ -50,7 +50,7 @@ const CampaignPage = () => {
       <Navbar />
       <div className="flex flex-1 w-full">
         <DashboardLayout>
-          <div className="max-w-6xl mx-auto w-full px-2 md:px-4 pt-14 md:pt-4 campaign-content">
+          <div className="max-w-6xl mx-auto w-full px-2 md:px-4 pt-14 md:pt-4 campaign-content overflow-hidden">
             {showCreateWizard ? (
               <CampaignCreationWizard 
                 onComplete={handleCreateCampaign}
