@@ -30,9 +30,7 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       email: '', // This will be set by the AuthProvider
       full_name: data.full_name || '',
       avatar_url: null, // Set to null since it doesn't exist in the database
-      company_name: data.company_name || '',
-      is_admin: !!data.is_admin,
-      is_affiliate: !!data.is_affiliate
+      is_admin: !!data.is_admin
     };
     
     return profile;
@@ -57,25 +55,6 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
     return true;
   } catch (error: any) {
     console.error("Error in updateUserProfile:", error.message);
-    return false;
-  }
-}
-
-export async function setUserAsAffiliate(userId: string): Promise<boolean> {
-  try {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ is_affiliate: true })
-      .eq('id', userId);
-      
-    if (error) {
-      console.error("Error setting affiliate status:", error.message);
-      return false;
-    }
-    
-    return true;
-  } catch (error: any) {
-    console.error("Error in setUserAsAffiliate:", error.message);
     return false;
   }
 }

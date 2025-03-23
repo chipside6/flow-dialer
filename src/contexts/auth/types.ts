@@ -12,9 +12,7 @@ export type UserProfile = {
   full_name?: string;
   avatar_url?: string | null;
   email: string;
-  company_name?: string;
   is_admin?: boolean;
-  is_affiliate?: boolean;
 };
 
 export type Session = {
