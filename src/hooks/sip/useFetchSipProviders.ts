@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { SipProvider } from "@/types/sipProviders";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
-import { fetchSipProviders } from "@/services/customBackendService";
+import { fetchSipProviders } from "@/services/api/sipProvidersService";
 import { 
   DialerErrorType, 
   createDialerError, 

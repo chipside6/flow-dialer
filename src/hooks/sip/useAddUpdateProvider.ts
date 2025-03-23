@@ -3,7 +3,7 @@ import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { SipProvider } from "@/types/sipProviders";
 import { useAuth } from "@/contexts/auth";
-import { addSipProvider, updateSipProvider } from "@/services/customBackendService";
+import { addSipProvider, updateSipProvider } from "@/services/api/sipProvidersService";
 
 export const useAddUpdateProvider = (
   providers: SipProvider[],
