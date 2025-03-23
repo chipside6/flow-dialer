@@ -28,7 +28,7 @@ export function useTransferNumbers() {
   const { fetchTransferNumbers } = useFetchTransferNumbers({
     setTransferNumbers,
     setIsLoading,
-    setError: (err: Error) => setError(err.message) // Convert Error to string
+    setError // Pass setError directly since it now accepts string
   });
   
   const { addTransferNumber } = useAddTransferNumber(

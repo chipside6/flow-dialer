@@ -8,7 +8,7 @@ import { toast } from "@/components/ui/use-toast";
 interface UseFetchTransferNumbersState {
   setTransferNumbers: (transferNumbers: TransferNumber[]) => void;
   setIsLoading: (isLoading: boolean) => void;
-  setError: (error: string | null) => void;  // Changed to accept string instead of Error
+  setError: (error: string | null) => void;  // Takes string, not Error
 }
 
 export const useFetchTransferNumbers = ({
