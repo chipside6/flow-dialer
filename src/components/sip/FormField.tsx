@@ -26,15 +26,20 @@ export const FormField: React.FC<FormFieldProps> = ({
 }) => {
   return (
     <div className={className}>
-      <Label htmlFor={id}>{label}{required && "*"}</Label>
+      <Label htmlFor={id} className="block font-medium">
+        {label} {required && <span className="text-red-500">*</span>}
+      </Label>
       <Input
         id={id}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="w-full"
+        className="w-full border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-500"
         type={type}
+        required={required}
+        aria-required={required}
       />
     </div>
   );
 };
+
