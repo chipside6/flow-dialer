@@ -10,7 +10,7 @@ export interface GreetingFile {
   user_id: string;
   filename: string;
   url: string;
-  file_path: string; // This field now exists in the database
+  file_path: string;
   file_type?: string;
   file_size?: number;
   duration_seconds?: number | null;
@@ -23,7 +23,7 @@ interface DbGreetingFile {
   user_id: string;
   filename: string;
   url: string;
-  file_path: string; // Updated to be required since it now exists in the database
+  file_path: string;
   file_type?: string;
   file_size?: number;
   duration_seconds?: number | null;
@@ -54,7 +54,7 @@ export function useGreetingFiles() {
           .from('greeting_files')
           .select('*')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false }); // Show newest files first
+          .order('created_at', { ascending: false });
 
         if (error) {
           console.error("Error fetching greeting files:", error);
@@ -76,11 +76,11 @@ export function useGreetingFiles() {
         throw new Error("Failed to fetch greeting files. Please check your network connection.");
       }
     },
-    staleTime: 60 * 1000, // 1 minute
-    retry: 2,  // Increased retries for network issues
+    staleTime: 30 * 1000, // 30 seconds (reduced from 60 seconds)
+    retry: 3,  // Increased retries for network issues
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000), // Exponential backoff with max 10s
     enabled: !!user, // Only run query when user is available
-    refetchOnWindowFocus: false, // Don't refetch when window gains focus to reduce unnecessary requests
+    refetchOnWindowFocus: true, // Re-enable refetch on window focus
   });
 
   // Mutation for deleting greeting files

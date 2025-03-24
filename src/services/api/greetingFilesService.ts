@@ -9,7 +9,13 @@ export const fetchGreetingFiles = async (userId: string) => {
   
   try {
     const data = await apiFetch<any[]>(`greeting-files?userId=${userId}`);
-    console.log(`[GreetingFilesService] Fetched ${data.length} greeting files successfully`);
+    console.log(`[GreetingFilesService] Fetched ${data?.length || 0} greeting files successfully`);
+    
+    // Handle case where data might be null/undefined
+    if (!data) {
+      console.warn('[GreetingFilesService] No data returned from the API');
+      return [];
+    }
     
     return data.map(item => ({
       id: item.id,
@@ -38,9 +44,7 @@ export const uploadGreetingFile = async (userId: string, file: File) => {
     const data = await apiFetch<any>('greeting-files', {
       method: 'POST',
       body: formData,
-      headers: {
-        // Content-Type is automatically set by the browser for FormData
-      }
+      // Content-Type is automatically set by the browser for FormData
     });
     
     console.log(`[GreetingFilesService] Upload successful:`, data);

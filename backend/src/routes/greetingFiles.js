@@ -7,7 +7,18 @@ const router = express.Router();
 // Get all greeting files
 router.get('/', async (req, res) => {
   try {
-    const [greetingFiles] = await pool.query('SELECT * FROM greeting_files');
+    const { userId } = req.query;
+    
+    if (!userId) {
+      return res.status(400).json({ error: true, message: 'User ID is required' });
+    }
+    
+    const [greetingFiles] = await pool.query(
+      'SELECT * FROM greeting_files WHERE user_id = ?',
+      [userId]
+    );
+    
+    console.log(`Fetched ${greetingFiles.length} greeting files for user ${userId}`);
     res.status(200).json(greetingFiles);
   } catch (error) {
     console.error('Error fetching greeting files:', error);
