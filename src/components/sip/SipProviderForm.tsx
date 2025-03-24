@@ -1,12 +1,19 @@
-
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
-import { SipProvider } from "@/types/sipProviders";
-import { FormField } from "./FormField";
-import { PasswordField } from "./PasswordField";
 import { FormActions } from "./FormActions";
+import FormField from "@/components/ui/form-field"; // Ensure this exists
+import PasswordField from "@/components/ui/password-field"; // Ensure this exists
+
+interface SipProvider {
+  id?: string;
+  name: string;
+  host: string;
+  port: string;
+  username: string;
+  password: string;
+  description?: string;
+}
 
 interface SipProviderFormProps {
   onSubmit: (provider: SipProvider) => Promise<void>;
@@ -27,68 +34,39 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   const [username, setUsername] = useState(editingProvider?.username || "");
   const [password, setPassword] = useState(editingProvider?.password || "");
   const [description, setDescription] = useState(editingProvider?.description || "");
+
   const [localIsSubmitting, setLocalIsSubmitting] = useState(false);
-  
-  const isSubmitting = externalIsSubmitting || localIsSubmitting;
-  
-  // Update form when editingProvider changes
+
+  // Ensure form updates when editingProvider changes
   useEffect(() => {
     if (editingProvider) {
-      setName(editingProvider.name);
-      setHost(editingProvider.host);
-      setPort(editingProvider.port);
-      setUsername(editingProvider.username);
-      setPassword(editingProvider.password);
-      setDescription(editingProvider.description);
+      setName(editingProvider.name || "");
+      setHost(editingProvider.host || "");
+      setPort(editingProvider.port || "5060");
+      setUsername(editingProvider.username || "");
+      setPassword(editingProvider.password || "");
+      setDescription(editingProvider.description || "");
     }
   }, [editingProvider]);
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!name || !host || !username || !password) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+
+  // Combine internal and external submission states
+  const isSubmitting = externalIsSubmitting || localIsSubmitting;
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault(); // Prevent page reload
+
     setLocalIsSubmitting(true);
-    
+
     try {
-      console.log("Submitting SIP provider form:", { name, host, port, username, password });
-      
-      await onSubmit({
-        id: editingProvider?.id ?? 'new',
-        name,
-        host,
-        port,
-        username,
-        password,
-        description: description || "No description provided",
-        dateAdded: editingProvider?.dateAdded || new Date(),
-        isActive: editingProvider?.isActive || false
-      });
-      
-      // Clear form if not editing (don't clear when editing as the form might remain open with updated values)
-      if (!editingProvider) {
-        setName("");
-        setHost("");
-        setPort("5060");
-        setUsername("");
-        setPassword("");
-        setDescription("");
-      }
+      console.log("Submitting SIP provider:", { name, host, port, username, password, description });
+      await onSubmit({ name, host, port, username, password, description });
     } catch (error) {
-      console.error("Error submitting SIP provider form:", error);
+      console.error("Error submitting SIP provider:", error);
     } finally {
-      // Always ensure localIsSubmitting is set to false when the operation completes
       setLocalIsSubmitting(false);
     }
   };
-  
+
   return (
     <Card className="mb-8 w-full max-w-full overflow-hidden">
       <CardHeader>
@@ -97,11 +75,12 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
           {editingProvider ? "Edit SIP Provider" : "Add New SIP Provider"}
         </CardTitle>
         <CardDescription>
-          {editingProvider 
-            ? `Editing ${editingProvider.name}` 
+          {editingProvider
+            ? `Editing ${editingProvider.name}`
             : "Configure a new SIP trunk provider for outgoing calls"}
         </CardDescription>
       </CardHeader>
+
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -122,7 +101,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
               required
             />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               id="provider-username"
@@ -140,7 +119,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
               onChange={(e) => setPort(e.target.value)}
             />
           </div>
-          
+
           <PasswordField
             id="provider-password"
             label="Password/API Key"
@@ -149,7 +128,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          
+
           <FormField
             id="provider-description"
             label="Description"
@@ -157,16 +136,13 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          
+
           <div className="flex justify-end mt-4">
-            <FormActions 
-              isEditing={!!editingProvider}
-              onCancel={onCancel}
-              isSubmitting={isSubmitting}
-            />
+            <FormActions isEditing={!!editingProvider} onCancel={onCancel} isSubmitting={isSubmitting} />
           </div>
         </form>
       </CardContent>
     </Card>
   );
 };
+
