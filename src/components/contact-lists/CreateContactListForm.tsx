@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { ContactList } from "@/hooks/useContactLists";
@@ -94,11 +95,11 @@ const CreateContactListForm: React.FC<CreateContactListFormProps> = ({ onListCre
   };
 
   return (
-    <Card className="shadow-md">
-      <CardHeader className="border-b pb-3">
-        <CardTitle className="text-xl">Create New Contact List</CardTitle>
+    <Card>
+      <CardHeader>
+        <CardTitle>Create New Contact List</CardTitle>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent>
         <Tabs defaultValue="manual" onValueChange={(value) => setUploadMode(value as "manual" | "csv")}>
           <TabsList className="mb-4">
             <TabsTrigger value="manual">Create Empty List</TabsTrigger>
