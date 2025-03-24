@@ -4,7 +4,7 @@ import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -26,17 +26,37 @@ const LogoutButton = ({
   const { signOut } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
+  // Set a cleanup timer if logout takes too long
+  useEffect(() => {
+    if (!isLoggingOut) return;
+    
+    const timeoutId = setTimeout(() => {
+      if (isLoggingOut) {
+        console.log("LogoutButton - Logout timeout reached, forcing logout completion");
+        setIsLoggingOut(false);
+        navigate("/login", { replace: true });
+      }
+    }, 3000); // 3 second timeout as fallback
+    
+    return () => clearTimeout(timeoutId);
+  }, [isLoggingOut, navigate]);
+  
   const handleLogout = async () => {
-    if (isLoggingOut) return; // Prevent multiple clicks
+    if (isLoggingOut) {
+      // If already logging out, force navigation to login
+      navigate("/login", { replace: true });
+      return;
+    }
     
     setIsLoggingOut(true);
     console.log("LogoutButton - Initiating logout");
     
-    // Force navigation to login page IMMEDIATELY - do this first
+    // Force navigation to login page IMMEDIATELY - this is the most critical part
     navigate("/login", { replace: true });
     
+    // Run the logout process after navigation has been triggered
     try {
-      // Call signOut after navigation has been triggered
+      console.log("LogoutButton - Calling signOut");
       const result = await signOut();
       
       // Optional callback if provided

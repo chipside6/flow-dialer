@@ -37,35 +37,30 @@ export const signInUser = async (email: string, password: string) => {
 
 export const signOutUser = async () => {
   console.log("authActions - Signing out user");
+  
+  // Completely clear auth storage first as top priority
   try {
-    // First try to sign out from Supabase
-    const { error: supabaseError } = await supabase.auth.signOut();
+    // First clear ALL possible localStorage auth-related items
+    console.log("authActions - Clearing all local storage auth items");
     
-    // Also try to sign out from custom backend API
-    try {
-      await apiSignOut();
-    } catch (apiError) {
-      console.warn("authActions - API sign out error, continuing with local sign out:", apiError);
-      // Continue with the sign out process even if the API call fails
-    }
-    
-    // Force clear all auth-related local storage items to ensure clean logout
+    // Target specific known auth tokens
     localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
     localStorage.removeItem('supabase.auth.token');
     localStorage.removeItem('user_session');
     
-    // More aggressive approach to clear all possible Supabase auth items
-    // Iterate through localStorage and remove any Supabase related items
+    // Clear ALL items that might be related to auth
     Object.keys(localStorage).forEach(key => {
       if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+        console.log(`authActions - Removing localStorage item: ${key}`);
         localStorage.removeItem(key);
       }
     });
     
-    // Manually clear Supabase session - extra measure
+    // Reset Supabase auth client session immediately
     try {
       // @ts-ignore - Accessing internal method
       if (supabase.auth._session) {
+        console.log("authActions - Manually clearing Supabase internal session");
         // @ts-ignore - Reset the session object
         supabase.auth._session = null;
       }
@@ -73,25 +68,37 @@ export const signOutUser = async () => {
       console.warn("Failed to manually clear Supabase session:", e);
     }
     
-    // If there was an error with Supabase signout
-    if (supabaseError) {
-      console.error("authActions - Supabase sign out error:", supabaseError.message);
-      toast({
-        title: "Warning during sign out",
-        description: "Your session may not be fully cleared",
-        variant: "destructive",
-      });
-      return { success: true, error: supabaseError }; // Still return success as we're doing our best effort
+    // Try to sign out from Supabase (not critical if this fails)
+    try {
+      console.log("authActions - Calling Supabase signOut method");
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (supabaseError) {
+      console.warn("authActions - Warning during Supabase signOut call:", supabaseError);
+      // Continue with the sign out process even if this fails
     }
     
+    // Try to sign out from custom backend API (not critical if this fails)
+    try {
+      console.log("authActions - Calling backend API signOut method");
+      await apiSignOut();
+    } catch (apiError) {
+      console.warn("authActions - API sign out error:", apiError);
+      // Continue with the sign out process even if the API call fails
+    }
+    
+    console.log("authActions - Logout process completed successfully");
     return { success: true, error: null };
   } catch (error: any) {
     console.error("authActions - Sign out error:", error.message);
     
     // Make a best effort to clear local storage even if other parts failed
-    localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
-    localStorage.removeItem('supabase.auth.token');
-    localStorage.removeItem('user_session');
+    try {
+      localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('user_session');
+    } catch (e) {
+      console.error("Final attempt to clear storage failed:", e);
+    }
     
     return { success: false, error };
   }
