@@ -25,6 +25,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   const [username, setUsername] = useState(editingProvider?.username || "");
   const [password, setPassword] = useState(editingProvider?.password || "");
   const [description, setDescription] = useState(editingProvider?.description || "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Update form when editingProvider changes
   useEffect(() => {
@@ -38,7 +39,9 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
     }
   }, [editingProvider]);
   
-  const handleSubmit = () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (!name || !host || !username || !password) {
       toast({
         title: "Missing information",
@@ -48,19 +51,37 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
       return;
     }
     
-    console.log("Submitting SIP provider form:", { name, host, port, username, password });
+    setIsSubmitting(true);
     
-    onSubmit({
-      id: editingProvider?.id,
-      name,
-      host,
-      port,
-      username,
-      password,
-      description: description || "No description provided",
-      dateAdded: editingProvider?.dateAdded || new Date(),
-      isActive: editingProvider?.isActive || false
-    });
+    try {
+      console.log("Submitting SIP provider form:", { name, host, port, username, password });
+      
+      await onSubmit({
+        id: editingProvider?.id ?? 'new',
+        name,
+        host,
+        port,
+        username,
+        password,
+        description: description || "No description provided",
+        dateAdded: editingProvider?.dateAdded || new Date(),
+        isActive: editingProvider?.isActive || false
+      });
+      
+      // Clear form if not editing (don't clear when editing as the form might remain open with updated values)
+      if (!editingProvider) {
+        setName("");
+        setHost("");
+        setPort("5060");
+        setUsername("");
+        setPassword("");
+        setDescription("");
+      }
+    } catch (error) {
+      console.error("Error submitting SIP provider form:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -77,7 +98,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               id="provider-name"
@@ -132,12 +153,14 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
             onChange={(e) => setDescription(e.target.value)}
           />
           
-          <FormActions 
-            onSubmit={handleSubmit}
-            onCancel={onCancel}
-            isEditing={!!editingProvider}
-          />
-        </div>
+          <div className="flex justify-end mt-4">
+            <FormActions 
+              isEditing={!!editingProvider}
+              onCancel={onCancel}
+              isSubmitting={isSubmitting}
+            />
+          </div>
+        </form>
       </CardContent>
     </Card>
   );
