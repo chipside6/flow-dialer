@@ -10,7 +10,7 @@ export const useDeleteTransferNumber = (
   const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
   
-  const handleDeleteTransferNumber = async (transferNumberId: string) => {
+  const handleDeleteTransferNumber = async (transferNumberId: string): Promise<boolean> => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -35,7 +35,7 @@ export const useDeleteTransferNumber = (
       console.error("Error deleting transfer number:", err);
       toast({
         title: "Error deleting transfer number",
-        description: err.message,
+        description: err.message || "Failed to delete transfer number",
         variant: "destructive"
       });
       return false;

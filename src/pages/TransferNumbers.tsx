@@ -46,14 +46,16 @@ const TransferNumbers = () => {
         return;
       }
       
-      await tryCatchWithErrorHandling(
-        async () => {
-          await refreshTransferNumbers();
-          return true;
-        },
-        "Failed to load your transfer numbers",
-        DialerErrorType.SERVER
-      );
+      try {
+        await refreshTransferNumbers();
+      } catch (err) {
+        console.error("Failed to load transfer numbers:", err);
+        toast({
+          title: "Error",
+          description: "Failed to load your transfer numbers",
+          variant: "destructive"
+        });
+      }
 
       // Set initialLoad to false after a delay to ensure smoother UX
       setTimeout(() => {
@@ -81,21 +83,23 @@ const TransferNumbers = () => {
       return null;
     }
     
-    const result = await tryCatchWithErrorHandling(
-      async () => {
-        return await addTransferNumber(name, number, description);
-      },
-      "Failed to add the transfer number",
-      DialerErrorType.SERVER
-    );
-    
-    // If no result but no error was thrown, try refreshing
-    if (result === null) {
-      console.log("No result from addTransferNumber, manually refreshing");
-      setTimeout(() => refreshTransferNumbers(), 500);
+    try {
+      const result = await addTransferNumber(name, number, description);
+      // If no result but no error was thrown, try refreshing
+      if (!result) {
+        console.log("No result from addTransferNumber, manually refreshing");
+        setTimeout(() => refreshTransferNumbers(), 500);
+      }
+      return result;
+    } catch (err: any) {
+      console.error("Error adding transfer number:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to add the transfer number",
+        variant: "destructive"
+      });
+      return null;
     }
-    
-    return result;
   };
   
   // Handler for manual refresh with error handling
@@ -111,18 +115,20 @@ const TransferNumbers = () => {
       return;
     }
     
-    await tryCatchWithErrorHandling(
-      async () => {
-        await refreshTransferNumbers();
-        toast({
-          title: "Refreshed",
-          description: "Transfer numbers have been refreshed"
-        });
-        return true;
-      },
-      "Failed to refresh transfer numbers",
-      DialerErrorType.SERVER
-    );
+    try {
+      await refreshTransferNumbers();
+      toast({
+        title: "Refreshed",
+        description: "Transfer numbers have been refreshed"
+      });
+    } catch (err: any) {
+      console.error("Error refreshing transfer numbers:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to refresh transfer numbers",
+        variant: "destructive"
+      });
+    }
   };
   
   // Render authentication loading state

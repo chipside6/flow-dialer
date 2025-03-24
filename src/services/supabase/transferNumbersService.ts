@@ -1,13 +1,21 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { TransferNumber } from '@/types/transferNumber';
 
 /**
  * Fetches all transfer numbers for a specific user
  */
-export const fetchUserTransferNumbers = async (userId: string) => {
+export const fetchUserTransferNumbers = async (userId: string): Promise<TransferNumber[]> => {
   console.log(`[TransferNumbersService] Fetching transfer numbers for user: ${userId}`);
   
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('[TransferNumbersService] No active session');
+      throw new Error('Authentication required to fetch transfer numbers');
+    }
+    
     const { data, error } = await supabase
       .from('transfer_numbers')
       .select('*')
@@ -18,9 +26,9 @@ export const fetchUserTransferNumbers = async (userId: string) => {
       throw error;
     }
     
-    console.log(`[TransferNumbersService] Fetched ${data.length} transfer numbers successfully`);
+    console.log(`[TransferNumbersService] Fetched ${data?.length || 0} transfer numbers successfully`);
     
-    return data.map(item => ({
+    return (data || []).map(item => ({
       id: item.id,
       name: item.name,
       number: item.phone_number,
@@ -42,7 +50,7 @@ export const addTransferNumber = async (
   name: string, 
   number: string, 
   description: string
-) => {
+): Promise<TransferNumber> => {
   console.log(`[TransferNumbersService] Adding transfer number for user: ${userId}`, {
     name,
     number,
@@ -50,6 +58,13 @@ export const addTransferNumber = async (
   });
   
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('[TransferNumbersService] No active session');
+      throw new Error('Authentication required to add transfer numbers');
+    }
+    
     const { data, error } = await supabase
       .from('transfer_numbers')
       .insert({
@@ -89,10 +104,17 @@ export const addTransferNumber = async (
 export const deleteTransferNumber = async (
   userId: string, 
   transferNumberId: string
-) => {
+): Promise<boolean> => {
   console.log(`[TransferNumbersService] Deleting transfer number ${transferNumberId} for user ${userId}`);
   
   try {
+    // Check if user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error('[TransferNumbersService] No active session');
+      throw new Error('Authentication required to delete transfer numbers');
+    }
+    
     const { error } = await supabase
       .from('transfer_numbers')
       .delete()

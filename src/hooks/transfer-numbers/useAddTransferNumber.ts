@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
 import { addTransferNumber } from "@/services/supabase/transferNumbersService";
+import { TransferNumber } from "@/types/transferNumber";
 
 export const useAddTransferNumber = (
   setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>,
@@ -14,30 +15,32 @@ export const useAddTransferNumber = (
     name: string,
     number: string,
     description: string
-  ) => {
+  ): Promise<TransferNumber | null> => {
     if (!user) {
       toast({
         title: "Authentication required",
         description: "You must be logged in to add a transfer number",
         variant: "destructive",
       });
-      return;
+      return null;
     }
     
     setIsSubmitting(true);
     try {
-      await addTransferNumber(user.id, name, number, description);
+      const result = await addTransferNumber(user.id, name, number, description);
       toast({
         title: "Transfer number added",
         description: "The transfer number has been added successfully",
       });
+      return result;
     } catch (err: any) {
       console.error("Error adding transfer number:", err);
       toast({
         title: "Error adding transfer number",
-        description: err.message,
+        description: err.message || "Failed to add transfer number",
         variant: "destructive"
       });
+      return null;
     } finally {
       setIsSubmitting(false);
       await refreshTransferNumbers();

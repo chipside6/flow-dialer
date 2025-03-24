@@ -76,6 +76,11 @@ export const AddTransferNumberForm = ({
       }
     } catch (error) {
       console.error("Error in form submission:", error);
+    } finally {
+      // Ensure local submitting state is reset even if parent state doesn't change
+      setTimeout(() => {
+        setLocalSubmitting(false);
+      }, 500);
     }
   };
   
