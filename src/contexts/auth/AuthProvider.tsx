@@ -6,7 +6,7 @@ import type { User, UserProfile } from './types';
 import { fetchUserProfile } from './authUtils';
 import { signOutUser } from './authActions';
 import { toast } from '@/components/ui/use-toast';
-import { createLifetimePlanForUser, ensureVoiceAppUploadsBucket } from '@/services/supabase/greetingFilesService';
+import { ensureVoiceAppUploadsBucket } from '@/services/supabase/greetingFilesService';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -66,13 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               setIsAdmin(!!updatedProfile.is_admin);
             }
             
-            // Create lifetime plan for the user if it's a new sign-in
-            try {
-              await createLifetimePlanForUser(session.user.id);
-            } catch (planError) {
-              console.error("AuthProvider: Error creating lifetime plan:", planError);
-              // Don't block auth flow if plan creation fails
-            }
+            // Removed automatic lifetime plan creation
           } catch (error) {
             console.error("AuthProvider: Error during sign in:", error);
             setError(error instanceof Error ? error : new Error('Unknown error during sign in'));
@@ -143,13 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               setIsAdmin(!!updatedProfile.is_admin);
             }
             
-            // Create lifetime plan for the user
-            try {
-              await createLifetimePlanForUser(data.session.user.id);
-            } catch (planError) {
-              console.error("AuthProvider: Error creating lifetime plan:", planError);
-              // Don't block auth flow if plan creation fails
-            }
+            // Removed automatic lifetime plan creation
           } catch (profileError) {
             console.error("AuthProvider: Error fetching profile:", profileError);
           }
