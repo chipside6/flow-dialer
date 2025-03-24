@@ -23,18 +23,20 @@ export const UploadProgress = ({
     if (isUploading) {
       timeoutId = setTimeout(() => {
         setShowLoader(true);
-      }, 300);
-    } else {
+      }, 100); // Reduced delay for better responsiveness
+    } else if (!isUploading && uploadProgress !== 100) {
       setShowLoader(false);
     }
     
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [isUploading]);
+  }, [isUploading, uploadProgress]);
   
-  // Don't show anything if not uploading and no progress or error
-  if (!showLoader && uploadProgress === 0 && !error) {
+  // Always show the progress if we're uploading or at 100%
+  const shouldShow = showLoader || isUploading || uploadProgress === 100 || error;
+  
+  if (!shouldShow) {
     return null;
   }
 

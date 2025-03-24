@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, FileAudio } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useUploadProgress } from '@/hooks/useUploadProgress';
+import { UploadProgress } from '../recording/UploadProgress';
 
 interface UploadFormProps {
   userId?: string;
@@ -22,6 +24,7 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { uploadProgress, setUploadProgress } = useUploadProgress(isUploading);
   
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -63,14 +66,22 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
     
     setIsUploading(true);
     setError(null);
+    setUploadProgress(10); // Start at 10%
     
     try {
       // Upload directly to the Supabase storage
       const filePath = `${effectiveUserId}/${Date.now()}-${selectedFile.name}`;
       
+      // Show manual progress updates during upload
+      setTimeout(() => setUploadProgress(30), 500);
+      setTimeout(() => setUploadProgress(50), 1000);
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('voice-app-uploads')
         .upload(filePath, selectedFile);
+      
+      // Update progress to 70% after storage upload completes
+      setUploadProgress(70);
       
       if (uploadError) {
         throw uploadError;
@@ -80,6 +91,9 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
       const { data: urlData } = supabase.storage
         .from('voice-app-uploads')
         .getPublicUrl(filePath);
+      
+      // Update progress to 85% before database entry
+      setUploadProgress(85);
       
       // Create record in greeting_files table
       const { error: insertError } = await supabase
@@ -97,6 +111,9 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
         throw insertError;
       }
       
+      // Final progress update
+      setUploadProgress(100);
+      
       // Refresh the list
       if (refreshGreetingFiles) {
         await refreshGreetingFiles();
@@ -109,25 +126,28 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
         description: 'Your greeting file has been uploaded successfully'
       });
       
-      // Reset form
-      setSelectedFile(null);
-      
-      // Reset file input
-      const fileInput = document.getElementById('greeting-file') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = '';
-      }
+      // Reset form after a short delay to show 100% completion
+      setTimeout(() => {
+        setSelectedFile(null);
+        setIsUploading(false);
+        setUploadProgress(0);
+        
+        // Reset file input
+        const fileInput = document.getElementById('greeting-file') as HTMLInputElement;
+        if (fileInput) {
+          fileInput.value = '';
+        }
+      }, 1500);
       
     } catch (error: any) {
       console.error('Upload error:', error);
       setError(error.message || 'Failed to upload file');
+      setIsUploading(false);
       toast({
         variant: 'destructive',
         title: 'Upload failed',
         description: error.message || 'Failed to upload greeting file'
       });
-    } finally {
-      setIsUploading(false);
     }
   };
   
@@ -158,6 +178,14 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
             {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
           </span>
         </div>
+      )}
+      
+      {isUploading && (
+        <UploadProgress 
+          isUploading={isUploading} 
+          uploadProgress={uploadProgress}
+          error={error}
+        />
       )}
       
       <Button 

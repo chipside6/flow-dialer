@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -93,26 +94,21 @@ export const RecordGreetingForm = ({ userId, refreshGreetingFiles }: RecordGreet
     }
     
     setIsUploading(true);
-    setUploadProgress(0);
+    setUploadProgress(10);
     setUploadError(null);
     
     try {
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 300);
+      // Set manual progress steps
+      setTimeout(() => setUploadProgress(30), 500);
+      setTimeout(() => setUploadProgress(50), 1000);
       
       // Upload recording to Supabase
       console.log("Starting upload of recording, blob size:", audioBlob.size);
-      await uploadRecording(audioBlob, effectiveUserId);
       
-      clearInterval(progressInterval);
+      setTimeout(() => setUploadProgress(70), 1500);
+      
+      const fileData = await uploadRecording(audioBlob, effectiveUserId);
+      
       setUploadProgress(100);
       
       // Refetch greeting files after upload
