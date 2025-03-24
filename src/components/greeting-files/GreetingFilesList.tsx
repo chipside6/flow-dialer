@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
@@ -34,7 +34,39 @@ export const GreetingFilesList = ({
   const { toast } = useToast();
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMobile = useIsMobile();
+
+  // Initialize audio element
+  useEffect(() => {
+    audioRef.current = new Audio();
+    
+    // Add event listeners to the audio element
+    const audio = audioRef.current;
+    
+    const handleEnded = () => {
+      setIsPlaying(false);
+    };
+    
+    const handleError = (e: ErrorEvent) => {
+      console.error("Audio playback error:", e);
+      toast({
+        variant: "destructive",
+        title: "Playback Error",
+        description: "There was an error playing this audio file."
+      });
+      setIsPlaying(false);
+    };
+    
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError as EventListener);
+    
+    return () => {
+      audio.pause();
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError as EventListener);
+    };
+  }, [toast]);
 
   if (isLoading) {
     return <LoadingState message="Loading greeting files..." />;
@@ -73,11 +105,29 @@ export const GreetingFilesList = ({
   };
 
   const handlePlayToggle = (url: string) => {
+    if (!audioRef.current) return;
+    
     if (currentAudio === url && isPlaying) {
       // Pause the current audio
+      audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      // Play the selected audio
+      // Stop any currently playing audio first
+      if (audioRef.current.src) {
+        audioRef.current.pause();
+      }
+      
+      // Set the new audio source and play
+      audioRef.current.src = url;
+      audioRef.current.play().catch(error => {
+        console.error("Error playing audio:", error);
+        toast({
+          variant: "destructive",
+          title: "Playback Error",
+          description: "There was an error playing this audio file."
+        });
+      });
+      
       setCurrentAudio(url);
       setIsPlaying(true);
     }
@@ -91,8 +141,8 @@ export const GreetingFilesList = ({
           file={file}
           isPlaying={isPlaying && currentAudio === file.url}
           isActiveAudio={currentAudio === file.url}
-          onPlayToggle={handlePlayToggle}
-          onDelete={handleDelete}
+          onPlayToggle={() => handlePlayToggle(file.url)}
+          onDelete={() => handleDelete(file.id)}
         />
       ))}
     </div>
