@@ -23,24 +23,48 @@ const CreateContactListForm: React.FC = () => {
     }
   });
 
+  // Function to handle the actual upload (simulated here with a delay)
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true);
+    try {
+      // Simulate file upload (replace with actual file upload logic)
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Here you would make an API call to your backend to upload the file
+      // For example, use fetch() or axios to upload the file
+      const response = await fetch("/upload-endpoint", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload file");
+      }
+
+      toast({
+        title: "File uploaded",
+        description: `Your file ${file.name} has been uploaded successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Upload Failed",
+        description: "There was an issue uploading the file.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const onSubmit = async (data: ListFormValues) => {
     try {
       setIsCreating(true);
 
       if (uploadMode === "csv" && selectedFile) {
-        setIsUploading(true);
-        // Simulate upload action
-        // Replace with actual file upload logic
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate upload delay
-
-        toast({
-          title: "File uploaded",
-          description: `Your file ${selectedFile.name} has been uploaded successfully.`,
-        });
-        setIsUploading(false);
+        await handleFileUpload(selectedFile);
       } else {
         // Simulate list creation
-        // Replace with actual list creation logic
         await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate creation delay
 
         toast({
@@ -49,7 +73,6 @@ const CreateContactListForm: React.FC = () => {
         });
       }
 
-      // Reset form after submission
       form.reset();
       setSelectedFile(null);
     } catch (error: any) {
@@ -76,13 +99,13 @@ const CreateContactListForm: React.FC = () => {
               selectedFile={selectedFile}
               setSelectedFile={setSelectedFile}
               isDisabled={isCreating || isUploading}
+              onUpload={handleFileUpload} // Pass the onUpload function
             />
             <FormActions
               isSubmitting={isCreating}
               isUploading={isUploading}
               uploadMode={uploadMode}
               hasSelectedFile={!!selectedFile}
-              onSubmit={() => form.handleSubmit(onSubmit)()} // Pass onSubmit here
             />
           </form>
         </Form>
@@ -92,3 +115,4 @@ const CreateContactListForm: React.FC = () => {
 };
 
 export default CreateContactListForm;
+
