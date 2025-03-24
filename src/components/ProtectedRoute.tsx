@@ -6,10 +6,11 @@ import { useAuth } from '@/contexts/auth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requireAdmin?: boolean;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, sessionChecked, initialized, error } = useAuth();
+const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
+  const { isAuthenticated, isLoading, sessionChecked, initialized, error, isAdmin } = useAuth();
   const location = useLocation();
   
   console.log("Protected Route State:", { 
@@ -18,6 +19,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     sessionChecked, 
     initialized, 
     error,
+    isAdmin,
+    requireAdmin,
     path: location.pathname
   });
   
@@ -49,6 +52,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         </button>
       </div>
     );
+  }
+  
+  // If user is authenticated but route requires admin privileges
+  if (isAuthenticated && requireAdmin && !isAdmin) {
+    console.log("User is authenticated but lacks admin privileges, redirecting to unauthorized");
+    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
   
   // If user is authenticated, render children

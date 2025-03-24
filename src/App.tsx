@@ -1,4 +1,3 @@
-
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -23,6 +22,7 @@ import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import DiagnosticPage from "./pages/DiagnosticPage";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 // Import the App.css for styling
 import "./App.css"; 
@@ -41,6 +41,7 @@ const App = () => (
             <Route path="/support" element={<Support />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/unauthorized" element={<UnauthorizedPage />} />
             
             {/* Protected routes */}
             <Route 
@@ -127,7 +128,7 @@ const App = () => (
             <Route 
               path="/admin" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin>
                   <AdminPanel />
                 </ProtectedRoute>
               } 
