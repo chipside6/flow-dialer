@@ -19,23 +19,33 @@ export const useFetchTransferNumbers = ({
   const { user } = useAuth();
 
   const fetchTransferNumbers = useCallback(async () => {
+    console.log("[useFetchTransferNumbers] Hook triggered.");
+
     if (!user) {
-      console.log("No authenticated user, can't fetch transfer numbers");
+      console.warn("[useFetchTransferNumbers] No authenticated user.");
       setTransferNumbers([]);
       setIsLoading(false);
       setError(null);
       return;
     }
 
-    console.log(`Fetching transfer numbers for user: ${user.id}`);
+    console.log(`[useFetchTransferNumbers] Fetching transfer numbers for user: ${user.id}`);
+    
     setIsLoading(true);
     setError(null);
 
     try {
       const data = await fetchUserTransferNumbers(user.id);
+
+      if (!data || data.length === 0) {
+        console.warn("[useFetchTransferNumbers] No transfer numbers found.");
+      } else {
+        console.log(`[useFetchTransferNumbers] Retrieved ${data.length} transfer numbers.`);
+      }
+
       setTransferNumbers(data);
     } catch (err: any) {
-      console.error("Error fetching transfer numbers:", err);
+      console.error("[useFetchTransferNumbers] Error fetching transfer numbers:", err);
       setError(err.message || "Failed to load transfer numbers");
       toast({
         title: "Error loading transfer numbers",
