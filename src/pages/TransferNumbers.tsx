@@ -34,19 +34,17 @@ const TransferNumbers = () => {
     isAuthLoading
   });
   
-  // Handle initial data loading
   useEffect(() => {
     const loadData = async () => {
       console.log("TransferNumbers page mounted, loading data");
-      
-      if (!user && !isAuthLoading) {
+
+      if (!isAuthLoading && !user) {
         console.log("No authenticated user, showing login prompt");
         setInitialLoad(false);
         return;
       }
-      
-      // Wait for authentication before loading data
-      if (!isAuthLoading && user) {
+
+      if (user) {
         try {
           await refreshTransferNumbers();
         } catch (err) {
@@ -57,23 +55,16 @@ const TransferNumbers = () => {
             variant: "destructive"
           });
         }
-      }
-
-      // Set initialLoad to false after a delay to ensure smoother UX
-      setTimeout(() => {
         setInitialLoad(false);
-      }, 800);
+      }
     };
-    
+
     loadData();
-    
-    return () => {
-      console.log("TransferNumbers page unmounted");
-    };
+
+    return () => console.log("TransferNumbers page unmounted");
   }, [user, isAuthLoading, refreshTransferNumbers, toast]);
-  
-  // Handler for adding a transfer number with improved error handling
-  const handleAddTransferNumber = async (name: string, number: string, description: string) => {
+
+  const handleAddTransferNumber = async (name, number, description) => {
     console.log("handleAddTransferNumber called with:", { name, number, description });
     
     if (!user) {
@@ -88,7 +79,7 @@ const TransferNumbers = () => {
     try {
       const result = await addTransferNumber(name, number, description);
       return result;
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error adding transfer number:", err);
       toast({
         title: "Error",
@@ -98,8 +89,7 @@ const TransferNumbers = () => {
       return null;
     }
   };
-  
-  // Handler for manual refresh with error handling
+
   const handleManualRefresh = async () => {
     console.log("Manual refresh requested from UI");
     
@@ -118,7 +108,7 @@ const TransferNumbers = () => {
         title: "Refreshed",
         description: "Transfer numbers have been refreshed"
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error refreshing transfer numbers:", err);
       toast({
         title: "Error",
@@ -128,12 +118,11 @@ const TransferNumbers = () => {
     }
   };
   
-  // Render authentication loading state
-  if (isAuthLoading) {
+  if (isAuthLoading || initialLoad) {
     return (
       <DashboardLayout>
         <TransferNumbersHeader />
-        <LoadingState message="Checking authentication, please wait..." />
+        <LoadingState message="Loading transfer numbers, please wait..." />
       </DashboardLayout>
     );
   }
@@ -141,9 +130,7 @@ const TransferNumbers = () => {
   return (
     <DashboardLayout>
       <TransferNumbersHeader />
-      
       <AuthRequiredAlert isVisible={!user} />
-      
       {user && (
         <TransferNumbersContent
           transferNumbers={transferNumbers}
