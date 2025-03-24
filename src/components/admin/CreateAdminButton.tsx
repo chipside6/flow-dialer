@@ -28,9 +28,10 @@ export function CreateAdminButton() {
         return;
       }
       
-      const { data, error } = await supabase.functions.invoke('create-admin-user', {
-        method: 'POST',
-        body: {}
+      // Direct database approach instead of edge function
+      const { data, error } = await supabase.rpc('create_admin_user', {
+        admin_email: 'admin@gmail.com',
+        admin_password: 'test123'
       });
       
       if (error) {
@@ -45,17 +46,17 @@ export function CreateAdminButton() {
       
       console.log("Admin user created response:", data);
       
-      // Force refresh the user data
       toast({
         title: "Success",
         description: "Admin user created successfully! Refreshing data...",
       });
       
-      // Wait a moment for the database to propagate the changes
+      // Force invalidate and refetch admin users query immediately
+      await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      
+      // Then attempt a refetch after a short delay to allow database changes to propagate
       setTimeout(async () => {
         try {
-          // Force invalidate and refetch admin users query
-          await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
           await queryClient.refetchQueries({ queryKey: ["admin", "users"] });
           
           toast({
@@ -65,7 +66,7 @@ export function CreateAdminButton() {
         } catch (refetchError) {
           console.error("Error refreshing data:", refetchError);
         }
-      }, 2000); // Increased timeout to 2 seconds for better chances of data propagation
+      }, 1000);
       
     } catch (err) {
       console.error("Unexpected error:", err);

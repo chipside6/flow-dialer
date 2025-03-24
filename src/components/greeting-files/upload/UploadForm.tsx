@@ -1,5 +1,5 @@
 
-import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,30 +25,6 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { uploadProgress, setUploadProgress } = useUploadProgress(isUploading);
-  const [bucketChecked, setBucketChecked] = useState(false);
-  
-  // Check if the bucket exists
-  useEffect(() => {
-    const checkBucket = async () => {
-      try {
-        const { data: buckets } = await supabase.storage.listBuckets();
-        const voiceAppBucket = buckets?.find(bucket => bucket.name === 'voice-app-uploads');
-        
-        if (!voiceAppBucket) {
-          console.log('Voice app uploads bucket does not exist');
-        } else {
-          console.log('Voice app uploads bucket exists:', voiceAppBucket.name);
-        }
-        
-        setBucketChecked(true);
-      } catch (error) {
-        console.error('Error checking bucket:', error);
-        setBucketChecked(true); // Mark as checked anyway to not block UI
-      }
-    };
-    
-    checkBucket();
-  }, []);
   
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -183,15 +159,6 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
       });
     }
   };
-  
-  if (!bucketChecked) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin mr-2" />
-        <span>Checking storage configuration...</span>
-      </div>
-    );
-  }
   
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

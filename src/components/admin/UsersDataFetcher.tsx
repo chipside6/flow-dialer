@@ -22,7 +22,7 @@ export function UsersDataFetcher() {
     isSuccess,
     isFetched
   } = useAdminUsers({
-    staleTime: 5000 // Short stale time
+    staleTime: 5000 // Short stale time for more frequent updates
   });
 
   console.log("UsersDataFetcher - Data status:", { 
@@ -34,8 +34,9 @@ export function UsersDataFetcher() {
     userCount: users?.length ?? 0
   });
 
-  // Auto-retry once on initial error
+  // Auto-retry on initial load plus periodic refresh
   useEffect(() => {
+    // Auto-retry once on initial error
     if (error && !isRefetching && !isSuccess) {
       console.log("UsersDataFetcher - Auto-retrying after error");
       const timer = setTimeout(() => {
@@ -43,6 +44,14 @@ export function UsersDataFetcher() {
       }, 1000);
       return () => clearTimeout(timer);
     }
+    
+    // Set up periodic refresh every 15 seconds
+    const refreshInterval = setInterval(() => {
+      console.log("UsersDataFetcher - Periodic refresh");
+      refetch();
+    }, 15000);
+    
+    return () => clearInterval(refreshInterval);
   }, [error, isRefetching, isSuccess, refetch]);
 
   const handleRetry = () => {
@@ -66,7 +75,7 @@ export function UsersDataFetcher() {
         console.log("UsersDataFetcher - Forcing render after timeout");
         setForceRender(true);
       }
-    }, 3000); // 3 second timeout
+    }, 2000); // Shorter timeout to ensure UI responsiveness
     
     return () => clearTimeout(timer);
   }, [isLoading, isFetched, users]);
