@@ -9,17 +9,21 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
   console.log(`[TransferNumbersService] Fetching transfer numbers for user: ${userId}`);
   
   try {
-    // Check if user is authenticated
-    const { data: sessionData } = await supabase.auth.getSession();
+    // Verify we have a valid session first
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
+    
     if (!sessionData.session) {
       console.error('[TransferNumbersService] No active session');
       throw new Error('Authentication required to fetch transfer numbers');
     }
     
+    // Fetch transfer numbers for this user
     const { data, error } = await supabase
       .from('transfer_numbers')
       .select('*')
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
     
     if (error) {
       console.error(`[TransferNumbersService] Error in fetchUserTransferNumbers:`, error);
@@ -58,8 +62,10 @@ export const addTransferNumber = async (
   });
   
   try {
-    // Check if user is authenticated
-    const { data: sessionData } = await supabase.auth.getSession();
+    // Verify we have a valid session first
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
+    
     if (!sessionData.session) {
       console.error('[TransferNumbersService] No active session');
       throw new Error('Authentication required to add transfer numbers');
@@ -108,8 +114,10 @@ export const deleteTransferNumber = async (
   console.log(`[TransferNumbersService] Deleting transfer number ${transferNumberId} for user ${userId}`);
   
   try {
-    // Check if user is authenticated
-    const { data: sessionData } = await supabase.auth.getSession();
+    // Verify we have a valid session first
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
+    
     if (!sessionData.session) {
       console.error('[TransferNumbersService] No active session');
       throw new Error('Authentication required to delete transfer numbers');

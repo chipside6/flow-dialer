@@ -32,6 +32,8 @@ export const useAddTransferNumber = (
         title: "Transfer number added",
         description: "The transfer number has been added successfully",
       });
+      
+      await refreshTransferNumbers();
       return result;
     } catch (err: any) {
       console.error("Error adding transfer number:", err);
@@ -43,7 +45,6 @@ export const useAddTransferNumber = (
       return null;
     } finally {
       setIsSubmitting(false);
-      await refreshTransferNumbers();
     }
   };
   

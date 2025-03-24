@@ -4,7 +4,6 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useTransferNumbers } from "@/hooks/useTransferNumbers";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { useToast } from "@/components/ui/use-toast";
-import { tryCatchWithErrorHandling, DialerErrorType } from "@/utils/errorHandlingUtils";
 import { useAuth } from "@/contexts/auth";
 import { TransferNumbersHeader } from "@/components/transfer-numbers/TransferNumbersHeader";
 import { AuthRequiredAlert } from "@/components/transfer-numbers/AuthRequiredAlert";
@@ -35,7 +34,7 @@ const TransferNumbers = () => {
     isAuthLoading
   });
   
-  // Handle initial data loading with better error handling
+  // Handle initial data loading
   useEffect(() => {
     const loadData = async () => {
       console.log("TransferNumbers page mounted, loading data");
@@ -46,15 +45,18 @@ const TransferNumbers = () => {
         return;
       }
       
-      try {
-        await refreshTransferNumbers();
-      } catch (err) {
-        console.error("Failed to load transfer numbers:", err);
-        toast({
-          title: "Error",
-          description: "Failed to load your transfer numbers",
-          variant: "destructive"
-        });
+      // Wait for authentication before loading data
+      if (!isAuthLoading && user) {
+        try {
+          await refreshTransferNumbers();
+        } catch (err) {
+          console.error("Failed to load transfer numbers:", err);
+          toast({
+            title: "Error",
+            description: "Failed to load your transfer numbers",
+            variant: "destructive"
+          });
+        }
       }
 
       // Set initialLoad to false after a delay to ensure smoother UX
@@ -68,7 +70,7 @@ const TransferNumbers = () => {
     return () => {
       console.log("TransferNumbers page unmounted");
     };
-  }, [user, isAuthLoading]);
+  }, [user, isAuthLoading, refreshTransferNumbers, toast]);
   
   // Handler for adding a transfer number with improved error handling
   const handleAddTransferNumber = async (name: string, number: string, description: string) => {
@@ -85,11 +87,6 @@ const TransferNumbers = () => {
     
     try {
       const result = await addTransferNumber(name, number, description);
-      // If no result but no error was thrown, try refreshing
-      if (!result) {
-        console.log("No result from addTransferNumber, manually refreshing");
-        setTimeout(() => refreshTransferNumbers(), 500);
-      }
       return result;
     } catch (err: any) {
       console.error("Error adding transfer number:", err);

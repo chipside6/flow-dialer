@@ -8,7 +8,7 @@ import { toast } from "@/components/ui/use-toast";
 interface UseFetchTransferNumbersState {
   setTransferNumbers: (transferNumbers: TransferNumber[]) => void;
   setIsLoading: (isLoading: boolean) => void;
-  setError: (error: string | null) => void;  // Takes string, not Error
+  setError: (error: string | null) => void;
 }
 
 export const useFetchTransferNumbers = ({
@@ -20,12 +20,14 @@ export const useFetchTransferNumbers = ({
 
   const fetchTransferNumbers = useCallback(async () => {
     if (!user) {
+      console.log("No authenticated user, can't fetch transfer numbers");
       setTransferNumbers([]);
       setIsLoading(false);
       setError(null);
       return;
     }
 
+    console.log(`Fetching transfer numbers for user: ${user.id}`);
     setIsLoading(true);
     setError(null);
 
