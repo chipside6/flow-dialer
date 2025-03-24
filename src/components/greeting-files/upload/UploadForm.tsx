@@ -1,4 +1,3 @@
-
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -94,7 +93,7 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
         clearInterval(progressInterval);
       };
       
-      // Upload file to storage
+      // Upload file to storage - No onUploadProgress option, just the supported options
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('voice-app-uploads')
         .upload(filePath, selectedFile, {
