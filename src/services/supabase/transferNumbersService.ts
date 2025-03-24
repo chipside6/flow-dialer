@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { TransferNumber } from '@/types/transferNumber';
+import { toast } from '@/components/ui/use-toast';
 
 /**
  * Fetches all transfer numbers for a specific user
@@ -42,6 +43,11 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
     }));
   } catch (error) {
     console.error(`[TransferNumbersService] Error in fetchUserTransferNumbers:`, error);
+    toast({
+      title: "Error fetching transfer numbers",
+      description: error.message || "There was an error fetching your transfer numbers.",
+      variant: "destructive"
+    });
     throw error;
   }
 };
@@ -90,6 +96,11 @@ export const addTransferNumber = async (
     
     console.log(`[TransferNumbersService] Insert successful:`, data);
     
+    toast({
+      title: "Transfer number added",
+      description: `"${name}" has been added successfully.`
+    });
+    
     return {
       id: data.id,
       name,
@@ -100,6 +111,11 @@ export const addTransferNumber = async (
     };
   } catch (error) {
     console.error(`[TransferNumbersService] Error in addTransferNumber:`, error);
+    toast({
+      title: "Error adding transfer number",
+      description: error.message || "There was an error adding your transfer number.",
+      variant: "destructive"
+    });
     throw error;
   }
 };
@@ -135,9 +151,20 @@ export const deleteTransferNumber = async (
     }
     
     console.log(`[TransferNumbersService] Successfully deleted transfer number ${transferNumberId}`);
+    
+    toast({
+      title: "Transfer number deleted",
+      description: "The transfer number has been deleted successfully."
+    });
+    
     return true;
   } catch (error) {
     console.error(`[TransferNumbersService] Error in deleteTransferNumber:`, error);
+    toast({
+      title: "Error deleting transfer number",
+      description: error.message || "There was an error deleting your transfer number.",
+      variant: "destructive"
+    });
     throw error;
   }
 };

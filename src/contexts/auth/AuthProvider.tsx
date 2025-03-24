@@ -6,7 +6,7 @@ import type { User, UserProfile } from './types';
 import { fetchUserProfile } from './authUtils';
 import { signOutUser } from './authActions';
 import { toast } from '@/components/ui/use-toast';
-import { createLifetimePlanForUser } from '@/services/supabase/greetingFilesService';
+import { createLifetimePlanForUser, ensureVoiceAppUploadsBucket } from '@/services/supabase/greetingFilesService';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -50,6 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             
             setUser(appUser);
+            
+            // Ensure storage bucket exists
+            await ensureVoiceAppUploadsBucket();
             
             // Fetch profile data
             const userProfile = await fetchUserProfile(session.user.id);
@@ -124,6 +127,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             
             setUser(appUser);
+            
+            // Ensure storage bucket exists
+            await ensureVoiceAppUploadsBucket();
             
             // Fetch user profile
             const userProfile = await fetchUserProfile(data.session.user.id);
