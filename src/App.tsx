@@ -69,6 +69,7 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            
             <Route 
               path="/greetings" 
               element={
@@ -125,6 +126,7 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            {/* Admin route - requires admin privileges */}
             <Route 
               path="/admin" 
               element={
