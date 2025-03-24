@@ -35,21 +35,23 @@ const LogoutButton = ({
       
       const result = await signOut();
       
-      if (result.error) {
-        throw result.error;
-      }
-      
       // Optional callback if provided
       if (onClick) onClick();
       
       // Force navigation to login page
+      console.log("Navigating to login page");
       navigate("/login", { replace: true });
       
-      // Show success toast after navigation is initiated
+      // Show success toast
       toast({
         title: "Logged out successfully",
         description: "You have been signed out of your account",
       });
+      
+      // Check for errors after toast (to ensure user sees success message)
+      if (result.error) {
+        console.warn("LogoutButton - Warning during logout:", result.error);
+      }
     } catch (error: any) {
       console.error("LogoutButton - Error during logout:", error);
       toast({
@@ -57,6 +59,9 @@ const LogoutButton = ({
         description: error.message || "An error occurred during logout",
         variant: "destructive",
       });
+      
+      // Still try to navigate to login
+      navigate("/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
     }

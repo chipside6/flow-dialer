@@ -17,25 +17,33 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
     
     try {
       setIsLoggingOut(true);
+      console.log("DiagnosticActions - Initiating logout");
+      
       const result = await signOut();
       
-      if (result.error) {
-        throw result.error;
-      }
-      
       // Force navigation to login page immediately
+      console.log("Navigating to login page");
       navigate("/login", { replace: true });
       
       toast({
         title: "Signed out successfully",
         description: "You have been logged out of your account"
       });
+      
+      // Check for errors after toast (to ensure user sees success message)
+      if (result.error) {
+        console.warn("DiagnosticActions - Warning during logout:", result.error);
+      }
     } catch (error: any) {
+      console.error("DiagnosticActions - Error signing out:", error);
       toast({
         variant: "destructive",
         title: "Error signing out",
         description: error.message || "An error occurred while signing out"
       });
+      
+      // Still try to navigate to login
+      navigate("/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
     }
