@@ -178,6 +178,8 @@ export type Database = {
           created_at: string
           duration_seconds: number | null
           file_path: string | null
+          file_size: number | null
+          file_type: string | null
           filename: string
           id: string
           url: string
@@ -187,6 +189,8 @@ export type Database = {
           created_at?: string
           duration_seconds?: number | null
           file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
           filename: string
           id?: string
           url: string
@@ -196,6 +200,8 @@ export type Database = {
           created_at?: string
           duration_seconds?: number | null
           file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
           filename?: string
           id?: string
           url?: string
