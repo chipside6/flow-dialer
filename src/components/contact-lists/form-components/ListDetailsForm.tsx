@@ -1,28 +1,12 @@
 
 import React from "react";
-import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { UseFormReturn } from "react-hook-form";
-import { z } from "zod";
+import { FormField, FormControl, FormItem, FormLabel, FormDescription, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input"; // Assuming you are using a custom Input component
 
-// Schema for form validation
-export const listFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional()
-});
-
-// Type for form values
-export type ListFormValues = z.infer<typeof listFormSchema>;
-
-interface ListDetailsFormProps {
-  form: UseFormReturn<ListFormValues>;
-  isDisabled: boolean;
-}
-
-const ListDetailsForm: React.FC<ListDetailsFormProps> = ({ form, isDisabled }) => {
+const ListDetailsForm = ({ form, isDisabled }: { form: any; isDisabled: boolean }) => {
   return (
-    <>
+    <div className="space-y-4">
+      {/* List Name Input */}
       <FormField
         control={form.control}
         name="name"
@@ -30,35 +14,34 @@ const ListDetailsForm: React.FC<ListDetailsFormProps> = ({ form, isDisabled }) =
           <FormItem>
             <FormLabel>List Name</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="My Contact List" disabled={isDisabled} />
+              <Input {...field} disabled={isDisabled} placeholder="Enter list name" />
             </FormControl>
             <FormDescription>
-              A descriptive name for your contact list
+              Provide a name for your contact list.
             </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
       
+      {/* List Description Input */}
       <FormField
         control={form.control}
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description (Optional)</FormLabel>
+            <FormLabel>Description</FormLabel>
             <FormControl>
-              <Textarea 
-                {...field}
-                placeholder="Enter a description for this list" 
-                rows={3}
-                disabled={isDisabled}
-              />
+              <Input {...field} disabled={isDisabled} placeholder="Enter description" />
             </FormControl>
+            <FormDescription>
+              Provide a brief description of your contact list.
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
-    </>
+    </div>
   );
 };
 
