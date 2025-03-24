@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Copy, CheckCircle2 } from "lucide-react";
+import { Loader2, Copy, CheckCircle2, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface CryptoPaymentFormProps {
   planPrice: number;
@@ -18,13 +19,21 @@ export const CryptoPaymentForm = ({ planPrice, planName, onPaymentComplete }: Cr
   const [isVerifying, setIsVerifying] = useState(false);
   const [txHash, setTxHash] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
+  const [isWalletInfoOpen, setIsWalletInfoOpen] = useState(false);
   const { toast } = useToast();
 
-  // Example crypto addresses - these would be replaced with your actual addresses
+  // Example crypto addresses - these would be replaced with your actual wallet addresses
   const cryptoAddresses = {
     btc: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
     eth: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
     usdt: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F", // USDT on Ethereum
+  };
+
+  // Wallet owner information
+  const walletOwner = {
+    name: "Company Name, Inc.",
+    email: "payments@example.com",
+    supportEmail: "support@example.com"
   };
 
   const handleCopy = (address: string, type: string) => {
@@ -155,6 +164,29 @@ export const CryptoPaymentForm = ({ planPrice, planName, onPaymentComplete }: Cr
             </TabsContent>
           ))}
         </Tabs>
+        
+        <Collapsible 
+          open={isWalletInfoOpen} 
+          onOpenChange={setIsWalletInfoOpen}
+          className="border rounded-lg p-4"
+        >
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="flex w-full justify-between">
+              <span>Wallet Information</span>
+              <ArrowRight className={`h-4 w-4 transition-transform duration-200 ${isWalletInfoOpen ? 'rotate-90' : ''}`} />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-4 space-y-3">
+            <div>
+              <p className="text-sm font-medium">Wallet Owner: {walletOwner.name}</p>
+              <p className="text-sm text-muted-foreground">Contact: {walletOwner.email}</p>
+              <p className="text-sm mt-2">
+                After sending your payment, we will verify the transaction and activate your account.
+                If you have any issues, please contact us at {walletOwner.supportEmail}.
+              </p>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
         
         <div className="space-y-2 pt-4 border-t">
           <Label htmlFor="txHash">Transaction Hash</Label>

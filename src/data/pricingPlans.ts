@@ -24,8 +24,7 @@ export const pricingPlans: PricingPlan[] = [
       "500 contacts per campaign",
       "Cannot modify contact lists once campaign starts",
       "View-only contact lists",
-      "Community support",
-      "No credit card required"
+      "Community support"
     ],
     isFree: true
   },
