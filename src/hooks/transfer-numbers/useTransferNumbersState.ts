@@ -12,7 +12,7 @@ export function useTransferNumbersState() {
   
   // Force reset loading state after 10 seconds to prevent UI from getting stuck
   useEffect(() => {
-    let timeoutId: number | undefined;
+    let timeoutId: number | null = null;
     
     if (isLoading) {
       timeoutId = window.setTimeout(() => {
@@ -22,18 +22,15 @@ export function useTransferNumbersState() {
     }
     
     return () => {
-      if (timeoutId) {
+      if (timeoutId !== null) {
         window.clearTimeout(timeoutId);
       }
-      // Reset states when unmounting
-      setIsLoading(false);
-      setIsSubmitting(false);
     };
   }, [isLoading]);
   
   // Reset isSubmitting after 5 seconds to prevent it from getting stuck
   useEffect(() => {
-    let submitTimeout: number | undefined;
+    let submitTimeout: number | null = null;
     
     if (isSubmitting) {
       submitTimeout = window.setTimeout(() => {
@@ -43,7 +40,7 @@ export function useTransferNumbersState() {
     }
     
     return () => {
-      if (submitTimeout) {
+      if (submitTimeout !== null) {
         window.clearTimeout(submitTimeout);
       }
     };
@@ -53,6 +50,7 @@ export function useTransferNumbersState() {
   const refreshTransferNumbers = async () => {
     console.log("Refreshing transfer numbers");
     setLastRefresh(Date.now());
+    // If you want this to trigger a re-fetch of data, you should integrate it into your fetch logic elsewhere
     return Promise.resolve();  // Return a resolved promise
   };
 
