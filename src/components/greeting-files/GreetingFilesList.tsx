@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyGreetingsState } from './EmptyGreetingsState';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -52,8 +52,9 @@ export const GreetingFilesList = ({
           variant="outline" 
           className="mt-2" 
           onClick={() => refreshGreetingFiles()}
+          size="sm"
         >
-          Try Again
+          <RefreshCw className="h-4 w-4 mr-2" /> Try Again
         </Button>
       </Alert>
     );

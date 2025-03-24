@@ -53,7 +53,8 @@ export function useGreetingFiles() {
         const { data, error } = await supabase
           .from('greeting_files')
           .select('*')
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }); // Show newest files first
 
         if (error) {
           console.error("Error fetching greeting files:", error);
@@ -79,6 +80,7 @@ export function useGreetingFiles() {
     retry: 2,  // Increased retries for network issues
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000), // Exponential backoff with max 10s
     enabled: !!user, // Only run query when user is available
+    refetchOnWindowFocus: false, // Don't refetch when window gains focus to reduce unnecessary requests
   });
 
   // Mutation for deleting greeting files
