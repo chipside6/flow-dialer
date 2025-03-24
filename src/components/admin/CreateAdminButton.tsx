@@ -28,10 +28,12 @@ export function CreateAdminButton() {
         return;
       }
       
-      // Direct database approach instead of edge function
-      const { data, error } = await supabase.rpc('create_admin_user', {
-        admin_email: 'admin@gmail.com',
-        admin_password: 'test123'
+      // Use the Supabase Edge Function instead of RPC
+      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+        body: {
+          email: 'admin@gmail.com',
+          password: 'test123'
+        }
       });
       
       if (error) {

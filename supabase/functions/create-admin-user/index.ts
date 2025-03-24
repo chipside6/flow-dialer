@@ -38,10 +38,15 @@ serve(async (req) => {
     
     console.log("Creating admin user...");
     
+    // Get request body
+    const body = await req.json();
+    const email = body.email || "admin@gmail.com";
+    const password = body.password || "test123";
+    
     // Create or get admin user
     const { data: userData, error: userError } = await supabase.auth.admin.createUser({
-      email: "admin@gmail.com",
-      password: "test123",
+      email: email,
+      password: password,
       email_confirm: true,
       user_metadata: {
         full_name: "Admin User",
@@ -60,7 +65,7 @@ serve(async (req) => {
           throw findError;
         }
         
-        const adminUser = users.find(u => u.email === "admin@gmail.com");
+        const adminUser = users.find(u => u.email === email);
         
         if (!adminUser) {
           throw new Error("Could not find admin user");
@@ -82,7 +87,7 @@ serve(async (req) => {
           JSON.stringify({ 
             success: true, 
             message: "Admin user updated successfully",
-            user: { email: "admin@gmail.com" }
+            user: { email: email }
           }),
           { 
             headers: { ...corsHeaders, "Content-Type": "application/json" },
