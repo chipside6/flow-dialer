@@ -25,7 +25,7 @@ const TransferNumbers = () => {
   const { toast } = useToast();
   
   console.log("TransferNumbers page render state:", { 
-    transferNumbersCount: transferNumbers.length, 
+    transferNumbersCount: transferNumbers?.length || 0, 
     isLoading,
     isSubmitting,
     initialLoad,
@@ -55,13 +55,11 @@ const TransferNumbers = () => {
             variant: "destructive"
           });
         }
-        setInitialLoad(false);
       }
+      setInitialLoad(false);
     };
 
     loadData();
-
-    return () => console.log("TransferNumbers page unmounted");
   }, [user, isAuthLoading, refreshTransferNumbers, toast]);
 
   const handleAddTransferNumber = async (name, number, description) => {
@@ -78,6 +76,7 @@ const TransferNumbers = () => {
     
     try {
       const result = await addTransferNumber(name, number, description);
+      await refreshTransferNumbers();
       return result;
     } catch (err) {
       console.error("Error adding transfer number:", err);
@@ -133,7 +132,7 @@ const TransferNumbers = () => {
       <AuthRequiredAlert isVisible={!user} />
       {user && (
         <TransferNumbersContent
-          transferNumbers={transferNumbers}
+          transferNumbers={transferNumbers || []}
           isLoading={isLoading}
           isSubmitting={isSubmitting}
           error={error}
@@ -148,3 +147,4 @@ const TransferNumbers = () => {
 };
 
 export default TransferNumbers;
+
