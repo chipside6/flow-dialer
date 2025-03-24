@@ -78,14 +78,6 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
       // Update progress to 20% before storage upload begins
       setUploadProgress(20);
       
-      // Upload file to storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('voice-app-uploads')
-        .upload(filePath, selectedFile, {
-          cacheControl: '3600',
-          upsert: true
-        });
-      
       // Simulate progress during upload since we can't track it directly
       // Start a progress simulation that will update every 500ms
       let simulatedProgress = 20;
@@ -101,6 +93,14 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
       const clearProgressInterval = () => {
         clearInterval(progressInterval);
       };
+      
+      // Upload file to storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('voice-app-uploads')
+        .upload(filePath, selectedFile, {
+          cacheControl: '3600',
+          upsert: true
+        });
       
       if (uploadError) {
         clearProgressInterval();
