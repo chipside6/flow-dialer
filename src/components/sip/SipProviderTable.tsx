@@ -18,7 +18,7 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
   providers,
   onEdit,
   onDelete,
-  onToggleStatus,
+  onToggleStatus
 }) => {
   return (
     <Card className="w-full max-w-full overflow-hidden">
@@ -35,7 +35,7 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
           </div>
         ) : (
           <div className="w-full overflow-x-auto">
-            <Table className="min-w-full">
+            <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -49,9 +49,7 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
               <TableBody>
                 {providers.map((provider) => (
                   <TableRow key={provider.id}>
-                    <TableCell className="font-medium whitespace-nowrap">
-                      {provider.name}
-                    </TableCell>
+                    <TableCell className="font-medium whitespace-nowrap">{provider.name}</TableCell>
                     <TableCell className="whitespace-nowrap">
                       {provider.host}:{provider.port}
                     </TableCell>
@@ -59,9 +57,7 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
                     <TableCell className="whitespace-nowrap">
                       <div className="flex items-center">
                         <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {provider.dateAdded
-                          ? formatDistanceToNow(new Date(provider.dateAdded), { addSuffix: true })
-                          : "Unknown"}
+                        {formatDistanceToNow(provider.dateAdded, { addSuffix: true })}
                       </div>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
@@ -79,11 +75,10 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
                           onClick={() => onToggleStatus(provider.id)}
-                          aria-label={`Toggle status for ${provider.name}`}
                         >
                           {provider.isActive ? (
                             <X className="h-4 w-4 text-red-600" />
@@ -91,25 +86,19 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
                             <Check className="h-4 w-4 text-green-600" />
                           )}
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
                           onClick={() => onEdit(provider)}
-                          aria-label={`Edit ${provider.name}`}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            if (confirm(`Are you sure you want to delete ${provider.name}?`)) {
-                              onDelete(provider.id);
-                            }
-                          }}
-                          aria-label={`Delete ${provider.name}`}
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => onDelete(provider.id)}
                         >
-                          <Trash className="h-4 w-4 text-red-600" />
+                          <Trash className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
                     </TableCell>
