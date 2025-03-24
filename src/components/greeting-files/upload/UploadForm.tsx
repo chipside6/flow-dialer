@@ -69,26 +69,36 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
     setUploadProgress(10); // Start at 10%
     
     try {
-      // Upload directly to the Supabase storage
-      const filePath = `${effectiveUserId}/${Date.now()}-${selectedFile.name}`;
+      // Generate a unique filename to prevent conflicts
+      const timestamp = Date.now();
+      const fileExtension = selectedFile.name.split('.').pop();
+      const uniqueFilename = `greeting_${timestamp}.${fileExtension}`;
+      const filePath = `${effectiveUserId}/${uniqueFilename}`;
       
-      // Show manual progress updates during upload
-      setTimeout(() => setUploadProgress(30), 500);
-      setTimeout(() => setUploadProgress(50), 1000);
+      // Update progress to 20% before storage upload begins
+      setUploadProgress(20);
       
+      // Use the more reliable upload method with proper progress tracking
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('voice-app-uploads')
         .upload(filePath, selectedFile, {
           cacheControl: '3600',
-          upsert: true // Changed to true to handle conflicts
+          upsert: true,
+          onUploadProgress: (progress) => {
+            // Calculate progress percentage based on uploaded vs total bytes
+            const percentage = Math.round((progress.loaded / progress.total) * 60) + 20;
+            // Cap progress at 80% until backend processing completes
+            setUploadProgress(Math.min(percentage, 80));
+          }
         });
       
-      // Update progress to 70% after storage upload completes
-      setUploadProgress(70);
-      
       if (uploadError) {
+        console.error('Storage upload error:', uploadError);
         throw uploadError;
       }
+      
+      // Update progress to 85% before database entry
+      setUploadProgress(85);
       
       // Get the public URL
       const { data: urlData } = supabase.storage
@@ -98,9 +108,6 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
       if (!urlData.publicUrl) {
         throw new Error("Failed to get public URL for uploaded file");
       }
-      
-      // Update progress to 85% before database entry
-      setUploadProgress(85);
       
       // Create record in greeting_files table
       const { data: fileData, error: insertError } = await supabase
@@ -117,6 +124,7 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
         .single();
       
       if (insertError) {
+        console.error('Database insert error:', insertError);
         throw insertError;
       }
       
@@ -139,7 +147,6 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
       setTimeout(() => {
         setSelectedFile(null);
         setIsUploading(false);
-        setUploadProgress(0);
         
         // Reset file input
         const fileInput = document.getElementById('greeting-file') as HTMLInputElement;
@@ -152,6 +159,7 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
       console.error('Upload error:', error);
       setError(error.message || 'Failed to upload file');
       setIsUploading(false);
+      setUploadProgress(0);
       toast({
         variant: 'destructive',
         title: 'Upload failed',

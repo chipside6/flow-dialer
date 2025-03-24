@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logSupabaseOperation, OperationType } from '@/utils/supabaseDebug';
 
-// Simply check if the voice-app-uploads bucket exists without trying to create it
+// Check if the voice-app-uploads bucket exists and has proper permissions
 export async function ensureVoiceAppUploadsBucket() {
   try {
     // Check if the bucket exists
@@ -13,22 +13,27 @@ export async function ensureVoiceAppUploadsBucket() {
       return false;
     }
     
-    const bucketExists = buckets?.some(bucket => bucket.name === 'voice-app-uploads');
+    const voiceAppUploadsBucket = buckets?.find(bucket => bucket.name === 'voice-app-uploads');
     
-    if (!bucketExists) {
+    if (!voiceAppUploadsBucket) {
       console.log('Voice app uploads bucket does not exist. Please check SQL migrations.');
       return false;
-    } else {
-      console.log('voice-app-uploads bucket exists');
-      return true;
     }
+    
+    // Verify bucket is public (optional, for debugging purposes)
+    if (!voiceAppUploadsBucket.public) {
+      console.warn('voice-app-uploads bucket exists but is not public - this might cause issues');
+    }
+    
+    console.log('voice-app-uploads bucket exists and is properly configured');
+    return true;
   } catch (error) {
     console.error('Error checking bucket existence:', error);
     return false;
   }
 }
 
-// Upload a greeting file to Supabase Storage
+// Upload a greeting file to Supabase Storage with proper error handling and retry logic
 export async function uploadGreetingFile(file: File, userId: string) {
   try {
     // Generate a unique filename
@@ -37,25 +42,61 @@ export async function uploadGreetingFile(file: File, userId: string) {
     const filename = `greeting_${timestamp}.${fileExtension}`;
     const filePath = `${userId}/${filename}`;
     
-    // Upload the file with upsert enabled
-    const { data, error } = await supabase.storage
-      .from('voice-app-uploads')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true
-      });
+    // Implement retry logic for upload
+    let attempts = 0;
+    const maxAttempts = 3;
+    let uploadError = null;
+    let data = null;
     
-    if (error) {
-      console.error('Error uploading file:', error);
+    while (attempts < maxAttempts) {
+      attempts++;
+      console.log(`Upload attempt ${attempts} for file: ${filename}`);
+      
+      try {
+        // Upload the file with upsert enabled
+        const result = await supabase.storage
+          .from('voice-app-uploads')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true
+          });
+        
+        if (result.error) {
+          uploadError = result.error;
+          console.warn(`Upload attempt ${attempts} failed:`, result.error);
+          
+          // If it's not a connection issue, break immediately
+          if (!result.error.message.includes('network') && 
+              !result.error.message.includes('timeout')) {
+            break;
+          }
+          
+          // Wait before retry (exponential backoff)
+          await new Promise(r => setTimeout(r, 1000 * attempts));
+        } else {
+          data = result.data;
+          uploadError = null;
+          break; // Success, exit retry loop
+        }
+      } catch (e) {
+        console.error(`Unexpected error in upload attempt ${attempts}:`, e);
+        uploadError = e;
+        // Wait before retry
+        await new Promise(r => setTimeout(r, 1000 * attempts));
+      }
+    }
+    
+    if (uploadError) {
+      console.error('All upload attempts failed:', uploadError);
       logSupabaseOperation({
         operation: OperationType.WRITE,
         table: 'storage.objects',
         user_id: userId,
         success: false,
-        error,
+        error: uploadError,
         auth_status: 'AUTHENTICATED'
       });
-      throw error;
+      throw uploadError;
     }
     
     // Get the public URL

@@ -15,6 +15,7 @@ export const UploadProgress = ({
   error 
 }: UploadProgressProps) => {
   const [showLoader, setShowLoader] = useState(false);
+  const [displayProgress, setDisplayProgress] = useState(0);
   
   // Only show the loader after a brief delay to prevent flashing for quick uploads
   useEffect(() => {
@@ -23,7 +24,7 @@ export const UploadProgress = ({
     if (isUploading) {
       timeoutId = setTimeout(() => {
         setShowLoader(true);
-      }, 100); // Reduced delay for better responsiveness
+      }, 100);
     } else if (!isUploading && uploadProgress !== 100) {
       setShowLoader(false);
     }
@@ -33,11 +34,42 @@ export const UploadProgress = ({
     };
   }, [isUploading, uploadProgress]);
   
+  // Smooth progress updates
+  useEffect(() => {
+    // If upload progress changes, animate to the new value
+    if (displayProgress !== uploadProgress) {
+      // For small increments, update immediately
+      if (Math.abs(uploadProgress - displayProgress) < 5) {
+        setDisplayProgress(uploadProgress);
+      } else {
+        // For larger jumps, animate the transition
+        const step = uploadProgress > displayProgress ? 1 : -1;
+        const timer = setTimeout(() => {
+          setDisplayProgress(prev => prev + step);
+        }, 20);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [uploadProgress, displayProgress]);
+  
   // Always show the progress if we're uploading or at 100%
   const shouldShow = showLoader || isUploading || uploadProgress === 100 || error;
   
   if (!shouldShow) {
     return null;
+  }
+
+  // Calculate the status text
+  let statusText = 'Uploading...';
+  if (uploadProgress === 100 && !isUploading) {
+    statusText = 'Upload complete!';
+  } else if (uploadProgress < 20) {
+    statusText = 'Preparing upload...';
+  } else if (uploadProgress < 80) {
+    statusText = 'Uploading file...';
+  } else if (uploadProgress < 100) {
+    statusText = 'Processing file...';
   }
 
   return (
@@ -50,13 +82,13 @@ export const UploadProgress = ({
           </span>
         ) : (
           <>
-            <span>{uploadProgress === 100 && !isUploading ? 'Upload complete!' : 'Uploading...'}</span>
-            <span>{uploadProgress}%</span>
+            <span>{statusText}</span>
+            <span>{displayProgress}%</span>
           </>
         )}
       </div>
       <Progress 
-        value={error ? 100 : uploadProgress} 
+        value={error ? 100 : displayProgress} 
         className={`h-2 ${error ? 'bg-destructive/20' : ''}`}
       />
     </div>

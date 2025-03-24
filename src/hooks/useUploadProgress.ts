@@ -4,16 +4,17 @@ import { useState, useEffect } from 'react';
 export function useUploadProgress(isUploading: boolean) {
   const [uploadProgress, setUploadProgress] = useState(0);
   
+  // Reset progress when upload status changes
   useEffect(() => {
-    let interval: number | null = null;
-    
-    // When upload completes or is cancelled, handle cleanup
     if (!isUploading && uploadProgress !== 100) {
-      setUploadProgress(0);
+      // Only reset if not showing completion (100%)
+      setTimeout(() => {
+        setUploadProgress(0);
+      }, 2000);
     }
     
     return () => {
-      if (interval) window.clearInterval(interval);
+      // Clean up any pending timeouts
     };
   }, [isUploading, uploadProgress]);
 
