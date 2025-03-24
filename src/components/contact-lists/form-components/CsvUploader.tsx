@@ -2,7 +2,7 @@
 import React from "react";
 import { Upload } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { FormField } from "@/components/ui/FormField"; // Import FormField
+import { FormField } from "@/components/ui/form"; 
 import { Input } from "@/components/ui/input"; // Custom Input component
 
 interface CsvUploaderProps {
