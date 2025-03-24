@@ -49,8 +49,9 @@ export const signOutUser = async () => {
       // Continue with the sign out process even if the API call fails
     }
     
-    // Clear all auth-related local storage items
+    // Clear all auth-related local storage items to ensure clean logout
     localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
+    localStorage.removeItem('supabase.auth.token');
     localStorage.removeItem('user_session');
     
     // If there was an error with Supabase signout
@@ -70,6 +71,7 @@ export const signOutUser = async () => {
     
     // Make a best effort to clear local storage even if other parts failed
     localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
+    localStorage.removeItem('supabase.auth.token');
     localStorage.removeItem('user_session');
     
     return { success: false, error };

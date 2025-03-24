@@ -17,7 +17,11 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
     
     try {
       setIsLoggingOut(true);
-      await signOut(); // Don't destructure to avoid potential issues
+      const result = await signOut();
+      
+      if (result.error) {
+        throw result.error;
+      }
       
       // Force navigation to login page immediately
       navigate("/login", { replace: true });

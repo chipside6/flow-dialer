@@ -32,7 +32,12 @@ const LogoutButton = ({
     try {
       setIsLoggingOut(true);
       console.log("LogoutButton - Initiating logout");
-      await signOut(); // Don't destructure the response to avoid potential issues
+      
+      const result = await signOut();
+      
+      if (result.error) {
+        throw result.error;
+      }
       
       // Optional callback if provided
       if (onClick) onClick();
