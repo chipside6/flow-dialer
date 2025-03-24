@@ -51,8 +51,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             setUser(appUser);
             
-            // Ensure storage bucket exists
-            await ensureVoiceAppUploadsBucket();
+            // Check bucket existence but don't block on failure
+            try {
+              await ensureVoiceAppUploadsBucket();
+            } catch (bucketError) {
+              console.warn('Could not verify storage bucket, but continuing:', bucketError);
+              // Don't block the auth flow for storage issues
+            }
             
             // Fetch profile data
             const userProfile = await fetchUserProfile(session.user.id);
@@ -65,8 +70,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               setProfile(updatedProfile);
               setIsAdmin(!!updatedProfile.is_admin);
             }
-            
-            // Removed automatic lifetime plan creation
           } catch (error) {
             console.error("AuthProvider: Error during sign in:", error);
             setError(error instanceof Error ? error : new Error('Unknown error during sign in'));
@@ -122,8 +125,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             setUser(appUser);
             
-            // Ensure storage bucket exists
-            await ensureVoiceAppUploadsBucket();
+            // Check bucket existence but don't block on failure
+            try {
+              await ensureVoiceAppUploadsBucket();
+            } catch (bucketError) {
+              console.warn('Could not verify storage bucket, but continuing:', bucketError);
+              // Don't block the auth flow for storage issues
+            }
             
             // Fetch user profile
             const userProfile = await fetchUserProfile(data.session.user.id);
@@ -136,8 +144,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               setProfile(updatedProfile);
               setIsAdmin(!!updatedProfile.is_admin);
             }
-            
-            // Removed automatic lifetime plan creation
           } catch (profileError) {
             console.error("AuthProvider: Error fetching profile:", profileError);
           }

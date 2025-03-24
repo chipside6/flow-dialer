@@ -16,13 +16,22 @@ export const uploadRecording = async (blob: Blob, userId: string): Promise<any> 
 
     console.log(`Uploading recording to: ${filePath}, size: ${blob.size} bytes`);
 
+    // Check if bucket exists
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some(bucket => bucket.name === 'voice-app-uploads');
+    
+    if (!bucketExists) {
+      console.log('Bucket does not exist, cannot upload file');
+      throw new Error('Storage bucket not found. Please try again later.');
+    }
+
     // Upload to Supabase Storage
     const { data, error } = await supabase.storage
       .from('voice-app-uploads')
       .upload(filePath, blob, {
         contentType: 'audio/webm',
         cacheControl: '3600',
-        upsert: false
+        upsert: true // Changed to true to handle potential conflicts
       });
 
     if (error) {
@@ -35,6 +44,12 @@ export const uploadRecording = async (blob: Blob, userId: string): Promise<any> 
         error,
         auth_status: 'AUTHENTICATED'
       });
+      
+      // Special handling for auth errors
+      if (error.message?.includes('not authorized') || error.message?.includes('JWT')) {
+        throw new Error('Authentication expired. Please refresh the page and try again.');
+      }
+      
       throw error;
     }
 
