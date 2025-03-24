@@ -43,7 +43,7 @@ export const uploadRecording = async (blob: Blob, userId: string): Promise<any> 
         user_id: userId,
         filename: filename,
         url: urlData.publicUrl,
-        file_path: filePath,
+        file_path: filePath, // Now this is properly saved
         file_type: 'audio/webm',
         file_size: blob.size
       })

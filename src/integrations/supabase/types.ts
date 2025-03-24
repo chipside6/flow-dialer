@@ -177,6 +177,7 @@ export type Database = {
         Row: {
           created_at: string
           duration_seconds: number | null
+          file_path: string | null
           filename: string
           id: string
           url: string
@@ -185,6 +186,7 @@ export type Database = {
         Insert: {
           created_at?: string
           duration_seconds?: number | null
+          file_path?: string | null
           filename: string
           id?: string
           url: string
@@ -193,6 +195,7 @@ export type Database = {
         Update: {
           created_at?: string
           duration_seconds?: number | null
+          file_path?: string | null
           filename?: string
           id?: string
           url?: string

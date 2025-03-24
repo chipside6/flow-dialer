@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +9,7 @@ export interface GreetingFile {
   user_id: string;
   filename: string;
   url: string;
-  file_path: string; // This is required in our interface
+  file_path: string; // This field now exists in the database
   file_type?: string;
   file_size?: number;
   duration_seconds?: number | null;
@@ -23,7 +22,7 @@ interface DbGreetingFile {
   user_id: string;
   filename: string;
   url: string;
-  file_path?: string; // This might be missing in some records
+  file_path: string; // Updated to be required since it now exists in the database
   file_type?: string;
   file_size?: number;
   duration_seconds?: number | null;
@@ -65,6 +64,7 @@ export function useGreetingFiles() {
         // Transform the data to ensure each record has a file_path property
         const processedData: GreetingFile[] = (data as DbGreetingFile[] || []).map(file => ({
           ...file,
+          // Set a default value if file_path is somehow missing
           file_path: file.file_path || ''
         }));
         

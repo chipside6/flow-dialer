@@ -174,6 +174,7 @@ export const uploadGreetingFile = async (file: File, userId: string) => {
         user_id: userId,
         filename: file.name,
         url: urlData.publicUrl,
+        file_path: filePath, // Make sure to store the file path
         file_type: file.type,
         file_size: file.size
       })
@@ -224,7 +225,8 @@ export const deleteGreetingFile = async (fileId: string, userId: string) => {
       throw fileError;
     }
     
-    if (fileData.file_path) {
+    // Now we can safely access file_path as it exists in the database
+    if (fileData && fileData.file_path) {
       console.log(`[GreetingFilesService] Deleting file from storage: ${fileData.file_path}`);
       
       // Delete from Supabase storage

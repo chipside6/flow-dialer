@@ -107,7 +107,7 @@ serve(async (req) => {
         user_id: user.id,
         filename: file.name,
         url: publicUrl,
-        file_path: filePath
+        file_path: filePath  // Now correctly saving the file path
       })
       .select()
       .single();
