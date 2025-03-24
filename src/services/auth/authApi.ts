@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/use-toast";
 import { User, Session, API_URL } from './types';
 import { storeSession, clearSession, getStoredSession } from './session';
@@ -132,23 +131,33 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     
     if (session) {
       console.log("Making logout request to:", `${API_URL}/auth/logout`);
-      // Call the logout endpoint
-      const response = await fetch(`${API_URL}/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.token || ''}`
-        },
-        // Add these options to help with CORS and network issues
-        mode: 'cors',
-        credentials: 'same-origin'
-      });
-      
-      // Check for non-200 response
-      if (!response.ok) {
-        console.error("Logout error: Server returned", response.status);
-        const errorText = await response.text();
-        console.error("Error details:", errorText);
+      try {
+        // Call the logout endpoint with a timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const response = await fetch(`${API_URL}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.token || ''}`
+          },
+          mode: 'cors',
+          credentials: 'same-origin',
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        // Check for non-200 response
+        if (!response.ok) {
+          console.warn("Logout warning: Server returned", response.status);
+          const errorText = await response.text();
+          console.warn("Warning details:", errorText);
+        }
+      } catch (apiError) {
+        // Log but continue with local logout even if API call fails
+        console.warn("API logout failed, continuing with local logout:", apiError);
       }
     }
     

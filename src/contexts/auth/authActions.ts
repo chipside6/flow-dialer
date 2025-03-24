@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { UserProfile } from './types';
@@ -41,7 +42,15 @@ export const signOutUser = async () => {
     const { error: supabaseError } = await supabase.auth.signOut();
     
     // Also try to sign out from custom backend API
-    const apiResult = await apiSignOut();
+    try {
+      await apiSignOut();
+    } catch (apiError) {
+      console.warn("authActions - API sign out error, continuing with local sign out:", apiError);
+      // Continue with the sign out process even if the API call fails
+    }
+    
+    // Clear local storage to ensure session data is removed
+    localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
     
     // If there was an error with Supabase signout
     if (supabaseError) {
@@ -57,6 +66,10 @@ export const signOutUser = async () => {
     return { success: true, error: null };
   } catch (error: any) {
     console.error("authActions - Sign out error:", error.message);
+    
+    // Make a best effort to clear local storage even if other parts failed
+    localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
+    
     return { success: false, error };
   }
 };

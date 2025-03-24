@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { RotateCcw, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -10,9 +10,13 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleSignOut = async () => {
+    if (isLoggingOut) return; // Prevent multiple clicks
+    
     try {
+      setIsLoggingOut(true);
       const { success, error } = await signOut();
       
       if (success) {
@@ -30,6 +34,8 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
         title: "Error signing out",
         description: error.message || "An error occurred while signing out"
       });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   
@@ -39,9 +45,14 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
         <RotateCcw className="h-4 w-4 mr-2" />
         Refresh Status
       </Button>
-      <Button variant="outline" onClick={handleSignOut} className="flex items-center">
+      <Button 
+        variant="outline" 
+        onClick={handleSignOut} 
+        className="flex items-center"
+        disabled={isLoggingOut}
+      >
         <LogOut className="h-4 w-4 mr-2" />
-        Sign Out
+        {isLoggingOut ? "Signing Out..." : "Sign Out"}
       </Button>
     </div>
   );

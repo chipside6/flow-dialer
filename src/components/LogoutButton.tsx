@@ -4,6 +4,7 @@ import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
+import { useState } from "react";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -23,9 +24,13 @@ const LogoutButton = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signOut } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent multiple clicks
+    
     try {
+      setIsLoggingOut(true);
       console.log("LogoutButton - Initiating logout");
       const { success, error } = await signOut();
       
@@ -41,7 +46,7 @@ const LogoutButton = ({
         });
       } else {
         // No error, proceed with navigation and success toast
-        navigate("/");
+        navigate("/login");
         
         toast({
           title: "Logged out successfully",
@@ -55,14 +60,22 @@ const LogoutButton = ({
         description: error.message || "An error occurred during logout",
         variant: "destructive",
       });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   
   const buttonClasses = `${className} ${position === "left" ? "justify-start" : "justify-center"}`;
   
   return (
-    <Button variant={variant} size={size} onClick={handleLogout} className={buttonClasses}>
-      <LogOut className="h-4 w-4 mr-2" /> <span>Logout</span>
+    <Button 
+      variant={variant} 
+      size={size} 
+      onClick={handleLogout} 
+      className={buttonClasses}
+      disabled={isLoggingOut}
+    >
+      <LogOut className="h-4 w-4 mr-2" /> <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
     </Button>
   );
 };
