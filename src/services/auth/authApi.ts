@@ -171,6 +171,7 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     // Still clear the session even if API call fails
     clearSession();
     
-    return { success: true, error: null }; // Return success true even on error since we cleared the session
+    // Return success true even on error since we cleared the session
+    return { success: true, error: null };
   }
 };

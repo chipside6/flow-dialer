@@ -17,17 +17,15 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
     
     try {
       setIsLoggingOut(true);
-      const { success, error } = await signOut();
+      await signOut(); // Don't destructure to avoid potential issues
       
-      if (success) {
-        toast({
-          title: "Signed out successfully",
-          description: "You have been logged out of your account"
-        });
-        navigate('/login');
-      } else if (error) {
-        throw error;
-      }
+      // Force navigation to login page immediately
+      navigate("/login", { replace: true });
+      
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account"
+      });
     } catch (error: any) {
       toast({
         variant: "destructive",
