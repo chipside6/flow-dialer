@@ -6,6 +6,7 @@ import type { User, UserProfile } from './types';
 import { fetchUserProfile } from './authUtils';
 import { signOutUser } from './authActions';
 import { toast } from '@/components/ui/use-toast';
+import { createLifetimePlanForUser } from '@/services/supabase/greetingFilesService';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -60,6 +61,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               };
               setProfile(updatedProfile);
               setIsAdmin(!!updatedProfile.is_admin);
+            }
+            
+            // Create lifetime plan for the user if it's a new sign-in
+            try {
+              await createLifetimePlanForUser(session.user.id);
+            } catch (planError) {
+              console.error("AuthProvider: Error creating lifetime plan:", planError);
+              // Don't block auth flow if plan creation fails
             }
           } catch (error) {
             console.error("AuthProvider: Error during sign in:", error);
@@ -126,6 +135,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               };
               setProfile(updatedProfile);
               setIsAdmin(!!updatedProfile.is_admin);
+            }
+            
+            // Create lifetime plan for the user
+            try {
+              await createLifetimePlanForUser(data.session.user.id);
+            } catch (planError) {
+              console.error("AuthProvider: Error creating lifetime plan:", planError);
+              // Don't block auth flow if plan creation fails
             }
           } catch (profileError) {
             console.error("AuthProvider: Error fetching profile:", profileError);

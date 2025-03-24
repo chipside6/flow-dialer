@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
@@ -9,12 +9,14 @@ import { PhoneListActions } from "./PhoneListActions";
 import { PhoneNumberDisplay } from "./PhoneNumberDisplay";
 import { IvrConfigSection } from "./ivr-config/IvrConfigSection";
 import { SipTrunkSection } from "./sip-config/SipTrunkSection";
+import { useAuth } from "@/contexts/auth";
 
 interface PhoneNumberListProps {
   campaignId?: string;
 }
 
 const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
+  const { user } = useAuth();
   const [phoneNumbers, setPhoneNumbers] = useState<string[]>([]);
   const [newNumber, setNewNumber] = useState("");
   const [bulkNumbers, setBulkNumbers] = useState("");
@@ -28,10 +30,18 @@ const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
   const [sipHost, setSipHost] = useState("");
   const [sipPort, setSipPort] = useState("5060");
   const [showSipConfig, setShowSipConfig] = useState(false);
+  const [isActionInProgress, setIsActionInProgress] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddNumber = () => {
-    if (!newNumber) return;
+    if (!newNumber) {
+      toast({
+        title: "Empty number",
+        description: "Please enter a phone number",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Basic validation for phone number format
     const phoneRegex = /^\+?[0-9\s\-()]+$/;
@@ -44,23 +54,44 @@ const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
       return;
     }
     
-    setPhoneNumbers([...phoneNumbers, newNumber]);
-    setNewNumber("");
+    setIsActionInProgress(true);
     
-    toast({
-      title: "Number added",
-      description: "Phone number has been added to the list",
-    });
+    // Simulate network delay for better UX feedback
+    setTimeout(() => {
+      setPhoneNumbers(prev => [...prev, newNumber]);
+      setNewNumber("");
+      
+      toast({
+        title: "Number added",
+        description: "Phone number has been added to the list",
+      });
+      
+      setIsActionInProgress(false);
+    }, 300);
   };
 
   const handleRemoveNumber = (index: number) => {
-    const updatedNumbers = [...phoneNumbers];
-    updatedNumbers.splice(index, 1);
-    setPhoneNumbers(updatedNumbers);
+    setIsActionInProgress(true);
+    
+    // Simulate network delay for better UX feedback
+    setTimeout(() => {
+      const updatedNumbers = [...phoneNumbers];
+      updatedNumbers.splice(index, 1);
+      setPhoneNumbers(updatedNumbers);
+      
+      setIsActionInProgress(false);
+    }, 300);
   };
 
   const handleBulkAdd = () => {
-    if (!bulkNumbers.trim()) return;
+    if (!bulkNumbers.trim()) {
+      toast({
+        title: "No numbers provided",
+        description: "Please enter phone numbers to add",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Split by newlines, commas, or semicolons
     const numbers = bulkNumbers
@@ -68,26 +99,41 @@ const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
       .map(num => num.trim())
       .filter(num => num.length > 0);
     
+    if (numbers.length === 0) {
+      toast({
+        title: "No valid numbers found",
+        description: "Please enter valid phone numbers to add",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsActionInProgress(true);
+    
     // Basic validation
     const phoneRegex = /^\+?[0-9\s\-()]+$/;
     const validNumbers = numbers.filter(num => phoneRegex.test(num));
     
-    if (validNumbers.length !== numbers.length) {
-      toast({
-        title: "Some numbers were invalid",
-        description: `Added ${validNumbers.length} out of ${numbers.length} numbers`,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Numbers added",
-        description: `Added ${validNumbers.length} phone numbers to the list`,
-      });
-    }
-    
-    setPhoneNumbers([...phoneNumbers, ...validNumbers]);
-    setBulkNumbers("");
-    setShowBulkInput(false);
+    // Simulate network delay for better UX feedback
+    setTimeout(() => {
+      if (validNumbers.length !== numbers.length) {
+        toast({
+          title: "Some numbers were invalid",
+          description: `Added ${validNumbers.length} out of ${numbers.length} numbers`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Numbers added",
+          description: `Added ${validNumbers.length} phone numbers to the list`,
+        });
+      }
+      
+      setPhoneNumbers(prev => [...prev, ...validNumbers]);
+      setBulkNumbers("");
+      setShowBulkInput(false);
+      setIsActionInProgress(false);
+    }, 800);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,15 +179,18 @@ const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
       return;
     }
     
-    // Format for Asterisk dialplan with IVR functionality
-    const formattedNumbers = phoneNumbers.map(num => {
-      // Remove non-numeric characters for Asterisk
-      const cleanNumber = num.replace(/[^0-9+]/g, '');
-      return `exten => s,n,Dial(SIP/${cleanNumber}@${sipTrunkProvider},30,g)`;
-    }).join('\n');
+    setIsActionInProgress(true);
     
-    // Create SIP trunk configuration
-    const sipConfig = `
+    setTimeout(() => {
+      // Format for Asterisk dialplan with IVR functionality
+      const formattedNumbers = phoneNumbers.map(num => {
+        // Remove non-numeric characters for Asterisk
+        const cleanNumber = num.replace(/[^0-9+]/g, '');
+        return `exten => s,n,Dial(SIP/${cleanNumber}@${sipTrunkProvider},30,g)`;
+      }).join('\n');
+      
+      // Create SIP trunk configuration
+      const sipConfig = `
 [${sipTrunkProvider}]
 type=peer
 host=${sipHost}
@@ -153,10 +202,10 @@ context=from-trunk
 disallow=all
 allow=ulaw
 allow=alaw
-    `.trim();
-    
-    // Create a dialplan with IVR functionality
-    const dialplan = `
+      `.trim();
+      
+      // Create a dialplan with IVR functionality
+      const dialplan = `
 ; SIP Provider Configuration
 ${sipConfig}
 
@@ -172,31 +221,34 @@ exten => s,n,Hangup()
 exten => 1,1,NoOp(Transferring call to ${transferNumber})
 exten => 1,n,Dial(SIP/${transferNumber},30)
 exten => 1,n,Hangup()
-    `.trim();
-    
-    // Create and download the file
-    const blob = new Blob([dialplan], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `campaign-${campaignId || 'dialer'}.conf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    // If there's an audio file, create a zip file and include it
-    if (audioFile) {
-      toast({
-        title: "Dialplan exported",
-        description: "Remember to upload the audio file to your Asterisk server",
-      });
-    } else {
-      toast({
-        title: "Dialplan exported",
-        description: "Asterisk dialplan file with IVR functionality has been downloaded",
-      });
-    }
+      `.trim();
+      
+      // Create and download the file
+      const blob = new Blob([dialplan], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `campaign-${campaignId || 'dialer'}.conf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      // If there's an audio file, create a zip file and include it
+      if (audioFile) {
+        toast({
+          title: "Dialplan exported",
+          description: "Remember to upload the audio file to your Asterisk server",
+        });
+      } else {
+        toast({
+          title: "Dialplan exported",
+          description: "Asterisk dialplan file with IVR functionality has been downloaded",
+        });
+      }
+      
+      setIsActionInProgress(false);
+    }, 1000);
   };
 
   const handleExportCSV = () => {
@@ -209,24 +261,30 @@ exten => 1,n,Hangup()
       return;
     }
     
-    // Create CSV content
-    const csvContent = "phone_number\n" + phoneNumbers.join("\n");
+    setIsActionInProgress(true);
     
-    // Create and download the file
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `campaign-${campaignId || 'numbers'}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "CSV exported",
-      description: "Phone numbers have been exported as CSV",
-    });
+    setTimeout(() => {
+      // Create CSV content
+      const csvContent = "phone_number\n" + phoneNumbers.join("\n");
+      
+      // Create and download the file
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `campaign-${campaignId || 'numbers'}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "CSV exported",
+        description: "Phone numbers have been exported as CSV",
+      });
+      
+      setIsActionInProgress(false);
+    }, 800);
   };
 
   return (
@@ -242,6 +300,7 @@ exten => 1,n,Hangup()
           newNumber={newNumber}
           setNewNumber={setNewNumber}
           handleAddNumber={handleAddNumber}
+          isActionInProgress={isActionInProgress}
         />
         
         <IvrConfigSection
@@ -252,6 +311,7 @@ exten => 1,n,Hangup()
           fileInputRef={fileInputRef}
           handleFileChange={handleFileChange}
           audioFile={audioFile}
+          isActionInProgress={isActionInProgress}
         />
         
         <SipTrunkSection
@@ -267,6 +327,7 @@ exten => 1,n,Hangup()
           setSipHost={setSipHost}
           sipPort={sipPort}
           setSipPort={setSipPort}
+          isActionInProgress={isActionInProgress}
         />
         
         <PhoneListActions
@@ -275,6 +336,7 @@ exten => 1,n,Hangup()
           handleExportCSV={handleExportCSV}
           handleExportForAsterisk={handleExportForAsterisk}
           phoneNumbers={phoneNumbers}
+          isActionInProgress={isActionInProgress}
         />
         
         {showBulkInput && (
@@ -282,12 +344,14 @@ exten => 1,n,Hangup()
             bulkNumbers={bulkNumbers}
             setBulkNumbers={setBulkNumbers}
             handleBulkAdd={handleBulkAdd}
+            isActionInProgress={isActionInProgress}
           />
         )}
         
         <PhoneNumberDisplay
           phoneNumbers={phoneNumbers}
           handleRemoveNumber={handleRemoveNumber}
+          isActionInProgress={isActionInProgress}
         />
       </CardContent>
     </Card>

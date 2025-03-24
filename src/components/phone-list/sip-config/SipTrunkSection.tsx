@@ -1,9 +1,9 @@
 
 import React from "react";
-import { Server } from "lucide-react";
+import { Phone, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 
 interface SipTrunkSectionProps {
   showSipConfig: boolean;
@@ -18,6 +18,7 @@ interface SipTrunkSectionProps {
   setSipHost: (value: string) => void;
   sipPort: string;
   setSipPort: (value: string) => void;
+  isActionInProgress: boolean;
 }
 
 export const SipTrunkSection: React.FC<SipTrunkSectionProps> = ({
@@ -33,84 +34,103 @@ export const SipTrunkSection: React.FC<SipTrunkSectionProps> = ({
   setSipHost,
   sipPort,
   setSipPort,
+  isActionInProgress,
 }) => {
   return (
-    <div className="border rounded-md p-4 space-y-3">
-      <div className="flex justify-between items-center">
-        <h3 className="font-medium flex items-center">
-          <Server className="h-4 w-4 mr-2" />
-          SIP Trunk Configuration
-        </h3>
-        <Button 
-          variant="ghost" 
-          onClick={() => setShowSipConfig(!showSipConfig)}
-          size="sm"
-        >
-          {showSipConfig ? "Hide" : "Show"}
-        </Button>
-      </div>
+    <div className="border rounded-md">
+      <Button
+        variant="ghost"
+        className="w-full flex justify-between p-4 h-auto"
+        onClick={() => setShowSipConfig(!showSipConfig)}
+        disabled={isActionInProgress}
+      >
+        <div className="flex items-center">
+          <Phone className="h-4 w-4 mr-2" />
+          <span className="font-medium">SIP Trunk Configuration</span>
+        </div>
+        {isActionInProgress ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : showSipConfig ? (
+          <ChevronUp className="h-4 w-4" />
+        ) : (
+          <ChevronDown className="h-4 w-4" />
+        )}
+      </Button>
       
       {showSipConfig && (
-        <div className="space-y-4">
-          <FormItem>
-            <FormLabel>SIP Trunk Provider</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="Enter provider name (e.g., twilio, voip.ms)"
-                value={sipTrunkProvider}
-                onChange={(e) => setSipTrunkProvider(e.target.value)}
-              />
-            </FormControl>
-          </FormItem>
-          
+        <div className="p-4 pt-0 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormItem>
-              <FormLabel>SIP Username</FormLabel>
+              <FormLabel>Provider Name</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Username/Account ID"
-                  value={sipUsername}
-                  onChange={(e) => setSipUsername(e.target.value)}
+                  placeholder="e.g., twilio, vonage"
+                  value={sipTrunkProvider}
+                  onChange={(e) => setSipTrunkProvider(e.target.value)}
+                  disabled={isActionInProgress}
                 />
               </FormControl>
             </FormItem>
             
             <FormItem>
-              <FormLabel>SIP Password</FormLabel>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="SIP username"
+                  value={sipUsername}
+                  onChange={(e) => setSipUsername(e.target.value)}
+                  disabled={isActionInProgress}
+                />
+              </FormControl>
+            </FormItem>
+            
+            <FormItem>
+              <FormLabel>Password</FormLabel>
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="Password/API Key"
+                  placeholder="SIP password"
                   value={sipPassword}
                   onChange={(e) => setSipPassword(e.target.value)}
-                />
-              </FormControl>
-            </FormItem>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormItem>
-              <FormLabel>SIP Host</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Host/Server (e.g., sip.provider.com)"
-                  value={sipHost}
-                  onChange={(e) => setSipHost(e.target.value)}
+                  disabled={isActionInProgress}
                 />
               </FormControl>
             </FormItem>
             
-            <FormItem>
-              <FormLabel>SIP Port</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Port (default: 5060)"
-                  value={sipPort}
-                  onChange={(e) => setSipPort(e.target.value)}
-                />
-              </FormControl>
-            </FormItem>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-2">
+                <FormItem>
+                  <FormLabel>Host</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., sip.provider.com"
+                      value={sipHost}
+                      onChange={(e) => setSipHost(e.target.value)}
+                      disabled={isActionInProgress}
+                    />
+                  </FormControl>
+                </FormItem>
+              </div>
+              
+              <div>
+                <FormItem>
+                  <FormLabel>Port</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="5060"
+                      value={sipPort}
+                      onChange={(e) => setSipPort(e.target.value)}
+                      disabled={isActionInProgress}
+                    />
+                  </FormControl>
+                </FormItem>
+              </div>
+            </div>
           </div>
+          
+          <FormDescription>
+            These settings will be used when exporting for Asterisk
+          </FormDescription>
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { AudioLines, Upload } from "lucide-react";
+import { AudioLines, Upload, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
@@ -13,6 +13,7 @@ interface IvrConfigSectionProps {
   fileInputRef: React.RefObject<HTMLInputElement>;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   audioFile: File | null;
+  isActionInProgress: boolean;
 }
 
 export const IvrConfigSection: React.FC<IvrConfigSectionProps> = ({
@@ -23,6 +24,7 @@ export const IvrConfigSection: React.FC<IvrConfigSectionProps> = ({
   fileInputRef,
   handleFileChange,
   audioFile,
+  isActionInProgress,
 }) => {
   return (
     <div className="border rounded-md p-4 space-y-3">
@@ -41,6 +43,7 @@ export const IvrConfigSection: React.FC<IvrConfigSectionProps> = ({
               className="hidden"
               ref={fileInputRef}
               onChange={handleFileChange}
+              disabled={isActionInProgress}
             />
             <Input
               placeholder="Select greeting audio file"
@@ -48,13 +51,20 @@ export const IvrConfigSection: React.FC<IvrConfigSectionProps> = ({
               onChange={(e) => setRecordingFile(e.target.value)}
               className="flex-1"
               readOnly={!!audioFile}
+              disabled={isActionInProgress}
             />
             <Button 
               variant="outline" 
               onClick={() => fileInputRef.current?.click()}
               type="button"
+              disabled={isActionInProgress}
             >
-              <Upload className="h-4 w-4 mr-2" /> Upload
+              {isActionInProgress ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4 mr-2" />
+              )}
+              Upload
             </Button>
           </div>
           <FormDescription>
@@ -69,6 +79,7 @@ export const IvrConfigSection: React.FC<IvrConfigSectionProps> = ({
               placeholder="Enter transfer destination"
               value={transferNumber}
               onChange={(e) => setTransferNumber(e.target.value)}
+              disabled={isActionInProgress}
             />
           </FormControl>
           <FormDescription>
