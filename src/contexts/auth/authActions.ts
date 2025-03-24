@@ -54,6 +54,14 @@ export const signOutUser = async () => {
     localStorage.removeItem('supabase.auth.token');
     localStorage.removeItem('user_session');
     
+    // More aggressive approach to clear all possible Supabase auth items
+    // Iterate through localStorage and remove any Supabase related items
+    Object.keys(localStorage).forEach(key => {
+      if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
     // Manually clear Supabase session - extra measure
     try {
       // @ts-ignore - Accessing internal method

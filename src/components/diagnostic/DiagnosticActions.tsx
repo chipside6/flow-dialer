@@ -15,15 +15,15 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
   const handleSignOut = async () => {
     if (isLoggingOut) return; // Prevent multiple clicks
     
+    setIsLoggingOut(true);
+    console.log("DiagnosticActions - Initiating logout");
+    
+    // Force navigation to login page IMMEDIATELY - do this first
+    navigate("/login", { replace: true });
+    
     try {
-      setIsLoggingOut(true);
-      console.log("DiagnosticActions - Initiating logout");
-      
+      // Call signOut after navigation has been triggered
       const result = await signOut();
-      
-      // Force navigation to login page immediately
-      console.log("Navigating to login page");
-      navigate("/login", { replace: true });
       
       toast({
         title: "Signed out successfully",
@@ -41,9 +41,6 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
         title: "Error signing out",
         description: error.message || "An error occurred while signing out"
       });
-      
-      // Still try to navigate to login
-      navigate("/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
     }

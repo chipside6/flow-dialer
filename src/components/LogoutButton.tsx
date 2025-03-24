@@ -29,18 +29,18 @@ const LogoutButton = ({
   const handleLogout = async () => {
     if (isLoggingOut) return; // Prevent multiple clicks
     
+    setIsLoggingOut(true);
+    console.log("LogoutButton - Initiating logout");
+    
+    // Force navigation to login page IMMEDIATELY - do this first
+    navigate("/login", { replace: true });
+    
     try {
-      setIsLoggingOut(true);
-      console.log("LogoutButton - Initiating logout");
-      
+      // Call signOut after navigation has been triggered
       const result = await signOut();
       
       // Optional callback if provided
       if (onClick) onClick();
-      
-      // Force navigation to login page
-      console.log("Navigating to login page");
-      navigate("/login", { replace: true });
       
       // Show success toast
       toast({
@@ -59,9 +59,6 @@ const LogoutButton = ({
         description: error.message || "An error occurred during logout",
         variant: "destructive",
       });
-      
-      // Still try to navigate to login
-      navigate("/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
     }
