@@ -9,15 +9,17 @@ import { PasswordField } from "./PasswordField";
 import { FormActions } from "./FormActions";
 
 interface SipProviderFormProps {
-  onSubmit: (provider: SipProvider) => void;
+  onSubmit: (provider: SipProvider) => Promise<void>;
   editingProvider: SipProvider | null;
   onCancel: () => void;
+  isSubmitting?: boolean;
 }
 
 export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   onSubmit,
   editingProvider,
-  onCancel
+  onCancel,
+  isSubmitting: externalIsSubmitting = false
 }) => {
   const [name, setName] = useState(editingProvider?.name || "");
   const [host, setHost] = useState(editingProvider?.host || "");
@@ -25,7 +27,9 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
   const [username, setUsername] = useState(editingProvider?.username || "");
   const [password, setPassword] = useState(editingProvider?.password || "");
   const [description, setDescription] = useState(editingProvider?.description || "");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localIsSubmitting, setLocalIsSubmitting] = useState(false);
+  
+  const isSubmitting = externalIsSubmitting || localIsSubmitting;
   
   // Update form when editingProvider changes
   useEffect(() => {
@@ -51,7 +55,7 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
       return;
     }
     
-    setIsSubmitting(true);
+    setLocalIsSubmitting(true);
     
     try {
       console.log("Submitting SIP provider form:", { name, host, port, username, password });
@@ -80,7 +84,8 @@ export const SipProviderForm: React.FC<SipProviderFormProps> = ({
     } catch (error) {
       console.error("Error submitting SIP provider form:", error);
     } finally {
-      setIsSubmitting(false);
+      // Always ensure localIsSubmitting is set to false when the operation completes
+      setLocalIsSubmitting(false);
     }
   };
   

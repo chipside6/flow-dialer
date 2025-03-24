@@ -23,12 +23,14 @@ export const useAddUpdateProvider = (
       return;
     }
     
+    // Set submitting state at the beginning
     setIsSubmitting(true);
+    
     try {
       if (provider.id === 'new') {
         // Adding a new provider
         const newProvider = await addSipProvider(provider, user.id);
-        setProviders([...providers, newProvider]);
+        setProviders(prevProviders => [...prevProviders, newProvider]);
         toast({
           title: "Provider added",
           description: "The SIP provider has been added successfully",
@@ -36,8 +38,8 @@ export const useAddUpdateProvider = (
       } else {
         // Updating an existing provider
         const updatedProvider = await updateSipProvider(provider, user.id);
-        setProviders(
-          providers.map(p => (p.id === provider.id ? updatedProvider : p))
+        setProviders(prevProviders => 
+          prevProviders.map(p => (p.id === provider.id ? updatedProvider : p))
         );
         toast({
           title: "Provider updated",
@@ -49,10 +51,11 @@ export const useAddUpdateProvider = (
       console.error("Error adding/updating SIP provider:", err);
       toast({
         title: "Error",
-        description: err.message,
+        description: err.message || "Failed to save provider. Please try again.",
         variant: "destructive",
       });
     } finally {
+      // Always ensure isSubmitting is set to false, even if there's an error
       setIsSubmitting(false);
     }
   };
