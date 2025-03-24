@@ -19,11 +19,15 @@ const FormActions: React.FC<FormActionsProps> = ({
   const isDisabled = isSubmitting || isUploading || (uploadMode === "csv" && !hasSelectedFile);
   
   return (
-    <Button type="submit" disabled={isDisabled}>
+    <Button 
+      type="submit" 
+      disabled={isDisabled}
+      className="w-full md:w-auto"
+    >
       {isSubmitting || isUploading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-          {isUploading ? "Uploading Contacts..." : "Creating..."}
+          {isUploading ? "Uploading Contacts..." : "Creating List..."}
         </>
       ) : (
         uploadMode === "csv" ? "Create & Upload Contacts" : "Create Contact List"

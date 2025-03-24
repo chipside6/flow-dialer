@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { ContactList } from "@/hooks/useContactLists";
@@ -52,11 +51,13 @@ const CreateContactListForm: React.FC<CreateContactListFormProps> = ({ onListCre
               title: "Contact list created with uploaded contacts",
               description: `"${data.name}" has been created with your uploaded contacts`,
             });
-          } catch (uploadError) {
+            form.reset();
+            setSelectedFile(null);
+          } catch (uploadError: any) {
             console.error("Error uploading contacts:", uploadError);
             toast({
               title: "Error uploading contacts",
-              description: "The list was created but we couldn't upload your contacts",
+              description: uploadError.message || "The list was created but we couldn't upload your contacts",
               variant: "destructive"
             });
           }
@@ -75,17 +76,15 @@ const CreateContactListForm: React.FC<CreateContactListFormProps> = ({ onListCre
             title: "Contact list created",
             description: `"${data.name}" has been created successfully`,
           });
+          form.reset();
+          setSelectedFile(null);
         }
       }
-      
-      // Reset form and states
-      form.reset();
-      setSelectedFile(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating contact list:", error);
       toast({
         title: "Error creating contact list",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        description: error.message || "An unknown error occurred",
         variant: "destructive"
       });
     } finally {
@@ -108,7 +107,7 @@ const CreateContactListForm: React.FC<CreateContactListFormProps> = ({ onListCre
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <ListDetailsForm form={form} isDisabled={isCreating} />
+              <ListDetailsForm form={form} isDisabled={isCreating || isUploading} />
               
               <TabsContent value="csv" className="mt-0 space-y-4">
                 <CsvUploader
@@ -118,12 +117,14 @@ const CreateContactListForm: React.FC<CreateContactListFormProps> = ({ onListCre
                 />
               </TabsContent>
               
-              <FormActions
-                isSubmitting={isCreating}
-                isUploading={isUploading}
-                uploadMode={uploadMode}
-                hasSelectedFile={!!selectedFile}
-              />
+              <div className="flex justify-end mt-6">
+                <FormActions
+                  isSubmitting={isCreating}
+                  isUploading={isUploading}
+                  uploadMode={uploadMode}
+                  hasSelectedFile={!!selectedFile}
+                />
+              </div>
             </form>
           </Form>
         </Tabs>

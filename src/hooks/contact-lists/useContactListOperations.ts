@@ -45,7 +45,7 @@ export const useContactListOperations = (
           error,
           auth_status: 'AUTHENTICATED'
         });
-        throw error;
+        throw new Error(error.message || "Failed to create contact list");
       }
 
       console.log("New contact list created:", newList);
@@ -67,7 +67,10 @@ export const useContactListOperations = (
         lastModified: new Date(newList.updated_at)
       };
 
-      setLists(prevLists => [...prevLists, formattedList]);
+      // Add a small delay before updating the UI to ensure Supabase has finished processing
+      setTimeout(() => {
+        setLists(prevLists => [...prevLists, formattedList]);
+      }, 250);
       
       return formattedList;
     } catch (err: any) {
