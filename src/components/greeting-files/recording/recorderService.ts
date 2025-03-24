@@ -16,23 +16,35 @@ export const uploadRecording = async (blob: Blob, userId: string): Promise<any> 
 
     console.log(`Uploading recording to: ${filePath}, size: ${blob.size} bytes`);
 
-    // Check if bucket exists
-    const { data: buckets } = await supabase.storage.listBuckets();
-    const bucketExists = buckets?.some(bucket => bucket.name === 'voice-app-uploads');
-    
-    if (!bucketExists) {
-      console.log('Bucket does not exist, cannot upload file');
-      throw new Error('Storage bucket not found. Please try again later.');
-    }
+    // Upload to Supabase Storage - now with retry logic
+    let uploadAttempt = 0;
+    const maxAttempts = 2;
+    let data, error;
 
-    // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('voice-app-uploads')
-      .upload(filePath, blob, {
-        contentType: 'audio/webm',
-        cacheControl: '3600',
-        upsert: true // Changed to true to handle potential conflicts
-      });
+    while (uploadAttempt < maxAttempts) {
+      uploadAttempt++;
+      
+      // Upload with upsert enabled to handle conflicts
+      const result = await supabase.storage
+        .from('voice-app-uploads')
+        .upload(filePath, blob, {
+          contentType: 'audio/webm',
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      data = result.data;
+      error = result.error;
+      
+      // If successful or not a bucket-not-exists error, exit retry loop
+      if (!error || !error.message.includes('does not exist')) {
+        break;
+      }
+      
+      // If this is the first attempt and we got a bucket-not-exists error,
+      // simply continue to try again as the bucket should exist via migrations
+      console.log(`Bucket does not exist (attempt ${uploadAttempt}), retrying...`);
+    }
 
     if (error) {
       console.error('Error uploading recording:', error);
@@ -45,9 +57,13 @@ export const uploadRecording = async (blob: Blob, userId: string): Promise<any> 
         auth_status: 'AUTHENTICATED'
       });
       
-      // Special handling for auth errors
+      // Special handling for different error types
       if (error.message?.includes('not authorized') || error.message?.includes('JWT')) {
         throw new Error('Authentication expired. Please refresh the page and try again.');
+      }
+      
+      if (error.message?.includes('does not exist')) {
+        throw new Error('Storage configuration is incomplete. Please contact support.');
       }
       
       throw error;

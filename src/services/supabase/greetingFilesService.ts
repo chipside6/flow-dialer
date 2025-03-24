@@ -1,10 +1,11 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { logSupabaseOperation, OperationType } from '@/utils/supabaseDebug';
 
-// Ensure the voice-app-uploads bucket exists - now more robust
+// Simply check if the voice-app-uploads bucket exists without trying to create it
 export async function ensureVoiceAppUploadsBucket() {
   try {
-    // First check if the bucket already exists
+    // Check if the bucket exists
     const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
     
     if (bucketsError) {
@@ -14,24 +15,15 @@ export async function ensureVoiceAppUploadsBucket() {
     
     const bucketExists = buckets?.some(bucket => bucket.name === 'voice-app-uploads');
     
-    // Don't try to create the bucket if it already exists
     if (!bucketExists) {
-      console.log('Voice app uploads bucket does not exist. It should be created via SQL migration.');
-      
-      // Don't attempt to create the bucket here as it will likely fail due to RLS.
-      // Instead, inform the system that the bucket should exist from SQL migrations.
-      
-      // We'll return true anyway to prevent blocking the UI, since the SQL migrations
-      // should have created the bucket already.
+      console.log('Voice app uploads bucket does not exist. Please check SQL migrations.');
+      return false;
     } else {
-      console.log('voice-app-uploads bucket already exists');
+      console.log('voice-app-uploads bucket exists');
+      return true;
     }
-    
-    // No need to manually create RLS policies here as they are now managed via SQL migrations
-    
-    return true;
   } catch (error) {
-    console.error('Error ensuring bucket exists:', error);
+    console.error('Error checking bucket existence:', error);
     return false;
   }
 }

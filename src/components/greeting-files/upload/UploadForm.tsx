@@ -35,7 +35,7 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
         const voiceAppBucket = buckets?.find(bucket => bucket.name === 'voice-app-uploads');
         
         if (!voiceAppBucket) {
-          console.log('Voice app uploads bucket does not exist, will create on upload');
+          console.log('Voice app uploads bucket does not exist');
         } else {
           console.log('Voice app uploads bucket exists:', voiceAppBucket.name);
         }
@@ -93,25 +93,6 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
     setUploadProgress(10); // Start at 10%
     
     try {
-      // Check if bucket exists and create if needed
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const voiceAppBucket = buckets?.find(bucket => bucket.name === 'voice-app-uploads');
-      
-      if (!voiceAppBucket) {
-        console.log('Creating voice-app-uploads bucket...');
-        const { data: newBucket, error: bucketError } = await supabase.storage.createBucket('voice-app-uploads', {
-          public: false
-        });
-        
-        if (bucketError) {
-          throw new Error('Failed to create storage bucket: ' + bucketError.message);
-        }
-        
-        // Create public bucket policy
-        await supabase.storage.from('voice-app-uploads').getPublicUrl('test');
-        console.log('Created new bucket:', newBucket);
-      }
-      
       // Upload directly to the Supabase storage
       const filePath = `${effectiveUserId}/${Date.now()}-${selectedFile.name}`;
       
@@ -123,7 +104,7 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
         .from('voice-app-uploads')
         .upload(filePath, selectedFile, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true // Changed to true to handle conflicts
         });
       
       // Update progress to 70% after storage upload completes
