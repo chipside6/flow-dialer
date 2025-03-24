@@ -78,26 +78,38 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userId, refreshGreetingF
       // Update progress to 20% before storage upload begins
       setUploadProgress(20);
       
-      // Use the more reliable upload method with proper progress tracking
+      // Upload file to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('voice-app-uploads')
         .upload(filePath, selectedFile, {
           cacheControl: '3600',
-          upsert: true,
-          onUploadProgress: (progress) => {
-            // Calculate progress percentage based on uploaded vs total bytes
-            const percentage = Math.round((progress.loaded / progress.total) * 60) + 20;
-            // Cap progress at 80% until backend processing completes
-            setUploadProgress(Math.min(percentage, 80));
-          }
+          upsert: true
         });
       
+      // Simulate progress during upload since we can't track it directly
+      // Start a progress simulation that will update every 500ms
+      let simulatedProgress = 20;
+      const progressInterval = setInterval(() => {
+        simulatedProgress += 5;
+        // Cap progress at 80% until we confirm upload is complete
+        if (simulatedProgress <= 80) {
+          setUploadProgress(simulatedProgress);
+        }
+      }, 500);
+      
+      // Clear the interval when we're done or if there's an error
+      const clearProgressInterval = () => {
+        clearInterval(progressInterval);
+      };
+      
       if (uploadError) {
+        clearProgressInterval();
         console.error('Storage upload error:', uploadError);
         throw uploadError;
       }
       
       // Update progress to 85% before database entry
+      clearProgressInterval();
       setUploadProgress(85);
       
       // Get the public URL

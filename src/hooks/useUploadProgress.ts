@@ -8,14 +8,14 @@ export function useUploadProgress(isUploading: boolean) {
   useEffect(() => {
     if (!isUploading && uploadProgress !== 100) {
       // Only reset if not showing completion (100%)
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setUploadProgress(0);
       }, 2000);
+      
+      return () => {
+        clearTimeout(timer);
+      };
     }
-    
-    return () => {
-      // Clean up any pending timeouts
-    };
   }, [isUploading, uploadProgress]);
 
   return {
