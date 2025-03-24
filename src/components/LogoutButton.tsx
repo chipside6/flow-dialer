@@ -4,7 +4,7 @@ import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -26,41 +26,21 @@ const LogoutButton = ({
   const { signOut } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // Set a cleanup timer if logout takes too long
-  useEffect(() => {
-    if (!isLoggingOut) return;
-    
-    const timeoutId = setTimeout(() => {
-      if (isLoggingOut) {
-        console.log("LogoutButton - Logout timeout reached, forcing logout completion");
-        setIsLoggingOut(false);
-        navigate("/login", { replace: true });
-      }
-    }, 3000); // 3 second timeout as fallback
-    
-    return () => clearTimeout(timeoutId);
-  }, [isLoggingOut, navigate]);
-  
   const handleLogout = async () => {
-    if (isLoggingOut) {
-      // If already logging out, force navigation to login
-      navigate("/login", { replace: true });
-      return;
-    }
+    if (isLoggingOut) return; // Prevent multiple clicks
     
-    setIsLoggingOut(true);
-    console.log("LogoutButton - Initiating logout");
-    
-    // Force navigation to login page IMMEDIATELY - this is the most critical part
-    navigate("/login", { replace: true });
-    
-    // Run the logout process after navigation has been triggered
     try {
-      console.log("LogoutButton - Calling signOut");
+      setIsLoggingOut(true);
+      console.log("LogoutButton - Initiating logout");
+      
       const result = await signOut();
       
       // Optional callback if provided
       if (onClick) onClick();
+      
+      // Force navigation to login page
+      console.log("Navigating to login page");
+      navigate("/login", { replace: true });
       
       // Show success toast
       toast({
@@ -79,6 +59,9 @@ const LogoutButton = ({
         description: error.message || "An error occurred during logout",
         variant: "destructive",
       });
+      
+      // Still try to navigate to login
+      navigate("/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
     }

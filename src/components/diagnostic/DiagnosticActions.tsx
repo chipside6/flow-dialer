@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { RotateCcw, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,38 +12,18 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
   const { toast } = useToast();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // Set a cleanup timer if logout takes too long
-  useEffect(() => {
-    if (!isLoggingOut) return;
-    
-    const timeoutId = setTimeout(() => {
-      if (isLoggingOut) {
-        console.log("DiagnosticActions - Logout timeout reached, forcing logout completion");
-        setIsLoggingOut(false);
-        navigate("/login", { replace: true });
-      }
-    }, 3000); // 3 second timeout as fallback
-    
-    return () => clearTimeout(timeoutId);
-  }, [isLoggingOut, navigate]);
-  
   const handleSignOut = async () => {
-    if (isLoggingOut) {
-      // If already logging out, force navigation to login
-      navigate("/login", { replace: true });
-      return;
-    }
-    
-    setIsLoggingOut(true);
-    console.log("DiagnosticActions - Initiating logout");
-    
-    // Force navigation to login page IMMEDIATELY - do this first
-    navigate("/login", { replace: true });
+    if (isLoggingOut) return; // Prevent multiple clicks
     
     try {
-      // Call signOut after navigation has been triggered
-      console.log("DiagnosticActions - Calling signOut");
+      setIsLoggingOut(true);
+      console.log("DiagnosticActions - Initiating logout");
+      
       const result = await signOut();
+      
+      // Force navigation to login page immediately
+      console.log("Navigating to login page");
+      navigate("/login", { replace: true });
       
       toast({
         title: "Signed out successfully",
@@ -61,6 +41,9 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
         title: "Error signing out",
         description: error.message || "An error occurred while signing out"
       });
+      
+      // Still try to navigate to login
+      navigate("/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
     }
