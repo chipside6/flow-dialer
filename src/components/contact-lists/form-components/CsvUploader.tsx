@@ -9,7 +9,6 @@ interface CsvUploaderProps {
   selectedFile: File | null;
   setSelectedFile: (file: File | null) => void;
   isDisabled: boolean;
-  onUpload: (file: File) => Promise<void>;  // Add onUpload function to trigger the upload
 }
 
 const FILE_TYPES = ["text/csv", "application/vnd.ms-excel"];
@@ -18,10 +17,9 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const CsvUploader: React.FC<CsvUploaderProps> = ({
   selectedFile,
   setSelectedFile,
-  isDisabled,
-  onUpload, // Function to handle the file upload
+  isDisabled
 }) => {
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
@@ -44,20 +42,8 @@ const CsvUploader: React.FC<CsvUploaderProps> = ({
       });
       return;
     }
-
-    // Set the selected file
+    
     setSelectedFile(file);
-
-    // Trigger the upload process
-    try {
-      await onUpload(file); // Trigger file upload from the parent component
-    } catch (error) {
-      toast({
-        title: "Upload Failed",
-        description: "There was an issue uploading the file.",
-        variant: "destructive",
-      });
-    }
   };
 
   return (
