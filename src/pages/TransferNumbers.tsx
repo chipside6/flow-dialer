@@ -1,8 +1,7 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { useTransferNumbersState } from "@/hooks/useTransferNumbersState"; // Updated import
-import { useFetchTransferNumbers } from "@/hooks/useFetchTransferNumbers"; // Updated import
+import { useTransferNumbers } from "@/hooks/useTransferNumbers";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
@@ -11,40 +10,47 @@ import { AuthRequiredAlert } from "@/components/transfer-numbers/AuthRequiredAle
 import { TransferNumbersContent } from "@/components/transfer-numbers/TransferNumbersContent";
 
 const TransferNumbers = () => {
-  const {
-    transferNumbers,
-    isLoading,
+  const { 
+    transferNumbers, 
+    isLoading, 
     isSubmitting,
     error,
-    lastRefresh,
-    setTransferNumbers,
-    setIsLoading,
-    setError,
-    setIsSubmitting,
-    refreshTransferNumbers,
-  } = useTransferNumbersState();
-
+    addTransferNumber, 
+    deleteTransferNumber,
+    refreshTransferNumbers
+  } = useTransferNumbers();
+  
   const { user, isLoading: isAuthLoading } = useAuth();
+  const [initialLoad, setInitialLoad] = useState(true);
   const { toast } = useToast();
   
-  const { fetchTransferNumbers } = useFetchTransferNumbers({
-    setTransferNumbers,
-    setIsLoading,
-    setError,
-    lastRefresh, // Pass lastRefresh to trigger fetch
+  console.log("TransferNumbers page render state:", { 
+    transferNumbersCount: transferNumbers.length, 
+    isLoading,
+    isSubmitting,
+    initialLoad,
+    error,
+    isAuthenticated: !!user,
+    isAuthLoading
   });
-
+  
   // Handle initial data loading
   useEffect(() => {
     const loadData = async () => {
+      console.log("TransferNumbers page mounted, loading data");
+      
       if (!user && !isAuthLoading) {
+        console.log("No authenticated user, showing login prompt");
+        setInitialLoad(false);
         return;
       }
-
+      
+      // Wait for authentication before loading data
       if (!isAuthLoading && user) {
         try {
-          await fetchTransferNumbers();
+          await refreshTransferNumbers();
         } catch (err) {
+          console.error("Failed to load transfer numbers:", err);
           toast({
             title: "Error",
             description: "Failed to load your transfer numbers",
@@ -52,20 +58,77 @@ const TransferNumbers = () => {
           });
         }
       }
+
+      // Set initialLoad to false after a delay to ensure smoother UX
+      setTimeout(() => {
+        setInitialLoad(false);
+      }, 800);
     };
-
+    
     loadData();
-
+    
     return () => {
       console.log("TransferNumbers page unmounted");
     };
-  }, [user, isAuthLoading, fetchTransferNumbers, toast]);
-
-  // Handler for manual refresh
-  const handleManualRefresh = async () => {
-    refreshTransferNumbers(); // Trigger the refresh
+  }, [user, isAuthLoading, refreshTransferNumbers, toast]);
+  
+  // Handler for adding a transfer number with improved error handling
+  const handleAddTransferNumber = async (name: string, number: string, description: string) => {
+    console.log("handleAddTransferNumber called with:", { name, number, description });
+    
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You need to be logged in to add transfer numbers",
+        variant: "destructive"
+      });
+      return null;
+    }
+    
+    try {
+      const result = await addTransferNumber(name, number, description);
+      return result;
+    } catch (err: any) {
+      console.error("Error adding transfer number:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to add the transfer number",
+        variant: "destructive"
+      });
+      return null;
+    }
   };
-
+  
+  // Handler for manual refresh with error handling
+  const handleManualRefresh = async () => {
+    console.log("Manual refresh requested from UI");
+    
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You need to be logged in to view transfer numbers",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      await refreshTransferNumbers();
+      toast({
+        title: "Refreshed",
+        description: "Transfer numbers have been refreshed"
+      });
+    } catch (err: any) {
+      console.error("Error refreshing transfer numbers:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to refresh transfer numbers",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  // Render authentication loading state
   if (isAuthLoading) {
     return (
       <DashboardLayout>
@@ -74,17 +137,22 @@ const TransferNumbers = () => {
       </DashboardLayout>
     );
   }
-
+  
   return (
     <DashboardLayout>
       <TransferNumbersHeader />
+      
       <AuthRequiredAlert isVisible={!user} />
+      
       {user && (
         <TransferNumbersContent
           transferNumbers={transferNumbers}
           isLoading={isLoading}
           isSubmitting={isSubmitting}
           error={error}
+          isInitialLoad={initialLoad}
+          addTransferNumber={handleAddTransferNumber}
+          deleteTransferNumber={deleteTransferNumber}
           onRefresh={handleManualRefresh}
         />
       )}
