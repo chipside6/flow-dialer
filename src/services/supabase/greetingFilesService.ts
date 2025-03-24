@@ -1,4 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
+import { logSupabaseOperation, OperationType } from '@/utils/supabaseDebug';
 
 // Ensure the voice-app-uploads bucket exists
 export async function ensureVoiceAppUploadsBucket() {
@@ -9,11 +11,18 @@ export async function ensureVoiceAppUploadsBucket() {
     if (!bucketExists) {
       console.log('Creating voice-app-uploads bucket');
       const { error } = await supabase.storage.createBucket('voice-app-uploads', {
-        public: false
+        public: true
       });
       
       if (error) {
         console.error('Error creating bucket:', error);
+        logSupabaseOperation({
+          operation: OperationType.WRITE,
+          table: 'storage.buckets',
+          success: false,
+          error,
+          auth_status: 'AUTHENTICATED'
+        });
         throw error;
       }
       
@@ -21,6 +30,8 @@ export async function ensureVoiceAppUploadsBucket() {
     } else {
       console.log('voice-app-uploads bucket already exists');
     }
+    
+    // No need to manually create RLS policies here as they are now managed via SQL migrations
     
     return true;
   } catch (error) {
@@ -48,6 +59,14 @@ export async function uploadGreetingFile(file: File, userId: string) {
     
     if (error) {
       console.error('Error uploading file:', error);
+      logSupabaseOperation({
+        operation: OperationType.WRITE,
+        table: 'storage.objects',
+        user_id: userId,
+        success: false,
+        error,
+        auth_status: 'AUTHENTICATED'
+      });
       throw error;
     }
     
@@ -55,6 +74,16 @@ export async function uploadGreetingFile(file: File, userId: string) {
     const { data: urlData } = supabase.storage
       .from('voice-app-uploads')
       .getPublicUrl(filePath);
+    
+    // Log successful operation
+    logSupabaseOperation({
+      operation: OperationType.WRITE,
+      table: 'storage.objects',
+      user_id: userId,
+      success: true,
+      data: { path: data.path },
+      auth_status: 'AUTHENTICATED'
+    });
     
     // Return the file data
     return {

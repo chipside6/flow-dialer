@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { logSupabaseOperation, OperationType } from '@/utils/supabaseDebug';
 
 export const uploadRecording = async (blob: Blob, userId: string): Promise<any> => {
   try {
@@ -26,6 +27,14 @@ export const uploadRecording = async (blob: Blob, userId: string): Promise<any> 
 
     if (error) {
       console.error('Error uploading recording:', error);
+      logSupabaseOperation({
+        operation: OperationType.WRITE,
+        table: 'storage.objects',
+        user_id: userId,
+        success: false,
+        error,
+        auth_status: 'AUTHENTICATED'
+      });
       throw error;
     }
 
@@ -43,7 +52,7 @@ export const uploadRecording = async (blob: Blob, userId: string): Promise<any> 
         user_id: userId,
         filename: filename,
         url: urlData.publicUrl,
-        file_path: filePath, // Now this is properly saved
+        file_path: filePath,
         file_type: 'audio/webm',
         file_size: blob.size
       })
@@ -52,8 +61,26 @@ export const uploadRecording = async (blob: Blob, userId: string): Promise<any> 
 
     if (insertError) {
       console.error('Error saving file record:', insertError);
+      logSupabaseOperation({
+        operation: OperationType.WRITE,
+        table: 'greeting_files',
+        user_id: userId,
+        success: false,
+        error: insertError,
+        auth_status: 'AUTHENTICATED'
+      });
       throw insertError;
     }
+
+    // Log successful operation
+    logSupabaseOperation({
+      operation: OperationType.WRITE,
+      table: 'greeting_files',
+      user_id: userId,
+      success: true,
+      data: fileData,
+      auth_status: 'AUTHENTICATED'
+    });
 
     console.log('Greeting file record created:', fileData?.id);
     return fileData;
