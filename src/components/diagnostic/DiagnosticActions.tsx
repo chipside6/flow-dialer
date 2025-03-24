@@ -21,7 +21,7 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
           description: "You have been logged out of your account"
         });
         navigate('/login');
-      } else {
+      } else if (error) {
         throw error;
       }
     } catch (error: any) {

@@ -2,8 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/auth";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -21,17 +21,19 @@ const LogoutButton = ({
   position = "right"
 }: LogoutButtonProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { signOut } = useAuth();
   
   const handleLogout = async () => {
     try {
       console.log("LogoutButton - Initiating logout");
-      const { error } = await supabase.auth.signOut();
+      const { success, error } = await signOut();
       
       // Optional callback if provided
       if (onClick) onClick();
       
       if (error) {
-        console.error("LogoutButton - Error from signOut:", error);
+        console.error("LogoutButton - Error during logout:", error);
         toast({
           title: "Logout failed",
           description: error.message,

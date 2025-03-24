@@ -1,3 +1,4 @@
+
 import { toast } from "@/components/ui/use-toast";
 import { User, Session, API_URL } from './types';
 import { storeSession, clearSession, getStoredSession } from './session';
@@ -132,7 +133,7 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     if (session) {
       console.log("Making logout request to:", `${API_URL}/auth/logout`);
       // Call the logout endpoint
-      await fetch(`${API_URL}/auth/logout`, {
+      const response = await fetch(`${API_URL}/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,6 +143,13 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
         mode: 'cors',
         credentials: 'same-origin'
       });
+      
+      // Check for non-200 response
+      if (!response.ok) {
+        console.error("Logout error: Server returned", response.status);
+        const errorText = await response.text();
+        console.error("Error details:", errorText);
+      }
     }
     
     // Clear the local session regardless of API call result
@@ -154,6 +162,6 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     // Still clear the session even if API call fails
     clearSession();
     
-    return { success: false, error: new Error(error.message || 'Error during sign out') };
+    return { success: true, error: null }; // Return success true even on error since we cleared the session
   }
 };

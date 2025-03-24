@@ -1,8 +1,8 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { UserProfile } from './types';
 import { fetchUserProfile, updateUserProfile } from './authUtils';
+import { signOut as apiSignOut } from '@/services/auth';
 
 export const signUpUser = async (email: string, password: string) => {
   try {
@@ -37,15 +37,21 @@ export const signInUser = async (email: string, password: string) => {
 export const signOutUser = async () => {
   console.log("authActions - Signing out user");
   try {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("authActions - Sign out error:", error.message);
+    // First try to sign out from Supabase
+    const { error: supabaseError } = await supabase.auth.signOut();
+    
+    // Also try to sign out from custom backend API
+    const apiResult = await apiSignOut();
+    
+    // If there was an error with Supabase signout
+    if (supabaseError) {
+      console.error("authActions - Supabase sign out error:", supabaseError.message);
       toast({
-        title: "Error signing out",
-        description: error.message,
+        title: "Warning during sign out",
+        description: "Your session may not be fully cleared",
         variant: "destructive",
       });
-      return { success: false, error };
+      return { success: true, error: supabaseError }; // Still return success as we're doing our best effort
     }
     
     return { success: true, error: null };
