@@ -10,7 +10,7 @@ export function useTransferNumbersState() {
   const [lastRefresh, setLastRefresh] = useState(Date.now());
   const [error, setError] = useState<string | null>(null);
   
-  // Force reset loading state after 5 seconds to prevent UI from getting stuck
+  // Force reset loading state after 6 seconds to prevent UI from getting stuck
   useEffect(() => {
     let timeoutId: number | undefined;
     
@@ -18,20 +18,26 @@ export function useTransferNumbersState() {
       timeoutId = window.setTimeout(() => {
         console.log("Loading timeout reached, resetting isLoading state");
         setIsLoading(false);
-      }, 5000); // Shorter timeout for better UX
+        
+        // Only show toast if there were no transfer numbers loaded
+        if (transferNumbers.length === 0) {
+          toast({
+            title: "Loading timeout reached",
+            description: "We couldn't load your transfer numbers. Please try refreshing.",
+            variant: "destructive"
+          });
+        }
+      }, 10000); // Increased from 5000 to ensure data has time to load
     }
     
     return () => {
       if (timeoutId) {
         window.clearTimeout(timeoutId);
       }
-      // Reset states when unmounting
-      setIsLoading(false);
-      setIsSubmitting(false);
     };
-  }, [isLoading]);
+  }, [isLoading, transferNumbers.length]);
   
-  // Reset isSubmitting after 3 seconds to prevent it from getting stuck
+  // Reset isSubmitting after 5 seconds to prevent it from getting stuck
   useEffect(() => {
     let submitTimeout: number | undefined;
     
@@ -44,7 +50,7 @@ export function useTransferNumbersState() {
           description: "The operation is taking longer than expected. Please check if it completed successfully.",
           variant: "destructive"
         });
-      }, 3000); // Shorter timeout
+      }, 5000); // Increased from 3000 to give more time for submission
     }
     
     return () => {

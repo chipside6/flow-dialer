@@ -32,18 +32,47 @@ export const useFetchTransferNumbers = ({
     setError(null);
 
     try {
-      const data = await fetchUserTransferNumbers(user.id);
+      // Set up a timeout for the fetch operation
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("Request timed out. Please try again."));
+        }, 8000); // 8 second timeout
+      });
+
+      // Race between the actual fetch and the timeout
+      const data = await Promise.race([
+        fetchUserTransferNumbers(user.id),
+        timeoutPromise
+      ]) as TransferNumber[];
+      
       setTransferNumbers(data);
     } catch (err: any) {
       console.error("Error fetching transfer numbers:", err);
-      setError(err.message || "Failed to load transfer numbers");
-      toast({
-        title: "Error loading transfer numbers",
-        description: err.message || "Failed to load transfer numbers",
-        variant: "destructive",
-      });
+      const errorMessage = err.message || "Failed to load transfer numbers";
+      setError(errorMessage);
+      
+      // Provide user-friendly error feedback
+      if (errorMessage.includes("timed out")) {
+        toast({
+          title: "Request timed out",
+          description: "We couldn't load your transfer numbers in time. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error loading transfer numbers",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
+      
+      // Still clear loading state when error occurs
+      setIsLoading(false);
+      
+      // Return empty array for safety
       setTransferNumbers([]);
     } finally {
+      // Ensure loading state is cleared
       setIsLoading(false);
     }
   }, [user, setTransferNumbers, setIsLoading, setError]);

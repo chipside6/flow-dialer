@@ -9,7 +9,7 @@ interface LoadingStateProps {
 
 export const LoadingState: React.FC<LoadingStateProps> = ({ 
   message, 
-  timeout = 15000 // Default 15 seconds
+  timeout = 10000 // Default 10 seconds (reduced from 15 seconds)
 }) => {
   const [isTimedOut, setIsTimedOut] = useState(false);
   

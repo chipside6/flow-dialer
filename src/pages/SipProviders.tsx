@@ -8,6 +8,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Loader2, AlertCircle, WifiOff, RefreshCw } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 const SipProviders = () => {
   const {
@@ -26,21 +27,26 @@ const SipProviders = () => {
   const isMobile = useIsMobile();
   const [forceShowContent, setForceShowContent] = useState(false);
   
-  // Force show content after timeout to prevent infinite loading
+  // Force show content after shorter timeout to prevent infinite loading
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
         setForceShowContent(true);
+        toast({
+          title: "Still loading data",
+          description: "We're showing you the UI while provider data continues to load",
+          variant: "default"
+        });
       }
-    }, 8000); // 8 seconds timeout
+    }, 6000); // Reduced from 8 seconds to 6 seconds
     
     return () => clearTimeout(timer);
   }, [isLoading]);
   
   const isNetworkError = error && 
-    (error.message.includes("NetworkError") || 
-     error.message.includes("network") || 
-     error.message.includes("fetch") ||
+    (error.message?.includes("NetworkError") || 
+     error.message?.includes("network") || 
+     error.message?.includes("fetch") ||
      !navigator.onLine);
   
   return (
@@ -101,17 +107,17 @@ const SipProviders = () => {
               onToggleStatus={(id) => {
                 const provider = providers.find(p => p.id === id);
                 if (provider) {
-                  toggleProviderStatus(id, provider.isActive);
+                  toggleProviderStatus(id, !provider.isActive);
                 }
               }}
             />
           )
         )}
         
-        {forceShowContent && isLoading && (
+        {(forceShowContent && isLoading) && (
           <div className="mt-4 bg-orange-50 p-4 rounded border border-orange-200 flex items-center">
             <AlertCircle className="h-5 w-5 text-orange-500 mr-2" />
-            <span className="text-orange-700">Still loading... You can use the form above to add a new provider.</span>
+            <span className="text-orange-700">Still loading... You can use the form above to add a new provider while we finish loading your data.</span>
           </div>
         )}
       </div>

@@ -5,6 +5,7 @@ import { AddTransferNumberForm } from "./AddTransferNumberForm";
 import { TransferNumbersList } from "./TransferNumbersList";
 import { ErrorAlert } from "./ErrorAlert";
 import { LoadingState } from "@/components/upgrade/LoadingState";
+import { toast } from "@/components/ui/use-toast";
 
 interface TransferNumbersContentProps {
   transferNumbers: TransferNumber[];
@@ -29,11 +30,18 @@ export const TransferNumbersContent = ({
 }: TransferNumbersContentProps) => {
   const [forceShowContent, setForceShowContent] = useState(false);
   
-  // Force show content after timeout to prevent infinite loading
+  // Force show content after shorter timeout to prevent infinite loading
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading && isInitialLoad) {
         setForceShowContent(true);
+        if (isLoading) {
+          toast({
+            title: "Still loading data",
+            description: "We're showing you the UI while data continues to load in the background",
+            variant: "default"
+          });
+        }
       }
     }, 5000); // 5 seconds timeout
     
@@ -45,7 +53,7 @@ export const TransferNumbersContent = ({
     return (
       <LoadingState 
         message="Loading your transfer numbers, please wait..." 
-        timeout={8000} 
+        timeout={6000} // Reduced timeout
       />
     );
   }
