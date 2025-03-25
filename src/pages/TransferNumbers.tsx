@@ -24,23 +24,10 @@ const TransferNumbers = () => {
   const [initialLoad, setInitialLoad] = useState(true);
   const { toast } = useToast();
   
-  console.log("TransferNumbers page render state:", { 
-    transferNumbersCount: transferNumbers.length, 
-    isLoading,
-    isSubmitting,
-    initialLoad,
-    error,
-    isAuthenticated: !!user,
-    isAuthLoading
-  });
-  
   // Handle initial data loading
   useEffect(() => {
     const loadData = async () => {
-      console.log("TransferNumbers page mounted, loading data");
-      
       if (!user && !isAuthLoading) {
-        console.log("No authenticated user, showing login prompt");
         setInitialLoad(false);
         return;
       }
@@ -66,16 +53,10 @@ const TransferNumbers = () => {
     };
     
     loadData();
-    
-    return () => {
-      console.log("TransferNumbers page unmounted");
-    };
   }, [user, isAuthLoading, refreshTransferNumbers, toast]);
   
   // Handler for adding a transfer number with improved error handling
   const handleAddTransferNumber = async (name: string, number: string, description: string) => {
-    console.log("handleAddTransferNumber called with:", { name, number, description });
-    
     if (!user) {
       toast({
         title: "Authentication required",
@@ -101,8 +82,6 @@ const TransferNumbers = () => {
   
   // Handler for manual refresh with error handling
   const handleManualRefresh = async () => {
-    console.log("Manual refresh requested from UI");
-    
     if (!user) {
       toast({
         title: "Authentication required",

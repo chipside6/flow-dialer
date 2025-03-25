@@ -1,7 +1,7 @@
+
 import React from "react";
 import { Sidebar, SidebarContent, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 import { 
-  Phone, 
   Home, 
   BarChart3, 
   AudioWaveform, 
@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/auth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Logo } from "@/components/ui/Logo";
 
 interface DashboardSidebarProps {
   onCloseMobile?: () => void;
@@ -60,10 +61,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="bg-[#9b87f5] text-white">
         <div className="flex items-center p-4 justify-between">
-          <div className="flex items-center">
-            <Phone size={18} className="mr-2" />
-            <span className="font-semibold text-lg">Flow Dialer</span>
-          </div>
+          <Logo withText={true} className="text-white" />
           
           {/* Only show close button for mobile */}
           {isMobile && (

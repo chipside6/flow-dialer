@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Menu, Phone, User } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import LogoutButton from '@/components/LogoutButton';
+import { Logo } from '@/components/ui/Logo';
 
 interface DashboardNavbarProps {
   toggleSidebar: () => void;
@@ -33,12 +34,9 @@ export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
           </button>
           <Link 
             to="/dashboard" 
-            className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"
+            className="flex items-center gap-2"
           >
-            <span className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
-              <Phone size={18} />
-            </span>
-            <span className="md:inline hidden">Flow Dialer</span>
+            <Logo size="md" withText={true} />
           </Link>
         </div>
         

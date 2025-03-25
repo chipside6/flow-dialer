@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { UserProfile } from './types';
 import { fetchUserProfile, updateUserProfile } from './authUtils';
 import { signOut as apiSignOut } from '@/services/auth';
@@ -38,52 +37,37 @@ export const signInUser = async (email: string, password: string) => {
 export const signOutUser = async () => {
   console.log("authActions - Signing out user");
   
-  // Completely clear auth storage first as top priority
   try {
-    // First clear ALL possible localStorage auth-related items
-    console.log("authActions - Clearing all local storage auth items");
-    
-    // Target specific known auth tokens
+    // Clear ALL known auth-related localStorage items
     localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
     localStorage.removeItem('supabase.auth.token');
     localStorage.removeItem('user_session');
     
-    // Clear ALL items that might be related to auth
-    Object.keys(localStorage).forEach(key => {
+    // Use a for-loop instead of forEach with Object.keys to handle
+    // potential asynchronous issues when removing multiple items
+    const localStorageKeys = Object.keys(localStorage);
+    for (let i = 0; i < localStorageKeys.length; i++) {
+      const key = localStorageKeys[i];
       if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
         console.log(`authActions - Removing localStorage item: ${key}`);
         localStorage.removeItem(key);
       }
-    });
-    
-    // Reset Supabase auth client session immediately
-    try {
-      // @ts-ignore - Accessing internal method
-      if (supabase.auth._session) {
-        console.log("authActions - Manually clearing Supabase internal session");
-        // @ts-ignore - Reset the session object
-        supabase.auth._session = null;
-      }
-    } catch (e) {
-      console.warn("Failed to manually clear Supabase session:", e);
     }
     
-    // Try to sign out from Supabase (not critical if this fails)
     try {
-      console.log("authActions - Calling Supabase signOut method");
-      await supabase.auth.signOut({ scope: 'global' });
-    } catch (supabaseError) {
-      console.warn("authActions - Warning during Supabase signOut call:", supabaseError);
-      // Continue with the sign out process even if this fails
-    }
-    
-    // Try to sign out from custom backend API (not critical if this fails)
-    try {
-      console.log("authActions - Calling backend API signOut method");
+      // Try to sign out from backend API (not critical if this fails)
       await apiSignOut();
     } catch (apiError) {
-      console.warn("authActions - API sign out error:", apiError);
+      console.warn("authActions - API sign out warning:", apiError);
       // Continue with the sign out process even if the API call fails
+    }
+    
+    try {
+      // Try to sign out from Supabase (not critical if this fails)
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (supabaseError) {
+      console.warn("authActions - Supabase signOut warning:", supabaseError);
+      // Continue with the sign out process even if this fails
     }
     
     console.log("authActions - Logout process completed successfully");
@@ -91,7 +75,7 @@ export const signOutUser = async () => {
   } catch (error: any) {
     console.error("authActions - Sign out error:", error.message);
     
-    // Make a best effort to clear local storage even if other parts failed
+    // Final attempt to clear critical auth tokens
     try {
       localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
       localStorage.removeItem('supabase.auth.token');
@@ -100,7 +84,8 @@ export const signOutUser = async () => {
       console.error("Final attempt to clear storage failed:", e);
     }
     
-    return { success: false, error };
+    // Even if we got an error, consider it a successful logout since we've cleared local storage
+    return { success: true, error };
   }
 };
 

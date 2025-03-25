@@ -1,10 +1,10 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
-import { useState, useEffect } from "react";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -26,52 +26,25 @@ const LogoutButton = ({
   const { signOut } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // Set a cleanup timer if logout takes too long
-  useEffect(() => {
-    if (!isLoggingOut) return;
-    
-    const timeoutId = setTimeout(() => {
-      if (isLoggingOut) {
-        console.log("LogoutButton - Logout timeout reached, forcing logout completion");
-        setIsLoggingOut(false);
-        navigate("/login", { replace: true });
-      }
-    }, 3000); // 3 second timeout as fallback
-    
-    return () => clearTimeout(timeoutId);
-  }, [isLoggingOut, navigate]);
-  
   const handleLogout = async () => {
-    if (isLoggingOut) {
-      // If already logging out, force navigation to login
-      navigate("/login", { replace: true });
-      return;
-    }
+    if (isLoggingOut) return;
     
     setIsLoggingOut(true);
-    console.log("LogoutButton - Initiating logout");
     
-    // Force navigation to login page IMMEDIATELY - this is the most critical part
-    navigate("/login", { replace: true });
-    
-    // Run the logout process after navigation has been triggered
     try {
-      console.log("LogoutButton - Calling signOut");
-      const result = await signOut();
+      // First navigate to login page immediately
+      navigate("/login", { replace: true });
       
-      // Optional callback if provided
+      // Then attempt to sign out
+      await signOut();
+      
+      // Call optional callback if provided
       if (onClick) onClick();
       
-      // Show success toast
       toast({
         title: "Logged out successfully",
         description: "You have been signed out of your account",
       });
-      
-      // Check for errors after toast (to ensure user sees success message)
-      if (result.error) {
-        console.warn("LogoutButton - Warning during logout:", result.error);
-      }
     } catch (error: any) {
       console.error("LogoutButton - Error during logout:", error);
       toast({

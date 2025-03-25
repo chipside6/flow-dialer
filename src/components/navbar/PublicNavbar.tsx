@@ -1,12 +1,13 @@
 
 import { Link } from 'react-router-dom';
-import { Menu, Phone, LogIn } from 'lucide-react';
+import { Menu, LogIn } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { NavLinks } from './NavLinks';
 import { MobileMenu } from './MobileMenu';
 import { Dispatch, SetStateAction } from 'react';
 import { useAuth } from '@/contexts/auth';
 import LogoutButton from '@/components/LogoutButton';
+import { Logo } from '@/components/ui/Logo';
 
 interface PublicNavbarProps {
   isScrolled: boolean;
@@ -15,7 +16,7 @@ interface PublicNavbarProps {
 }
 
 export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen }: PublicNavbarProps) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 py-4 ${isScrolled ? 'bg-background/80 backdrop-blur-sm shadow-sm border-b' : 'border-transparent'}`}>
@@ -30,12 +31,9 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
           </button>
           <Link 
             to={isAuthenticated ? "/dashboard" : "/"} 
-            className="flex items-center gap-2 text-xl font-display font-bold tracking-tight"
+            className="flex items-center gap-2"
           >
-            <span className="min-w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
-              <Phone size={18} />
-            </span>
-            <span>Flow Dialer</span>
+            <Logo />
           </Link>
         </div>
         

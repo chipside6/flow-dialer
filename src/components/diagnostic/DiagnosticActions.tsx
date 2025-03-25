@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { RotateCcw, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,48 +12,22 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
   const { toast } = useToast();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  // Set a cleanup timer if logout takes too long
-  useEffect(() => {
-    if (!isLoggingOut) return;
-    
-    const timeoutId = setTimeout(() => {
-      if (isLoggingOut) {
-        console.log("DiagnosticActions - Logout timeout reached, forcing logout completion");
-        setIsLoggingOut(false);
-        navigate("/login", { replace: true });
-      }
-    }, 3000); // 3 second timeout as fallback
-    
-    return () => clearTimeout(timeoutId);
-  }, [isLoggingOut, navigate]);
-  
   const handleSignOut = async () => {
-    if (isLoggingOut) {
-      // If already logging out, force navigation to login
-      navigate("/login", { replace: true });
-      return;
-    }
+    if (isLoggingOut) return;
     
     setIsLoggingOut(true);
-    console.log("DiagnosticActions - Initiating logout");
-    
-    // Force navigation to login page IMMEDIATELY - do this first
-    navigate("/login", { replace: true });
     
     try {
-      // Call signOut after navigation has been triggered
-      console.log("DiagnosticActions - Calling signOut");
-      const result = await signOut();
+      // First navigate to login page immediately
+      navigate("/login", { replace: true });
+      
+      // Then attempt to sign out
+      await signOut();
       
       toast({
         title: "Signed out successfully",
         description: "You have been logged out of your account"
       });
-      
-      // Check for errors after toast (to ensure user sees success message)
-      if (result.error) {
-        console.warn("DiagnosticActions - Warning during logout:", result.error);
-      }
     } catch (error: any) {
       console.error("DiagnosticActions - Error signing out:", error);
       toast({
