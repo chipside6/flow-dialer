@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GreetingFilesList } from '@/components/greeting-files/GreetingFilesList';
 import { RecordGreetingForm } from '@/components/greeting-files/RecordGreetingForm';
@@ -13,18 +13,9 @@ import { Button } from '@/components/ui/button';
 
 const GreetingFiles = () => {
   const { user, sessionChecked } = useAuth();
-  const { 
-    greetingFiles, 
-    isLoading, 
-    error, 
-    isError, 
-    refreshGreetingFiles, 
-    deleteGreetingFile,
-    fetchAttempts 
-  } = useGreetingFiles();
+  const { greetingFiles, isLoading, error, isError, refreshGreetingFiles, deleteGreetingFile } = useGreetingFiles();
   const [activeTab, setActiveTab] = useState('files');
   const [isInitialized, setIsInitialized] = useState(false);
-  const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
   
   // Set initialized flag after initial render to prevent infinite loading
   useEffect(() => {
@@ -35,42 +26,10 @@ const GreetingFiles = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Track loading start time for stuck loaders
-  useEffect(() => {
-    if (isLoading && loadingStartTime === null) {
-      setLoadingStartTime(Date.now());
-    } else if (!isLoading) {
-      setLoadingStartTime(null);
-    }
-  }, [isLoading, loadingStartTime]);
-
-  // Force retry if loading takes too long
-  useEffect(() => {
-    if (loadingStartTime && isLoading) {
-      const timeElapsed = Date.now() - loadingStartTime;
-      if (timeElapsed > 15000 && fetchAttempts < 2) { // 15 seconds
-        console.log('Loading took too long, forcing refresh');
-        refreshGreetingFiles();
-      }
-    }
-  }, [loadingStartTime, isLoading, fetchAttempts, refreshGreetingFiles]);
-
-  // Enhanced refresh function with loading state handling
-  const handleRefreshGreetingFiles = useCallback(async () => {
-    try {
-      await refreshGreetingFiles();
-    } catch (error) {
-      console.error("Error in refresh handler:", error);
-    }
-  }, [refreshGreetingFiles]);
-
   // If we've been waiting too long and session check isn't completed yet,
   // just show the UI anyway instead of getting stuck
   if (!sessionChecked && !isInitialized) {
-    return <LoadingState 
-      message="Checking authentication..." 
-      onRetry={() => window.location.reload()}
-    />;
+    return <LoadingState message="Checking authentication..." />;
   }
 
   // Handle the auth state - even if session isn't checked yet, we can proceed after timeout
@@ -103,7 +62,7 @@ const GreetingFiles = () => {
           <Button 
             variant="outline" 
             className="mt-2" 
-            onClick={() => handleRefreshGreetingFiles()}
+            onClick={() => refreshGreetingFiles()}
             size="sm"
           >
             <RefreshCw className="h-4 w-4 mr-2" /> Try Again
@@ -121,23 +80,14 @@ const GreetingFiles = () => {
     setActiveTab('upload');
   };
 
+  // Create a wrapper function to handle the correct typing
+  const handleRefreshGreetingFiles = async () => {
+    await refreshGreetingFiles();
+  };
+
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-semibold">Greeting Files</h1>
-        
-        {!isLoading && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRefreshGreetingFiles}
-            className="gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
-        )}
-      </div>
+      <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="mb-4">

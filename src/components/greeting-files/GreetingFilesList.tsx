@@ -34,8 +34,6 @@ export const GreetingFilesList = ({
   const { toast } = useToast();
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [loadingAttempts, setLoadingAttempts] = useState(0);
-  const [hasLoadingTimedOut, setHasLoadingTimedOut] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMobile = useIsMobile();
 
@@ -69,45 +67,9 @@ export const GreetingFilesList = ({
       audio.removeEventListener('error', handleError as EventListener);
     };
   }, [toast]);
-  
-  // Handle long loading state
-  useEffect(() => {
-    let timerId: number | undefined;
-    
-    if (isLoading) {
-      timerId = window.setTimeout(() => {
-        setHasLoadingTimedOut(true);
-        // Auto-retry once
-        if (loadingAttempts < 1) {
-          console.log('Loading timed out, auto-retrying...');
-          refreshGreetingFiles();
-          setLoadingAttempts(prev => prev + 1);
-        }
-      }, 10000); // 10 seconds timeout
-    } else {
-      setHasLoadingTimedOut(false);
-    }
-    
-    return () => {
-      if (timerId) window.clearTimeout(timerId);
-    };
-  }, [isLoading, loadingAttempts, refreshGreetingFiles]);
-
-  // Reset loading attempts when refreshing manually
-  const handleManualRefresh = async () => {
-    setLoadingAttempts(0);
-    setHasLoadingTimedOut(false);
-    await refreshGreetingFiles();
-  };
 
   if (isLoading) {
-    return (
-      <LoadingState 
-        message={`Loading greeting files${loadingAttempts > 0 ? ` (attempt ${loadingAttempts + 1})` : ''}...`} 
-        timeout={8000}
-        onRetry={handleManualRefresh}
-      />
-    );
+    return <LoadingState message="Loading greeting files..." />;
   }
 
   if (isError) {
@@ -121,7 +83,7 @@ export const GreetingFilesList = ({
         <Button 
           variant="outline" 
           className="mt-2" 
-          onClick={handleManualRefresh}
+          onClick={() => refreshGreetingFiles()}
           size="sm"
         >
           <RefreshCw className="h-4 w-4 mr-2" /> Try Again
@@ -131,7 +93,7 @@ export const GreetingFilesList = ({
   }
 
   if (greetingFiles.length === 0) {
-    return <EmptyGreetingsState onUploadClick={onUploadClick} onRefresh={handleManualRefresh} />;
+    return <EmptyGreetingsState onUploadClick={onUploadClick} onRefresh={refreshGreetingFiles} />;
   }
 
   const handleDelete = async (fileId: string) => {
