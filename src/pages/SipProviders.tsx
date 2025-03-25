@@ -9,14 +9,12 @@ import { Loader2, AlertCircle, WifiOff, RefreshCw } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { LoadingState } from "@/components/upgrade/LoadingState";
 
 const SipProviders = () => {
   const {
     providers,
     editingProvider,
     isLoading,
-    hasInitiallyLoaded,
     error,
     refetch,
     handleAddProvider,
@@ -40,7 +38,7 @@ const SipProviders = () => {
           variant: "default"
         });
       }
-    }, 5000); // Reduced from 6 seconds to 5 seconds
+    }, 6000); // Reduced from 8 seconds to 6 seconds
     
     return () => clearTimeout(timer);
   }, [isLoading]);
@@ -50,33 +48,12 @@ const SipProviders = () => {
      error.message?.includes("network") || 
      error.message?.includes("fetch") ||
      !navigator.onLine);
-
-  // Handle manual refresh
-  const handleManualRefresh = () => {
-    toast({
-      title: "Refreshing providers",
-      description: "Attempting to reload your SIP providers"
-    });
-    refetch();
-  };
   
   return (
     <DashboardLayout>
       <div className="container-fluid">
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-6">
           <h1 className={`text-3xl font-bold ${isMobile ? 'pl-2' : ''}`}>SIP Providers</h1>
-          
-          {!isLoading && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleManualRefresh}
-              className="gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
-            </Button>
-          )}
         </div>
         
         <SipProviderForm 
@@ -116,37 +93,28 @@ const SipProviders = () => {
           </Alert>
         )}
         
-        {isLoading && !forceShowContent && !hasInitiallyLoaded ? (
-          <LoadingState 
-            message="Loading SIP providers..." 
-            onRetry={handleManualRefresh}
-          />
+        {isLoading && !forceShowContent ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+            <span>Loading SIP providers...</span>
+          </div>
         ) : (
           !error && (
-            <>
-              <SipProviderTable 
-                providers={providers}
-                onEdit={handleEditProvider}
-                onDelete={handleDeleteProvider}
-                onToggleStatus={(id) => {
-                  const provider = providers.find(p => p.id === id);
-                  if (provider) {
-                    toggleProviderStatus(id, !provider.isActive);
-                  }
-                }}
-              />
-              
-              {isLoading && (
-                <div className="mt-4 bg-blue-50 p-4 rounded border border-blue-200 flex items-center">
-                  <Loader2 className="h-5 w-5 text-blue-500 mr-2 animate-spin" />
-                  <span className="text-blue-700">Refreshing provider data...</span>
-                </div>
-              )}
-            </>
+            <SipProviderTable 
+              providers={providers}
+              onEdit={handleEditProvider}
+              onDelete={handleDeleteProvider}
+              onToggleStatus={(id) => {
+                const provider = providers.find(p => p.id === id);
+                if (provider) {
+                  toggleProviderStatus(id, !provider.isActive);
+                }
+              }}
+            />
           )
         )}
         
-        {(forceShowContent && isLoading && !hasInitiallyLoaded) && (
+        {(forceShowContent && isLoading) && (
           <div className="mt-4 bg-orange-50 p-4 rounded border border-orange-200 flex items-center">
             <AlertCircle className="h-5 w-5 text-orange-500 mr-2" />
             <span className="text-orange-700">Still loading... You can use the form above to add a new provider while we finish loading your data.</span>

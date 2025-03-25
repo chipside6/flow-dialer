@@ -6,8 +6,6 @@ import { TransferNumbersList } from "./TransferNumbersList";
 import { ErrorAlert } from "./ErrorAlert";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { toast } from "@/components/ui/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 
 interface TransferNumbersContentProps {
   transferNumbers: TransferNumber[];
@@ -31,14 +29,6 @@ export const TransferNumbersContent = ({
   onRefresh
 }: TransferNumbersContentProps) => {
   const [forceShowContent, setForceShowContent] = useState(false);
-  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
-  
-  // Reset timeout state when loading changes
-  useEffect(() => {
-    if (!isLoading) {
-      setLoadingTimedOut(false);
-    }
-  }, [isLoading]);
   
   // Force show content after shorter timeout to prevent infinite loading
   useEffect(() => {
@@ -53,40 +43,17 @@ export const TransferNumbersContent = ({
           });
         }
       }
-    }, 4000); // Reduced from 5 seconds to 4 seconds
+    }, 5000); // 5 seconds timeout
     
     return () => clearTimeout(timer);
   }, [isLoading, isInitialLoad]);
-  
-  // Add timeout for loading state
-  useEffect(() => {
-    if (!isLoading) return;
-    
-    const longLoadingTimer = setTimeout(() => {
-      if (isLoading) {
-        setLoadingTimedOut(true);
-        if (!forceShowContent) {
-          setForceShowContent(true);
-        }
-        
-        toast({
-          title: "Loading timeout reached",
-          description: "We're having trouble loading your data. You can still use the application.",
-          variant: "destructive"
-        });
-      }
-    }, 12000); // 12 seconds timeout
-    
-    return () => clearTimeout(longLoadingTimer);
-  }, [isLoading, forceShowContent]);
   
   // During initial load, show a dedicated loading state
   if (isInitialLoad && isLoading && !forceShowContent) {
     return (
       <LoadingState 
         message="Loading your transfer numbers, please wait..." 
-        timeout={5000} // 5 seconds timeout
-        onRetry={onRefresh}
+        timeout={6000} // Reduced timeout
       />
     );
   }
@@ -94,15 +61,6 @@ export const TransferNumbersContent = ({
   return (
     <>
       <ErrorAlert error={error} onRetry={onRefresh} />
-      
-      {loadingTimedOut && isLoading && (
-        <Alert variant="warning" className="mb-6">
-          <AlertCircle className="h-4 w-4 text-amber-500" />
-          <AlertDescription className="text-amber-800">
-            Loading is taking longer than expected. You can continue to use the application, but some data may not be up-to-date.
-          </AlertDescription>
-        </Alert>
-      )}
       
       <AddTransferNumberForm 
         onAddTransferNumber={addTransferNumber} 
@@ -116,13 +74,6 @@ export const TransferNumbersContent = ({
         onDeleteTransferNumber={deleteTransferNumber}
         onRefresh={onRefresh}
       />
-      
-      {(forceShowContent && isLoading) && (
-        <div className="mt-4 bg-blue-50 p-4 rounded border border-blue-200 flex items-center">
-          <AlertCircle className="h-5 w-5 text-blue-500 mr-2" />
-          <span className="text-blue-700">Loading your transfer numbers in the background...</span>
-        </div>
-      )}
     </>
   );
 };

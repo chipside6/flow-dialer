@@ -31,25 +31,21 @@ export const useFetchTransferNumbers = ({
     setIsLoading(true);
     setError(null);
 
-    // Create a controller to be able to abort the fetch
-    const controller = new AbortController();
-    const signal = controller.signal;
-
     try {
       // Set up a timeout for the fetch operation
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-        throw new Error("Request timed out. Please try again.");
-      }, 15000); // 15 second timeout - increased from 8 seconds
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("Request timed out. Please try again."));
+        }, 8000); // 8 second timeout
+      });
 
-      // Fetch with abort signal
-      const data = await fetchUserTransferNumbers(user.id);
-      
-      // Clear timeout since fetch completed successfully
-      clearTimeout(timeoutId);
+      // Race between the actual fetch and the timeout
+      const data = await Promise.race([
+        fetchUserTransferNumbers(user.id),
+        timeoutPromise
+      ]) as TransferNumber[];
       
       setTransferNumbers(data);
-      console.log(`Successfully fetched ${data.length} transfer numbers`);
     } catch (err: any) {
       console.error("Error fetching transfer numbers:", err);
       const errorMessage = err.message || "Failed to load transfer numbers";
@@ -70,7 +66,10 @@ export const useFetchTransferNumbers = ({
         });
       }
       
-      // Set empty array for safety
+      // Still clear loading state when error occurs
+      setIsLoading(false);
+      
+      // Return empty array for safety
       setTransferNumbers([]);
     } finally {
       // Ensure loading state is cleared

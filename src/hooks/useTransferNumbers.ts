@@ -6,7 +6,6 @@ import { useTransferNumbersState } from "./transfer-numbers/useTransferNumbersSt
 import { useFetchTransferNumbers } from "./transfer-numbers/useFetchTransferNumbers";
 import { useAddTransferNumber } from "./transfer-numbers/useAddTransferNumber";
 import { useDeleteTransferNumber } from "./transfer-numbers/useDeleteTransferNumber";
-import { toast } from "@/components/ui/use-toast";
 
 export type { TransferNumber } from "@/types/transferNumber";
 
@@ -23,14 +22,13 @@ export function useTransferNumbers() {
     lastRefresh,
     error,
     setError,
-    hasTimedOut,
     refreshTransferNumbers
   } = useTransferNumbersState();
   
   const { fetchTransferNumbers } = useFetchTransferNumbers({
     setTransferNumbers,
     setIsLoading,
-    setError
+    setError // Pass setError directly since it now accepts string
   });
   
   const { addTransferNumber } = useAddTransferNumber(
@@ -57,42 +55,6 @@ export function useTransferNumbers() {
       setError(null);
     }
   }, [user, lastRefresh, fetchTransferNumbers, setTransferNumbers, setIsLoading, setError]);
-  
-  // Add a maximum retry count for persistent loading issues
-  useEffect(() => {
-    let retryCount = 0;
-    let retryInterval: number | undefined;
-    
-    // If loading has timed out but we're still in loading state
-    if (hasTimedOut && isLoading) {
-      retryInterval = window.setInterval(() => {
-        retryCount++;
-        
-        if (retryCount <= 3) {
-          console.log(`Auto-retry attempt ${retryCount} for transfer numbers`);
-          fetchTransferNumbers();
-        } else {
-          console.log("Maximum retry attempts reached, stopping auto-retry");
-          window.clearInterval(retryInterval);
-          
-          // Force loading state to false as a last resort
-          setIsLoading(false);
-          
-          toast({
-            title: "Loading failed",
-            description: "We couldn't load your transfer numbers after multiple attempts. Please try manually refreshing.",
-            variant: "destructive"
-          });
-        }
-      }, 10000); // Try every 10 seconds
-    }
-    
-    return () => {
-      if (retryInterval) {
-        window.clearInterval(retryInterval);
-      }
-    };
-  }, [hasTimedOut, isLoading, fetchTransferNumbers, setIsLoading]);
   
   return {
     transferNumbers,
