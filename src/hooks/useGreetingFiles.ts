@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -33,6 +33,8 @@ interface DbGreetingFile {
 export function useGreetingFiles() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [fetchAttempts, setFetchAttempts] = useState(0);
+  const [manualRefetchQueued, setManualRefetchQueued] = useState(false);
 
   // Use React Query to fetch greeting files
   const { 
@@ -50,11 +52,21 @@ export function useGreetingFiles() {
       
       console.log("Fetching greeting files for user:", user.id);
       try {
+        // Create a controller to be able to abort the fetch if it takes too long
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+          controller.abort();
+        }, 12000); // 12 second timeout
+        
         const { data, error } = await supabase
           .from('greeting_files')
           .select('*')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .abortSignal(controller.signal);
+        
+        // Clear the timeout
+        clearTimeout(timeoutId);
 
         if (error) {
           console.error("Error fetching greeting files:", error);
@@ -70,18 +82,42 @@ export function useGreetingFiles() {
           file_path: file.file_path || ''
         }));
         
+        // Reset fetch attempts on successful fetch
+        setFetchAttempts(0);
+        
         return processedData;
-      } catch (error) {
+      } catch (error: any) {
         console.error("Network or unexpected error fetching greeting files:", error);
-        throw new Error("Failed to fetch greeting files. Please check your network connection.");
+        
+        // If we got an abort error, throw a more user-friendly error
+        if (error.code === 20 || error.name === 'AbortError' || error.message?.includes('aborted')) {
+          throw new Error("Request timed out. Please try refreshing the page.");
+        }
+        
+        // Increment fetch attempts
+        setFetchAttempts(prev => prev + 1);
+        
+        throw new Error(error.message || "Failed to fetch greeting files. Please check your network connection.");
       }
     },
     staleTime: 30 * 1000, // 30 seconds (reduced from 60 seconds)
-    retry: 3,  // Increased retries for network issues
-    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000), // Exponential backoff with max 10s
+    retry: 2,  // Retry twice automatically
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 8000), // Exponential backoff with max 8s
     enabled: !!user, // Only run query when user is available
     refetchOnWindowFocus: true, // Re-enable refetch on window focus
   });
+
+  // Effect to handle queued refetch when fetch attempts reach the limit
+  useEffect(() => {
+    if (manualRefetchQueued && !isLoading) {
+      const timer = setTimeout(() => {
+        refetch();
+        setManualRefetchQueued(false);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [manualRefetchQueued, isLoading, refetch]);
 
   // Mutation for deleting greeting files
   const deleteGreetingFile = useMutation({
@@ -156,9 +192,30 @@ export function useGreetingFiles() {
   });
 
   // Create a wrapper for refetch that returns a Promise<void> for compatibility
-  const refreshGreetingFiles = async (): Promise<void> => {
-    await refetch();
-  };
+  const refreshGreetingFiles = useCallback(async (): Promise<void> => {
+    if (isLoading) {
+      // Queue a refetch for when the current one completes
+      setManualRefetchQueued(true);
+      return Promise.resolve();
+    }
+    
+    try {
+      await refetch();
+      toast({
+        title: "Refreshed",
+        description: "Greeting files have been refreshed.",
+      });
+    } catch (error) {
+      console.error("Error refreshing greeting files:", error);
+      toast({
+        title: "Refresh failed",
+        description: "Could not refresh greeting files. Please try again.",
+        variant: "destructive",
+      });
+    }
+    
+    return Promise.resolve();
+  }, [isLoading, refetch, toast]);
 
   return { 
     greetingFiles, 
@@ -166,6 +223,7 @@ export function useGreetingFiles() {
     error, 
     isError: !!error,
     refreshGreetingFiles,
-    deleteGreetingFile
+    deleteGreetingFile,
+    fetchAttempts
   };
 }
