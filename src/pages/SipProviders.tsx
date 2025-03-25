@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { SipProviderForm } from "@/components/sip/SipProviderForm";
 import { SipProviderTable } from "@/components/sip/SipProviderTable";
 import { useSipProviders } from "@/hooks/useSipProviders";
@@ -24,6 +24,18 @@ const SipProviders = () => {
   } = useSipProviders();
   
   const isMobile = useIsMobile();
+  const [forceShowContent, setForceShowContent] = useState(false);
+  
+  // Force show content after timeout to prevent infinite loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        setForceShowContent(true);
+      }
+    }, 8000); // 8 seconds timeout
+    
+    return () => clearTimeout(timer);
+  }, [isLoading]);
   
   const isNetworkError = error && 
     (error.message.includes("NetworkError") || 
@@ -75,9 +87,10 @@ const SipProviders = () => {
           </Alert>
         )}
         
-        {isLoading ? (
+        {isLoading && !forceShowContent ? (
           <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+            <span>Loading SIP providers...</span>
           </div>
         ) : (
           !error && (
@@ -93,6 +106,13 @@ const SipProviders = () => {
               }}
             />
           )
+        )}
+        
+        {forceShowContent && isLoading && (
+          <div className="mt-4 bg-orange-50 p-4 rounded border border-orange-200 flex items-center">
+            <AlertCircle className="h-5 w-5 text-orange-500 mr-2" />
+            <span className="text-orange-700">Still loading... You can use the form above to add a new provider.</span>
+          </div>
         )}
       </div>
     </DashboardLayout>

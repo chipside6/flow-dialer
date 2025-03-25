@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -23,12 +23,26 @@ export const useCampaigns = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     let isMounted = true;
     
     const fetchCampaigns = async () => {
       try {
+        // Clear any existing loading timeout
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+        }
+        
+        // Set a new loading timeout
+        loadingTimeoutRef.current = setTimeout(() => {
+          if (isLoading && isMounted) {
+            console.log("Campaigns loading timeout reached, ending loading state");
+            setIsLoading(false);
+          }
+        }, 8000);
+        
         // If no user is logged in, return empty array
         if (!user || !isAuthenticated) {
           console.log("No authenticated user, returning empty campaigns array");
@@ -122,6 +136,12 @@ export const useCampaigns = () => {
             });
           }
         }
+      } finally {
+        // Clear the loading timeout
+        if (loadingTimeoutRef.current && isMounted) {
+          clearTimeout(loadingTimeoutRef.current);
+          loadingTimeoutRef.current = null;
+        }
       }
     };
 
@@ -130,6 +150,9 @@ export const useCampaigns = () => {
     // Cleanup function
     return () => {
       isMounted = false;
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
     };
   }, [user, isAuthenticated, toast]);
 

@@ -1,5 +1,6 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/auth';
@@ -12,6 +13,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, sessionChecked, initialized, error, isAdmin } = useAuth();
   const location = useLocation();
+  const [forceRender, setForceRender] = useState(false);
   
   console.log("Protected Route State:", { 
     isAuthenticated, 
@@ -21,11 +23,24 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     error,
     isAdmin,
     requireAdmin,
-    path: location.pathname
+    path: location.pathname,
+    forceRender
   });
   
-  // If we're still initializing and haven't completed auth check
-  if ((isLoading || !initialized) && !error) {
+  // Force render after timeout to prevent infinite loading state
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if ((isLoading || !initialized) && !error) {
+        console.log("Protected Route: Forcing render after timeout");
+        setForceRender(true);
+      }
+    }, 3000); // 3 seconds timeout
+    
+    return () => clearTimeout(timeoutId);
+  }, [isLoading, initialized, error]);
+  
+  // If we're still initializing and haven't completed auth check, but force render triggered
+  if ((isLoading || !initialized) && !error && !forceRender) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
@@ -60,13 +75,13 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
   
-  // If user is authenticated, render children
-  if (isAuthenticated) {
+  // If user is authenticated or we force render after timeout, render children
+  if (isAuthenticated || (forceRender && initialized)) {
     return <>{children}</>;
   }
   
   // If initialization is complete and user is not authenticated, redirect to login
-  if (initialized && !isAuthenticated) {
+  if ((initialized || forceRender) && !isAuthenticated) {
     console.log("User not authenticated, redirecting to login");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

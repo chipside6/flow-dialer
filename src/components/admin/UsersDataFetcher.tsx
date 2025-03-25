@@ -22,7 +22,10 @@ export function UsersDataFetcher() {
     isSuccess,
     isFetched
   } = useAdminUsers({
-    staleTime: 5000 // Short stale time for more frequent updates
+    staleTime: 5000, // Short stale time for more frequent updates
+    refetchOnReconnect: true,
+    retry: 2, // Retry failed requests up to 2 times
+    retryDelay: 1000 // 1 second delay between retries
   });
 
   console.log("UsersDataFetcher - Data status:", { 
@@ -45,11 +48,11 @@ export function UsersDataFetcher() {
       return () => clearTimeout(timer);
     }
     
-    // Set up periodic refresh every 15 seconds
+    // Set up periodic refresh every 30 seconds
     const refreshInterval = setInterval(() => {
       console.log("UsersDataFetcher - Periodic refresh");
       refetch();
-    }, 15000);
+    }, 30000); // 30 seconds
     
     return () => clearInterval(refreshInterval);
   }, [error, isRefetching, isSuccess, refetch]);

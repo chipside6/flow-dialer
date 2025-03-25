@@ -15,11 +15,18 @@ export const useContactListsState = (): ContactListsState & {
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchContactLists = async () => {
     // If there's a previous request in progress, abort it
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+    }
+    
+    // Clear any pending timeouts
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+      fetchTimeoutRef.current = null;
     }
     
     // Create a new abort controller for this request
@@ -36,6 +43,19 @@ export const useContactListsState = (): ContactListsState & {
       setIsLoading(true);
       setError(null);
       console.log("Fetching contact lists for user:", user.id);
+      
+      // Set a timeout to prevent the loading state from getting stuck
+      fetchTimeoutRef.current = setTimeout(() => {
+        if (isLoading) {
+          console.log("Fetch timeout reached, ending loading state");
+          setIsLoading(false);
+          toast({
+            title: "Loading timed out",
+            description: "Fetching contact lists is taking longer than expected. Please try refreshing.",
+            variant: "destructive"
+          });
+        }
+      }, 8000);
       
       const { data, error } = await supabase
         .from('contact_lists')
@@ -92,6 +112,11 @@ export const useContactListsState = (): ContactListsState & {
         });
       }
     } finally {
+      // Clear the timeout
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+        fetchTimeoutRef.current = null;
+      }
       // Set loading to false regardless
       setIsLoading(false);
     }
@@ -106,12 +131,16 @@ export const useContactListsState = (): ContactListsState & {
         console.log("Safety timeout reached, resetting loading state");
         setIsLoading(false);
       }
-    }, 15000);
+    }, 10000);
 
     return () => {
       // Clean up abort controller
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
+      }
+      // Clean up timeouts
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
       }
       clearTimeout(safetyTimeout);
     };

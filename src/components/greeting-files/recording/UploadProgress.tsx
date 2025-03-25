@@ -16,6 +16,7 @@ export const UploadProgress = ({
 }: UploadProgressProps) => {
   const [showLoader, setShowLoader] = useState(false);
   const [displayProgress, setDisplayProgress] = useState(0);
+  const [isStuck, setIsStuck] = useState(false);
   
   // Only show the loader after a brief delay to prevent flashing for quick uploads
   useEffect(() => {
@@ -53,8 +54,25 @@ export const UploadProgress = ({
     }
   }, [uploadProgress, displayProgress]);
   
+  // Detect stuck upload (no progress for 10 seconds while uploading)
+  useEffect(() => {
+    let stuckTimeout: NodeJS.Timeout;
+    
+    if (isUploading && uploadProgress > 0 && uploadProgress < 100) {
+      stuckTimeout = setTimeout(() => {
+        setIsStuck(true);
+      }, 10000); // 10 seconds with no progress change
+    } else {
+      setIsStuck(false);
+    }
+    
+    return () => {
+      if (stuckTimeout) clearTimeout(stuckTimeout);
+    };
+  }, [isUploading, uploadProgress]);
+  
   // Always show the progress if we're uploading or at 100%
-  const shouldShow = showLoader || isUploading || uploadProgress === 100 || error;
+  const shouldShow = showLoader || isUploading || uploadProgress === 100 || error || isStuck;
   
   if (!shouldShow) {
     return null;
@@ -64,6 +82,8 @@ export const UploadProgress = ({
   let statusText = 'Uploading...';
   if (uploadProgress === 100 && !isUploading) {
     statusText = 'Upload complete!';
+  } else if (isStuck) {
+    statusText = 'Upload may be stuck. You can try again.';
   } else if (uploadProgress < 20) {
     statusText = 'Preparing upload...';
   } else if (uploadProgress < 80) {
@@ -89,7 +109,7 @@ export const UploadProgress = ({
       </div>
       <Progress 
         value={error ? 100 : displayProgress} 
-        className={`h-2 ${error ? 'bg-destructive/20' : ''}`}
+        className={`h-2 ${error ? 'bg-destructive/20' : isStuck ? 'bg-amber-200' : ''}`}
       />
     </div>
   );

@@ -10,7 +10,7 @@ export function useTransferNumbersState() {
   const [lastRefresh, setLastRefresh] = useState(Date.now());
   const [error, setError] = useState<string | null>(null);
   
-  // Force reset loading state after 10 seconds to prevent UI from getting stuck
+  // Force reset loading state after 5 seconds to prevent UI from getting stuck
   useEffect(() => {
     let timeoutId: number | undefined;
     
@@ -18,7 +18,7 @@ export function useTransferNumbersState() {
       timeoutId = window.setTimeout(() => {
         console.log("Loading timeout reached, resetting isLoading state");
         setIsLoading(false);
-      }, 10000);
+      }, 5000); // Shorter timeout for better UX
     }
     
     return () => {
@@ -31,7 +31,7 @@ export function useTransferNumbersState() {
     };
   }, [isLoading]);
   
-  // Reset isSubmitting after 5 seconds to prevent it from getting stuck
+  // Reset isSubmitting after 3 seconds to prevent it from getting stuck
   useEffect(() => {
     let submitTimeout: number | undefined;
     
@@ -39,7 +39,12 @@ export function useTransferNumbersState() {
       submitTimeout = window.setTimeout(() => {
         console.log("Submit timeout reached, resetting isSubmitting state");
         setIsSubmitting(false);
-      }, 5000);
+        toast({
+          title: "Operation timed out",
+          description: "The operation is taking longer than expected. Please check if it completed successfully.",
+          variant: "destructive"
+        });
+      }, 3000); // Shorter timeout
     }
     
     return () => {
