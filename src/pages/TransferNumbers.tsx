@@ -8,6 +8,8 @@ import { useAuth } from "@/contexts/auth";
 import { TransferNumbersHeader } from "@/components/transfer-numbers/TransferNumbersHeader";
 import { AuthRequiredAlert } from "@/components/transfer-numbers/AuthRequiredAlert";
 import { TransferNumbersContent } from "@/components/transfer-numbers/TransferNumbersContent";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 const TransferNumbers = () => {
   const { 
@@ -23,6 +25,7 @@ const TransferNumbers = () => {
   const { user, isLoading: isAuthLoading } = useAuth();
   const [initialLoad, setInitialLoad] = useState(true);
   const { toast } = useToast();
+  const [refreshAttempts, setRefreshAttempts] = useState(0);
   
   // Handle initial data loading
   useEffect(() => {
@@ -47,13 +50,46 @@ const TransferNumbers = () => {
       }
 
       // Set initialLoad to false after a delay to ensure smoother UX
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setInitialLoad(false);
       }, 800);
+      
+      return () => clearTimeout(timer);
     };
     
     loadData();
   }, [user, isAuthLoading, refreshTransferNumbers, toast]);
+  
+  // Force data refresh after multiple failed attempts
+  useEffect(() => {
+    if (refreshAttempts > 0) {
+      const attemptRefresh = async () => {
+        try {
+          await refreshTransferNumbers();
+          toast({
+            title: "Refresh attempt",
+            description: `Attempt ${refreshAttempts}: Trying to load your data again.`
+          });
+        } catch (err) {
+          console.error("Refresh attempt failed:", err);
+        }
+      };
+      
+      attemptRefresh();
+    }
+  }, [refreshAttempts, refreshTransferNumbers, toast]);
+
+  // Add automatic retry for persistent loading issues
+  useEffect(() => {
+    if (isLoading && !initialLoad) {
+      const retryTimer = setTimeout(() => {
+        // Auto-retry loading if stuck for too long
+        setRefreshAttempts(prev => prev + 1);
+      }, 20000); // 20 second auto-retry
+      
+      return () => clearTimeout(retryTimer);
+    }
+  }, [isLoading, initialLoad]);
   
   // Handler for adding a transfer number with improved error handling
   const handleAddTransferNumber = async (name: string, number: string, description: string) => {
@@ -93,9 +129,12 @@ const TransferNumbers = () => {
     
     try {
       await refreshTransferNumbers();
+      // Increment refresh attempts to trigger the effect that will reload data
+      setRefreshAttempts(prev => prev + 1);
+      
       toast({
-        title: "Refreshed",
-        description: "Transfer numbers have been refreshed"
+        title: "Refreshing data",
+        description: "Transfer numbers are being refreshed"
       });
     } catch (err: any) {
       console.error("Error refreshing transfer numbers:", err);
@@ -112,14 +151,32 @@ const TransferNumbers = () => {
     return (
       <DashboardLayout>
         <TransferNumbersHeader />
-        <LoadingState message="Checking authentication, please wait..." />
+        <LoadingState 
+          message="Checking authentication, please wait..." 
+          timeout={8000}
+        />
       </DashboardLayout>
     );
   }
   
   return (
     <DashboardLayout>
-      <TransferNumbersHeader />
+      <div className="flex justify-between items-center mb-6">
+        <TransferNumbersHeader />
+        
+        {!initialLoad && user && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleManualRefresh}
+            disabled={isAuthLoading}
+            className="gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+        )}
+      </div>
       
       <AuthRequiredAlert isVisible={!user} />
       
