@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, initialized } = useAuth();
   
   // Get the intended destination from location state, or default to dashboard
   const from = location.state?.from?.pathname || '/dashboard';
@@ -26,7 +27,7 @@ const Login = () => {
 
   // Redirect authenticated users to appropriate pages
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && initialized) {
       if (isAdminRedirect && !isAdmin) {
         // If trying to reach admin but not an admin
         navigate('/unauthorized', { 
@@ -39,7 +40,7 @@ const Login = () => {
         navigate(from, { replace: true });
       }
     }
-  }, [isAuthenticated, navigate, from, isAdmin, isAdminRedirect]);
+  }, [isAuthenticated, navigate, from, isAdmin, isAdminRedirect, initialized]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

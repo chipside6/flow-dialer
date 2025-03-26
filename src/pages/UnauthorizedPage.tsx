@@ -9,7 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, initialized } = useAuth();
   
   // Check if user came from admin panel
   const isFromAdmin = location.state?.from?.pathname === '/admin';
@@ -40,10 +40,15 @@ const UnauthorizedPage = () => {
         <div className="space-y-4">
           {isAuthenticated ? (
             <>
-              {isFromAdmin && !isAdmin && (
+              {isFromAdmin && isAdmin === false && (
                 <p className="text-sm text-center text-muted-foreground mb-4">
                   Your account doesn't have administrator privileges. 
-                  {isAdmin === false ? ' Please contact an administrator for access.' : ' Checking privileges...'}
+                  Please contact an administrator for access.
+                </p>
+              )}
+              {isFromAdmin && isAdmin === null && !initialized && (
+                <p className="text-sm text-center text-muted-foreground mb-4">
+                  Checking your privileges...
                 </p>
               )}
               <Button 

@@ -12,7 +12,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -20,12 +20,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log("AuthProvider: Checking for existing session");
     
+    let isMounted = true;
     let authStateChangeComplete = false;
     let sessionCheckComplete = false;
     
     // Set a timeout to prevent infinite loading
     const timeout = setTimeout(() => {
-      if (!initialized) {
+      if (isMounted && !initialized) {
         console.log("AuthProvider: Timeout reached, forcing initialization");
         setIsLoading(false);
         setSessionChecked(true);
@@ -36,6 +37,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state change listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return;
+        
         console.log('AuthProvider: Auth state changed:', event);
         authStateChangeComplete = true;
         
@@ -69,10 +72,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               };
               setProfile(updatedProfile);
               setIsAdmin(!!updatedProfile.is_admin);
+            } else {
+              // Set isAdmin to false when no profile is found
+              setIsAdmin(false);
             }
           } catch (error) {
             console.error("AuthProvider: Error during sign in:", error);
             setError(error instanceof Error ? error : new Error('Unknown error during sign in'));
+            setIsAdmin(false); // Default to non-admin on error
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
@@ -85,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         }
         
-        if (sessionCheckComplete) {
+        if (sessionCheckComplete && isMounted) {
           setIsLoading(false);
           setSessionChecked(true);
           setInitialized(true);
@@ -97,6 +104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // THEN check for existing session
     const checkSession = async () => {
       try {
+        if (!isMounted) return;
+        
         console.log("AuthProvider: Getting current session");
         
         // Get current user session
@@ -143,9 +152,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               };
               setProfile(updatedProfile);
               setIsAdmin(!!updatedProfile.is_admin);
+            } else {
+              // Set isAdmin to false when no profile is found
+              setIsAdmin(false);
             }
           } catch (profileError) {
             console.error("AuthProvider: Error fetching profile:", profileError);
+            setIsAdmin(false); // Default to non-admin on error
           }
         } else {
           console.log("AuthProvider: No active session found");
@@ -156,14 +169,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error('AuthProvider: Error checking session:', error);
         setError(error instanceof Error ? error : new Error('Unknown error during session check'));
+        setIsAdmin(false); // Default to non-admin on error
       } finally {
-        sessionCheckComplete = true;
-        
-        if (authStateChangeComplete) {
-          setIsLoading(false);
-          setSessionChecked(true);
-          setInitialized(true);
-          clearTimeout(timeout);
+        if (isMounted) {
+          sessionCheckComplete = true;
+          
+          if (authStateChangeComplete) {
+            setIsLoading(false);
+            setSessionChecked(true);
+            setInitialized(true);
+            clearTimeout(timeout);
+          }
         }
       }
     };
@@ -172,6 +188,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Clean up
     return () => {
+      isMounted = false;
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
@@ -182,20 +199,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setProfile(newProfile);
     if (newProfile) {
       setIsAdmin(!!newProfile.is_admin);
+    } else {
+      setIsAdmin(false);
     }
   };
   
   // Handler for signing out
   const signOut = async () => {
-    const result = await signOutUser();
-    return result;
+    try {
+      setIsLoading(true);
+      const result = await signOutUser();
+      
+      if (!result.success) {
+        console.error("AuthProvider: Error during sign out:", result.error);
+        // Still reset state even if API call fails
+        setUser(null);
+        setProfile(null);
+        setIsAdmin(false);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error("AuthProvider: Unexpected error during sign out:", error);
+      // Reset state on error too
+      setUser(null);
+      setProfile(null);
+      setIsAdmin(false);
+      return { success: true, error };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   console.log("AuthProvider: Current state:", { 
     isAuthenticated: !!user, 
     isLoading, 
     initialized, 
-    sessionChecked 
+    sessionChecked,
+    isAdmin
   });
 
   const value = {
@@ -203,7 +244,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     isLoading,
     isAuthenticated: !!user,
-    isAdmin,
+    isAdmin: !!isAdmin, // Ensure this is always a boolean
     error,
     sessionChecked,
     initialized,

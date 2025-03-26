@@ -38,36 +38,42 @@ export const signOutUser = async () => {
   console.log("authActions - Signing out user");
   
   try {
-    // Clear ALL known auth-related localStorage items
-    localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
-    localStorage.removeItem('supabase.auth.token');
-    localStorage.removeItem('user_session');
+    // First, try to sign out from Supabase
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+      console.log("authActions - Supabase signOut completed");
+    } catch (supabaseError) {
+      console.warn("authActions - Supabase signOut warning:", supabaseError);
+      // Continue with the sign out process even if this fails
+    }
     
-    // Use a for-loop instead of forEach with Object.keys to handle
-    // potential asynchronous issues when removing multiple items
-    const localStorageKeys = Object.keys(localStorage);
-    for (let i = 0; i < localStorageKeys.length; i++) {
-      const key = localStorageKeys[i];
-      if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
-        console.log(`authActions - Removing localStorage item: ${key}`);
-        localStorage.removeItem(key);
+    // Then clear ALL known auth-related localStorage items for good measure
+    try {
+      localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('user_session');
+      
+      // Use a for-loop to handle potential asynchronous issues when removing multiple items
+      const localStorageKeys = Object.keys(localStorage);
+      for (let i = 0; i < localStorageKeys.length; i++) {
+        const key = localStorageKeys[i];
+        if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+          console.log(`authActions - Removing localStorage item: ${key}`);
+          localStorage.removeItem(key);
+        }
       }
+    } catch (storageError) {
+      console.warn("authActions - Local storage clear warning:", storageError);
+      // Continue even if localStorage clearing fails
     }
     
     try {
       // Try to sign out from backend API (not critical if this fails)
       await apiSignOut();
+      console.log("authActions - API sign out completed");
     } catch (apiError) {
       console.warn("authActions - API sign out warning:", apiError);
       // Continue with the sign out process even if the API call fails
-    }
-    
-    try {
-      // Try to sign out from Supabase (not critical if this fails)
-      await supabase.auth.signOut({ scope: 'global' });
-    } catch (supabaseError) {
-      console.warn("authActions - Supabase signOut warning:", supabaseError);
-      // Continue with the sign out process even if this fails
     }
     
     console.log("authActions - Logout process completed successfully");

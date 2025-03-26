@@ -11,18 +11,21 @@ interface LoadingStateProps {
 
 export const LoadingState: React.FC<LoadingStateProps> = ({ 
   message, 
-  timeout = 8000, // Reduced default timeout
+  timeout = 10000, // Default timeout increased to 10 seconds
   onRetry
 }) => {
   const [isTimedOut, setIsTimedOut] = useState(false);
   
   useEffect(() => {
+    // Reset the timeout state when the component re-renders with new props
+    setIsTimedOut(false);
+    
     const timer = setTimeout(() => {
       setIsTimedOut(true);
     }, timeout);
     
     return () => clearTimeout(timer);
-  }, [timeout]);
+  }, [timeout, message, onRetry]); // Add dependencies to reset timer when props change
   
   return (
     <div className="flex flex-col justify-center items-center min-h-[40vh]">

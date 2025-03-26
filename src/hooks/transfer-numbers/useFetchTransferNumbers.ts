@@ -16,10 +16,10 @@ export const useFetchTransferNumbers = ({
   setIsLoading,
   setError,
 }: UseFetchTransferNumbersState) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const fetchTransferNumbers = useCallback(async () => {
-    if (!user) {
+    if (!isAuthenticated || !user) {
       console.log("No authenticated user, can't fetch transfer numbers");
       setTransferNumbers([]);
       setIsLoading(false);
@@ -43,7 +43,7 @@ export const useFetchTransferNumbers = ({
       }, 15000); // 15 second timeout - increased from 8 seconds
 
       // Fetch with abort signal
-      const data = await fetchUserTransferNumbers(user.id);
+      const data = await fetchUserTransferNumbers(user.id, signal);
       
       // Clear timeout since fetch completed successfully
       clearTimeout(timeoutId);
@@ -76,7 +76,7 @@ export const useFetchTransferNumbers = ({
       // Ensure loading state is cleared
       setIsLoading(false);
     }
-  }, [user, setTransferNumbers, setIsLoading, setError]);
+  }, [user, isAuthenticated, setTransferNumbers, setIsLoading, setError]);
 
   return { fetchTransferNumbers };
 };

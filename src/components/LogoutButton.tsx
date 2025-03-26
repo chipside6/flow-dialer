@@ -32,25 +32,32 @@ const LogoutButton = ({
     setIsLoggingOut(true);
     
     try {
-      // First navigate to login page immediately
+      // First navigate to login page immediately to ensure rapid UI response
       navigate("/login", { replace: true });
-      
-      // Then attempt to sign out
-      await signOut();
       
       // Call optional callback if provided
       if (onClick) onClick();
       
-      toast({
-        title: "Logged out successfully",
-        description: "You have been signed out of your account",
-      });
+      // Then attempt to sign out
+      const { success, error } = await signOut();
+      
+      if (success) {
+        toast({
+          title: "Logged out successfully",
+          description: "You have been signed out of your account",
+        });
+      } else if (error) {
+        console.error("LogoutButton - Error during logout:", error);
+        toast({
+          title: "Logout issue",
+          description: "Signed out, but encountered an issue cleaning up session data",
+        });
+      }
     } catch (error: any) {
       console.error("LogoutButton - Error during logout:", error);
       toast({
-        title: "Logout failed",
-        description: error.message || "An error occurred during logout",
-        variant: "destructive",
+        title: "Logout completed",
+        description: "Signed out, but encountered an error: " + (error.message || "Unknown error"),
       });
     } finally {
       setIsLoggingOut(false);
