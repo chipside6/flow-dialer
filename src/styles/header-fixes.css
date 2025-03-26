@@ -42,3 +42,34 @@
   position: relative;
   z-index: 50;
 }
+
+/* Fix content overlap and scrolling issues */
+body, html {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Ensure proper content spacing with sidebar */
+[data-sidebar-inset] {
+  padding-top: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Fix dashboard container scrolling */
+.dashboard-content-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Fix campaign page spacing */
+.campaign-content {
+  padding-top: 0 !important;
+  padding-bottom: 2rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}

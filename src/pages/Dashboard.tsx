@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Navbar } from "@/components/Navbar";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Suspense } from "react";
@@ -19,7 +18,6 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <SidebarProvider>
         <div className="min-h-screen bg-background flex flex-col w-full">
-          <Navbar />
           <div className="flex flex-1 w-full max-w-full overflow-hidden">
             <DashboardLayout>
               <Suspense fallback={<DashboardFallback />}>

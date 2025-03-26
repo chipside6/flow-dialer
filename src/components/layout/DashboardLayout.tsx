@@ -35,8 +35,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* DashboardSidebar contains its own header on mobile */}
       <DashboardSidebar />
       <DashboardContent>
-        {/* Add extra padding-top for mobile to avoid overlap with sidebar button */}
-        <div className={isMobile ? "pt-16 sm:pt-0" : ""}>
+        {/* No extra padding needed here - let child components handle their own spacing */}
+        <div className="w-full max-w-full overflow-x-hidden">
           {children}
         </div>
       </DashboardContent>

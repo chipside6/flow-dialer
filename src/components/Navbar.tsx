@@ -67,8 +67,9 @@ export const Navbar = () => {
     };
   }, [isDashboard, openMobile]);
 
+  // Don't render navbar on dashboard pages - use the sidebar with dashboard header instead
   if (isDashboard) {
-    return <DashboardNavbar toggleSidebar={toggleSidebar} />;
+    return null;
   }
 
   return (
