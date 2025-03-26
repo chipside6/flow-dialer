@@ -42,8 +42,8 @@ export const useFetchTransferNumbers = ({
         throw new Error("Request timed out. Please try again.");
       }, 15000); // 15 second timeout - increased from 8 seconds
 
-      // Fetch with abort signal
-      const data = await fetchUserTransferNumbers(user.id, signal);
+      // Fetch transfer numbers - passing only user.id since the service doesn't accept signal
+      const data = await fetchUserTransferNumbers(user.id);
       
       // Clear timeout since fetch completed successfully
       clearTimeout(timeoutId);
