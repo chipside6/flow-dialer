@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Sidebar, SidebarContent, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 import { 
@@ -59,7 +58,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="bg-[#9b87f5] text-white">
+      <SidebarHeader className="bg-[#7e69ab] text-white">
         <div className="flex items-center p-4 justify-between">
           <Logo withText={true} className="text-white" />
           
@@ -68,7 +67,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-white hover:bg-primary/80" 
+              className="text-white hover:bg-white/20" 
               onClick={() => {
                 setOpenMobile(false);
                 if (onCloseMobile) onCloseMobile();
