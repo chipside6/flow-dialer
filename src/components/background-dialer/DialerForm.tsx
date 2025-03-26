@@ -1,11 +1,11 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Play } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SipProvider, ContactList, DialerFormData } from "./types";
+import { Phone, Loader2 } from "lucide-react";
 
 interface DialerFormProps {
   sipProviders: SipProvider[];
@@ -15,6 +15,7 @@ interface DialerFormProps {
   isLoadingLists: boolean;
   onChange: (field: keyof DialerFormData, value: string) => void;
   onStart: () => void;
+  disableSipProviderSelect?: boolean;
 }
 
 const DialerForm: React.FC<DialerFormProps> = ({
@@ -24,25 +25,41 @@ const DialerForm: React.FC<DialerFormProps> = ({
   isLoadingProviders,
   isLoadingLists,
   onChange,
-  onStart
+  onStart,
+  disableSipProviderSelect = false
 }) => {
+  const isFormValid = 
+    formData.sipProviderId && 
+    formData.contactListId && 
+    formData.transferNumber;
+  
+  // Get name of selected SIP provider for display when disabled
+  const selectedProviderName = sipProviders.find(p => p.id === formData.sipProviderId)?.name || '';
+    
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="sip-provider">SIP Provider</Label>
+      <div className="space-y-2">
+        <Label htmlFor="sipProvider">SIP Provider</Label>
+        {disableSipProviderSelect ? (
+          <div className="flex items-center border rounded-md p-2 bg-muted/50">
+            <span>{selectedProviderName || 'Selected provider'}</span>
+          </div>
+        ) : (
           <Select
             value={formData.sipProviderId}
-            onValueChange={(value) => onChange("sipProviderId", value)}
+            onValueChange={(value) => onChange('sipProviderId', value)}
+            disabled={isLoadingProviders || disableSipProviderSelect}
           >
-            <SelectTrigger id="sip-provider" disabled={isLoadingProviders}>
-              <SelectValue placeholder={isLoadingProviders ? "Loading..." : "Select a SIP provider"} />
+            <SelectTrigger id="sipProvider" className="w-full">
+              <SelectValue placeholder="Select a SIP provider" />
             </SelectTrigger>
             <SelectContent>
               {sipProviders.length === 0 ? (
-                <SelectItem value="none" disabled>No SIP providers available</SelectItem>
+                <SelectItem value="no-providers" disabled>
+                  No SIP providers available
+                </SelectItem>
               ) : (
-                sipProviders.map(provider => (
+                sipProviders.map((provider) => (
                   <SelectItem key={provider.id} value={provider.id}>
                     {provider.name}
                   </SelectItem>
@@ -50,62 +67,62 @@ const DialerForm: React.FC<DialerFormProps> = ({
               )}
             </SelectContent>
           </Select>
-        </div>
-        
-        <div>
-          <Label htmlFor="contact-list">Contact List</Label>
-          <Select
-            value={formData.contactListId}
-            onValueChange={(value) => onChange("contactListId", value)}
-          >
-            <SelectTrigger id="contact-list" disabled={isLoadingLists}>
-              <SelectValue placeholder={isLoadingLists ? "Loading..." : "Select a contact list"} />
-            </SelectTrigger>
-            <SelectContent>
-              {contactLists.length === 0 ? (
-                <SelectItem value="none" disabled>No contact lists available</SelectItem>
-              ) : (
-                contactLists.map(list => (
-                  <SelectItem key={list.id} value={list.id}>
-                    {list.name} ({list.contactCount} contacts)
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-        </div>
+        )}
       </div>
       
-      <div>
-        <Label htmlFor="transfer-number">Transfer Number (Optional)</Label>
-        <Input
-          id="transfer-number"
-          placeholder="Enter transfer destination"
-          value={formData.transferNumber}
-          onChange={(e) => onChange("transferNumber", e.target.value)}
-        />
-      </div>
-      
-      <div>
-        <Label htmlFor="greeting-file">Greeting Audio File</Label>
-        <Input
-          id="greeting-file"
-          placeholder="greeting.wav"
-          value={formData.greetingFile}
-          onChange={(e) => onChange("greetingFile", e.target.value)}
-        />
-      </div>
-      
-      <div className="flex justify-end space-x-2">
-        <Button 
-          onClick={onStart} 
-          className="bg-green-600 hover:bg-green-700"
-          disabled={isLoadingProviders || isLoadingLists || sipProviders.length === 0 || contactLists.length === 0}
+      <div className="space-y-2">
+        <Label htmlFor="contactList">Contact List</Label>
+        <Select
+          value={formData.contactListId}
+          onValueChange={(value) => onChange('contactListId', value)}
+          disabled={isLoadingLists}
         >
-          <Play className="mr-2 h-4 w-4" />
-          Start Dialing
-        </Button>
+          <SelectTrigger id="contactList" className="w-full">
+            <SelectValue placeholder="Select a contact list" />
+          </SelectTrigger>
+          <SelectContent>
+            {contactLists.length === 0 ? (
+              <SelectItem value="no-lists" disabled>
+                No contact lists available
+              </SelectItem>
+            ) : (
+              contactLists.map((list) => (
+                <SelectItem key={list.id} value={list.id}>
+                  {list.name} ({list.contactCount} contacts)
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
       </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="transferNumber">Transfer Number</Label>
+        <Input
+          id="transferNumber"
+          value={formData.transferNumber}
+          onChange={(e) => onChange('transferNumber', e.target.value)}
+          placeholder="e.g. +1234567890"
+        />
+      </div>
+      
+      <Button
+        onClick={onStart}
+        disabled={!isFormValid || isLoadingProviders || isLoadingLists}
+        className="w-full"
+      >
+        {isLoadingProviders || isLoadingLists ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Loading...
+          </>
+        ) : (
+          <>
+            <Phone className="h-4 w-4 mr-2" />
+            Start Dialing
+          </>
+        )}
+      </Button>
     </div>
   );
 };

@@ -19,6 +19,7 @@ export const fetchCampaigns = async (userId: string) => {
       greetingFileUrl: item.greeting_file_url || item.greetingFileUrl || "",
       greetingFileName: item.greeting_file_name || item.greetingFileName || "",
       transferNumber: item.transfer_number || item.transferNumber || "",
+      sipProviderId: item.sip_provider_id || item.sipProviderId || "",
       progress: item.progress || 0,
       totalCalls: item.total_calls || item.totalCalls || 0,
       answeredCalls: item.answered_calls || item.answeredCalls || 0,
@@ -54,6 +55,23 @@ export const createCampaign = async (campaign: any, userId: string) => {
     return data;
   } catch (error) {
     console.error(`[CampaignsService] Error in createCampaign:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch Asterisk configuration for a campaign
+ */
+export const fetchAsteriskConfig = async (campaignId: string) => {
+  console.log(`[CampaignsService] Fetching Asterisk config for campaign: ${campaignId}`);
+  
+  try {
+    const data = await apiFetch<{sipConfig: string, dialplanConfig: string}>(`campaigns/asterisk-config/${campaignId}`);
+    console.log(`[CampaignsService] Successfully fetched Asterisk config`);
+    
+    return data;
+  } catch (error) {
+    console.error(`[CampaignsService] Error in fetchAsteriskConfig:`, error);
     throw error;
   }
 };

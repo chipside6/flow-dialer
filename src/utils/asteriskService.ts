@@ -135,5 +135,38 @@ export const asteriskService = {
         failedCalls: 0
       };
     }
+  },
+
+  /**
+   * Generate Asterisk configuration for a campaign
+   */
+  generateAsteriskConfig: async (campaignId: string): Promise<{
+    sipConfig: string;
+    dialplanConfig: string;
+  }> => {
+    console.log("Generating Asterisk config for campaign:", campaignId);
+    
+    try {
+      const response = await fetch(`${ASTERISK_API_URL}/generate-config/${campaignId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate Asterisk config');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error generating Asterisk config:", error);
+      handleDialerError(createDialerError(
+        DialerErrorType.CONFIG,
+        "Could not generate Asterisk configuration.",
+        error
+      ));
+      
+      return {
+        sipConfig: '',
+        dialplanConfig: ''
+      };
+    }
   }
 };

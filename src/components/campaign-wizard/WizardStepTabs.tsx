@@ -1,70 +1,54 @@
 
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { WizardStep } from "./types";
+import { FileText, Users, Audio, PhoneForwarded, CalendarClock, ClipboardCheck, Server } from "lucide-react";
 
 interface WizardStepTabsProps {
   currentStep: WizardStep;
   setStep: (step: WizardStep) => void;
-  isStepAvailable: Record<Exclude<WizardStep, "basics">, boolean>;
+  isStepAvailable: Record<WizardStep, boolean>;
 }
 
-export const WizardStepTabs = ({ currentStep, setStep, isStepAvailable }: WizardStepTabsProps) => {
+export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
+  currentStep,
+  setStep,
+  isStepAvailable
+}) => {
+  const steps = [
+    { id: "basics", label: "Basics", icon: <FileText className="h-4 w-4" /> },
+    { id: "contacts", label: "Contacts", icon: <Users className="h-4 w-4" /> },
+    { id: "audio", label: "Audio", icon: <Audio className="h-4 w-4" /> },
+    { id: "transfers", label: "Transfers", icon: <PhoneForwarded className="h-4 w-4" /> },
+    { id: "sipProvider", label: "SIP Provider", icon: <Server className="h-4 w-4" /> },
+    { id: "schedule", label: "Schedule", icon: <CalendarClock className="h-4 w-4" /> },
+    { id: "review", label: "Review", icon: <ClipboardCheck className="h-4 w-4" /> }
+  ];
+
   return (
-    <div className="w-full px-1 mb-4">
-      <ScrollArea className="w-full pb-2">
-        <TabsList className="inline-flex w-full min-w-max">
-          <TabsTrigger 
-            value="basics" 
-            onClick={() => currentStep !== "basics" && setStep("basics")} 
-            className="text-xs md:text-sm px-3 py-2 whitespace-nowrap"
-          >
-            Basics
-          </TabsTrigger>
-          <TabsTrigger 
-            value="contacts" 
-            onClick={() => currentStep !== "contacts" && isStepAvailable.contacts && setStep("contacts")} 
-            className="text-xs md:text-sm px-3 py-2 whitespace-nowrap"
-            disabled={!isStepAvailable.contacts}
-          >
-            Contacts
-          </TabsTrigger>
-          <TabsTrigger 
-            value="audio" 
-            onClick={() => currentStep !== "audio" && isStepAvailable.audio && setStep("audio")} 
-            className="text-xs md:text-sm px-3 py-2 whitespace-nowrap"
-            disabled={!isStepAvailable.audio}
-          >
-            Audio
-          </TabsTrigger>
-          <TabsTrigger 
-            value="transfers" 
-            onClick={() => currentStep !== "transfers" && isStepAvailable.transfers && setStep("transfers")} 
-            className="text-xs md:text-sm px-3 py-2 whitespace-nowrap"
-            disabled={!isStepAvailable.transfers}
-          >
-            Transfers
-          </TabsTrigger>
-          <TabsTrigger 
-            value="schedule" 
-            onClick={() => currentStep !== "schedule" && isStepAvailable.schedule && setStep("schedule")} 
-            className="text-xs md:text-sm px-3 py-2 whitespace-nowrap"
-            disabled={!isStepAvailable.schedule}
-          >
-            Schedule
-          </TabsTrigger>
-          <TabsTrigger 
-            value="review" 
-            onClick={() => currentStep !== "review" && isStepAvailable.review && setStep("review")} 
-            className="text-xs md:text-sm px-3 py-2 whitespace-nowrap"
-            disabled={!isStepAvailable.review}
-          >
-            Review
-          </TabsTrigger>
-        </TabsList>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-    </div>
+    <TabsList className="grid grid-cols-7 mb-6 max-w-4xl mx-auto overflow-x-auto scrollbar-hide">
+      {steps.map((step) => (
+        <TabsTrigger
+          key={step.id}
+          value={step.id}
+          onClick={() => {
+            if (isStepAvailable[step.id as WizardStep]) {
+              setStep(step.id as WizardStep);
+            }
+          }}
+          disabled={!isStepAvailable[step.id as WizardStep]}
+          className={`flex flex-col items-center justify-center py-2 px-1 sm:px-3 ${
+            currentStep === step.id
+              ? "bg-primary text-primary-foreground font-medium"
+              : "text-muted-foreground"
+          } ${!isStepAvailable[step.id as WizardStep] ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          <span className="flex items-center justify-center mb-1">
+            {step.icon}
+          </span>
+          <span className="text-xs truncate max-w-full">{step.label}</span>
+        </TabsTrigger>
+      ))}
+    </TabsList>
   );
 };

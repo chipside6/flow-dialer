@@ -8,9 +8,10 @@ import { useBackgroundDialer } from "@/hooks/background-dialer/useBackgroundDial
 
 interface BackgroundDialerProps {
   campaignId: string;
+  sipProviderId?: string;
 }
 
-const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
+const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProviderId }) => {
   const {
     sipProviders,
     contactLists,
@@ -26,6 +27,13 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
   } = useBackgroundDialer(campaignId);
   
   const [isStuck, setIsStuck] = useState(false);
+  
+  // Set SIP provider if provided
+  useEffect(() => {
+    if (sipProviderId && formData.sipProviderId !== sipProviderId) {
+      handleFormChange("sipProviderId", sipProviderId);
+    }
+  }, [sipProviderId, formData.sipProviderId]);
   
   // Check if loading is taking too long
   useEffect(() => {
@@ -80,6 +88,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
                 isLoadingLists={isLoadingLists}
                 onChange={handleFormChange}
                 onStart={startDialing}
+                disableSipProviderSelect={!!sipProviderId}
               />
             ) : (
               <DialerStatusDisplay

@@ -6,6 +6,7 @@ export interface CampaignData {
   contactListId: string;
   greetingFileId: string;
   transferNumber: string;
+  sipProviderId: string; // New field for SIP provider selection
   schedule: {
     startDate: string;
     maxConcurrentCalls: number;
@@ -20,7 +21,7 @@ export interface CampaignData {
   user_id?: string;
 }
 
-export type WizardStep = "basics" | "contacts" | "audio" | "transfers" | "schedule" | "review";
+export type WizardStep = "basics" | "contacts" | "audio" | "transfers" | "sipProvider" | "schedule" | "review";
 
 export interface ContactList {
   id: string;

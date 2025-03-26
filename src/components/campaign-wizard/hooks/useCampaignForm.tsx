@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { CampaignData, WizardStep } from "../types";
@@ -15,6 +16,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     contactListId: "",
     greetingFileId: "",
     transferNumber: "",
+    sipProviderId: "", // Initialize SIP provider ID
     schedule: {
       startDate: new Date().toISOString().split("T")[0],
       maxConcurrentCalls: 1 // Fixed value of 1
@@ -90,7 +92,8 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
             user_id: authUser.id,
             contact_list_id: newCampaign.contactListId || null,
             transfer_number: newCampaign.transferNumber || null,
-            greeting_file_url: newCampaign.greetingFileId || null
+            greeting_file_url: newCampaign.greetingFileId || null,
+            sip_provider_id: newCampaign.sipProviderId || null // Add SIP provider ID
           })
           .select();
           
