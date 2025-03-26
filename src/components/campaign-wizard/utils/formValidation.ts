@@ -71,3 +71,13 @@ export const getPreviousStep = (currentStep: WizardStep): WizardStep => {
       return "basics";
   }
 };
+
+// Create a hook that wraps all validation functions
+export const useFormValidation = () => {
+  return {
+    validateStep,
+    getStepAvailability,
+    getNextStep,
+    getPreviousStep
+  };
+};

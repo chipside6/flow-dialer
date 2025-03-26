@@ -2,7 +2,7 @@
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WizardStep } from "./types";
-import { FileText, Users, Audio, PhoneForwarded, CalendarClock, ClipboardCheck, Server } from "lucide-react";
+import { FileText, Users, Radio, PhoneForwarded, CalendarClock, ClipboardCheck, Server } from "lucide-react";
 
 interface WizardStepTabsProps {
   currentStep: WizardStep;
@@ -18,7 +18,7 @@ export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
   const steps = [
     { id: "basics", label: "Basics", icon: <FileText className="h-4 w-4" /> },
     { id: "contacts", label: "Contacts", icon: <Users className="h-4 w-4" /> },
-    { id: "audio", label: "Audio", icon: <Audio className="h-4 w-4" /> },
+    { id: "audio", label: "Audio", icon: <Radio className="h-4 w-4" /> },
     { id: "transfers", label: "Transfers", icon: <PhoneForwarded className="h-4 w-4" /> },
     { id: "sipProvider", label: "SIP Provider", icon: <Server className="h-4 w-4" /> },
     { id: "schedule", label: "Schedule", icon: <CalendarClock className="h-4 w-4" /> },

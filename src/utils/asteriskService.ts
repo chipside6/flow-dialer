@@ -158,7 +158,7 @@ export const asteriskService = {
     } catch (error) {
       console.error("Error generating Asterisk config:", error);
       handleDialerError(createDialerError(
-        DialerErrorType.CONFIG,
+        DialerErrorType.CONFIGURATION,
         "Could not generate Asterisk configuration.",
         error
       ));
