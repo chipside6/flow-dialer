@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Sidebar, SidebarContent, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 import { 
@@ -45,6 +46,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
     { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5" /> },
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
+    { name: "Billing", path: "/billing", icon: <CreditCard className="h-5 w-5" /> },
   ];
   
   // Show upgrade link for free users
@@ -58,7 +60,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="bg-[#7e69ab] text-white">
+      <SidebarHeader className="bg-primary text-white dark:bg-primary/90">
         <div className="flex items-center p-4 justify-between">
           <Logo withText={true} className="text-white" />
           
@@ -106,6 +108,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
               variant="ghost" 
               className="w-full justify-start py-3 px-4 text-left" 
               onClick={handleItemClick}
+              position="left"
             />
           </div>
         </nav>

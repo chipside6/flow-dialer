@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import LogoutButton from '@/components/LogoutButton';
 import { Logo } from '@/components/ui/Logo';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DashboardNavbarProps {
   toggleSidebar: () => void;
@@ -18,6 +19,13 @@ interface DashboardNavbarProps {
 
 export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
   const { profile } = useAuth();
+  const isMobile = useIsMobile();
+  
+  // Only render the navbar when not on mobile
+  // On mobile, this content is shown in the sidebar header
+  if (isMobile) {
+    return null;
+  }
   
   return (
     <header 
@@ -43,13 +51,13 @@ export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full w-12 h-12">
+              <Button variant="ghost" size="icon" className="rounded-full w-12 h-12 relative">
                 <User className="h-6 w-6" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="min-w-[180px]">
               <DropdownMenuItem asChild>
-                <Link to="/profile">Profile</Link>
+                <Link to="/profile" className="w-full cursor-pointer">Profile</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <LogoutButton variant="ghost" className="w-full justify-start p-0" />

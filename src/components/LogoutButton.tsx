@@ -32,9 +32,6 @@ const LogoutButton = ({
     setIsLoggingOut(true);
     
     try {
-      // First navigate to login page immediately to ensure rapid UI response
-      navigate("/login", { replace: true });
-      
       // Call optional callback if provided
       if (onClick) onClick();
       
@@ -46,19 +43,30 @@ const LogoutButton = ({
           title: "Logged out successfully",
           description: "You have been signed out of your account",
         });
+        
+        // Navigate to login page after successful logout
+        navigate("/login", { replace: true });
       } else if (error) {
         console.error("LogoutButton - Error during logout:", error);
         toast({
           title: "Logout issue",
-          description: "Signed out, but encountered an issue cleaning up session data",
+          description: "Encountered an issue during logout. You may need to clear your browser cache.",
+          variant: "destructive"
         });
+        
+        // Still navigate to login even if there was an error
+        navigate("/login", { replace: true });
       }
     } catch (error: any) {
       console.error("LogoutButton - Error during logout:", error);
       toast({
-        title: "Logout completed",
-        description: "Signed out, but encountered an error: " + (error.message || "Unknown error"),
+        title: "Logout error",
+        description: "An error occurred during logout: " + (error.message || "Unknown error"),
+        variant: "destructive"
       });
+      
+      // Force navigation to login on error
+      navigate("/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
     }
@@ -74,7 +82,8 @@ const LogoutButton = ({
       className={buttonClasses}
       disabled={isLoggingOut}
     >
-      <LogOut className="h-4 w-4 mr-2" /> <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+      <LogOut className="h-4 w-4 mr-2" /> 
+      <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
     </Button>
   );
 };

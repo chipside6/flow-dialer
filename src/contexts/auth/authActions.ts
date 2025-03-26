@@ -49,16 +49,14 @@ export const signOutUser = async () => {
     
     // Then clear ALL known auth-related localStorage items for good measure
     try {
+      // Use a simpler approach for clearing critical auth data
       localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
       localStorage.removeItem('supabase.auth.token');
       localStorage.removeItem('user_session');
       
-      // Use a for-loop to handle potential asynchronous issues when removing multiple items
-      const localStorageKeys = Object.keys(localStorage);
-      for (let i = 0; i < localStorageKeys.length; i++) {
-        const key = localStorageKeys[i];
+      // Clear any other auth-related items
+      for (const key of Object.keys(localStorage)) {
         if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
-          console.log(`authActions - Removing localStorage item: ${key}`);
           localStorage.removeItem(key);
         }
       }
