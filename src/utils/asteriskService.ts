@@ -14,8 +14,19 @@ interface DialContactsOptions {
   maxConcurrentCalls?: number;
 }
 
-// Configuration for connecting to your Asterisk server
-const ASTERISK_API_URL = "http://your-asterisk-server/api"; // Replace with your actual Asterisk API URL
+// Replace this with your actual Asterisk API URL
+const ASTERISK_API_URL = "http://your-asterisk-server:8088/ari"; // Update with your actual Asterisk server address
+const ASTERISK_API_USERNAME = "asterisk"; // Update with your Asterisk API username
+const ASTERISK_API_PASSWORD = "asterisk"; // Update with your Asterisk API password
+
+// Authentication headers for Asterisk REST Interface
+const getAuthHeaders = () => {
+  const basicAuth = btoa(`${ASTERISK_API_USERNAME}:${ASTERISK_API_PASSWORD}`);
+  return {
+    'Authorization': `Basic ${basicAuth}`,
+    'Content-Type': 'application/json',
+  };
+};
 
 export const asteriskService = {
   /**
@@ -27,19 +38,21 @@ export const asteriskService = {
     console.log("Starting dial job with options:", options);
     
     try {
-      // Make an actual API call to your backend which controls Asterisk
-      const response = await fetch(`${ASTERISK_API_URL}/start-dialing`, {
+      // Make an actual API call to your Asterisk server
+      const response = await fetch(`${ASTERISK_API_URL}/channels/create`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
-          contactListId,
-          campaignId,
-          transferNumber,
-          sipProviderId,
-          greetingFile,
-          maxConcurrentCalls: 1 // Fixed at 1
+          endpoint: sipProviderId,
+          extension: 'start-campaign',
+          context: `campaign-${campaignId}`,
+          variables: {
+            CAMPAIGN_ID: campaignId,
+            CONTACT_LIST_ID: contactListId,
+            TRANSFER_NUMBER: transferNumber || '',
+            GREETING_FILE: greetingFile || 'beep',
+            MAX_CONCURRENT: options.maxConcurrentCalls || 1
+          }
         }),
       });
       
@@ -50,7 +63,7 @@ export const asteriskService = {
       
       const data = await response.json();
       return {
-        jobId: data.jobId
+        jobId: data.id || `job-${Date.now()}`
       };
     } catch (error) {
       console.error("Error starting dialing job:", error);
@@ -74,8 +87,9 @@ export const asteriskService = {
     console.log("Stopping dial job:", jobId);
     
     try {
-      const response = await fetch(`${ASTERISK_API_URL}/stop-dialing/${jobId}`, {
-        method: 'POST',
+      const response = await fetch(`${ASTERISK_API_URL}/channels/${jobId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
       });
       
       if (!response.ok) {
@@ -83,8 +97,7 @@ export const asteriskService = {
         throw new Error(errorData.message || 'Failed to stop dialing');
       }
       
-      const data = await response.json();
-      return { success: data.success };
+      return { success: true };
     } catch (error) {
       console.error("Error stopping dialing job:", error);
       handleDialerError(createDialerError(
@@ -110,14 +123,25 @@ export const asteriskService = {
     console.log("Getting status for job:", jobId);
     
     try {
-      const response = await fetch(`${ASTERISK_API_URL}/dialing-status/${jobId}`);
+      const response = await fetch(`${ASTERISK_API_URL}/bridges/${jobId}`, {
+        headers: getAuthHeaders(),
+      });
       
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to get dialing status');
       }
       
-      return await response.json();
+      const data = await response.json();
+      
+      // Parse bridge channel information to get call statistics
+      return {
+        status: data.channels && data.channels.length > 0 ? 'running' : 'completed',
+        totalCalls: data.statistics?.total || 0,
+        completedCalls: data.statistics?.completed || 0,
+        answeredCalls: data.statistics?.answered || 0, 
+        failedCalls: data.statistics?.failed || 0
+      };
     } catch (error) {
       console.error("Error getting dialing status:", error);
       handleDialerError(createDialerError(
@@ -147,7 +171,13 @@ export const asteriskService = {
     console.log("Generating Asterisk config for campaign:", campaignId);
     
     try {
-      const response = await fetch(`${ASTERISK_API_URL}/generate-config/${campaignId}`);
+      // Get the configuration from the backend API
+      const response = await fetch(`/api/campaigns/asterisk-config/${campaignId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any authorization headers needed
+        }
+      });
       
       if (!response.ok) {
         const errorData = await response.json();
