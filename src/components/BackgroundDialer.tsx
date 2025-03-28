@@ -17,6 +17,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProv
     contactLists,
     isLoadingProviders,
     isLoadingLists,
+    isLoadingCampaign,
     formData,
     isDialing,
     currentJobId,
@@ -28,7 +29,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProv
   
   const [isStuck, setIsStuck] = useState(false);
   
-  // Set SIP provider if provided
+  // Set SIP provider if provided explicitly via props
   useEffect(() => {
     if (sipProviderId && formData.sipProviderId !== sipProviderId) {
       handleFormChange("sipProviderId", sipProviderId);
@@ -39,7 +40,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProv
   useEffect(() => {
     let stuckTimer: NodeJS.Timeout;
     
-    if (isLoadingProviders || isLoadingLists) {
+    if (isLoadingProviders || isLoadingLists || isLoadingCampaign) {
       stuckTimer = setTimeout(() => {
         setIsStuck(true);
       }, 10000); // 10 seconds before considering it stuck
@@ -50,7 +51,14 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProv
     return () => {
       if (stuckTimer) clearTimeout(stuckTimer);
     };
-  }, [isLoadingProviders, isLoadingLists]);
+  }, [isLoadingProviders, isLoadingLists, isLoadingCampaign]);
+  
+  const isLoading = isLoadingProviders || isLoadingLists || isLoadingCampaign;
+  const loadingMessage = isLoadingCampaign 
+    ? "Loading campaign settings..." 
+    : isLoadingProviders 
+      ? "Loading SIP providers..." 
+      : "Loading contact lists...";
   
   return (
     <Card className="border-border/40 shadow-md">
@@ -61,10 +69,10 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProv
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {(isLoadingProviders || isLoadingLists) && !isStuck ? (
+        {isLoading && !isStuck ? (
           <div className="flex justify-center items-center py-6">
             <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
-            <span>{isLoadingProviders ? "Loading SIP providers..." : "Loading contact lists..."}</span>
+            <span>{loadingMessage}</span>
           </div>
         ) : isStuck ? (
           <div className="flex flex-col items-center justify-center py-6 text-center">
@@ -88,7 +96,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProv
                 isLoadingLists={isLoadingLists}
                 onChange={handleFormChange}
                 onStart={startDialing}
-                disableSipProviderSelect={!!sipProviderId}
+                disableSipProviderSelect={!!formData.sipProviderId}
               />
             ) : (
               <DialerStatusDisplay

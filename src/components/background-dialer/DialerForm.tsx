@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SipProvider, ContactList, DialerFormData } from "./types";
-import { Phone, Loader2 } from "lucide-react";
+import { Phone, Loader2, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DialerFormProps {
   sipProviders: SipProvider[];
@@ -34,15 +35,35 @@ const DialerForm: React.FC<DialerFormProps> = ({
     formData.transferNumber;
   
   // Get name of selected SIP provider for display when disabled
-  const selectedProviderName = sipProviders.find(p => p.id === formData.sipProviderId)?.name || '';
+  const selectedProvider = sipProviders.find(p => p.id === formData.sipProviderId);
+  const selectedProviderName = selectedProvider?.name || 'Selected provider';
     
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="sipProvider">SIP Provider</Label>
+        <Label htmlFor="sipProvider" className="flex items-center">
+          SIP Provider
+          {disableSipProviderSelect && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 ml-2 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Using the SIP provider selected for this campaign</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </Label>
         {disableSipProviderSelect ? (
           <div className="flex items-center border rounded-md p-2 bg-muted/50">
-            <span>{selectedProviderName || 'Selected provider'}</span>
+            <span>{selectedProviderName}</span>
+            {selectedProvider && (
+              <span className="ml-auto text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                Campaign default
+              </span>
+            )}
           </div>
         ) : (
           <Select
