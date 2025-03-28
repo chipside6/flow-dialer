@@ -93,7 +93,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
             contact_list_id: newCampaign.contactListId || null,
             transfer_number: newCampaign.transferNumber || null,
             greeting_file_url: newCampaign.greetingFileId || null,
-            sip_provider_id: newCampaign.sipProviderId || null // Add SIP provider ID
+            sip_provider_id: newCampaign.sipProviderId || null // Save SIP provider ID
           })
           .select();
           

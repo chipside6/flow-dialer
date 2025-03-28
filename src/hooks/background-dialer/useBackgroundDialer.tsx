@@ -5,6 +5,7 @@ import { useDialerStatus } from "./useDialerStatus";
 import { useDialerActions } from "./useDialerActions";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 export const useBackgroundDialer = (campaignId: string) => {
   // Get form data and form handlers
@@ -39,16 +40,26 @@ export const useBackgroundDialer = (campaignId: string) => {
         // Query only the columns that actually exist in the database
         const { data, error } = await supabase
           .from('campaigns')
-          .select('contact_list_id, transfer_number')
+          .select('contact_list_id, transfer_number, sip_provider_id')
           .eq('id', campaignId)
           .single();
         
         if (error) {
           console.error("Error fetching campaign data:", error);
+          toast({
+            title: "Error loading campaign",
+            description: "Could not load campaign settings. Please try again.",
+            variant: "destructive"
+          });
           return;
         }
         
         if (data) {
+          // If campaign has a SIP provider set, use it
+          if (data.sip_provider_id) {
+            handleFormChange("sipProviderId", data.sip_provider_id);
+          }
+          
           // Set contact list ID if available
           if (data.contact_list_id) {
             handleFormChange("contactListId", data.contact_list_id);
@@ -61,13 +72,18 @@ export const useBackgroundDialer = (campaignId: string) => {
         }
       } catch (err) {
         console.error("Error loading campaign preferences:", err);
+        toast({
+          title: "Error",
+          description: "Failed to load campaign settings",
+          variant: "destructive"
+        });
       } finally {
         setIsLoadingCampaign(false);
       }
     };
     
     fetchCampaignData();
-  }, [campaignId]);
+  }, [campaignId, handleFormChange]);
   
   // Start dialing wrapper to include campaign ID
   const handleStartDialing = () => {
