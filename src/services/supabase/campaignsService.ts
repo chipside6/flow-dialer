@@ -49,7 +49,8 @@ export const createCampaign = async (campaign: any, userId: string) => {
         answered_calls: campaign.answeredCalls || 0,
         transferred_calls: campaign.transferredCalls || 0,
         failed_calls: campaign.failedCalls || 0,
-        contact_list_id: campaign.contactListId || null
+        contact_list_id: campaign.contactListId || null,
+        sip_provider_id: campaign.sipProviderId || null
       })
       .select()
       .single();

@@ -37,7 +37,6 @@ export const useBackgroundDialer = (campaignId: string) => {
       setIsLoadingCampaign(true);
       
       try {
-        // Query only the columns that actually exist in the database
         const { data, error } = await supabase
           .from('campaigns')
           .select('contact_list_id, transfer_number, sip_provider_id')

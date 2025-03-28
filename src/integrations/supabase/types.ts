@@ -20,6 +20,7 @@ export type Database = {
           greeting_file_url: string | null
           id: string
           progress: number | null
+          sip_provider_id: string | null
           status: string | null
           title: string
           total_calls: number | null
@@ -38,6 +39,7 @@ export type Database = {
           greeting_file_url?: string | null
           id?: string
           progress?: number | null
+          sip_provider_id?: string | null
           status?: string | null
           title: string
           total_calls?: number | null
@@ -56,6 +58,7 @@ export type Database = {
           greeting_file_url?: string | null
           id?: string
           progress?: number | null
+          sip_provider_id?: string | null
           status?: string | null
           title?: string
           total_calls?: number | null
@@ -70,6 +73,13 @@ export type Database = {
             columns: ["contact_list_id"]
             isOneToOne: false
             referencedRelation: "contact_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_sip_provider_id_fkey"
+            columns: ["sip_provider_id"]
+            isOneToOne: false
+            referencedRelation: "sip_providers"
             referencedColumns: ["id"]
           },
         ]
