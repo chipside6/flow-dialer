@@ -36,9 +36,10 @@ export const useBackgroundDialer = (campaignId: string) => {
       setIsLoadingCampaign(true);
       
       try {
+        // Query only the columns that actually exist in the database
         const { data, error } = await supabase
           .from('campaigns')
-          .select('sip_provider_id, contact_list_id, transfer_number')
+          .select('contact_list_id, transfer_number')
           .eq('id', campaignId)
           .single();
         
@@ -48,16 +49,12 @@ export const useBackgroundDialer = (campaignId: string) => {
         }
         
         if (data) {
-          // If campaign has a SIP provider set, use it
-          if (data.sip_provider_id) {
-            handleFormChange("sipProviderId", data.sip_provider_id);
-          }
-          
-          // Also set other relevant fields from the campaign
+          // Set contact list ID if available
           if (data.contact_list_id) {
             handleFormChange("contactListId", data.contact_list_id);
           }
           
+          // Set transfer number if available
           if (data.transfer_number) {
             handleFormChange("transferNumber", data.transfer_number);
           }
