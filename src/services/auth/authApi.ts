@@ -145,14 +145,18 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
           mode: 'cors',
           credentials: 'same-origin',
           signal: controller.signal
+        }).catch(err => {
+          // Ignore network errors during logout, just log them
+          console.warn("Network error during API logout:", err);
+          return null;
         });
         
         clearTimeout(timeoutId);
         
         // Check for non-200 response
-        if (!response.ok) {
+        if (response && !response.ok) {
           console.warn("Logout warning: Server returned", response.status);
-          const errorText = await response.text();
+          const errorText = await response.text().catch(e => "Could not read error response");
           console.warn("Warning details:", errorText);
         }
       } catch (apiError) {
@@ -161,7 +165,7 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
       }
     }
     
-    // Clear the local session regardless of API call result
+    // Always clear the local session regardless of API call result
     clearSession();
     
     return { success: true, error: null };

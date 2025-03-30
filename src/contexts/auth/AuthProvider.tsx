@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -257,23 +256,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       setIsLoading(true);
+      
+      // Immediately reset state for better UX
+      setUser(null);
+      setProfile(null);
+      setIsAdmin(false);
+      
       const result = await signOutUser();
       
       if (!result.success) {
         console.error("AuthProvider: Error during sign out:", result.error);
-        // Still reset state even if API call fails
-        setUser(null);
-        setProfile(null);
-        setIsAdmin(false);
       }
       
       return result;
     } catch (error) {
       console.error("AuthProvider: Unexpected error during sign out:", error);
-      // Reset state on error too
-      setUser(null);
-      setProfile(null);
-      setIsAdmin(false);
       return { success: true, error };
     } finally {
       setIsLoading(false);

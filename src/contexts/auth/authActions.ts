@@ -47,17 +47,33 @@ export const signOutUser = async () => {
       // Continue with the sign out process even if this fails
     }
     
-    // Then clear ALL known auth-related localStorage items for good measure
+    // Clear ALL known auth-related localStorage items for good measure
     try {
-      // Use a simpler approach for clearing critical auth data
-      localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('user_session');
+      // Use a more aggressive approach for clearing auth data
+      const keysToRemove = [
+        'sb-grhvoclalziyjbjlhpml-auth-token',
+        'supabase.auth.token',
+        'user_session',
+        'supabase-auth-token',
+      ];
       
-      // Clear any other auth-related items
+      // Remove specific keys first
+      keysToRemove.forEach(key => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.warn(`Failed to remove ${key}:`, e);
+        }
+      });
+      
+      // Then try broader pattern matching
       for (const key of Object.keys(localStorage)) {
         if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
-          localStorage.removeItem(key);
+          try {
+            localStorage.removeItem(key);
+          } catch (e) {
+            console.warn(`Failed to remove ${key}:`, e);
+          }
         }
       }
     } catch (storageError) {

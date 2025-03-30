@@ -18,7 +18,7 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
     setIsLoggingOut(true);
     
     try {
-      // First navigate to login page immediately
+      // First navigate to login page immediately for better UX
       navigate("/login", { replace: true });
       
       // Then attempt to sign out
@@ -31,16 +31,17 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
         });
       } else if (error) {
         console.error("DiagnosticActions - Error during sign out:", error);
+        // Still consider it a successful logout for UX purposes
         toast({
-          title: "Logout issue",
-          description: "Signed out, but encountered an issue cleaning up session data"
+          title: "Signed out",
+          description: "You've been signed out, but there was an issue cleaning up session data"
         });
       }
     } catch (error: any) {
       console.error("DiagnosticActions - Error signing out:", error);
       toast({
-        title: "Error during sign out",
-        description: error.message || "An error occurred while signing out",
+        title: "An error occurred",
+        description: "There was an issue during logout, but you've been signed out.",
         variant: "destructive"
       });
     } finally {

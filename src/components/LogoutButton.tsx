@@ -35,6 +35,9 @@ const LogoutButton = ({
       // Call optional callback if provided
       if (onClick) onClick();
       
+      // Navigate to login page first for better UX
+      navigate("/login", { replace: true });
+      
       // Then attempt to sign out
       const { success, error } = await signOut();
       
@@ -43,30 +46,21 @@ const LogoutButton = ({
           title: "Logged out successfully",
           description: "You have been signed out of your account",
         });
-        
-        // Navigate to login page after successful logout
-        navigate("/login", { replace: true });
       } else if (error) {
         console.error("LogoutButton - Error during logout:", error);
+        // Still consider it a successful logout for UX purposes
         toast({
-          title: "Logout issue",
-          description: "Encountered an issue during logout. You may need to clear your browser cache.",
-          variant: "destructive"
+          title: "Logged out",
+          description: "You've been signed out, but there was an issue cleaning up session data.",
         });
-        
-        // Still navigate to login even if there was an error
-        navigate("/login", { replace: true });
       }
     } catch (error: any) {
-      console.error("LogoutButton - Error during logout:", error);
+      console.error("LogoutButton - Unexpected error during logout:", error);
       toast({
-        title: "Logout error",
-        description: "An error occurred during logout: " + (error.message || "Unknown error"),
+        title: "An error occurred",
+        description: "There was an issue during logout, but you've been signed out.",
         variant: "destructive"
       });
-      
-      // Force navigation to login on error
-      navigate("/login", { replace: true });
     } finally {
       setIsLoggingOut(false);
     }
