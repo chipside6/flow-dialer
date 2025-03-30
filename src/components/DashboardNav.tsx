@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -56,8 +57,8 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
       icon: Server,
     },
     {
-      href: "/billing",
-      label: "Billing",
+      href: "/upgrade",
+      label: "Upgrade",
       icon: CreditCard,
     },
     {

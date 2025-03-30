@@ -46,7 +46,6 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
     { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5" /> },
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
-    { name: "Billing", path: "/billing", icon: <CreditCard className="h-5 w-5" /> },
   ];
   
   // Show upgrade link for free users
