@@ -1,40 +1,38 @@
-
-import React from "react";
-import { useSubscription } from "@/hooks/useSubscription";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Loader2, CreditCard, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useSubscription } from "@/hooks/subscription";
+import { PricingPlan } from "@/data/pricingPlans";
+import { Loader2 } from "lucide-react";
 
-export function SubscriptionDetails() {
-  const { isLoading, currentPlan, subscription, getPlanById } = useSubscription();
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [isCancelling, setIsCancelling] = React.useState(false);
-  
-  const activePlan = currentPlan ? getPlanById(currentPlan) : null;
+export const SubscriptionDetails = () => {
+  const { isLoading, currentPlan, subscription, fetchCurrentSubscription, getPlanById } = useSubscription();
+  const [activePlan, setActivePlan] = useState<PricingPlan | null>(null);
 
-  const goToUpgradePage = () => {
-    navigate('/billing');
-  };
+  useEffect(() => {
+    const loadSubscription = async () => {
+      await fetchCurrentSubscription();
+    };
+    
+    loadSubscription();
+  }, []);
+
+  useEffect(() => {
+    if (currentPlan) {
+      const plan = getPlanById(currentPlan);
+      if (plan) setActivePlan(plan);
+    } else {
+      setActivePlan(null);
+    }
+  }, [currentPlan]);
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="pt-6 flex justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
   }
 
@@ -42,86 +40,33 @@ export function SubscriptionDetails() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Free Plan</CardTitle>
+          <CardTitle>No Active Subscription</CardTitle>
           <CardDescription>
-            You're currently on the free plan with limited features.
+            You don't have an active subscription. Choose a plan below to get started.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-2 text-muted-foreground mb-4">
-            <AlertTriangle className="h-5 w-5" />
-            <span>Limited to 500 calls per month</span>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={goToUpgradePage}>Upgrade to Lifetime</Button>
-        </CardFooter>
       </Card>
     );
   }
 
-  // If user has lifetime plan
-  if (activePlan.isLifetime) {
-    return (
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Lifetime Access</CardTitle>
-            <Badge variant="outline" className="bg-primary/10 text-primary">
-              Lifetime
-            </Badge>
-          </div>
-          <CardDescription>
-            You have unlimited access to all features forever
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-xl font-semibold">{activePlan.name} Plan</h3>
-              <p className="text-muted-foreground">One-time payment of ${activePlan.price}</p>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-medium">Plan Features:</h4>
-              <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                {activePlan.features.map((feature, idx) => (
-                  <li key={idx}>{feature}</li>
-                ))}
-              </ul>
-            </div>
+  // Calculate subscription end date for display
+  const endDate = subscription?.current_period_end 
+    ? new Date(subscription.current_period_end).toLocaleDateString() 
+    : 'Unknown';
 
-            <div className="pt-4 border-t flex items-center gap-2 text-primary">
-              <CheckCircle2 className="h-5 w-5" />
-              <p className="font-medium">
-                Lifetime access activated
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // For free plan with more details
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Free Plan</CardTitle>
-          <Badge variant="outline" className="bg-muted/50 text-muted-foreground">
-            Limited
-          </Badge>
-        </div>
+        <CardTitle>Subscription Details</CardTitle>
         <CardDescription>
-          You're currently on the free plan with limited features
+          Your current plan and subscription information
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div>
             <h3 className="text-xl font-semibold">{activePlan.name} Plan</h3>
-            <p className="text-muted-foreground">Free access with limitations</p>
+            <p className="text-muted-foreground">${activePlan.price}/month</p>
           </div>
           
           <div className="space-y-2">
@@ -133,21 +78,18 @@ export function SubscriptionDetails() {
             </ul>
           </div>
 
-          <div className="pt-4 border-t">
-            <p className="text-sm flex items-center gap-2 text-amber-500">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="font-medium">Limited to 500 calls per month</span>
+          <div className="pt-2 border-t">
+            <p className="text-sm text-muted-foreground">
+              Next billing date: {endDate}
             </p>
           </div>
         </div>
       </CardContent>
       <CardFooter>
-        <Button 
-          variant="default" 
-          onClick={goToUpgradePage}>
-          Upgrade to Lifetime
+        <Button variant="default" asChild>
+          <Link to="/upgrade">Manage Subscription</Link>
         </Button>
       </CardFooter>
     </Card>
   );
-}
+};

@@ -1,30 +1,55 @@
 
-import { Link } from 'react-router-dom';
+import React from "react";
+import { NavLink } from "react-router-dom";
+import { useAuth } from "@/contexts/auth";
 
-interface NavLinksProps {
-  mobile?: boolean;
-  onClick?: () => void;
-}
-
-export const NavLinks = ({ mobile = false, onClick }: NavLinksProps) => {
-  const linkClass = mobile 
-    ? "mobile-nav-link" 
-    : "text-sm font-medium hover:text-primary transition-colors";
+export const NavLinks = () => {
+  const { isAuthenticated } = useAuth();
 
   return (
-    <>
-      <Link to="/" className={linkClass} onClick={onClick}>
-        Home
-      </Link>
-      <Link to="/features" className={linkClass} onClick={onClick}>
+    <div className="hidden md:flex md:gap-10">
+      <NavLink
+        to="/features"
+        className={({ isActive }) =>
+          isActive
+            ? "text-foreground font-semibold"
+            : "text-muted-foreground hover:text-foreground transition-colors"
+        }
+      >
         Features
-      </Link>
-      <Link to="/pricing" className={linkClass} onClick={onClick}>
+      </NavLink>
+      <NavLink
+        to="/pricing"
+        className={({ isActive }) =>
+          isActive
+            ? "text-foreground font-semibold"
+            : "text-muted-foreground hover:text-foreground transition-colors"
+        }
+      >
         Pricing
-      </Link>
-      <Link to="/support" className={linkClass} onClick={onClick}>
+      </NavLink>
+      <NavLink
+        to="/support"
+        className={({ isActive }) =>
+          isActive
+            ? "text-foreground font-semibold"
+            : "text-muted-foreground hover:text-foreground transition-colors"
+        }
+      >
         Support
-      </Link>
-    </>
+      </NavLink>
+      {isAuthenticated && (
+        <NavLink
+          to="/upgrade"
+          className={({ isActive }) =>
+            isActive
+              ? "text-foreground font-semibold"
+              : "text-muted-foreground hover:text-foreground transition-colors"
+          }
+        >
+          Upgrade
+        </NavLink>
+      )}
+    </div>
   );
 };
