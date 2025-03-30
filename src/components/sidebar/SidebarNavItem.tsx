@@ -1,30 +1,32 @@
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { NavItem } from "@/components/navigation/NavItem";
 import { useLocation } from "react-router-dom";
+import { LucideIcon } from 'lucide-react';
 
 interface SidebarNavItemProps {
-  item: {
-    name: string;
-    path: string;
-    icon: React.ReactNode;
-  };
-  onClick?: () => void;
+  to: string;
+  icon: LucideIcon;
+  children: ReactNode;
 }
 
-export const SidebarNavItem = ({ item, onClick }: SidebarNavItemProps) => {
+export const SidebarNavItem = ({ to, icon, children }: SidebarNavItemProps) => {
   const location = useLocation();
   // Check if current path starts with item path for nested routes
   // For example, /campaign/new should highlight the Campaign nav item
-  const isActive = location.pathname === item.path || 
-                  (item.path !== '/' && location.pathname.startsWith(item.path));
+  const isActive = location.pathname === to || 
+                  (to !== '/' && location.pathname.startsWith(to));
+  
+  const item = {
+    name: typeof children === 'string' ? children : 'Menu Item',
+    path: to,
+    icon: React.createElement(icon)
+  };
   
   return (
     <NavItem 
-      key={item.path} 
       item={item} 
       isActive={isActive}
-      onClick={onClick}
     />
   );
 };

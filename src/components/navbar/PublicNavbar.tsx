@@ -6,8 +6,9 @@ import { NavLinks } from './NavLinks';
 import { MobileMenu } from './MobileMenu';
 import { Dispatch, SetStateAction } from 'react';
 import { useAuth } from '@/contexts/auth';
-import LogoutButton from '@/components/LogoutButton';
 import { Logo } from '@/components/ui/Logo';
+import { LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface PublicNavbarProps {
   isScrolled: boolean;
@@ -16,7 +17,13 @@ interface PublicNavbarProps {
 }
 
 export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen }: PublicNavbarProps) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, signOut } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
   
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 py-4 ${isScrolled ? 'bg-background/80 backdrop-blur-sm shadow-sm border-b' : 'border-transparent'}`}>
@@ -49,7 +56,14 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
               <Button variant="ghost" asChild className="hidden md:flex">
                 <Link to="/dashboard">Dashboard</Link>
               </Button>
-              <LogoutButton variant="ghost" className="hidden md:flex" />
+              <Button 
+                variant="ghost" 
+                className="hidden md:flex items-center gap-2"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </>
           ) : (
             <>
@@ -69,7 +83,7 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
       
       <MobileMenu 
         isOpen={isMobileMenuOpen} 
-        onClose={() => setIsMobileMenuOpen(false)} 
+        setIsOpen={setIsMobileMenuOpen}
       />
     </header>
   );

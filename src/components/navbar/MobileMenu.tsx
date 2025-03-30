@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -10,22 +10,37 @@ import {
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CreditCard,
   DollarSign,
   Home,
   LayoutDashboard,
   LifeBuoy,
+  LogOut,
   Star,
   User,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
-import { LogoutButton } from "@/components/auth/LogoutButton";
 
-export const MobileMenu = () => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const { isAuthenticated } = useAuth();
+interface MobileMenuProps {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const MobileMenu = ({ isOpen, setIsOpen }: MobileMenuProps) => {
+  const { isAuthenticated, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setIsOpen(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -104,7 +119,14 @@ export const MobileMenu = () => {
                 <User className="h-5 w-5" />
                 Profile
               </Link>
-              <LogoutButton onClick={() => setIsOpen(false)} />
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 px-4 py-2 rounded-md transition-colors mt-2 w-full justify-start"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-5 w-5" />
+                Logout
+              </Button>
             </>
           ) : (
             <div className="flex flex-col gap-2 mt-2">
