@@ -1,15 +1,16 @@
 
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/auth';
 
 interface ProtectedRouteProps {
+  children: React.ReactNode;
   requireAdmin?: boolean;
 }
 
-const ProtectedRoute = ({ requireAdmin = false }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, sessionChecked, initialized, error, isAdmin } = useAuth();
   const location = useLocation();
   const [forceRender, setForceRender] = useState(false);
@@ -76,7 +77,7 @@ const ProtectedRoute = ({ requireAdmin = false }: ProtectedRouteProps) => {
   
   // If user is authenticated or we force render after timeout, render children
   if (isAuthenticated || (forceRender && initialized)) {
-    return <Outlet />;
+    return <>{children}</>;
   }
   
   // If initialization is complete and user is not authenticated, redirect to login

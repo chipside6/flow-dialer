@@ -1,55 +1,30 @@
 
-import React from "react";
-import { NavLink } from "react-router-dom";
-import { useAuth } from "@/contexts/auth";
+import { Link } from 'react-router-dom';
 
-export const NavLinks = () => {
-  const { isAuthenticated } = useAuth();
+interface NavLinksProps {
+  mobile?: boolean;
+  onClick?: () => void;
+}
+
+export const NavLinks = ({ mobile = false, onClick }: NavLinksProps) => {
+  const linkClass = mobile 
+    ? "mobile-nav-link" 
+    : "text-sm font-medium hover:text-primary transition-colors";
 
   return (
-    <div className="hidden md:flex md:gap-10">
-      <NavLink
-        to="/features"
-        className={({ isActive }) =>
-          isActive
-            ? "text-foreground font-semibold"
-            : "text-muted-foreground hover:text-foreground transition-colors"
-        }
-      >
+    <>
+      <Link to="/" className={linkClass} onClick={onClick}>
+        Home
+      </Link>
+      <Link to="/features" className={linkClass} onClick={onClick}>
         Features
-      </NavLink>
-      <NavLink
-        to="/pricing"
-        className={({ isActive }) =>
-          isActive
-            ? "text-foreground font-semibold"
-            : "text-muted-foreground hover:text-foreground transition-colors"
-        }
-      >
+      </Link>
+      <Link to="/pricing" className={linkClass} onClick={onClick}>
         Pricing
-      </NavLink>
-      <NavLink
-        to="/support"
-        className={({ isActive }) =>
-          isActive
-            ? "text-foreground font-semibold"
-            : "text-muted-foreground hover:text-foreground transition-colors"
-        }
-      >
+      </Link>
+      <Link to="/support" className={linkClass} onClick={onClick}>
         Support
-      </NavLink>
-      {isAuthenticated && (
-        <NavLink
-          to="/upgrade"
-          className={({ isActive }) =>
-            isActive
-              ? "text-foreground font-semibold"
-              : "text-muted-foreground hover:text-foreground transition-colors"
-          }
-        >
-          Upgrade
-        </NavLink>
-      )}
-    </div>
+      </Link>
+    </>
   );
 };

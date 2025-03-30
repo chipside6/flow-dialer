@@ -5,8 +5,6 @@ import { UsersDataFetcher } from "@/components/admin/UsersDataFetcher";
 import { CreateAdminButton } from "@/components/admin/CreateAdminButton";
 import { useAuth } from "@/contexts/auth";
 import { Loader2 } from "lucide-react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 const AdminPanel = () => {
   console.log("AdminPanel - Rendering component");
@@ -45,17 +43,13 @@ const AdminPanel = () => {
   }
   
   return (
-    <SidebarProvider>
-      <DashboardLayout>
-        <div className="w-full overflow-hidden">
-          <div className="mb-6 flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Admin Panel</h1>
-            <CreateAdminButton />
-          </div>
-          <UsersDataFetcher />
-        </div>
-      </DashboardLayout>
-    </SidebarProvider>
+    <div className="w-full overflow-hidden">
+      <div className="mb-6 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Admin Panel</h1>
+        <CreateAdminButton />
+      </div>
+      <UsersDataFetcher />
+    </div>
   );
 };
 

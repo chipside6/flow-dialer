@@ -3,7 +3,7 @@ import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
-  fallback?: (error: Error) => ReactNode;
+  fallback: (error: Error) => ReactNode;
 }
 
 interface State {
@@ -27,22 +27,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render(): ReactNode {
     if (this.state.hasError && this.state.error) {
-      if (this.props.fallback) {
-        return this.props.fallback(this.state.error);
-      }
-      // Default fallback UI if no custom fallback is provided
-      return (
-        <div className="p-8 text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-4">Something went wrong</h2>
-          <p className="mb-4">{this.state.error.message}</p>
-          <button
-            className="px-4 py-2 bg-primary text-white rounded-md"
-            onClick={() => window.location.reload()}
-          >
-            Reload page
-          </button>
-        </div>
-      );
+      return this.props.fallback(this.state.error);
     }
 
     return this.props.children;

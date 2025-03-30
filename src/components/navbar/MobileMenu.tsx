@@ -1,149 +1,62 @@
 
-import React, { useState } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
-import { Logo } from "@/components/ui/Logo";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  CreditCard,
-  DollarSign,
-  Home,
-  LayoutDashboard,
-  LifeBuoy,
-  LogOut,
-  Star,
-  User,
-} from "lucide-react";
-import { useAuth } from "@/contexts/auth";
+import { NavLinks } from './NavLinks';
+import { X, LogIn } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/auth';
+import LogoutButton from '@/components/LogoutButton';
 
 interface MobileMenuProps {
   isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
 }
 
-export const MobileMenu = ({ isOpen, setIsOpen }: MobileMenuProps) => {
-  const { isAuthenticated, signOut } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      setIsOpen(false);
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
+export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
+  const { isAuthenticated } = useAuth();
+  
+  if (!isOpen) return null;
+  
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          className="md:hidden"
-          size="icon"
-          aria-label="Menu"
+    <div className="fixed inset-0 bg-background z-50 overflow-y-auto mobile-menu">
+      <div className="px-6 py-4 border-b flex items-center justify-between bg-muted/10">
+        <h2 className="text-xl font-bold">Menu</h2>
+        <button
+          onClick={onClose}
+          className="p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted"
+          aria-label="Close mobile menu"
         >
-          <Menu className="h-6 w-6" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="w-72 sm:max-w-md">
-        <SheetHeader className="mb-4">
-          <SheetTitle>
-            <Logo />
-          </SheetTitle>
-        </SheetHeader>
-        <div className="flex flex-col gap-4">
-          <Link
-            to="/"
-            className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            <Home className="h-5 w-5" />
-            Home
-          </Link>
-          <Link
-            to="/features"
-            className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            <Star className="h-5 w-5" />
-            Features
-          </Link>
-          <Link
-            to="/pricing"
-            className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            <DollarSign className="h-5 w-5" />
-            Pricing
-          </Link>
-          <Link
-            to="/support"
-            className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
-            onClick={() => setIsOpen(false)}
-          >
-            <LifeBuoy className="h-5 w-5" />
-            Support
-          </Link>
+          <X size={24} />
+        </button>
+      </div>
+      
+      <nav className="px-6 py-8 flex flex-col gap-8">
+        <div className="flex flex-col gap-6 text-xl">
+          <NavLinks mobile onClick={onClose} />
+        </div>
+        
+        <div className="flex flex-col gap-4 mt-6">
           {isAuthenticated ? (
             <>
-              <Link
-                to="/dashboard"
-                className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <LayoutDashboard className="h-5 w-5" />
-                Dashboard
-              </Link>
-              <Link
-                to="/upgrade"
-                className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <CreditCard className="h-5 w-5" />
-                Upgrade
-              </Link>
-              <Link
-                to="/profile"
-                className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <User className="h-5 w-5" />
-                Profile
-              </Link>
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 px-4 py-2 rounded-md transition-colors mt-2 w-full justify-start"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-5 w-5" />
-                Logout
+              <Button asChild variant="default" size="lg" className="w-full">
+                <Link to="/dashboard" onClick={onClose}>Dashboard</Link>
               </Button>
+              <LogoutButton variant="outline" size="lg" className="w-full" onClick={onClose} position="left" />
             </>
           ) : (
-            <div className="flex flex-col gap-2 mt-2">
-              <Button asChild>
-                <Link to="/login" onClick={() => setIsOpen(false)}>
-                  Log In
+            <>
+              <Button asChild variant="default" size="lg" className="w-full">
+                <Link to="/signup" onClick={onClose}>Get Started</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="w-full">
+                <Link to="/login" onClick={onClose} className="flex items-center">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  <span>Log In</span>
                 </Link>
               </Button>
-              <Button asChild variant="outline">
-                <Link to="/signup" onClick={() => setIsOpen(false)}>
-                  Sign Up
-                </Link>
-              </Button>
-            </div>
+            </>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </nav>
+    </div>
   );
 };
