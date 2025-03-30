@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Sheet,
@@ -20,7 +21,7 @@ import {
   User,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
-import { LogoutButton } from "../auth/LogoutButton";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 
 export const MobileMenu = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -103,7 +104,7 @@ export const MobileMenu = () => {
                 <User className="h-5 w-5" />
                 Profile
               </Link>
-              <LogoutButton />
+              <LogoutButton onClick={() => setIsOpen(false)} />
             </>
           ) : (
             <div className="flex flex-col gap-2 mt-2">
