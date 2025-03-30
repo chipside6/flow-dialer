@@ -7,26 +7,26 @@ export interface PricingPlan {
   description: string;
   features: string[];
   popular?: boolean;
-  isFree?: boolean;
+  isTrial?: boolean;
   isLifetime?: boolean;
 }
 
 // Shared pricing plans data
 export const pricingPlans: PricingPlan[] = [
   {
-    id: "free",
-    name: "Free",
+    id: "trial",
+    name: "3-Day Trial",
     price: 0,
-    description: "Basic access with limitations",
+    description: "Full access for 3 days",
     features: [
-      "500 calls monthly limit",
-      "Limited campaigns",
-      "500 contacts per campaign",
-      "Cannot modify contact lists once campaign starts",
-      "View-only contact lists",
-      "Community support"
+      "Full feature access for 3 days",
+      "Unlimited calls during trial period",
+      "Unlimited campaigns during trial",
+      "Unlimited contacts",
+      "Access to all premium features",
+      "Automatically downgrades after 3 days"
     ],
-    isFree: true
+    isTrial: true
   },
   {
     id: "lifetime",

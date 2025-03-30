@@ -17,7 +17,6 @@ import ContactLists from "./pages/ContactLists";
 import TransferNumbers from "./pages/TransferNumbers";
 import SipProviders from "./pages/SipProviders";
 import Dashboard from "./pages/Dashboard";
-import Billing from "./pages/Billing";
 import UpgradePage from "./pages/UpgradePage";
 import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
@@ -105,13 +104,10 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            {/* Redirect /billing to /upgrade */}
             <Route 
               path="/billing" 
-              element={
-                <ProtectedRoute>
-                  <Billing />
-                </ProtectedRoute>
-              } 
+              element={<Navigate to="/upgrade" replace />} 
             />
             <Route 
               path="/upgrade" 

@@ -7,6 +7,8 @@ import { fetchUserProfile } from './authUtils';
 import { signOutUser } from './authActions';
 import { toast } from '@/components/ui/use-toast';
 import { ensureVoiceAppUploadsBucket } from '@/services/supabase/greetingFilesService';
+import { createLifetimeSubscription } from '@/hooks/subscription/subscriptionApi';
+import { pricingPlans } from '@/data/pricingPlans';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -33,6 +35,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setInitialized(true);
       }
     }, 5000); // 5 second timeout
+    
+    // Helper function to activate trial plan for new users
+    const activateTrialForNewUser = async (userId: string) => {
+      console.log("Checking if user needs trial activation:", userId);
+      
+      try {
+        // Check if user already has any subscription
+        const { data, error } = await supabase
+          .from('subscriptions')
+          .select('id')
+          .eq('user_id', userId);
+        
+        if (error) {
+          console.error("Error checking subscriptions:", error);
+          return;
+        }
+        
+        // If no subscription exists, activate trial plan
+        if (!data || data.length === 0) {
+          console.log("No subscription found, activating trial plan");
+          
+          const trialPlan = pricingPlans.find(plan => plan.isTrial);
+          
+          if (trialPlan) {
+            // Calculate trial end date (3 days from now)
+            const trialEndDate = new Date();
+            trialEndDate.setDate(trialEndDate.getDate() + 3);
+            
+            // Create trial subscription
+            await createLifetimeSubscription(userId, {
+              ...trialPlan,
+              trialEndDate: trialEndDate.toISOString()
+            });
+            
+            console.log("Trial plan activated successfully");
+          }
+        }
+      } catch (err) {
+        console.error("Error activating trial plan:", err);
+      }
+    };
     
     // Set up auth state change listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -76,6 +119,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               // Set isAdmin to false when no profile is found
               setIsAdmin(false);
             }
+            
+            // Activate trial plan for new user using setTimeout to prevent blocking
+            setTimeout(() => {
+              activateTrialForNewUser(session.user.id);
+            }, 0);
+            
           } catch (error) {
             console.error("AuthProvider: Error during sign in:", error);
             setError(error instanceof Error ? error : new Error('Unknown error during sign in'));

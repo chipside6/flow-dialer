@@ -27,7 +27,8 @@ export const Logo = ({ size = "md", withText = true, className }: LogoProps) => 
         />
       </div>
       {withText && (
-        <span className="font-display text-xl font-bold tracking-tight text-white drop-shadow-sm">
+        <span className={cn("font-display text-xl font-bold tracking-tight drop-shadow-sm", 
+          className?.includes("text-white") ? "text-white" : "text-foreground")}>
           Flow Dialer
         </span>
       )}

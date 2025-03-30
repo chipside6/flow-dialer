@@ -2,7 +2,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Subscription } from "./types";
 import { PricingPlan, pricingPlans } from "@/data/pricingPlans";
-import { useToast } from "@/components/ui/use-toast";
 
 export const fetchSubscription = async (userId: string | undefined): Promise<Subscription | null> => {
   if (!userId) {
@@ -28,6 +27,25 @@ export const fetchSubscription = async (userId: string | undefined): Promise<Sub
     
     if (data) {
       console.log("Found active subscription:", data);
+      
+      // Check if it's a trial plan and if it has expired
+      if (data.plan_id === 'trial' && data.current_period_end) {
+        const endDate = new Date(data.current_period_end);
+        const now = new Date();
+        
+        if (now > endDate) {
+          console.log("Trial has expired");
+          
+          // Update the subscription to inactive
+          await supabase
+            .from('subscriptions')
+            .update({ status: 'inactive' })
+            .eq('id', data.id);
+            
+          return null;
+        }
+      }
+      
       return data as Subscription;
     }
     
@@ -61,12 +79,17 @@ export const fetchUserCallCount = async (userId: string | undefined): Promise<nu
 
 export const createLifetimeSubscription = async (
   userId: string | undefined, 
-  plan: PricingPlan
+  plan: PricingPlan & { trialEndDate?: string }
 ): Promise<boolean> => {
   if (!userId) return false;
   
   try {
-    console.log("Activating lifetime plan for user:", userId);
+    console.log("Activating plan for user:", userId);
+    
+    // For trial plans, include the end date
+    const currentPeriodEnd = plan.isTrial && plan.trialEndDate 
+      ? plan.trialEndDate 
+      : null;
     
     // Upsert the subscription record
     const { error } = await supabase
@@ -76,17 +99,17 @@ export const createLifetimeSubscription = async (
         plan_id: plan.id,
         plan_name: plan.name,
         status: 'active',
-        current_period_end: null // Null for lifetime plans
+        current_period_end: currentPeriodEnd
       }, { 
         onConflict: 'user_id'
       });
     
     if (error) {
-      console.error("Error upgrading to lifetime plan:", error);
+      console.error("Error creating subscription:", error);
       return false;
     }
     
-    console.log("Lifetime plan activated successfully");
+    console.log("Plan activated successfully");
     return true;
   } catch (error) {
     console.error("Error in createLifetimeSubscription:", error);

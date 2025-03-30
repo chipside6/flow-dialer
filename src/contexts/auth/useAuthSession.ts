@@ -55,6 +55,16 @@ export function useAuthSession() {
     }
   }, []);
 
+  // Function to clear session data
+  const clearSessionData = useCallback(() => {
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    setIsAdmin(false);
+    setIsLoading(false);
+    setSessionChecked(true);
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
     
@@ -75,19 +85,15 @@ export function useAuthSession() {
         
         console.log("useAuthSession - Auth state changed:", event);
         
-        if (event === 'SIGNED_OUT') {
-          // Handle sign out without waiting for profile fetch
-          setUser(null);
-          setSession(null);
-          setProfile(null);
-          setIsAdmin(false);
-          setIsLoading(false);
-          setSessionChecked(true);
+        if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !currentSession) {
+          clearSessionData();
           
-          toast({
-            title: "Signed out", 
-            description: "You have been signed out successfully"
-          });
+          if (event === 'SIGNED_OUT') {
+            toast({
+              title: "Signed out", 
+              description: "You have been signed out successfully"
+            });
+          }
           return;
         }
         
@@ -125,6 +131,18 @@ export function useAuthSession() {
         }
         
         if (isMounted) {
+          // Check if the session is valid by looking at its expiry time
+          if (session) {
+            const expiresAt = session.expires_at ? new Date(session.expires_at * 1000) : null;
+            const now = new Date();
+            
+            if (expiresAt && expiresAt < now) {
+              console.log("useAuthSession - Session has expired, clearing session data");
+              clearSessionData();
+              return;
+            }
+          }
+          
           await processUserAndProfile(session?.user || null, session);
         }
       } catch (error: any) {
@@ -139,12 +157,26 @@ export function useAuthSession() {
 
     checkSession();
 
+    // Periodic session check to handle expiry
+    const intervalId = setInterval(() => {
+      if (session) {
+        const expiresAt = session.expires_at ? new Date(session.expires_at * 1000) : null;
+        const now = new Date();
+        
+        if (expiresAt && expiresAt < now) {
+          console.log("useAuthSession - Session expired during interval check");
+          clearSessionData();
+        }
+      }
+    }, 60000); // Check every minute
+
     // Clean up
     return () => {
       isMounted = false;
+      clearInterval(intervalId);
       subscription.unsubscribe();
     };
-  }, [processUserAndProfile]);
+  }, [processUserAndProfile, clearSessionData]);
 
   return {
     user,

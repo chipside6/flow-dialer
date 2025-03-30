@@ -1,3 +1,4 @@
+
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -81,11 +82,26 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: true, message: 'Invalid login credentials' });
     }
 
+    // Cleanup any existing sessions for this user (optional)
+    await pool.query('UPDATE sessions SET active = 0 WHERE user_id = ?', [user.id]).catch(err => {
+      console.warn('Error cleaning up old sessions, continuing anyway:', err);
+    });
+
     // Create JWT token
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key', { expiresIn: '7d' });
 
     // Calculate expiry date for the session
     const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days in seconds
+
+    // Store the new session
+    try {
+      await pool.query(
+        'INSERT INTO sessions (user_id, token, expires_at, active) VALUES (?, ?, FROM_UNIXTIME(?), 1)',
+        [user.id, token, expiresAt]
+      );
+    } catch (sessionError) {
+      console.warn('Error storing session, continuing anyway:', sessionError);
+    }
 
     // Return user session matching the expected format in authService.ts
     res.status(200).json({
@@ -105,10 +121,26 @@ router.post('/login', async (req, res) => {
 });
 
 // Add a logout endpoint
-router.post('/logout', (req, res) => {
-  // In a token-based system, backend logout is minimal
-  // The client should handle removing the token
-  res.status(200).json({ message: 'Logged out successfully' });
+router.post('/logout', async (req, res) => {
+  try {
+    // Get the token from the authorization header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (token) {
+      // Mark the session as inactive in the database
+      try {
+        await pool.query('UPDATE sessions SET active = 0 WHERE token = ?', [token]);
+      } catch (err) {
+        console.warn('Error marking session as inactive:', err);
+      }
+    }
+    
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Error during logout:', error);
+    res.status(500).json({ error: true, message: 'Error during logout process' });
+  }
 });
 
 module.exports = router;
