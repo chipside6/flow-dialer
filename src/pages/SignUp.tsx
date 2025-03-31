@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Phone, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +14,6 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,10 +22,7 @@ const SignUp = () => {
     setErrorMessage(null);
 
     try {
-      console.log("Attempting to sign up with email:", email);
-      
-      // Use Supabase directly for signup
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
       });
@@ -36,31 +31,11 @@ const SignUp = () => {
         throw error;
       }
 
-      toast({
-        title: "Account created",
-        description: "Your account has been created successfully with Supabase.",
-      });
-
-      // Check if email confirmation is required
-      if (data.session) {
-        // User is already confirmed and logged in
-        navigate('/dashboard');
-      } else {
-        // User needs to confirm email
-        toast({
-          title: "Email verification required",
-          description: "Please check your email to verify your account before logging in.",
-        });
-        navigate('/login');
-      }
+      alert("Account created successfully! You can now login.");
+      navigate('/login');
     } catch (error: any) {
       console.error("Signup error:", error);
       setErrorMessage(error.message || "An unexpected error occurred");
-      toast({
-        title: "Signup failed",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
