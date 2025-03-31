@@ -11,14 +11,14 @@ export function AdminUserCreator() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const handleCreateAdmin = async () => {
     setIsLoading(true);
     try {
       console.log("AdminUserCreator - Invoking create-admin-user function");
       
-      if (!isAuthenticated) {
+      if (!isAuthenticated || !user) {
         toast({
           variant: "destructive",
           title: "Authentication Error",
@@ -55,6 +55,38 @@ export function AdminUserCreator() {
       
       // Force invalidate and refetch admin users query
       await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      
+      // Also update current user profile if needed
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .single();
+          
+        console.log("Current user admin status check:", profileData);
+        
+        if (!profileError && !profileData?.is_admin) {
+          const { data: updateData, error: updateError } = await supabase
+            .from('profiles')
+            .update({ is_admin: true })
+            .eq('id', user.id);
+            
+          if (!updateError) {
+            toast({
+              title: "Admin Access Granted",
+              description: "Your account now has admin privileges. You may need to refresh.",
+            });
+            
+            // Force page refresh to update permissions
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          }
+        }
+      } catch (profileCheckError) {
+        console.error("Error checking current user profile:", profileCheckError);
+      }
       
       // Refetch after a short delay to allow database changes to propagate
       setTimeout(async () => {

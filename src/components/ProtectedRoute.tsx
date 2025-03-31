@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,9 +12,49 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, sessionChecked, initialized, error, isAdmin } = useAuth();
+  const { user, isAuthenticated, isLoading, sessionChecked, initialized, error, isAdmin } = useAuth();
   const location = useLocation();
   const [forceRender, setForceRender] = useState(false);
+  const [manualAdminCheck, setManualAdminCheck] = useState<boolean | null>(null);
+  const [isManualChecking, setIsManualChecking] = useState(false);
+  
+  // Perform direct admin check as backup
+  useEffect(() => {
+    const checkAdminDirectly = async () => {
+      if (!requireAdmin || !user || manualAdminCheck !== null) return;
+      
+      if (isAdmin === false) {
+        setIsManualChecking(true);
+        try {
+          console.log("ProtectedRoute - Performing direct admin check for user:", user.id);
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', user.id)
+            .single();
+          
+          if (error) {
+            console.error("ProtectedRoute - Direct admin check error:", error);
+            setManualAdminCheck(false);
+            return;
+          }
+          
+          const isUserAdmin = !!data?.is_admin;
+          console.log("ProtectedRoute - Direct admin check result:", isUserAdmin);
+          setManualAdminCheck(isUserAdmin);
+        } catch (err) {
+          console.error("ProtectedRoute - Error in direct admin check:", err);
+          setManualAdminCheck(false);
+        } finally {
+          setIsManualChecking(false);
+        }
+      }
+    };
+    
+    if (initialized && isAuthenticated && requireAdmin) {
+      checkAdminDirectly();
+    }
+  }, [user, requireAdmin, isAdmin, isAuthenticated, initialized, manualAdminCheck]);
   
   console.log("Protected Route State:", { 
     isAuthenticated, 
@@ -24,7 +65,9 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     isAdmin,
     requireAdmin,
     path: location.pathname,
-    forceRender
+    forceRender,
+    manualAdminCheck,
+    isManualChecking
   });
   
   // Force render after timeout to prevent infinite loading state
@@ -69,8 +112,13 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     );
   }
   
+  // If manual admin check passed, allow access
+  if (requireAdmin && manualAdminCheck === true) {
+    return <>{children}</>;
+  }
+  
   // If user is authenticated but route requires admin privileges
-  if (isAuthenticated && requireAdmin && !isAdmin) {
+  if (isAuthenticated && requireAdmin && isAdmin === false && manualAdminCheck !== true) {
     console.log("User is authenticated but lacks admin privileges, redirecting to unauthorized");
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
