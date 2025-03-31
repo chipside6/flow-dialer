@@ -62,7 +62,6 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            {/* Add campaigns route (plural) as an alias to campaign */}
             <Route 
               path="/campaigns" 
               element={
@@ -71,7 +70,6 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            
             <Route 
               path="/greetings" 
               element={
@@ -104,7 +102,6 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            {/* Redirect /billing to /upgrade */}
             <Route 
               path="/billing" 
               element={<Navigate to="/upgrade" replace />} 
@@ -125,7 +122,6 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            {/* Admin route - requires admin privileges */}
             <Route 
               path="/admin" 
               element={

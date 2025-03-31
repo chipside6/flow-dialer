@@ -1,6 +1,7 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AdminPanelUser } from "@/components/admin/UserManagement";
+import { AdminUser } from "@/components/admin/UsersList";
 import { useAuth } from "@/contexts/auth";
 import { useEffect } from "react";
 
@@ -20,7 +21,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
     refetchOnReconnect = true,
     retry = 3,
     retryDelay = 1000 
-  } = options; // Reduced stale time
+  } = options;
   
   const queryResult = useQuery({
     queryKey: ["admin", "users"],
@@ -28,7 +29,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
       console.log("useAdminUsers - Fetching users data");
       
       try {
-        // First, try to get profiles directly as this is more reliable
+        // First, try to get profiles directly
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select("*");
@@ -49,7 +50,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
               console.error("useAdminUsers - Error fetching auth users:", authError);
               
               // Just use profile data if we can't get auth users
-              return profiles.map((profile: any): AdminPanelUser => ({
+              return profiles.map((profile: any): AdminUser => ({
                 id: profile.id,
                 email: "No Email Available", // We don't have emails from profiles only
                 created_at: profile.created_at,
@@ -68,7 +69,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
             }, {});
             
             // Combine profile and auth user data
-            return profiles.map((profile: any): AdminPanelUser => {
+            return profiles.map((profile: any): AdminUser => {
               const authUser = usersMap[profile.id];
               
               return {
@@ -85,7 +86,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
             console.error("useAdminUsers - Error in auth users fetch:", error);
             
             // Fall back to just profiles
-            return profiles.map((profile: any): AdminPanelUser => ({
+            return profiles.map((profile: any): AdminUser => ({
               id: profile.id,
               email: "No Email Available",
               created_at: profile.created_at,
@@ -105,7 +106,7 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
               return [];
             }
             
-            return (users || []).map((user: any): AdminPanelUser => ({
+            return (users || []).map((user: any): AdminUser => ({
               id: user.id,
               email: user.email || "No Email Available",
               created_at: user.created_at || new Date().toISOString(),
@@ -130,11 +131,11 @@ export function useAdminUsers(options: UseAdminUsersOptions = {}) {
     },
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    retry: 3,
-    retryDelay: 1000,
+    retry,
+    retryDelay,
     // Only fetch data if user is authenticated, admin, and session has been checked
     enabled: enabled && isAuthenticated && sessionChecked,
-    staleTime: staleTime, // Reduced stale time to refresh more often
+    staleTime,
     gcTime: 60000 * 5,
   });
   

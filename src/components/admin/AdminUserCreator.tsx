@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/auth";
 
-export function CreateAdminButton() {
+export function AdminUserCreator() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -16,7 +16,7 @@ export function CreateAdminButton() {
   const handleCreateAdmin = async () => {
     setIsLoading(true);
     try {
-      console.log("CreateAdminButton - Invoking create-admin-user function");
+      console.log("AdminUserCreator - Invoking create-admin-user function");
       
       if (!isAuthenticated) {
         toast({
@@ -28,7 +28,7 @@ export function CreateAdminButton() {
         return;
       }
       
-      // Use the Supabase Edge Function instead of RPC
+      // Use the Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('create-admin-user', {
         body: {
           email: 'admin@gmail.com',
@@ -53,10 +53,10 @@ export function CreateAdminButton() {
         description: "Admin user created successfully! Refreshing data...",
       });
       
-      // Force invalidate and refetch admin users query immediately
+      // Force invalidate and refetch admin users query
       await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       
-      // Then attempt a refetch after a short delay to allow database changes to propagate
+      // Refetch after a short delay to allow database changes to propagate
       setTimeout(async () => {
         try {
           await queryClient.refetchQueries({ queryKey: ["admin", "users"] });

@@ -1,13 +1,12 @@
 
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { UsersDataFetcher } from "@/components/admin/UsersDataFetcher";
-import { CreateAdminButton } from "@/components/admin/CreateAdminButton";
 import { useAuth } from "@/contexts/auth";
 import { Loader2 } from "lucide-react";
+import { AdminPanel as AdminPanelComponent } from "@/components/admin/AdminPanel";
 
-const AdminPanel = () => {
-  console.log("AdminPanel - Rendering component");
+const AdminPage = () => {
+  console.log("AdminPage - Rendering component");
   const { isAdmin, isAuthenticated, isLoading, initialized } = useAuth();
   const [isAuthorizing, setIsAuthorizing] = useState(true);
   
@@ -18,7 +17,7 @@ const AdminPanel = () => {
     }
   }, [isLoading, initialized]);
   
-  console.log("AdminPanel - Auth state:", { 
+  console.log("AdminPage - Auth state:", { 
     isAdmin, 
     isAuthenticated, 
     isLoading, 
@@ -38,19 +37,11 @@ const AdminPanel = () => {
   
   // Redirect non-admin users to the unauthorized page
   if (!isAuthenticated || isAdmin === false) {
-    console.log("AdminPanel - Access denied, redirecting to unauthorized page");
+    console.log("AdminPage - Access denied, redirecting to unauthorized page");
     return <Navigate to="/unauthorized" replace />;
   }
   
-  return (
-    <div className="w-full overflow-hidden">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Admin Panel</h1>
-        <CreateAdminButton />
-      </div>
-      <UsersDataFetcher />
-    </div>
-  );
+  return <AdminPanelComponent />;
 };
 
-export default AdminPanel;
+export default AdminPage;

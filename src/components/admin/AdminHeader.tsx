@@ -1,11 +1,10 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { CreateAdminButton } from "./CreateAdminButton";
+import { AdminUserCreator } from "./AdminUserCreator";
 
 interface AdminHeaderProps {
   userCount: number;
-  // Removing affiliateCount from required props
 }
 
 export function AdminHeader({ userCount }: AdminHeaderProps) {
@@ -24,7 +23,7 @@ export function AdminHeader({ userCount }: AdminHeaderProps) {
         </Card>
         <Card>
           <CardContent className="p-6 flex items-center justify-center">
-            <CreateAdminButton />
+            <AdminUserCreator />
           </CardContent>
         </Card>
       </div>
