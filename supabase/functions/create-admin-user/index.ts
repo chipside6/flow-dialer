@@ -53,16 +53,12 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Check if user already exists
-    const { data: existingUsers, error: searchError } = await supabase
-      .from("auth.users")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
+    const { data: existingUser, error: searchError } = await supabase.auth.admin.getUserByEmail(email);
 
     let userId;
 
     // If user doesn't exist, create a new one
-    if (searchError || !existingUsers) {
+    if (searchError || !existingUser) {
       console.log("User not found, creating new user");
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email,
@@ -78,7 +74,19 @@ serve(async (req) => {
       console.log(`User created with ID: ${userId}`);
     } else {
       console.log("User already exists");
-      userId = existingUsers.id;
+      userId = existingUser.user.id;
+      
+      // Update user password anyway to ensure it matches what was requested
+      const { error: updateError } = await supabase.auth.admin.updateUserById(
+        userId,
+        { password }
+      );
+      
+      if (updateError) {
+        console.warn("Could not update password:", updateError.message);
+      } else {
+        console.log("User password updated successfully");
+      }
     }
 
     // Make the user an admin by updating their profile
