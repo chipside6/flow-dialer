@@ -43,6 +43,7 @@ export function AdminUserCreator() {
           title: "Error",
           description: "Failed to create admin user: " + error.message,
         });
+        setIsLoading(false);
         return;
       }
       
@@ -50,57 +51,21 @@ export function AdminUserCreator() {
       
       toast({
         title: "Success",
-        description: "Admin user created successfully! Refreshing data...",
+        description: "Admin user created successfully! You can now log in with admin@gmail.com and password test123",
       });
       
-      // Force invalidate and refetch admin users query
-      await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
-      
-      // Also update current user profile if needed
-      try {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', user.id)
-          .single();
-          
-        console.log("Current user admin status check:", profileData);
+      // If it's the current user, update their profile
+      if (user?.email === 'admin@gmail.com') {
+        toast({
+          title: "Admin Access",
+          description: "Your account now has admin privileges. The page will refresh shortly.",
+        });
         
-        if (!profileError && !profileData?.is_admin) {
-          const { data: updateData, error: updateError } = await supabase
-            .from('profiles')
-            .update({ is_admin: true })
-            .eq('id', user.id);
-            
-          if (!updateError) {
-            toast({
-              title: "Admin Access Granted",
-              description: "Your account now has admin privileges. You may need to refresh.",
-            });
-            
-            // Force page refresh to update permissions
-            setTimeout(() => {
-              window.location.reload();
-            }, 1500);
-          }
-        }
-      } catch (profileCheckError) {
-        console.error("Error checking current user profile:", profileCheckError);
+        // Force page refresh after a short delay
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       }
-      
-      // Refetch after a short delay to allow database changes to propagate
-      setTimeout(async () => {
-        try {
-          await queryClient.refetchQueries({ queryKey: ["admin", "users"] });
-          
-          toast({
-            title: "Success",
-            description: "Admin user created/updated successfully! Email: admin@gmail.com, Password: test123",
-          });
-        } catch (refetchError) {
-          console.error("Error refreshing data:", refetchError);
-        }
-      }, 1000);
       
     } catch (err) {
       console.error("Unexpected error:", err);

@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/auth';
 import { Shield, AlertCircle, LogIn, ArrowLeft, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
+import { AdminUserCreator } from '@/components/admin/AdminUserCreator';
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
@@ -109,16 +110,24 @@ const UnauthorizedPage = () => {
                   <AlertTitle>Admin access denied</AlertTitle>
                   <AlertDescription>
                     The database confirms you do not have administrator privileges.
-                    Please contact an administrator for access.
+                    You can create an admin user with the button below.
                   </AlertDescription>
                 </Alert>
               )}
+              
+              <div className="bg-muted p-4 rounded-lg mt-4">
+                <h3 className="text-md font-medium mb-2">Quick Admin Access</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Click the button below to create an admin user with email: admin@gmail.com and password: test123
+                </p>
+                <AdminUserCreator />
+              </div>
               
               {isFromAdmin && (
                 <Button 
                   onClick={checkAdminPrivilegesDirectly} 
                   disabled={isCheckingDirectly || directAdminCheck === true}
-                  className="w-full"
+                  className="w-full mt-4"
                 >
                   {isCheckingDirectly ? (
                     <>
