@@ -1,10 +1,10 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/contexts/auth/index";
 import { useAuth } from "@/contexts/auth/index";
 
 export function AdminUserCreator() {
@@ -57,7 +57,7 @@ export function AdminUserCreator() {
       });
       
       // Refresh the user list if this page has that component
-      queryClient.invalidateQueries(["admin", "users"]);
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       
       // If it's the current user, update their profile
       if (user?.email === adminEmail) {

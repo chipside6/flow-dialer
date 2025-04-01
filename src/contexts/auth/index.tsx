@@ -5,59 +5,98 @@ import { supabase } from '@/integrations/supabase/client';
 interface User {
   id: string;
   email: string;
+  created_at?: string;
+  last_sign_in_at?: string;
+}
+
+interface UserProfile {
+  id: string;
+  full_name?: string;
+  email: string;
+  is_admin?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
+  profile: UserProfile | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
   isLoading: boolean;
   initialized: boolean;
+  sessionChecked: boolean;
+  setProfile: (profile: UserProfile | null) => void;
   signOut: () => Promise<{ success: boolean, error: any | null }>;
 }
 
 // Create context with default values
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  profile: null,
   isAuthenticated: false,
   isAdmin: false,
   isLoading: true,
   initialized: false,
+  sessionChecked: false,
+  setProfile: () => {},
   signOut: async () => ({ success: false, error: null }),
 });
 
 // Provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setUser(session?.user ? { id: session.user.id, email: session.user.email || '' } : null);
-        
-        // Check admin status if authenticated
         if (session?.user) {
+          const userData: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            created_at: session.user.created_at,
+            last_sign_in_at: session.user.last_sign_in_at
+          };
+          setUser(userData);
+          
+          // Check admin status if authenticated
           try {
             const { data } = await supabase
               .from('profiles')
-              .select('is_admin')
+              .select('*')
               .eq('id', session.user.id)
               .single();
               
-            setIsAdmin(!!data?.is_admin);
+            if (data) {
+              const profileData: UserProfile = {
+                id: data.id,
+                full_name: data.full_name,
+                email: session.user.email || '',
+                is_admin: !!data.is_admin
+              };
+              setProfile(profileData);
+              setIsAdmin(!!data.is_admin);
+            } else {
+              setProfile(null);
+              setIsAdmin(false);
+            }
           } catch (error) {
             console.error("Error checking admin status:", error);
+            setProfile(null);
             setIsAdmin(false);
           }
         } else {
+          setUser(null);
+          setProfile(null);
           setIsAdmin(false);
         }
         
         setIsLoading(false);
+        setSessionChecked(true);
         setInitialized(true);
       }
     );
@@ -67,27 +106,54 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
-        setUser(session?.user ? { id: session.user.id, email: session.user.email || '' } : null);
-        
-        // Check admin status if authenticated
         if (session?.user) {
+          const userData: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            created_at: session.user.created_at,
+            last_sign_in_at: session.user.last_sign_in_at
+          };
+          setUser(userData);
+          
+          // Check admin status if authenticated
           try {
             const { data } = await supabase
               .from('profiles')
-              .select('is_admin')
+              .select('*')
               .eq('id', session.user.id)
               .single();
               
-            setIsAdmin(!!data?.is_admin);
+            if (data) {
+              const profileData: UserProfile = {
+                id: data.id,
+                full_name: data.full_name,
+                email: session.user.email || '',
+                is_admin: !!data.is_admin
+              };
+              setProfile(profileData);
+              setIsAdmin(!!data.is_admin);
+            } else {
+              setProfile(null);
+              setIsAdmin(false);
+            }
           } catch (error) {
             console.error("Error checking admin status:", error);
+            setProfile(null);
             setIsAdmin(false);
           }
+        } else {
+          setUser(null);
+          setProfile(null);
+          setIsAdmin(false);
         }
       } catch (error) {
         console.error("Session check error:", error);
+        setUser(null);
+        setProfile(null);
+        setIsAdmin(false);
       } finally {
         setIsLoading(false);
+        setSessionChecked(true);
         setInitialized(true);
       }
     };
@@ -98,6 +164,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       subscription.unsubscribe();
     };
   }, []);
+
+  const updateProfile = (newProfile: UserProfile | null) => {
+    setProfile(newProfile);
+  };
 
   const signOut = async () => {
     try {
@@ -112,10 +182,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={{
       user,
+      profile,
       isAuthenticated: !!user,
       isAdmin,
       isLoading,
       initialized,
+      sessionChecked,
+      setProfile: updateProfile,
       signOut
     }}>
       {children}

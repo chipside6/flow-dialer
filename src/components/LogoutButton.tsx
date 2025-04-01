@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
@@ -8,12 +9,16 @@ interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
+  position?: "left" | "right";
+  onClick?: () => void;
 }
 
 const LogoutButton = ({ 
   variant = "outline", 
   size = "default", 
-  className = ""
+  className = "",
+  position = "right",
+  onClick
 }: LogoutButtonProps) => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -26,6 +31,12 @@ const LogoutButton = ({
     
     try {
       await signOut();
+      
+      // Call the onClick handler if provided
+      if (onClick) {
+        onClick();
+      }
+      
       navigate("/login", { replace: true });
     } catch (error: any) {
       console.error("Logout error:", error);
@@ -43,8 +54,9 @@ const LogoutButton = ({
       className={className}
       disabled={isLoggingOut}
     >
-      <LogOut className="h-4 w-4 mr-2" /> 
+      {position === "left" && <LogOut className="h-4 w-4 mr-2" />}
       <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+      {position === "right" && <LogOut className="h-4 w-4 ml-2" />}
     </Button>
   );
 };
