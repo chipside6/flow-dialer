@@ -10,7 +10,7 @@ import {
 } from "./contact-lists/useContactUploads";
 import { 
   ContactList, 
-  Contact 
+  Contact
 } from "./contact-lists/types";
 
 export type { ContactList, Contact };

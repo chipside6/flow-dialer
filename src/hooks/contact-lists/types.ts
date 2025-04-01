@@ -1,6 +1,4 @@
 
-import { Contact } from "@/hooks/useContactLists";
-
 export interface ContactList {
   id: string;
   name: string;
@@ -8,6 +6,14 @@ export interface ContactList {
   contactCount: number;
   dateCreated: Date;
   lastModified?: Date;
+}
+
+export interface Contact {
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  email?: string;
+  id?: string;
 }
 
 export interface UseContactListsOperationsReturn {
