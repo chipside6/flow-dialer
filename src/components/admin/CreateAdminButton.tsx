@@ -13,8 +13,15 @@ export function CreateAdminButton() {
   const { isAuthenticated, signOut } = useAuth();
 
   const handleCreateAdmin = async () => {
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to create an admin user");
+      return;
+    }
+    
     setIsLoading(true);
+    
     try {
+      toast.info("Creating admin user...");
       console.log("CreateAdminButton - Invoking create-admin-user function");
       
       // Use the Supabase Edge Function
@@ -49,9 +56,9 @@ export function CreateAdminButton() {
         });
       }, 2000);
       
-    } catch (err) {
+    } catch (err: any) {
       console.error("Unexpected error:", err);
-      toast.error("An unexpected error occurred while creating admin user");
+      toast.error("An unexpected error occurred while creating admin user: " + (err.message || "Unknown error"));
     } finally {
       setIsLoading(false);
     }

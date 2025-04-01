@@ -29,6 +29,8 @@ export default function QuickAdminSetup() {
     setIsLoading(true);
     
     try {
+      // Show a toast that we're creating the admin user
+      toast.info("Creating admin user...");
       console.log("QuickAdminSetup - Invoking create-admin-user function");
       
       // Call the edge function to create an admin user
@@ -37,6 +39,7 @@ export default function QuickAdminSetup() {
       });
       
       if (error) {
+        console.error("Error creating admin user:", error);
         throw new Error(error.message || "Failed to create admin user");
       }
       
