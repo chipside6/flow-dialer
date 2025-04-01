@@ -29,123 +29,135 @@ import "./App.css";
 // Import the header-fixes.css for header and logout button fixes
 import "./styles/header-fixes.css";
 
-const App = () => (
-  <TooltipProvider>
-    <AuthProvider>
-      <BrowserRouter>
-        <SidebarProvider defaultOpen>
-          <Sonner />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/support" element={<Support />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            
-            {/* Protected routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/campaign" 
-              element={
-                <ProtectedRoute>
-                  <Campaign />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/campaigns" 
-              element={
-                <ProtectedRoute>
-                  <Campaign />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/greetings" 
-              element={
-                <ProtectedRoute>
-                  <GreetingsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/contacts" 
-              element={
-                <ProtectedRoute>
-                  <ContactLists />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/transfers" 
-              element={
-                <ProtectedRoute>
-                  <TransferNumbers />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/sip-providers" 
-              element={
-                <ProtectedRoute>
-                  <SipProviders />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/billing" 
-              element={<Navigate to="/upgrade" replace />} 
-            />
-            <Route 
-              path="/upgrade" 
-              element={
-                <ProtectedRoute>
-                  <UpgradePage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminPanel />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/diagnostics" 
-              element={
-                <ProtectedRoute>
-                  <DiagnosticPage />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </SidebarProvider>
-      </BrowserRouter>
-    </AuthProvider>
-  </TooltipProvider>
-);
+console.log('🔍 App.tsx is initializing');
+
+const App = () => {
+  console.log('🔍 App component rendering');
+  
+  return (
+    <TooltipProvider>
+      {console.log('🔍 TooltipProvider rendering')}
+      <AuthProvider>
+        {console.log('🔍 AuthProvider rendering')}
+        <BrowserRouter>
+          {console.log('🔍 BrowserRouter rendering')}
+          <SidebarProvider defaultOpen>
+            {console.log('🔍 SidebarProvider rendering')}
+            <Sonner />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/unauthorized" element={<UnauthorizedPage />} />
+              
+              {/* Protected routes */}
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/campaign" 
+                element={
+                  <ProtectedRoute>
+                    <Campaign />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/campaigns" 
+                element={
+                  <ProtectedRoute>
+                    <Campaign />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/greetings" 
+                element={
+                  <ProtectedRoute>
+                    <GreetingsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/contacts" 
+                element={
+                  <ProtectedRoute>
+                    <ContactLists />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/transfers" 
+                element={
+                  <ProtectedRoute>
+                    <TransferNumbers />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/sip-providers" 
+                element={
+                  <ProtectedRoute>
+                    <SipProviders />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/billing" 
+                element={<Navigate to="/upgrade" replace />} 
+              />
+              <Route 
+                path="/upgrade" 
+                element={
+                  <ProtectedRoute>
+                    <UpgradePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminPanel />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/diagnostics" 
+                element={
+                  <ProtectedRoute>
+                    <DiagnosticPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </SidebarProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </TooltipProvider>
+  );
+};
+
+console.log('🔍 App.tsx finished initializing');
 
 export default App;

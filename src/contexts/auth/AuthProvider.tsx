@@ -6,7 +6,11 @@ import type { User, UserProfile } from './types';
 import { fetchUserProfile } from './authUtils';
 import { signOutUser } from './authActions';
 
+console.log('🔍 AuthProvider.tsx is being imported');
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  console.log('🔍 AuthProvider component initializing');
+  
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    console.log("AuthProvider: Setting up auth state");
+    console.log("🔍 AuthProvider: Setting up auth state");
     
     let isMounted = true;
     
@@ -25,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         if (!isMounted) return;
         
-        console.log('AuthProvider: Auth state changed:', event);
+        console.log('🔍 AuthProvider: Auth state changed:', event);
         
         if (session?.user) {
           try {
@@ -54,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               setIsAdmin(false);
             }
           } catch (error) {
-            console.error("AuthProvider: Error during sign in:", error);
+            console.error("🔍 AuthProvider: Error during sign in:", error);
             setError(error instanceof Error ? error : new Error('Unknown error during sign in'));
             setIsAdmin(false); // Default to non-admin on error
           }
@@ -77,13 +81,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         if (!isMounted) return;
         
-        console.log("AuthProvider: Getting current session");
+        console.log("🔍 AuthProvider: Getting current session");
         
         // Get current user session
         const { data, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
-          console.error('AuthProvider: Error checking session:', sessionError);
+          console.error('🔍 AuthProvider: Error checking session:', sessionError);
           setError(sessionError instanceof Error ? sessionError : new Error('Unknown error during session check'));
           setIsLoading(false);
           setSessionChecked(true);
@@ -92,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         if (data.session?.user) {
-          console.log("AuthProvider: Found active session for user:", data.session.user.email);
+          console.log("🔍 AuthProvider: Found active session for user:", data.session.user.email);
           
           try {
             // Convert Supabase User to our User type
@@ -120,17 +124,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               setIsAdmin(false);
             }
           } catch (profileError) {
-            console.error("AuthProvider: Error fetching profile:", profileError);
+            console.error("🔍 AuthProvider: Error fetching profile:", profileError);
             setIsAdmin(false); // Default to non-admin on error
           }
         } else {
-          console.log("AuthProvider: No active session found");
+          console.log("🔍 AuthProvider: No active session found");
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
         }
       } catch (error) {
-        console.error('AuthProvider: Error checking session:', error);
+        console.error('🔍 AuthProvider: Error checking session:', error);
         setError(error instanceof Error ? error : new Error('Unknown error during session check'));
         setIsAdmin(false); // Default to non-admin on error
       } finally {
@@ -164,6 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Handler for signing out
   const signOut = async () => {
     try {
+      console.log('🔍 AuthProvider: Signing out user');
       setIsLoading(true);
       
       // Immediately reset state for better UX
@@ -174,19 +179,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signOutUser();
       
       if (!result.success) {
-        console.error("AuthProvider: Error during sign out:", result.error);
+        console.error("🔍 AuthProvider: Error during sign out:", result.error);
       }
       
       return result;
     } catch (error) {
-      console.error("AuthProvider: Unexpected error during sign out:", error);
+      console.error("🔍 AuthProvider: Unexpected error during sign out:", error);
       return { success: true, error };
     } finally {
       setIsLoading(false);
     }
   };
 
-  console.log("AuthProvider: Current state:", { 
+  console.log("🔍 AuthProvider: Current state:", { 
     isAuthenticated: !!user, 
     isLoading, 
     initialized, 
@@ -210,3 +215,5 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+
+console.log('🔍 AuthProvider.tsx has been loaded');
