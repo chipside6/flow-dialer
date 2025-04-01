@@ -28,6 +28,7 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
             aria-label="Open mobile menu"
           >
             <Menu size={24} className="text-foreground" />
+            <span className="sr-only">Menu</span>
           </button>
           <Link 
             to={isAuthenticated ? "/dashboard" : "/"} 
@@ -46,21 +47,25 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
-              <Button variant="ghost" asChild className="hidden md:flex text-foreground">
-                <Link to="/dashboard">Dashboard</Link>
+              <Button variant="ghost" asChild className="hidden md:inline-flex text-foreground">
+                <Link to="/dashboard">
+                  <span className="visible">Dashboard</span>
+                </Link>
               </Button>
-              <LogoutButton variant="ghost" className="hidden md:flex text-foreground" />
+              <LogoutButton variant="ghost" className="hidden md:inline-flex text-foreground" />
             </>
           ) : (
             <>
-              <Button variant="ghost" asChild className="hidden md:flex text-foreground">
+              <Button variant="ghost" asChild className="hidden md:inline-flex text-foreground">
                 <Link to="/login">
                   <LogIn className="h-4 w-4 mr-2" />
-                  <span>Log In</span>
+                  <span className="visible">Log In</span>
                 </Link>
               </Button>
-              <Button className="bg-primary rounded-full text-primary-foreground" asChild>
-                <Link to="/signup">Get Started</Link>
+              <Button className="bg-primary rounded-full text-primary-foreground inline-flex items-center" asChild>
+                <Link to="/signup">
+                  <span className="visible">Get Started</span>
+                </Link>
               </Button>
             </>
           )}

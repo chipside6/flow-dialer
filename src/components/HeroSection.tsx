@@ -33,13 +33,13 @@ export const HeroSection = () => {
             <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 justify-center">
               <Button size="lg" className="rounded-full px-8 group" asChild>
                 <Link to="/signup">
-                  Try for Free
+                  <span className="visible">Try for Free</span>
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" className="rounded-full px-8" asChild>
                 <Link to="/features">
-                  Learn More
+                  <span className="visible">Learn More</span>
                 </Link>
               </Button>
             </div>
