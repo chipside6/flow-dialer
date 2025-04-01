@@ -9,7 +9,7 @@ import { CTASection } from "@/components/CTASection";
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
-      <div className="h-16 md:h-20"></div> {/* Add spacer to push content below navbar */}
+      {/* Remove any additional spacer here since it's handled in PublicLayout */}
       <main className="text-foreground">
         <HeroSection />
         <FeaturesSection />

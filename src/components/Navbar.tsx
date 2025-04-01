@@ -72,6 +72,7 @@ export const Navbar = () => {
     return <DashboardNavbar toggleSidebar={toggleSidebar} />;
   }
 
+  // On regular pages, render the PublicNavbar
   return (
     <PublicNavbar 
       isScrolled={isScrolled}
@@ -79,4 +80,4 @@ export const Navbar = () => {
       setIsMobileMenuOpen={setIsMobileMenuOpen}
     />
   );
-};
+}

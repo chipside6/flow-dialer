@@ -16,6 +16,7 @@ header {
 header *, header a, header button, header svg {
   color: hsl(var(--foreground)) !important;
   visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Logo in navbar */
@@ -40,4 +41,21 @@ header nav a {
 /* Fix z-index issues */
 .mobile-menu {
   z-index: 1001 !important;
+}
+
+/* Remove any overlapping headers by making sure only one header is visible */
+.navbar-dashboard {
+  display: none !important;
+}
+
+/* Increase specificity for NavLinks */
+.md\:flex.items-center.gap-6 nav a {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 600 !important;
+}
+
+/* Higher contrast for buttons */
+header button, header a.button {
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
 }
