@@ -1,5 +1,6 @@
 
 /* Import base styles and utilities */
+@import './styles/base-styles.css';
 @import './styles/base.css';
 @import './styles/utilities.css';
 @import './styles/typography.css';
