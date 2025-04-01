@@ -21,8 +21,8 @@ export function CreateAdminButton() {
       // Use the Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('create-admin-user', {
         body: {
-          email: 'admin@gmail.com',
-          password: 'test123'
+          email: 'cchips474@gmail.com',
+          password: 'starty123'
         }
       });
       
@@ -34,14 +34,14 @@ export function CreateAdminButton() {
       
       console.log("Admin user created response:", data);
       
-      toast.success("Admin user created successfully! Email: admin@gmail.com, Password: test123");
+      toast.success("Admin user created successfully! Email: cchips474@gmail.com, Password: starty123");
       
       // Force invalidate and refetch admin users query immediately
       await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       
       // Let the user know they should log out and log back in as admin
       setTimeout(() => {
-        toast.info("To use admin privileges, please log out and log back in as admin@gmail.com", {
+        toast.info("To use admin privileges, please log out and log back in as cchips474@gmail.com", {
           duration: 8000,
           action: {
             label: "Log Out Now",
