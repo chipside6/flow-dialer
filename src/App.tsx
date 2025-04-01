@@ -36,13 +36,10 @@ const App = () => {
   
   return (
     <TooltipProvider>
-      {console.log('🔍 TooltipProvider rendering')}
       <AuthProvider>
-        {console.log('🔍 AuthProvider rendering')}
         <BrowserRouter>
-          {console.log('🔍 BrowserRouter rendering')}
           <SidebarProvider defaultOpen>
-            {console.log('🔍 SidebarProvider rendering')}
+            {/* Properly moved console.log statements outside of JSX rendering */}
             <Sonner />
             <Routes>
               {/* Public routes */}

@@ -13,7 +13,6 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-background">
-      {console.log('🔍 Index page JSX rendering')}
       <Navbar />
       <main> 
         <HeroSection />
