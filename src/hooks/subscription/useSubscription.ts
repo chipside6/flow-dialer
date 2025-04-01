@@ -1,81 +1,75 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { fetchSubscription, getPlanById } from "@/hooks/subscription/subscriptionApi";
 import { useSubscriptionLimit } from "./useSubscriptionLimit";
 import { useLifetimePlan } from "./useLifetimePlan";
 import { Subscription, UseSubscriptionReturn } from "./types";
 import { useToast } from "@/components/ui/use-toast";
+import { useCachedFetch } from "@/hooks/useCachedFetch";
 
 export const useSubscription = (): UseSubscriptionReturn => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [error, setError] = useState<Error | null>(null);
 
-  // Fetch subscription data when component mounts and when user changes
-  useEffect(() => {
-    if (user) {
-      console.log("User authenticated, fetching subscription data");
-      fetchCurrentSubscription();
-    } else {
-      console.log("No user authenticated, resetting subscription state");
-      setIsLoading(false);
-      setCurrentPlan(null);
-      setSubscription(null);
-      setError(null);
+  // Use cached fetch for subscription data
+  const { 
+    data: subscriptionData,
+    isLoading,
+    error,
+    refetch: refetchSubscription
+  } = useCachedFetch(
+    () => fetchSubscription(user?.id),
+    {
+      cacheKey: user?.id ? `subscription-${user.id}` : undefined,
+      cacheDuration: 10 * 60 * 1000, // 10 minutes
+      enabled: !!user,
+      retry: 2,
+      retryDelay: 2000,
+      onSuccess: (data) => {
+        if (data) {
+          setCurrentPlan(data.plan_id);
+          setSubscription(data);
+        } else {
+          setCurrentPlan('free');
+          setSubscription(null);
+        }
+      },
+      onError: (err) => {
+        console.error("Error in fetchCurrentSubscription:", err);
+        setCurrentPlan('free');
+        setSubscription(null);
+        
+        toast({
+          title: "Subscription Error",
+          description: "Could not retrieve your subscription information. Default free plan applied.",
+          variant: "destructive"
+        });
+      }
     }
-  }, [user]);
+  );
 
-  const fetchCurrentSubscription = async () => {
+  // Enhanced fetch subscription function that uses the cached fetch
+  const fetchCurrentSubscription = useCallback(async () => {
     if (!user) {
-      setIsLoading(false);
       setCurrentPlan('free');
       setSubscription(null);
       return null;
     }
     
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const subscriptionData = await fetchSubscription(user.id);
-      
-      if (subscriptionData) {
-        setCurrentPlan(subscriptionData.plan_id);
-        setSubscription(subscriptionData);
-      } else {
-        setCurrentPlan('free');
-        setSubscription(null);
-      }
-      
-      setIsLoading(false);
-      return subscriptionData;
-    } catch (error) {
-      console.error("Error in fetchCurrentSubscription:", error);
-      setCurrentPlan('free');
-      setSubscription(null);
-      setError(error instanceof Error ? error : new Error('Unknown error occurred'));
-      setIsLoading(false);
-      
-      toast({
-        title: "Subscription Error",
-        description: "Could not retrieve your subscription information. Default free plan applied.",
-        variant: "destructive"
-      });
-      
-      return null;
-    }
-  };
+    await refetchSubscription(true); // Force refresh
+    return subscriptionData;
+  }, [user, refetchSubscription, subscriptionData]);
 
-  // Use the subscription limit hook
+  // Use the subscription limit hook with optimized parameters
   const { 
     callCount, 
     showLimitDialog, 
-    fetchCallCount, 
-    closeLimitDialog 
+    closeLimitDialog,
+    hasReachedLimit,
+    callLimit
   } = useSubscriptionLimit(user?.id, currentPlan);
 
   // Use the lifetime plan activation hook
@@ -91,6 +85,8 @@ export const useSubscription = (): UseSubscriptionReturn => {
     fetchCurrentSubscription,
     activateLifetimePlan,
     getPlanById,
-    error
+    error,
+    hasReachedLimit,
+    callLimit
   };
 };

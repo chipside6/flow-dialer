@@ -1,44 +1,65 @@
 
 import { useState, useEffect } from "react";
-import { fetchUserCallCount } from "@/services/subscriptionService";
+import { fetchUserCallCount } from "./subscriptionApi";
+import { pricingPlans } from "@/data/pricingPlans";
+import { useCachedFetch } from "@/hooks/useCachedFetch";
 
-export const useSubscriptionLimit = (
-  userId: string | undefined, 
-  currentPlan: string | null
-) => {
-  const [callCount, setCallCount] = useState<number>(0);
+/**
+ * Hook for checking subscription limits like call count
+ */
+export const useSubscriptionLimit = (userId: string | undefined, currentPlan: string | null) => {
   const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const [callLimit, setCallLimit] = useState(0);
 
-  const fetchCallCount = async () => {
-    if (!userId) return 0;
-    
-    const totalCalls = await fetchUserCallCount(userId);
-    setCallCount(totalCalls);
-    
-    // Check if free user has reached limit
-    if (currentPlan === 'free' && totalCalls >= 500) {
-      setShowLimitDialog(true);
-    }
-    
-    return totalCalls;
-  };
-
+  // Get the call limit for the current plan
   useEffect(() => {
-    if (userId) {
-      fetchCallCount();
+    if (currentPlan) {
+      const plan = pricingPlans.find(p => p.id === currentPlan);
+      setCallLimit(plan?.features?.maxCalls || 0);
     } else {
-      setCallCount(0);
+      // Default to free plan limit
+      const freePlan = pricingPlans.find(p => p.id === 'free');
+      setCallLimit(freePlan?.features?.maxCalls || 0);
     }
-  }, [userId, currentPlan]);
+  }, [currentPlan]);
 
+  // Use cached fetch for call count with automatic retries
+  const { 
+    data: callCount = 0, 
+    refetch: fetchCallCount,
+    isLoading: isLoadingCallCount,
+    error: callCountError
+  } = useCachedFetch(
+    () => fetchUserCallCount(userId), 
+    {
+      cacheKey: userId ? `call-count-${userId}` : undefined,
+      cacheDuration: 5 * 60 * 1000, // 5 minutes
+      enabled: !!userId,
+      retry: 2,
+      retryDelay: 1500,
+    }
+  );
+
+  // Close the limit dialog
   const closeLimitDialog = () => {
     setShowLimitDialog(false);
   };
 
+  // Check if user has reached call limit
+  useEffect(() => {
+    if (callLimit > 0 && callCount >= callLimit) {
+      setShowLimitDialog(true);
+    }
+  }, [callCount, callLimit]);
+
   return {
     callCount,
     showLimitDialog,
+    closeLimitDialog,
     fetchCallCount,
-    closeLimitDialog
+    isLoadingCallCount,
+    callCountError,
+    callLimit,
+    hasReachedLimit: callLimit > 0 && callCount >= callLimit
   };
 };
