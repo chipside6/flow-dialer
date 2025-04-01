@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "@/hooks/subscription";
 
 interface LimitReachedDialogProps {
   open: boolean;
@@ -19,6 +20,7 @@ interface LimitReachedDialogProps {
 
 export function LimitReachedDialog({ open, onClose }: LimitReachedDialogProps) {
   const navigate = useNavigate();
+  const { callLimit } = useSubscription();
 
   const handleUpgradeClick = () => {
     onClose(); // Close the dialog
@@ -34,7 +36,7 @@ export function LimitReachedDialog({ open, onClose }: LimitReachedDialogProps) {
           </div>
           <DialogTitle className="text-center text-xl pt-4">Monthly Call Limit Reached</DialogTitle>
           <DialogDescription className="text-center">
-            You've reached your 500 calls limit for this month on the free plan. 
+            You've reached your {callLimit} calls limit for this month on the free plan. 
             Upgrade to lifetime access for unlimited calls.
           </DialogDescription>
         </DialogHeader>

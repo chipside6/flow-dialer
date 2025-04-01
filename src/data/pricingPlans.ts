@@ -6,6 +6,10 @@ export interface PricingPlan {
   price: number;
   description: string;
   features: string[];
+  featuresObj?: {
+    maxCalls: number;
+    [key: string]: any;
+  };
   popular?: boolean;
   isTrial?: boolean;
   isLifetime?: boolean;
@@ -26,6 +30,9 @@ export const pricingPlans: PricingPlan[] = [
       "Access to all premium features",
       "Automatically downgrades after 3 days"
     ],
+    featuresObj: {
+      maxCalls: 9999 // Unlimited for practical purposes
+    },
     isTrial: true
   },
   {
@@ -41,7 +48,24 @@ export const pricingPlans: PricingPlan[] = [
       "Custom branding options",
       "Pay once, use forever"
     ],
+    featuresObj: {
+      maxCalls: 9999 // Unlimited for practical purposes
+    },
     popular: true,
     isLifetime: true
+  },
+  {
+    id: "free",
+    name: "Free",
+    price: 0,
+    description: "Basic features with limitations",
+    features: [
+      "Limited to 500 calls per month",
+      "Basic campaign features",
+      "Standard support"
+    ],
+    featuresObj: {
+      maxCalls: 500
+    }
   }
 ];

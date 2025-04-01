@@ -15,11 +15,11 @@ export const useSubscriptionLimit = (userId: string | undefined, currentPlan: st
   useEffect(() => {
     if (currentPlan) {
       const plan = pricingPlans.find(p => p.id === currentPlan);
-      setCallLimit(plan?.features?.maxCalls || 0);
+      setCallLimit(plan?.featuresObj?.maxCalls || 0);
     } else {
       // Default to free plan limit
       const freePlan = pricingPlans.find(p => p.id === 'free');
-      setCallLimit(freePlan?.features?.maxCalls || 0);
+      setCallLimit(freePlan?.featuresObj?.maxCalls || 0);
     }
   }, [currentPlan]);
 
