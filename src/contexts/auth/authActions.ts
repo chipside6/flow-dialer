@@ -4,6 +4,50 @@ import { UserProfile } from './types';
 import { fetchUserProfile, updateUserProfile } from './authUtils';
 import { signOut as apiSignOut } from '@/services/auth';
 
+export const signUpUser = async (email: string, password: string) => {
+  try {
+    console.log("authActions - Signing up user:", email);
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    
+    if (error) {
+      console.error("authActions - Sign up error:", error);
+      return { error };
+    }
+    
+    console.log("authActions - Sign up successful:", data);
+    return { data, error: null };
+  } catch (error: any) {
+    console.error("authActions - Unexpected sign up error:", error);
+    return { error };
+  }
+};
+
+export const signInUser = async (email: string, password: string) => {
+  try {
+    console.log("authActions - Signing in user:", email);
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    
+    if (error) {
+      console.error("authActions - Sign in error:", error);
+      return { error };
+    }
+    
+    console.log("authActions - Sign in successful:", data);
+    return { data, error: null };
+  } catch (error: any) {
+    console.error("authActions - Unexpected sign in error:", error);
+    return { error };
+  }
+};
+
 export const signOutUser = async () => {
   console.log("authActions - Signing out user");
   
