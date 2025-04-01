@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { API_URL } from "@/services/api/apiConfig";
-import { ASTERISK_API_URL } from "@/utils/asteriskService";
+import { ASTERISK_API_URL, ASTERISK_API_USERNAME, ASTERISK_API_PASSWORD, asteriskService } from "@/utils/asteriskService";
+import { Button } from "@/components/ui/button";
 
 interface SystemCheck {
   name: string;
@@ -22,58 +23,77 @@ const LaunchReadinessChecker = () => {
     { name: "Environment Variables", status: "checking", message: "Checking configuration..." },
     { name: "Authentication", status: "checking", message: "Verifying authentication..." }
   ]);
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const runChecks = async () => {
+    setIsRetrying(true);
+    
+    // Check Supabase Connection
+    try {
+      const { data, error } = await supabase.from('contact_lists').select('count').limit(1);
+      if (error) throw error;
+      updateCheck("Supabase Connection", "success", "Connected to Supabase successfully");
+    } catch (error) {
+      updateCheck("Supabase Connection", "error", `Failed to connect: ${error.message}`);
+    }
+
+    // Check API Connection
+    try {
+      const response = await fetch(`${API_URL}/health`, { method: 'GET' });
+      if (!response.ok) throw new Error(`Status: ${response.status}`);
+      updateCheck("API Connection", "success", "API is reachable");
+    } catch (error) {
+      updateCheck("API Connection", "error", `API unreachable: ${error.message}`);
+    }
+
+    // Check Asterisk Connection - Now we do a real test using the service
+    try {
+      if (!ASTERISK_API_URL || ASTERISK_API_URL === "http://your-asterisk-server:8088/ari") {
+        updateCheck("Asterisk Connection", "error", "Asterisk URL not configured");
+      } else if (!ASTERISK_API_USERNAME || !ASTERISK_API_PASSWORD) {
+        updateCheck("Asterisk Connection", "error", "Asterisk credentials not configured");
+      } else {
+        // Use the service to test the connection
+        const result = await asteriskService.testConnection();
+        if (result.success) {
+          updateCheck("Asterisk Connection", "success", result.message);
+        } else {
+          updateCheck("Asterisk Connection", "error", result.message);
+        }
+      }
+    } catch (error) {
+      updateCheck("Asterisk Connection", "error", `Error testing Asterisk connection: ${error.message}`);
+    }
+
+    // Check Environment Variables
+    const requiredVars = [
+      "VITE_SUPABASE_URL", 
+      "VITE_SUPABASE_PUBLISHABLE_KEY", 
+      "VITE_API_URL", 
+      "VITE_ASTERISK_API_URL",
+      "VITE_ASTERISK_API_USERNAME",
+      "VITE_ASTERISK_API_PASSWORD"
+    ];
+    
+    const missingVars = requiredVars.filter(v => !import.meta.env[v]);
+    
+    if (missingVars.length === 0) {
+      updateCheck("Environment Variables", "success", "All required environment variables are set");
+    } else {
+      updateCheck("Environment Variables", "error", `Missing variables: ${missingVars.join(', ')}`);
+    }
+
+    // Check Authentication
+    if (user) {
+      updateCheck("Authentication", "success", "Authentication is working");
+    } else {
+      updateCheck("Authentication", "warning", "Not authenticated. Please login to verify authentication");
+    }
+    
+    setIsRetrying(false);
+  };
 
   useEffect(() => {
-    const runChecks = async () => {
-      // Check Supabase Connection
-      try {
-        const { data, error } = await supabase.from('contact_lists').select('count').limit(1);
-        if (error) throw error;
-        updateCheck("Supabase Connection", "success", "Connected to Supabase successfully");
-      } catch (error) {
-        updateCheck("Supabase Connection", "error", `Failed to connect: ${error.message}`);
-      }
-
-      // Check API Connection
-      try {
-        const response = await fetch(`${API_URL}/health`, { method: 'GET' });
-        if (!response.ok) throw new Error(`Status: ${response.status}`);
-        updateCheck("API Connection", "success", "API is reachable");
-      } catch (error) {
-        updateCheck("API Connection", "error", `API unreachable: ${error.message}`);
-      }
-
-      // Check Asterisk Connection - Note: This is a mock check as we can't directly test from browser
-      if (ASTERISK_API_URL && ASTERISK_API_URL !== "http://your-asterisk-server:8088/ari") {
-        updateCheck("Asterisk Connection", "warning", "Asterisk URL configured, but connection can't be verified from browser");
-      } else {
-        updateCheck("Asterisk Connection", "error", "Asterisk URL not configured");
-      }
-
-      // Check Environment Variables
-      const requiredVars = [
-        "VITE_SUPABASE_URL", 
-        "VITE_SUPABASE_PUBLISHABLE_KEY", 
-        "VITE_API_URL", 
-        "VITE_ASTERISK_API_URL"
-      ];
-      
-      const missingVars = requiredVars.filter(v => !import.meta.env[v]);
-      
-      if (missingVars.length === 0) {
-        updateCheck("Environment Variables", "success", "All required environment variables are set");
-      } else {
-        updateCheck("Environment Variables", "error", `Missing variables: ${missingVars.join(', ')}`);
-      }
-
-      // Check Authentication
-      if (user) {
-        updateCheck("Authentication", "success", "Authentication is working");
-      } else {
-        updateCheck("Authentication", "warning", "Not authenticated. Please login to verify authentication");
-      }
-    };
-
     runChecks();
   }, [user]);
 
@@ -85,10 +105,34 @@ const LaunchReadinessChecker = () => {
     );
   };
 
+  const handleRetry = () => {
+    // Reset status to checking
+    setChecks(prev => 
+      prev.map(check => ({ ...check, status: "checking", message: `Rechecking ${check.name.toLowerCase()}...` }))
+    );
+    
+    // Run checks again
+    runChecks();
+  };
+
   return (
     <Card className="shadow-md">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-xl font-semibold">Launch Readiness Checker</CardTitle>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRetry} 
+          disabled={isRetrying}
+          className="flex items-center gap-2"
+        >
+          {isRetrying ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+          Retry Checks
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

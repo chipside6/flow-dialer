@@ -1,4 +1,3 @@
-
 import { 
   createDialerError, 
   DialerErrorType, 
@@ -14,10 +13,21 @@ interface DialContactsOptions {
   maxConcurrentCalls?: number;
 }
 
-// Replace with your production Asterisk API URL and credentials
+// Export Asterisk API credentials so they can be accessed by other components
 export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || "http://your-asterisk-server:8088/ari";
-const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || "asterisk";
-const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || "asterisk";
+export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || "asterisk";
+export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || "asterisk";
+
+// SIP Configuration defaults
+export const SIP_CONFIG = {
+  defaultContext: "from-external",
+  defaultTransport: "udp",
+  defaultCodecs: ["ulaw", "alaw", "g729"],
+  defaultPort: "5060",
+  maxRetries: 3,
+  retryInterval: 60, // seconds
+  callTimeout: 30,   // seconds
+};
 
 // Authentication headers for Asterisk REST Interface
 const getAuthHeaders = () => {
@@ -160,7 +170,7 @@ export const asteriskService = {
       };
     }
   },
-
+  
   /**
    * Generate Asterisk configuration for a campaign
    */
@@ -196,6 +206,57 @@ export const asteriskService = {
       return {
         sipConfig: '',
         dialplanConfig: ''
+      };
+    }
+  },
+  
+  /**
+   * Generate a SIP trunk configuration for a specific provider
+   */
+  generateSipTrunkConfig: (providerName: string, host: string, port: string, username: string, password: string): string => {
+    return `
+[${providerName}]
+type=peer
+host=${host}
+port=${port || SIP_CONFIG.defaultPort}
+username=${username}
+secret=${password}
+fromuser=${username}
+context=${SIP_CONFIG.defaultContext}
+insecure=port,invite
+disallow=all
+allow=${SIP_CONFIG.defaultCodecs.join(',')}
+transport=${SIP_CONFIG.defaultTransport}
+dtmfmode=rfc2833
+nat=force_rport,comedia
+qualify=yes
+    `.trim();
+  },
+  
+  /**
+   * Test connection to Asterisk server
+   */
+  testConnection: async (): Promise<{ success: boolean; message: string }> => {
+    console.log("Testing connection to Asterisk server:", ASTERISK_API_URL);
+    
+    try {
+      const response = await fetch(`${ASTERISK_API_URL}/applications`, {
+        headers: getAuthHeaders(),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      
+      return {
+        success: true,
+        message: "Successfully connected to Asterisk server"
+      };
+    } catch (error) {
+      console.error("Error connecting to Asterisk server:", error);
+      return {
+        success: false,
+        message: `Failed to connect: ${error.message}`
       };
     }
   }
