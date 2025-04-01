@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, Phone, AlertCircle, ShieldAlert } from 'lucide-react';
+import { Loader2, AlertCircle, ShieldAlert } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
+import { Logo } from '@/components/ui/Logo';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -92,10 +92,8 @@ const Login = () => {
     <div className="container max-w-md mx-auto py-10">
       <Card className="border border-border/40 shadow-sm">
         <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-2">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white">
-              <Phone size={32} />
-            </div>
+          <div className="flex justify-center mb-4">
+            <Logo size="lg" />
           </div>
           <CardTitle className="text-2xl font-semibold text-center">
             {isAdminRedirect ? "Administrator Login" : "Login to your account"}
