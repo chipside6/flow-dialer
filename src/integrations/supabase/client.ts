@@ -19,12 +19,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('🔍 WARNING: Using fallback Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment for proper configuration.');
 }
 
+// Create a placeholder for the supabase client that will be exported
+let supabaseClient;
+
 // Create Supabase client with explicit error handling
 try {
-  // Create Supabase client with explicit error handling
   console.log('🔍 Creating Supabase client with URL:', supabaseUrl);
   
-  export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
@@ -36,7 +38,7 @@ try {
   console.log('🔍 Supabase client created successfully');
   
   // Verify the client was created with a simple check
-  if (supabase && supabase.auth) {
+  if (supabaseClient && supabaseClient.auth) {
     console.log('🔍 Supabase client looks valid');
   } else {
     console.error('🔍 Supabase client may be invalid - missing properties');
@@ -46,7 +48,7 @@ try {
   
   // Create a dummy client to prevent application crashes
   // This allows the app to load, but Supabase functionality won't work
-  export const supabase = {
+  supabaseClient = {
     auth: {
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
@@ -66,8 +68,10 @@ try {
     }
   };
   
-  // Throw a more detailed error after setting up the dummy client
-  throw new Error(`Failed to initialize Supabase client: ${error.message}. The application will load but database features won't work.`);
+  console.error(`Failed to initialize Supabase client: ${error.message}. The application will load but database features won't work.`);
 }
+
+// Export the client after it has been initialized
+export const supabase = supabaseClient;
 
 console.log('🔍 Supabase client initialization - COMPLETE');
