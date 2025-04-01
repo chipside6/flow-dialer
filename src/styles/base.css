@@ -50,9 +50,25 @@ button:focus, a:focus {
   outline-offset: 2px;
 }
 
+/* Fix for content positioning with fixed headers */
+.fixed-header-spacing {
+  padding-top: 80px; /* Adjust based on your header height */
+}
+
+/* Ensure content is visible below fixed headers */
+main {
+  position: relative;
+  z-index: 1;
+}
+
 @media (max-width: 768px) {
   .container-fluid {
     padding-right: 1rem;
     padding-left: 1rem;
+  }
+  
+  /* Adjust mobile header spacing */
+  .fixed-header-spacing {
+    padding-top: 70px;
   }
 }

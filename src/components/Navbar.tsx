@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSidebar } from "@/components/ui/sidebar";
@@ -69,14 +68,18 @@ export const Navbar = () => {
 
   // Don't render navbar on dashboard pages - use the sidebar with dashboard header instead
   if (isDashboard) {
-    return null;
+    return <DashboardNavbar toggleSidebar={toggleSidebar} />;
   }
 
   return (
-    <PublicNavbar 
-      isScrolled={isScrolled}
-      isMobileMenuOpen={isMobileMenuOpen}
-      setIsMobileMenuOpen={setIsMobileMenuOpen}
-    />
+    <>
+      <PublicNavbar 
+        isScrolled={isScrolled}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+      />
+      {/* Add a spacer div to prevent content from being hidden under the navbar */}
+      <div className="h-16 md:h-20"></div>
+    </>
   );
 };
