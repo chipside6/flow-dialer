@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, UserProfile } from './types';
+import { toast } from '@/components/ui/use-toast';
 
 console.log('🔍 AuthProvider.tsx is being imported - simplified version');
 
@@ -15,24 +16,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [supabaseInitError, setSupabaseInitError] = useState<boolean>(false);
 
   useEffect(() => {
     console.log("🔍 AuthProvider: Setting up auth state - simplified");
     
     let isMounted = true;
     
-    // Use a timeout to prevent permanent loading state
+    // Use a short timeout to prevent permanent loading state
     const timeoutId = setTimeout(() => {
       if (isMounted && isLoading) {
         console.log("🔍 AuthProvider: Auth state timeout reached, continuing with app");
         setIsLoading(false);
         setSessionChecked(true);
       }
-    }, 2000);
+    }, 1500);
     
     // Set up auth state listener
     try {
       console.log("🔍 AuthProvider: Trying to set up auth listener");
+      
+      // Check if supabase is fully initialized
+      if (!supabase || !supabase.auth) {
+        throw new Error("Supabase client is not properly initialized");
+      }
+      
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         (event, session) => {
           if (!isMounted) return;
@@ -98,7 +106,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       };
       
-      checkSession();
+      // Use Promise.race with a timeout to prevent hanging
+      Promise.race([
+        checkSession(),
+        new Promise(resolve => setTimeout(() => {
+          console.log("🔍 AuthProvider: Session check timed out");
+          if (isMounted) {
+            setIsLoading(false);
+            setSessionChecked(true);
+          }
+          resolve(null);
+        }, 1000))
+      ]);
       
       // Clean up
       return () => {
@@ -108,9 +127,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
     } catch (error) {
       console.error('🔍 AuthProvider: Error setting up auth state:', error);
+      setSupabaseInitError(true);
       setIsLoading(false);
       setSessionChecked(true);
       setError(error instanceof Error ? error : new Error('Unknown error setting up auth'));
+      
+      // Continue with children even if Supabase initialization fails
+      // This allows the app to render without authentication features
       
       return () => {
         isMounted = false;
@@ -119,11 +142,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  useEffect(() => {
+    // Display a toast if Supabase initialization failed
+    if (supabaseInitError) {
+      console.log("🔍 Displaying error toast for Supabase initialization error");
+      toast({
+        title: "Database Connection Issue",
+        description: "Unable to connect to the database. Some features may be unavailable.",
+        variant: "destructive",
+      });
+    }
+  }, [supabaseInitError]);
+
   console.log("🔍 AuthProvider state:", { 
     isAuthenticated: !!user, 
     isLoading, 
     isAdmin,
-    sessionChecked
+    sessionChecked,
+    hasError: !!error || supabaseInitError
   });
 
   const value = {
@@ -140,7 +176,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut: async () => {
       try {
         console.log('🔍 AuthProvider: Signing out user');
-        await supabase.auth.signOut();
+        if (supabase && supabase.auth) {
+          await supabase.auth.signOut();
+        }
         setUser(null);
         setProfile(null);
         setIsAdmin(false);
@@ -152,7 +190,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Render children even if we're loading, to avoid blank screen
+  // Always render children even if there are authentication errors
+  // This allows the app to function without authentication features
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
