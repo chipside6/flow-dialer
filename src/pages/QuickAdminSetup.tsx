@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -12,8 +11,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth";
 
 export default function QuickAdminSetup() {
-  const [email, setEmail] = useState("cchips474@gmail.com");
-  const [password, setPassword] = useState("starty123");
+  const [email, setEmail] = useState("admin@example.com");
+  const [password, setPassword] = useState("admin123");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated, signOut } = useAuth();

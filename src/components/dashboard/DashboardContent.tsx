@@ -18,7 +18,7 @@ export const DashboardContent = () => {
           <CardHeader className="pb-3">
             <CardTitle>Welcome!</CardTitle>
             <CardDescription>
-              {profile?.full_name ? `Hello, ${profile.full_name}` : user?.email ? `Hello, ${user.email}` : 'Welcome to the Dashboard'}
+              {user?.email ? `Hello, ${user.email}` : 'Welcome to the Dashboard'}
             </CardDescription>
           </CardHeader>
           <CardContent>
