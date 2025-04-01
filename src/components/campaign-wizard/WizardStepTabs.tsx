@@ -28,7 +28,7 @@ export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
 
   return (
     <div className="wizard-tabs-container">
-      <ScrollArea orientation="horizontal" className="w-full">
+      <ScrollArea className="w-full">
         <TabsList className="inline-flex mb-6 max-w-4xl mx-auto no-vertical-scroll">
           {steps.map((step) => (
             <TabsTrigger

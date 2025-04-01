@@ -90,6 +90,19 @@
   display: none;
 }
 
+/* Ensure horizontal scrolling in tab container */
+.wizard-tabs-container .scroll-area {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Ensure the tabs scroll horizontally */
+.wizard-tabs-container .inline-flex {
+  white-space: nowrap;
+  display: inline-flex;
+  min-width: min-content;
+}
+
 @media (prefers-color-scheme: dark) {
   .wizard-tabs-container {
     background-color: hsl(var(--background));
