@@ -1,72 +1,50 @@
 
-import { useState, useEffect, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/auth";
-import { toast } from "@/components/ui/use-toast";
-import { logSupabaseOperation, OperationType } from "@/utils/supabaseDebug";
-import { ContactList, ContactListsState } from "./types";
+import { useState, useEffect } from 'react';
+import { ContactList } from './types';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/auth';
+import { toast } from '@/components/ui/use-toast';
+import { logSupabaseOperation, OperationType } from '@/utils/supabaseDebug';
 
-export const useContactListsState = (): ContactListsState & { 
-  fetchContactLists: () => Promise<void>;
-  setLists: React.Dispatch<React.SetStateAction<ContactList[]>>;
-} => {
+export const useContactListsState = () => {
   const [lists, setLists] = useState<ContactList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchContactLists = async () => {
-    // If there's a previous request in progress, abort it
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    
-    // Clear any pending timeouts
-    if (fetchTimeoutRef.current) {
-      clearTimeout(fetchTimeoutRef.current);
-      fetchTimeoutRef.current = null;
-    }
-    
-    // Create a new abort controller for this request
-    abortControllerRef.current = new AbortController();
-    
     if (!user) {
-      setLists([]);
+      console.log("No user found, skipping contact lists fetch");
       setIsLoading(false);
-      setError(null);
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
+    console.log(`Fetching contact lists for user: ${user.id}`);
+
     try {
-      setIsLoading(true);
-      setError(null);
-      console.log("Fetching contact lists for user:", user.id);
-      
-      // Set a timeout to prevent the loading state from getting stuck
-      fetchTimeoutRef.current = setTimeout(() => {
-        if (isLoading) {
-          console.log("Fetch timeout reached, ending loading state");
-          setIsLoading(false);
-          toast({
-            title: "Loading timed out",
-            description: "Fetching contact lists is taking longer than expected. Please try refreshing.",
-            variant: "destructive"
-          });
-        }
-      }, 8000);
-      
+      // Set a timeout to handle persistently stuck loading states
+      const timeoutId = setTimeout(() => {
+        console.log("Fetch timeout reached, ending loading state");
+        setIsLoading(false);
+      }, 6000);
+
       const { data, error } = await supabase
         .from('contact_lists')
         .select(`
           *,
           contact_list_items:contact_list_items(count)
         `)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      // Clear the timeout since we got a response
+      clearTimeout(timeoutId);
 
       if (error) {
-        console.error("Supabase error:", error);
+        console.error("Error fetching contact lists:", error);
         logSupabaseOperation({
           operation: OperationType.READ,
           table: 'contact_lists',
@@ -75,21 +53,18 @@ export const useContactListsState = (): ContactListsState & {
           error,
           auth_status: 'AUTHENTICATED'
         });
-        throw error;
+        throw new Error(error.message || "Failed to fetch contact lists");
       }
 
-      console.log("Contact lists data from DB:", data);
       logSupabaseOperation({
         operation: OperationType.READ,
         table: 'contact_lists',
         user_id: user.id,
         success: true,
-        data,
         auth_status: 'AUTHENTICATED'
       });
-      
-      // Transform data to match ContactList interface
-      const transformedData = (data || []).map((list: any) => ({
+
+      const formattedLists: ContactList[] = data.map(list => ({
         id: list.id,
         name: list.name,
         description: list.description || "",
@@ -97,51 +72,30 @@ export const useContactListsState = (): ContactListsState & {
         dateCreated: new Date(list.created_at),
         lastModified: new Date(list.updated_at)
       }));
-      
-      console.log("Transformed contact lists:", transformedData);
-      setLists(transformedData);
+
+      setLists(formattedLists);
+      setIsLoading(false);
     } catch (err: any) {
-      // Only set error if this request wasn't aborted
-      if (err.name !== 'AbortError') {
-        console.error("Error fetching contact lists:", err);
-        setError(err);
-        toast({
-          title: "Error loading contact lists",
-          description: err.message,
-          variant: "destructive"
-        });
-      }
-    } finally {
-      // Clear the timeout
-      if (fetchTimeoutRef.current) {
-        clearTimeout(fetchTimeoutRef.current);
-        fetchTimeoutRef.current = null;
-      }
-      // Set loading to false regardless
+      console.error("Error in fetchContactLists:", err);
+      setError(err);
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchContactLists();
-    
-    // Safety timeout to ensure isLoading state doesn't get stuck
+    if (user) {
+      fetchContactLists();
+    } else {
+      setIsLoading(false);
+    }
+
+    // Set a safety timeout to avoid stuck loading states
     const safetyTimeout = setTimeout(() => {
-      if (isLoading) {
-        console.log("Safety timeout reached, resetting loading state");
-        setIsLoading(false);
-      }
+      console.log("Safety timeout reached, resetting loading state");
+      setIsLoading(false);
     }, 10000);
 
     return () => {
-      // Clean up abort controller
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      // Clean up timeouts
-      if (fetchTimeoutRef.current) {
-        clearTimeout(fetchTimeoutRef.current);
-      }
       clearTimeout(safetyTimeout);
     };
   }, [user]);

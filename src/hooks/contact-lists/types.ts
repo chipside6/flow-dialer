@@ -1,5 +1,5 @@
 
-import { User } from "@supabase/supabase-js";
+import { Contact } from "@/hooks/useContactLists";
 
 export interface ContactList {
   id: string;
@@ -7,20 +7,7 @@ export interface ContactList {
   description: string;
   contactCount: number;
   dateCreated: Date;
-  lastModified: Date;
-}
-
-export interface Contact {
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  email?: string;
-}
-
-export interface ContactListsState {
-  lists: ContactList[];
-  isLoading: boolean;
-  error: Error | null;
+  lastModified?: Date;
 }
 
 export interface UseContactListsOperationsReturn {

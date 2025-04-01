@@ -9,6 +9,8 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const ContactLists = () => {
   const { user } = useAuth();
@@ -42,13 +44,12 @@ const ContactLists = () => {
   
   // Handle manual refresh
   const handleRefresh = () => {
+    toast({
+      title: "Refreshing contact lists",
+      description: "Fetching your latest contact lists...",
+    });
     refreshLists();
   };
-  
-  console.log("Contact Lists page render - user:", user?.id);
-  console.log("Contact Lists page render - lists:", lists);
-  console.log("Contact Lists loading state:", isLoading);
-  console.log("Contact Lists error state:", error);
   
   return (
     <DashboardLayout>
@@ -89,9 +90,12 @@ const ContactLists = () => {
           </div>
         ) : loadingTimeout ? (
           <div className="flex flex-col justify-center items-center py-12 space-y-4">
-            <p className="text-center text-muted-foreground">
-              It's taking longer than expected to load your contact lists.
-            </p>
+            <Alert variant="warning" className="max-w-lg">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                It's taking longer than expected to load your contact lists.
+              </AlertDescription>
+            </Alert>
             <Button 
               variant="outline" 
               onClick={handleRefresh}
@@ -103,9 +107,12 @@ const ContactLists = () => {
           </div>
         ) : error ? (
           <div className="flex flex-col justify-center items-center py-12 space-y-4">
-            <p className="text-center text-destructive">
-              Error loading contact lists: {error.message || "Unknown error"}
-            </p>
+            <Alert variant="destructive" className="max-w-lg">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Error loading contact lists: {error.message || "Unknown error"}
+              </AlertDescription>
+            </Alert>
             <Button 
               variant="outline" 
               onClick={handleRefresh}

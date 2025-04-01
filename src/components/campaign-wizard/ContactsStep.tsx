@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CampaignData } from "./types";
 import { ContactList } from "@/hooks/useContactLists";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ContactsStepProps {
   campaign: CampaignData;
@@ -44,9 +46,14 @@ export const ContactsStep = ({ campaign, contactLists, onSelectChange, isLoading
           </div>
         )}
         {contactLists.length === 0 && !isLoading && (
-          <p className="text-sm text-muted-foreground mt-2">
-            You don't have any contact lists yet. Please create one in the Contact Lists section.
-          </p>
+          <div className="mt-4">
+            <Alert variant="warning" className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <AlertDescription className="text-sm text-amber-700 dark:text-amber-300">
+                You don't have any contact lists yet. Please create one in the Contact Lists section.
+              </AlertDescription>
+            </Alert>
+          </div>
         )}
       </div>
     </div>
