@@ -14,10 +14,10 @@ interface DialContactsOptions {
   maxConcurrentCalls?: number;
 }
 
-// Replace this with your actual Asterisk API URL
-const ASTERISK_API_URL = "http://your-asterisk-server:8088/ari"; // Update with your actual Asterisk server address
-const ASTERISK_API_USERNAME = "asterisk"; // Update with your Asterisk API username
-const ASTERISK_API_PASSWORD = "asterisk"; // Update with your Asterisk API password
+// Replace with your production Asterisk API URL and credentials
+const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || "http://your-asterisk-server:8088/ari";
+const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || "asterisk";
+const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || "asterisk";
 
 // Authentication headers for Asterisk REST Interface
 const getAuthHeaders = () => {
