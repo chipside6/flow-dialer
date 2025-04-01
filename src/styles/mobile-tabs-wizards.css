@@ -74,6 +74,7 @@
   z-index: 10;
   background-color: white;
   overflow-y: hidden;
+  padding: 16px 16px 0 16px; /* Add padding to the top and sides */
 }
 
 .no-vertical-scroll {
@@ -108,3 +109,14 @@
     background-color: hsl(var(--background));
   }
 }
+
+/* Add better spacing for tab triggers */
+[role="tab"] {
+  margin: 0 2px;
+}
+
+/* Ensure card title has proper spacing */
+.card-header .card-title {
+  padding: 8px 8px 0 8px;
+}
+

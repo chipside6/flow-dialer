@@ -29,7 +29,7 @@ export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
   return (
     <div className="wizard-tabs-container">
       <ScrollArea className="w-full">
-        <TabsList className="inline-flex mb-6 max-w-4xl mx-auto no-vertical-scroll">
+        <TabsList className="inline-flex mb-4 max-w-4xl mx-auto no-vertical-scroll">
           {steps.map((step) => (
             <TabsTrigger
               key={step.id}
