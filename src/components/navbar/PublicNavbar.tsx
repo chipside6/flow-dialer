@@ -19,21 +19,21 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
   const { isAuthenticated } = useAuth();
   
   return (
-    <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-in-out px-6 py-4 bg-background border-b ${isScrolled ? 'shadow-sm' : ''}`}>
+    <header className={`fixed top-0 left-0 right-0 z-[1000] transition-all duration-300 ease-in-out px-6 py-4 bg-background border-b ${isScrolled ? 'header-shadow' : ''}`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted"
+            className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted mobile-menu-button"
             aria-label="Open mobile menu"
           >
             <Menu size={24} className="text-foreground" />
           </button>
           <Link 
             to={isAuthenticated ? "/dashboard" : "/"} 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 logo-container"
           >
-            <Logo />
+            <Logo className="text-foreground" />
           </Link>
         </div>
         
@@ -46,20 +46,20 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
-              <Button variant="ghost" asChild className="hidden md:flex">
+              <Button variant="ghost" asChild className="hidden md:flex text-foreground">
                 <Link to="/dashboard">Dashboard</Link>
               </Button>
-              <LogoutButton variant="ghost" className="hidden md:flex" />
+              <LogoutButton variant="ghost" className="hidden md:flex text-foreground" />
             </>
           ) : (
             <>
-              <Button variant="ghost" asChild className="hidden md:flex">
+              <Button variant="ghost" asChild className="hidden md:flex text-foreground">
                 <Link to="/login">
                   <LogIn className="h-4 w-4 mr-2" />
                   <span>Log In</span>
                 </Link>
               </Button>
-              <Button className="bg-primary rounded-full" asChild>
+              <Button className="bg-primary rounded-full text-primary-foreground" asChild>
                 <Link to="/signup">Get Started</Link>
               </Button>
             </>
