@@ -53,6 +53,7 @@ serve(async (req) => {
         throw new Error(`Error listing users: ${listError.message}`);
       }
       
+      // Find the user in the returned list
       const existingUser = data?.users?.find(u => u.email === email);
       
       if (existingUser) {

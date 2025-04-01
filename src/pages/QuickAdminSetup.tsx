@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,8 @@ export default function QuickAdminSetup() {
     setIsLoading(true);
     
     try {
+      console.log("QuickAdminSetup - Invoking create-admin-user function");
+      
       // Call the edge function to create an admin user
       const { data, error } = await supabase.functions.invoke('create-admin-user', {
         body: { email, password }
@@ -36,6 +39,8 @@ export default function QuickAdminSetup() {
       if (error) {
         throw new Error(error.message || "Failed to create admin user");
       }
+      
+      console.log("Admin user created response:", data);
       
       toast.success(`Admin user created successfully!`);
       toast.info("Please log in with the admin credentials", {
@@ -62,6 +67,7 @@ export default function QuickAdminSetup() {
       }
       
     } catch (error: any) {
+      console.error("Error creating admin:", error);
       toast.error(`Error: ${error.message || "Failed to create admin"}`);
     } finally {
       setIsLoading(false);
