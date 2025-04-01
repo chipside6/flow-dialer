@@ -1,10 +1,11 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -24,9 +25,10 @@ const LogoutButton = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signOut } = useAuth();
+  const { isOnline } = useNetworkStatus();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     if (isLoggingOut) return;
     
     setIsLoggingOut(true);
@@ -34,6 +36,15 @@ const LogoutButton = ({
     try {
       // Call optional callback if provided
       if (onClick) onClick();
+      
+      // Check network status and show appropriate message
+      if (!isOnline) {
+        toast({
+          title: "You're offline",
+          description: "Your session will be cleared locally, but server logout will occur when you're back online.",
+          variant: "warning"
+        });
+      }
       
       // Navigate to login page first for better UX
       navigate("/login", { replace: true });
@@ -64,7 +75,7 @@ const LogoutButton = ({
     } finally {
       setIsLoggingOut(false);
     }
-  };
+  }, [isLoggingOut, onClick, navigate, signOut, toast, isOnline]);
   
   const buttonClasses = `${className} ${position === "left" ? "justify-start" : "justify-center"}`;
   

@@ -1,8 +1,9 @@
+
 import { toast } from "@/components/ui/use-toast";
 import { User, Session, API_URL } from './types';
 import { storeSession, clearSession, getStoredSession } from './session';
 
-// Sign up a new user
+// Sign up a new user with enhanced error handling and timeout management
 export const signUp = async (email: string, password: string): Promise<{ error: Error | null, session?: Session }> => {
   try {
     console.log("Signing up new user:", email);
@@ -32,9 +33,20 @@ export const signUp = async (email: string, password: string): Promise<{ error: 
     console.log("Signup response status:", response.status);
     
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error("Signup failed:", response.status, errorData);
-      throw new Error(errorData || `Server responded with status: ${response.status}`);
+      let errorMessage: string;
+      
+      try {
+        // Try to parse error as JSON
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.error || `Server responded with status: ${response.status}`;
+      } catch {
+        // Fallback to text if not JSON
+        const errorText = await response.text();
+        errorMessage = errorText || `Server responded with status: ${response.status}`;
+      }
+      
+      console.error("Signup failed:", response.status, errorMessage);
+      throw new Error(errorMessage);
     }
     
     const data = await response.json();
@@ -56,14 +68,14 @@ export const signUp = async (email: string, password: string): Promise<{ error: 
     if (error.name === 'AbortError') {
       return { error: new Error('Network request timed out. Please check your internet connection and try again.') };
     } else if (error.message === 'Failed to fetch') {
-      return { error: new Error('Could not connect to the server. Please make sure the backend server is running at http://localhost:5000.') };
+      return { error: new Error('Could not connect to the server. Please make sure you have an internet connection and the backend server is running.') };
     }
     
     return { error: new Error(error.message || 'Network error occurred during signup') };
   }
 };
 
-// Sign in an existing user
+// Sign in an existing user with enhanced error handling
 export const signIn = async (email: string, password: string): Promise<{ error: Error | null, session?: Session }> => {
   try {
     console.log("Signing in user:", email);
@@ -93,9 +105,20 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
     console.log("Login response status:", response.status);
     
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error("Login failed:", response.status, errorData);
-      throw new Error(errorData || `Invalid login credentials (${response.status})`);
+      let errorMessage: string;
+      
+      try {
+        // Try to parse error as JSON
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.error || `Invalid login credentials (${response.status})`;
+      } catch {
+        // Fallback to text if not JSON
+        const errorText = await response.text();
+        errorMessage = errorText || `Invalid login credentials (${response.status})`;
+      }
+      
+      console.error("Login failed:", response.status, errorMessage);
+      throw new Error(errorMessage);
     }
     
     const data = await response.json();
@@ -116,18 +139,22 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
     if (error.name === 'AbortError') {
       return { error: new Error('Network request timed out. Please check your internet connection and try again.') };
     } else if (error.message === 'Failed to fetch') {
-      return { error: new Error('Could not connect to the server. Please make sure the backend server is running at http://localhost:5000.') };
+      return { error: new Error('Could not connect to the server. Please make sure you have an internet connection and the backend server is running.') };
     }
     
     return { error: new Error(error.message || 'Network error occurred during login') };
   }
 };
 
-// Sign out the current user
+// Sign out the current user with enhanced reliability and cleanup
 export const signOut = async (): Promise<{ success: boolean, error: Error | null }> => {
   try {
     console.log("Signing out user");
     const session = getStoredSession();
+    
+    // Create a flag to track overall success
+    let apiCallSucceeded = true;
+    let apiErrorMessage = '';
     
     if (session) {
       console.log("Making logout request to:", `${API_URL}/auth/logout`);
@@ -148,6 +175,8 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
         }).catch(err => {
           // Ignore network errors during logout, just log them
           console.warn("Network error during API logout:", err);
+          apiCallSucceeded = false;
+          apiErrorMessage = err.message;
           return null;
         });
         
@@ -155,18 +184,29 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
         
         // Check for non-200 response
         if (response && !response.ok) {
+          apiCallSucceeded = false;
           console.warn("Logout warning: Server returned", response.status);
           const errorText = await response.text().catch(e => "Could not read error response");
+          apiErrorMessage = errorText;
           console.warn("Warning details:", errorText);
         }
-      } catch (apiError) {
+      } catch (apiError: any) {
         // Log but continue with local logout even if API call fails
         console.warn("API logout failed, continuing with local logout:", apiError);
+        apiCallSucceeded = false;
+        apiErrorMessage = apiError.message;
       }
     }
     
     // Always clear the local session regardless of API call result
     clearSession();
+    
+    // Log the outcome for debugging
+    if (!apiCallSucceeded) {
+      console.log(`Logout completed with API warnings: ${apiErrorMessage}, but local session was cleared`);
+    } else {
+      console.log("Logout completed successfully");
+    }
     
     return { success: true, error: null };
   } catch (error: any) {
