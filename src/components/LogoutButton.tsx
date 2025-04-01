@@ -42,7 +42,7 @@ const LogoutButton = ({
         toast({
           title: "You're offline",
           description: "Your session will be cleared locally, but server logout will occur when you're back online.",
-          variant: "warning"
+          variant: "destructive" // Changed from "warning" to "destructive" to match allowed variants
         });
       }
       
