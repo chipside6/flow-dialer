@@ -52,15 +52,30 @@ serve(async (req) => {
     // Create Supabase client with service role key (admin privileges)
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check if user already exists
-    const { data: existingUser, error: searchError } = await supabase.auth.admin.getUserByEmail(email);
-
-    let userId;
+    // Check if user already exists - using a compatible method
+    let existingUser = null;
+    let userId = null;
+    
+    try {
+      const { data: userData, error: userError } = await supabase
+        .from('auth.users')
+        .select('id, email')
+        .eq('email', email)
+        .maybeSingle();
+        
+      if (!userError && userData) {
+        existingUser = userData;
+        userId = userData.id;
+        console.log("Found existing user:", userId);
+      }
+    } catch (err) {
+      console.log("Error checking for existing user, will try to create new one:", err.message);
+    }
 
     // If user doesn't exist, create a new one
-    if (searchError || !existingUser) {
+    if (!existingUser) {
       console.log("User not found, creating new user");
-      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+      const { data: authData, error: createError } = await supabase.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
@@ -70,11 +85,10 @@ serve(async (req) => {
         throw createError;
       }
 
-      userId = newUser.user.id;
+      userId = authData.user.id;
       console.log(`User created with ID: ${userId}`);
     } else {
       console.log("User already exists");
-      userId = existingUser.user.id;
       
       // Update user password anyway to ensure it matches what was requested
       const { error: updateError } = await supabase.auth.admin.updateUserById(

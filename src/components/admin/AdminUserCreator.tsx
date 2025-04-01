@@ -12,6 +12,8 @@ export function AdminUserCreator() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuth();
+  const [adminEmail] = useState('admin@example.com');
+  const [adminPassword] = useState('admin123');
 
   const handleCreateAdmin = async () => {
     setIsLoading(true);
@@ -31,8 +33,8 @@ export function AdminUserCreator() {
       // Use the Supabase Edge Function with the specific credentials
       const { data, error } = await supabase.functions.invoke('create-admin-user', {
         body: {
-          email: 'cchips474@gmail.com',
-          password: 'test123'
+          email: adminEmail,
+          password: adminPassword
         }
       });
       
@@ -51,14 +53,14 @@ export function AdminUserCreator() {
       
       toast({
         title: "Success",
-        description: "Admin user created successfully! You can now log in with cchips474@gmail.com and password test123",
+        description: `Admin user created successfully! You can now log in with ${adminEmail} and password ${adminPassword}`,
       });
       
       // Refresh the user list if this page has that component
       queryClient.invalidateQueries(["admin", "users"]);
       
       // If it's the current user, update their profile
-      if (user?.email === 'cchips474@gmail.com') {
+      if (user?.email === adminEmail) {
         toast({
           title: "Admin Access",
           description: "Your account now has admin privileges. The page will refresh shortly.",

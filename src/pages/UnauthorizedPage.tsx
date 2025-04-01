@@ -10,6 +10,8 @@ const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
+  const [adminEmail] = useState('admin@example.com'); 
+  const [adminPassword] = useState('admin123');
   
   // Check if user came from admin panel
   const isFromAdmin = location.state?.from?.pathname === '/admin';
@@ -18,11 +20,13 @@ const UnauthorizedPage = () => {
     setIsCreatingAdmin(true);
     
     try {
+      console.log("UnauthorizedPage - Checking admin privileges directly for user:", supabase.auth.getUser());
+      
       // Use the Supabase Edge Function to create admin user
       const { data, error } = await supabase.functions.invoke('create-admin-user', {
         body: {
-          email: 'admin@gmail.com',
-          password: 'test123'
+          email: adminEmail,
+          password: adminPassword
         }
       });
       
@@ -33,7 +37,7 @@ const UnauthorizedPage = () => {
         return;
       }
       
-      alert("Admin user created! You can now login with:\nEmail: admin@gmail.com\nPassword: test123");
+      alert(`Admin user created! You can now login with:\nEmail: ${adminEmail}\nPassword: ${adminPassword}`);
       
       // Navigate to login page with redirect to admin
       navigate('/login', { state: { from: { pathname: '/admin' } } });
@@ -72,8 +76,8 @@ const UnauthorizedPage = () => {
             <h3 className="text-md font-medium mb-2">Quick Admin Access</h3>
             <p className="text-sm text-muted-foreground mb-3">
               Click the button below to create an admin user, then login with:
-              <br />Email: admin@gmail.com
-              <br />Password: test123
+              <br />Email: {adminEmail}
+              <br />Password: {adminPassword}
             </p>
             <Button 
               onClick={handleCreateAdmin} 
