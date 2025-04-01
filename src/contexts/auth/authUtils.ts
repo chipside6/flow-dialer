@@ -29,7 +29,7 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       id: data.id,
       email: '', // This will be set by the AuthProvider
       full_name: data.full_name || '',
-      avatar_url: data.avatar_url || null,
+      avatar_url: data.avatar_url || null, // This might not exist in DB
       company_name: data.company_name || '',
       is_admin: !!data.is_admin // Ensure this is a boolean
     };
