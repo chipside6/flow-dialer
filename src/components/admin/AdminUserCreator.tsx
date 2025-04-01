@@ -1,11 +1,11 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/contexts/auth";
+import { useAuth } from "@/contexts/auth/index";
+import { useAuth } from "@/contexts/auth/index";
 
 export function AdminUserCreator() {
   const [isLoading, setIsLoading] = useState(false);
