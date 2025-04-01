@@ -15,7 +15,7 @@ interface DialContactsOptions {
 }
 
 // Replace with your production Asterisk API URL and credentials
-const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || "http://your-asterisk-server:8088/ari";
+export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || "http://your-asterisk-server:8088/ari";
 const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || "asterisk";
 const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || "asterisk";
 
