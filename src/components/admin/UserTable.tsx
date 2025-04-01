@@ -1,34 +1,26 @@
 
 import React from "react";
 import { 
-  Table, TableHeader, TableBody, 
-  TableHead, TableRow, TableCell 
+  Table, 
+  TableHeader, 
+  TableBody, 
+  TableHead, 
+  TableRow, 
+  TableCell 
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, AlertCircle } from "lucide-react";
+import { AdminPanelUser, UserProfile } from "./UserManagement";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export interface AdminUser {
-  id: string;
-  email?: string | null;
-  created_at?: string;
-  profile?: {
-    id: string;
-    full_name?: string | null;
-    is_admin?: boolean | null;
-    created_at?: string;
-    updated_at?: string;
-    user_id: string;
-  };
-}
-
-interface UsersListProps {
-  users: AdminUser[];
+interface UserTableProps {
+  users: AdminPanelUser[];
   isLoading: boolean;
 }
 
-export function UsersList({ users, isLoading }: UsersListProps) {
-  console.log("UsersList - Rendering with users:", users?.length || 0, "isLoading:", isLoading);
+export function UserTable({ users, isLoading }: UserTableProps) {
+  console.log("UserTable - Rendering with users:", users?.length || 0, "isLoading:", isLoading);
   
   if (isLoading) {
     return (

@@ -1,18 +1,18 @@
 
 import React, { useEffect } from "react";
-import { RefreshCw, Info, Loader2 } from "lucide-react";
-import { AdminHeader } from "./AdminHeader";
-import { UsersList } from "./UsersList";
-import { useAdminUsers } from "@/hooks/useAdminUsers";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2, Info, RefreshCw } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { UserManagement } from "@/components/admin/UserManagement";
+import { useAdminUsers } from "@/hooks/useAdminUsers";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function AdminPanel() {
-  console.log("AdminPanel - Component rendering");
-  
+export function UsersDataFetcher() {
+  console.log("UsersDataFetcher - Component rendering");
+
   const { 
     data: users = [], 
     isLoading, 
@@ -22,15 +22,13 @@ export function AdminPanel() {
     isSuccess,
     isFetched
   } = useAdminUsers({
-    staleTime: 5000,
+    staleTime: 5000, // Short stale time for more frequent updates
     refetchOnReconnect: true,
-    retry: 2,
-    retryDelay: 1000
+    retry: 2, // Retry failed requests up to 2 times
+    retryDelay: 1000 // 1 second delay between retries
   });
 
-  const { toast } = useToast();
-  
-  console.log("AdminPanel - Data status:", { 
+  console.log("UsersDataFetcher - Data status:", { 
     isLoading, 
     isRefetching,
     isSuccess,
@@ -43,7 +41,7 @@ export function AdminPanel() {
   useEffect(() => {
     // Auto-retry once on initial error
     if (error && !isRefetching && !isSuccess) {
-      console.log("AdminPanel - Auto-retrying after error");
+      console.log("UsersDataFetcher - Auto-retrying after error");
       const timer = setTimeout(() => {
         refetch();
       }, 1000);
@@ -52,7 +50,7 @@ export function AdminPanel() {
     
     // Set up periodic refresh every 30 seconds
     const refreshInterval = setInterval(() => {
-      console.log("AdminPanel - Periodic refresh");
+      console.log("UsersDataFetcher - Periodic refresh");
       refetch();
     }, 30000); // 30 seconds
     
@@ -60,7 +58,7 @@ export function AdminPanel() {
   }, [error, isRefetching, isSuccess, refetch]);
 
   const handleRetry = () => {
-    console.log("AdminPanel - Manual retry triggered");
+    console.log("UsersDataFetcher - Manual retry triggered");
     toast({
       title: "Refreshing Data",
       description: "Fetching updated user data...",
@@ -68,19 +66,19 @@ export function AdminPanel() {
     refetch();
   };
 
-  // Calculate stats
+  // Calculate stats - providing defaults for when data isn't available
   const userCount = users?.length ?? 0;
   
-  // Force rendering content after a reasonable timeout
+  // Force rendering content after a reasonable timeout, even if still loading
   const [forceRender, setForceRender] = React.useState(false);
   
   useEffect(() => {
     const timer = setTimeout(() => {
       if ((isLoading || !isFetched) && !users.length) {
-        console.log("AdminPanel - Forcing render after timeout");
+        console.log("UsersDataFetcher - Forcing render after timeout");
         setForceRender(true);
       }
-    }, 2000);
+    }, 2000); // Shorter timeout to ensure UI responsiveness
     
     return () => clearTimeout(timer);
   }, [isLoading, isFetched, users]);
@@ -141,8 +139,8 @@ export function AdminPanel() {
 
         {(!shouldShowContent) && (
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              {[1, 2].map((i) => (
+            <div className="grid gap-4 md:grid-cols-3">
+              {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-24 w-full rounded-lg" />
               ))}
             </div>
@@ -154,13 +152,12 @@ export function AdminPanel() {
           <>
             <AdminHeader userCount={userCount} />
             
-            <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-4">User Management</h2>
-              <UsersList 
-                users={users} 
-                isLoading={isLoading && !forceRender && !isFetched} 
-              />
-            </div>
+            <UserManagement 
+              users={users} 
+              isLoading={isLoading && !forceRender && !isFetched} 
+              error={error instanceof Error ? error : null} 
+              onRetry={handleRetry}
+            />
           </>
         )}
       </div>

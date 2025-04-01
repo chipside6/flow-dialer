@@ -1,68 +1,56 @@
 
-import React from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { AdminPanel as AdminPanelComponent } from "@/components/admin/AdminPanel";
+import React, { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { UsersDataFetcher } from "@/components/admin/UsersDataFetcher";
+import { CreateAdminButton } from "@/components/admin/CreateAdminButton";
+import { useAuth } from "@/contexts/auth";
+import { Loader2 } from "lucide-react";
 
-const AdminPage = () => {
-  const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+const AdminPanel = () => {
+  console.log("AdminPanel - Rendering component");
+  const { isAdmin, isAuthenticated, isLoading, initialized } = useAuth();
+  const [isAuthorizing, setIsAuthorizing] = useState(true);
   
-  React.useEffect(() => {
-    // Simple check for admin status
-    const checkAdminStatus = async () => {
-      try {
-        // Get current session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session) {
-          setIsAdmin(false);
-          setIsLoading(false);
-          return;
-        }
-        
-        // Check if user is admin in profiles table
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (error) {
-          console.error("Error checking admin status:", error);
-          setIsAdmin(false);
-        } else {
-          setIsAdmin(!!data?.is_admin);
-        }
-      } catch (err) {
-        console.error("Unexpected error checking admin status:", err);
-        setIsAdmin(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    checkAdminStatus();
-  }, []);
+  useEffect(() => {
+    // When auth state is fully determined, we're done authorizing
+    if (initialized && !isLoading) {
+      setIsAuthorizing(false);
+    }
+  }, [isLoading, initialized]);
   
-  // Show loading state
-  if (isLoading) {
+  console.log("AdminPanel - Auth state:", { 
+    isAdmin, 
+    isAuthenticated, 
+    isLoading, 
+    initialized,
+    isAuthorizing
+  });
+  
+  // Show loading state while checking permissions
+  if (isAuthorizing || isLoading || !initialized) {
     return (
       <div className="w-full h-[50vh] flex flex-col items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
         <p className="text-lg text-muted-foreground">Checking admin permissions...</p>
       </div>
     );
   }
   
-  // Redirect non-admin users
-  if (isAdmin === false) {
-    return <Navigate to="/unauthorized" state={{ from: { pathname: '/admin' } }} replace />;
+  // Redirect non-admin users to the unauthorized page
+  if (!isAuthenticated || isAdmin === false) {
+    console.log("AdminPanel - Access denied, redirecting to unauthorized page");
+    return <Navigate to="/unauthorized" replace />;
   }
   
-  return <AdminPanelComponent />;
+  return (
+    <div className="w-full overflow-hidden">
+      <div className="mb-6 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Admin Panel</h1>
+        <CreateAdminButton />
+      </div>
+      <UsersDataFetcher />
+    </div>
+  );
 };
 
-export default AdminPage;
+export default AdminPanel;

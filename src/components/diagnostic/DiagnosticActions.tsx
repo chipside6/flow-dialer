@@ -1,66 +1,69 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { RotateCw, Database, Info } from 'lucide-react';
-import { clearDebugHistory } from '@/utils/supabaseDebug';
-import { toast } from '@/components/ui/use-toast';
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { RotateCcw, LogOut } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/auth";
+import { useNavigate } from "react-router-dom";
 
-interface DiagnosticActionsProps {
-  onRefresh?: () => void;
-}
-
-export function DiagnosticActions({ onRefresh }: DiagnosticActionsProps) {
-  const handleClearLogs = () => {
-    clearDebugHistory();
-    toast({
-      title: "Debug logs cleared",
-      description: "Operation history has been reset",
-    });
-  };
+export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  const handleCheckEnv = () => {
-    // Check for environment variables
-    const envVars = {
-      VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || null,
-      VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY ? '(set)' : null,
-    };
+  const handleSignOut = async () => {
+    if (isLoggingOut) return;
     
-    console.table(envVars);
+    setIsLoggingOut(true);
     
-    toast({
-      title: "Environment variables",
-      description: `VITE_SUPABASE_URL: ${envVars.VITE_SUPABASE_URL ? 'Set' : 'Not set'}, VITE_SUPABASE_ANON_KEY: ${envVars.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Not set'}`,
-    });
+    try {
+      // First navigate to login page immediately for better UX
+      navigate("/login", { replace: true });
+      
+      // Then attempt to sign out
+      const { success, error } = await signOut();
+      
+      if (success) {
+        toast({
+          title: "Signed out successfully",
+          description: "You have been logged out of your account"
+        });
+      } else if (error) {
+        console.error("DiagnosticActions - Error during sign out:", error);
+        // Still consider it a successful logout for UX purposes
+        toast({
+          title: "Signed out",
+          description: "You've been signed out, but there was an issue cleaning up session data"
+        });
+      }
+    } catch (error: any) {
+      console.error("DiagnosticActions - Error signing out:", error);
+      toast({
+        title: "An error occurred",
+        description: "There was an issue during logout, but you've been signed out.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
   
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button 
-        variant="outline" 
-        size="sm"
-        onClick={onRefresh}
-      >
-        <RotateCw className="h-4 w-4 mr-2" />
-        Refresh
+    <div className="flex flex-col md:flex-row gap-2 mt-4">
+      <Button variant="outline" onClick={onRefresh} className="flex items-center">
+        <RotateCcw className="h-4 w-4 mr-2" />
+        Refresh Status
       </Button>
-      
       <Button 
         variant="outline" 
-        size="sm"
-        onClick={handleClearLogs}
+        onClick={handleSignOut} 
+        className="flex items-center"
+        disabled={isLoggingOut}
       >
-        <Database className="h-4 w-4 mr-2" />
-        Clear Logs
-      </Button>
-      
-      <Button 
-        variant="outline" 
-        size="sm"
-        onClick={handleCheckEnv}
-      >
-        <Info className="h-4 w-4 mr-2" />
-        Check Env
+        <LogOut className="h-4 w-4 mr-2" />
+        {isLoggingOut ? "Signing Out..." : "Sign Out"}
       </Button>
     </div>
   );
-}
+};

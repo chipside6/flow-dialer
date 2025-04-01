@@ -1,52 +1,18 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Shield, AlertCircle, LogIn, ArrowLeft, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/auth';
+import { Shield, AlertCircle, LogIn, ArrowLeft } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { supabase } from '@/integrations/supabase/client';
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
-  const [adminEmail] = useState('admin@example.com');
-  const [adminPassword] = useState('admin123');
+  const { isAuthenticated, isAdmin, initialized } = useAuth();
   
   // Check if user came from admin panel
   const isFromAdmin = location.state?.from?.pathname === '/admin';
-  
-  const handleCreateAdmin = async () => {
-    setIsCreatingAdmin(true);
-    
-    try {
-      console.log("UnauthorizedPage - Creating admin user");
-      
-      // Use the Supabase Edge Function to create admin user
-      const { data, error } = await supabase.functions.invoke('create-admin-user', {
-        body: {
-          email: adminEmail,
-          password: adminPassword
-        }
-      });
-      
-      if (error) {
-        console.error("Error creating admin user:", error);
-        alert(`Failed to create admin user: ${error.message}`);
-        setIsCreatingAdmin(false);
-        return;
-      }
-      
-      alert(`Admin user created! You can now login with:\nEmail: ${adminEmail}\nPassword: ${adminPassword}`);
-      
-      // Navigate to login page with redirect to admin
-      navigate('/login', { state: { from: { pathname: '/admin' } } });
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      alert("An unexpected error occurred while creating admin user");
-      setIsCreatingAdmin(false);
-    }
-  };
   
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] p-6">
@@ -72,46 +38,42 @@ const UnauthorizedPage = () => {
         )}
         
         <div className="space-y-4">
-          <div className="bg-muted p-4 rounded-lg">
-            <h3 className="text-md font-medium mb-2">Quick Admin Access</h3>
-            <p className="text-sm text-muted-foreground mb-3">
-              Click the button below to create an admin user, then login with:
-              <br />Email: {adminEmail}
-              <br />Password: {adminPassword}
-            </p>
-            <Button 
-              onClick={handleCreateAdmin} 
-              disabled={isCreatingAdmin}
-              className="w-full"
-            >
-              {isCreatingAdmin ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Admin...
-                </>
-              ) : (
-                "Create Admin User"
+          {isAuthenticated ? (
+            <>
+              {isFromAdmin && isAdmin === false && (
+                <p className="text-sm text-center text-muted-foreground mb-4">
+                  Your account doesn't have administrator privileges. 
+                  Please contact an administrator for access.
+                </p>
               )}
-            </Button>
-          </div>
-          
-          <Button 
-            onClick={() => navigate('/login', { state: { from: { pathname: '/admin' } } })} 
-            className="w-full"
-          >
-            <LogIn className="mr-2 h-4 w-4" />
-            Login as Administrator
-          </Button>
-          
-          <Button 
-            onClick={() => navigate(-1)} 
-            variant="outline" 
-            className="w-full"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Go Back
-          </Button>
-          
+              {isFromAdmin && isAdmin === null && !initialized && (
+                <p className="text-sm text-center text-muted-foreground mb-4">
+                  Checking your privileges...
+                </p>
+              )}
+              <Button 
+                onClick={() => navigate(-1)} 
+                variant="outline" 
+                className="w-full"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Go Back
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-center text-muted-foreground mb-4">
+                You need to sign in with an administrator account to access this area.
+              </p>
+              <Button 
+                onClick={() => navigate('/login', { state: { from: { pathname: '/admin' } } })} 
+                className="w-full"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign in as Administrator
+              </Button>
+            </>
+          )}
           <Button 
             onClick={() => navigate('/')} 
             variant="outline" 

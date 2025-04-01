@@ -6,45 +6,31 @@ import { signOut as apiSignOut } from '@/services/auth';
 
 export const signUpUser = async (email: string, password: string) => {
   try {
-    console.log("authActions - Signing up user:", email);
-    
-    const { data, error } = await supabase.auth.signUp({
+    console.log("authActions - Signing up new user:", email);
+    const { error } = await supabase.auth.signUp({
       email,
-      password,
+      password
     });
     
-    if (error) {
-      console.error("authActions - Sign up error:", error);
-      return { error };
-    }
-    
-    console.log("authActions - Sign up successful:", data);
-    return { data, error: null };
+    return { error: error ? new Error(error.message) : null };
   } catch (error: any) {
-    console.error("authActions - Unexpected sign up error:", error);
-    return { error };
+    console.error("authActions - Sign up error:", error.message);
+    return { error: new Error(error.message) };
   }
 };
 
 export const signInUser = async (email: string, password: string) => {
   try {
     console.log("authActions - Signing in user:", email);
-    
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     
-    if (error) {
-      console.error("authActions - Sign in error:", error);
-      return { error };
-    }
-    
-    console.log("authActions - Sign in successful:", data);
-    return { data, error: null };
+    return { error: error ? new Error(error.message) : null };
   } catch (error: any) {
-    console.error("authActions - Unexpected sign in error:", error);
-    return { error };
+    console.error("authActions - Sign in error:", error.message);
+    return { error: new Error(error.message) };
   }
 };
 

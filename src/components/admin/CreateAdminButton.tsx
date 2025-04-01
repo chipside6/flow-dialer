@@ -7,20 +7,18 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/auth";
 
-export function AdminUserCreator() {
+export function CreateAdminButton() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { isAuthenticated, user } = useAuth();
-  const [adminEmail] = useState('admin@example.com');
-  const [adminPassword] = useState('admin123');
+  const { isAuthenticated } = useAuth();
 
   const handleCreateAdmin = async () => {
     setIsLoading(true);
     try {
-      console.log("AdminUserCreator - Invoking create-admin-user function");
+      console.log("CreateAdminButton - Invoking create-admin-user function");
       
-      if (!isAuthenticated || !user) {
+      if (!isAuthenticated) {
         toast({
           variant: "destructive",
           title: "Authentication Error",
@@ -30,11 +28,11 @@ export function AdminUserCreator() {
         return;
       }
       
-      // Use the Supabase Edge Function with the specific credentials
+      // Use the Supabase Edge Function instead of RPC
       const { data, error } = await supabase.functions.invoke('create-admin-user', {
         body: {
-          email: adminEmail,
-          password: adminPassword
+          email: 'admin@gmail.com',
+          password: 'test123'
         }
       });
       
@@ -45,7 +43,6 @@ export function AdminUserCreator() {
           title: "Error",
           description: "Failed to create admin user: " + error.message,
         });
-        setIsLoading(false);
         return;
       }
       
@@ -53,24 +50,25 @@ export function AdminUserCreator() {
       
       toast({
         title: "Success",
-        description: `Admin user created successfully! You can now log in with ${adminEmail} and password ${adminPassword}`,
+        description: "Admin user created successfully! Refreshing data...",
       });
       
-      // Refresh the user list if this page has that component
-      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      // Force invalidate and refetch admin users query immediately
+      await queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       
-      // If it's the current user, update their profile
-      if (user?.email === adminEmail) {
-        toast({
-          title: "Admin Access",
-          description: "Your account now has admin privileges. The page will refresh shortly.",
-        });
-        
-        // Force page refresh after a short delay
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      }
+      // Then attempt a refetch after a short delay to allow database changes to propagate
+      setTimeout(async () => {
+        try {
+          await queryClient.refetchQueries({ queryKey: ["admin", "users"] });
+          
+          toast({
+            title: "Success",
+            description: "Admin user created/updated successfully! Email: admin@gmail.com, Password: test123",
+          });
+        } catch (refetchError) {
+          console.error("Error refreshing data:", refetchError);
+        }
+      }, 1000);
       
     } catch (err) {
       console.error("Unexpected error:", err);
