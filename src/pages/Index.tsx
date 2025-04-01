@@ -5,19 +5,19 @@ import { FeaturesSection } from "@/components/FeaturesSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { PricingSection } from "@/components/PricingSection";
 import { CTASection } from "@/components/CTASection";
+import PublicLayout from "@/components/layout/PublicLayout";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main> 
+    <PublicLayout>
+      <main className="bg-background"> 
         <HeroSection />
         <FeaturesSection />
         <TestimonialsSection />
         <PricingSection />
         <CTASection />
       </main>
-    </div>
+    </PublicLayout>
   );
 };
 

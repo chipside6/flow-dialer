@@ -1,6 +1,6 @@
 
 /* Import base styles and utilities */
-@import './styles/base-styles.css';
+@import './styles/base.css';
 @import './styles/utilities.css';
 @import './styles/typography.css';
 @import './styles/dropdown-styles.css';
@@ -10,3 +10,4 @@
 @import './styles/mobile-tabs-wizards.css';
 @import './styles/mobile-sidebar-z-index.css';
 @import './styles/dashboard-z-index.css';
+@import './styles/header-fixes.css';
