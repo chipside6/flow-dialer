@@ -1,4 +1,3 @@
-
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -23,6 +22,7 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import DiagnosticPage from "./pages/DiagnosticPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import AsteriskConfigPage from "./pages/AsteriskConfigPage";
 
 // Import the App.css for styling
 import "./App.css"; 
@@ -139,6 +139,16 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DiagnosticPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Asterisk Configuration route */}
+            <Route 
+              path="/asterisk-config" 
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AsteriskConfigPage />
                 </ProtectedRoute>
               } 
             />

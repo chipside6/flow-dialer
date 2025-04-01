@@ -11,12 +11,13 @@ import {
   ShieldCheck,
   X,
   User,
-  CreditCard
+  CreditCard,
+  PhoneCall
 } from "lucide-react";
 import { SidebarNavItem } from "@/components/sidebar/SidebarNavItem";
 import LogoutButton from "@/components/LogoutButton";
 import { useAuth } from "@/contexts/auth";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription } from "@/hooks/subscription";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/ui/Logo";
@@ -57,6 +58,20 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     });
   }
   
+  // Admin navItems - only displayed to admin users
+  const adminNavItems = [
+    {
+      name: "Admin Panel",
+      path: "/admin",
+      icon: <ShieldCheck className="h-5 w-5" />
+    },
+    {
+      name: "Asterisk Config",
+      path: "/asterisk-config",
+      icon: <PhoneCall className="h-5 w-5" />
+    }
+  ];
+  
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="bg-primary text-white dark:bg-primary/90">
@@ -89,16 +104,17 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
             />
           ))}
           
-          {/* Admin Panel Link */}
+          {/* Admin Links */}
           {profile?.is_admin === true && (
-            <SidebarNavItem 
-              item={{
-                name: "Admin Panel",
-                path: "/admin",
-                icon: <ShieldCheck className="h-5 w-5" />
-              }}
-              onClick={handleItemClick}
-            />
+            <>
+              {adminNavItems.map((item) => (
+                <SidebarNavItem 
+                  key={item.path}
+                  item={item}
+                  onClick={handleItemClick}
+                />
+              ))}
+            </>
           )}
           
           {/* Logout button */}
