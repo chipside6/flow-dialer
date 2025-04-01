@@ -1,90 +1,33 @@
+
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, UserProfile } from './types';
 import { fetchUserProfile } from './authUtils';
 import { signOutUser } from './authActions';
-import { toast } from '@/components/ui/use-toast';
-import { ensureVoiceAppUploadsBucket } from '@/services/supabase/greetingFilesService';
-import { createLifetimeSubscription } from '@/hooks/subscription/subscriptionApi';
-import { pricingPlans } from '@/data/pricingPlans';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    console.log("AuthProvider: Checking for existing session");
+    console.log("AuthProvider: Setting up auth state");
     
     let isMounted = true;
-    let authStateChangeComplete = false;
-    let sessionCheckComplete = false;
     
-    // Set a timeout to prevent infinite loading
-    const timeout = setTimeout(() => {
-      if (isMounted && !initialized) {
-        console.log("AuthProvider: Timeout reached, forcing initialization");
-        setIsLoading(false);
-        setSessionChecked(true);
-        setInitialized(true);
-      }
-    }, 5000); // 5 second timeout
-    
-    // Helper function to activate trial plan for new users
-    const activateTrialForNewUser = async (userId: string) => {
-      console.log("Checking if user needs trial activation:", userId);
-      
-      try {
-        // Check if user already has any subscription
-        const { data, error } = await supabase
-          .from('subscriptions')
-          .select('id')
-          .eq('user_id', userId);
-        
-        if (error) {
-          console.error("Error checking subscriptions:", error);
-          return;
-        }
-        
-        // If no subscription exists, activate trial plan
-        if (!data || data.length === 0) {
-          console.log("No subscription found, activating trial plan");
-          
-          const trialPlan = pricingPlans.find(plan => plan.isTrial);
-          
-          if (trialPlan) {
-            // Calculate trial end date (3 days from now)
-            const trialEndDate = new Date();
-            trialEndDate.setDate(trialEndDate.getDate() + 3);
-            
-            // Create trial subscription
-            await createLifetimeSubscription(userId, {
-              ...trialPlan,
-              trialEndDate: trialEndDate.toISOString()
-            });
-            
-            console.log("Trial plan activated successfully");
-          }
-        }
-      } catch (err) {
-        console.error("Error activating trial plan:", err);
-      }
-    };
-    
-    // Set up auth state change listener FIRST
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return;
         
         console.log('AuthProvider: Auth state changed:', event);
-        authStateChangeComplete = true;
         
-        if (event === 'SIGNED_IN' && session?.user) {
+        if (session?.user) {
           try {
             // Convert Supabase User to our User type
             const appUser: User = {
@@ -95,14 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             
             setUser(appUser);
-            
-            // Check bucket existence but don't block on failure
-            try {
-              await ensureVoiceAppUploadsBucket();
-            } catch (bucketError) {
-              console.warn('Could not verify storage bucket, but continuing:', bucketError);
-              // Don't block the auth flow for storage issues
-            }
             
             // Fetch profile data
             const userProfile = await fetchUserProfile(session.user.id);
@@ -118,12 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               // Set isAdmin to false when no profile is found
               setIsAdmin(false);
             }
-            
-            // Activate trial plan for new user using setTimeout to prevent blocking
-            setTimeout(() => {
-              activateTrialForNewUser(session.user.id);
-            }, 0);
-            
           } catch (error) {
             console.error("AuthProvider: Error during sign in:", error);
             setError(error instanceof Error ? error : new Error('Unknown error during sign in'));
@@ -133,18 +62,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
-          
-          toast({
-            title: "Signed out", 
-            description: "You have been signed out successfully"
-          });
         }
         
-        if (sessionCheckComplete && isMounted) {
+        if (isMounted) {
           setIsLoading(false);
           setSessionChecked(true);
           setInitialized(true);
-          clearTimeout(timeout);
         }
       }
     );
@@ -182,14 +105,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             setUser(appUser);
             
-            // Check bucket existence but don't block on failure
-            try {
-              await ensureVoiceAppUploadsBucket();
-            } catch (bucketError) {
-              console.warn('Could not verify storage bucket, but continuing:', bucketError);
-              // Don't block the auth flow for storage issues
-            }
-            
             // Fetch user profile
             const userProfile = await fetchUserProfile(data.session.user.id);
             if (userProfile) {
@@ -220,14 +135,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAdmin(false); // Default to non-admin on error
       } finally {
         if (isMounted) {
-          sessionCheckComplete = true;
-          
-          if (authStateChangeComplete) {
-            setIsLoading(false);
-            setSessionChecked(true);
-            setInitialized(true);
-            clearTimeout(timeout);
-          }
+          setIsLoading(false);
+          setSessionChecked(true);
+          setInitialized(true);
         }
       }
     };
@@ -237,7 +147,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Clean up
     return () => {
       isMounted = false;
-      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);
@@ -290,7 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     isLoading,
     isAuthenticated: !!user,
-    isAdmin: !!isAdmin, // Ensure this is always a boolean
+    isAdmin, 
     error,
     sessionChecked,
     initialized,

@@ -1,5 +1,5 @@
 
-// Re-export the types with clear names to avoid circular dependency
+// Types for the auth context
 export type User = {
   id: string;
   email: string;
