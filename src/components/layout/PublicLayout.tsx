@@ -9,10 +9,9 @@ interface PublicLayoutProps {
 
 const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <div className="h-20 md:h-20"></div> {/* Spacer for fixed header */}
-      <main className="flex-1 bg-background text-foreground z-10">
+      <main className="flex-1">
         {children || <Outlet />}
       </main>
     </div>

@@ -19,27 +19,26 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
   const { isAuthenticated } = useAuth();
   
   return (
-    <header className={`fixed top-0 left-0 right-0 z-[1000] transition-all duration-300 ease-in-out px-6 py-4 bg-background border-b ${isScrolled ? 'header-shadow' : ''}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 py-4 ${isScrolled ? 'bg-background/80 backdrop-blur-sm shadow-sm border-b' : 'border-transparent'}`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted mobile-menu-button"
+            className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted"
             aria-label="Open mobile menu"
           >
-            <Menu size={24} className="text-foreground" />
-            <span className="sr-only">Menu</span>
+            <Menu size={24} />
           </button>
           <Link 
             to={isAuthenticated ? "/dashboard" : "/"} 
-            className="flex items-center gap-2 logo-container"
+            className="flex items-center gap-2"
           >
-            <Logo className="text-foreground" />
+            <Logo />
           </Link>
         </div>
         
         <div className="hidden md:flex items-center gap-6">
-          <nav className="flex items-center gap-6 text-foreground">
+          <nav className="flex items-center gap-6">
             <NavLinks />
           </nav>
         </div>
@@ -47,25 +46,21 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
-              <Button variant="ghost" asChild className="hidden md:inline-flex text-foreground">
-                <Link to="/dashboard">
-                  <span className="visible">Dashboard</span>
-                </Link>
+              <Button variant="ghost" asChild className="hidden md:flex">
+                <Link to="/dashboard">Dashboard</Link>
               </Button>
-              <LogoutButton variant="ghost" className="hidden md:inline-flex text-foreground" />
+              <LogoutButton variant="ghost" className="hidden md:flex" />
             </>
           ) : (
             <>
-              <Button variant="ghost" asChild className="hidden md:inline-flex text-foreground">
+              <Button variant="ghost" asChild className="hidden md:flex">
                 <Link to="/login">
                   <LogIn className="h-4 w-4 mr-2" />
                   <span>Log In</span>
                 </Link>
               </Button>
-              <Button className="bg-primary text-primary-foreground rounded-full inline-flex items-center" asChild>
-                <Link to="/signup">
-                  <span>Get Started</span>
-                </Link>
+              <Button className="bg-primary rounded-full" asChild>
+                <Link to="/signup">Get Started</Link>
               </Button>
             </>
           )}

@@ -1,265 +1,75 @@
 
-/* Header fixes to ensure visibility */
-header {
-  background-color: hsl(var(--background)) !important;
-  color: hsl(var(--foreground)) !important;
-  z-index: 9999 !important;
-  border-bottom: 1px solid hsl(var(--border));
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
+/* Header and logout button fixes */
+
+/* Fix navbar spacing when on mobile */
+.navbar-dashboard {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Ensure the logout button text is visible */
+.menu-open button[disabled] {
+  opacity: 0.7;
+}
+
+/* Ensure dropdown menus appear above other elements */
+.dropdown-menu-content {
+  z-index: 100;
+}
+
+/* Fix sidebar header on mobile */
+@media (max-width: 768px) {
+  [data-sidebar="header"] {
+    padding: 0.5rem !important;
+  }
+  
+  /* Make sure logout button text stays visible */
+  button:has(.logout-icon) span {
+    display: inline-block !important;
+    white-space: nowrap;
+  }
+}
+
+/* Improve logo visibility in header */
+.navbar-dashboard .logo, 
+[data-sidebar="header"] .logo {
+  display: flex;
+  align-items: center;
+}
+
+/* Make sure auth menu is clickable */
+.auth-menu-trigger {
+  position: relative;
+  z-index: 50;
+}
+
+/* Fix content overlap and scrolling issues */
+body, html {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Ensure proper content spacing with sidebar */
+[data-sidebar-inset] {
+  padding-top: 0 !important;
   width: 100% !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: block !important;
-  overflow: visible !important;
-  min-height: 70px !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
 }
 
-/* Extreme measures to force visibility of ALL header elements */
-header *, 
-header a, 
-header button, 
-header svg, 
-header span,
-header div,
-header nav,
-header p,
-header img {
-  color: hsl(var(--foreground)) !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  pointer-events: auto !important;
-  position: relative !important;
-  z-index: 10000 !important;
-  white-space: nowrap !important;
-  overflow: visible !important;
-  min-height: 1.5rem !important;
-}
-
-/* Force all spans to be visible */
-header span,
-header a span,
-header button span,
-header div span,
-header nav span {
-  display: inline !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  white-space: nowrap !important;
-  overflow: visible !important;
-  position: static !important;
-  color: inherit !important;
-}
-
-/* Force all button content to be visible */
-header button,
-header a.button,
-header [role="button"] {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  overflow: visible !important;
-  height: auto !important;
-  min-height: 2.5rem !important;
-  padding: 0.5rem 1rem !important;
-  background: transparent !important;
-}
-
-/* Special handling for text inside buttons */
-header button *,
-header a.button *,
-header [role="button"] * {
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: inline !important;
-  position: static !important;
-  background: transparent !important;
-}
-
-/* Logo text specific fix */
-header .logo-container span,
-header a:has(svg) + span {
-  display: inline !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  margin-left: 0.5rem !important;
-}
-
-/* Ensure buttons have proper borders and backgrounds */
-header .bg-primary {
-  background-color: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground)) !important;
-  border: none !important;
-}
-
-/* Fix for rounded-full buttons */
-header .rounded-full {
-  border-radius: 9999px !important;
-}
-
-/* Force nav links to be visible */
-header nav a {
-  display: inline-flex !important;
-  align-items: center !important;
-  padding: 0.5rem !important;
-}
-
-/* Fix for sr-only to NOT hide content */
-header .sr-only,
-header [class*='sr-'] {
-  position: static !important;
-  width: auto !important;
-  height: auto !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: visible !important;
-  clip: auto !important;
-  white-space: normal !important;
-  border: 0 !important;
-}
-
-/* Special fix for "Get Started" button */
-header a[href="/signup"],
-header a[href="/signup"] * {
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: inline-flex !important;
-  color: hsl(var(--primary-foreground)) !important;
-  font-weight: 500 !important;
-  z-index: 10001 !important;
-  position: relative !important;
-  background-color: transparent !important;
-}
-
-header a[href="/signup"] span {
-  color: hsl(var(--primary-foreground)) !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: inline !important;
-  z-index: 10001 !important;
-}
-
-/* Special fix for "Log In" button */
-header a[href="/login"],
-header a[href="/login"] * {
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  z-index: 10001 !important;
-  position: relative !important;
-  background-color: transparent !important;
-}
-
-header a[href="/login"] span {
-  color: inherit !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: inline !important;
-  z-index: 10001 !important;
-}
-
-/* Fix for the mobile menu button */
-header .mobile-menu-button {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  z-index: 10001 !important;
-  background-color: transparent !important;
-}
-
-/* Ensure the header is not collapsed */
-header > div {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
+/* Fix dashboard container scrolling */
+.dashboard-content-wrapper {
   width: 100% !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  padding: 0.75rem 1rem !important;
-  background-color: transparent !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
 }
 
-/* Remove any backdrop filters that might cause issues */
-header,
-header *,
-header *::before,
-header *::after {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Force links to be visible */
-header a {
-  text-decoration: none !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  color: hsl(var(--foreground)) !important;
-  position: relative !important;
-  z-index: 10001 !important;
-  background-color: transparent !important;
-}
-
-/* Fix gradient or overlay issues */
-header::before,
-header::after {
-  content: none !important;
-  display: none !important;
-}
-
-/* Override any absolute positioning within header */
-header .absolute,
-header [class*="absolute"] {
-  position: relative !important;
-  z-index: 10001 !important;
-}
-
-/* Cancel out any transforms that might be affecting elements */
-header *,
-header *::before,
-header *::after {
-  transform: none !important;
-}
-
-/* Ensure buttons with primary class are visible */
-header .bg-primary {
-  background-color: hsl(var(--primary)) !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-  z-index: 10002 !important;
-}
-
-/* Fix any flex issues in the header */
-header .flex {
-  display: flex !important;
-  visibility: visible !important;
-}
-
-/* Ensure all SVG icons are visible */
-header svg {
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: inline-block !important;
-  width: 24px !important;
-  height: 24px !important;
-  overflow: visible !important;
-  z-index: 10001 !important;
-}
-
-/* Fix any potential stacking context issues */
-header, 
-header div,
-header nav,
-header a,
-header button {
-  isolation: isolate !important;
+/* Fix campaign page spacing */
+.campaign-content {
+  padding-top: 0 !important;
+  padding-bottom: 2rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
 }

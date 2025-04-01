@@ -69,10 +69,9 @@ export const Navbar = () => {
 
   // Don't render navbar on dashboard pages - use the sidebar with dashboard header instead
   if (isDashboard) {
-    return <DashboardNavbar toggleSidebar={toggleSidebar} />;
+    return null;
   }
 
-  // On regular pages, render the PublicNavbar
   return (
     <PublicNavbar 
       isScrolled={isScrolled}
@@ -80,4 +79,4 @@ export const Navbar = () => {
       setIsMobileMenuOpen={setIsMobileMenuOpen}
     />
   );
-}
+};

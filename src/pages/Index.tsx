@@ -1,5 +1,5 @@
 
-import React from "react";
+import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
@@ -8,8 +8,9 @@ import { CTASection } from "@/components/CTASection";
 
 const Index = () => {
   return (
-    <div className="bg-background">
-      <main className="text-foreground">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main> 
         <HeroSection />
         <FeaturesSection />
         <TestimonialsSection />

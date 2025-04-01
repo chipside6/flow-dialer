@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 export const HeroSection = () => {
   return (
-    <section className="py-24 md:py-32 px-6 md:px-10 overflow-hidden relative mt-20">
+    <section className="py-32 md:py-40 px-6 md:px-10 overflow-hidden relative">
       {/* Background gradient shapes */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 to-secondary/5 opacity-70"></div>
@@ -33,13 +33,13 @@ export const HeroSection = () => {
             <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 justify-center">
               <Button size="lg" className="rounded-full px-8 group" asChild>
                 <Link to="/signup">
-                  <span className="visible">Try for Free</span>
+                  Try for Free
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" className="rounded-full px-8" asChild>
                 <Link to="/features">
-                  <span className="visible">Learn More</span>
+                  Learn More
                 </Link>
               </Button>
             </div>
