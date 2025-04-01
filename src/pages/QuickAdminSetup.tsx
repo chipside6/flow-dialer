@@ -1,0 +1,133 @@
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { PublicLayout } from "@/components/layout/PublicLayout";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/auth";
+
+export default function QuickAdminSetup() {
+  const [email, setEmail] = useState("admin@gmail.com");
+  const [password, setPassword] = useState("test123");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, signOut } = useAuth();
+
+  const createAdmin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Email and password are required");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // Call the edge function to create an admin user
+      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+        body: { email, password }
+      });
+      
+      if (error) {
+        throw new Error(error.message || "Failed to create admin user");
+      }
+      
+      toast.success(`Admin user created successfully!`);
+      toast.info("Please log in with the admin credentials", {
+        duration: 5000
+      });
+      
+      // If already logged in, suggest logging out
+      if (isAuthenticated) {
+        setTimeout(() => {
+          toast.info("You are currently logged in. Please log out first to log in as admin.", {
+            duration: 8000,
+            action: {
+              label: "Log Out Now",
+              onClick: () => {
+                signOut?.();
+                setTimeout(() => navigate("/login"), 500);
+              }
+            }
+          });
+        }, 1000);
+      } else {
+        // Otherwise redirect to login
+        setTimeout(() => navigate("/login"), 2000);
+      }
+      
+    } catch (error: any) {
+      toast.error(`Error: ${error.message || "Failed to create admin"}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <PublicLayout>
+      <div className="container mx-auto py-10">
+        <Card className="max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle>Quick Admin Setup</CardTitle>
+            <CardDescription>
+              Create an admin user to access restricted areas of the application
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={createAdmin}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Admin Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@example.com"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Admin Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Make sure to remember these credentials!
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-2">
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Admin...
+                  </>
+                ) : (
+                  "Create Admin User"
+                )}
+              </Button>
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/login">Back to Login</Link>
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
+    </PublicLayout>
+  );
+}

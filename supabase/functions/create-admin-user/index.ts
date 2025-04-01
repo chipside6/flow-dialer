@@ -41,45 +41,61 @@ serve(async (req) => {
     
     console.log(`Creating admin user with email: ${email}`);
     
-    // Check if user already exists
-    const { data: existingUsers, error: lookupError } = await supabaseAdmin
-      .from('profiles')
-      .select('*')
-      .eq('id', 'auth.users.id')
-      .filter('full_name', 'ilike', '%admin%');
+    // Try to find if the user already exists
+    const { data: existingUser, error: lookupError } = await supabaseAdmin.auth.admin.listUsers();
     
     if (lookupError) {
       throw new Error(`Error checking existing users: ${lookupError.message}`);
     }
-
-    // Create or update the user
-    const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-
-    if (createError) {
-      throw new Error(`Error creating user: ${createError.message}`);
+    
+    // Check if user already exists by email
+    const userExists = existingUser?.users.find(u => u.email === email);
+    
+    let userData;
+    
+    if (userExists) {
+      // Update existing user
+      console.log(`User ${email} already exists, updating...`);
+      const { data, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+        userExists.id,
+        { password }
+      );
+      
+      if (updateError) throw new Error(`Error updating user: ${updateError.message}`);
+      userData = data;
+    } else {
+      // Create new user
+      console.log(`Creating new user with email ${email}`);
+      const { data, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+      
+      if (createError) throw new Error(`Error creating user: ${createError.message}`);
+      userData = data;
     }
 
-    if (!userData.user) {
-      throw new Error('Failed to create user');
+    if (!userData?.user) {
+      throw new Error('Failed to create or update user');
     }
 
     // Update the user's profile to make them an admin
-    const { error: updateError } = await supabaseAdmin
+    const { error: updateProfileError } = await supabaseAdmin
       .from('profiles')
-      .update({ is_admin: true })
-      .eq('id', userData.user.id);
+      .upsert({ 
+        id: userData.user.id, 
+        is_admin: true,
+        full_name: 'Admin User'
+      });
 
-    if (updateError) {
-      throw new Error(`Error updating profile: ${updateError.message}`);
+    if (updateProfileError) {
+      throw new Error(`Error updating profile: ${updateProfileError.message}`);
     }
 
     return new Response(
       JSON.stringify({ 
-        message: 'Admin user created successfully', 
+        message: 'Admin user created/updated successfully', 
         userId: userData.user.id 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }

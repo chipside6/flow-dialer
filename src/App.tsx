@@ -1,3 +1,4 @@
+
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -23,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import DiagnosticPage from "./pages/DiagnosticPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import AsteriskConfigPage from "./pages/AsteriskConfigPage";
+import QuickAdminSetup from "./pages/QuickAdminSetup";
 
 // Import the App.css for styling
 import "./App.css"; 
@@ -44,6 +46,7 @@ const App = () => (
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
+            <Route path="/quick-admin-setup" element={<QuickAdminSetup />} />
             
             {/* Protected routes */}
             <Route 
