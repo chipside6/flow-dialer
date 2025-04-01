@@ -13,8 +13,17 @@ header {
 }
 
 /* Ensure all header content is visible */
-header *, header a, header button, header svg {
+header *, header a, header button, header svg, header span {
   color: hsl(var(--foreground)) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Show all text in buttons */
+header button span, header a span {
+  display: inline-flex !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
@@ -58,4 +67,17 @@ header nav a {
 header button, header a.button {
   color: hsl(var(--foreground)) !important;
   border: 1px solid hsl(var(--border)) !important;
+  background-color: hsl(var(--background)) !important;
+}
+
+/* Force text to be visible */
+header .text-foreground {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Fix button text visibility */
+button span, a span {
+  display: inline !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
