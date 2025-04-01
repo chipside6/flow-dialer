@@ -106,6 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             // Fetch profile data
             const userProfile = await fetchUserProfile(session.user.id);
+            console.log("AuthProvider: Fetched user profile:", userProfile);
             if (userProfile) {
               // Make sure to set the email from the auth user
               const updatedProfile = {
@@ -114,8 +115,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               };
               setProfile(updatedProfile);
               setIsAdmin(!!updatedProfile.is_admin);
+              console.log("AuthProvider: Set isAdmin flag to:", !!updatedProfile.is_admin);
             } else {
               // Set isAdmin to false when no profile is found
+              console.log("AuthProvider: No profile found, setting isAdmin to false");
               setIsAdmin(false);
             }
             
@@ -192,6 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             
             // Fetch user profile
             const userProfile = await fetchUserProfile(data.session.user.id);
+            console.log("AuthProvider: Fetched user profile (session check):", userProfile);
             if (userProfile) {
               // Make sure to set the email from the auth user
               const updatedProfile = {
@@ -200,8 +204,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               };
               setProfile(updatedProfile);
               setIsAdmin(!!updatedProfile.is_admin);
+              console.log("AuthProvider: Set isAdmin flag to (session check):", !!updatedProfile.is_admin);
             } else {
               // Set isAdmin to false when no profile is found
+              console.log("AuthProvider: No profile found, setting isAdmin to false (session check)");
               setIsAdmin(false);
             }
           } catch (profileError) {

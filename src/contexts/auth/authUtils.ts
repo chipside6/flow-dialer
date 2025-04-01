@@ -29,8 +29,9 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       id: data.id,
       email: '', // This will be set by the AuthProvider
       full_name: data.full_name || '',
-      avatar_url: null, // Set to null since it doesn't exist in the database
-      is_admin: !!data.is_admin
+      avatar_url: data.avatar_url || null,
+      company_name: data.company_name || '',
+      is_admin: !!data.is_admin // Ensure this is a boolean
     };
     
     return profile;
@@ -42,6 +43,8 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
 
 export async function updateUserProfile(userId: string, data: Partial<UserProfile>): Promise<boolean> {
   try {
+    console.log("Updating user profile:", userId, data);
+    
     const { error } = await supabase
       .from('profiles')
       .update(data)
@@ -52,6 +55,7 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
       return false;
     }
     
+    console.log("Profile updated successfully");
     return true;
   } catch (error: any) {
     console.error("Error in updateUserProfile:", error.message);

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -87,6 +88,14 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  // For debugging - let's add more detailed logging
+  console.log("Login component state:", { 
+    isAuthenticated, 
+    isAdmin, 
+    initialized,
+    from
+  });
 
   return (
     <div className="container max-w-md mx-auto py-10">
