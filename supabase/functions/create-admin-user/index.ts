@@ -41,15 +41,15 @@ serve(async (req) => {
     
     console.log(`Creating admin user with email: ${email}`);
     
-    // Try to find if the user already exists
-    const { data: existingUser, error: lookupError } = await supabaseAdmin.auth.admin.listUsers();
+    // Check if the user already exists
+    const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
     
-    if (lookupError) {
-      throw new Error(`Error checking existing users: ${lookupError.message}`);
+    if (listError) {
+      throw new Error(`Error checking existing users: ${listError.message}`);
     }
     
-    // Check if user already exists by email
-    const userExists = existingUser?.users.find(u => u.email === email);
+    // Find user by email
+    const userExists = existingUsers?.users.find(u => u.email === email);
     
     let userData;
     
