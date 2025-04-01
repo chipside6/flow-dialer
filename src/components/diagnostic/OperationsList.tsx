@@ -1,26 +1,29 @@
 
 import React from 'react';
-import { SupabaseDebugInfo } from '@/utils/supabaseDebug';
+import { Card, CardContent } from '@/components/ui/card';
 import { OperationItem } from './OperationItem';
+import { SupabaseDebugInfo } from '@/utils/supabaseDebug';
 
 interface OperationsListProps {
   operations: SupabaseDebugInfo[];
 }
 
-export const OperationsList: React.FC<OperationsListProps> = ({ operations }) => {
+export function OperationsList({ operations }: OperationsListProps) {
   if (operations.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        No operations recorded yet
-      </div>
+      <Card>
+        <CardContent className="p-6">
+          <p className="text-muted-foreground text-center">No operations logged yet</p>
+        </CardContent>
+      </Card>
     );
   }
-
+  
   return (
-    <div className="max-h-96 overflow-y-auto space-y-2">
-      {operations.map((op, i) => (
-        <OperationItem key={i} op={op} />
+    <div className="space-y-2">
+      {operations.map((operation, index) => (
+        <OperationItem key={index} operation={operation} />
       ))}
     </div>
   );
-};
+}

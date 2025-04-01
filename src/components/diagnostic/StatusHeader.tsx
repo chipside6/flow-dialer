@@ -1,37 +1,49 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { DatabaseIcon } from 'lucide-react';
-import { CardTitle } from '@/components/ui/card';
 
 interface StatusHeaderProps {
-  isAuthenticated: boolean;
-  user: any;
-  errorCount: number;
+  title: string;
+  status: 'online' | 'error' | 'warning' | 'offline';
 }
 
-export const StatusHeader: React.FC<StatusHeaderProps> = ({ 
-  isAuthenticated, 
-  user, 
-  errorCount 
-}) => {
+export function StatusHeader({ title, status }: StatusHeaderProps) {
+  const getStatusColor = () => {
+    switch (status) {
+      case 'online':
+        return 'bg-green-500';
+      case 'warning':
+        return 'bg-yellow-500';
+      case 'error':
+        return 'bg-red-500';
+      case 'offline':
+        return 'bg-gray-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+  
+  const getStatusText = () => {
+    switch (status) {
+      case 'online':
+        return 'Online';
+      case 'warning':
+        return 'Warning';
+      case 'error':
+        return 'Error';
+      case 'offline':
+        return 'Offline';
+      default:
+        return 'Unknown';
+    }
+  };
+  
   return (
-    <div className="flex justify-between items-center">
-      <div className="flex items-center gap-2">
-        <DatabaseIcon className="h-5 w-5" />
-        <CardTitle>Supabase Diagnostic</CardTitle>
-      </div>
-      <div className="flex items-center gap-2">
-        <Badge variant={isAuthenticated ? "default" : "destructive"}>
-          {isAuthenticated ? "Authenticated" : "Not Authenticated"}
-        </Badge>
-        {isAuthenticated && user && (
-          <Badge variant="outline">{user.id.substring(0, 8)}...</Badge>
-        )}
-        {errorCount > 0 && (
-          <Badge variant="destructive">{errorCount} Errors</Badge>
-        )}
+    <div className="flex items-center justify-between">
+      <h2 className="text-2xl font-bold">{title}</h2>
+      <div className="flex items-center space-x-2">
+        <div className={`h-3 w-3 rounded-full ${getStatusColor()}`} />
+        <span className="text-sm font-medium">{getStatusText()}</span>
       </div>
     </div>
   );
-};
+}

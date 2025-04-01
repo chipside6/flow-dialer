@@ -1,9 +1,9 @@
-
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth";
 import Index from "./pages/Index";
+import DiagnosticPage from "./pages/DiagnosticPage";
 
 // Import the App.css for styling
 import "./App.css"; 
@@ -24,6 +24,7 @@ const App = () => {
             <Routes>
               {/* Only include Index route for testing */}
               <Route path="/" element={<Index />} />
+              <Route path="/diagnostic" element={<DiagnosticPage />} />
               <Route path="*" element={<div>Not Found Page</div>} />
             </Routes>
           </div>

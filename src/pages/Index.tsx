@@ -1,5 +1,8 @@
 
 import React, { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
 
 // Add more detailed logging
 console.log('🔍 Index page is being imported - simplified');
@@ -7,6 +10,7 @@ console.log('🔍 Index page is being imported - simplified');
 const Index = () => {
   // Add pre-render logging
   console.log('🔍 Index page is rendering - simplified');
+  const navigate = useNavigate();
   
   useEffect(() => {
     console.log('🔍 Index page useEffect running');
@@ -22,6 +26,17 @@ const Index = () => {
     <div className="min-h-screen bg-background p-8">
       <h1 className="text-3xl font-bold mb-4">Welcome to Flow Dialer</h1>
       <p className="text-lg mb-4">This is a simplified version of the home page for debugging.</p>
+      
+      <div className="mb-8">
+        <Button 
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={() => navigate('/diagnostic')}
+        >
+          <AlertCircle size={16} />
+          View Diagnostics
+        </Button>
+      </div>
       
       <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
         <h2 className="text-xl font-semibold text-yellow-800 mb-2">Development Notes</h2>

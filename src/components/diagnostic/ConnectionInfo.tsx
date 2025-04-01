@@ -1,60 +1,61 @@
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/contexts/auth";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-export const ConnectionInfo: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+export function ConnectionInfo() {
+  // Check environment variables
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
   
   return (
     <Card>
       <CardHeader>
         <CardTitle>Connection Information</CardTitle>
-        <CardDescription>
-          Details about your Supabase connection
-        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-medium">Project URL</h3>
-            <p className="font-mono text-sm text-muted-foreground break-all">
-              {import.meta.env.VITE_SUPABASE_URL || 'https://grhvoclalziyjbjlhpml.supabase.co'}
-            </p>
+      <CardContent className="space-y-4">
+        <div>
+          <h3 className="text-sm font-medium mb-1">Environment Variables</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm font-semibold">VITE_SUPABASE_URL</p>
+              <p className="text-sm text-muted-foreground">
+                {supabaseUrl ? (
+                  <span className="text-green-600">Set</span>
+                ) : (
+                  <span className="text-red-600">Not set</span>
+                )}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold">VITE_SUPABASE_ANON_KEY</p>
+              <p className="text-sm text-muted-foreground">
+                {supabaseKey ? (
+                  <span className="text-green-600">Set</span>
+                ) : (
+                  <span className="text-red-600">Not set</span>
+                )}
+              </p>
+            </div>
           </div>
-          
-          <div>
-            <h3 className="font-medium">Auth Configuration</h3>
-            <p className="font-mono text-sm text-muted-foreground">
-              Storage: {typeof localStorage !== 'undefined' ? 'localStorage' : 'unavailable'}
+        </div>
+        
+        <Alert>
+          <AlertDescription>
+            <p className="text-sm">
+              If environment variables are missing, the application will use fallback values for development purposes.
+              In production, make sure to properly set these environment variables.
             </p>
-            <p className="font-mono text-sm text-muted-foreground">
-              Persist Session: true
-            </p>
-            <p className="font-mono text-sm text-muted-foreground">
-              Auto Refresh Token: true
-            </p>
-          </div>
-          
-          <div>
-            <h3 className="font-medium">User Info</h3>
-            {isAuthenticated && user ? (
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="font-medium">User ID:</p>
-                  <p className="font-mono break-all text-muted-foreground">{user.id}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Email:</p>
-                  <p className="font-mono break-all text-muted-foreground">{user.email}</p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Not authenticated</p>
-            )}
-          </div>
+          </AlertDescription>
+        </Alert>
+        
+        <div>
+          <h3 className="text-sm font-medium mb-1">Project Information</h3>
+          <p className="text-sm text-muted-foreground">
+            Project ID: grhvoclalziyjbjlhpml
+          </p>
         </div>
       </CardContent>
     </Card>
   );
-};
+}
