@@ -59,12 +59,12 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
               <Button variant="ghost" asChild className="hidden md:inline-flex text-foreground">
                 <Link to="/login">
                   <LogIn className="h-4 w-4 mr-2" />
-                  <span className="visible">Log In</span>
+                  <span>Log In</span>
                 </Link>
               </Button>
-              <Button className="bg-primary rounded-full text-primary-foreground inline-flex items-center" asChild>
+              <Button className="bg-primary text-primary-foreground rounded-full inline-flex items-center" asChild>
                 <Link to="/signup">
-                  <span className="visible">Get Started</span>
+                  <span>Get Started</span>
                 </Link>
               </Button>
             </>

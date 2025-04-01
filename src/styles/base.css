@@ -62,6 +62,7 @@ main {
   position: relative;
   z-index: 1;
   background-color: hsl(var(--background));
+  margin-top: 70px; /* Space for fixed header */
 }
 
 /* Ensure headers remain visible and on top of content */
@@ -88,12 +89,41 @@ span, p, h1, h2, h3, h4, h5, h6, a, button, label, input, textarea, select {
   visibility: visible !important;
   opacity: 1 !important;
   color: inherit !important;
+  z-index: auto !important;
 }
 
 /* Make sure link and button text is visible */
 a *, button * {
   visibility: visible !important;
   opacity: 1 !important;
+  background-color: transparent !important;
+}
+
+/* Fix for buttons in the header */
+header button span, header a span {
+  color: inherit !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline !important;
+}
+
+/* Fix for primary buttons */
+.bg-primary {
+  background-color: hsl(var(--primary)) !important;
+}
+
+.bg-primary span, 
+a.bg-primary span,
+button.bg-primary span {
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Remove any overlay or filter effects that might interfere */
+.after\:absolute, 
+.before\:absolute, 
+[class*="after:"], 
+[class*="before:"] {
+  position: static !important;
 }
 
 @media (max-width: 768px) {
@@ -105,5 +135,10 @@ a *, button * {
   /* Adjust mobile header spacing */
   .fixed-header-spacing {
     padding-top: 70px;
+  }
+  
+  /* Fix mobile header buttons */
+  header .mobile-menu-button {
+    z-index: 10001 !important;
   }
 }

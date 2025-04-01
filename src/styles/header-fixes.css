@@ -68,6 +68,7 @@ header [role="button"] {
   height: auto !important;
   min-height: 2.5rem !important;
   padding: 0.5rem 1rem !important;
+  background: transparent !important;
 }
 
 /* Special handling for text inside buttons */
@@ -78,6 +79,7 @@ header [role="button"] * {
   opacity: 1 !important;
   display: inline !important;
   position: static !important;
+  background: transparent !important;
 }
 
 /* Logo text specific fix */
@@ -123,22 +125,44 @@ header [class*='sr-'] {
 }
 
 /* Special fix for "Get Started" button */
-header a[href="/signup"] span,
-header a[href="/signup"] {
+header a[href="/signup"],
+header a[href="/signup"] * {
   visibility: visible !important;
   opacity: 1 !important;
   display: inline-flex !important;
   color: hsl(var(--primary-foreground)) !important;
   font-weight: 500 !important;
+  z-index: 10001 !important;
+  position: relative !important;
+  background-color: transparent !important;
+}
+
+header a[href="/signup"] span {
+  color: hsl(var(--primary-foreground)) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline !important;
+  z-index: 10001 !important;
 }
 
 /* Special fix for "Log In" button */
-header a[href="/login"] span,
-header a[href="/login"] {
+header a[href="/login"],
+header a[href="/login"] * {
   visibility: visible !important;
   opacity: 1 !important;
   display: inline-flex !important;
   align-items: center !important;
+  z-index: 10001 !important;
+  position: relative !important;
+  background-color: transparent !important;
+}
+
+header a[href="/login"] span {
+  color: inherit !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline !important;
+  z-index: 10001 !important;
 }
 
 /* Fix for the mobile menu button */
@@ -148,6 +172,8 @@ header .mobile-menu-button {
   justify-content: center !important;
   visibility: visible !important;
   opacity: 1 !important;
+  z-index: 10001 !important;
+  background-color: transparent !important;
 }
 
 /* Ensure the header is not collapsed */
@@ -159,4 +185,81 @@ header > div {
   visibility: visible !important;
   opacity: 1 !important;
   padding: 0.75rem 1rem !important;
+  background-color: transparent !important;
+}
+
+/* Remove any backdrop filters that might cause issues */
+header,
+header *,
+header *::before,
+header *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Force links to be visible */
+header a {
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  color: hsl(var(--foreground)) !important;
+  position: relative !important;
+  z-index: 10001 !important;
+  background-color: transparent !important;
+}
+
+/* Fix gradient or overlay issues */
+header::before,
+header::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Override any absolute positioning within header */
+header .absolute,
+header [class*="absolute"] {
+  position: relative !important;
+  z-index: 10001 !important;
+}
+
+/* Cancel out any transforms that might be affecting elements */
+header *,
+header *::before,
+header *::after {
+  transform: none !important;
+}
+
+/* Ensure buttons with primary class are visible */
+header .bg-primary {
+  background-color: hsl(var(--primary)) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 10002 !important;
+}
+
+/* Fix any flex issues in the header */
+header .flex {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+/* Ensure all SVG icons are visible */
+header svg {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-block !important;
+  width: 24px !important;
+  height: 24px !important;
+  overflow: visible !important;
+  z-index: 10001 !important;
+}
+
+/* Fix any potential stacking context issues */
+header, 
+header div,
+header nav,
+header a,
+header button {
+  isolation: isolate !important;
 }
