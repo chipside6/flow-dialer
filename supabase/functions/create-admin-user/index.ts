@@ -41,73 +41,84 @@ serve(async (req) => {
     
     console.log(`Creating admin user with email: ${email}`);
     
-    let userData;
     let userId;
 
     try {
-      // First try to get user by email to check if they exist
-      const { data: userList, error: getUserError } = await supabaseAdmin.auth.admin.listUsers();
+      // First check if user exists using auth.admin.listUsers()
+      console.log("Fetching users list to check if user exists");
+      const { data, error: listError } = await supabaseAdmin.auth.admin.listUsers();
       
-      if (getUserError) {
-        throw new Error(`Error fetching users: ${getUserError.message}`);
+      if (listError) {
+        console.error("Error listing users:", listError);
+        throw new Error(`Error listing users: ${listError.message}`);
       }
       
-      // Check if user exists in the list
-      const existingUser = userList.users.find(u => u.email === email);
+      const existingUser = data?.users?.find(u => u.email === email);
       
       if (existingUser) {
-        // Update existing user's password
-        console.log(`User ${email} already exists, updating password...`);
-        const { data, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+        // User exists, update password
+        console.log(`User ${email} already exists with ID: ${existingUser.id}, updating password`);
+        const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
           existingUser.id,
           { password }
         );
         
         if (updateError) {
+          console.error("Error updating user:", updateError);
           throw new Error(`Error updating user: ${updateError.message}`);
         }
         
-        userData = data;
         userId = existingUser.id;
+        console.log(`Updated user password successfully for ID: ${userId}`);
       } else {
-        // Create new user
-        console.log(`Creating new user with email ${email}`);
-        const { data, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        // User doesn't exist, create new user
+        console.log(`User ${email} doesn't exist, creating new user`);
+        const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
           email,
           password,
           email_confirm: true,
         });
         
         if (createError) {
+          console.error("Error creating user:", createError);
           throw new Error(`Error creating user: ${createError.message}`);
         }
         
-        userData = data;
-        userId = data.user.id;
+        if (!createData.user) {
+          throw new Error("User creation succeeded but no user data returned");
+        }
+        
+        userId = createData.user.id;
+        console.log(`Created new user successfully with ID: ${userId}`);
       }
     } catch (authError) {
-      console.error("Auth operation error:", authError.message);
+      console.error("Authentication operation failed:", authError);
       throw authError;
     }
 
     if (!userId) {
+      console.error("No user ID available after auth operation");
       throw new Error('Failed to create or update user: No user ID available');
     }
 
     // Update the user's profile to make them an admin
     try {
-      const { error: updateProfileError } = await supabaseAdmin
+      console.log(`Updating profile for user ID: ${userId} to make them admin`);
+      const { error: profileError } = await supabaseAdmin
         .from('profiles')
         .upsert({ 
           id: userId, 
           is_admin: true
         });
 
-      if (updateProfileError) {
-        throw new Error(`Error updating profile: ${updateProfileError.message}`);
+      if (profileError) {
+        console.error("Error updating profile:", profileError);
+        throw new Error(`Error updating profile: ${profileError.message}`);
       }
+      
+      console.log(`Successfully updated profile for user ID: ${userId}`);
     } catch (profileError) {
-      console.error("Profile update error:", profileError.message);
+      console.error("Profile update operation failed:", profileError);
       throw profileError;
     }
 
