@@ -1,16 +1,19 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth";
-import { fetchSubscription, getPlanById } from "@/services/subscriptionService";
+import { fetchSubscription, getPlanById } from "@/hooks/subscription/subscriptionApi";
 import { useSubscriptionLimit } from "./useSubscriptionLimit";
 import { useLifetimePlan } from "./useLifetimePlan";
 import { Subscription, UseSubscriptionReturn } from "./types";
+import { useToast } from "@/components/ui/use-toast";
 
 export const useSubscription = (): UseSubscriptionReturn => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   // Fetch subscription data when component mounts and when user changes
   useEffect(() => {
@@ -22,6 +25,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
       setIsLoading(false);
       setCurrentPlan(null);
       setSubscription(null);
+      setError(null);
     }
   }, [user]);
 
@@ -35,6 +39,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
     
     try {
       setIsLoading(true);
+      setError(null);
       
       const subscriptionData = await fetchSubscription(user.id);
       
@@ -52,7 +57,15 @@ export const useSubscription = (): UseSubscriptionReturn => {
       console.error("Error in fetchCurrentSubscription:", error);
       setCurrentPlan('free');
       setSubscription(null);
+      setError(error instanceof Error ? error : new Error('Unknown error occurred'));
       setIsLoading(false);
+      
+      toast({
+        title: "Subscription Error",
+        description: "Could not retrieve your subscription information. Default free plan applied.",
+        variant: "destructive"
+      });
+      
       return null;
     }
   };
@@ -77,6 +90,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
     closeLimitDialog,
     fetchCurrentSubscription,
     activateLifetimePlan,
-    getPlanById
+    getPlanById,
+    error
   };
 };

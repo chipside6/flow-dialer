@@ -18,6 +18,7 @@ export interface SubscriptionState {
   subscription: Subscription | null;
   callCount: number;
   showLimitDialog: boolean;
+  error: Error | null;
 }
 
 export interface SubscriptionActions {

@@ -38,25 +38,45 @@ export const usePaymentProcessing = () => {
       }
       
       console.log("Recording payment in database for user:", user.id);
-      // Record the payment in the database with better error handling
-      const { data: paymentData, error: paymentError } = await supabase
-        .from('payments')
-        .insert([{
-          user_id: user.id,
-          amount: lifetimePlan.price || 0,
-          payment_method: 'crypto',
-          payment_details: paymentDetails,
-          plan_id: lifetimePlan.id || '',
-          status: 'completed'
-        }])
-        .select();
-        
-      if (paymentError) {
-        console.error("Error recording payment:", paymentError);
-        throw new Error(`Failed to record payment: ${paymentError.message}`);
-      }
       
-      console.log("Payment recorded successfully:", paymentData);
+      // Record the payment in the database with retries
+      let paymentRecorded = false;
+      let retryAttempt = 0;
+      const MAX_RETRIES = 3;
+      
+      while (!paymentRecorded && retryAttempt < MAX_RETRIES) {
+        try {
+          const { data: paymentData, error: paymentError } = await supabase
+            .from('payments')
+            .insert([{
+              user_id: user.id,
+              amount: lifetimePlan.price || 0,
+              payment_method: 'crypto',
+              payment_details: paymentDetails,
+              plan_id: lifetimePlan.id || '',
+              status: 'completed'
+            }])
+            .select();
+            
+          if (paymentError) {
+            throw new Error(`Failed to record payment: ${paymentError.message}`);
+          }
+          
+          console.log("Payment recorded successfully:", paymentData);
+          paymentRecorded = true;
+        } catch (error) {
+          retryAttempt++;
+          console.error(`Error recording payment (attempt ${retryAttempt}):`, error);
+          
+          // If this is the last retry and it still failed, throw the error
+          if (retryAttempt >= MAX_RETRIES) {
+            throw error;
+          }
+          
+          // Wait before retrying (with exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryAttempt - 1)));
+        }
+      }
       
       // Activate the lifetime plan
       console.log("Activating lifetime plan for user:", user.id);
@@ -83,7 +103,7 @@ export const usePaymentProcessing = () => {
       console.error("Error processing payment:", error);
       toast({
         title: "Error upgrading plan",
-        description: error.message || "There was a problem processing your payment",
+        description: error.message || "There was a problem processing your payment. Please try again or contact support.",
         variant: "destructive"
       });
     } finally {
