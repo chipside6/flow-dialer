@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import PublicLayout from "@/components/layout/PublicLayout";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ export default function QuickAdminSetup() {
   const [email, setEmail] = useState("admin@example.com");
   const [password, setPassword] = useState("admin123");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { isAuthenticated, signOut } = useAuth();
 
@@ -22,11 +23,13 @@ export default function QuickAdminSetup() {
     event.preventDefault();
     
     if (!email || !password) {
+      setError("Email and password are required");
       toast.error("Email and password are required");
       return;
     }
     
     setIsLoading(true);
+    setError(null);
     
     try {
       // Show a toast that we're creating the admin user
@@ -38,16 +41,20 @@ export default function QuickAdminSetup() {
         body: { email, password }
       });
       
+      console.log("Admin user creation response:", data, error);
+      
       if (error) {
         console.error("Error creating admin user:", error);
         throw new Error(error.message || "Failed to create admin user");
       }
       
-      console.log("Admin user created response:", data);
+      if (!data?.success) {
+        throw new Error(data?.error || "Unknown error occurred");
+      }
       
       toast.success(`Admin user created successfully!`);
-      toast.info("Please log in with the admin credentials", {
-        duration: 5000
+      toast.info(`Email: ${email}, Password: ${password}`, {
+        duration: 8000
       });
       
       // If already logged in, suggest logging out
@@ -69,9 +76,10 @@ export default function QuickAdminSetup() {
         setTimeout(() => navigate("/login"), 2000);
       }
       
-    } catch (error: any) {
-      console.error("Error creating admin:", error);
-      toast.error(`Error: ${error.message || "Failed to create admin"}`);
+    } catch (err: any) {
+      console.error("Error creating admin:", err);
+      setError(err.message || "Failed to create admin user");
+      toast.error(`Error: ${err.message || "Failed to create admin"}`);
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +97,13 @@ export default function QuickAdminSetup() {
           </CardHeader>
           <form onSubmit={createAdmin}>
             <CardContent className="space-y-4">
+              {error && (
+                <div className="bg-destructive/15 p-3 rounded-md flex items-start">
+                  <AlertCircle className="h-5 w-5 text-destructive mr-2 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <Label htmlFor="email">Admin Email</Label>
                 <Input

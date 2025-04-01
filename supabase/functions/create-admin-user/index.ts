@@ -41,21 +41,22 @@ serve(async (req) => {
     
     console.log(`Creating admin user with email: ${email}`);
     
-    // First, create or update the user
+    // Create or update the user
     let userId;
+    
     try {
-      // Try to get the existing user
-      const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+      // Check if user exists by listing all users and finding the one with the matching email
+      const { data: userList, error: listError } = await supabaseAdmin.auth.admin.listUsers();
       
       if (listError) {
         throw new Error(`Error listing users: ${listError.message}`);
       }
       
-      const existingUser = users?.users?.find(u => u.email === email);
+      const existingUser = userList?.users?.find(u => u.email === email);
       
       if (existingUser) {
         // User exists, update password
-        console.log(`User exists: ${existingUser.id} - updating password`);
+        console.log(`User exists with ID: ${existingUser.id} - updating password`);
         
         const { data, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
           existingUser.id,
@@ -74,7 +75,7 @@ serve(async (req) => {
         const { data, error: createError } = await supabaseAdmin.auth.admin.createUser({
           email,
           password,
-          email_confirm: true,
+          email_confirm: true, // Auto-confirm the email
         });
         
         if (createError) {
@@ -84,7 +85,7 @@ serve(async (req) => {
         userId = data.user.id;
       }
       
-      console.log(`User id: ${userId}`);
+      console.log(`User ID: ${userId}`);
     } catch (authError) {
       console.error(`Auth operation failed: ${authError.message}`);
       throw authError;
@@ -114,7 +115,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         message: 'Admin user created/updated successfully', 
-        userId 
+        userId,
+        success: true
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
@@ -122,7 +124,10 @@ serve(async (req) => {
     console.error(`Error in create-admin-user function: ${error.message}`);
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        success: false 
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     );
   }
