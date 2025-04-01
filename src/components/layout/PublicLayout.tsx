@@ -11,7 +11,8 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-1 pt-20"> {/* Add padding-top to ensure content is below navbar */}
+      <div className="h-16 md:h-20"></div> {/* Spacer div to push content below fixed navbar */}
+      <main className="flex-1">
         {children || <Outlet />}
       </main>
     </div>

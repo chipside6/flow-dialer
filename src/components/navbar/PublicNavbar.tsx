@@ -19,7 +19,7 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
   const { isAuthenticated } = useAuth();
   
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 py-4 ${isScrolled ? 'bg-background/80 backdrop-blur-sm shadow-sm border-b' : 'border-transparent'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ease-in-out px-6 py-4 bg-background border-b ${isScrolled ? 'shadow-sm' : ''}`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button

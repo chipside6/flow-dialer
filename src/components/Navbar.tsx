@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSidebar } from "@/components/ui/sidebar";
@@ -78,8 +79,6 @@ export const Navbar = () => {
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
-      {/* Add a spacer div to prevent content from being hidden under the navbar */}
-      <div className="h-16 md:h-20"></div>
     </>
   );
 };

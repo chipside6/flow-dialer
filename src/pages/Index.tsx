@@ -9,7 +9,7 @@ import { CTASection } from "@/components/CTASection";
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
-      <main className="pt-24"> {/* Add padding-top to push content below header */}
+      <main>
         <HeroSection />
         <FeaturesSection />
         <TestimonialsSection />

@@ -61,6 +61,12 @@ main {
   z-index: 1;
 }
 
+/* Ensure headers remain visible and on top of content */
+header {
+  position: relative;
+  z-index: 100 !important;
+}
+
 @media (max-width: 768px) {
   .container-fluid {
     padding-right: 1rem;
