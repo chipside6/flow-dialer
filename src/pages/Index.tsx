@@ -1,5 +1,4 @@
 
-import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
@@ -10,13 +9,13 @@ import PublicLayout from "@/components/layout/PublicLayout";
 const Index = () => {
   return (
     <PublicLayout>
-      <main className="bg-background"> 
+      <div className="bg-background"> 
         <HeroSection />
         <FeaturesSection />
         <TestimonialsSection />
         <PricingSection />
         <CTASection />
-      </main>
+      </div>
     </PublicLayout>
   );
 };
