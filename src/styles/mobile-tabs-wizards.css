@@ -66,3 +66,32 @@
     flex: 1;
   }
 }
+
+/* Remove vertical scrolling for campaign wizard tabs */
+.wizard-tabs-container {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  overflow-y: hidden;
+}
+
+.no-vertical-scroll {
+  overflow-y: hidden !important;
+}
+
+/* Make sure horizontal scroll works properly */
+.wizard-tabs-container .scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.wizard-tabs-container .scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .wizard-tabs-container {
+    background-color: hsl(var(--background));
+  }
+}

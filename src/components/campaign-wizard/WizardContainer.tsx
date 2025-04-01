@@ -39,15 +39,13 @@ export const WizardContainer: React.FC<WizardContainerProps> = ({
       <CardHeader className="border-b bg-muted/30">
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 overflow-hidden">
         <Tabs value={step} className="w-full">
-          <div className={`${isMobile ? 'overflow-x-auto scrollbar-none' : ''}`}>
-            <WizardStepTabs 
-              currentStep={step} 
-              setStep={setStep} 
-              isStepAvailable={isStepAvailable} 
-            />
-          </div>
+          <WizardStepTabs 
+            currentStep={step} 
+            setStep={setStep} 
+            isStepAvailable={isStepAvailable} 
+          />
           <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
             {children}
           </div>
