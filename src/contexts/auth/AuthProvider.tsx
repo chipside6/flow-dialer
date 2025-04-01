@@ -3,13 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, UserProfile } from './types';
-import { fetchUserProfile } from './authUtils';
-import { signOutUser } from './authActions';
 
-console.log('🔍 AuthProvider.tsx is being imported');
+console.log('🔍 AuthProvider.tsx is being imported - simplified version');
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  console.log('🔍 AuthProvider component initializing');
+  console.log('🔍 AuthProvider component initializing - simplified version');
   
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -17,186 +15,115 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
-  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    console.log("🔍 AuthProvider: Setting up auth state");
+    console.log("🔍 AuthProvider: Setting up auth state - simplified");
     
     let isMounted = true;
     
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!isMounted) return;
-        
-        console.log('🔍 AuthProvider: Auth state changed:', event);
-        
-        if (session?.user) {
-          try {
-            // Convert Supabase User to our User type
-            const appUser: User = {
+    // Use a timeout to prevent permanent loading state
+    const timeoutId = setTimeout(() => {
+      if (isMounted && isLoading) {
+        console.log("🔍 AuthProvider: Auth state timeout reached, continuing with app");
+        setIsLoading(false);
+        setSessionChecked(true);
+      }
+    }, 2000);
+    
+    // Set up auth state listener
+    try {
+      console.log("🔍 AuthProvider: Trying to set up auth listener");
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          if (!isMounted) return;
+          
+          console.log('🔍 AuthProvider: Auth state changed:', event);
+          
+          if (session?.user) {
+            console.log('🔍 AuthProvider: User is authenticated:', session.user.email);
+            setUser({
               id: session.user.id,
               email: session.user.email || '',
               created_at: session.user.created_at,
               last_sign_in_at: session.user.last_sign_in_at
-            };
-            
-            setUser(appUser);
-            
-            // Fetch profile data
-            const userProfile = await fetchUserProfile(session.user.id);
-            if (userProfile) {
-              // Make sure to set the email from the auth user
-              const updatedProfile = {
-                ...userProfile,
-                email: session.user.email || ''
-              };
-              setProfile(updatedProfile);
-              setIsAdmin(!!updatedProfile.is_admin);
-            } else {
-              // Set isAdmin to false when no profile is found
-              setIsAdmin(false);
-            }
-          } catch (error) {
-            console.error("🔍 AuthProvider: Error during sign in:", error);
-            setError(error instanceof Error ? error : new Error('Unknown error during sign in'));
-            setIsAdmin(false); // Default to non-admin on error
+            });
+          } else {
+            console.log('🔍 AuthProvider: No active session');
+            setUser(null);
+            setProfile(null);
+            setIsAdmin(false);
           }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setProfile(null);
-          setIsAdmin(false);
-        }
-        
-        if (isMounted) {
-          setIsLoading(false);
-          setSessionChecked(true);
-          setInitialized(true);
-        }
-      }
-    );
-    
-    // THEN check for existing session
-    const checkSession = async () => {
-      try {
-        if (!isMounted) return;
-        
-        console.log("🔍 AuthProvider: Getting current session");
-        
-        // Get current user session
-        const { data, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error('🔍 AuthProvider: Error checking session:', sessionError);
-          setError(sessionError instanceof Error ? sessionError : new Error('Unknown error during session check'));
-          setIsLoading(false);
-          setSessionChecked(true);
-          setInitialized(true);
-          return;
-        }
-        
-        if (data.session?.user) {
-          console.log("🔍 AuthProvider: Found active session for user:", data.session.user.email);
           
-          try {
-            // Convert Supabase User to our User type
-            const appUser: User = {
+          setIsLoading(false);
+          setSessionChecked(true);
+        }
+      );
+      
+      // Check for existing session with error handling
+      const checkSession = async () => {
+        try {
+          console.log("🔍 AuthProvider: Checking for current session");
+          const { data, error: sessionError } = await supabase.auth.getSession();
+          
+          if (sessionError) {
+            console.error('🔍 AuthProvider: Error checking session:', sessionError);
+            setError(sessionError instanceof Error ? sessionError : new Error('Unknown error'));
+            setIsLoading(false);
+            setSessionChecked(true);
+            return;
+          }
+          
+          if (data.session?.user) {
+            console.log("🔍 AuthProvider: Found active session for user:", data.session.user.email);
+            setUser({
               id: data.session.user.id,
               email: data.session.user.email || '',
               created_at: data.session.user.created_at,
               last_sign_in_at: data.session.user.last_sign_in_at
-            };
-            
-            setUser(appUser);
-            
-            // Fetch user profile
-            const userProfile = await fetchUserProfile(data.session.user.id);
-            if (userProfile) {
-              // Make sure to set the email from the auth user
-              const updatedProfile = {
-                ...userProfile,
-                email: data.session.user.email || ''
-              };
-              setProfile(updatedProfile);
-              setIsAdmin(!!updatedProfile.is_admin);
-            } else {
-              // Set isAdmin to false when no profile is found
-              setIsAdmin(false);
-            }
-          } catch (profileError) {
-            console.error("🔍 AuthProvider: Error fetching profile:", profileError);
-            setIsAdmin(false); // Default to non-admin on error
+            });
+          } else {
+            console.log("🔍 AuthProvider: No active session found");
+            setUser(null);
+            setProfile(null);
+            setIsAdmin(false);
           }
-        } else {
-          console.log("🔍 AuthProvider: No active session found");
-          setUser(null);
-          setProfile(null);
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        console.error('🔍 AuthProvider: Error checking session:', error);
-        setError(error instanceof Error ? error : new Error('Unknown error during session check'));
-        setIsAdmin(false); // Default to non-admin on error
-      } finally {
-        if (isMounted) {
+          
           setIsLoading(false);
           setSessionChecked(true);
-          setInitialized(true);
+        } catch (error) {
+          console.error('🔍 AuthProvider: Exception checking session:', error);
+          setError(error instanceof Error ? error : new Error('Unknown error'));
+          setIsLoading(false);
+          setSessionChecked(true);
         }
-      }
-    };
-    
-    checkSession();
-    
-    // Clean up
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
+      };
+      
+      checkSession();
+      
+      // Clean up
+      return () => {
+        isMounted = false;
+        clearTimeout(timeoutId);
+        subscription.unsubscribe();
+      };
+    } catch (error) {
+      console.error('🔍 AuthProvider: Error setting up auth state:', error);
+      setIsLoading(false);
+      setSessionChecked(true);
+      setError(error instanceof Error ? error : new Error('Unknown error setting up auth'));
+      
+      return () => {
+        isMounted = false;
+        clearTimeout(timeoutId);
+      };
+    }
   }, []);
 
-  // Handler for updating the profile
-  const updateProfile = (newProfile: UserProfile | null) => {
-    setProfile(newProfile);
-    if (newProfile) {
-      setIsAdmin(!!newProfile.is_admin);
-    } else {
-      setIsAdmin(false);
-    }
-  };
-  
-  // Handler for signing out
-  const signOut = async () => {
-    try {
-      console.log('🔍 AuthProvider: Signing out user');
-      setIsLoading(true);
-      
-      // Immediately reset state for better UX
-      setUser(null);
-      setProfile(null);
-      setIsAdmin(false);
-      
-      const result = await signOutUser();
-      
-      if (!result.success) {
-        console.error("🔍 AuthProvider: Error during sign out:", result.error);
-      }
-      
-      return result;
-    } catch (error) {
-      console.error("🔍 AuthProvider: Unexpected error during sign out:", error);
-      return { success: true, error };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  console.log("🔍 AuthProvider: Current state:", { 
+  console.log("🔍 AuthProvider state:", { 
     isAuthenticated: !!user, 
     isLoading, 
-    initialized, 
-    sessionChecked,
-    isAdmin
+    isAdmin,
+    sessionChecked
   });
 
   const value = {
@@ -207,13 +134,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin, 
     error,
     sessionChecked,
-    initialized,
-    setProfile: updateProfile,
-    updateProfile,
-    signOut
+    initialized: true,
+    setProfile: (newProfile: UserProfile | null) => setProfile(newProfile),
+    updateProfile: (newProfile: UserProfile | null) => setProfile(newProfile),
+    signOut: async () => {
+      try {
+        console.log('🔍 AuthProvider: Signing out user');
+        await supabase.auth.signOut();
+        setUser(null);
+        setProfile(null);
+        setIsAdmin(false);
+        return { success: true, error: null };
+      } catch (error) {
+        console.error("🔍 AuthProvider: Error during sign out:", error);
+        return { success: false, error };
+      }
+    }
   };
 
+  // Render children even if we're loading, to avoid blank screen
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-console.log('🔍 AuthProvider.tsx has been loaded');
+console.log('🔍 AuthProvider.tsx has been loaded - simplified version');
