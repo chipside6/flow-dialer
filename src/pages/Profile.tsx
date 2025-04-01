@@ -14,14 +14,6 @@ const Profile = () => {
   const { currentPlan, getPlanById } = useSubscription();
   
   const activePlan = currentPlan ? getPlanById(currentPlan) : null;
-  
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part.charAt(0))
-      .join('')
-      .toUpperCase();
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -32,13 +24,13 @@ const Profile = () => {
               <div className="flex flex-col md:flex-row gap-6 md:items-center">
                 <Avatar className="h-20 w-20">
                   <AvatarFallback className="text-xl">
-                    {profile?.full_name ? getInitials(profile.full_name) : user?.email?.charAt(0).toUpperCase()}
+                    {user?.email?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight">
-                    {profile?.full_name || 'User Profile'}
+                    User Profile
                   </h1>
                   <p className="text-muted-foreground">
                     {user?.email}

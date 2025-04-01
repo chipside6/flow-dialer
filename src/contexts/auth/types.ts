@@ -9,8 +9,5 @@ export interface User {
 export interface UserProfile {
   id: string;
   email: string;
-  full_name?: string;
-  avatar_url?: string | null;
-  company_name?: string;
   is_admin?: boolean;
 }
