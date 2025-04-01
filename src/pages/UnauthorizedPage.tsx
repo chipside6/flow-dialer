@@ -10,7 +10,7 @@ const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
-  const [adminEmail] = useState('admin@example.com'); 
+  const [adminEmail] = useState('admin@example.com');
   const [adminPassword] = useState('admin123');
   
   // Check if user came from admin panel
@@ -20,7 +20,7 @@ const UnauthorizedPage = () => {
     setIsCreatingAdmin(true);
     
     try {
-      console.log("UnauthorizedPage - Checking admin privileges directly for user:", supabase.auth.getUser());
+      console.log("UnauthorizedPage - Creating admin user");
       
       // Use the Supabase Edge Function to create admin user
       const { data, error } = await supabase.functions.invoke('create-admin-user', {

@@ -52,20 +52,20 @@ serve(async (req) => {
     // Create Supabase client with service role key (admin privileges)
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check if user already exists - using a compatible method
+    // Check if user already exists by querying the user's email
     let existingUser = null;
     let userId = null;
     
     try {
-      const { data: userData, error: userError } = await supabase
-        .from('auth.users')
-        .select('id, email')
+      const { data: users, error: userError } = await supabase
+        .from('profiles')
+        .select('id')
         .eq('email', email)
-        .maybeSingle();
+        .limit(1);
         
-      if (!userError && userData) {
-        existingUser = userData;
-        userId = userData.id;
+      if (!userError && users && users.length > 0) {
+        existingUser = users[0];
+        userId = users[0].id;
         console.log("Found existing user:", userId);
       }
     } catch (err) {
