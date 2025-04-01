@@ -50,6 +50,16 @@ body, html {
   max-width: 100vw;
 }
 
+/* Ensure fixed header stays on top */
+header.fixed {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 50 !important;
+}
+
 /* Ensure proper content spacing with sidebar */
 [data-sidebar-inset] {
   padding-top: 0 !important;
