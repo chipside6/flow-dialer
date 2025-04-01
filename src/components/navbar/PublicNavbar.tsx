@@ -27,7 +27,7 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
             className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted"
             aria-label="Open mobile menu"
           >
-            <Menu size={24} />
+            <Menu size={24} className="text-foreground" />
           </button>
           <Link 
             to={isAuthenticated ? "/dashboard" : "/"} 
@@ -38,7 +38,7 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
         </div>
         
         <div className="hidden md:flex items-center gap-6">
-          <nav className="flex items-center gap-6">
+          <nav className="flex items-center gap-6 text-foreground">
             <NavLinks />
           </nav>
         </div>

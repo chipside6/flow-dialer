@@ -73,12 +73,10 @@ export const Navbar = () => {
   }
 
   return (
-    <>
-      <PublicNavbar 
-        isScrolled={isScrolled}
-        isMobileMenuOpen={isMobileMenuOpen}
-        setIsMobileMenuOpen={setIsMobileMenuOpen}
-      />
-    </>
+    <PublicNavbar 
+      isScrolled={isScrolled}
+      isMobileMenuOpen={isMobileMenuOpen}
+      setIsMobileMenuOpen={setIsMobileMenuOpen}
+    />
   );
 };
