@@ -30,19 +30,32 @@ export const useAddTransferNumber = (
       console.log("Adding transfer number:", { name, number, description });
       const result = await addTransferNumber(user.id, name, number, description);
       
-      // Wait for a short delay before refreshing to allow the database to update
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Explicitly refresh the transfer numbers
-      await refreshTransferNumbers();
-      
-      // Show success message
-      toast({
-        title: "Transfer number added",
-        description: "The transfer number has been added successfully",
-      });
-      
-      return result;
+      if (result) {
+        console.log("Successfully added transfer number:", result);
+        
+        // Wait for a short delay to ensure database consistency
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        console.log("Refreshing transfer numbers list after successful add");
+        // Explicitly refresh the transfer numbers
+        await refreshTransferNumbers();
+        
+        // Show success message
+        toast({
+          title: "Transfer number added",
+          description: "The transfer number has been added successfully",
+        });
+        
+        return result;
+      } else {
+        console.error("Failed to add transfer number, server returned null/undefined");
+        toast({
+          title: "Error adding transfer number",
+          description: "Server returned an invalid response",
+          variant: "destructive"
+        });
+        return null;
+      }
     } catch (err: any) {
       console.error("Error adding transfer number:", err);
       toast({

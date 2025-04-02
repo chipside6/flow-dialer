@@ -84,7 +84,7 @@ export const useFetchTransferNumbers = ({
     },
     {
       cacheKey: user?.id ? `transfer-numbers-${user.id}` : undefined,
-      cacheDuration: 5 * 1000, // Reduce cache time to 5 seconds for more frequent updates
+      cacheDuration: 3 * 1000, // Reduce cache time to just 3 seconds for more frequent updates
       enabled: false, // Don't fetch automatically, we'll call it explicitly
       retry: 1, 
       retryDelay: 500,

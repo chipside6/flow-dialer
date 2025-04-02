@@ -51,24 +51,59 @@ export const TransferNumbersContent = ({
   // Handle adding a transfer number with optimistic update
   const handleAddTransferNumber = async (name: string, number: string, description: string) => {
     try {
+      // Generate a temporary ID for optimistic update
+      const tempId = `temp-${Date.now()}`;
+      
+      // Optimistically add the new transfer number to the local state
+      const optimisticNewNumber: TransferNumber = {
+        id: tempId,
+        name,
+        number,
+        description: description || "No description provided",
+        dateAdded: new Date(),
+        callCount: 0
+      };
+      
+      // Add to local state immediately for optimistic UI update
+      setLocalTransferNumbers(prev => [optimisticNewNumber, ...prev]);
+      
+      // Call the actual API to add the transfer number
       const result = await addTransferNumber(name, number, description);
+      
       if (result) {
-        // Optimistically add the new transfer number to the local state
-        const newNumber: TransferNumber = {
-          ...result,
-          dateAdded: new Date()
-        };
+        console.log("Successfully added transfer number, server returned:", result);
         
-        setLocalTransferNumbers(prev => [newNumber, ...prev]);
+        // Replace the temporary entry with the real one from the server
+        setLocalTransferNumbers(prev => 
+          prev.map(tn => tn.id === tempId ? {
+            ...result,
+            dateAdded: new Date(result.dateAdded)
+          } : tn)
+        );
         
         // Force refresh after a short delay to get the real data from the server
         setTimeout(() => {
+          console.log("Triggering refresh after add");
           onRefresh();
-        }, 500);
+        }, 800);
+      } else {
+        // If failed, remove the optimistic entry
+        setLocalTransferNumbers(prev => prev.filter(tn => tn.id !== tempId));
+        toast({
+          title: "Error adding transfer number",
+          description: "Server returned an invalid response",
+          variant: "destructive"
+        });
       }
+      
       return result;
     } catch (error) {
       console.error("Error adding transfer number:", error);
+      toast({
+        title: "Error adding transfer number",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive"
+      });
       return null;
     }
   };
@@ -76,6 +111,9 @@ export const TransferNumbersContent = ({
   // Handle deleting a transfer number with optimistic update
   const handleDeleteTransferNumber = async (id: string) => {
     try {
+      // Save the current state for potential rollback
+      const previousState = [...localTransferNumbers];
+      
       // Optimistically remove the transfer number from the local state
       setLocalTransferNumbers(prev => prev.filter(tn => tn.id !== id));
       
@@ -83,12 +121,18 @@ export const TransferNumbersContent = ({
       
       // If the deletion failed, revert the optimistic update
       if (!result) {
-        setLocalTransferNumbers(transferNumbers);
+        setLocalTransferNumbers(previousState);
+        toast({
+          title: "Error deleting transfer number",
+          description: "Failed to delete the transfer number",
+          variant: "destructive"
+        });
       } else {
         // Force refresh after a short delay to get the real data from the server
         setTimeout(() => {
+          console.log("Triggering refresh after delete");
           onRefresh();
-        }, 500);
+        }, 800);
       }
       
       return result;
@@ -96,6 +140,11 @@ export const TransferNumbersContent = ({
       console.error("Error deleting transfer number:", error);
       // Revert the optimistic update on error
       setLocalTransferNumbers(transferNumbers);
+      toast({
+        title: "Error deleting transfer number",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive"
+      });
       return false;
     }
   };
