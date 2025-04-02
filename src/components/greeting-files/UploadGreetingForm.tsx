@@ -16,30 +16,30 @@ export const UploadGreetingForm = ({ userId, refreshGreetingFiles }: UploadGreet
 
   return (
     <Card className="shadow-md">
-      <CardHeader className="p-4">
-        <CardTitle className="text-xl">Add New Greeting</CardTitle>
+      <CardHeader>
+        <CardTitle>Add a new greeting file</CardTitle>
         <CardDescription>
-          Upload or record an audio file
+          Upload or record an audio file to use as your campaign greeting
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-4 pt-0">
+      <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-2 mb-4">
             <TabsTrigger value="upload" id="upload-tab">
               <Upload className="h-4 w-4 mr-2" />
-              Upload
+              Upload File
             </TabsTrigger>
             <TabsTrigger value="record" id="record-tab">
               <Mic className="h-4 w-4 mr-2" />
-              Record
+              Record Audio
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="upload" className="space-y-4 mt-2">
+          <TabsContent value="upload" className="space-y-4">
             <UploadForm userId={userId} refreshGreetingFiles={refreshGreetingFiles} />
           </TabsContent>
           
-          <TabsContent value="record" className="mt-2">
+          <TabsContent value="record">
             <RecordGreetingForm userId={userId} refreshGreetingFiles={refreshGreetingFiles} />
           </TabsContent>
         </Tabs>

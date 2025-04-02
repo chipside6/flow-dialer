@@ -86,17 +86,17 @@ const GreetingFiles = () => {
   };
 
   return (
-    <div className="w-full px-4">
-      <h1 className="text-2xl sm:text-3xl font-semibold mb-6">Greeting Files</h1>
+    <div className="w-full">
+      <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="mb-4 w-full">
-          <TabsTrigger value="files" className="flex-1">My Files</TabsTrigger>
-          <TabsTrigger value="record" className="flex-1">Record</TabsTrigger>
-          <TabsTrigger value="upload" className="flex-1">Upload</TabsTrigger>
+        <TabsList className="mb-4">
+          <TabsTrigger value="files">My Files</TabsTrigger>
+          <TabsTrigger value="record">Record New</TabsTrigger>
+          <TabsTrigger value="upload">Upload File</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="files" className="mt-2">
+        <TabsContent value="files">
           <GreetingFilesList 
             greetingFiles={greetingFiles} 
             isLoading={isLoading}
@@ -108,11 +108,11 @@ const GreetingFiles = () => {
           />
         </TabsContent>
         
-        <TabsContent value="record" className="mt-2">
+        <TabsContent value="record">
           <RecordGreetingForm userId={user?.id} refreshGreetingFiles={handleRefreshGreetingFiles} />
         </TabsContent>
         
-        <TabsContent value="upload" className="mt-2">
+        <TabsContent value="upload">
           <UploadGreetingForm userId={user?.id} refreshGreetingFiles={handleRefreshGreetingFiles} />
         </TabsContent>
       </Tabs>

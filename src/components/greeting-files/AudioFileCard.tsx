@@ -30,7 +30,7 @@ export const AudioFileCard: React.FC<AudioFileCardProps> = ({
   const timeAgo = formatDistanceToNow(new Date(file.created_at), { addSuffix: true });
   
   return (
-    <Card className="overflow-hidden h-auto">
+    <Card className="overflow-hidden">
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
           <h3 className="font-medium text-base line-clamp-1" title={file.filename}>
@@ -39,7 +39,7 @@ export const AudioFileCard: React.FC<AudioFileCardProps> = ({
           <span className="text-xs text-muted-foreground">{timeAgo}</span>
         </div>
         
-        <div className="mt-4 h-12 flex items-center justify-center">
+        <div className="mt-4 h-16 flex items-center justify-center">
           <AudioWaveform
             isPlaying={isPlaying}
             isActive={isActiveAudio}
@@ -48,7 +48,7 @@ export const AudioFileCard: React.FC<AudioFileCardProps> = ({
         </div>
       </CardContent>
       
-      <CardFooter className="p-4 pt-0 flex justify-between gap-2">
+      <CardFooter className="p-4 pt-2 flex justify-between gap-2">
         <Button 
           variant="outline" 
           size="sm"

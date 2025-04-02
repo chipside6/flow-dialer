@@ -17,7 +17,7 @@
   }
   
   [role="tabpanel"] {
-    padding: 16px 12px !important;
+    padding: 20px 16px !important;
   }
   
   /* Fix for scrollable tabs on mobile */
@@ -44,7 +44,6 @@
     white-space: nowrap;
     font-size: 14px !important;
     padding: 10px 14px !important;
-    flex: 1;
   }
   
   /* Wizard header styling */
@@ -65,19 +64,6 @@
   
   .wizard-navigation button {
     flex: 1;
-  }
-  
-  /* Fix TabsTrigger widths to be even */
-  .TabsTrigger {
-    flex: 1 !important;
-    text-align: center !important;
-  }
-  
-  /* Ensure tabs are evenly sized in the container */
-  .TabsList {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
-    width: 100% !important;
   }
 }
 
