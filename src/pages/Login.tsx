@@ -90,8 +90,8 @@ const Login = () => {
   };
 
   return (
-    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-4 mx-auto">
-      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden mt-[-80px]">
+    <div className="container flex flex-col items-center justify-start min-h-screen px-4 py-4 mx-auto pt-16">
+      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 z-0 rounded-xl"></div>
         <CardHeader className="space-y-1 relative z-10 pb-2 text-left">
           <div className="flex justify-center mb-4">
@@ -155,15 +155,15 @@ const Login = () => {
             </div>
             <Button type="submit" className="w-full font-medium transition-all mt-4 h-10 px-4 py-2" disabled={isLoading}>
               {isLoading ? (
-                <>
+                <span className="flex items-center justify-center">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  <span>Signing in...</span>
-                </>
+                  Signing in...
+                </span>
               ) : (
-                <>
+                <span className="flex items-center justify-center">
                   {isAdminRedirect ? "Sign in as Administrator" : "Sign in"} 
-                  <LogIn className="ml-2 h-4 w-4 transition-transform" />
-                </>
+                  <LogIn className="ml-2 h-4 w-4" />
+                </span>
               )}
             </Button>
           </form>

@@ -11,7 +11,7 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    white-space: normal !important;
+    white-space: nowrap !important;
     height: auto !important;
     min-height: 40px !important;
     line-height: 1.2 !important;
@@ -31,6 +31,14 @@
     flex-shrink: 0 !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
+  }
+  
+  /* Ensure button text and icons align horizontally */
+  button span,
+  .button span {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
   
   /* Improve touch targets */
@@ -96,7 +104,6 @@
       max-width: 100% !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
-      display: inline-block !important;
     }
   }
 }
