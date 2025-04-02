@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -80,7 +81,7 @@ const SignUp = () => {
             Get started with Flow Dialer today
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 relative z-10 pt-2">
+        <CardContent className="space-y-3 relative z-10 pt-0">
           {errorMessage && (
             <Alert variant="destructive" className="animate-fade-in">
               <AlertCircle className="h-4 w-4" />
@@ -94,7 +95,7 @@ const SignUp = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Your email address"
+                  placeholder="Enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
@@ -108,7 +109,7 @@ const SignUp = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Create a secure password"
+                  placeholder="Create a password (min. 6 characters)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"

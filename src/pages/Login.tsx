@@ -41,6 +41,7 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate, from, isAdmin, isAdminRedirect, initialized]);
 
+  // handleSubmit function
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -104,7 +105,7 @@ const Login = () => {
               : "Sign in to your Flow Dialer account"}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 relative z-10 pt-2">
+        <CardContent className="space-y-3 relative z-10 pt-0">
           {isAdminRedirect && (
             <Alert className="bg-amber-50 border-amber-200">
               <ShieldAlert className="h-4 w-4 text-amber-600" />
@@ -127,7 +128,7 @@ const Login = () => {
                 <Input 
                   id="email" 
                   type="email" 
-                  placeholder="Your email address" 
+                  placeholder="Enter your email address" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
