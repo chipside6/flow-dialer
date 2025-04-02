@@ -146,7 +146,7 @@ const App = () => (
               } 
             />
             
-            {/* Asterisk Configuration route - no longer requires admin */}
+            {/* Asterisk Configuration route - no longer requires admin privileges */}
             <Route 
               path="/asterisk-config" 
               element={
