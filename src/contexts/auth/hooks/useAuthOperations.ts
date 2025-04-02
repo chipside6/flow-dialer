@@ -53,6 +53,7 @@ export function useAuthOperations() {
           variant: "destructive",
         });
       }
+      // Success toast removed for login
       
       return result;
     } catch (error: any) {

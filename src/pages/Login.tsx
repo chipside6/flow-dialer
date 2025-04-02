@@ -66,11 +66,8 @@ const Login = () => {
 
       console.log("Login successful, user:", data.user);
       
-      toast({
-        title: "Login successful",
-        description: "You've been successfully logged in",
-      });
-
+      // Removed success toast notification 
+      
       // For admin redirects, we'll let the useEffect handle it based on isAdmin status
       // For regular redirects, navigate directly
       if (!isAdminRedirect) {
