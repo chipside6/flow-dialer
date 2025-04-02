@@ -90,8 +90,8 @@ const Login = () => {
   };
 
   return (
-    <div className="container flex flex-col items-center justify-start min-h-screen px-4 py-4 mx-auto pt-16">
-      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden">
+    <div className="container flex flex-col items-center min-h-screen px-4 mx-auto pt-4">
+      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden mt-8">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 z-0 rounded-xl"></div>
         <CardHeader className="space-y-1 relative z-10 pb-2 text-left">
           <div className="flex justify-center mb-4">
