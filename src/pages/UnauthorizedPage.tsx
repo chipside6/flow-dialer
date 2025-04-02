@@ -1,8 +1,9 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import { Shield, AlertCircle, LogIn, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Shield, AlertCircle, LogIn, ArrowLeft } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const UnauthorizedPage = () => {
@@ -34,8 +35,8 @@ const UnauthorizedPage = () => {
   };
   
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] p-6">
-      <div className="w-full max-w-md space-y-6">
+    <div className="flex flex-col items-center justify-center min-h-[100vh] p-6">
+      <div className="w-full max-w-md mx-auto space-y-6">
         <div className="flex flex-col items-center mb-6">
           <div className="p-3 bg-destructive/10 rounded-full mb-4">
             <Shield className="h-10 w-10 text-destructive" />
@@ -69,29 +70,21 @@ const UnauthorizedPage = () => {
           </Alert>
         )}
         
-        <div className="space-y-4">
+        <div className="space-y-4 flex flex-col items-center">
           {isAuthenticated ? (
             <>
               {isFromAdmin && isAdmin === false && (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full text-center">
                   <p className="text-sm text-center text-muted-foreground">
                     Your account doesn't have administrator privileges. 
                     Please contact an administrator for access.
                   </p>
-                  <Button 
-                    onClick={refreshAdminStatus} 
-                    variant="outline" 
-                    className="w-full"
-                  >
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Refresh Admin Status
-                  </Button>
                 </div>
               )}
               <Button 
                 onClick={() => navigate(-1)} 
                 variant="outline" 
-                className="w-full"
+                className="w-full max-w-xs"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Go Back
@@ -104,7 +97,7 @@ const UnauthorizedPage = () => {
               </p>
               <Button 
                 onClick={() => navigate('/login', { state: { from: { pathname: '/admin' } } })} 
-                className="w-full"
+                className="w-full max-w-xs"
               >
                 <LogIn className="mr-2 h-4 w-4" />
                 Sign in as Administrator
@@ -114,7 +107,7 @@ const UnauthorizedPage = () => {
           <Button 
             onClick={() => navigate('/')} 
             variant="outline" 
-            className="w-full"
+            className="w-full max-w-xs"
           >
             Go to Home
           </Button>

@@ -49,7 +49,8 @@
   
   /* Specific styles for mobile menu button */
   .mobile-menu-button,
-  [data-mobile-menu-button="true"] {
+  [data-mobile-menu-button="true"],
+  .mobile-sidebar-button {
     width: 42px !important;
     height: 42px !important;
     min-width: 42px !important;
@@ -65,11 +66,16 @@
   .button-group,
   .flex-col > button,
   .space-y-4 > button,
-  div[class*="space-y"] > button {
+  div[class*="space-y"] > button,
+  .space-y-4,
+  .unauthorized-page-buttons {
     margin-left: auto !important;
     margin-right: auto !important;
     justify-content: center !important;
     text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
   
   /* Full width buttons on very small screens */
@@ -86,5 +92,16 @@
       text-overflow: ellipsis !important;
       display: inline-block !important;
     }
+  }
+}
+
+/* Desktop specific button fixes */
+@media screen and (min-width: 769px) {
+  /* Fix for authentication page buttons - ensure max width and centering */
+  .unauthorized-page button,
+  .auth-page button {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 320px;
   }
 }

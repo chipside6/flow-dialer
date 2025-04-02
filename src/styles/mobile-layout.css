@@ -146,6 +146,22 @@
 
 /* Web view specific fixes */
 @media screen and (min-width: 769px) {
+  /* Full height centered content for specific pages */
+  .unauthorized-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  
+  /* Center authentication content */
+  .unauthorized-page > div,
+  .auth-page > div {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 480px;
+  }
+
   /* Remove duplicate padding */
   .dashboard-content-wrapper,
   .content-with-fixed-header,
