@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,9 +11,11 @@ import {
   TestTube, 
   AlertTriangle, 
   Clipboard, 
-  FileCode2
+  FileCode2,
+  Info
 } from "lucide-react";
 import { asteriskService } from "@/utils/asteriskService";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface EnvironmentSetupProps {
   apiUrl: string;
@@ -47,7 +49,11 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
       });
       
       // Test connection with current values
-      const result = await asteriskService.testConnection();
+      const result = await asteriskService.testConnection({
+        apiUrl, 
+        username, 
+        password
+      });
       
       if (result.success) {
         setConnectionStatus("success");
@@ -131,58 +137,20 @@ VITE_ASTERISK_API_PASSWORD=${password}
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Production Environment Variables Setup</CardTitle>
+        <CardTitle>Asterisk Environment Setup</CardTitle>
         <CardDescription>
-          For production use, Asterisk API settings should be set as environment variables.
-          These variables are required for proper operation of the system.
+          Configure your Asterisk server connection details below.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
-          <div className="flex items-start gap-2 mb-2">
-            <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
-            <div>
-              <h4 className="font-medium">Production Environment Variables</h4>
-              <p className="text-sm text-amber-700 mb-2">
-                To use this application in production, you must set the following environment variables:
-              </p>
-              <div className="font-mono text-sm bg-gray-800 text-white p-3 rounded">
-                <pre className="whitespace-pre-wrap">
-                  VITE_ASTERISK_API_URL=http://your-asterisk-server:8088/ari<br/>
-                  VITE_ASTERISK_API_USERNAME=your_asterisk_username<br/>
-                  VITE_ASTERISK_API_PASSWORD=your_asterisk_password
-                </pre>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-2 mt-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={copyEnvVars}
-              className="active:scale-95 transition-transform"
-              disabled={copyingEnvVars}
-            >
-              {copyingEnvVars ? (
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-              ) : (
-                <Clipboard className="h-4 w-4 mr-2" />
-              )}
-              {copyingEnvVars ? "Copied!" : "Copy Current Values"}
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={createEnvFile}
-              className="active:scale-95 transition-transform"
-            >
-              <FileCode2 className="h-4 w-4 mr-2" />
-              Download .env File
-            </Button>
-          </div>
-        </div>
+        <Alert className="mb-4">
+          <Info className="h-4 w-4" />
+          <AlertTitle>Lovable Hosting Notice</AlertTitle>
+          <AlertDescription>
+            Since you're hosting on Lovable, these environment variables will be saved in the application.
+            You can modify them here at any time.
+          </AlertDescription>
+        </Alert>
         
         <div className="space-y-2">
           <Label htmlFor="api-url">API URL</Label>
@@ -220,7 +188,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
           </div>
         </div>
         
-        <div className="flex flex-wrap gap-2 pt-2">
+        <div className="flex flex-wrap gap-2 pt-4">
           <Button 
             onClick={testConnection} 
             disabled={isTesting}
@@ -232,6 +200,21 @@ VITE_ASTERISK_API_PASSWORD=${password}
               <TestTube className="h-4 w-4" />
             )}
             Test Connection
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={copyEnvVars}
+            className="ml-auto active:scale-95 transition-transform"
+            disabled={copyingEnvVars}
+          >
+            {copyingEnvVars ? (
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+            ) : (
+              <Clipboard className="h-4 w-4 mr-2" />
+            )}
+            {copyingEnvVars ? "Copied!" : "Copy Values"}
           </Button>
           
           {connectionStatus === "success" && (
