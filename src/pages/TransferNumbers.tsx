@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useTransferNumbers } from "@/hooks/useTransferNumbers";
@@ -123,7 +122,7 @@ const TransferNumbers = () => {
       <AuthRequiredAlert isVisible={!user} />
       
       {user && error && error.includes("auth") && (
-        <Alert variant="destructive" className="mb-6">
+        <Alert variant="destructive" className="mb-6 text-left">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Authentication Error</AlertTitle>
           <AlertDescription>

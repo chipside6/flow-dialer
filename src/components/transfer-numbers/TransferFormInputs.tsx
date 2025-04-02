@@ -24,8 +24,8 @@ export const TransferFormInputs = ({
 }: TransferFormInputsProps) => {
   return (
     <>
-      <div>
-        <Label htmlFor="transfer-name">Name</Label>
+      <div className="text-left">
+        <Label htmlFor="transfer-name" className="text-left">Name</Label>
         <Input
           id="transfer-name"
           placeholder="Enter a name for this transfer destination"
@@ -36,8 +36,8 @@ export const TransferFormInputs = ({
           className="mb-0"
         />
       </div>
-      <div>
-        <Label htmlFor="transfer-number">Phone Number</Label>
+      <div className="text-left">
+        <Label htmlFor="transfer-number" className="text-left">Phone Number</Label>
         <Input
           id="transfer-number"
           placeholder="Enter the phone number (e.g., +1-555-123-4567)"
@@ -49,8 +49,8 @@ export const TransferFormInputs = ({
           className="mb-0"
         />
       </div>
-      <div>
-        <Label htmlFor="transfer-description">Description</Label>
+      <div className="text-left">
+        <Label htmlFor="transfer-description" className="text-left">Description</Label>
         <Input
           id="transfer-description"
           placeholder="Enter a description for this transfer number"

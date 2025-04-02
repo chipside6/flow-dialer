@@ -1,32 +1,29 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { PhoneForwarded, Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 
 interface TransferFormButtonProps {
   isSubmitting: boolean;
   isDisabled: boolean;
 }
 
-export const TransferFormButton = ({ 
-  isSubmitting, 
-  isDisabled 
-}: TransferFormButtonProps) => {
+export const TransferFormButton = ({ isSubmitting, isDisabled }: TransferFormButtonProps) => {
   return (
     <Button 
-      type="submit"
-      disabled={isDisabled}
-      className="w-full sm:w-auto mt-4"
+      type="submit" 
+      disabled={isDisabled} 
+      className="w-full sm:w-auto text-left"
     >
       {isSubmitting ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Adding...
+          <span>Adding...</span>
         </>
       ) : (
         <>
-          <PhoneForwarded className="mr-2 h-4 w-4" />
-          Add Transfer Number
+          <Plus className="mr-2 h-4 w-4" />
+          <span>Add Transfer Number</span>
         </>
       )}
     </Button>

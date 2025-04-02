@@ -90,7 +90,7 @@ export const AddTransferNumberForm = ({
   
   return (
     <Card className="mb-8">
-      <CardHeader>
+      <CardHeader className="text-left">
         <CardTitle className="flex items-center">
           <Plus className="mr-2 h-5 w-5" />
           Add New Transfer Number
@@ -99,7 +99,7 @@ export const AddTransferNumberForm = ({
       <CardContent>
         <form 
           onSubmit={handleSubmit} 
-          className="space-y-4"
+          className="space-y-4 text-left"
           data-mobile={isMobile ? "true" : "false"}
         >
           <TransferFormInputs 
@@ -112,10 +112,12 @@ export const AddTransferNumberForm = ({
             isSubmitting={isSubmittingNow}
           />
           
-          <TransferFormButton 
-            isSubmitting={isSubmittingNow}
-            isDisabled={buttonDisabled}
-          />
+          <div className="flex justify-start">
+            <TransferFormButton 
+              isSubmitting={isSubmittingNow}
+              isDisabled={buttonDisabled}
+            />
+          </div>
         </form>
       </CardContent>
     </Card>
