@@ -25,7 +25,7 @@ export const PasswordInput = ({
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <Input
         id="password"
         type={showPassword ? "text" : "password"}
@@ -33,13 +33,14 @@ export const PasswordInput = ({
         onChange={onChange}
         required={required}
         minLength={minLength}
-        className="h-12"
+        className="h-12 w-full pr-10"
         placeholder={placeholder}
       />
       <button 
         type="button"
         onClick={togglePasswordVisibility}
         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 focus:outline-none"
+        aria-label={showPassword ? "Hide password" : "Show password"}
       >
         {showPassword ? (
           <EyeOff className="h-5 w-5" />
