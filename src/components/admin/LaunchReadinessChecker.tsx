@@ -189,10 +189,25 @@ COMMON ASTERISK TROUBLESHOOTING:
 
 6. Common error solutions:
    - "No such command": Using command for the wrong SIP stack or module not loaded
-   - "No object found": Resource doesn't exist or path is incorrect 
+   - "No object found": This error means Asterisk couldn't find the resource you're looking for. Solutions:
+     * For "pjsip show endpoints" - You need to add endpoints to pjsip.conf first
+     * For ARI commands - Make sure applications are defined in ari.conf
+     * For any command - Check if the module is loaded with "module show like X"
+     * After adding configuration - Reload the appropriate module with "module reload X"
    - Connection refused: Firewall blocking access or service not running
 
-7. After making configuration changes, reload Asterisk modules:
+7. "No object found" specific steps:
+   a. If you're seeing this with PJSIP:
+      - Make sure you've added your SIP provider configuration to pjsip.conf
+      - Reload the PJSIP module: asterisk -rx "pjsip reload"
+      - Verify the configuration format is correct (Asterisk 13+ uses different syntax)
+   
+   b. If you're seeing this with ARI:
+      - Make sure you've enabled ARI in asterisk.conf
+      - Make sure your ARI user is defined in ari.conf
+      - Restart Asterisk or reload the res_ari module
+
+8. After making configuration changes, reload Asterisk modules:
    asterisk -rx "module reload"
    asterisk -rx "dialplan reload"
    asterisk -rx "pjsip reload" or "sip reload" (based on your SIP stack)
