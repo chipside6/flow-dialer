@@ -27,8 +27,7 @@ export const connectionService = {
       
       console.log("Connection test initiated with API URL:", apiUrl);
       
-      // For all environments, we'll now accept the configuration regardless of connection test results
-      // This ensures that users with running servers don't get false errors
+      // Test the actual connection to the Asterisk server
       try {
         const basicAuth = btoa(`${username}:${password}`);
         const controller = new AbortController();
@@ -43,26 +42,43 @@ export const connectionService = {
         });
         
         clearTimeout(timeoutId);
-        console.log("Successfully connected to Asterisk server");
         
-        return { 
-          success: true,
-          message: "Connected successfully to Asterisk server"
-        };
+        if (response.ok) {
+          console.log("Successfully connected to Asterisk server");
+          return { 
+            success: true,
+            message: "Connected successfully to Asterisk server"
+          };
+        } else {
+          console.log("Connection test failed - server returned error:", response.status);
+          return { 
+            success: false,
+            message: `Server returned error: ${response.status} ${response.statusText}`
+          };
+        }
       } catch (error) {
-        // Accept the configuration regardless of connection errors
-        console.log("Connection test failed, but accepting configuration anyway:", error);
-        return { 
-          success: true,
-          message: "Assuming Asterisk server is running despite connection issues"
-        };
+        console.log("Connection test failed:", error);
+        const isHosted = isHostedEnvironment();
+        
+        if (isHosted) {
+          // In hosted environment, still save the configuration but report the error
+          return { 
+            success: false,
+            message: `Could not connect to Asterisk server: ${error.message || "Unknown error"}`
+          };
+        } else {
+          return { 
+            success: false,
+            message: `Connection error: ${error.message || "Unknown error"}`
+          };
+        }
       }
     } catch (error) {
       console.error('Error in connection test:', error);
-      // Even if there's an issue with the configuration, we'll accept it
       return { 
-        success: true, 
-        message: 'Assuming Asterisk server is running'
+        success: false, 
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
       };
     }
   },

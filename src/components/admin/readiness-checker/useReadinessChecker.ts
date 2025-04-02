@@ -73,11 +73,10 @@ export const useReadinessChecker = (user: UserWithId | null) => {
     
     // Update environment variables check
     setTimeout(() => {
-      // Always show success for env vars check
-      const envVarStatus = "success";
-      const envVarMessage = isHosted 
-        ? "Configuration settings detected" 
-        : "Environment variables accepted";
+      const envVarStatus = envVarCheck.allSet ? "success" : "error";
+      const envVarMessage = envVarCheck.allSet 
+        ? (isHosted ? "Configuration settings detected" : "Environment variables accepted") 
+        : "Missing required environment variables";
       
       setChecks(prev => prev.map(check => 
         check.name === "Environment Variables" ? {
@@ -87,21 +86,87 @@ export const useReadinessChecker = (user: UserWithId | null) => {
         } : check
       ));
       
-      // Skip troubleshooting instructions since we're assuming everything is working
+      if (!envVarCheck.allSet) {
+        setTroubleshootInstructions(prev => [
+          ...prev,
+          "Please set the missing environment variables in your configuration."
+        ]);
+      }
+      
+      // If env vars are set, test Asterisk connection
+      if (envVarCheck.allSet) {
+        testAsteriskConnection();
+      } else {
+        // Update all remaining checks to error if env vars are missing
+        setChecks(prev => prev.map(check => 
+          check.name !== "Environment Variables" ? {
+            ...check,
+            status: "error",
+            message: "Cannot check without environment variables"
+          } : check
+        ));
+        setIsRetrying(false);
+      }
     }, 500);
     
-    // Check Asterisk connection - always show success
-    setTimeout(() => {
-      setChecks(prev => prev.map(check => 
-        check.name === "Asterisk Connection" ? {
-          ...check,
-          status: "success",
-          message: "Assuming Asterisk server is running correctly"
-        } : check
-      ));
+    const testAsteriskConnection = async () => {
+      try {
+        const result = await asteriskService.testConnection();
         
-      // Since connection is now considered successful, run the additional checks
-      // Transfer Number check
+        if (result.success) {
+          setChecks(prev => prev.map(check => 
+            check.name === "Asterisk Connection" ? {
+              ...check,
+              status: "success",
+              message: "Connected to Asterisk server successfully"
+            } : check
+          ));
+          
+          // Since connection is successful, check other configs
+          checkTransferConfig();
+          checkGreetingConfig();
+        } else {
+          setChecks(prev => prev.map(check => 
+            check.name === "Asterisk Connection" ? {
+              ...check,
+              status: "error",
+              message: "Could not connect to Asterisk server"
+            } : check
+          ));
+          
+          setTroubleshootInstructions(prev => [
+            ...prev,
+            "Check if your Asterisk server is running and accessible.",
+            "Verify your API URL, username, and password are correct.",
+            "Ensure there are no network issues blocking the connection."
+          ]);
+          
+          // Update remaining checks to warning since we can't verify them
+          setChecks(prev => prev.map(check => 
+            !["Environment Variables", "Asterisk Connection"].includes(check.name) ? {
+              ...check,
+              status: "warning",
+              message: "Cannot verify without Asterisk connection"
+            } : check
+          ));
+          
+          setIsRetrying(false);
+        }
+      } catch (error) {
+        setChecks(prev => prev.map(check => 
+          check.name === "Asterisk Connection" ? {
+            ...check,
+            status: "error",
+            message: `Connection error: ${error.message || "Unknown error"}`
+          } : check
+        ));
+        
+        setIsRetrying(false);
+      }
+    };
+    
+    const checkTransferConfig = () => {
+      // For now, we'll mark this as successful if we have a connection
       setTimeout(() => {
         setChecks(prev => prev.map(check => 
           check.name === "Transfer Number Config" ? {
@@ -111,8 +176,10 @@ export const useReadinessChecker = (user: UserWithId | null) => {
           } : check
         ));
       }, 500);
-        
-      // Greeting Audio check
+    };
+    
+    const checkGreetingConfig = () => {
+      // For now, we'll mark this as successful if we have a connection
       setTimeout(() => {
         setChecks(prev => prev.map(check => 
           check.name === "Greeting Audio Config" ? {
@@ -121,13 +188,9 @@ export const useReadinessChecker = (user: UserWithId | null) => {
             message: "Greeting audio is properly configured"
           } : check
         ));
+        setIsRetrying(false);
       }, 700);
-    }, 1000);
-    
-    // Complete the retry process
-    setTimeout(() => {
-      setIsRetrying(false);
-    }, 1500);
+    };
   }, []);
   
   // Run checks on initial mount
