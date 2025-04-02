@@ -18,6 +18,8 @@
     text-align: center !important;
     width: auto !important;
     font-size: 14px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
   
   /* Fix icon sizing and alignment */
@@ -54,6 +56,20 @@
     min-height: 42px !important;
     border-radius: 50% !important;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12) !important;
+  }
+  
+  /* Center button containers */
+  .button-container,
+  .action-buttons,
+  .form-actions,
+  .button-group,
+  .flex-col > button,
+  .space-y-4 > button,
+  div[class*="space-y"] > button {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    justify-content: center !important;
+    text-align: center !important;
   }
   
   /* Full width buttons on very small screens */

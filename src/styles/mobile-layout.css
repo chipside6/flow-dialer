@@ -112,6 +112,36 @@
   .campaign-content {
     padding-top: 16px !important;
   }
+  
+  /* Center all buttons and button containers */
+  .button-container,
+  .form-actions,
+  .actions-container,
+  .flex.justify-end,
+  .flex.justify-between,
+  .flex.justify-start {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure action buttons are properly centered */
+  .action-buttons,
+  .form-actions button,
+  .form-actions .button,
+  .action-container button,
+  .action-container .button {
+    margin: 0 auto !important;
+  }
+  
+  /* Center button groups */
+  .button-group,
+  .inline-flex {
+    justify-content: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
 }
 
 /* Web view specific fixes */
