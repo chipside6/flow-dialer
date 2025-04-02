@@ -10,6 +10,7 @@ import { AuthAlert } from '@/components/auth/AuthAlert';
 import { PasswordInput } from '@/components/auth/PasswordInput';
 import { AuthButton } from '@/components/auth/AuthButton';
 import { AuthFooter } from '@/components/auth/AuthFooter';
+import { Input } from '@/components/ui/input';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
@@ -80,13 +81,13 @@ const SignUp = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
-          <input
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full h-12 px-3 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base placeholder:text-gray-500"
+            className="h-12"
             placeholder="Enter your email"
           />
           
