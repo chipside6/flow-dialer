@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, XCircle, AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { CheckCircle2, XCircle, AlertCircle, Loader2, RefreshCw, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { ASTERISK_API_URL, ASTERISK_API_USERNAME, ASTERISK_API_PASSWORD, asteriskService } from "@/utils/asteriskService";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface SystemCheck {
   name: string;
@@ -15,6 +16,7 @@ interface SystemCheck {
 
 const LaunchReadinessChecker = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [checks, setChecks] = useState<SystemCheck[]>([
     { name: "Supabase Connection", status: "checking", message: "Checking connection..." },
     { name: "Asterisk Connection", status: "checking", message: "Checking Asterisk server..." },
@@ -24,11 +26,13 @@ const LaunchReadinessChecker = () => {
   const [isRetrying, setIsRetrying] = useState(false);
   const [serverInstructions, setServerInstructions] = useState<string | null>(null);
   const [troubleshootInstructions, setTroubleshootInstructions] = useState<string | null>(null);
+  const [missingEnvVars, setMissingEnvVars] = useState<string[]>([]);
 
   const runChecks = async () => {
     setIsRetrying(true);
     setServerInstructions(null);
     setTroubleshootInstructions(null);
+    setMissingEnvVars([]);
     
     // Reset checks to "checking" state
     setChecks(prev => 
@@ -61,10 +65,10 @@ const LaunchReadinessChecker = () => {
       const effectivePassword = storedPassword || ASTERISK_API_PASSWORD;
       
       if (!effectiveApiUrl || effectiveApiUrl === "" || effectiveApiUrl === "http://your-asterisk-server:8088/ari") {
-        updateCheck("Asterisk Connection", "error", "Asterisk URL not configured. Set VITE_ASTERISK_API_URL environment variable or configure in SIP Configuration tab.");
+        updateCheck("Asterisk Connection", "error", "Asterisk URL not configured. Configure in SIP Configuration tab or set VITE_ASTERISK_API_URL environment variable.");
         setServerInstructions("Configure your Asterisk server first and update the URL in the SIP Configuration tab.");
       } else if (!effectiveUsername || !effectivePassword) {
-        updateCheck("Asterisk Connection", "error", "Asterisk credentials not configured. Set VITE_ASTERISK_API_USERNAME and VITE_ASTERISK_API_PASSWORD environment variables or configure in SIP Configuration tab.");
+        updateCheck("Asterisk Connection", "error", "Asterisk credentials not configured. Configure in SIP Configuration tab or set VITE_ASTERISK_API_USERNAME and VITE_ASTERISK_API_PASSWORD environment variables.");
         setServerInstructions("Configure your Asterisk API credentials in the SIP Configuration tab.");
       } else {
         // Use the temporary service to test the connection with latest settings
@@ -103,16 +107,27 @@ const LaunchReadinessChecker = () => {
       { name: "VITE_ASTERISK_API_PASSWORD", value: import.meta.env.VITE_ASTERISK_API_PASSWORD }
     ];
     
-    const missingVars = requiredVars.filter(v => !v.value);
+    const missing = requiredVars.filter(v => !v.value);
+    setMissingEnvVars(missing.map(v => v.name));
     
-    if (missingVars.length === 0) {
+    if (missing.length === 0) {
       updateCheck("Environment Variables", "success", "All required environment variables are set");
     } else {
-      updateCheck(
-        "Environment Variables", 
-        "error", 
-        `Missing variables: ${missingVars.map(v => v.name).join(', ')}`
-      );
+      // Check if we have localStorage values for Asterisk settings
+      const hasStoredAsteriskSettings = 
+        localStorage.getItem("asterisk_api_url") && 
+        localStorage.getItem("asterisk_api_username") && 
+        localStorage.getItem("asterisk_api_password");
+      
+      const message = `Missing ${missing.length} variables: ${missing.map(v => v.name).join(', ')}`;
+      
+      // If some Asterisk settings are missing but we have localStorage values, show as warning instead of error
+      if (missing.every(v => v.name.startsWith('VITE_ASTERISK_')) && hasStoredAsteriskSettings) {
+        updateCheck("Environment Variables", "warning", 
+          "Using locally stored Asterisk settings instead of environment variables");
+      } else {
+        updateCheck("Environment Variables", "error", message);
+      }
     }
 
     // Check Authentication
@@ -222,24 +237,42 @@ COMMON ASTERISK TROUBLESHOOTING:
     runChecks();
   };
 
+  const goToSipConfig = () => {
+    navigate("/asterisk-config", { state: { tab: "config" } });
+  };
+
   return (
     <Card className="shadow-md">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-xl font-semibold">Launch Readiness Checker</CardTitle>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleRetry} 
-          disabled={isRetrying}
-          className="flex items-center gap-2 active:scale-95 transition-transform"
-        >
-          {isRetrying ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4" />
+        <div className="flex gap-2">
+          {(checks.some(check => check.status === "error" && check.name === "Asterisk Connection") || 
+           checks.some(check => check.status === "warning" && check.name.includes("Environment"))) && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={goToSipConfig}
+              className="flex items-center gap-2 active:scale-95 transition-transform"
+            >
+              <Settings className="h-4 w-4" />
+              Configure Asterisk
+            </Button>
           )}
-          Retry Checks
-        </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRetry} 
+            disabled={isRetrying}
+            className="flex items-center gap-2 active:scale-95 transition-transform"
+          >
+            {isRetrying ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Retry Checks
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -267,6 +300,37 @@ COMMON ASTERISK TROUBLESHOOTING:
               </div>
             </div>
           ))}
+          
+          {missingEnvVars.length > 0 && (
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
+              <div className="flex items-start gap-2 mb-2">
+                <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
+                <div>
+                  <h4 className="font-medium">Missing Environment Variables</h4>
+                  <p className="text-sm text-amber-700">
+                    The following environment variables are not set:
+                  </p>
+                  <ul className="list-disc pl-5 text-sm text-amber-800 mt-1">
+                    {missingEnvVars.map(varName => (
+                      <li key={varName}>{varName}</li>
+                    ))}
+                  </ul>
+                  <p className="text-sm text-amber-700 mt-2">
+                    You can either set these as environment variables or configure them through the SIP Configuration tab.
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={goToSipConfig}
+                className="mt-2 flex items-center gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Go to SIP Configuration
+              </Button>
+            </div>
+          )}
           
           {serverInstructions && (
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
