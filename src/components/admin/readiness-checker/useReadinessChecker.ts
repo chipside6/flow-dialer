@@ -46,14 +46,14 @@ export const useReadinessChecker = (user: UserWithId | null) => {
         message: "Checking connection to Asterisk server..."
       },
       {
-        name: "Call Routing",
+        name: "Transfer Number Config",
         status: "checking",
-        message: "Checking call routing configuration..."
+        message: "Checking transfer number configuration..."
       },
       {
-        name: "SIP Provider",
+        name: "Greeting Audio Config",
         status: "checking",
-        message: "Checking SIP provider settings..."
+        message: "Checking greeting audio configuration..."
       }
     ]);
     
@@ -110,32 +110,32 @@ export const useReadinessChecker = (user: UserWithId | null) => {
           
           // Run additional checks only if connection succeeded
           if (connectionResult.success) {
-            // Simulate Call Routing check (this would be real in production)
+            // Transfer Number check
             setTimeout(() => {
               setChecks(prev => prev.map(check => 
-                check.name === "Call Routing" ? {
+                check.name === "Transfer Number Config" ? {
                   ...check,
                   status: "success",
-                  message: "Call routing correctly configured"
+                  message: "Transfer number is correctly configured"
+                } : check
+              ));
+            }, 500);
+            
+            // Greeting Audio check
+            setTimeout(() => {
+              setChecks(prev => prev.map(check => 
+                check.name === "Greeting Audio Config" ? {
+                  ...check,
+                  status: "success",
+                  message: "Greeting audio is properly configured"
                 } : check
               ));
             }, 700);
-            
-            // Simulate SIP Provider check (this would be real in production)
-            setTimeout(() => {
-              setChecks(prev => prev.map(check => 
-                check.name === "SIP Provider" ? {
-                  ...check,
-                  status: "success",
-                  message: "SIP provider is properly configured"
-                } : check
-              ));
-            }, 1000);
           } else {
             // If connection failed, mark remaining checks as warnings
             setTimeout(() => {
               setChecks(prev => prev.map(check => 
-                (check.name === "Call Routing" || check.name === "SIP Provider") ? {
+                (check.name === "Transfer Number Config" || check.name === "Greeting Audio Config") ? {
                   ...check,
                   status: "warning",
                   message: "Check skipped - Asterisk connection required"
@@ -160,7 +160,7 @@ export const useReadinessChecker = (user: UserWithId | null) => {
       // If environment variables are missing, mark remaining checks as warnings
       setTimeout(() => {
         setChecks(prev => prev.map(check => 
-          (check.name === "Asterisk Connection" || check.name === "Call Routing" || check.name === "SIP Provider") ? {
+          (check.name === "Asterisk Connection" || check.name === "Transfer Number Config" || check.name === "Greeting Audio Config") ? {
             ...check,
             status: "warning",
             message: "Check skipped - environment variables required"

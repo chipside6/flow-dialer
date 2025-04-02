@@ -5,7 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { CheckCircle2, Loader2, Save, TestTube, AlertTriangle, Copy, Clipboard, FileCode2 } from "lucide-react";
+import { 
+  CheckCircle2, 
+  Loader2, 
+  Save, 
+  TestTube, 
+  AlertTriangle, 
+  Copy, 
+  Clipboard, 
+  FileCode2,
+  Upload,
+  Phone 
+} from "lucide-react";
 import { asteriskService, asteriskConfig } from "@/utils/asteriskService";
 
 const SipConfiguration = () => {
@@ -24,13 +35,15 @@ const SipConfiguration = () => {
   const [port, setPort] = useState("5060");
   const [providerUsername, setProviderUsername] = useState("sipuser");
   const [providerPassword, setProviderPassword] = useState("sippassword");
+  const [transferNumber, setTransferNumber] = useState("");
+  const [greetingFile, setGreetingFile] = useState("greeting.wav");
   const [configOutput, setConfigOutput] = useState("");
   const [isTesting, setIsTesting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"untested" | "success" | "error">("untested");
   const [copyingToClipboard, setCopyingToClipboard] = useState(false);
   const [copyingEnvVars, setCopyingEnvVars] = useState(false);
-  const [showEnvHelp, setShowEnvHelp] = useState(true); // Always show env help for production
+  const [fileInputRef] = useState<React.RefObject<HTMLInputElement>>(React.createRef());
 
   const testConnection = async () => {
     setIsTesting(true);
@@ -71,6 +84,29 @@ const SipConfiguration = () => {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      // Check if it's an audio file
+      if (!file.type.startsWith('audio/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload an audio file (wav, mp3)",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setGreetingFile(file.name);
+      
+      toast({
+        title: "Audio file selected",
+        description: `File "${file.name}" will be used as the greeting`,
+      });
+    }
+  };
+
   const generateConfig = () => {
     setIsGenerating(true);
     
@@ -83,14 +119,20 @@ const SipConfiguration = () => {
         providerPassword
       );
       
-      // Generate a basic dialplan
+      // Generate a dialplan that includes transfer number and greeting file
       const dialplan = `
 [from-${providerName}]
 exten => _X.,1,NoOp(Incoming call from ${providerName})
 exten => _X.,n,Answer()
 exten => _X.,n,Wait(1)
-exten => _X.,n,Playback(hello-world)
+exten => _X.,n,Playback(${greetingFile || 'hello-world'})
+exten => _X.,n,WaitExten(5)
 exten => _X.,n,Hangup()
+
+; Handle keypress 1 for transfer
+exten => 1,1,NoOp(Transferring call to ${transferNumber || ''})
+exten => 1,n,Dial(SIP/${transferNumber || ''},30)
+exten => 1,n,Hangup()
 
 [outbound-${providerName}]
 exten => _X.,1,NoOp(Outbound call via ${providerName})
@@ -291,13 +333,77 @@ VITE_ASTERISK_API_PASSWORD=${password}
         </CardContent>
       </Card>
       
-      {/* Keep the SIP Provider Configuration Generator card */}
+      {/* New Card for Core Features */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Core Feature Configuration</CardTitle>
+          <CardDescription>
+            Set up the core features of your system: transfer numbers and greeting audio files.
+            These settings will be used in the generated Asterisk configuration.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="transferNumber" className="flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                Transfer Number
+              </Label>
+              <Input
+                id="transferNumber"
+                value={transferNumber}
+                onChange={(e) => setTransferNumber(e.target.value)}
+                placeholder="e.g., +1 555-123-4567"
+                className="focus:ring-2 focus:ring-primary focus:border-primary"
+              />
+              <p className="text-sm text-gray-500">
+                This number will receive calls when the recipient presses 1 during the call
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="greetingFile" className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Greeting Audio File
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  type="file"
+                  accept="audio/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                />
+                <Input
+                  id="greetingFile"
+                  value={greetingFile}
+                  onChange={(e) => setGreetingFile(e.target.value)}
+                  placeholder="e.g., greeting.wav"
+                  className="flex-1 focus:ring-2 focus:ring-primary focus:border-primary"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => fileInputRef.current?.click()}
+                  type="button"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Browse
+                </Button>
+              </div>
+              <p className="text-sm text-gray-500">
+                This audio file will be played when a call is received
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* SIP Provider Configuration */}
       <Card>
         <CardHeader>
           <CardTitle>SIP Provider Configuration Generator</CardTitle>
           <CardDescription>
-            Generate Asterisk configuration for your SIP provider.
-            This will create SIP trunk and basic dialplan configurations.
+            Generate Asterisk configuration for your SIP provider, including the transfer number and greeting audio setup.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

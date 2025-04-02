@@ -1,3 +1,4 @@
+
 // This file provides Asterisk API integration
 
 // Get values directly from env variables for production
@@ -48,6 +49,7 @@ directmedia=no
   
   /**
    * Generate a basic dialplan configuration for Asterisk
+   * Updated to include transfer number and greeting file
    */
   generateDialplan(campaignId: string, greetingFileUrl: string, transferNumber: string) {
     return `
@@ -95,6 +97,35 @@ export const asteriskService = {
       return { success: true };
     } catch (error) {
       console.error('Error testing Asterisk connection:', error);
+      return { 
+        success: false, 
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  },
+  
+  /**
+   * Configure transfer number and greeting file for a campaign
+   */
+  async configureCallFlow(campaignId: string, greetingFile: string, transferNumber: string) {
+    try {
+      if (!ASTERISK_API_URL || !ASTERISK_API_USERNAME || !ASTERISK_API_PASSWORD) {
+        throw new Error('Asterisk API configuration missing. Please set all required environment variables.');
+      }
+      
+      // In a real implementation, this would update the Asterisk configuration
+      console.log(`Configuring call flow for campaign ${campaignId}:`);
+      console.log(`- Greeting file: ${greetingFile}`);
+      console.log(`- Transfer number: ${transferNumber}`);
+      
+      // Simulate successful configuration
+      return { 
+        success: true,
+        message: "Call flow configured successfully" 
+      };
+    } catch (error) {
+      console.error('Error configuring call flow:', error);
       return { 
         success: false, 
         error,
