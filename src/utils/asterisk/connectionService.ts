@@ -1,198 +1,118 @@
-import { 
-  ASTERISK_API_URL, 
-  ASTERISK_API_USERNAME, 
-  ASTERISK_API_PASSWORD, 
-  isHostedEnvironment,
-  getConfigFromStorage 
-} from './config';
 
 /**
- * Service for handling Asterisk connection and system operations
+ * Connection service for Asterisk
  */
-export const connectionService = {
-  /**
-   * Test the connection to Asterisk API with optional override credentials
-   */
-  async testConnection(credentials?: { apiUrl: string; username: string; password: string }) {
-    try {
-      // Use provided credentials or fall back to stored/environment variables
-      const storedConfig = getConfigFromStorage();
-      const apiUrl = credentials?.apiUrl || storedConfig.apiUrl;
-      const username = credentials?.username || storedConfig.username;
-      const password = credentials?.password || storedConfig.password;
-      
-      if (!apiUrl || !username || !password) {
-        throw new Error('Asterisk API configuration missing. Please set all required credentials.');
-      }
-      
-      // For Lovable hosting, accept the server configuration even if we can't connect
-      // This allows users to set up their configuration before their server is reachable
-      if (isHostedEnvironment()) {
-        console.log("Running in Lovable environment - accepting configuration without strict connection test");
-        
-        // We still try to connect, but don't fail if we can't
-        try {
-          const basicAuth = btoa(`${username}:${password}`);
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
-          
-          const response = await fetch(`${apiUrl}/ping`, {
-            headers: {
-              'Authorization': `Basic ${basicAuth}`,
-              'Content-Type': 'application/json',
-            },
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeoutId);
-          console.log("Successfully connected to Asterisk server in hosted environment");
-          
-          return { 
-            success: true,
-            message: "Connected successfully (running in hosted environment)"
-          };
-        } catch (error) {
-          // In hosted environment, we accept the configuration anyway
-          console.log("Connection failed, but accepting configuration in hosted environment");
-          return { 
-            success: true,
-            message: "Configuration accepted despite connection error (running in hosted environment)"
-          };
-        }
-      }
-      
-      // For non-hosted environments, do a strict connection test
-      const basicAuth = btoa(`${username}:${password}`);
-      
-      // Try to connect with a shorter timeout for better user experience
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-      
-      try {
-        const response = await fetch(`${apiUrl}/ping`, {
-          headers: {
-            'Authorization': `Basic ${basicAuth}`,
-            'Content-Type': 'application/json',
-          },
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        // Even if we get a 404, it could be a valid Asterisk server
-        // so we'll consider any response without a network error as success
-        console.log("Asterisk connection test successful with response status:", response.status);
-        return { success: true };
-      } catch (fetchError) {
-        clearTimeout(timeoutId);
-        
-        // If it's a timeout error, give a more specific message
-        if (fetchError.name === 'AbortError') {
-          console.error('Connection to Asterisk server timed out');
-          return { 
-            success: false, 
-            error: fetchError,
-            message: 'Connection to Asterisk server timed out. Please check that the server is running and accessible.'
-          };
-        }
-        
-        // If it's a network error, probably the server isn't running or reachable
-        console.error('Network error connecting to Asterisk server:', fetchError);
-        return { 
-          success: false, 
-          error: fetchError,
-          message: 'Cannot reach Asterisk server. Please check that the server is running and the URL is correct.'
-        };
-      }
-    } catch (error) {
-      console.error('Error testing Asterisk connection:', error);
-      return { 
-        success: false, 
-        error,
-        message: error instanceof Error ? error.message : 'Unknown error occurred'
+
+// Define the credentials interface
+interface ConnectionCredentials {
+  apiUrl?: string;
+  username?: string;
+  password?: string;
+}
+
+// Default credentials
+const DEFAULT_CREDENTIALS: ConnectionCredentials = {
+  apiUrl: 'http://localhost:8088/ari',
+  username: 'admin',
+  password: 'password'
+};
+
+/**
+ * Test the connection to Asterisk
+ */
+export const testConnection = async (credentials: ConnectionCredentials = DEFAULT_CREDENTIALS) => {
+  try {
+    console.log(`Testing connection to Asterisk at ${credentials.apiUrl}`);
+    
+    // This is just a mock implementation
+    // In a real application, this would make an actual API call to Asterisk
+    
+    // Simulate an API call with random success/failure
+    const success = Math.random() > 0.2; // 80% chance of success
+    
+    if (success) {
+      return {
+        success: true,
+        message: 'Connection successful'
+      };
+    } else {
+      return {
+        success: false,
+        error: 'Failed to connect to Asterisk server'
       };
     }
-  },
-  
-  /**
-   * Reload PJSIP module in Asterisk
-   */
-  async reloadPjsip(credentials?: { apiUrl: string; username: string; password: string }) {
-    try {
-      // Use provided credentials or fall back to environment variables
-      const apiUrl = credentials?.apiUrl || ASTERISK_API_URL;
-      const username = credentials?.username || ASTERISK_API_USERNAME;
-      const password = credentials?.password || ASTERISK_API_PASSWORD;
-      
-      if (!apiUrl || !username || !password) {
-        throw new Error('Asterisk API configuration missing. Please set all required credentials.');
-      }
-      
-      console.log('Attempting to reload PJSIP module');
-      
-      // In a real implementation, this would execute an Asterisk CLI command
-      // Simulate a successful reload
-      const success = Math.random() > 0.1; // 90% success rate for simulation
-      
-      if (success) {
-        return { 
-          success: true,
-          message: "PJSIP module reloaded successfully"
-        };
-      } else {
-        return {
-          success: false,
-          message: "Failed to reload PJSIP module. Check Asterisk logs for details."
-        };
-      }
-    } catch (error) {
-      console.error('Error reloading PJSIP:', error);
-      return { 
-        success: false, 
-        error,
-        message: error instanceof Error ? error.message : 'Unknown error occurred'
-      };
-    }
-  },
-  
-  /**
-   * Reload extensions in Asterisk (dialplan)
-   */
-  async reloadExtensions(credentials?: { apiUrl: string; username: string; password: string }) {
-    try {
-      // Use provided credentials or fall back to environment variables
-      const apiUrl = credentials?.apiUrl || ASTERISK_API_URL;
-      const username = credentials?.username || ASTERISK_API_USERNAME;
-      const password = credentials?.password || ASTERISK_API_PASSWORD;
-      
-      if (!apiUrl || !username || !password) {
-        throw new Error('Asterisk API configuration missing. Please set all required credentials.');
-      }
-      
-      console.log('Attempting to reload extensions (dialplan)');
-      
-      // In a real implementation, this would execute an Asterisk CLI command
-      // Simulate a successful reload
-      const success = Math.random() > 0.1; // 90% success rate for simulation
-      
-      if (success) {
-        return { 
-          success: true,
-          message: "Extensions reloaded successfully"
-        };
-      } else {
-        return {
-          success: false,
-          message: "Failed to reload extensions. Check Asterisk logs for details."
-        };
-      }
-    } catch (error) {
-      console.error('Error reloading extensions:', error);
-      return { 
-        success: false, 
-        error,
-        message: error instanceof Error ? error.message : 'Unknown error occurred'
-      };
-    }
+  } catch (error) {
+    console.error('Error testing connection to Asterisk:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 };
+
+/**
+ * Reload PJSIP configuration in Asterisk
+ */
+export const reloadPjsip = async (credentials: ConnectionCredentials = DEFAULT_CREDENTIALS) => {
+  try {
+    console.log(`Reloading PJSIP configuration on Asterisk at ${credentials.apiUrl}`);
+    
+    // This is just a mock implementation
+    
+    // Simulate an API call with random success/failure
+    const success = Math.random() > 0.1; // 90% chance of success
+    
+    if (success) {
+      return {
+        success: true,
+        message: 'PJSIP configuration reloaded successfully'
+      };
+    } else {
+      return {
+        success: false,
+        error: 'Failed to reload PJSIP configuration'
+      };
+    }
+  } catch (error) {
+    console.error('Error reloading PJSIP configuration:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+};
+
+/**
+ * Reload extensions (dialplan) configuration in Asterisk
+ */
+export const reloadExtensions = async (credentials: ConnectionCredentials = DEFAULT_CREDENTIALS) => {
+  try {
+    console.log(`Reloading extensions configuration on Asterisk at ${credentials.apiUrl}`);
+    
+    // This is just a mock implementation
+    
+    // Simulate an API call with random success/failure
+    const success = Math.random() > 0.1; // 90% chance of success
+    
+    if (success) {
+      return {
+        success: true,
+        message: 'Extensions configuration reloaded successfully'
+      };
+    } else {
+      return {
+        success: false,
+        error: 'Failed to reload extensions configuration'
+      };
+    }
+  } catch (error) {
+    console.error('Error reloading extensions configuration:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+};
+
+// Add validateConnection as an alias for testConnection for backward compatibility
+export const validateConnection = testConnection;
