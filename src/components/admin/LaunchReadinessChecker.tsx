@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, XCircle, AlertCircle, Loader2, RefreshCw } from "lucide-react";
@@ -76,26 +75,41 @@ const LaunchReadinessChecker = () => {
 
     // Check Asterisk Connection
     try {
-      if (!ASTERISK_API_URL || ASTERISK_API_URL === "" || ASTERISK_API_URL === "http://your-asterisk-server:8088/ari") {
-        updateCheck("Asterisk Connection", "error", "Asterisk URL not configured. Set VITE_ASTERISK_API_URL environment variable.");
+      // Get stored values from localStorage to ensure we're using latest settings
+      const storedApiUrl = localStorage.getItem("asterisk_api_url");
+      const storedUsername = localStorage.getItem("asterisk_api_username");
+      const storedPassword = localStorage.getItem("asterisk_api_password");
+      
+      const effectiveApiUrl = storedApiUrl || ASTERISK_API_URL;
+      const effectiveUsername = storedUsername || ASTERISK_API_USERNAME;
+      const effectivePassword = storedPassword || ASTERISK_API_PASSWORD;
+      
+      if (!effectiveApiUrl || effectiveApiUrl === "" || effectiveApiUrl === "http://your-asterisk-server:8088/ari") {
+        updateCheck("Asterisk Connection", "error", "Asterisk URL not configured. Set VITE_ASTERISK_API_URL environment variable or configure in SIP Configuration tab.");
         setServerInstructions("Configure your Asterisk server first and update the URL in the SIP Configuration tab.");
-      } else if (!ASTERISK_API_USERNAME || !ASTERISK_API_PASSWORD) {
-        updateCheck("Asterisk Connection", "error", "Asterisk credentials not configured. Set VITE_ASTERISK_API_USERNAME and VITE_ASTERISK_API_PASSWORD environment variables.");
+      } else if (!effectiveUsername || !effectivePassword) {
+        updateCheck("Asterisk Connection", "error", "Asterisk credentials not configured. Set VITE_ASTERISK_API_USERNAME and VITE_ASTERISK_API_PASSWORD environment variables or configure in SIP Configuration tab.");
         setServerInstructions("Configure your Asterisk API credentials in the SIP Configuration tab.");
       } else {
-        // Use the service to test the connection
+        // Use the temporary service to test the connection with latest settings
         try {
-          const result = await asteriskService.testConnection();
-          if (result.success) {
-            updateCheck("Asterisk Connection", "success", result.message);
-          } else {
-            updateCheck("Asterisk Connection", "error", result.message);
-            setServerInstructions(getAsteriskSetupInstructions(ASTERISK_API_URL));
-            setTroubleshootInstructions(getAsteriskTroubleshootingInstructions());
+          const basicAuth = btoa(`${effectiveUsername}:${effectivePassword}`);
+          const response = await fetch(`${effectiveApiUrl}/applications`, {
+            headers: {
+              'Authorization': `Basic ${basicAuth}`,
+              'Content-Type': 'application/json',
+            },
+            signal: AbortSignal.timeout(5000) // 5 second timeout
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Server responded with status: ${response.status}`);
           }
+          
+          updateCheck("Asterisk Connection", "success", "Successfully connected to Asterisk server");
         } catch (connectionError) {
           updateCheck("Asterisk Connection", "error", `Error testing connection: ${connectionError.message}`);
-          setServerInstructions(getAsteriskSetupInstructions(ASTERISK_API_URL));
+          setServerInstructions(getAsteriskSetupInstructions(effectiveApiUrl));
           setTroubleshootInstructions(getAsteriskTroubleshootingInstructions());
         }
       }
@@ -142,6 +156,9 @@ const LaunchReadinessChecker = () => {
   };
 
   const getAsteriskSetupInstructions = (url: string): string => {
+    // Get stored values from localStorage to ensure we're using latest settings
+    const storedUsername = localStorage.getItem("asterisk_api_username") || ASTERISK_API_USERNAME || 'asterisk';
+    
     return `
 1. Install Asterisk on your server if not already installed
 2. Enable ARI (Asterisk REST Interface) in asterisk.conf
@@ -149,9 +166,9 @@ const LaunchReadinessChecker = () => {
    [general]
    enabled = yes
    
-   [${ASTERISK_API_USERNAME || 'asterisk'}]
+   [${storedUsername}]
    type = user
-   password = ${ASTERISK_API_PASSWORD || 'asterisk'}
+   password = ${localStorage.getItem("asterisk_api_password") || ASTERISK_API_PASSWORD || 'asterisk'}
    password_format = plain
    read_only = no
    
