@@ -1,15 +1,11 @@
 import { Check } from "lucide-react";
 
-const features = [
-  // The three features below have been removed as requested:
-  // - Campaign Automation
-  // - Real-time Analytics
-  // - Compliance Management
-];
+// Empty features array since all features were removed
+const features = [];
 
 export const FeaturesSection = () => {
   return (
-    <section className="py-24 px-6 md:px-10 bg-secondary/10 relative overflow-hidden">
+    <section className="py-16 px-6 md:px-10 bg-secondary/10 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 to-secondary/5"></div>
@@ -18,20 +14,13 @@ export const FeaturesSection = () => {
       </div>
       
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-6">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight mb-4">
             Powerful Features
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Our platform offers everything you need to make your calling campaigns successful.
           </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
-          {/* Empty features grid since we removed all features */}
-          <div className="text-center text-muted-foreground">
-            Custom calling solutions that work for your business
-          </div>
         </div>
       </div>
     </section>
