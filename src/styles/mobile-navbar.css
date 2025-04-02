@@ -1,0 +1,37 @@
+
+/* Mobile navbar specific styles */
+
+@media (max-width: 768px) {
+  /* Ensure navbar elements are properly aligned */
+  header .max-w-7xl {
+    width: 100%;
+    justify-content: space-between !important;
+  }
+  
+  /* Fix logo and menu button positioning */
+  header .flex.items-center.gap-2 {
+    justify-content: flex-start;
+    margin-right: auto;
+  }
+  
+  /* Ensure Get Started button stays on the right */
+  header .flex.items-center.gap-2:last-child {
+    margin-left: auto;
+  }
+  
+  /* Make the header background more visible */
+  header {
+    background-color: var(--background);
+  }
+  
+  /* Improve menu button touch target */
+  header button[aria-label="Open mobile menu"] {
+    padding: 8px;
+    margin-right: 8px;
+  }
+  
+  /* Fix Get Started button styling */
+  header a[href="/signup"] {
+    padding: 8px 16px !important;
+  }
+}
