@@ -70,7 +70,8 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
   }
   
   // If user is authenticated but route requires admin privileges
-  if (isAuthenticated && requireAdmin && isAdmin === false) {
+  // Treat null isAdmin as not having admin privileges
+  if (isAuthenticated && requireAdmin && isAdmin !== true) {
     console.log("User is authenticated but lacks admin privileges, redirecting to unauthorized");
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }

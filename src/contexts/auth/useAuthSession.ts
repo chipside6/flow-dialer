@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
@@ -12,7 +11,7 @@ export function useAuthSession() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false); // Default to false instead of null
   const [authError, setAuthError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const { isOnline } = useNetworkStatus();
@@ -48,8 +47,9 @@ export function useAuthSession() {
               console.log("useAuthSession - Profile data:", profileData);
               setProfile(profileData);
               
-              // Check admin role
-              setIsAdmin(!!profileData.is_admin);
+              // Check admin role - explicitly set to boolean
+              setIsAdmin(profileData.is_admin === true);
+              console.log("useAuthSession - Setting isAdmin to:", profileData.is_admin === true);
             } else if (isMounted.current) {
               console.log("useAuthSession - No profile found for user");
               setProfile(null);
@@ -244,7 +244,7 @@ export function useAuthSession() {
     profile,
     isLoading,
     isAuthenticated: !!user,
-    isAdmin,
+    isAdmin, // This is now a boolean, not nullable
     authError,
     sessionChecked,
     setProfile

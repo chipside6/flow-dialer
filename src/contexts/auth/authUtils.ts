@@ -34,11 +34,11 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     
     const userEmail = userData?.user?.email || '';
     
-    // Create a UserProfile object with required fields
+    // Create a UserProfile object with required fields, ensuring is_admin is a boolean
     const profile: UserProfile = {
       id: data.id,
       email: userEmail,
-      is_admin: !!data.is_admin // Force to boolean
+      is_admin: data.is_admin === true // Force to boolean
     };
     
     console.log("Constructed profile object:", profile);
@@ -57,7 +57,7 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
     const { error } = await supabase
       .from('profiles')
       .update({
-        is_admin: data.is_admin
+        is_admin: data.is_admin === true // Force to boolean
       })
       .eq('id', userId);
     

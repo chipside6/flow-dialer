@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,7 +14,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false); // Default to false, not null
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -114,8 +115,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 email: session.user.email || ''
               };
               setProfile(updatedProfile);
-              setIsAdmin(!!updatedProfile.is_admin);
-              console.log("AuthProvider: Set isAdmin flag to:", !!updatedProfile.is_admin);
+              
+              // Explicitly convert to boolean to avoid null
+              const isAdminFlag = updatedProfile.is_admin === true;
+              setIsAdmin(isAdminFlag);
+              console.log("AuthProvider: Set isAdmin flag to:", isAdminFlag);
             } else {
               // Set isAdmin to false when no profile is found
               console.log("AuthProvider: No profile found, setting isAdmin to false");
@@ -203,8 +207,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 email: data.session.user.email || ''
               };
               setProfile(updatedProfile);
-              setIsAdmin(!!updatedProfile.is_admin);
-              console.log("AuthProvider: Set isAdmin flag to (session check):", !!updatedProfile.is_admin);
+              
+              // Explicitly convert to boolean to avoid null
+              const isAdminFlag = updatedProfile.is_admin === true;
+              setIsAdmin(isAdminFlag);
+              console.log("AuthProvider: Set isAdmin flag to (session check):", isAdminFlag);
             } else {
               // Set isAdmin to false when no profile is found
               console.log("AuthProvider: No profile found, setting isAdmin to false (session check)");
@@ -296,7 +303,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     isLoading,
     isAuthenticated: !!user,
-    isAdmin: !!isAdmin, // Ensure this is always a boolean
+    isAdmin: isAdmin, // Ensure this is always a boolean
     error,
     sessionChecked,
     initialized,
