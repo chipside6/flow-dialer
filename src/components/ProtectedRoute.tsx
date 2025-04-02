@@ -39,7 +39,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
         toast({
           title: "Loading timeout reached",
           description: "Authentication check is taking longer than expected. Proceeding with available data.",
-          variant: "warning"
+          variant: "default" // Changed from "warning" to "default"
         });
       }
     }, 2000); // Reduced to 2 seconds from 3 seconds for faster feedback

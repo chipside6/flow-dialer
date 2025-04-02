@@ -72,7 +72,7 @@ export const TransferNumbersContent = ({
         toast({
           title: "Loading timeout reached",
           description: "We're having trouble loading your data. You can still use the application.",
-          variant: "destructive"
+          variant: "destructive" // Changed from potentially 'warning' to 'destructive'
         });
       }
     }, 4000); // 4 seconds timeout (reduced from 5s)
