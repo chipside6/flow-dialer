@@ -10,9 +10,9 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
   console.log(`[TransferNumbersService] Fetching transfer numbers for user: ${userId}`);
   
   try {
-    // Set a reasonable timeout for the query
+    // Set a shorter timeout for the query
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 second timeout (reduced from 5s)
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout (reduced from 4s)
     
     // Fetch transfer numbers for this user
     const { data, error } = await supabase

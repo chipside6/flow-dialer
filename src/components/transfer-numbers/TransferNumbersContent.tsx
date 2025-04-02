@@ -52,7 +52,7 @@ export const TransferNumbersContent = ({
           });
         }
       }
-    }, 3000); // Reduced from 4 seconds to 3 seconds
+    }, 2000); // Reduced from 3 seconds to 2 seconds
     
     return () => clearTimeout(timer);
   }, [isLoading, isInitialLoad]);
@@ -74,7 +74,7 @@ export const TransferNumbersContent = ({
           variant: "destructive"
         });
       }
-    }, 8000); // 8 seconds timeout (reduced from 12s)
+    }, 5000); // 5 seconds timeout (reduced from 8s)
     
     return () => clearTimeout(longLoadingTimer);
   }, [isLoading, forceShowContent]);
@@ -84,7 +84,7 @@ export const TransferNumbersContent = ({
     return (
       <LoadingState 
         message="Loading your transfer numbers, please wait..." 
-        timeout={3000} // 3 seconds timeout (reduced from 5s)
+        timeout={2000} // 2 seconds timeout (reduced from 3s)
         onRetry={onRefresh}
       />
     );

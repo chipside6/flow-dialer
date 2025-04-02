@@ -152,10 +152,18 @@ const AdminPanel = () => {
       
       console.log(`Attempting to grant lifetime access to user ${userId}`);
       
+      // Get the current session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("No active session found");
+      }
+      
       const { data, error } = await supabase.functions.invoke('grant-lifetime-access', {
         body: {
           targetUserId: userId,
-          adminToken: user.id  // Use the admin's user ID as the token
+          // Pass the actual access token instead of just the user ID
+          adminToken: session.access_token
         }
       });
       

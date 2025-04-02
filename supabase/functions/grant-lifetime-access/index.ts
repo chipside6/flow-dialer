@@ -7,8 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Set a timeout for database operations (in ms)
-const DB_OPERATION_TIMEOUT = 10000;
+// Set a shorter timeout for database operations (in ms)
+const DB_OPERATION_TIMEOUT = 6000;
 
 // Create a promise that rejects after a timeout
 const timeoutPromise = (ms: number) => new Promise((_, reject) => {
@@ -49,12 +49,20 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
+
+    if (!adminToken) {
+      console.error("Admin token is required");
+      return new Response(
+        JSON.stringify({ error: 'Admin token is required', success: false }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
     
     // Verify the requesting user is an admin
     try {
-      // Get the user from the token
+      // Get the user from the JWT token
       const { data: authData, error: authError } = await Promise.race([
-        supabaseClient.auth.getUser(adminToken),
+        supabaseClient.auth.getUser(adminToken), // Use the provided JWT token
         timeoutPromise(DB_OPERATION_TIMEOUT)
       ]);
       
