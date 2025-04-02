@@ -71,7 +71,7 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
       label: "Diagnostics",
       icon: Activity,
     },
-    // Add Asterisk Config to regular routes available to all users
+    // Asterisk Config is already available to all users
     {
       href: "/asterisk-config",
       label: "Asterisk Config",
