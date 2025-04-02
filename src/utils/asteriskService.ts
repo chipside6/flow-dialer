@@ -65,6 +65,43 @@ exten => 1,1,NoOp(Transferring call to ${transferNumber || ''})
 exten => 1,n,Dial(SIP/${transferNumber || ''},30)
 exten => 1,n,Hangup()
 `.trim();
+  },
+  
+  /**
+   * Generate a complete configuration for a campaign
+   * Combines SIP trunk config and dialplan with user's transfer number and greeting file
+   */
+  generateFullConfig(
+    campaignId: string,
+    providerName: string,
+    host: string,
+    port: string,
+    username: string,
+    password: string,
+    greetingFileUrl: string,
+    transferNumber: string
+  ) {
+    const sipConfig = this.generateSipTrunkConfig(
+      providerName, 
+      host, 
+      port, 
+      username, 
+      password
+    );
+    
+    const dialplan = this.generateDialplan(
+      campaignId,
+      greetingFileUrl,
+      transferNumber
+    );
+    
+    return `
+; SIP Provider Configuration
+${sipConfig}
+
+; Dialplan Configuration
+${dialplan}
+`.trim();
   }
 };
 
@@ -191,5 +228,34 @@ export const asteriskService = {
   ) {
     console.warn('asteriskService.generateSipTrunkConfig is deprecated. Use asteriskConfig.generateSipTrunkConfig instead.');
     return asteriskConfig.generateSipTrunkConfig(providerName, host, port, username, password);
+  },
+  
+  /**
+   * Generate a complete SIP configuration that includes the user's transfer number and greeting file
+   */
+  generateCompleteConfig(
+    campaignId: string,
+    sipDetails: {
+      providerName: string;
+      host: string;
+      port: string;
+      username: string;
+      password: string;
+    },
+    userConfig: {
+      transferNumber: string;
+      greetingFile: string;
+    }
+  ) {
+    return asteriskConfig.generateFullConfig(
+      campaignId,
+      sipDetails.providerName,
+      sipDetails.host,
+      sipDetails.port,
+      sipDetails.username,
+      sipDetails.password,
+      userConfig.greetingFile,
+      userConfig.transferNumber
+    );
   }
 };
