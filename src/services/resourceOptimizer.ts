@@ -77,6 +77,34 @@ export const setupPreconnect = (domains: string[]) => {
   });
 };
 
+// Type definition for Network Information API
+interface NetworkInformation {
+  effectiveType: 'slow-2g' | '2g' | '3g' | '4g';
+  saveData?: boolean;
+  rtt?: number;
+  downlink?: number;
+}
+
+/**
+ * Safely checks if the user is on a slow connection
+ */
+const isSlowConnection = (): boolean => {
+  // Check if Network Information API is available
+  if (
+    'connection' in navigator && 
+    (navigator as any).connection && 
+    (navigator as any).connection.effectiveType
+  ) {
+    const connection = (navigator as any).connection as NetworkInformation;
+    return connection.effectiveType === 'slow-2g' || 
+           connection.effectiveType === '2g' || 
+           (connection.saveData === true);
+  }
+  
+  // Fallback: if we can't detect, assume it's not a slow connection
+  return false;
+};
+
 /**
  * Initialize performance optimizations
  */
@@ -90,7 +118,7 @@ export const initResourceOptimizations = () => {
   ]);
   
   // Detect slow connections and reduce resource loading
-  if (navigator.connection && (navigator.connection as any).effectiveType === '2g') {
+  if (isSlowConnection()) {
     // Set up reduced quality resources for slow connections
     document.documentElement.classList.add('slow-connection');
   }
