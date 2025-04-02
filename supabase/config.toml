@@ -5,16 +5,10 @@ project_id = "grhvoclalziyjbjlhpml"
 [api]
 # Port to use for the API URL.
 port = 54321
-# Enable JWT verification for APIs. Defaults to true.
-jwt_verification = true
 
 [db]
 # Port to use for the local database URL.
 port = 54322
-
-[realtime]
-# Port to use for the local Realtime URL.
-port = 54323
 
 [studio]
 # Port to use for the local Studio URL.
@@ -51,27 +45,9 @@ enable_confirmations = false
 # The maximum file size allowed (e.g. "5MB", "500KB").
 file_size_limit = "50MiB"
 
-[analytics]
-# Enable/disable Analytics.
-enabled = false
-
-# Set the log level.
-log_level = "warn"
-
+# Simplified functions section without the invalid properties
 [functions]
-# Port that the Edge Functions server listens on.
-port = 54321
-# Function timeout in seconds. Defaults to 30.
-function_timeout = 30
-# Serve functions from the filesystem rather than the Database. Defaults to false.
-serve_from_fs = false
-# The maximum number of retries when a function fails. Defaults to 0.
-max_retries = 1
-# The delay between retries in milliseconds. Defaults to 0.
-retry_interval = 500
-
-[pooler]
-enabled = false
-pool_mode = "transaction"
-default_pool_size = 15
-pool_size = 15
+# Define specific functions if needed in the correct format
+# For example:
+# [functions.grant-lifetime-access]
+# verify_jwt = true
