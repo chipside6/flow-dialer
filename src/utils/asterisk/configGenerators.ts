@@ -1,86 +1,122 @@
 
-// Define interface for SIP configuration parameters
-export interface SipConfigParams {
-  host?: string;
-  port?: number;
-  username?: string;
-  password?: string;
-  transport?: string;
-  dtmfMode?: string;
-  context?: string;
-  provider?: string;
-}
-
-// Define interface for dialplan configuration parameters
-export interface DialplanConfigParams {
-  context?: string;
-  extension?: string;
-  priority?: number;
-  application?: string;
-  data?: string;
-  provider?: string;
-}
-
 /**
- * Generate a SIP configuration file based on provided parameters
+ * Configuration generators for Asterisk
  */
-export const generateSipConfig = (params: SipConfigParams = {}): string => {
-  const {
-    host = 'sip.example.com',
-    port = 5060,
-    username = 'user',
-    password = 'password',
-    transport = 'udp',
-    dtmfMode = 'rfc2833',
-    context = 'default',
-    provider = 'default'
-  } = params;
-
-  return `
-[${provider}]
-type=endpoint
-context=${context}
+export const asteriskConfig = {
+  /**
+   * Generate a SIP trunk configuration for Asterisk
+   */
+  generateSipTrunkConfig(
+    providerName: string,
+    host: string,
+    port: string,
+    username: string,
+    password: string
+  ) {
+    return `
+[${providerName}]
+type=peer
+host=${host}
+port=${port}
+username=${username}
+secret=${password}
+fromuser=${username}
+context=from-trunk
 disallow=all
 allow=ulaw
-transport=${transport}
-auth=${provider}_auth
-aors=${provider}_aor
-direct_media=no
-dtmf_mode=${dtmfMode}
+allow=alaw
+dtmfmode=rfc2833
+insecure=port,invite
+nat=force_rport,comedia
+qualify=yes
+directmedia=no
+`.trim();
+  },
+  
+  /**
+   * Generate a basic dialplan configuration for Asterisk
+   * Updated to include transfer number and greeting file
+   */
+  generateDialplan(campaignId: string, greetingFileUrl: string, transferNumber: string) {
+    return `
+[campaign-${campaignId}]
+exten => s,1,Answer()
+exten => s,n,Wait(1)
+exten => s,n,Playback(${greetingFileUrl || 'greeting'})
+exten => s,n,WaitExten(5)
+exten => s,n,Hangup()
 
-[${provider}_auth]
-type=auth
-auth_type=userpass
-username=${username}
-password=${password}
+; Handle keypress 1 for transfer
+exten => 1,1,NoOp(Transferring call to ${transferNumber || ''})
+exten => 1,n,Dial(SIP/${transferNumber || ''},30)
+exten => 1,n,Hangup()
+`.trim();
+  },
+  
+  /**
+   * Generate a complete configuration for a campaign
+   * Combines SIP trunk config and dialplan with user's transfer number and greeting file
+   */
+  generateFullConfig(
+    campaignId: string,
+    providerName: string,
+    host: string,
+    port: string,
+    username: string,
+    password: string,
+    greetingFileUrl: string,
+    transferNumber: string
+  ) {
+    const sipConfig = this.generateSipTrunkConfig(
+      providerName, 
+      host, 
+      port, 
+      username, 
+      password
+    );
+    
+    const dialplan = this.generateDialplan(
+      campaignId,
+      greetingFileUrl,
+      transferNumber
+    );
+    
+    return `
+; SIP Provider Configuration
+${sipConfig}
 
-[${provider}_aor]
-type=aor
-contact=sip:${username}@${host}:${port}
-`;
+; Dialplan Configuration
+${dialplan}
+`.trim();
+  }
 };
 
 /**
- * Generate a dialplan configuration file based on provided parameters
+ * Generate a complete SIP configuration that includes the user's transfer number and greeting file
+ * @deprecated Use asteriskConfig.generateFullConfig instead
  */
-export const generateDialplanConfig = (params: DialplanConfigParams = {}): string => {
-  const {
-    context = 'outbound',
-    extension = '_X.',
-    priority = 1,
-    application = 'Dial',
-    data = 'SIP/${EXTEN}@provider,30',
-    provider = 'default'
-  } = params;
-
-  return `
-[${context}]
-exten => ${extension},${priority},${application}(${data})
-same => n,Hangup()
-`;
-};
-
-export const configGenerators = {
-  generateSipConfig,
-  generateDialplanConfig
+export const generateCompleteConfig = (
+  campaignId: string,
+  sipDetails: {
+    providerName: string;
+    host: string;
+    port: string;
+    username: string;
+    password: string;
+  },
+  userConfig: {
+    transferNumber: string;
+    greetingFile: string;
+  }
+) => {
+  return asteriskConfig.generateFullConfig(
+    campaignId,
+    sipDetails.providerName,
+    sipDetails.host,
+    sipDetails.port,
+    sipDetails.username,
+    sipDetails.password,
+    userConfig.greetingFile,
+    userConfig.transferNumber
+  );
 };

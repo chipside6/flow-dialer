@@ -1,47 +1,42 @@
 
-// If the file exists, add this type to it. If not, create it:
-
-export type WizardStep = "basics" | "contacts" | "audio" | "transfers" | "sipProvider" | "review";
-
 export interface CampaignData {
-  id: string;
+  id: string; // Changed from optional to required
   title: string;
   description: string;
-  contactListId?: string;
-  greetingFileId?: string;
-  transferNumber?: string;
-  sipProviderId?: string;
-  status?: 'pending' | 'running' | 'paused' | 'completed' | 'failed';
+  contactListId: string;
+  greetingFileId: string;
+  transferNumber: string;
+  sipProviderId: string; // New field for SIP provider selection
+  schedule: {
+    startDate: string;
+    maxConcurrentCalls: number;
+  };
+  status?: "pending" | "running" | "completed" | "paused";
   progress?: number;
   totalCalls?: number;
   answeredCalls?: number;
   transferredCalls?: number;
   failedCalls?: number;
-  dateCreated?: string;
-  dateUpdated?: string;
+  createdAt?: string;
   user_id?: string;
-  schedule?: {
-    startDate?: string;
-    startTime?: string;
-    endDate?: string;
-    endTime?: string;
-    timezone?: string;
-  };
 }
+
+export type WizardStep = "basics" | "contacts" | "audio" | "transfers" | "sipProvider" | "schedule" | "review";
 
 export interface ContactList {
   id: string;
   name: string;
-  description?: string;
-  contactCount: number;
-  dateCreated?: Date;
-  dateUpdated?: Date;
 }
 
+// Updated to match the interface in useGreetingFiles.ts
 export interface GreetingFile {
   id: string;
+  user_id: string;
   filename: string;
   url: string;
-  durationSeconds?: number;
-  dateAdded?: Date;
+  file_path: string;
+  file_type?: string;
+  file_size?: number;
+  duration_seconds?: number | null;
+  created_at: string;
 }

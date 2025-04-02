@@ -1,40 +1,39 @@
 
 import { CampaignData, WizardStep } from "../types";
 
-// Function to validate each step of the campaign creation wizard
 export const validateStep = (step: WizardStep, campaign: CampaignData): boolean => {
   switch (step) {
     case "basics":
-      return campaign.title.trim() !== "" && campaign.description.trim() !== "";
-
+      return !!campaign.title && campaign.title.length >= 3;
     case "contacts":
-      return !!campaign.contactListId?.trim();
-
+      return !!campaign.contactListId;
     case "audio":
-      return !!campaign.greetingFileId?.trim();
-
+      return !!campaign.greetingFileId;
     case "transfers":
-      return !!campaign.transferNumber?.trim();
-
+      return !!campaign.transferNumber && campaign.transferNumber.length >= 7;
     case "sipProvider":
-      return !!campaign.sipProviderId?.trim();
-
+      return !!campaign.sipProviderId;
+    case "schedule":
+      return !!campaign.schedule.startDate;
     case "review":
-      return (
-        campaign.title.trim() !== "" &&
-        campaign.description.trim() !== "" &&
-        !!campaign.contactListId?.trim() &&
-        !!campaign.greetingFileId?.trim() &&
-        !!campaign.transferNumber?.trim() &&
-        !!campaign.sipProviderId?.trim()
-      );
-
+      return true;
     default:
       return false;
   }
 };
 
-// Function to get the next step in the wizard
+export const getStepAvailability = (campaign: CampaignData) => {
+  return {
+    basics: true,
+    contacts: true,
+    audio: !!campaign.title,
+    transfers: !!campaign.greetingFileId,
+    sipProvider: !!campaign.transferNumber,
+    schedule: !!campaign.sipProviderId,
+    review: !!campaign.schedule.startDate
+  };
+};
+
 export const getNextStep = (currentStep: WizardStep): WizardStep => {
   switch (currentStep) {
     case "basics":
@@ -46,13 +45,14 @@ export const getNextStep = (currentStep: WizardStep): WizardStep => {
     case "transfers":
       return "sipProvider";
     case "sipProvider":
+      return "schedule";
+    case "schedule":
       return "review";
     default:
       return "review";
   }
 };
 
-// Function to get the previous step in the wizard
 export const getPreviousStep = (currentStep: WizardStep): WizardStep => {
   switch (currentStep) {
     case "contacts":
@@ -63,31 +63,21 @@ export const getPreviousStep = (currentStep: WizardStep): WizardStep => {
       return "audio";
     case "sipProvider":
       return "transfers";
-    case "review":
+    case "schedule":
       return "sipProvider";
+    case "review":
+      return "schedule";
     default:
       return "basics";
   }
 };
 
-// Function to determine if a step is available based on previous step completion
-export const getStepAvailability = (campaign: CampaignData) => {
-  return {
-    basics: true, // Always available
-    contacts: validateStep("basics", campaign),
-    audio: validateStep("basics", campaign) && validateStep("contacts", campaign),
-    transfers: validateStep("basics", campaign) && validateStep("contacts", campaign) && validateStep("audio", campaign),
-    sipProvider: validateStep("basics", campaign) && validateStep("contacts", campaign) && validateStep("audio", campaign) && validateStep("transfers", campaign),
-    review: validateStep("basics", campaign) && validateStep("contacts", campaign) && validateStep("audio", campaign) && validateStep("transfers", campaign) && validateStep("sipProvider", campaign)
-  };
-};
-
-// Custom hook to provide form validation functions
+// Create a hook that wraps all validation functions
 export const useFormValidation = () => {
   return {
     validateStep,
+    getStepAvailability,
     getNextStep,
-    getPreviousStep,
-    getStepAvailability
+    getPreviousStep
   };
 };

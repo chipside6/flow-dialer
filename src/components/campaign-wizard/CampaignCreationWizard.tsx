@@ -6,6 +6,7 @@ import { ContactsStep } from "./ContactsStep";
 import { AudioStep } from "./AudioStep";
 import { TransfersStep } from "./TransfersStep";
 import { SipProviderStep } from "./SipProviderStep";
+import { ScheduleStep } from "./ScheduleStep";
 import { ReviewStep } from "./ReviewStep";
 import { WizardContainer } from "./WizardContainer";
 import { CampaignData } from "./types";
@@ -31,6 +32,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
     step,
     setStep,
     handleInputChange,
+    handleScheduleChange,
     handleSelectChange,
     handleComplete
   } = useCampaignForm(onComplete, user);
@@ -84,6 +86,14 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
       <TabsContent value="sipProvider">
         <SipProviderStep
           campaign={campaign}
+          onSelectChange={handleSelectChange}
+        />
+      </TabsContent>
+      
+      <TabsContent value="schedule">
+        <ScheduleStep 
+          campaign={campaign}
+          onChange={handleScheduleChange}
           onSelectChange={handleSelectChange}
         />
       </TabsContent>

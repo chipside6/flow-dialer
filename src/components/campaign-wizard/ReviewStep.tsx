@@ -1,8 +1,9 @@
+
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CampaignData } from "./types";
-import type { ContactList } from "@/hooks/useContactLists";
-import type { GreetingFile } from "@/hooks/useGreetingFiles";
+import { Card, CardContent } from "@/components/ui/card";
+import { CampaignData, ContactList, GreetingFile } from "./types";
+import { SipProvider } from "@/types/sipProviders";
+import { useSipProviders } from "@/hooks/useSipProviders";
 
 interface ReviewStepProps {
   campaign: CampaignData;
@@ -11,82 +12,82 @@ interface ReviewStepProps {
 }
 
 export const ReviewStep: React.FC<ReviewStepProps> = ({ campaign, contactLists, greetingFiles }) => {
-
-  // Helper function to find contact list name by ID
-  const getContactListName = (id: string | undefined): string => {
-    const contactList = contactLists?.find((list) => list.id === id);
-    return contactList ? contactList.name : "Not Selected";
-  };
-
-  // Helper function to find greeting file name by ID
-  const getGreetingFileName = (id: string | undefined): string => {
-    const greetingFile = greetingFiles?.find((file) => file.id === id);
-    return greetingFile ? greetingFile.filename : "Not Selected";
-  };
-
+  const { providers } = useSipProviders();
+  
+  // Find the selected contact list, greeting file, and SIP provider
+  const selectedList = contactLists.find(list => list.id === campaign.contactListId);
+  const selectedGreeting = greetingFiles.find(file => file.id === campaign.greetingFileId);
+  const selectedProvider = providers.find(provider => provider.id === campaign.sipProviderId);
+  
+  const sections = [
+    {
+      title: "Campaign Basics",
+      items: [
+        { label: "Campaign Name", value: campaign.title || "Not specified" },
+        { label: "Description", value: campaign.description || "No description" }
+      ]
+    },
+    {
+      title: "Contact List",
+      items: [
+        { label: "Selected List", value: selectedList?.name || "No list selected" }
+      ]
+    },
+    {
+      title: "Audio Greeting",
+      items: [
+        { label: "Selected Greeting", value: selectedGreeting?.filename || "No greeting selected" }
+      ]
+    },
+    {
+      title: "Transfer Number",
+      items: [
+        { label: "Transfer To", value: campaign.transferNumber || "No transfer number specified" }
+      ]
+    },
+    {
+      title: "SIP Provider",
+      items: [
+        { label: "Provider", value: selectedProvider?.name || "No provider selected" },
+        { label: "Host", value: selectedProvider?.host || "Not specified" },
+        { label: "Port", value: selectedProvider?.port || "Not specified" }
+      ]
+    },
+    {
+      title: "Schedule",
+      items: [
+        { label: "Start Date", value: campaign.schedule.startDate || "Not specified" },
+        { label: "Concurrent Calls", value: "1" }
+      ]
+    }
+  ];
+  
   return (
-    <div>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Campaign Details Review</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            {/* Campaign Title and Description */}
-            <div>
-              <h2 className="text-lg font-semibold">Basics</h2>
-              <div className="pl-2">
-                <p>
-                  <strong>Title:</strong> {campaign.title || "N/A"}
-                </p>
-                <p>
-                  <strong>Description:</strong> {campaign.description || "N/A"}
-                </p>
+    <Card>
+      <CardContent className="pt-6 pb-8 space-y-6">
+        <div>
+          <h3 className="text-lg font-medium">Review Campaign Details</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Please review your campaign details before creating it.
+          </p>
+        </div>
+        
+        <div className="space-y-6">
+          {sections.map((section, idx) => (
+            <div key={idx} className="space-y-3">
+              <h4 className="font-medium text-sm border-b pb-1">{section.title}</h4>
+              <div className="grid gap-y-2">
+                {section.items.map((item, itemIdx) => (
+                  <div key={itemIdx} className="grid grid-cols-3 gap-2">
+                    <span className="text-sm text-muted-foreground col-span-1">{item.label}:</span>
+                    <span className="text-sm font-medium col-span-2">{item.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* Contact List */}
-            <div>
-              <h2 className="text-lg font-semibold">Contacts</h2>
-              <div className="pl-2">
-                <p>
-                  <strong>Contact List:</strong> {getContactListName(campaign.contactListId)}
-                </p>
-              </div>
-            </div>
-
-            {/* Audio */}
-            <div>
-              <h2 className="text-lg font-semibold">Audio</h2>
-              <div className="pl-2">
-                <p>
-                  <strong>Greeting File:</strong> {getGreetingFileName(campaign.greetingFileId)}
-                </p>
-              </div>
-            </div>
-
-            {/* Transfer Number */}
-            <div>
-              <h2 className="text-lg font-semibold">Transfers</h2>
-              <div className="pl-2">
-                <p>
-                  <strong>Transfer Number:</strong> {campaign.transferNumber || "N/A"}
-                </p>
-              </div>
-            </div>
-
-            {/* SIP Provider */}
-            <div>
-              <h2 className="text-lg font-semibold">SIP Provider</h2>
-              <div className="pl-2">
-                <p>
-                  <strong>SIP Provider ID:</strong> {campaign.sipProviderId || "N/A"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
