@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,18 +33,17 @@ export default function QuickAdminSetup() {
     try {
       // Show a toast that we're creating the admin user
       toast.info("Creating admin user...");
-      console.log("QuickAdminSetup - Invoking create-admin-user function");
+      console.log(`QuickAdminSetup - Invoking create-admin-user function with email: ${email}`);
       
       // Call the edge function to create an admin user
-      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+      const { data, error: funcError } = await supabase.functions.invoke('create-admin-user', {
         body: { email, password }
       });
       
-      console.log("Admin user creation response:", data, error);
+      console.log("Admin user creation response:", data);
       
-      if (error) {
-        console.error("Error creating admin user:", error);
-        throw new Error(error.message || "Failed to create admin user");
+      if (funcError) {
+        throw new Error(funcError.message || "Failed to invoke create-admin-user function");
       }
       
       if (!data?.success) {
@@ -66,14 +64,18 @@ export default function QuickAdminSetup() {
               label: "Log Out Now",
               onClick: () => {
                 signOut?.();
-                setTimeout(() => navigate("/login"), 500);
+                setTimeout(() => navigate("/login", { 
+                  state: { from: { pathname: "/admin" } }
+                }), 500);
               }
             }
           });
         }, 1000);
       } else {
         // Otherwise redirect to login
-        setTimeout(() => navigate("/login"), 2000);
+        setTimeout(() => navigate("/login", { 
+          state: { from: { pathname: "/admin" } }
+        }), 2000);
       }
       
     } catch (err: any) {

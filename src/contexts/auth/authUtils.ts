@@ -8,7 +8,7 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, is_admin')
+      .select('id, is_admin, email')
       .eq('id', userId)
       .single();
     
@@ -27,7 +27,7 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     // Create a UserProfile object with only required fields
     const profile: UserProfile = {
       id: data.id,
-      email: '', // This will be set by the AuthProvider
+      email: data.email || '', // Use email from profile if available
       is_admin: !!data.is_admin // Ensure this is a boolean
     };
     
@@ -45,7 +45,8 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
     const { error } = await supabase
       .from('profiles')
       .update({
-        is_admin: data.is_admin
+        is_admin: data.is_admin,
+        email: data.email
       })
       .eq('id', userId);
     

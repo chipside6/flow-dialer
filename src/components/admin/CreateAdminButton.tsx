@@ -25,17 +25,19 @@ export function CreateAdminButton() {
       console.log("CreateAdminButton - Invoking create-admin-user function");
       
       // Use the Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+      const { data, error: funcError } = await supabase.functions.invoke('create-admin-user', {
         body: {
           email: 'admin@example.com',
           password: 'admin123'
         }
       });
       
-      if (error) {
-        console.error("Error creating admin user:", error);
-        toast.error("Failed to create admin user: " + error.message);
-        return;
+      if (funcError) {
+        throw new Error(funcError.message || "Failed to invoke create-admin-user function");
+      }
+      
+      if (!data?.success) {
+        throw new Error(data?.error || "Unknown error occurred");
       }
       
       console.log("Admin user created response:", data);
