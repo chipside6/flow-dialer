@@ -33,8 +33,15 @@ export const useFetchTransferNumbers = ({
       console.log(`Fetching transfer numbers for user: ${user.id}`);
       
       try {
-        // Fetch transfer numbers with shorter timeout
-        const data = await fetchUserTransferNumbers(user.id);
+        // Set a timeout for the fetch operation (implemented at the service level)
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => abortController.abort(), 8000); // 8 second timeout
+        
+        // Fetch transfer numbers
+        const data = await fetchUserTransferNumbers(user.id, abortController.signal);
+        
+        // Clear timeout
+        clearTimeout(timeoutId);
         
         if (data && data.length > 0) {
           setTransferNumbers(data);
@@ -49,25 +56,35 @@ export const useFetchTransferNumbers = ({
         return data;
       } catch (err: any) {
         console.error("Error fetching transfer numbers:", err);
-        const errorMessage = err.message || "Failed to load transfer numbers";
-        setError(errorMessage);
+        
+        // Check if this is an AbortError (timeout)
+        if (err.name === 'AbortError') {
+          console.log('Fetch operation timed out');
+          setError('Connection timed out. Please try again later.');
+        } else {
+          const errorMessage = err.message || "Failed to load transfer numbers";
+          setError(errorMessage);
+        }
         
         // Set empty array for safety
         setTransferNumbers([]);
         setIsLoading(false);
         
-        toast({
-          title: "Error loading transfer numbers",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        // Only show toast for non-timeout errors to prevent UI clutter
+        if (err.name !== 'AbortError') {
+          toast({
+            title: "Error loading transfer numbers",
+            description: err.message || "Failed to load transfer numbers",
+            variant: "destructive",
+          });
+        }
         
         return [];
       }
     },
     {
       cacheKey: user?.id ? `transfer-numbers-${user.id}` : undefined,
-      cacheDuration: 30 * 1000, // 30 seconds (reduced from 1 minute)
+      cacheDuration: 15 * 1000, // 15 seconds (reduced from 30 seconds)
       enabled: false, // Don't fetch automatically, we'll call it explicitly
       retry: 1, // One retry is sufficient
       retryDelay: 500, // Reduced retry delay to 500ms
@@ -78,7 +95,7 @@ export const useFetchTransferNumbers = ({
 
   // Return the fetch function
   return { 
-    fetchTransferNumbers: useCallback(() => {
+    fetchTransferNumbers: useCallback((signal?: AbortSignal) => {
       setIsLoading(true);
       fetchTransferNumbers(true);
     }, [fetchTransferNumbers, setIsLoading])

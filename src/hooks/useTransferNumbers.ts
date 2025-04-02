@@ -24,6 +24,8 @@ export function useTransferNumbers() {
     error,
     setError,
     hasTimedOut,
+    retryCount,
+    incrementRetry,
     refreshTransferNumbers
   } = useTransferNumbersState();
   
@@ -46,7 +48,7 @@ export function useTransferNumbers() {
     }
   );
   
-  // Load transfer numbers just once when user or refresh trigger changes
+  // Load transfer numbers when user or refresh trigger changes
   useEffect(() => {
     let isMounted = true;
     
@@ -68,16 +70,22 @@ export function useTransferNumbers() {
     };
   }, [user, lastRefresh]);
   
-  // Add a single retry for persistent loading issues
+  // Add progressive retry logic for persistent loading issues
   useEffect(() => {
     let retryTimeout: number | undefined;
     
-    // If loading has timed out but we're still in loading state
-    if (hasTimedOut && isLoading && transferNumbers.length === 0) {
+    // If loading has timed out but we're still in loading state and under retry limit
+    if (hasTimedOut && isLoading && transferNumbers.length === 0 && retryCount < 3) {
+      // Exponential backoff: 1s, 2s, 4s
+      const backoffDelay = Math.pow(2, retryCount) * 1000;
+      
       retryTimeout = window.setTimeout(() => {
-        console.log("Auto-retry for transfer numbers");
+        console.log(`Auto-retry for transfer numbers (attempt ${retryCount + 1})`);
+        incrementRetry();
         fetchTransferNumbers();
-      }, 3000); // Retry once after 3 seconds
+      }, backoffDelay);
+      
+      console.log(`Scheduled retry in ${backoffDelay}ms`);
     }
     
     return () => {
@@ -85,7 +93,7 @@ export function useTransferNumbers() {
         window.clearTimeout(retryTimeout);
       }
     };
-  }, [hasTimedOut, isLoading, transferNumbers.length, fetchTransferNumbers]);
+  }, [hasTimedOut, isLoading, transferNumbers.length, retryCount, fetchTransferNumbers, incrementRetry]);
   
   return {
     transferNumbers,

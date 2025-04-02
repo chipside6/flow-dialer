@@ -8,7 +8,7 @@ import { CampaignData } from "./types";
 import { useAuth } from "@/contexts/auth";
 import { Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { useTransferNumbers } from "@/hooks/useTransferNumbers";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface TransfersStepProps {
   campaign: CampaignData;
@@ -60,8 +60,9 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
           <Label htmlFor="transferNumber">Transfer Number</Label>
           <Alert variant="destructive" className="mt-2">
             <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Connection Timeout</AlertTitle>
             <AlertDescription className="flex flex-col gap-2">
-              <span>Connection timed out. Please try again later.</span>
+              <span>We couldn't load your transfer numbers due to a connection timeout.</span>
               <Button 
                 variant="outline" 
                 size="sm" 

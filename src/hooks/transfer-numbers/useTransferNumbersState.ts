@@ -9,6 +9,7 @@ export function useTransferNumbersState() {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
   const [error, setError] = useState<string | null>(null);
   const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   
   // Ref to track loading timeout
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -35,6 +36,11 @@ export function useTransferNumbersState() {
         clearTimeout(loadingTimeoutRef.current);
         loadingTimeoutRef.current = null;
       }
+      
+      // Reset timeout state when loading completes successfully
+      if (hasTimedOut && !error) {
+        setHasTimedOut(false);
+      }
     }
     
     return () => {
@@ -42,13 +48,16 @@ export function useTransferNumbersState() {
         clearTimeout(loadingTimeoutRef.current);
       }
     };
-  }, [isLoading]);
+  }, [isLoading, hasTimedOut, error]);
   
+  // Manual refresh function
   const refreshTransferNumbers = useCallback(async () => {
     console.log("Manually refreshing transfer numbers");
     setIsLoading(true);
     setHasTimedOut(false);
+    setError(null);
     setLastRefresh(Date.now());
+    setRetryCount(0);
     
     // Return a promise that will be resolved when the effect runs
     return new Promise<void>((resolve) => {
@@ -56,6 +65,14 @@ export function useTransferNumbersState() {
       // This allows callers to await this function
       resolve();
     });
+  }, []);
+  
+  // Increment retry count function
+  const incrementRetry = useCallback(() => {
+    setRetryCount(prev => prev + 1);
+    setIsLoading(true);
+    setHasTimedOut(false);
+    setLastRefresh(Date.now());
   }, []);
   
   return {
@@ -69,6 +86,8 @@ export function useTransferNumbersState() {
     error,
     setError,
     hasTimedOut,
+    retryCount,
+    incrementRetry,
     refreshTransferNumbers
   };
 }

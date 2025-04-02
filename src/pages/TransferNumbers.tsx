@@ -10,6 +10,8 @@ import { AuthRequiredAlert } from "@/components/transfer-numbers/AuthRequiredAle
 import { TransferNumbersContent } from "@/components/transfer-numbers/TransferNumbersContent";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 const TransferNumbers = () => {
   const { 
@@ -24,6 +26,7 @@ const TransferNumbers = () => {
   
   const { user, isLoading: isAuthLoading } = useAuth();
   const [initialLoad, setInitialLoad] = useState(true);
+  const [refreshDisabled, setRefreshDisabled] = useState(false);
   const { toast } = useToast();
   
   // Handle initial data loading
@@ -48,8 +51,10 @@ const TransferNumbers = () => {
     }
   }, [user, isAuthLoading, refreshTransferNumbers]);
   
-  // Handler for manual refresh with error handling
+  // Handler for manual refresh with error handling and debounce
   const handleManualRefresh = async () => {
+    if (refreshDisabled) return;
+    
     if (!user) {
       toast({
         title: "Authentication required",
@@ -58,6 +63,9 @@ const TransferNumbers = () => {
       });
       return;
     }
+    
+    // Prevent multiple rapid refreshes
+    setRefreshDisabled(true);
     
     try {
       await refreshTransferNumbers();
@@ -72,6 +80,11 @@ const TransferNumbers = () => {
         description: err.message || "Failed to refresh transfer numbers",
         variant: "destructive"
       });
+    } finally {
+      // Re-enable after a delay
+      setTimeout(() => {
+        setRefreshDisabled(false);
+      }, 2000);
     }
   };
   
@@ -98,16 +111,26 @@ const TransferNumbers = () => {
             variant="outline" 
             size="sm" 
             onClick={handleManualRefresh}
-            disabled={isAuthLoading}
+            disabled={isAuthLoading || refreshDisabled || isLoading}
             className="gap-2"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         )}
       </div>
       
       <AuthRequiredAlert isVisible={!user} />
+      
+      {user && error && error.includes("auth") && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Authentication Error</AlertTitle>
+          <AlertDescription className="flex flex-col gap-2">
+            <span>There was an issue with your login session. Please try signing out and back in.</span>
+          </AlertDescription>
+        </Alert>
+      )}
       
       {user && (
         <TransferNumbersContent

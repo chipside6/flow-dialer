@@ -6,13 +6,19 @@ import { toast } from '@/components/ui/use-toast';
 /**
  * Fetches all transfer numbers for a specific user with optimized performance
  */
-export const fetchUserTransferNumbers = async (userId: string): Promise<TransferNumber[]> => {
+export const fetchUserTransferNumbers = async (userId: string, signal?: AbortSignal): Promise<TransferNumber[]> => {
   console.log(`[TransferNumbersService] Fetching transfer numbers for user: ${userId}`);
   
   try {
-    // Set a shorter timeout for the query (3 seconds)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    // Use the provided signal or create a new one
+    const controller = signal ? null : new AbortController();
+    const activeSignal = signal || (controller?.signal);
+    
+    // Add a separate timeout if needed
+    let timeoutId: NodeJS.Timeout | null = null;
+    if (!signal) {
+      timeoutId = setTimeout(() => controller?.abort(), 8000);
+    }
     
     // Fetch transfer numbers for this user
     const { data, error } = await supabase
@@ -20,10 +26,12 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .abortSignal(controller.signal);
+      .abortSignal(activeSignal);
     
-    // Clear the timeout
-    clearTimeout(timeoutId);
+    // Clear the timeout if we set one
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
     
     if (error) {
       console.error(`[TransferNumbersService] Error in fetchUserTransferNumbers:`, error);
@@ -109,7 +117,7 @@ export const addTransferNumber = async (
       dateAdded: new Date(),
       callCount: 0
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error(`[TransferNumbersService] Error in addTransferNumber:`, error);
     toast({
       title: "Error adding transfer number",
@@ -158,7 +166,7 @@ export const deleteTransferNumber = async (
     });
     
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error(`[TransferNumbersService] Error in deleteTransferNumber:`, error);
     toast({
       title: "Error deleting transfer number",
