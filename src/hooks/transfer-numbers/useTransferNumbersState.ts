@@ -18,7 +18,7 @@ export function useTransferNumbersState() {
     }
   }, [isLoading]);
   
-  // Force reset loading state after a timeout to prevent UI from getting stuck
+  // Set a reasonable timeout for loading state
   useEffect(() => {
     let timeoutId: number | undefined;
     
@@ -27,18 +27,15 @@ export function useTransferNumbersState() {
         console.log("Loading timeout reached, resetting isLoading state");
         setHasTimedOut(true);
         
-        // Don't auto-reset isLoading anymore, let the fetch process complete naturally
-        // instead of forcing it to false, which could cause race conditions
-        
         // Only show toast if there were no transfer numbers loaded
         if (transferNumbers.length === 0) {
           toast({
-            title: "Loading timeout reached",
-            description: "We couldn't load your transfer numbers. Please try refreshing.",
-            variant: "destructive"
+            title: "Loading is taking longer than expected",
+            description: "We'll keep trying to load your transfer numbers in the background.",
+            variant: "default"
           });
         }
-      }, 15000); // Increased from 10000 to ensure data has time to load
+      }, 8000); // Reduced from 15000 to 8000 ms
     }
     
     return () => {
@@ -48,7 +45,7 @@ export function useTransferNumbersState() {
     };
   }, [isLoading, transferNumbers.length]);
   
-  // Reset isSubmitting after timeout to prevent it from getting stuck
+  // Reset isSubmitting after timeout
   useEffect(() => {
     let submitTimeout: number | undefined;
     
@@ -61,7 +58,7 @@ export function useTransferNumbersState() {
           description: "The operation is taking longer than expected. Please check if it completed successfully.",
           variant: "destructive"
         });
-      }, 10000); // Increased from 5000 to give more time for submission
+      }, 7000); // Reduced from 10000 to 7000 ms
     }
     
     return () => {
@@ -83,11 +80,11 @@ export function useTransferNumbersState() {
         if (transferNumbers.length === 0) {
           toast({
             title: "Loading failed",
-            description: "We couldn't load your transfer numbers after multiple attempts. Please try again later.",
+            description: "We couldn't load your transfer numbers. Please try refreshing the page.",
             variant: "destructive"
           });
         }
-      }, 30000); // 30 seconds extreme timeout as a last resort
+      }, 15000); // Reduced from 30000 to 15000 ms
     }
     
     return () => {

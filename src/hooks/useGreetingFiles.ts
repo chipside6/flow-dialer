@@ -52,7 +52,7 @@ export function useGreetingFiles() {
       try {
         // Create an AbortController for the timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // Reduced from 15 second timeout to 10 seconds
         
         const { data, error } = await supabase
           .from('greeting_files')
@@ -97,13 +97,13 @@ export function useGreetingFiles() {
         throw new Error("Failed to fetch greeting files. Please check your network connection.");
       }
     },
-    staleTime: 30 * 1000, // 30 seconds
-    retry: 3,  // Increased retries for network issues
-    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000), // Exponential backoff with max 10s
+    staleTime: 20 * 1000, // 20 seconds - reduced from 30 seconds
+    retry: 2,  // Reduced to 2 retries
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 5000), // Reduced max delay to 5 seconds
     enabled: !!user, // Only run query when user is available
-    refetchOnWindowFocus: true,
-    // Add fallbacks to prevent blocking UI
-    placeholderData: []
+    refetchOnWindowFocus: false, // Reduced refetching
+    // Fix the TypeScript error by removing onError:
+    placeholderData: [] // Add fallbacks to prevent blocking UI
   });
 
   // Set up error handling separately using onSuccess/onError callbacks in useEffect
@@ -113,7 +113,7 @@ export function useGreetingFiles() {
       toast({
         variant: "destructive",
         title: "Error loading files",
-        description: error.message || "Failed to load greeting files. Please try again."
+        description: error instanceof Error ? error.message : "Failed to load greeting files. Please try again."
       });
     }
   }, [error]);
@@ -126,9 +126,9 @@ export function useGreetingFiles() {
       console.log("Deleting greeting file:", fileId);
       
       try {
-        // Set timeout of 10 seconds
+        // Set timeout of 7 seconds (reduced from 10)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
         
         // First, get the file details to find the storage path
         const { data: fileData, error: fetchError } = await supabase
@@ -211,7 +211,7 @@ export function useGreetingFiles() {
       });
     },
     // Add retry logic for network errors
-    retry: 2,
+    retry: 1, // Reduced from 2 to 1
     retryDelay: 1000,
   });
 

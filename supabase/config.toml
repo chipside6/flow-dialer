@@ -44,10 +44,3 @@ enable_confirmations = false
 [storage]
 # The maximum file size allowed (e.g. "5MB", "500KB").
 file_size_limit = "50MiB"
-
-# Simplified functions section without the invalid properties
-[functions]
-# Define specific functions if needed in the correct format
-# For example:
-# [functions.grant-lifetime-access]
-# verify_jwt = true

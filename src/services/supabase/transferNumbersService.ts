@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { TransferNumber } from '@/types/transferNumber';
 import { toast } from '@/components/ui/use-toast';
@@ -10,21 +9,20 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
   console.log(`[TransferNumbersService] Fetching transfer numbers for user: ${userId}`);
   
   try {
-    // Verify we have a valid session first
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError) throw sessionError;
-    
-    if (!sessionData.session) {
-      console.error('[TransferNumbersService] No active session');
-      throw new Error('Authentication required to fetch transfer numbers');
-    }
+    // Set a reasonable timeout for the query
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000); // 7 second timeout (reduced from 15s)
     
     // Fetch transfer numbers for this user
     const { data, error } = await supabase
       .from('transfer_numbers')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .abortSignal(controller.signal);
+    
+    // Clear the timeout
+    clearTimeout(timeoutId);
     
     if (error) {
       console.error(`[TransferNumbersService] Error in fetchUserTransferNumbers:`, error);
@@ -41,13 +39,14 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
       dateAdded: new Date(item.created_at),
       callCount: item.call_count !== null ? Number(item.call_count) : 0
     }));
-  } catch (error) {
+  } catch (error: any) {
+    // Handle timeout errors
+    if (error.name === 'AbortError') {
+      console.error("[TransferNumbersService] Timeout error fetching transfer numbers");
+      throw new Error("Request timed out when fetching transfer numbers. Please try again.");
+    }
+    
     console.error(`[TransferNumbersService] Error in fetchUserTransferNumbers:`, error);
-    toast({
-      title: "Error fetching transfer numbers",
-      description: error.message || "There was an error fetching your transfer numbers.",
-      variant: "destructive"
-    });
     throw error;
   }
 };

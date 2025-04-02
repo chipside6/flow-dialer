@@ -33,43 +33,48 @@ export const useFetchTransferNumbers = ({
       console.log(`Fetching transfer numbers for user: ${user.id}`);
       
       try {
-        // Fetch transfer numbers
+        // Fetch transfer numbers with shorter timeout
         const data = await fetchUserTransferNumbers(user.id);
         
-        setTransferNumbers(data);
-        console.log(`Successfully fetched ${data.length} transfer numbers`);
+        if (data && data.length > 0) {
+          setTransferNumbers(data);
+          console.log(`Successfully fetched ${data.length} transfer numbers`);
+        } else {
+          setTransferNumbers([]);
+          console.log("No transfer numbers found");
+        }
+        
+        setIsLoading(false);
+        setError(null);
         return data;
       } catch (err: any) {
         console.error("Error fetching transfer numbers:", err);
         const errorMessage = err.message || "Failed to load transfer numbers";
         setError(errorMessage);
         
+        // Set empty array for safety
+        setTransferNumbers([]);
+        setIsLoading(false);
+        
         // Provide user-friendly error feedback
-        if (errorMessage.includes("timed out")) {
+        if (!toast.isActive("transfer-numbers-error")) {
           toast({
-            title: "Request timed out",
-            description: "We couldn't load your transfer numbers in time. Please try again.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
+            id: "transfer-numbers-error",
             title: "Error loading transfer numbers",
             description: errorMessage,
             variant: "destructive",
           });
         }
         
-        // Set empty array for safety
-        setTransferNumbers([]);
         throw err;
       }
     },
     {
       cacheKey: user?.id ? `transfer-numbers-${user.id}` : undefined,
-      cacheDuration: 5 * 60 * 1000, // 5 minutes
+      cacheDuration: 2 * 60 * 1000, // 2 minutes (reduced from 5 minutes)
       enabled: false, // Don't fetch automatically, we'll call it explicitly
-      retry: 2,
-      retryDelay: 2000,
+      retry: 1, // Reduced from 2 to 1 retry
+      retryDelay: 1000, // Reduced from 2000 to 1000ms
       onSuccess: () => setIsLoading(false),
       onError: () => setIsLoading(false)
     }

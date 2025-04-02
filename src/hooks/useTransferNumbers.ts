@@ -46,53 +46,46 @@ export function useTransferNumbers() {
     }
   );
   
-  // Load transfer numbers when user or lastRefresh changes
+  // Load transfer numbers just once when user or refresh trigger changes
   useEffect(() => {
+    let isMounted = true;
+    
     if (user) {
-      console.log("User or refresh trigger changed, fetching transfer numbers");
-      fetchTransferNumbers();
+      // Prevent multiple concurrent fetches
+      if (!isLoading) {
+        console.log("User or refresh trigger changed, fetching transfer numbers");
+        setIsLoading(true);
+        fetchTransferNumbers();
+      }
     } else {
       setTransferNumbers([]);
       setIsLoading(false);
       setError(null);
     }
-  }, [user, lastRefresh, fetchTransferNumbers, setTransferNumbers, setIsLoading, setError]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [user, lastRefresh]);
   
-  // Add a maximum retry count for persistent loading issues
+  // Add a single retry for persistent loading issues
   useEffect(() => {
-    let retryCount = 0;
-    let retryInterval: number | undefined;
+    let retryTimeout: number | undefined;
     
     // If loading has timed out but we're still in loading state
-    if (hasTimedOut && isLoading) {
-      retryInterval = window.setInterval(() => {
-        retryCount++;
-        
-        if (retryCount <= 3) {
-          console.log(`Auto-retry attempt ${retryCount} for transfer numbers`);
-          fetchTransferNumbers();
-        } else {
-          console.log("Maximum retry attempts reached, stopping auto-retry");
-          window.clearInterval(retryInterval);
-          
-          // Force loading state to false as a last resort
-          setIsLoading(false);
-          
-          toast({
-            title: "Loading failed",
-            description: "We couldn't load your transfer numbers after multiple attempts. Please try manually refreshing.",
-            variant: "destructive"
-          });
-        }
-      }, 10000); // Try every 10 seconds
+    if (hasTimedOut && isLoading && transferNumbers.length === 0) {
+      retryTimeout = window.setTimeout(() => {
+        console.log("Auto-retry for transfer numbers");
+        fetchTransferNumbers();
+      }, 3000); // Retry once after 3 seconds
     }
     
     return () => {
-      if (retryInterval) {
-        window.clearInterval(retryInterval);
+      if (retryTimeout) {
+        window.clearTimeout(retryTimeout);
       }
     };
-  }, [hasTimedOut, isLoading, fetchTransferNumbers, setIsLoading]);
+  }, [hasTimedOut, isLoading, transferNumbers.length, fetchTransferNumbers]);
   
   return {
     transferNumbers,
