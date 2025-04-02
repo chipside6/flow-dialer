@@ -5,7 +5,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Eye, EyeOff, ChevronLeft, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
-import { Checkbox } from '@/components/ui/checkbox';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
@@ -134,24 +133,6 @@ const SignUp = () => {
                   <Eye className="h-5 w-5" />
                 )}
               </button>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox id="terms" className="data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
-            <div className="text-sm text-gray-600">
-              I acknowledge and agree to the{' '}
-              <Link to="/terms" className="text-primary hover:underline">
-                Terms of Use
-              </Link>
-              , <Link to="/disclosure" className="text-primary hover:underline">
-                911 Disclosures
-              </Link>{' '}
-              and{' '}
-              <Link to="/privacy" className="text-primary hover:underline">
-                Privacy Policy
-              </Link>
-              .
             </div>
           </div>
 
