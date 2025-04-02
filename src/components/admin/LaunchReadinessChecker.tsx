@@ -1,370 +1,48 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, XCircle, AlertCircle, Loader2, RefreshCw, Settings } from "lucide-react";
-import { useAuth } from "@/contexts/auth";
-import { supabase } from "@/integrations/supabase/client";
-import { ASTERISK_API_URL, ASTERISK_API_USERNAME, ASTERISK_API_PASSWORD, asteriskService } from "@/utils/asteriskService";
-import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
 
-interface SystemCheck {
-  name: string;
-  status: "checking" | "success" | "error" | "warning";
-  message: string;
-}
+import React from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useAuth } from "@/contexts/auth";
+import ReadinessCheckerHeader from "./readiness-checker/ReadinessCheckerHeader";
+import ChecksList from "./readiness-checker/ChecksList";
+import InstructionsPanel from "./readiness-checker/InstructionsPanel";
+import { useReadinessChecker } from "./readiness-checker/useReadinessChecker";
 
 const LaunchReadinessChecker = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [checks, setChecks] = useState<SystemCheck[]>([
-    { name: "Supabase Connection", status: "checking", message: "Checking connection..." },
-    { name: "Asterisk Connection", status: "checking", message: "Checking Asterisk server..." },
-    { name: "Environment Variables", status: "checking", message: "Checking configuration..." },
-    { name: "Authentication", status: "checking", message: "Verifying authentication..." }
-  ]);
-  const [isRetrying, setIsRetrying] = useState(false);
-  const [serverInstructions, setServerInstructions] = useState<string | null>(null);
-  const [troubleshootInstructions, setTroubleshootInstructions] = useState<string | null>(null);
-  const [missingEnvVars, setMissingEnvVars] = useState<string[]>([]);
+  const {
+    checks,
+    isRetrying,
+    serverInstructions,
+    troubleshootInstructions,
+    missingEnvVars,
+    runChecks
+  } = useReadinessChecker(user);
 
-  const runChecks = async () => {
-    setIsRetrying(true);
-    setServerInstructions(null);
-    setTroubleshootInstructions(null);
-    setMissingEnvVars([]);
-    
-    // Reset checks to "checking" state
-    setChecks(prev => 
-      prev.map(check => ({ ...check, status: "checking", message: `Checking ${check.name.toLowerCase()}...` }))
-    );
-    
-    toast({
-      title: "Running checks",
-      description: "Verifying your system configuration...",
-    });
-    
-    // Check Supabase Connection
-    try {
-      const { data, error } = await supabase.from('contact_lists').select('count').limit(1);
-      if (error) throw error;
-      updateCheck("Supabase Connection", "success", "Connected to Supabase successfully");
-    } catch (error) {
-      updateCheck("Supabase Connection", "error", `Failed to connect: ${error.message}`);
-    }
-
-    // Check Asterisk Connection
-    try {
-      // Get stored values from localStorage to ensure we're using latest settings
-      const storedApiUrl = localStorage.getItem("asterisk_api_url");
-      const storedUsername = localStorage.getItem("asterisk_api_username");
-      const storedPassword = localStorage.getItem("asterisk_api_password");
-      
-      const effectiveApiUrl = storedApiUrl || ASTERISK_API_URL;
-      const effectiveUsername = storedUsername || ASTERISK_API_USERNAME;
-      const effectivePassword = storedPassword || ASTERISK_API_PASSWORD;
-      
-      if (!effectiveApiUrl || effectiveApiUrl === "" || effectiveApiUrl === "http://your-asterisk-server:8088/ari") {
-        updateCheck("Asterisk Connection", "error", "Asterisk URL not configured. Configure in SIP Configuration tab or set VITE_ASTERISK_API_URL environment variable.");
-        setServerInstructions("Configure your Asterisk server first and update the URL in the SIP Configuration tab.");
-      } else if (!effectiveUsername || !effectivePassword) {
-        updateCheck("Asterisk Connection", "error", "Asterisk credentials not configured. Configure in SIP Configuration tab or set VITE_ASTERISK_API_USERNAME and VITE_ASTERISK_API_PASSWORD environment variables.");
-        setServerInstructions("Configure your Asterisk API credentials in the SIP Configuration tab.");
-      } else {
-        // Use the temporary service to test the connection with latest settings
-        try {
-          const basicAuth = btoa(`${effectiveUsername}:${effectivePassword}`);
-          const response = await fetch(`${effectiveApiUrl}/applications`, {
-            headers: {
-              'Authorization': `Basic ${basicAuth}`,
-              'Content-Type': 'application/json',
-            },
-            signal: AbortSignal.timeout(5000) // 5 second timeout
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Server responded with status: ${response.status}`);
-          }
-          
-          updateCheck("Asterisk Connection", "success", "Successfully connected to Asterisk server");
-        } catch (connectionError) {
-          updateCheck("Asterisk Connection", "error", `Error testing connection: ${connectionError.message}`);
-          setServerInstructions(getAsteriskSetupInstructions(effectiveApiUrl));
-          setTroubleshootInstructions(getAsteriskTroubleshootingInstructions());
-        }
-      }
-    } catch (error) {
-      updateCheck("Asterisk Connection", "error", `Error testing Asterisk connection: ${error.message}`);
-      setTroubleshootInstructions(getAsteriskTroubleshootingInstructions());
-    }
-
-    // Check Environment Variables
-    const requiredVars = [
-      { name: "VITE_SUPABASE_URL", value: import.meta.env.VITE_SUPABASE_URL }, 
-      { name: "VITE_SUPABASE_PUBLISHABLE_KEY", value: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, 
-      { name: "VITE_ASTERISK_API_URL", value: import.meta.env.VITE_ASTERISK_API_URL },
-      { name: "VITE_ASTERISK_API_USERNAME", value: import.meta.env.VITE_ASTERISK_API_USERNAME },
-      { name: "VITE_ASTERISK_API_PASSWORD", value: import.meta.env.VITE_ASTERISK_API_PASSWORD }
-    ];
-    
-    const missing = requiredVars.filter(v => !v.value);
-    setMissingEnvVars(missing.map(v => v.name));
-    
-    if (missing.length === 0) {
-      updateCheck("Environment Variables", "success", "All required environment variables are set");
-    } else {
-      // Check if we have localStorage values for Asterisk settings
-      const hasStoredAsteriskSettings = 
-        localStorage.getItem("asterisk_api_url") && 
-        localStorage.getItem("asterisk_api_username") && 
-        localStorage.getItem("asterisk_api_password");
-      
-      const message = `Missing ${missing.length} variables: ${missing.map(v => v.name).join(', ')}`;
-      
-      // If some Asterisk settings are missing but we have localStorage values, show as warning instead of error
-      if (missing.every(v => v.name.startsWith('VITE_ASTERISK_')) && hasStoredAsteriskSettings) {
-        updateCheck("Environment Variables", "warning", 
-          "Using locally stored Asterisk settings instead of environment variables");
-      } else {
-        updateCheck("Environment Variables", "error", message);
-      }
-    }
-
-    // Check Authentication
-    if (user) {
-      updateCheck("Authentication", "success", "Authentication is working");
-    } else {
-      updateCheck("Authentication", "warning", "Not authenticated. Please login to verify authentication");
-    }
-    
-    setIsRetrying(false);
-    
-    toast({
-      title: "Checks completed",
-      description: "System configuration verification finished.",
-    });
-  };
-
-  const getAsteriskSetupInstructions = (url: string): string => {
-    // Get stored values from localStorage to ensure we're using latest settings
-    const storedUsername = localStorage.getItem("asterisk_api_username") || ASTERISK_API_USERNAME || 'asterisk';
-    
-    return `
-1. Install Asterisk on your server if not already installed
-2. Enable ARI (Asterisk REST Interface) in asterisk.conf
-3. Configure ARI user in ari.conf:
-   [general]
-   enabled = yes
-   
-   [${storedUsername}]
-   type = user
-   password = ${localStorage.getItem("asterisk_api_password") || ASTERISK_API_PASSWORD || 'asterisk'}
-   password_format = plain
-   read_only = no
-   
-4. Make sure Asterisk is running and the ARI endpoint is accessible at ${url}
-5. Open required ports in your firewall (typically 8088 for ARI)
-    `;
-  };
-
-  const getAsteriskTroubleshootingInstructions = (): string => {
-    return `
-COMMON ASTERISK TROUBLESHOOTING:
-
-1. Check Asterisk is running:
-   systemctl status asterisk
-
-2. Check Asterisk version (different commands based on version):
-   asterisk -rx "core show version"
-
-3. Check which SIP stack you're using:
-   For PJSIP (newer Asterisk versions):
-   - asterisk -rx "module show like pjsip"
-   - asterisk -rx "pjsip show endpoints" 
-   - asterisk -rx "pjsip show registrations"
-
-   For chan_sip (older Asterisk versions):
-   - asterisk -rx "module show like chan_sip"
-   - asterisk -rx "sip show peers"
-
-4. Verify your dialplan is loaded properly:
-   asterisk -rx "dialplan show"
-
-5. Check if ARI is enabled and ARI endpoints:
-   asterisk -rx "ari show status"
-   asterisk -rx "ari show users"
-
-6. Common error solutions:
-   - "No such command": Using command for the wrong SIP stack or module not loaded
-   - "No object found": This error means Asterisk couldn't find the resource you're looking for. Solutions:
-     * For "pjsip show endpoints" - You need to add endpoints to pjsip.conf first
-     * For ARI commands - Make sure applications are defined in ari.conf
-     * For any command - Check if the module is loaded with "module show like X"
-     * After adding configuration - Reload the appropriate module with "module reload X"
-   - Connection refused: Firewall blocking access or service not running
-
-7. "No object found" specific steps:
-   a. If you're seeing this with PJSIP:
-      - Make sure you've added your SIP provider configuration to pjsip.conf
-      - Reload the PJSIP module: asterisk -rx "pjsip reload"
-      - Verify the configuration format is correct (Asterisk 13+ uses different syntax)
-   
-   b. If you're seeing this with ARI:
-      - Make sure you've enabled ARI in asterisk.conf
-      - Make sure your ARI user is defined in ari.conf
-      - Restart Asterisk or reload the res_ari module
-
-8. After making configuration changes, reload Asterisk modules:
-   asterisk -rx "module reload"
-   asterisk -rx "dialplan reload"
-   asterisk -rx "pjsip reload" or "sip reload" (based on your SIP stack)
-`;
-  };
-
-  useEffect(() => {
-    runChecks();
-  }, [user]);
-
-  const updateCheck = (name: string, status: SystemCheck["status"], message: string) => {
-    setChecks(prev => 
-      prev.map(check => 
-        check.name === name ? { ...check, status, message } : check
-      )
-    );
-  };
-
-  const handleRetry = () => {
-    runChecks();
-  };
-
-  const goToSipConfig = () => {
-    navigate("/asterisk-config", { state: { tab: "config" } });
-  };
+  // Determine if we should show the config button in the header
+  const showConfigButtonHeader = checks.some(check => check.status === "error" && check.name === "Asterisk Connection");
+  
+  // Determine if we should show the config button in the missing env vars panel
+  const showConfigButtonEnvVars = missingEnvVars.length > 0;
 
   return (
     <Card className="shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-semibold">Launch Readiness Checker</CardTitle>
-        <div className="flex gap-2">
-          {(checks.some(check => check.status === "error" && check.name === "Asterisk Connection") || 
-           checks.some(check => check.status === "warning" && check.name.includes("Environment"))) && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={goToSipConfig}
-              className="flex items-center gap-2 active:scale-95 transition-transform"
-            >
-              <Settings className="h-4 w-4" />
-              Configure Asterisk
-            </Button>
-          )}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRetry} 
-            disabled={isRetrying}
-            className="flex items-center gap-2 active:scale-95 transition-transform"
-          >
-            {isRetrying ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
-            Retry Checks
-          </Button>
-        </div>
+      <CardHeader>
+        <ReadinessCheckerHeader 
+          isRetrying={isRetrying} 
+          onRetry={runChecks} 
+          showConfigButton={showConfigButtonHeader}
+        />
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {checks.map((check) => (
-            <div 
-              key={check.name} 
-              className="flex items-start p-3 border rounded-md"
-            >
-              <div className="mr-3 mt-0.5">
-                {check.status === "checking" && <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />}
-                {check.status === "success" && <CheckCircle2 className="h-5 w-5 text-green-500" />}
-                {check.status === "error" && <XCircle className="h-5 w-5 text-red-500" />}
-                {check.status === "warning" && <AlertCircle className="h-5 w-5 text-amber-500" />}
-              </div>
-              <div>
-                <p className="font-medium">{check.name}</p>
-                <p className={`text-sm ${
-                  check.status === "error" ? "text-red-500" : 
-                  check.status === "warning" ? "text-amber-500" : 
-                  check.status === "success" ? "text-green-500" : 
-                  "text-gray-500"
-                }`}>
-                  {check.message}
-                </p>
-              </div>
-            </div>
-          ))}
+          <ChecksList checks={checks} />
           
-          {missingEnvVars.length > 0 && (
-            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
-              <div className="flex items-start gap-2 mb-2">
-                <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
-                <div>
-                  <h4 className="font-medium">Missing Environment Variables</h4>
-                  <p className="text-sm text-amber-700">
-                    The following environment variables are not set:
-                  </p>
-                  <ul className="list-disc pl-5 text-sm text-amber-800 mt-1">
-                    {missingEnvVars.map(varName => (
-                      <li key={varName}>{varName}</li>
-                    ))}
-                  </ul>
-                  <p className="text-sm text-amber-700 mt-2">
-                    You can either set these as environment variables or configure them through the SIP Configuration tab.
-                  </p>
-                </div>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={goToSipConfig}
-                className="mt-2 flex items-center gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                Go to SIP Configuration
-              </Button>
-            </div>
-          )}
-          
-          {serverInstructions && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-              <h3 className="text-lg font-medium text-blue-800 mb-2">Server Setup Instructions</h3>
-              <pre className="whitespace-pre-wrap text-sm bg-white p-3 rounded border border-blue-100 overflow-x-auto text-blue-900">
-                {serverInstructions}
-              </pre>
-            </div>
-          )}
-
-          {troubleshootInstructions && (
-            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
-              <h3 className="text-lg font-medium text-amber-800 mb-2">Troubleshooting Guide</h3>
-              <pre className="whitespace-pre-wrap text-sm bg-white p-3 rounded border border-amber-100 overflow-x-auto text-amber-900">
-                {troubleshootInstructions}
-              </pre>
-            </div>
-          )}
-          
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-            <h3 className="text-lg font-medium text-blue-800 mb-2">Supabase Setup</h3>
-            <p className="text-sm mb-2">
-              Your application is now configured to use Supabase exclusively as the backend. The Supabase integration provides:
-            </p>
-            <ul className="list-disc pl-5 text-sm space-y-1">
-              <li>Database storage (PostgreSQL)</li>
-              <li>User authentication</li>
-              <li>File storage</li>
-              <li>Real-time functionality</li>
-            </ul>
-            <p className="text-sm mt-3">
-              All necessary API endpoints are handled through the Supabase client, removing the need for a separate API server.
-            </p>
-          </div>
+          <InstructionsPanel 
+            serverInstructions={serverInstructions}
+            troubleshootInstructions={troubleshootInstructions}
+            missingEnvVars={missingEnvVars}
+            showConfigButton={showConfigButtonEnvVars}
+          />
         </div>
       </CardContent>
     </Card>
