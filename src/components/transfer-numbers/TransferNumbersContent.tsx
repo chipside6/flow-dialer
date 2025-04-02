@@ -6,7 +6,6 @@ import { TransferNumbersList } from "./TransferNumbersList";
 import { ErrorAlert } from "./ErrorAlert";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
 
 interface TransferNumbersContentProps {
   transferNumbers: TransferNumber[];
@@ -177,13 +176,6 @@ export const TransferNumbersContent = ({
         onDeleteTransferNumber={handleDeleteTransferNumber}
         onRefresh={onRefresh}
       />
-      
-      {isLoading && forceShowContent && (
-        <div className="mt-4 flex items-center justify-center py-2">
-          <Loader2 className="h-5 w-5 text-primary mr-2 animate-spin" />
-          <span className="text-muted-foreground">Refreshing data...</span>
-        </div>
-      )}
     </>
   );
 };

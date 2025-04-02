@@ -126,8 +126,8 @@ const TransferNumbers = () => {
         <Alert variant="destructive" className="mb-6">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Authentication Error</AlertTitle>
-          <AlertDescription className="flex flex-col gap-2">
-            <span>There was an issue with your login session. Please try signing out and back in.</span>
+          <AlertDescription>
+            There was an issue with your login session. Please try signing out and back in.
           </AlertDescription>
         </Alert>
       )}
