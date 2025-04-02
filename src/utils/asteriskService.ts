@@ -70,5 +70,34 @@ export const asteriskService = {
     return {
       success: true
     };
+  },
+
+  // Method to generate SIP trunk configuration
+  generateSipTrunkConfig(
+    providerName: string,
+    host: string,
+    port: string,
+    username: string,
+    password: string
+  ) {
+    // Generate a basic SIP trunk configuration for Asterisk
+    return `
+[${providerName}]
+type=peer
+host=${host}
+port=${port}
+username=${username}
+secret=${password}
+fromuser=${username}
+context=from-trunk
+disallow=all
+allow=ulaw
+allow=alaw
+dtmfmode=rfc2833
+insecure=port,invite
+nat=force_rport,comedia
+qualify=yes
+directmedia=no
+`.trim();
   }
 };
