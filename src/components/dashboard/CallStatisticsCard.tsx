@@ -2,8 +2,9 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, PhoneCall, PhoneForwarded, PhoneOff, VoicemailIcon } from "lucide-react";
+import { Eye, PhoneCall, PhoneForwarded, PhoneOff, VoicemailIcon } from "lucide-react";
 import { useCampaigns } from "@/hooks/useCampaigns";
+import { CallDetailsModal } from "./CallDetailsModal";
 
 interface CallStatistic {
   id: string;
@@ -16,7 +17,8 @@ interface CallStatistic {
 
 export const CallStatisticsCard = () => {
   const { campaigns } = useCampaigns();
-  const [showPhoneNumbers, setShowPhoneNumbers] = useState(false);
+  const [selectedStatistic, setSelectedStatistic] = useState<CallStatistic | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   // Calculate totals from all campaigns
   const totalStats = campaigns.reduce((acc, campaign) => {
@@ -31,14 +33,23 @@ export const CallStatisticsCard = () => {
   }, { total: 0, transferred: 0, failed: 0, voicemail: 0 });
   
   // Sample phone numbers (in a real app, these would come from your database)
-  // For demonstration purposes, we're creating dummy phone numbers based on campaign data
   const getPhoneNumbers = (type: 'total' | 'transferred' | 'failed' | 'voicemail') => {
     if (!campaigns.length) return ['No phone numbers available'];
     
     // This is just for demo purposes - in reality, you would fetch real phone numbers
-    const phoneNumbers = campaigns.map((campaign, index) => {
-      return `+1-${Math.floor(100 + Math.random() * 900)}-${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`;
-    }).slice(0, 3); // Limit to 3 for display purposes
+    const phoneNumbers = campaigns.flatMap((campaign, index) => {
+      const count = type === 'total' 
+        ? campaign.totalCalls || 0
+        : type === 'transferred' 
+          ? campaign.transferredCalls || 0
+          : type === 'failed'
+            ? campaign.failedCalls || 0
+            : (campaign.totalCalls || 0) - (campaign.transferredCalls || 0) - (campaign.failedCalls || 0);
+      
+      return Array(Math.min(count, 3)).fill(0).map((_, i) => 
+        `+1-${Math.floor(100 + Math.random() * 900)}-${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`
+      );
+    });
     
     return phoneNumbers.length ? phoneNumbers : ['No phone numbers available'];
   };
@@ -78,46 +89,62 @@ export const CallStatisticsCard = () => {
     }
   ];
 
+  const handleViewDetails = (stat: CallStatistic) => {
+    setSelectedStatistic(stat);
+    setDetailsOpen(true);
+  };
+
   return (
-    <Card className="shadow-sm">
-      <CardHeader className="pb-2 flex flex-row justify-between items-center">
-        <CardTitle className="text-xl">Call Statistics</CardTitle>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => setShowPhoneNumbers(!showPhoneNumbers)}
-          className="h-8 px-2 text-muted-foreground"
-        >
-          {showPhoneNumbers ? (
-            <EyeOff className="h-4 w-4 mr-1" />
-          ) : (
-            <Eye className="h-4 w-4 mr-1" />
-          )}
-          {showPhoneNumbers ? 'Hide Numbers' : 'View Numbers'}
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {callStats.map((stat) => (
-            <div key={stat.id} className="flex flex-col p-3 border rounded-lg bg-card">
-              <div className="flex items-center mb-2">
-                <div className={`rounded-full p-1.5 mr-2 ${stat.color.replace('text-', 'bg-').replace('500', '100')}`}>
-                  <span className={stat.color}>{stat.icon}</span>
+    <>
+      <Card className="shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl">Call Statistics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {callStats.map((stat) => (
+              <div key={stat.id} className="flex flex-col p-3 border rounded-lg bg-card">
+                <div className="flex items-center mb-2">
+                  <div className={`rounded-full p-1.5 mr-2 ${stat.color.replace('text-', 'bg-').replace('500', '100')}`}>
+                    <span className={stat.color}>{stat.icon}</span>
+                  </div>
+                  <div className="font-medium">{stat.title}</div>
                 </div>
-                <div className="font-medium">{stat.title}</div>
+                <div className="text-2xl font-bold mb-1">{stat.count}</div>
+                <div className="mt-2 pt-2 border-t text-xs">
+                  <div className="text-muted-foreground">
+                    {stat.phoneNumbers && stat.phoneNumbers[0] === 'No phone numbers available' ? (
+                      "No phone numbers available"
+                    ) : (
+                      <>Phone numbers available</>
+                    )}
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full mt-1 p-1 h-auto flex justify-center"
+                    onClick={() => handleViewDetails(stat)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    <span>View Details</span>
+                  </Button>
+                </div>
               </div>
-              <div className="text-2xl font-bold mb-1">{stat.count}</div>
-              {showPhoneNumbers && (
-                <div className="mt-2 pt-2 border-t text-xs space-y-1 max-h-24 overflow-y-auto">
-                  {stat.phoneNumbers?.map((phone, idx) => (
-                    <div key={idx} className="text-muted-foreground">{phone}</div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedStatistic && (
+        <CallDetailsModal
+          open={detailsOpen}
+          onOpenChange={setDetailsOpen}
+          title={selectedStatistic.title}
+          phoneNumbers={selectedStatistic.phoneNumbers || []}
+          icon={selectedStatistic.icon}
+          iconColor={selectedStatistic.color}
+        />
+      )}
+    </>
   );
 };
