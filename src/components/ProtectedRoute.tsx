@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/auth';
 import { toast } from '@/components/ui/use-toast';
+import { clearAllAuthData } from '@/utils/sessionCleanup';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -72,16 +73,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
         <button 
           onClick={() => {
             // Clear any stale auth data before redirecting
-            try {
-              for (const key of Object.keys(localStorage)) {
-                if (key.includes('supabase') || key.includes('auth') || key.includes('session') || key.includes('token')) {
-                  localStorage.removeItem(key);
-                }
-              }
-            } catch (e) {
-              console.warn("Error clearing auth data:", e);
-            }
-            
+            clearAllAuthData();
             window.location.href = '/login';
           }} 
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md mt-4 hover:bg-primary/90 transition-colors"
