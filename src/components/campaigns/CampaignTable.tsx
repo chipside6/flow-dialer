@@ -20,10 +20,10 @@ export const CampaignTable: React.FC = () => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Execution</TableHead>
-          <TableHead>Progress</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead className="w-[30%]">Name</TableHead>
+          <TableHead className="w-[15%]">Execution</TableHead>
+          <TableHead className="w-[30%]">Progress</TableHead>
+          <TableHead className="text-right w-[25%]">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
