@@ -30,9 +30,8 @@
   }
   
   /* Fixed button styles - proper z-index to prevent content overlap */
-  .fixed.top-4.left-4.z-40,
-  .fixed.top-5.left-4.z-40,
-  .fixed.top-5.left-4.z-50 {
+  .fixed.top-5.right-4.z-40,
+  .fixed.top-5.right-4.z-50 {
     transition: all 0.3s ease;
     z-index: 60 !important;
   }
@@ -53,12 +52,12 @@
   
   /* Additional margin for page headings to avoid mobile menu button overlap */
   .container-fluid h1 {
-    margin-left: 8px;
+    margin-right: 60px;
   }
   
   /* Fix SIP provider card headers */
   .card .flex.items-center {
-    padding-left: 8px;
+    padding-right: 8px;
   }
   
   /* Ensure mobile sidebar button is visible */

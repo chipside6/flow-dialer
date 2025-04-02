@@ -47,7 +47,7 @@
     padding: 12px 20px !important;
   }
   
-  /* Specific styles for mobile menu button */
+  /* Specific styles for mobile menu button - now on right side */
   .mobile-menu-button,
   [data-mobile-menu-button="true"],
   .mobile-sidebar-button {
@@ -57,6 +57,10 @@
     min-height: 42px !important;
     border-radius: 50% !important;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12) !important;
+    position: fixed !important;
+    right: 16px !important;
+    top: 16px !important;
+    z-index: 60 !important;
   }
   
   /* Center button containers */
