@@ -80,4 +80,56 @@
   .grid-cols-1 .card {
     margin-bottom: 16px;
   }
+  
+  /* Call Statistics Card specific fixes */
+  .shadow-sm .grid-cols-2 {
+    grid-gap: 8px !important;
+  }
+  
+  /* Better spacing for call stats cards */
+  .shadow-sm .grid-cols-2 > div {
+    padding: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    min-height: 130px !important;
+  }
+  
+  /* Call statistics title and icons */
+  .shadow-sm .grid-cols-2 > div .flex.items-center {
+    margin-bottom: 4px !important;
+  }
+  
+  /* Call statistics numbers */
+  .shadow-sm .grid-cols-2 > div .text-3xl {
+    font-size: 24px !important;
+    margin: 4px 0 !important;
+    text-align: center !important;
+  }
+  
+  /* Call statistics view details button */
+  .shadow-sm .grid-cols-2 > div .mt-1 button {
+    height: 28px !important;
+    font-size: 11px !important;
+    padding: 0 8px !important;
+  }
+  
+  /* Fix icon sizes in call statistics */
+  .shadow-sm .grid-cols-2 > div svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  
+  /* Fix icon container sizes */
+  .shadow-sm .grid-cols-2 > div .rounded-full {
+    padding: 4px !important;
+  }
+  
+  /* Keep titles one line */
+  .shadow-sm .grid-cols-2 > div .font-medium {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 12px !important;
+  }
 }

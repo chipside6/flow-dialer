@@ -1,9 +1,11 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, PhoneCall, PhoneForwarded, PhoneOff, VoicemailIcon } from "lucide-react";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { CallDetailsModal } from "./CallDetailsModal";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CallStatistic {
   id: string;
@@ -18,6 +20,7 @@ export const CallStatisticsCard = () => {
   const { campaigns } = useCampaigns();
   const [selectedStatistic, setSelectedStatistic] = useState<CallStatistic | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   // Calculate totals from all campaigns
   const totalStats = campaigns.reduce((acc, campaign) => {
@@ -31,7 +34,7 @@ export const CallStatisticsCard = () => {
     };
   }, { total: 0, transferred: 0, failed: 0, voicemail: 0 });
   
-  // Get phone numbers from campaigns data - without showing "no phone numbers available"
+  // Get phone numbers from campaigns data
   const getPhoneNumbers = (type: 'total' | 'transferred' | 'failed' | 'voicemail') => {
     if (!campaigns.length) return [];
     
@@ -97,28 +100,31 @@ export const CallStatisticsCard = () => {
     <>
       <Card className="shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-xl">Call Statistics</CardTitle>
+          <CardTitle className="text-xl text-center">Call Statistics</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {callStats.map((stat) => (
-              <div key={stat.id} className="flex flex-col p-3 border rounded-lg bg-card">
-                <div className="flex items-center mb-2">
-                  <div className={`rounded-full p-1.5 mr-2 ${stat.color.replace('text-', 'bg-').replace('500', '100')}`}>
+              <div 
+                key={stat.id} 
+                className="flex flex-col p-3 border rounded-lg bg-card shadow-sm"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`rounded-full p-1.5 ${stat.color.replace('text-', 'bg-').replace('500', '100')}`}>
                     <span className={stat.color}>{stat.icon}</span>
                   </div>
-                  <div className="font-medium">{stat.title}</div>
+                  <div className="font-medium text-sm">{stat.title}</div>
                 </div>
-                <div className="text-2xl font-bold mb-1">{stat.count}</div>
-                <div className="mt-2 pt-2 border-t text-xs">
+                <div className="text-3xl font-bold text-center my-2">{stat.count}</div>
+                <div className="mt-1 pt-2 border-t text-xs">
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="w-full mt-1 p-1 h-auto flex justify-center items-center"
+                    className="w-full h-8 text-xs flex justify-center items-center"
                     onClick={() => handleViewDetails(stat)}
                     aria-label={`View ${stat.title} details`}
                   >
-                    <Eye className="h-4 w-4 mr-1" />
+                    <Eye className="h-3 w-3 mr-1" />
                     <span>View Details</span>
                   </Button>
                 </div>
