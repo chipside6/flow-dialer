@@ -114,11 +114,7 @@ export const CallStatisticsCard = () => {
                 <div className="text-2xl font-bold mb-1">{stat.count}</div>
                 <div className="mt-2 pt-2 border-t text-xs">
                   <div className="text-muted-foreground">
-                    {stat.phoneNumbers && stat.phoneNumbers[0] === 'No phone numbers available' ? (
-                      "No phone numbers available"
-                    ) : (
-                      <>Phone numbers available</>
-                    )}
+                    Phone numbers available
                   </div>
                   <Button 
                     variant="ghost" 

@@ -143,7 +143,7 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
                           </Card>
                         ))
                       ) : (
-                        <div className="text-muted-foreground">No phone numbers available</div>
+                        <div className="text-muted-foreground">Phone numbers will appear here</div>
                       )}
                     </div>
                   </div>
