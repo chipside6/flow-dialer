@@ -143,12 +143,12 @@ VITE_ASTERISK_API_PASSWORD=${password}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Alert className="mb-4">
-          <Info className="h-4 w-4" />
-          <AlertTitle>Lovable Hosting Notice</AlertTitle>
-          <AlertDescription>
+        <Alert className="mb-4 bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4 text-blue-600" />
+          <AlertTitle className="text-blue-800">Lovable Hosting Notice</AlertTitle>
+          <AlertDescription className="text-blue-700">
             Since you're hosting on Lovable, these environment variables will be saved in the application.
-            You can modify them here at any time.
+            The values you enter here will be used throughout the application.
           </AlertDescription>
         </Alert>
         

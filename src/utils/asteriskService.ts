@@ -124,20 +124,46 @@ export const asteriskService = {
       
       const basicAuth = btoa(`${username}:${password}`);
       
-      // Simple test to see if we can connect - many Asterisk setups will return
-      // a 404 for /applications endpoint due to ARI module configuration, so we'll
-      // just check for a response rather than the specific data
-      const response = await fetch(`${apiUrl}/ping`, {
-        headers: {
-          'Authorization': `Basic ${basicAuth}`,
-          'Content-Type': 'application/json',
-        },
-        signal: AbortSignal.timeout(5000) // 5 second timeout
-      });
+      // Try to connect with a shorter timeout for better user experience
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
       
-      // Even if we get a 404, it could be a valid Asterisk server
-      // so we'll consider any response without a network error as success
-      return { success: true };
+      try {
+        const response = await fetch(`${apiUrl}/ping`, {
+          headers: {
+            'Authorization': `Basic ${basicAuth}`,
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        // Even if we get a 404, it could be a valid Asterisk server
+        // so we'll consider any response without a network error as success
+        console.log("Asterisk connection test successful with response status:", response.status);
+        return { success: true };
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        
+        // If it's a timeout error, give a more specific message
+        if (fetchError.name === 'AbortError') {
+          console.error('Connection to Asterisk server timed out');
+          return { 
+            success: false, 
+            error: fetchError,
+            message: 'Connection to Asterisk server timed out. Please check that the server is running and accessible.'
+          };
+        }
+        
+        // If it's a network error, probably the server isn't running or reachable
+        console.error('Network error connecting to Asterisk server:', fetchError);
+        return { 
+          success: false, 
+          error: fetchError,
+          message: 'Cannot reach Asterisk server. Please check that the server is running and the URL is correct.'
+        };
+      }
     } catch (error) {
       console.error('Error testing Asterisk connection:', error);
       return { 
