@@ -70,10 +70,16 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
       href: "/diagnostics",
       label: "Diagnostics",
       icon: Activity,
+    },
+    // Add Asterisk Config to regular routes available to all users
+    {
+      href: "/asterisk-config",
+      label: "Asterisk Config",
+      icon: Phone,
     }
   ];
 
-  // Add admin route if user is admin
+  // Add admin-only route if user is admin
   if (isAdmin) {
     routes.push({
       href: "/admin",
