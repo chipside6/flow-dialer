@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { Logo } from '@/components/ui/Logo';
@@ -67,22 +68,23 @@ const SignUp = () => {
   };
 
   return (
-    <div className="container max-w-md mx-auto py-10">
-      <Card className="border border-border/40 shadow-sm">
-        <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-4">
-            <Logo size="lg" />
+    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-10 mx-auto">
+      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 z-0 rounded-xl"></div>
+        <CardHeader className="space-y-1 relative z-10">
+          <div className="flex justify-center mb-6">
+            <Logo size="lg" className="animate-fade-in" />
           </div>
-          <CardTitle className="text-2xl font-semibold text-center">
+          <CardTitle className="text-2xl font-bold text-center">
             Create an account
           </CardTitle>
           <CardDescription className="text-center">
             Enter your details below to create your account
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 relative z-10">
           {errorMessage && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="animate-fade-in">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
@@ -90,43 +92,54 @@ const SignUp = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Create a strong password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Create a strong password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
+                  required
+                  minLength={6}
+                />
+              </div>
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full font-semibold transition-all group" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating account...
                 </>
               ) : (
-                "Sign Up"
+                <>
+                  Sign Up 
+                  <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </>
               )}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center pb-6 relative z-10">
           <p className="text-sm text-center text-muted-foreground">
             Already have an account?{" "}
-            <Link to="/login" className="text-primary hover:underline">
+            <Link to="/login" className="text-primary font-medium hover:underline transition-colors">
               Login
             </Link>
           </p>

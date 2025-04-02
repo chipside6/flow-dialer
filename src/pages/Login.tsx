@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, AlertCircle, ShieldAlert } from 'lucide-react';
+import { Loader2, AlertCircle, ShieldAlert, Mail, Lock, LogIn } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
@@ -98,14 +98,15 @@ const Login = () => {
   });
 
   return (
-    <div className="container max-w-md mx-auto py-10">
-      <Card className="border border-border/40 shadow-sm">
-        <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-4">
-            <Logo size="lg" />
+    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-10 mx-auto">
+      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 z-0 rounded-xl"></div>
+        <CardHeader className="space-y-1 relative z-10">
+          <div className="flex justify-center mb-6">
+            <Logo size="lg" className="animate-fade-in" />
           </div>
-          <CardTitle className="text-2xl font-semibold text-center">
-            {isAdminRedirect ? "Administrator Login" : "Login to your account"}
+          <CardTitle className="text-2xl font-bold text-center">
+            {isAdminRedirect ? "Administrator Login" : "Welcome back"}
           </CardTitle>
           <CardDescription className="text-center">
             {isAdminRedirect 
@@ -113,7 +114,7 @@ const Login = () => {
               : "Enter your credentials below to access your account"}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 relative z-10">
           {isAdminRedirect && (
             <Alert className="bg-amber-50 border-amber-200">
               <ShieldAlert className="h-4 w-4 text-amber-600" />
@@ -124,7 +125,7 @@ const Login = () => {
           )}
           
           {errorMessage && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="animate-fade-in">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
@@ -132,42 +133,53 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="you@example.com" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="you@example.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input 
-                id="password" 
-                type="password" 
-                placeholder="Enter your password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="Enter your password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full font-semibold transition-all group" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Logging in...
                 </>
               ) : (
-                isAdminRedirect ? "Sign in as Administrator" : "Login"
+                <>
+                  {isAdminRedirect ? "Sign in as Administrator" : "Login"} 
+                  <LogIn className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </>
               )}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center pb-6 relative z-10">
           <p className="text-sm text-center text-muted-foreground">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-primary hover:underline">
+            <Link to="/signup" className="text-primary font-medium hover:underline transition-colors">
               Sign Up
             </Link>
           </p>
