@@ -10,9 +10,9 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
   console.log(`[TransferNumbersService] Fetching transfer numbers for user: ${userId}`);
   
   try {
-    // Set a shorter timeout for the query
+    // Set a shorter timeout for the query (3 seconds)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout (reduced from 4s)
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
     
     // Fetch transfer numbers for this user
     const { data, error } = await supabase
@@ -44,7 +44,7 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
     // Handle timeout errors
     if (error.name === 'AbortError') {
       console.error("[TransferNumbersService] Timeout error fetching transfer numbers");
-      throw new Error("Request timed out when fetching transfer numbers. Please try again.");
+      throw new Error("Connection timed out when fetching transfer numbers. Please try again.");
     }
     
     console.error(`[TransferNumbersService] Error in fetchUserTransferNumbers:`, error);

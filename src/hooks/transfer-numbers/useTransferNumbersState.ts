@@ -2,6 +2,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { TransferNumber } from "@/types/transferNumber";
 import { usePollingInterval } from "@/hooks/usePollingInterval";
+import { toast } from "@/components/ui/use-toast";
 
 export function useTransferNumbersState() {
   const [transferNumbers, setTransferNumbers] = useState<TransferNumber[]>([]);
@@ -23,12 +24,18 @@ export function useTransferNumbersState() {
     if (isLoading) {
       startTimeRef.current = Date.now();
       
-      // Set a timeout to mark the loading as timed out after 8 seconds
+      // Set a timeout to mark the loading as timed out after 5 seconds (reduced from 8s)
       // This allows the UI to show a different state after this time
       timeoutTracker.current = setTimeout(() => {
-        console.log("Loading timeout reached, resetting isLoading state");
+        console.log("Loading timeout reached, handling gracefully");
         setHasTimedOut(true);
-      }, 8000);
+        
+        toast({
+          title: "Loading timeout reached",
+          description: "We're having trouble loading your transfer numbers. You can try refreshing.",
+          variant: "destructive" 
+        });
+      }, 5000);
     } else {
       if (timeoutTracker.current) {
         clearTimeout(timeoutTracker.current);
@@ -40,13 +47,14 @@ export function useTransferNumbersState() {
     }
     
     // Set an extreme timeout that will forcibly reset the loading state
-    // after 15 seconds, regardless of what happens
+    // after 10 seconds (reduced from 15s), regardless of what happens
     const extremeTimeout = setTimeout(() => {
       if (isLoading) {
         console.log("Extreme loading timeout reached, forcing loading state to false");
         setIsLoading(false);
+        setError("Connection timed out. Please try again later.");
       }
-    }, 15000);
+    }, 10000);
     
     return () => {
       if (timeoutTracker.current) {
@@ -58,6 +66,9 @@ export function useTransferNumbersState() {
   
   // Function to trigger a refresh
   const refreshTransferNumbers = useCallback(async () => {
+    // Clear any existing error since we're retrying
+    setError(null);
+    
     // Update the lastRefresh timestamp to trigger a new fetch
     lastRefreshRef.current = Date.now();
     setLastRefresh(lastRefreshRef.current);

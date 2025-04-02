@@ -32,61 +32,26 @@ export const TransferNumbersContent = ({
   onRefresh
 }: TransferNumbersContentProps) => {
   const [forceShowContent, setForceShowContent] = useState(false);
-  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
   
-  // Reset timeout state when loading changes
-  useEffect(() => {
-    if (!isLoading) {
-      setLoadingTimedOut(false);
-    }
-  }, [isLoading]);
-  
-  // Force show content after shorter timeout to prevent infinite loading
+  // Force show content after a short timeout for better UX
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading && isInitialLoad) {
         setForceShowContent(true);
-        if (isLoading) {
-          toast({
-            title: "Still loading data",
-            description: "We're showing you the UI while data continues to load in the background"
-          });
-        }
       }
-    }, 1500); // Reduced from 2 seconds to 1.5 seconds for faster UI feedback
+    }, 1000); // Show content after 1 second even if still loading
     
     return () => clearTimeout(timer);
   }, [isLoading, isInitialLoad]);
   
-  // Add timeout for loading state
-  useEffect(() => {
-    if (!isLoading) return;
-    
-    const longLoadingTimer = setTimeout(() => {
-      if (isLoading) {
-        setLoadingTimedOut(true);
-        if (!forceShowContent) {
-          setForceShowContent(true);
-        }
-        
-        toast({
-          title: "Loading timeout reached",
-          description: "We're having trouble loading your data. You can still use the application.",
-          variant: "destructive" // Changed from potentially 'warning' to 'destructive'
-        });
-      }
-    }, 4000); // 4 seconds timeout (reduced from 5s)
-    
-    return () => clearTimeout(longLoadingTimer);
-  }, [isLoading, forceShowContent]);
-  
-  // During initial load, show a dedicated loading state for a shorter time
+  // If this is the initial load and we're still loading (and haven't forced content)
   if (isInitialLoad && isLoading && !forceShowContent) {
     return (
       <LoadingState 
         message="Loading your transfer numbers, please wait..." 
-        timeout={1500} // 1.5 seconds timeout (reduced from 2s)
+        timeout={5000} // 5 seconds timeout for initial load
         onRetry={onRefresh}
+        errorVariant="warning"
       />
     );
   }
@@ -95,16 +60,16 @@ export const TransferNumbersContent = ({
     <>
       <ErrorAlert error={error} onRetry={onRefresh} />
       
-      {loadingTimedOut && isLoading && (
+      {isLoading && forceShowContent && (
         <Alert variant="warning" className="mb-6">
-          <AlertCircle className="h-4 w-4 text-amber-500" />
-          <AlertDescription className="text-amber-800 flex items-center justify-between w-full">
-            <span>Loading is taking longer than expected. You can continue to use the application.</span>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>Loading your transfer numbers...</span>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={onRefresh} 
-              className="ml-2 bg-amber-50"
+              className="ml-2"
             >
               <RefreshCw className="h-3 w-3 mr-1" /> Retry
             </Button>

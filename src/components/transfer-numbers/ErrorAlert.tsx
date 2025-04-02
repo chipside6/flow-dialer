@@ -16,16 +16,18 @@ export const ErrorAlert = ({ error, onRetry }: ErrorAlertProps) => {
     <Alert variant="destructive" className="mb-6">
       <AlertTriangle className="h-4 w-4" />
       <AlertTitle>Error loading transfer numbers</AlertTitle>
-      <AlertDescription>{error}</AlertDescription>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={onRetry} 
-        className="mt-2"
-      >
-        <RefreshCw className="h-4 w-4 mr-2" />
-        Try Again
-      </Button>
+      <AlertDescription className="flex flex-col gap-2">
+        <span>{error}</span>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={onRetry} 
+          className="w-fit mt-2 bg-destructive/10 text-destructive hover:bg-destructive/20"
+        >
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Try Again
+        </Button>
+      </AlertDescription>
     </Alert>
   );
 };
