@@ -56,22 +56,21 @@ export const useFetchTransferNumbers = ({
         setTransferNumbers([]);
         setIsLoading(false);
         
-        // Provide user-friendly error feedback
         toast({
           title: "Error loading transfer numbers",
           description: errorMessage,
           variant: "destructive",
         });
         
-        throw err;
+        return [];
       }
     },
     {
       cacheKey: user?.id ? `transfer-numbers-${user.id}` : undefined,
-      cacheDuration: 2 * 60 * 1000, // 2 minutes (reduced from 5 minutes)
+      cacheDuration: 60 * 1000, // 1 minute (reduced from 2 minutes)
       enabled: false, // Don't fetch automatically, we'll call it explicitly
       retry: 1, // Reduced from 2 to 1 retry
-      retryDelay: 1000, // Reduced from 2000 to 1000ms
+      retryDelay: 800, // Reduced retry delay
       onSuccess: () => setIsLoading(false),
       onError: () => setIsLoading(false)
     }

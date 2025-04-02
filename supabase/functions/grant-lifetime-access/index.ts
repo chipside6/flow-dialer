@@ -35,12 +35,7 @@ serve(async (req) => {
         auth: {
           autoRefreshToken: false,
           persistSession: false,
-        },
-        global: {
-          headers: {
-            'X-Client-Info': 'supabase-edge-function',
-          },
-        },
+        }
       }
     );
 
@@ -56,33 +51,23 @@ serve(async (req) => {
     }
     
     // Verify the requesting user is an admin
-    let authData;
     try {
-      const authResult = await Promise.race([
+      // Get the user from the token
+      const { data: authData, error: authError } = await Promise.race([
         supabaseClient.auth.getUser(adminToken),
         timeoutPromise(DB_OPERATION_TIMEOUT)
       ]);
-      authData = authResult.data;
-    } catch (error) {
-      console.error("Auth verification timed out:", error);
-      return new Response(
-        JSON.stringify({ error: 'Authentication verification timed out', success: false }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 408 }
-      );
-    }
-    
-    if (!authData || !authData.user) {
-      console.error("Invalid admin authentication");
-      return new Response(
-        JSON.stringify({ error: 'Invalid admin authentication', success: false }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
-    }
-    
-    // Check if the requesting user is an admin
-    let adminProfile;
-    try {
-      const profileResult = await Promise.race([
+      
+      if (authError || !authData.user) {
+        console.error("Invalid admin authentication:", authError);
+        return new Response(
+          JSON.stringify({ error: 'Invalid admin authentication', success: false }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+        );
+      }
+      
+      // Check if the requesting user is an admin
+      const { data: adminProfile, error: profileError } = await Promise.race([
         supabaseClient
           .from('profiles')
           .select('is_admin')
@@ -90,29 +75,27 @@ serve(async (req) => {
           .single(),
         timeoutPromise(DB_OPERATION_TIMEOUT)
       ]);
-      adminProfile = profileResult.data;
-    } catch (error) {
-      console.error("Admin profile check timed out:", error);
-      return new Response(
-        JSON.stringify({ error: 'Admin profile verification timed out', success: false }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 408 }
-      );
-    }
-    
-    if (!adminProfile || !adminProfile.is_admin) {
-      console.error("Requesting user is not an admin");
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized: Admin privileges required', success: false }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
-      );
-    }
-    
-    console.log(`Admin user ${authData.user.id} is granting lifetime access to user ${targetUserId}`);
-    
-    // First check if the user already has a subscription
-    let existingSubscription;
-    try {
-      const subscriptionResult = await Promise.race([
+      
+      if (profileError) {
+        console.error("Error checking admin profile:", profileError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to verify admin status', success: false }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        );
+      }
+      
+      if (!adminProfile || !adminProfile.is_admin) {
+        console.error("Requesting user is not an admin");
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Admin privileges required', success: false }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
+        );
+      }
+      
+      console.log(`Admin user ${authData.user.id} is granting lifetime access to user ${targetUserId}`);
+      
+      // First check if the user already has a subscription
+      const { data: existingSubscription, error: subscriptionError } = await Promise.race([
         supabaseClient
           .from('subscriptions')
           .select('*')
@@ -120,22 +103,21 @@ serve(async (req) => {
           .maybeSingle(),
         timeoutPromise(DB_OPERATION_TIMEOUT)
       ]);
-      existingSubscription = subscriptionResult.data;
-    } catch (error) {
-      console.error(`Subscription check timed out:`, error);
-      return new Response(
-        JSON.stringify({ error: 'Subscription check timed out', success: false }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 408 }
-      );
-    }
-    
-    let subscriptionResult;
-    
-    try {
+      
+      if (subscriptionError) {
+        console.error(`Subscription check error:`, subscriptionError);
+        return new Response(
+          JSON.stringify({ error: 'Error checking existing subscription', success: false }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        );
+      }
+      
+      let subscriptionResult;
+      
       if (existingSubscription) {
         // Update existing subscription
         console.log(`Updating existing subscription for user ${targetUserId}`);
-        const updateResult = await Promise.race([
+        const { data, error } = await Promise.race([
           supabaseClient
             .from('subscriptions')
             .update({
@@ -146,19 +128,20 @@ serve(async (req) => {
               updated_at: new Date().toISOString()
             })
             .eq('user_id', targetUserId)
-            .select(),
+            .select()
+            .single(),
           timeoutPromise(DB_OPERATION_TIMEOUT)
         ]);
         
-        if (updateResult.error) {
-          throw updateResult.error;
+        if (error) {
+          throw error;
         }
         
-        subscriptionResult = updateResult.data;
+        subscriptionResult = data;
       } else {
         // Insert new subscription
         console.log(`Creating new subscription for user ${targetUserId}`);
-        const insertResult = await Promise.race([
+        const { data, error } = await Promise.race([
           supabaseClient
             .from('subscriptions')
             .insert({
@@ -169,64 +152,67 @@ serve(async (req) => {
               current_period_end: null, // Null for lifetime plans
               updated_at: new Date().toISOString()
             })
-            .select(),
+            .select()
+            .single(),
           timeoutPromise(DB_OPERATION_TIMEOUT)
         ]);
         
-        if (insertResult.error) {
-          throw insertResult.error;
+        if (error) {
+          console.error(`Error creating subscription:`, error);
+          throw error;
         }
         
-        subscriptionResult = insertResult.data;
+        subscriptionResult = data;
       }
-    } catch (error) {
-      console.error(`Error updating/creating subscription: ${error.message}`);
+      
+      console.log(`Successfully granted lifetime access to user ${targetUserId}`);
+      
+      // Record the action in the payments table
+      try {
+        await Promise.race([
+          supabaseClient
+            .from('payments')
+            .insert({
+              user_id: targetUserId,
+              amount: 0, // Free upgrade by admin
+              payment_method: 'admin_grant',
+              plan_id: 'lifetime',
+              status: 'completed',
+              payment_details: {
+                granted_by: authData.user.id,
+                granted_at: new Date().toISOString(),
+                note: 'Lifetime access granted by admin'
+              }
+            }),
+          timeoutPromise(DB_OPERATION_TIMEOUT)
+        ]);
+      } catch (paymentError) {
+        // Just log the error but don't fail the whole operation
+        console.error(`Error recording payment: ${paymentError.message}`);
+      }
+
       return new Response(
-        JSON.stringify({ error: `Error processing subscription: ${error.message}`, success: false }),
+        JSON.stringify({ 
+          message: 'Lifetime access granted successfully', 
+          success: true,
+          subscription: subscriptionResult
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
+      
+    } catch (error) {
+      console.error(`Error processing request: ${error.message}`);
+      return new Response(
+        JSON.stringify({ error: error.message, success: false }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       );
     }
-    
-    console.log(`Successfully granted lifetime access to user ${targetUserId}`);
-    
-    // Record the action in the payments table
-    try {
-      await Promise.race([
-        supabaseClient
-          .from('payments')
-          .insert({
-            user_id: targetUserId,
-            amount: 0, // Free upgrade by admin
-            payment_method: 'admin_grant',
-            plan_id: 'lifetime',
-            status: 'completed',
-            payment_details: {
-              granted_by: authData.user.id,
-              granted_at: new Date().toISOString(),
-              note: 'Lifetime access granted by admin'
-            }
-          }),
-        timeoutPromise(DB_OPERATION_TIMEOUT)
-      ]);
-    } catch (error) {
-      // Just log the error but don't fail the whole operation
-      console.error(`Error recording payment: ${error.message}`);
-    }
-
-    return new Response(
-      JSON.stringify({ 
-        message: 'Lifetime access granted successfully', 
-        success: true,
-        subscription: subscriptionResult
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-    );
   } catch (error) {
     console.error(`Error in grant-lifetime-access function: ${error.message}`);
     
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: error.message || 'An unexpected error occurred',
         success: false 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }

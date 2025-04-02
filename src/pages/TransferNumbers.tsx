@@ -27,7 +27,7 @@ const TransferNumbers = () => {
   const { toast } = useToast();
   const [refreshAttempts, setRefreshAttempts] = useState(0);
   
-  // Handle initial data loading
+  // Handle initial data loading with reduced delays
   useEffect(() => {
     const loadData = async () => {
       if (!user && !isAuthLoading) {
@@ -41,18 +41,13 @@ const TransferNumbers = () => {
           await refreshTransferNumbers();
         } catch (err) {
           console.error("Failed to load transfer numbers:", err);
-          toast({
-            title: "Error",
-            description: "Failed to load your transfer numbers",
-            variant: "destructive"
-          });
         }
       }
 
-      // Set initialLoad to false after a delay to ensure smoother UX
+      // Set initialLoad to false after a shorter delay
       const timer = setTimeout(() => {
         setInitialLoad(false);
-      }, 800);
+      }, 500); // Reduced from 800ms to 500ms
       
       return () => clearTimeout(timer);
     };
@@ -66,10 +61,6 @@ const TransferNumbers = () => {
       const attemptRefresh = async () => {
         try {
           await refreshTransferNumbers();
-          toast({
-            title: "Refresh attempt",
-            description: `Attempt ${refreshAttempts}: Trying to load your data again.`
-          });
         } catch (err) {
           console.error("Refresh attempt failed:", err);
         }
@@ -79,13 +70,13 @@ const TransferNumbers = () => {
     }
   }, [refreshAttempts, refreshTransferNumbers, toast]);
 
-  // Add automatic retry for persistent loading issues
+  // Add automatic retry for persistent loading issues with faster timeouts
   useEffect(() => {
     if (isLoading && !initialLoad) {
       const retryTimer = setTimeout(() => {
         // Auto-retry loading if stuck for too long
         setRefreshAttempts(prev => prev + 1);
-      }, 20000); // 20 second auto-retry
+      }, 15000); // 15 second auto-retry (reduced from 20s)
       
       return () => clearTimeout(retryTimer);
     }
@@ -129,13 +120,7 @@ const TransferNumbers = () => {
     
     try {
       await refreshTransferNumbers();
-      // Increment refresh attempts to trigger the effect that will reload data
       setRefreshAttempts(prev => prev + 1);
-      
-      toast({
-        title: "Refreshing data",
-        description: "Transfer numbers are being refreshed"
-      });
     } catch (err: any) {
       console.error("Error refreshing transfer numbers:", err);
       toast({
@@ -146,14 +131,14 @@ const TransferNumbers = () => {
     }
   };
   
-  // Render authentication loading state
+  // Render authentication loading state but with a shorter timeout
   if (isAuthLoading) {
     return (
       <DashboardLayout>
         <TransferNumbersHeader />
         <LoadingState 
           message="Checking authentication, please wait..." 
-          timeout={8000}
+          timeout={5000} // Reduced from 8s to 5s
         />
       </DashboardLayout>
     );

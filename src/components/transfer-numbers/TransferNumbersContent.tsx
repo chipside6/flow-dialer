@@ -48,12 +48,11 @@ export const TransferNumbersContent = ({
         if (isLoading) {
           toast({
             title: "Still loading data",
-            description: "We're showing you the UI while data continues to load in the background",
-            variant: "default"
+            description: "We're showing you the UI while data continues to load in the background"
           });
         }
       }
-    }, 4000); // Reduced from 5 seconds to 4 seconds
+    }, 3000); // Reduced from 4 seconds to 3 seconds
     
     return () => clearTimeout(timer);
   }, [isLoading, isInitialLoad]);
@@ -75,17 +74,17 @@ export const TransferNumbersContent = ({
           variant: "destructive"
         });
       }
-    }, 12000); // 12 seconds timeout
+    }, 8000); // 8 seconds timeout (reduced from 12s)
     
     return () => clearTimeout(longLoadingTimer);
   }, [isLoading, forceShowContent]);
   
-  // During initial load, show a dedicated loading state
+  // During initial load, show a dedicated loading state for a shorter time
   if (isInitialLoad && isLoading && !forceShowContent) {
     return (
       <LoadingState 
         message="Loading your transfer numbers, please wait..." 
-        timeout={5000} // 5 seconds timeout
+        timeout={3000} // 3 seconds timeout (reduced from 5s)
         onRetry={onRefresh}
       />
     );
