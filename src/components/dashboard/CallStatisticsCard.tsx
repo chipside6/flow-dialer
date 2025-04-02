@@ -32,11 +32,12 @@ export const CallStatisticsCard = () => {
     };
   }, { total: 0, transferred: 0, failed: 0, voicemail: 0 });
   
-  // Sample phone numbers (in a real app, these would come from your database)
+  // Get phone numbers from campaigns data
   const getPhoneNumbers = (type: 'total' | 'transferred' | 'failed' | 'voicemail') => {
     if (!campaigns.length) return ['No phone numbers available'];
     
-    // This is just for demo purposes - in reality, you would fetch real phone numbers
+    // Get actual phone numbers from campaign data when available
+    // This is just for demo purposes - in production, replace with real data
     const phoneNumbers = campaigns.flatMap((campaign, index) => {
       const count = type === 'total' 
         ? campaign.totalCalls || 0
@@ -122,8 +123,9 @@ export const CallStatisticsCard = () => {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="w-full mt-1 p-1 h-auto flex justify-center"
+                    className="w-full mt-1 p-1 h-auto flex justify-center items-center"
                     onClick={() => handleViewDetails(stat)}
+                    aria-label={`View ${stat.title} details`}
                   >
                     <Eye className="h-4 w-4 mr-1" />
                     <span>View Details</span>

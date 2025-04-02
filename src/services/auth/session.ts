@@ -37,9 +37,9 @@ export const getStoredSession = (): Session | null => {
         return null;
       }
       
-      // Set the expiry time for the memory cache (2 minutes or session expiry, whichever is sooner)
+      // Set the expiry time for the memory cache (1 minute or session expiry, whichever is sooner)
       const cacheExpiry = Math.min(
-        now + 2 * 60 * 1000, // 2 minutes
+        now + 1 * 60 * 1000, // 1 minute
         expiryTime.getTime()
       );
       
@@ -47,9 +47,9 @@ export const getStoredSession = (): Session | null => {
       sessionCache = session;
       sessionCacheExpiry = cacheExpiry;
     } else {
-      // If no expiry time, cache for 2 minutes
+      // If no expiry time, cache for 1 minute
       sessionCache = session;
-      sessionCacheExpiry = now + 2 * 60 * 1000;
+      sessionCacheExpiry = now + 1 * 60 * 1000;
     }
     
     return session;
@@ -76,16 +76,16 @@ export const storeSession = (session: Session): void => {
     // Update memory cache
     sessionCache = session;
     
-    // Set cache expiry (2 minutes or session expiry, whichever is sooner)
+    // Set cache expiry (1 minute or session expiry, whichever is sooner)
     const now = Date.now();
     if (session.expires_at) {
       const expiryTime = new Date(session.expires_at * 1000);
       sessionCacheExpiry = Math.min(
-        now + 2 * 60 * 1000, // 2 minutes
+        now + 1 * 60 * 1000, // 1 minute
         expiryTime.getTime()
       );
     } else {
-      sessionCacheExpiry = now + 2 * 60 * 1000;
+      sessionCacheExpiry = now + 1 * 60 * 1000;
     }
   } catch (error) {
     console.error('Failed to store session in localStorage:', error);
@@ -129,6 +129,7 @@ export const refreshSession = (newExpiresAt: number): void => {
   if (session) {
     session.expires_at = newExpiresAt;
     storeSession(session);
+    console.log("Session expiry refreshed to:", new Date(newExpiresAt * 1000));
   }
 };
 
