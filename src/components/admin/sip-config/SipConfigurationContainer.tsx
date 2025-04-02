@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import EnvironmentSetup from "./EnvironmentSetup";
 import ProviderConfiguration from "./ProviderConfiguration";
 import ConnectionStatusAlerts from "./ConnectionStatusAlerts";
 import ActionButtons from "./ActionButtons";
 import { toast } from "@/components/ui/use-toast";
-import { asteriskService } from "@/utils/asteriskService";
+import { asteriskService } from "@/utils/asterisk";
 
 const SipConfigurationContainer = () => {
   // Initialize state with your Asterisk server credentials

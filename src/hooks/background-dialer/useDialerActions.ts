@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { DialStatus, DialerFormData } from "@/components/background-dialer/types";
-import { asteriskService } from "@/utils/asteriskService";
+import { asteriskService } from "@/utils/asterisk";
 import { toast } from "@/components/ui/use-toast";
 import { usePollingInterval } from "@/hooks/usePollingInterval";
 
