@@ -8,7 +8,7 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, is_admin, email')
+      .select('id, is_admin')
       .eq('id', userId)
       .single();
     
@@ -24,13 +24,18 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     
     console.log("Profile data from DB:", data);
     
+    // Get email from auth.users since it's not in the profiles table
+    const { data: userData } = await supabase.auth.admin.getUserById(userId);
+    const userEmail = userData?.user?.email || '';
+    
     // Create a UserProfile object with only required fields
     const profile: UserProfile = {
       id: data.id,
-      email: data.email || '', // Use email from profile if available
+      email: userEmail, // Use email from auth.users
       is_admin: !!data.is_admin // Ensure this is a boolean
     };
     
+    console.log("Constructed profile object:", profile);
     return profile;
   } catch (error: any) {
     console.error("Error in fetchUserProfile:", error.message);
@@ -42,11 +47,11 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
   try {
     console.log("Updating user profile:", userId, data);
     
+    // We don't update email in profiles since it's not stored there
     const { error } = await supabase
       .from('profiles')
       .update({
-        is_admin: data.is_admin,
-        email: data.email
+        is_admin: data.is_admin
       })
       .eq('id', userId);
     
