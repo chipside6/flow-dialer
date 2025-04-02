@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -68,8 +67,8 @@ const SignUp = () => {
   };
 
   return (
-    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-8 mx-auto">
-      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden">
+    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-4 mx-auto">
+      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden mt-[-80px]">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 z-0 rounded-xl"></div>
         <CardHeader className="space-y-1 relative z-10 pb-2 text-left">
           <div className="flex justify-center mb-4">
@@ -121,16 +120,16 @@ const SignUp = () => {
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full font-semibold transition-all group mt-4" disabled={isLoading}>
+            <Button type="submit" className="w-full font-medium transition-all mt-4 h-10 px-4 py-2" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
+                  <span>Creating account...</span>
                 </>
               ) : (
                 <>
-                  Create Account 
-                  <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  <span>Create Account</span>
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform" />
                 </>
               )}
             </Button>
