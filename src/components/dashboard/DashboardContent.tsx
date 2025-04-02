@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth";
 import { Link } from 'react-router-dom';
@@ -9,11 +9,34 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { CallStatisticsCard } from '@/components/dashboard/CallStatisticsCard';
 
 export const DashboardContent = () => {
-  const { user, profile } = useAuth();
-  const { showLimitDialog, closeLimitDialog, currentPlan, subscription } = useSubscription();
+  const { user } = useAuth();
+  const { 
+    showLimitDialog, 
+    closeLimitDialog, 
+    currentPlan, 
+    subscription,
+    fetchCurrentSubscription
+  } = useSubscription();
+  
+  // Initial data fetch on component mount
+  useEffect(() => {
+    if (user?.id) {
+      // Fetch subscription data with a slight delay to avoid race conditions
+      const timer = setTimeout(() => {
+        fetchCurrentSubscription();
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user?.id, fetchCurrentSubscription]);
   
   // Check if the user has a lifetime subscription
   const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
+  
+  // Get cached plan status if not yet loaded from server
+  const cachedPlanStatus = localStorage.getItem('userSubscriptionPlan');
+  const displayPlan = currentPlan || cachedPlanStatus || 'free';
+  const showLifetimeMessage = isLifetimePlan || displayPlan === 'lifetime';
 
   return (
     <>
@@ -27,12 +50,12 @@ export const DashboardContent = () => {
           </CardHeader>
           <CardContent>
             <p>
-              This is your dashboard. You can manage your campaign, view analytics, and more.
+              This is your dashboard. You can manage your campaigns, view analytics, and more.
             </p>
           </CardContent>
         </Card>
 
-        {/* New Call Statistics Card */}
+        {/* Call Statistics Card */}
         <CallStatisticsCard />
 
         <Card>
@@ -50,10 +73,10 @@ export const DashboardContent = () => {
                 </div>
                 <div className="ml-3">
                   <div className="text-sm text-blue-700">
-                    {isLifetimePlan ? (
+                    {showLifetimeMessage ? (
                       <p>You have lifetime access to all features.</p>
                     ) : (
-                      <p>You have a regular account. <Link to="/billing" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link>.</p>
+                      <p>You have a {displayPlan} account. <Link to="/upgrade" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link>.</p>
                     )}
                   </div>
                 </div>

@@ -32,12 +32,11 @@ export const CallStatisticsCard = () => {
     };
   }, { total: 0, transferred: 0, failed: 0, voicemail: 0 });
   
-  // Get phone numbers from campaigns data
+  // Get phone numbers from campaigns data - without showing "no phone numbers available"
   const getPhoneNumbers = (type: 'total' | 'transferred' | 'failed' | 'voicemail') => {
     if (!campaigns.length) return [];
     
     // Get actual phone numbers from campaign data when available
-    // This is just for demo purposes - in production, replace with real data
     const phoneNumbers = campaigns.flatMap((campaign, index) => {
       const count = type === 'total' 
         ? campaign.totalCalls || 0
