@@ -102,7 +102,7 @@ const SipConfiguration = () => {
         "${TRANSFER_NUMBER}" // This is a placeholder
       );
       
-      setConfigOutput(`; SIP Provider Configuration\n${sipConfig}\n\n; Dialplan Configuration\n${dialplan}\n\n; Note: The placeholders ${GREETING_FILE} and ${TRANSFER_NUMBER} will be replaced with the actual values configured in your campaigns.`);
+      setConfigOutput(`; SIP Provider Configuration\n${sipConfig}\n\n; Dialplan Configuration\n${dialplan}\n\n; Note: The placeholders \${GREETING_FILE} and \${TRANSFER_NUMBER} will be replaced with the actual values configured in your campaigns.`);
       
       toast({
         title: "Configuration Generated",
