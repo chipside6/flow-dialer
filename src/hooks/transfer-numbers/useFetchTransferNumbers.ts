@@ -57,15 +57,11 @@ export const useFetchTransferNumbers = ({
         setIsLoading(false);
         
         // Provide user-friendly error feedback
-        if (!toast({
-          id: "transfer-numbers-error",
+        toast({
           title: "Error loading transfer numbers",
           description: errorMessage,
           variant: "destructive",
-        }).id) {
-          // Handle error if toast fails (unlikely scenario)
-          console.error("Failed to show toast notification");
-        }
+        });
         
         throw err;
       }
