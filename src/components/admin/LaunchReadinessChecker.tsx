@@ -25,9 +25,11 @@ const LaunchReadinessChecker = () => {
     { name: "Authentication", status: "checking", message: "Verifying authentication..." }
   ]);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [serverInstructions, setServerInstructions] = useState<string | null>(null);
 
   const runChecks = async () => {
     setIsRetrying(true);
+    setServerInstructions(null);
     
     // Reset checks to "checking" state
     setChecks(prev => 
@@ -74,8 +76,10 @@ const LaunchReadinessChecker = () => {
     try {
       if (!ASTERISK_API_URL || ASTERISK_API_URL === "" || ASTERISK_API_URL === "http://your-asterisk-server:8088/ari") {
         updateCheck("Asterisk Connection", "error", "Asterisk URL not configured. Set VITE_ASTERISK_API_URL environment variable.");
+        setServerInstructions("Configure your Asterisk server first and update the URL in the SIP Configuration tab.");
       } else if (!ASTERISK_API_USERNAME || !ASTERISK_API_PASSWORD) {
         updateCheck("Asterisk Connection", "error", "Asterisk credentials not configured. Set VITE_ASTERISK_API_USERNAME and VITE_ASTERISK_API_PASSWORD environment variables.");
+        setServerInstructions("Configure your Asterisk API credentials in the SIP Configuration tab.");
       } else {
         // Use the service to test the connection
         try {
@@ -84,9 +88,11 @@ const LaunchReadinessChecker = () => {
             updateCheck("Asterisk Connection", "success", result.message);
           } else {
             updateCheck("Asterisk Connection", "error", result.message);
+            setServerInstructions(getAsteriskSetupInstructions(ASTERISK_API_URL));
           }
         } catch (connectionError) {
           updateCheck("Asterisk Connection", "error", `Error testing connection: ${connectionError.message}`);
+          setServerInstructions(getAsteriskSetupInstructions(ASTERISK_API_URL));
         }
       }
     } catch (error) {
@@ -130,6 +136,25 @@ const LaunchReadinessChecker = () => {
     });
   };
 
+  const getAsteriskSetupInstructions = (url: string): string => {
+    return `
+1. Install Asterisk on your server if not already installed
+2. Enable ARI (Asterisk REST Interface) in asterisk.conf
+3. Configure ARI user in ari.conf:
+   [general]
+   enabled = yes
+   
+   [${ASTERISK_API_USERNAME || 'asterisk'}]
+   type = user
+   password = ${ASTERISK_API_PASSWORD || 'asterisk'}
+   password_format = plain
+   read_only = no
+   
+4. Make sure Asterisk is running and the ARI endpoint is accessible at ${url}
+5. Open required ports in your firewall (typically 8088 for ARI)
+    `;
+  };
+
   useEffect(() => {
     runChecks();
   }, [user]);
@@ -155,7 +180,7 @@ const LaunchReadinessChecker = () => {
           size="sm" 
           onClick={handleRetry} 
           disabled={isRetrying}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 active:scale-95 transition-transform"
         >
           {isRetrying ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -191,6 +216,15 @@ const LaunchReadinessChecker = () => {
               </div>
             </div>
           ))}
+          
+          {serverInstructions && (
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+              <h3 className="text-lg font-medium text-blue-800 mb-2">Server Setup Instructions</h3>
+              <pre className="whitespace-pre-wrap text-sm bg-white p-3 rounded border border-blue-100 overflow-x-auto text-blue-900">
+                {serverInstructions}
+              </pre>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
