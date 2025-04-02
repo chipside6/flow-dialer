@@ -16,11 +16,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     contactListId: "",
     greetingFileId: "",
     transferNumber: "",
-    sipProviderId: "", // Initialize SIP provider ID
-    schedule: {
-      startDate: new Date().toISOString().split("T")[0],
-      maxConcurrentCalls: 1 // Fixed value of 1
-    }
+    sipProviderId: "" // Initialize SIP provider ID
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -28,23 +24,6 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     setCampaign(prev => ({
       ...prev,
       [name]: value
-    }));
-  };
-
-  const handleScheduleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
-    // If attempting to change maxConcurrentCalls, keep it as 1
-    if (name === "maxConcurrentCalls") {
-      return;
-    }
-    
-    setCampaign(prev => ({
-      ...prev,
-      schedule: {
-        ...prev.schedule,
-        [name]: value
-      }
     }));
   };
 
@@ -59,10 +38,6 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     // Format campaign data for submission
     const newCampaign = {
       ...campaign,
-      schedule: {
-        ...campaign.schedule,
-        maxConcurrentCalls: 1 // Ensure it's always 1
-      },
       status: "pending" as const,
       progress: 0,
       totalCalls: 0, // This will be calculated based on the selected list
@@ -128,7 +103,6 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     step,
     setStep,
     handleInputChange,
-    handleScheduleChange,
     handleSelectChange,
     handleComplete
   };
