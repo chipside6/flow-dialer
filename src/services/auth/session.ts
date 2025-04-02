@@ -102,18 +102,61 @@ export const clearSession = (): void => {
     sessionCache = null;
     sessionCacheExpiry = 0;
     
-    // Also clear any potential Supabase session tokens for good measure
+    // Enhanced cleanup - clear all potential auth-related items in localStorage
+    const authRelatedKeys = [
+      'sb-', 
+      'supabase', 
+      'auth', 
+      'token', 
+      'user_session',
+      'session'
+    ];
+    
+    // Iterate through localStorage and remove any keys that match our patterns
     for (const key of Object.keys(localStorage)) {
-      if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+      if (authRelatedKeys.some(pattern => key.includes(pattern))) {
         try {
+          console.log(`Removing session-related item: ${key}`);
           localStorage.removeItem(key);
         } catch (e) {
           console.warn(`Failed to remove potential auth key ${key}:`, e);
         }
       }
     }
+    
+    // Also try session storage
+    if (typeof sessionStorage !== 'undefined') {
+      for (const key of Object.keys(sessionStorage)) {
+        if (authRelatedKeys.some(pattern => key.includes(pattern))) {
+          try {
+            sessionStorage.removeItem(key);
+          } catch (e) {
+            console.warn(`Failed to remove session storage key ${key}:`, e);
+          }
+        }
+      }
+    }
+    
+    // Try to clear auth-related cookies too
+    document.cookie.split(';').forEach(cookie => {
+      const [name] = cookie.trim().split('=');
+      if (authRelatedKeys.some(pattern => name.includes(pattern))) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      }
+    });
+    
   } catch (error) {
     console.error('Error clearing session:', error);
+    
+    // Last resort - try to clear everything
+    try {
+      localStorage.clear();
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.clear();
+      }
+    } catch (e) {
+      console.error('Failed to clear storage as last resort:', e);
+    }
   }
 };
 

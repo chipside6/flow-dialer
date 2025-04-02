@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -275,6 +274,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(null);
       setIsAdmin(false);
       
+      // Clear any Supabase session and token
+      try {
+        // Sign out from Supabase directly
+        await supabase.auth.signOut();
+        
+        // Clear localStorage and sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Clear auth-related cookies
+        document.cookie.split(';').forEach(cookie => {
+          const [name] = cookie.trim().split('=');
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        });
+      } catch (e) {
+        console.warn("Error during Supabase signout:", e);
+      }
+      
+      // Call our signOutUser function
       const result = await signOutUser();
       
       if (!result.success) {

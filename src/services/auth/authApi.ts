@@ -201,6 +201,36 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     // Always clear the local session regardless of API call result
     clearSession();
     
+    // Now aggressively clear ALL session-related data
+    try {
+      // Clear all local storage items that might contain auth data
+      for (const key of Object.keys(localStorage)) {
+        if (key.includes('auth') || key.includes('session') || key.includes('token') || 
+            key.includes('user') || key.includes('supabase')) {
+          localStorage.removeItem(key);
+        }
+      }
+      
+      // Clear session storage too in case it's being used
+      for (const key of Object.keys(sessionStorage)) {
+        if (key.includes('auth') || key.includes('session') || key.includes('token') || 
+            key.includes('user') || key.includes('supabase')) {
+          sessionStorage.removeItem(key);
+        }
+      }
+      
+      // Clear any cookies related to authentication
+      document.cookie.split(';').forEach(cookie => {
+        const [name] = cookie.trim().split('=');
+        if (name.includes('auth') || name.includes('session') || name.includes('token') || 
+            name.includes('user') || name.includes('supabase')) {
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
+      });
+    } catch (clearError) {
+      console.warn("Error during aggressive cleanup:", clearError);
+    }
+    
     // Log the outcome for debugging
     if (!apiCallSucceeded) {
       console.log(`Logout completed with API warnings: ${apiErrorMessage}, but local session was cleared`);
@@ -214,6 +244,16 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     
     // Still clear the session even if API call fails
     clearSession();
+    
+    // Attempt aggressive cleanup here too
+    try {
+      // Clear local storage
+      localStorage.clear();
+      // Clear session storage
+      sessionStorage.clear();
+    } catch (e) {
+      console.warn("Error during emergency cleanup:", e);
+    }
     
     // Return success true even on error since we cleared the session
     return { success: true, error: null };

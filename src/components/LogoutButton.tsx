@@ -42,8 +42,20 @@ const LogoutButton = ({
         toast({
           title: "You're offline",
           description: "Your session will be cleared locally, but server logout will occur when you're back online.",
-          variant: "destructive" // Changed from "warning" to "destructive" to match allowed variants
+          variant: "destructive" 
         });
+      }
+      
+      // Clear any Supabase or auth-related data from localStorage preemptively
+      // This helps prevent auto sign-in on page reload
+      try {
+        for (const key of Object.keys(localStorage)) {
+          if (key.includes('supabase') || key.includes('auth') || key.includes('session') || key.includes('token')) {
+            localStorage.removeItem(key);
+          }
+        }
+      } catch (e) {
+        console.warn("Error during pre-emptive cleanup:", e);
       }
       
       // Navigate to login page first for better UX
@@ -57,6 +69,12 @@ const LogoutButton = ({
           title: "Logged out successfully",
           description: "You have been signed out of your account",
         });
+        
+        // Force page reload to clear any in-memory state
+        // This ensures a complete reset of the application state
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
       } else if (error) {
         console.error("LogoutButton - Error during logout:", error);
         // Still consider it a successful logout for UX purposes
@@ -64,6 +82,11 @@ const LogoutButton = ({
           title: "Logged out",
           description: "You've been signed out, but there was an issue cleaning up session data.",
         });
+        
+        // Force reload even on error
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
       }
     } catch (error: any) {
       console.error("LogoutButton - Unexpected error during logout:", error);
@@ -72,6 +95,11 @@ const LogoutButton = ({
         description: "There was an issue during logout, but you've been signed out.",
         variant: "destructive"
       });
+      
+      // Force reload even on error
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 100);
     } finally {
       setIsLoggingOut(false);
     }
