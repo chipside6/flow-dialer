@@ -1,279 +1,134 @@
-
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
-import { 
-  CheckCircle2, 
-  Loader2, 
-  TestTube, 
-  AlertTriangle, 
-  Clipboard, 
-  FileCode2,
-  Info
-} from "lucide-react";
-import { asteriskService } from "@/utils/asteriskService";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { 
-  getConfigFromStorage, 
-  saveConfigToStorage, 
-  isHostedEnvironment 
-} from "@/utils/asterisk/config";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { CheckCircle, XCircle } from "lucide-react";
+import { testEnvironmentReadiness } from "@/services/api/adminService";
 
 interface EnvironmentSetupProps {
-  apiUrl: string;
-  username: string;
-  password: string;
-  setApiUrl: (url: string) => void;
-  setUsername: (username: string) => void;
-  setPassword: (password: string) => void;
+    onComplete: () => void;
 }
 
-const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
-  apiUrl,
-  username,
-  password,
-  setApiUrl,
-  setUsername,
-  setPassword
-}) => {
-  const [isTesting, setIsTesting] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<"untested" | "success" | "error">("untested");
-  const [copyingEnvVars, setCopyingEnvVars] = useState(false);
-  const isHosted = isHostedEnvironment();
-  
-  // Load saved configuration on initial render
-  useEffect(() => {
-    const savedConfig = getConfigFromStorage();
-    
-    if (savedConfig.apiUrl && apiUrl !== savedConfig.apiUrl) {
-      setApiUrl(savedConfig.apiUrl);
-    }
-    
-    if (savedConfig.username && username !== savedConfig.username) {
-      setUsername(savedConfig.username);
-    }
-    
-    if (savedConfig.password && password !== savedConfig.password) {
-      setPassword(savedConfig.password);
-    }
-  }, []);
-  
-  // Save configuration to localStorage when changed (if in hosted environment)
-  useEffect(() => {
-    if (isHosted && apiUrl && username && password) {
-      saveConfigToStorage(apiUrl, username, password);
-    }
-  }, [apiUrl, username, password, isHosted]);
+export const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({ onComplete }) => {
+    const [apiUrl, setApiUrl] = useState(process.env.NEXT_PUBLIC_ASTERISK_API_URL || '');
+    const [username, setUsername] = useState(process.env.NEXT_PUBLIC_ASTERISK_API_USERNAME || '');
+    const [password, setPassword] = useState(process.env.NEXT_PUBLIC_ASTERISK_API_PASSWORD || '');
+    const [isReady, setIsReady] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const { toast } = useToast();
 
-  const testConnection = async () => {
-    setIsTesting(true);
-    setConnectionStatus("untested");
-    
-    try {
-      toast({
-        title: "Testing Connection",
-        description: "Attempting to connect to Asterisk server..."
-      });
-      
-      // Save current values to localStorage (if in hosted environment)
-      if (isHosted) {
-        saveConfigToStorage(apiUrl, username, password);
-      }
-      
-      // Test connection with current values
-      const result = await asteriskService.testConnection({
-        apiUrl, 
-        username, 
-        password
-      });
-      
-      if (result.success) {
-        setConnectionStatus("success");
-        toast({
-          title: "Connection Successful",
-          description: result.message || "Successfully connected to Asterisk server",
-        });
-      } else {
-        const isFatalError = !isHosted;
-        setConnectionStatus(isFatalError ? "error" : "success");
-        
-        toast({
-          title: isFatalError ? "Connection Failed" : "Configuration Accepted",
-          description: isHosted 
-            ? "Configuration saved despite connection issue (running in hosted environment)" 
-            : result.message || "Failed to connect to Asterisk server",
-          variant: isFatalError ? "destructive" : "default"
-        });
-      }
-    } catch (error) {
-      const isFatalError = !isHosted;
-      setConnectionStatus(isFatalError ? "error" : "success");
-      
-      toast({
-        title: isFatalError ? "Connection Error" : "Configuration Accepted",
-        description: isHosted 
-          ? "Configuration saved despite error (running in hosted environment)" 
-          : `An unexpected error occurred: ${error.message}`,
-        variant: isFatalError ? "destructive" : "default"
-      });
-    } finally {
-      setIsTesting(false);
-    }
-  };
+    const handleApiUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApiUrl(e.target.value);
+    };
 
-  const copyToClipboard = (text: string, successMessage: string) => {
-    try {
-      navigator.clipboard.writeText(text);
-      toast({
-        title: "Copied to Clipboard",
-        description: successMessage,
-      });
-    } catch (error) {
-      toast({
-        title: "Copy Failed",
-        description: `Could not copy to clipboard: ${error.message}`,
-        variant: "destructive"
-      });
-    }
-  };
+    const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setUsername(e.target.value);
+    };
 
-  const copyEnvVars = () => {
-    setCopyingEnvVars(true);
-    
-    const envVarText = `
-VITE_ASTERISK_API_URL=${apiUrl}
-VITE_ASTERISK_API_USERNAME=${username}
-VITE_ASTERISK_API_PASSWORD=${password}
-`.trim();
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPassword(e.target.value);
+    };
 
-    copyToClipboard(envVarText, "Environment variables have been copied to clipboard");
-    setTimeout(() => setCopyingEnvVars(false), 1000);
-  };
+    const handleTestReadiness = async () => {
+        setIsLoading(true);
+        setSuccessMessage(null);
+        setErrorMessage(null);
 
-  const createEnvFile = () => {
-    const envFileContent = `
-# Asterisk Configuration
-VITE_ASTERISK_API_URL=${apiUrl}
-VITE_ASTERISK_API_USERNAME=${username}
-VITE_ASTERISK_API_PASSWORD=${password}
-`.trim();
+        try {
+            const result = await testEnvironmentReadiness(apiUrl, username, password);
 
-    const blob = new Blob([envFileContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `.env`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+            if (result.success) {
+                setIsReady(true);
+                setSuccessMessage(result.message || "Environment setup completed successfully");
+                toast({
+                    title: "Success",
+                    description: result.message || "Environment setup completed successfully",
+                });
+                onComplete();
+            } else {
+                setIsReady(false);
+                setErrorMessage(result.error || 'Failed to validate environment setup.');
+                toast({
+                    title: "Error",
+                    description: result.error || 'Failed to validate environment setup.',
+                    variant: "destructive",
+                });
+            }
+        } catch (error: any) {
+            setIsReady(false);
+            setErrorMessage(error.message || 'An unexpected error occurred.');
+            toast({
+                title: "Error",
+                description: error.message || 'An unexpected error occurred.',
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-    toast({
-      title: "Environment File Created",
-      description: "A .env file has been downloaded. Add this to your project root for development.",
-    });
-  };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Asterisk Environment Setup</CardTitle>
-        <CardDescription>
-          Configure your Asterisk server connection details below.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isHosted && (
-          <Alert className="mb-4 bg-blue-50 border-blue-200">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800">Lovable Hosting Notice</AlertTitle>
-            <AlertDescription className="text-blue-700">
-              Since you're hosting on Lovable, these settings will be saved in your browser.
-              The configuration will be accepted even if the connection test fails.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        <div className="space-y-2">
-          <Label htmlFor="api-url">API URL</Label>
-          <Input
-            id="api-url"
-            value={apiUrl}
-            onChange={(e) => setApiUrl(e.target.value)}
-            placeholder="http://your-asterisk-server:8088/ari"
-            className="focus:ring-2 focus:ring-primary focus:border-primary"
-          />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="asterisk"
-              className="focus:ring-2 focus:ring-primary focus:border-primary"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="asterisk"
-              className="focus:ring-2 focus:ring-primary focus:border-primary"
-            />
-          </div>
-        </div>
-        
-        <div className="flex flex-wrap gap-2 pt-4">
-          <Button 
-            onClick={testConnection} 
-            disabled={isTesting}
-            className="flex items-center gap-2 active:scale-95 transition-transform"
-          >
-            {isTesting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <TestTube className="h-4 w-4" />
-            )}
-            Test Connection
-          </Button>
-          
-          {!isHosted && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={copyEnvVars}
-              className="ml-auto active:scale-95 transition-transform"
-              disabled={copyingEnvVars}
-            >
-              {copyingEnvVars ? (
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-              ) : (
-                <Clipboard className="h-4 w-4 mr-2" />
-              )}
-              {copyingEnvVars ? "Copied!" : "Copy Values"}
-            </Button>
-          )}
-          
-          {connectionStatus === "success" && (
-            <div className="ml-auto flex items-center gap-2 text-green-600">
-              <CheckCircle2 className="h-4 w-4" />
-              <span>Configuration {isHosted ? "saved" : "successful"}</span>
+    return (
+        <Card className="w-full">
+            <CardHeader>
+                <CardTitle>Environment Setup</CardTitle>
+                <CardDescription>
+                    Configure the Asterisk environment settings.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+                <div className="grid gap-2">
+                    <Label htmlFor="api-url">API URL</Label>
+                    <Input
+                        id="api-url"
+                        value={apiUrl}
+                        onChange={handleApiUrlChange}
+                        placeholder="http://localhost:8088/ari"
+                    />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                        id="username"
+                        value={username}
+                        onChange={handleUsernameChange}
+                        placeholder="admin"
+                    />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={handlePasswordChange}
+                        placeholder="password"
+                    />
+                </div>
+            </CardContent>
+            <div className="flex justify-between p-6">
+                <div>
+                    {isReady ? (
+                        <div className="text-green-500 flex items-center">
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Ready
+                        </div>
+                    ) : (
+                        <div className="text-red-500 flex items-center">
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Not Ready
+                        </div>
+                    )}
+                    {successMessage && <div className="text-sm text-green-500 mt-1">{successMessage}</div>}
+                    {errorMessage && <div className="text-sm text-red-500 mt-1">{errorMessage}</div>}
+                </div>
+                <Button onClick={handleTestReadiness} disabled={isLoading}>
+                    {isLoading ? "Testing..." : "Test Readiness"}
+                </Button>
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </Card>
+    );
 };
-
-export default EnvironmentSetup;

@@ -28,3 +28,20 @@ export interface CampaignData {
     timezone?: string;
   };
 }
+
+export interface ContactList {
+  id: string;
+  name: string;
+  description?: string;
+  contactCount: number;
+  dateCreated?: Date;
+  dateUpdated?: Date;
+}
+
+export interface GreetingFile {
+  id: string;
+  filename: string;
+  url: string;
+  durationSeconds?: number;
+  dateAdded?: Date;
+}

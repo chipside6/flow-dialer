@@ -1,35 +1,46 @@
+import { generateSipTrunkConfig, generateDialplan } from "@/utils/asterisk/configGenerators";
 
-import { asteriskConfig } from "@/utils/asteriskService";
+// Function to generate configuration files for a SIP provider
+export const generateConfigFiles = (provider: any) => {
+  // Generate SIP trunk configuration
+  const sipConfig = generateSipTrunkConfig(provider);
+  
+  // Generate dialplan configuration
+  const dialplanConfig = generateDialplan(provider);
+  
+  return {
+    sipConfig,
+    dialplanConfig
+  };
+};
 
-/**
- * Generates SIP configuration text with appropriate placeholders
- */
-export const generateSipConfig = (
-  providerName: string,
-  host: string,
-  port: string,
-  username: string,
-  password: string
-): string => {
-  // Generate SIP provider config
-  const sipConfig = asteriskConfig.generateSipTrunkConfig(
-    providerName,
-    host,
-    port,
-    username,
-    password
-  );
+// Function to validate SIP provider configuration
+export const validateSipConfig = (provider: any): { valid: boolean; errors: string[] } => {
+  const errors: string[] = [];
   
-  // Generate dialplan with placeholders that will be replaced with actual values
-  const dialplan = asteriskConfig.generateDialplan(
-    "example-campaign",
-    "${GREETING_FILE}", // This is a placeholder that will be replaced
-    "${TRANSFER_NUMBER}" // This is a placeholder that will be replaced
-  );
+  // Check required fields
+  if (!provider.name) errors.push("Provider name is required");
+  if (!provider.host) errors.push("Host/IP is required");
+  if (!provider.username) errors.push("Username is required");
+  if (!provider.password) errors.push("Password is required");
   
-  return `; SIP Provider Configuration\n${sipConfig}
-  
-; Dialplan Configuration\n${dialplan}
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+};
 
-; Note: The placeholders \${GREETING_FILE} and \${TRANSFER_NUMBER} will be replaced with the actual values configured in your campaigns.`;
+// Function to format SIP provider data for display
+export const formatProviderForDisplay = (provider: any) => {
+  return {
+    id: provider.id,
+    name: provider.name,
+    host: provider.host,
+    port: provider.port || 5060,
+    username: provider.username,
+    // Mask password for security
+    password: provider.password ? '••••••••' : '',
+    status: provider.status || 'inactive',
+    dateAdded: provider.dateAdded ? new Date(provider.dateAdded).toLocaleDateString() : 'Unknown'
+  };
 };

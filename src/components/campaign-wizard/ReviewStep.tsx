@@ -1,7 +1,8 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CampaignData, ContactList, GreetingFile } from "./types";
+import { CampaignData } from "./types";
+import type { ContactList } from "@/hooks/useContactLists";
+import type { GreetingFile } from "@/hooks/useGreetingFiles";
 
 interface ReviewStepProps {
   campaign: CampaignData;
@@ -9,82 +10,83 @@ interface ReviewStepProps {
   greetingFiles: GreetingFile[];
 }
 
-export const ReviewStep = ({ campaign, contactLists, greetingFiles }: ReviewStepProps) => {
-  // Find the selected contact list and greeting file
-  const selectedContactList = contactLists.find(list => list.id === campaign.contactListId);
-  const selectedGreetingFile = greetingFiles.find(file => file.id === campaign.greetingFileId);
+export const ReviewStep: React.FC<ReviewStepProps> = ({ campaign, contactLists, greetingFiles }) => {
+
+  // Helper function to find contact list name by ID
+  const getContactListName = (id: string | undefined): string => {
+    const contactList = contactLists?.find((list) => list.id === id);
+    return contactList ? contactList.name : "Not Selected";
+  };
+
+  // Helper function to find greeting file name by ID
+  const getGreetingFileName = (id: string | undefined): string => {
+    const greetingFile = greetingFiles?.find((file) => file.id === id);
+    return greetingFile ? greetingFile.filename : "Not Selected";
+  };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Review Campaign</h2>
-      <p className="text-muted-foreground">
-        Please review your campaign details before creating it.
-      </p>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
+    <div>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Campaign Details Review</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            {/* Campaign Title and Description */}
             <div>
-              <p className="font-medium">Title:</p>
-              <p>{campaign.title}</p>
+              <h2 className="text-lg font-semibold">Basics</h2>
+              <div className="pl-2">
+                <p>
+                  <strong>Title:</strong> {campaign.title || "N/A"}
+                </p>
+                <p>
+                  <strong>Description:</strong> {campaign.description || "N/A"}
+                </p>
+              </div>
             </div>
+
+            {/* Contact List */}
             <div>
-              <p className="font-medium">Description:</p>
-              <p>{campaign.description}</p>
+              <h2 className="text-lg font-semibold">Contacts</h2>
+              <div className="pl-2">
+                <p>
+                  <strong>Contact List:</strong> {getContactListName(campaign.contactListId)}
+                </p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact List</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="font-medium">Selected List:</p>
-            <p>{selectedContactList?.name || "No contact list selected"}</p>
-          </CardContent>
-        </Card>
+            {/* Audio */}
+            <div>
+              <h2 className="text-lg font-semibold">Audio</h2>
+              <div className="pl-2">
+                <p>
+                  <strong>Greeting File:</strong> {getGreetingFileName(campaign.greetingFileId)}
+                </p>
+              </div>
+            </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Audio</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="font-medium">Selected Greeting:</p>
-            <p>{selectedGreetingFile?.filename || "No greeting file selected"}</p>
-          </CardContent>
-        </Card>
+            {/* Transfer Number */}
+            <div>
+              <h2 className="text-lg font-semibold">Transfers</h2>
+              <div className="pl-2">
+                <p>
+                  <strong>Transfer Number:</strong> {campaign.transferNumber || "N/A"}
+                </p>
+              </div>
+            </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Transfer Number</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="font-medium">Number:</p>
-            <p>{campaign.transferNumber || "No transfer number set"}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>SIP Provider</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="font-medium">Provider ID:</p>
-            <p>{campaign.sipProviderId || "No SIP provider selected"}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="bg-muted p-4 rounded-md">
-        <p className="text-sm text-muted-foreground">
-          After creation, your campaign will be in a "pending" state. 
-          You can then start it from the campaigns dashboard when you're ready.
-        </p>
-      </div>
+            {/* SIP Provider */}
+            <div>
+              <h2 className="text-lg font-semibold">SIP Provider</h2>
+              <div className="pl-2">
+                <p>
+                  <strong>SIP Provider ID:</strong> {campaign.sipProviderId || "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

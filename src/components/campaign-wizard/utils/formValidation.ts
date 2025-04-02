@@ -1,6 +1,5 @@
 
 import { CampaignData, WizardStep } from "../types";
-import { useMemo } from "react";
 
 // Function to validate each step of the campaign creation wizard
 export const validateStep = (step: WizardStep, campaign: CampaignData): boolean => {
@@ -9,25 +8,25 @@ export const validateStep = (step: WizardStep, campaign: CampaignData): boolean 
       return campaign.title.trim() !== "" && campaign.description.trim() !== "";
 
     case "contacts":
-      return campaign.contactListId?.trim() !== "";
+      return !!campaign.contactListId?.trim();
 
     case "audio":
-      return campaign.greetingFileId?.trim() !== "";
+      return !!campaign.greetingFileId?.trim();
 
     case "transfers":
-      return campaign.transferNumber?.trim() !== "";
+      return !!campaign.transferNumber?.trim();
 
     case "sipProvider":
-      return campaign.sipProviderId?.trim() !== "";
+      return !!campaign.sipProviderId?.trim();
 
     case "review":
       return (
         campaign.title.trim() !== "" &&
         campaign.description.trim() !== "" &&
-        campaign.contactListId?.trim() !== "" &&
-        campaign.greetingFileId?.trim() !== "" &&
-        campaign.transferNumber?.trim() !== "" &&
-        campaign.sipProviderId?.trim() !== ""
+        !!campaign.contactListId?.trim() &&
+        !!campaign.greetingFileId?.trim() &&
+        !!campaign.transferNumber?.trim() &&
+        !!campaign.sipProviderId?.trim()
       );
 
     default:
@@ -71,7 +70,7 @@ export const getPreviousStep = (currentStep: WizardStep): WizardStep => {
   }
 };
 
-// Added function to determine if a step is available based on previous step completion
+// Function to determine if a step is available based on previous step completion
 export const getStepAvailability = (campaign: CampaignData) => {
   return {
     basics: true, // Always available
@@ -85,12 +84,10 @@ export const getStepAvailability = (campaign: CampaignData) => {
 
 // Custom hook to provide form validation functions
 export const useFormValidation = () => {
-  return useMemo(() => {
-    return {
-      validateStep,
-      getNextStep,
-      getPreviousStep,
-      getStepAvailability
-    };
-  }, []);
+  return {
+    validateStep,
+    getNextStep,
+    getPreviousStep,
+    getStepAvailability
+  };
 };
