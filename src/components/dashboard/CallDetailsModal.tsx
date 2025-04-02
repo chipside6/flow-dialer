@@ -3,7 +3,7 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { PhoneCall, PhoneForwarded, PhoneOff, VoicemailIcon } from "lucide-react";
+import { PhoneCall, PhoneForwarded, PhoneOff, VoicemailIcon, Phone } from "lucide-react";
 
 interface CallDetailsModalProps {
   open: boolean;
@@ -38,6 +38,7 @@ export const CallDetailsModal: React.FC<CallDetailsModalProps> = ({
               phoneNumbers.map((phone, idx) => (
                 <Card key={idx} className="p-3">
                   <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground text-sm">{phone}</span>
                   </div>
                 </Card>
