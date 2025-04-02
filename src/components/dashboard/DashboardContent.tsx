@@ -9,7 +9,10 @@ import { useSubscription } from "@/hooks/useSubscription";
 
 export const DashboardContent = () => {
   const { user, profile } = useAuth();
-  const { showLimitDialog, closeLimitDialog } = useSubscription();
+  const { showLimitDialog, closeLimitDialog, currentPlan, subscription } = useSubscription();
+  
+  // Check if the user has a lifetime subscription
+  const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
 
   return (
     <>
@@ -43,7 +46,11 @@ export const DashboardContent = () => {
                 </div>
                 <div className="ml-3">
                   <div className="text-sm text-blue-700">
-                    <p>You have a regular account. <Link to="/billing" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link>.</p>
+                    {isLifetimePlan ? (
+                      <p>You have lifetime access to all features.</p>
+                    ) : (
+                      <p>You have a regular account. <Link to="/billing" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link>.</p>
+                    )}
                   </div>
                 </div>
               </div>

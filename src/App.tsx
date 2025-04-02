@@ -25,6 +25,7 @@ import DiagnosticPage from "./pages/DiagnosticPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import AsteriskConfigPage from "./pages/AsteriskConfigPage";
 import QuickAdminSetup from "./pages/QuickAdminSetup";
+import { SubscriptionCheck } from "@/components/SubscriptionCheck";
 
 // Import the App.css for styling
 import "./App.css"; 
@@ -107,16 +108,20 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            {/* Redirect /billing to /upgrade */}
+            {/* Check subscription status before showing billing/upgrade pages */}
             <Route 
               path="/billing" 
-              element={<Navigate to="/upgrade" replace />} 
+              element={
+                <ProtectedRoute>
+                  <SubscriptionCheck redirectTo="/dashboard" />
+                </ProtectedRoute>
+              } 
             />
             <Route 
               path="/upgrade" 
               element={
                 <ProtectedRoute>
-                  <UpgradePage />
+                  <SubscriptionCheck redirectTo="/dashboard" />
                 </ProtectedRoute>
               } 
             />

@@ -28,9 +28,12 @@ interface DashboardSidebarProps {
 
 export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   const { profile } = useAuth();
-  const { currentPlan } = useSubscription();
+  const { currentPlan, subscription } = useSubscription();
   const { setOpenMobile } = useSidebar();
   const isMobile = useIsMobile();
+  
+  // Specifically check for lifetime plan
+  const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
   
   const handleItemClick = () => {
     if (isMobile) {
@@ -50,8 +53,8 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     // Remove Asterisk Config from regular navigation items
   ];
   
-  // Show upgrade link for free users
-  if (currentPlan === 'free' || !currentPlan) {
+  // Show upgrade link only if user is not on lifetime plan
+  if (!isLifetimePlan) {
     navItems.push({
       name: "Upgrade",
       path: "/upgrade",
