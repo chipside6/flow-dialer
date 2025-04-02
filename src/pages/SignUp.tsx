@@ -68,9 +68,9 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 pt-6">
-      <div className="max-w-md mx-auto">
-        <div className="mb-6">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
+      <div className="max-w-md w-full">
+        <div className="absolute top-6 left-4">
           <button 
             onClick={() => navigate('/')} 
             className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -79,7 +79,7 @@ const SignUp = () => {
           </button>
         </div>
         
-        <div className="mb-8">
+        <div className="mb-10 text-center">
           <h1 className="text-3xl font-bold text-gray-800">Create your account</h1>
           <p className="text-gray-600 mt-2">Get started with Flow Dialer today</p>
         </div>
@@ -92,25 +92,17 @@ const SignUp = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-1">
-            <label htmlFor="email" className="block text-sm font-medium text-primary">
-              Email
-            </label>
+          <div className="space-y-4">
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full pb-2 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base"
+              className="w-full h-12 pb-2 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base"
               placeholder="Enter your email"
             />
-          </div>
-          
-          <div className="space-y-1">
-            <label htmlFor="password" className="block text-sm font-medium text-primary">
-              Password
-            </label>
+            
             <div className="relative">
               <input
                 id="password"
@@ -119,7 +111,7 @@ const SignUp = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full pb-2 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base"
+                className="w-full h-12 pb-2 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base"
                 placeholder="Create a password"
               />
               <button 
@@ -139,7 +131,7 @@ const SignUp = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-gray-200 hover:bg-gray-300 rounded-full text-gray-800 font-medium transition-colors"
+            className="w-full h-12 py-3 px-4 bg-gray-200 hover:bg-gray-300 rounded-full text-gray-800 font-medium transition-colors"
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
