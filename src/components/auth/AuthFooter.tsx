@@ -7,36 +7,29 @@ interface AuthFooterProps {
 
 export const AuthFooter = ({ type }: AuthFooterProps) => {
   return (
-    <>
-      {type === 'login' && (
-        <>
-          <div className="mt-6 text-center">
-            <Link to="/forgot-password" className="text-primary hover:underline text-sm">
-              Forgot Password?
+    <div className="mt-8 text-center">
+      {type === 'login' ? (
+        <div className="space-y-2">
+          <div>
+            <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+              Forgot your password?
             </Link>
           </div>
-
-          <div className="mt-8 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{" "}
-              <Link to="/signup" className="text-primary font-medium hover:underline">
-                Create an account
-              </Link>
-            </p>
-          </div>
-        </>
-      )}
-
-      {type === 'signup' && (
-        <div className="mt-8 text-center">
-          <p className="text-gray-600">
-            Already have an account?{" "}
-            <Link to="/login" className="text-primary font-medium hover:underline">
-              Sign in
+          <div>
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-primary font-medium hover:underline">
+              Sign up
             </Link>
-          </p>
+          </div>
+        </div>
+      ) : (
+        <div>
+          Already have an account?{' '}
+          <Link to="/login" className="text-primary font-medium hover:underline">
+            Log in
+          </Link>
         </div>
       )}
-    </>
+    </div>
   );
 };

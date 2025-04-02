@@ -11,6 +11,8 @@ import Pricing from "./pages/Pricing";
 import Support from "./pages/Support";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Campaign from "./pages/Campaign";
 import GreetingsPage from "./pages/GreetingsPage";
 import ContactLists from "./pages/ContactLists";
@@ -46,6 +48,8 @@ const App = () => (
             <Route path="/support" element={<Support />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route path="/quick-admin-setup" element={<QuickAdminSetup />} />
             
