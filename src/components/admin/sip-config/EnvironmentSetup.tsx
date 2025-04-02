@@ -83,7 +83,7 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
         saveConfigToStorage(apiUrl, username, password);
       }
       
-      // Test connection with current values
+      // Test connection with current values - no manipulation of the URL
       const result = await asteriskService.testConnection({
         apiUrl, 
         username, 
@@ -203,9 +203,12 @@ VITE_ASTERISK_API_PASSWORD=${password}
             id="api-url"
             value={apiUrl}
             onChange={(e) => setApiUrl(e.target.value)}
-            placeholder="http://your-asterisk-server:8088/ari"
+            placeholder="127.0.0.1:8088/ari"
             className="focus:ring-2 focus:ring-primary focus:border-primary"
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            Enter the full URL with protocol if needed (e.g., http://127.0.0.1:8088/ari) or just the address (e.g., 127.0.0.1:8088/ari)
+          </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

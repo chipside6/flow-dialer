@@ -1,3 +1,4 @@
+
 import { 
   ASTERISK_API_URL, 
   ASTERISK_API_USERNAME, 
@@ -33,7 +34,11 @@ export const connectionService = {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         
-        const response = await fetch(`${apiUrl}/ping`, {
+        // Use the API URL directly without prepending any protocol
+        // This allows users to provide the full URL including the protocol
+        const pingUrl = apiUrl.includes('/ping') ? apiUrl : `${apiUrl}/ping`;
+        
+        const response = await fetch(pingUrl, {
           headers: {
             'Authorization': `Basic ${basicAuth}`,
             'Content-Type': 'application/json',

@@ -18,8 +18,8 @@ export const API_CONFIG = {
 
 // Asterisk Configuration
 export const ASTERISK_CONFIG = {
-  // Asterisk API URL
-  apiUrl: import.meta.env.VITE_ASTERISK_API_URL || 'https://asterisk.yourapp.com:8088/ari',
+  // Asterisk API URL - do not include protocol by default
+  apiUrl: import.meta.env.VITE_ASTERISK_API_URL || '127.0.0.1:8088/ari',
   
   // Authentication credentials
   username: import.meta.env.VITE_ASTERISK_API_USERNAME || '',

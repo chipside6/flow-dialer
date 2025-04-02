@@ -1,30 +1,40 @@
 
-import { ASTERISK_API_URL, ASTERISK_API_USERNAME, ASTERISK_API_PASSWORD } from './config';
-import { asteriskConfig } from './configGenerators';
+import { 
+  ASTERISK_API_URL, 
+  ASTERISK_API_USERNAME, 
+  ASTERISK_API_PASSWORD,
+  getConfigFromStorage
+} from './config';
 
-/**
- * Service for dialing operations and call flow configuration
- */
+interface CallFlowConfig {
+  transferNumber: string;
+  greetingFile?: string;
+  sipProviderId: string;
+}
+
+interface StartDialingParams extends CallFlowConfig {
+  contactListId: string;
+  campaignId: string;
+  maxConcurrentCalls?: number;
+}
+
+interface DialingStatus {
+  status: 'idle' | 'running' | 'completed' | 'failed' | 'stopped';
+  totalCalls: number;
+  completedCalls: number;
+  answeredCalls: number;
+  failedCalls: number;
+}
+
+// Create a new service for dialing operations
 export const dialingService = {
-  /**
-   * Configure transfer number and greeting file for a campaign
-   */
-  async configureCallFlow(campaignId: string, greetingFile: string, transferNumber: string) {
+  // Configure the call flow for a campaign
+  configureCallFlow: async (config: CallFlowConfig) => {
     try {
-      if (!ASTERISK_API_URL || !ASTERISK_API_USERNAME || !ASTERISK_API_PASSWORD) {
-        throw new Error('Asterisk API configuration missing. Please set all required environment variables.');
-      }
+      console.log('Configuring call flow with:', config);
       
-      // In a real implementation, this would update the Asterisk configuration
-      console.log(`Configuring call flow for campaign ${campaignId}:`);
-      console.log(`- Greeting file: ${greetingFile}`);
-      console.log(`- Transfer number: ${transferNumber}`);
-      
-      // Simulate successful configuration
-      return { 
-        success: true,
-        message: "Call flow configured successfully" 
-      };
+      // For demonstration - this would typically involve setting up Asterisk dialplan
+      return { success: true, message: 'Call flow configured successfully' };
     } catch (error) {
       console.error('Error configuring call flow:', error);
       return { 
@@ -35,47 +45,100 @@ export const dialingService = {
     }
   },
   
-  /**
-   * Get the status of a dialing job
-   */
-  async getDialingStatus(jobId: string) {
-    // This is a stub implementation - in real implementation, 
-    // this would fetch status from Asterisk
-    console.log(`[DialingService] Getting status for job ${jobId}`);
-    
-    return {
-      status: 'idle',
-      totalCalls: 0,
-      completedCalls: 0,
-      answeredCalls: 0,
-      failedCalls: 0
-    };
+  // Get status of a dialing job
+  getDialingStatus: async (jobId: string) => {
+    try {
+      console.log('Getting status for job:', jobId);
+      
+      const credentials = getConfigFromStorage();
+      const apiUrl = credentials.apiUrl;
+      const username = credentials.username;
+      const password = credentials.password;
+      
+      if (!apiUrl || !username || !password) {
+        throw new Error('Asterisk API configuration missing');
+      }
+      
+      // In a real implementation, you would make an API call to check the status
+      // This is a simulated response
+      const status: DialingStatus = {
+        status: Math.random() > 0.8 ? 'completed' : 'running',
+        totalCalls: 100,
+        completedCalls: 75,
+        answeredCalls: 50,
+        failedCalls: 25
+      };
+      
+      return status;
+    } catch (error) {
+      console.error('Error getting dialing status:', error);
+      return {
+        status: 'failed',
+        totalCalls: 0,
+        completedCalls: 0,
+        answeredCalls: 0,
+        failedCalls: 0
+      };
+    }
   },
   
-  /**
-   * Start a dialing job
-   */
-  async startDialing(params: any) {
-    // This is a stub implementation - in real implementation, 
-    // this would initiate dialing through Asterisk
-    console.log('[DialingService] Starting dialing with params:', params);
-    
-    return {
-      jobId: 'job-' + Date.now(),
-      success: true
-    };
+  // Start a dialing job
+  startDialing: async (params: StartDialingParams) => {
+    try {
+      console.log('Starting dialing with params:', params);
+      
+      const credentials = getConfigFromStorage();
+      const apiUrl = credentials.apiUrl;
+      const username = credentials.username;
+      const password = credentials.password;
+      
+      if (!apiUrl || !username || !password) {
+        throw new Error('Asterisk API configuration missing');
+      }
+      
+      // In a real implementation, you would make an API call to start the dialing
+      // For now, just return a simulated job ID
+      return { 
+        success: true, 
+        jobId: `job-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        message: 'Dialing started successfully'
+      };
+    } catch (error) {
+      console.error('Error starting dialing:', error);
+      return { 
+        success: false, 
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
   },
   
-  /**
-   * Stop a dialing job
-   */
-  async stopDialing(jobId: string) {
-    // This is a stub implementation - in real implementation, 
-    // this would stop dialing through Asterisk
-    console.log(`[DialingService] Stopping job ${jobId}`);
-    
-    return {
-      success: true
-    };
+  // Stop a dialing job
+  stopDialing: async (jobId: string) => {
+    try {
+      console.log('Stopping dialing job:', jobId);
+      
+      const credentials = getConfigFromStorage();
+      const apiUrl = credentials.apiUrl;
+      const username = credentials.username;
+      const password = credentials.password;
+      
+      if (!apiUrl || !username || !password) {
+        throw new Error('Asterisk API configuration missing');
+      }
+      
+      // In a real implementation, you would make an API call to stop the dialing
+      return { 
+        success: true,
+        message: 'Dialing stopped successfully'
+      };
+    } catch (error) {
+      console.error('Error stopping dialing:', error);
+      return { 
+        success: false, 
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
   }
 };
