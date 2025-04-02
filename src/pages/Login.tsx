@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'react-router-dom';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
@@ -12,6 +11,7 @@ import { AuthAlert } from '@/components/auth/AuthAlert';
 import { PasswordInput } from '@/components/auth/PasswordInput';
 import { AuthButton } from '@/components/auth/AuthButton';
 import { AuthFooter } from '@/components/auth/AuthFooter';
+import { Input } from '@/components/ui/input';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -102,13 +102,13 @@ const Login = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
-          <input
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full h-12 px-3 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base placeholder:text-gray-500"
+            className="h-12"
             placeholder="Enter your email"
           />
           
@@ -116,24 +116,6 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Checkbox id="terms" className="data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
-          <div className="text-sm text-gray-600">
-            I acknowledge and agree to the{' '}
-            <Link to="/terms" className="text-primary hover:underline">
-              Terms of Use
-            </Link>
-            , <Link to="/disclosure" className="text-primary hover:underline">
-              911 Disclosures
-            </Link>{' '}
-            and{' '}
-            <Link to="/privacy" className="text-primary hover:underline">
-              Privacy Policy
-            </Link>
-            .
-          </div>
         </div>
 
         <AuthButton 
