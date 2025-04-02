@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { API_URL } from "@/services/api/apiConfig";
 import { ASTERISK_API_URL, ASTERISK_API_USERNAME, ASTERISK_API_PASSWORD, asteriskService } from "@/utils/asteriskService";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 interface SystemCheck {
   name: string;
@@ -27,6 +28,16 @@ const LaunchReadinessChecker = () => {
 
   const runChecks = async () => {
     setIsRetrying(true);
+    
+    // Reset checks to "checking" state
+    setChecks(prev => 
+      prev.map(check => ({ ...check, status: "checking", message: `Checking ${check.name.toLowerCase()}...` }))
+    );
+    
+    toast({
+      title: "Running checks",
+      description: "Verifying your system configuration...",
+    });
     
     // Check Supabase Connection
     try {
@@ -112,6 +123,11 @@ const LaunchReadinessChecker = () => {
     }
     
     setIsRetrying(false);
+    
+    toast({
+      title: "Checks completed",
+      description: "System configuration verification finished.",
+    });
   };
 
   useEffect(() => {
@@ -127,12 +143,6 @@ const LaunchReadinessChecker = () => {
   };
 
   const handleRetry = () => {
-    // Reset status to checking
-    setChecks(prev => 
-      prev.map(check => ({ ...check, status: "checking", message: `Rechecking ${check.name.toLowerCase()}...` }))
-    );
-    
-    // Run checks again
     runChecks();
   };
 

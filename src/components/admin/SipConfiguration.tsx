@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { CheckCircle2, Loader2, Save, TestTube, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Loader2, Save, TestTube, AlertTriangle, Copy, Clipboard } from "lucide-react";
 import { asteriskService } from "@/utils/asteriskService";
 
 const SipConfiguration = () => {
@@ -36,6 +36,8 @@ const SipConfiguration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"untested" | "success" | "error">("untested");
   const [showEnvHelp, setShowEnvHelp] = useState(false);
+  const [copyingToClipboard, setCopyingToClipboard] = useState(false);
+  const [copyingEnvVars, setCopyingEnvVars] = useState(false);
 
   // Load stored values from localStorage on component mount
   useEffect(() => {
@@ -57,6 +59,11 @@ const SipConfiguration = () => {
       localStorage.setItem("asterisk_api_url", apiUrl);
       localStorage.setItem("asterisk_api_username", username);
       localStorage.setItem("asterisk_api_password", password);
+      
+      toast({
+        title: "Testing Connection",
+        description: "Attempting to connect to Asterisk server..."
+      });
       
       // Create temporary override of the service values
       const tempService = {
@@ -162,11 +169,23 @@ exten => _X.,n,Hangup()
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(configOutput);
-    toast({
-      title: "Copied to Clipboard",
-      description: "Configuration has been copied to clipboard",
-    });
+    setCopyingToClipboard(true);
+    
+    try {
+      navigator.clipboard.writeText(configOutput);
+      toast({
+        title: "Copied to Clipboard",
+        description: "Configuration has been copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: `Could not copy to clipboard: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setTimeout(() => setCopyingToClipboard(false), 1000);
+    }
   };
 
   const saveSettings = () => {
@@ -184,17 +203,29 @@ exten => _X.,n,Hangup()
   };
 
   const copyEnvVars = () => {
-    const envVarText = `
+    setCopyingEnvVars(true);
+    
+    try {
+      const envVarText = `
 VITE_ASTERISK_API_URL=${apiUrl}
 VITE_ASTERISK_API_USERNAME=${username}
 VITE_ASTERISK_API_PASSWORD=${password}
 `.trim();
 
-    navigator.clipboard.writeText(envVarText);
-    toast({
-      title: "Environment Variables Copied",
-      description: "Environment variables have been copied to clipboard",
-    });
+      navigator.clipboard.writeText(envVarText);
+      toast({
+        title: "Environment Variables Copied",
+        description: "Environment variables have been copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: `Could not copy environment variables: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setTimeout(() => setCopyingEnvVars(false), 1000);
+    }
   };
 
   return (
@@ -215,6 +246,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
               value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
               placeholder="http://your-asterisk-server:8088/ari"
+              className="focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
           
@@ -226,6 +258,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="asterisk"
+                className="focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
             
@@ -237,6 +270,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="asterisk"
+                className="focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
           </div>
@@ -245,7 +279,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
             <Button 
               onClick={testConnection} 
               disabled={isTesting}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 active:scale-95 transition-transform"
             >
               {isTesting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -258,7 +292,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
             <Button 
               variant="outline" 
               onClick={saveSettings}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 active:scale-95 transition-transform"
             >
               <Save className="h-4 w-4" />
               Save Settings
@@ -295,9 +329,15 @@ VITE_ASTERISK_API_PASSWORD=${password}
                 variant="outline" 
                 size="sm" 
                 onClick={copyEnvVars}
-                className="mt-2"
+                className="mt-2 active:scale-95 transition-transform"
+                disabled={copyingEnvVars}
               >
-                Copy Environment Variables
+                {copyingEnvVars ? (
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                ) : (
+                  <Clipboard className="h-4 w-4 mr-2" />
+                )}
+                {copyingEnvVars ? "Copied!" : "Copy Environment Variables"}
               </Button>
             </div>
           )}
@@ -320,6 +360,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
               value={providerName}
               onChange={(e) => setProviderName(e.target.value)}
               placeholder="my-sip-provider"
+              className="focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
           
@@ -331,6 +372,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
                 value={host}
                 onChange={(e) => setHost(e.target.value)}
                 placeholder="sip.provider.com"
+                className="focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
             
@@ -341,6 +383,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
                 value={port}
                 onChange={(e) => setPort(e.target.value)}
                 placeholder="5060"
+                className="focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
           </div>
@@ -353,6 +396,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
                 value={providerUsername}
                 onChange={(e) => setProviderUsername(e.target.value)}
                 placeholder="sipuser"
+                className="focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
             
@@ -364,6 +408,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
                 value={providerPassword}
                 onChange={(e) => setProviderPassword(e.target.value)}
                 placeholder="sippassword"
+                className="focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
           </div>
@@ -371,7 +416,7 @@ VITE_ASTERISK_API_PASSWORD=${password}
           <Button 
             onClick={generateConfig} 
             disabled={isGenerating}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 active:scale-95 transition-transform"
           >
             {isGenerating ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -389,10 +434,20 @@ VITE_ASTERISK_API_PASSWORD=${password}
                 value={configOutput}
                 readOnly
                 rows={15}
-                className="font-mono text-sm"
+                className="font-mono text-sm focus:ring-2 focus:ring-primary focus:border-primary"
               />
-              <Button variant="outline" onClick={copyToClipboard}>
-                Copy to Clipboard
+              <Button 
+                variant="outline" 
+                onClick={copyToClipboard}
+                className="active:scale-95 transition-transform"
+                disabled={copyingToClipboard}
+              >
+                {copyingToClipboard ? (
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                ) : (
+                  <Copy className="h-4 w-4 mr-2" />
+                )}
+                {copyingToClipboard ? "Copied!" : "Copy to Clipboard"}
               </Button>
             </div>
           )}
