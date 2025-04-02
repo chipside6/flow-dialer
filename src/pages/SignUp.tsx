@@ -71,7 +71,7 @@ const SignUp = () => {
     <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-8 mx-auto">
       <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 z-0 rounded-xl"></div>
-        <CardHeader className="space-y-1 relative z-10 pb-2">
+        <CardHeader className="space-y-1 relative z-10 pb-2 text-left">
           <div className="flex justify-center mb-4">
             <Logo size="lg" className="animate-fade-in" />
           </div>
@@ -91,7 +91,7 @@ const SignUp = () => {
           )}
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-left block">Email address</Label>
+              <Label htmlFor="email" className="text-left block font-medium text-sm">Email address</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
@@ -106,7 +106,7 @@ const SignUp = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-left block">Password</Label>
+              <Label htmlFor="password" className="text-left block font-medium text-sm">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
