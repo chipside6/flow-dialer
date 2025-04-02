@@ -5,26 +5,26 @@
   /* Better spacing for forms on mobile */
   input, select, textarea {
     font-size: 16px !important; /* Prevents iOS zoom */
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     padding: 12px 16px;
     max-width: 100%; /* Ensure inputs don't overflow */
     box-sizing: border-box;
     border-radius: 8px !important;
   }
   
-  /* More spacing around form elements */
+  /* Tighter spacing around form elements */
   form > div,
   .form-group,
   .space-y-2,
   .space-y-4 > div {
-    margin-bottom: 22px;
+    margin-bottom: 16px;
     width: 100%;
   }
   
   /* Form labels improvements */
   label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-size: 14px;
     font-weight: 500;
   }
@@ -42,7 +42,21 @@
   /* Improve card-based forms */
   form .card-content,
   .card form {
-    padding: 18px 16px 10px !important;
+    padding: 18px 16px 6px !important;
+  }
+  
+  /* Authentication forms special styling */
+  .space-y-3 > div {
+    margin-bottom: 12px !important;
+  }
+  
+  /* Card header and content spacing for auth pages */
+  .card-header.pb-2 {
+    padding-bottom: 8px !important;
+  }
+  
+  .card-content.pt-2 {
+    padding-top: 8px !important;
   }
   
   /* Tablet-specific adjustments */

@@ -68,36 +68,36 @@ const SignUp = () => {
   };
 
   return (
-    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-10 mx-auto">
+    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-8 mx-auto">
       <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 z-0 rounded-xl"></div>
-        <CardHeader className="space-y-1 relative z-10">
-          <div className="flex justify-center mb-6">
+        <CardHeader className="space-y-1 relative z-10 pb-2">
+          <div className="flex justify-center mb-4">
             <Logo size="lg" className="animate-fade-in" />
           </div>
           <CardTitle className="text-2xl font-bold text-center">
-            Create an account
+            Create your account
           </CardTitle>
-          <CardDescription className="text-center">
-            Enter your details below to create your account
+          <CardDescription className="text-center text-base">
+            Get started with Flow Dialer today
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 relative z-10">
+        <CardContent className="space-y-3 relative z-10 pt-2">
           {errorMessage && (
             <Alert variant="destructive" className="animate-fade-in">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="space-y-1">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
@@ -105,14 +105,14 @@ const SignUp = () => {
                 />
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Create a strong password"
+                  placeholder="Min. 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
@@ -121,7 +121,7 @@ const SignUp = () => {
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full font-semibold transition-all group" disabled={isLoading}>
+            <Button type="submit" className="w-full font-semibold transition-all group mt-2" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -129,18 +129,18 @@ const SignUp = () => {
                 </>
               ) : (
                 <>
-                  Sign Up 
+                  Create Account 
                   <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center pb-6 relative z-10">
+        <CardFooter className="flex justify-center pt-0 pb-6 relative z-10">
           <p className="text-sm text-center text-muted-foreground">
             Already have an account?{" "}
             <Link to="/login" className="text-primary font-medium hover:underline transition-colors">
-              Login
+              Sign in
             </Link>
           </p>
         </CardFooter>
