@@ -1,18 +1,63 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import { Shield, AlertCircle, LogIn, ArrowLeft } from 'lucide-react';
+import { Shield, AlertCircle, LogIn, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isAdmin, initialized } = useAuth();
+  const { isAuthenticated, isAdmin, initialized, user, profile, updateProfile } = useAuth();
   
   // Check if user came from admin panel
   const isFromAdmin = location.state?.from?.pathname === '/admin';
+  
+  // Debug function to refresh profile data
+  const refreshAdminStatus = async () => {
+    if (!user?.id) return;
+    
+    try {
+      console.log("Manually refreshing admin status for user:", user.id);
+      
+      // Get fresh profile data directly from DB
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, is_admin')
+        .eq('id', user.id)
+        .single();
+        
+      if (error) {
+        console.error("Error refreshing profile:", error.message);
+        return;
+      }
+      
+      if (data) {
+        console.log("Refreshed profile data:", data);
+        
+        // Update profile in context if found
+        if (profile) {
+          const updatedProfile = {
+            ...profile,
+            is_admin: data.is_admin === true // Force to boolean
+          };
+          updateProfile(updatedProfile);
+          console.log("Profile updated with refreshed data:", updatedProfile);
+        }
+      }
+    } catch (err) {
+      console.error("Error in refreshAdminStatus:", err);
+    }
+  };
+  
+  // Auto-refresh on page load
+  useEffect(() => {
+    if (user?.id && !isAdmin) {
+      refreshAdminStatus();
+    }
+  }, [user?.id, isAdmin]);
   
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] p-6">
@@ -26,6 +71,19 @@ const UnauthorizedPage = () => {
             You don't have permission to access this area
           </p>
         </div>
+        
+        {isAuthenticated && (
+          <Alert className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Authentication Status</AlertTitle>
+            <AlertDescription className="space-y-2 mt-2">
+              <p><strong>User ID:</strong> {user?.id || 'Unknown'}</p>
+              <p><strong>Email:</strong> {user?.email || profile?.email || 'Unknown'}</p>
+              <p><strong>Admin:</strong> {isAdmin ? 'Yes' : 'No'}</p>
+              <p><strong>Initialized:</strong> {initialized ? 'Yes' : 'No'}</p>
+            </AlertDescription>
+          </Alert>
+        )}
         
         {isFromAdmin && (
           <Alert variant="destructive" className="mb-6">
@@ -41,15 +99,20 @@ const UnauthorizedPage = () => {
           {isAuthenticated ? (
             <>
               {isFromAdmin && isAdmin === false && (
-                <p className="text-sm text-center text-muted-foreground mb-4">
-                  Your account doesn't have administrator privileges. 
-                  Please contact an administrator for access.
-                </p>
-              )}
-              {isFromAdmin && isAdmin === null && !initialized && (
-                <p className="text-sm text-center text-muted-foreground mb-4">
-                  Checking your privileges...
-                </p>
+                <div className="space-y-4">
+                  <p className="text-sm text-center text-muted-foreground">
+                    Your account doesn't have administrator privileges. 
+                    Please contact an administrator for access.
+                  </p>
+                  <Button 
+                    onClick={refreshAdminStatus} 
+                    variant="outline" 
+                    className="w-full"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Refresh Admin Status
+                  </Button>
+                </div>
               )}
               <Button 
                 onClick={() => navigate(-1)} 

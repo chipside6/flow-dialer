@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, sessionChecked, initialized, error, isAdmin } = useAuth();
+  const { isAuthenticated, isLoading, sessionChecked, initialized, error, isAdmin, user } = useAuth();
   const location = useLocation();
   const [forceRender, setForceRender] = useState(false);
   
@@ -23,6 +23,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     error,
     isAdmin,
     requireAdmin,
+    userId: user?.id,
     path: location.pathname,
     forceRender
   });
@@ -69,9 +70,8 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     );
   }
   
-  // If user is authenticated but route requires admin privileges
-  // Treat null isAdmin as not having admin privileges
-  if (isAuthenticated && requireAdmin && isAdmin !== true) {
+  // If user is authenticated but route requires admin privileges and user is not admin
+  if (isAuthenticated && requireAdmin === true && isAdmin !== true) {
     console.log("User is authenticated but lacks admin privileges, redirecting to unauthorized");
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }

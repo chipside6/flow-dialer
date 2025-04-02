@@ -25,14 +25,9 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     
     console.log("Profile data from DB:", data);
     
-    // Now get the user's email from auth.users using admin API
-    const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
-    
-    if (userError) {
-      console.error("Error fetching user email:", userError.message);
-    }
-    
-    const userEmail = userData?.user?.email || '';
+    // Get user's email directly from auth.session to avoid admin API call
+    const { data: sessionData } = await supabase.auth.getSession();
+    const userEmail = sessionData?.session?.user?.email || '';
     
     // Create a UserProfile object with required fields, ensuring is_admin is a boolean
     const profile: UserProfile = {
