@@ -63,7 +63,7 @@ export const PlansSection = ({ plans, onSelectPlan }: PlansSectionProps) => {
               className={`w-full rounded-full ${plan.popular ? '' : 'bg-primary/90 hover:bg-primary'}`}
               onClick={() => onSelectPlan(plan)}
             >
-              {plan.price === 0 ? 'Sign Up Free' : 'Get Lifetime Access'}
+              {plan.isTrial ? 'Start Free Trial' : 'Get Lifetime Access'}
             </Button>
           </CardFooter>
         </Card>

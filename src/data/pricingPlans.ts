@@ -53,19 +53,5 @@ export const pricingPlans: PricingPlan[] = [
     },
     popular: true,
     isLifetime: true
-  },
-  {
-    id: "free",
-    name: "Free",
-    price: 0,
-    description: "Basic features with limitations",
-    features: [
-      "Limited to 500 calls per month",
-      "Basic campaign features",
-      "Standard support"
-    ],
-    featuresObj: {
-      maxCalls: 500
-    }
   }
 ];
