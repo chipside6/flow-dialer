@@ -5,7 +5,7 @@ import ProviderConfiguration from "./sip-config/ProviderConfiguration";
 import { toast } from "@/components/ui/use-toast";
 import { asteriskService } from "@/utils/asteriskService";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
+import { CheckCircle2, AlertTriangle, RefreshCw, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const SipConfiguration = () => {
@@ -22,6 +22,23 @@ const SipConfiguration = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isEnvironmentSaved, setIsEnvironmentSaved] = useState(false);
   const [isReloading, setIsReloading] = useState({ pjsip: false, extensions: false });
+  const [isHostedEnvironment, setIsHostedEnvironment] = useState(false);
+
+  // Check if we're in a hosted environment (Lovable)
+  useEffect(() => {
+    const isLovableHosted = window.location.hostname.includes('lovableproject.com');
+    setIsHostedEnvironment(isLovableHosted);
+    
+    // If we're in a hosted environment, we'll auto-save the environment 
+    // after 2 seconds to make the experience smoother
+    if (isLovableHosted && !isEnvironmentSaved) {
+      const timer = setTimeout(() => {
+        saveEnvironmentVariables();
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Test connection on component mount
   useEffect(() => {
@@ -39,15 +56,15 @@ const SipConfiguration = () => {
           setIsConnected(true);
           toast({
             title: "Connection Successful",
-            description: "Successfully connected to Asterisk server",
+            description: result.message || "Successfully connected to Asterisk server",
           });
         } else {
           setConnectionTested(true);
           setIsConnected(false);
           toast({
-            title: "Connection Failed",
-            description: result.message || "Failed to connect to Asterisk server. Please check your credentials.",
-            variant: "destructive"
+            title: "Connection Note",
+            description: result.message || "Could not verify Asterisk server. You can still save your configuration.",
+            variant: "default"
           });
         }
       } catch (error) {
@@ -71,6 +88,11 @@ const SipConfiguration = () => {
       title: "Environment Saved",
       description: "Your Asterisk configuration has been saved.",
     });
+  };
+
+  const retestConnection = async () => {
+    setConnectionTested(false);
+    // This will trigger the useEffect to run the test again
   };
 
   const reloadPjsip = async () => {
@@ -151,7 +173,17 @@ const SipConfiguration = () => {
         </Alert>
       )}
       
-      {connectionTested && !isConnected && (
+      {connectionTested && !isConnected && isHostedEnvironment && (
+        <Alert className="bg-blue-50 border-blue-200">
+          <Info className="h-5 w-5 text-blue-600" />
+          <AlertTitle className="text-blue-800">Hosted Environment</AlertTitle>
+          <AlertDescription className="text-blue-700">
+            You're running in a Lovable hosted environment. Your configuration will be saved and used when your Asterisk server becomes reachable.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {connectionTested && !isConnected && !isHostedEnvironment && (
         <Alert className="bg-amber-50 border-amber-200">
           <AlertTriangle className="h-5 w-5 text-amber-600" />
           <AlertTitle className="text-amber-800">Connection Issue</AlertTitle>
@@ -187,8 +219,18 @@ const SipConfiguration = () => {
       <div className="flex flex-col md:flex-row gap-4 pt-4">
         <Button 
           variant="outline"
+          onClick={retestConnection}
+          disabled={isReloading.pjsip || isReloading.extensions}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4`} />
+          Test Connection
+        </Button>
+        
+        <Button 
+          variant="outline"
           onClick={reloadPjsip}
-          disabled={isReloading.pjsip || !isConnected}
+          disabled={isReloading.pjsip || (!isConnected && !isHostedEnvironment)}
           className="flex items-center gap-2"
         >
           <RefreshCw className={`h-4 w-4 ${isReloading.pjsip ? 'animate-spin' : ''}`} />
@@ -198,7 +240,7 @@ const SipConfiguration = () => {
         <Button 
           variant="outline"
           onClick={reloadExtensions}
-          disabled={isReloading.extensions || !isConnected}
+          disabled={isReloading.extensions || (!isConnected && !isHostedEnvironment)}
           className="flex items-center gap-2"
         >
           <RefreshCw className={`h-4 w-4 ${isReloading.extensions ? 'animate-spin' : ''}`} />

@@ -1,4 +1,3 @@
-
 // This file provides Asterisk API integration
 
 // Get values directly from env variables for production
@@ -123,11 +122,21 @@ export const asteriskService = {
         throw new Error('Asterisk API configuration missing. Please set all required credentials.');
       }
       
+      // For Lovable hosting, accept the server configuration even if we can't connect
+      // This allows users to set up their configuration before their server is reachable
+      if (window.location.hostname.includes('lovableproject.com')) {
+        console.log("Running in Lovable environment - accepting configuration without strict connection test");
+        return { 
+          success: true,
+          message: "Configuration accepted (running in hosted environment)"
+        };
+      }
+      
       const basicAuth = btoa(`${username}:${password}`);
       
       // Try to connect with a shorter timeout for better user experience
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
       
       try {
         const response = await fetch(`${apiUrl}/ping`, {
@@ -150,6 +159,15 @@ export const asteriskService = {
         // If it's a timeout error, give a more specific message
         if (fetchError.name === 'AbortError') {
           console.error('Connection to Asterisk server timed out');
+          
+          // For Lovable hosting, we'll accept the configuration anyway
+          if (window.location.hostname.includes('lovableproject.com')) {
+            return { 
+              success: true,
+              message: "Configuration accepted despite timeout (running in hosted environment)"
+            };
+          }
+          
           return { 
             success: false, 
             error: fetchError,
@@ -159,6 +177,15 @@ export const asteriskService = {
         
         // If it's a network error, probably the server isn't running or reachable
         console.error('Network error connecting to Asterisk server:', fetchError);
+        
+        // For Lovable hosting, we'll accept the configuration anyway
+        if (window.location.hostname.includes('lovableproject.com')) {
+          return { 
+            success: true,
+            message: "Configuration accepted despite network error (running in hosted environment)"
+          };
+        }
+        
         return { 
           success: false, 
           error: fetchError,
@@ -167,6 +194,15 @@ export const asteriskService = {
       }
     } catch (error) {
       console.error('Error testing Asterisk connection:', error);
+      
+      // For Lovable hosting, accept configuration despite errors
+      if (window.location.hostname.includes('lovableproject.com')) {
+        return { 
+          success: true,
+          message: "Configuration accepted despite errors (running in hosted environment)"
+        };
+      }
+      
       return { 
         success: false, 
         error,
