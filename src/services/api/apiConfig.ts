@@ -1,99 +1,67 @@
+// This file is kept for backward compatibility purposes only.
+// The application now uses Supabase exclusively for backend services.
+// Imports of this file will work but actual API usage is deprecated.
 
-import { getStoredSession } from "../authService";
-import { 
-  PRODUCTION_API_URL, 
-  MAX_RETRY_ATTEMPTS, 
-  REQUEST_TIMEOUT,
-  ENABLE_DETAILED_LOGGING 
-} from "./productionConfig";
+import { supabase } from "@/integrations/supabase/client";
 
-// Use the configured production URL or fallback to an empty string to prevent connection errors
-// Changed from using a specific fallback URL that might not exist
-export const API_URL = import.meta.env.VITE_API_URL || '';
+// Use the configured Supabase URL
+export const API_URL = import.meta.env.VITE_SUPABASE_URL || '';
 
 // Log configuration on startup (only in development)
 if (import.meta.env.DEV) {
-  console.log(`[API] Using API URL: ${API_URL}`);
+  console.log(`[API] Using Supabase URL: ${API_URL}`);
 }
 
 /**
  * Helper function to add auth headers to requests
+ * @deprecated Use supabase client directly
  */
 export const getAuthHeaders = (): Record<string, string> => {
-  const session = getStoredSession();
-  return session ? { 'Authorization': `Bearer ${session.user.id}` } : {};
+  console.warn('getAuthHeaders is deprecated. Use the Supabase client directly.');
+  return {};
 };
 
 /**
- * Base fetch function with common error handling and retry logic
+ * @deprecated Use supabase client directly
  */
 export const apiFetch = async <T>(
   endpoint: string, 
   options: RequestInit = {}
 ): Promise<T> => {
-  let retries = 0;
+  console.warn('apiFetch is deprecated. Use the Supabase client directly.');
   
-  // Check if API URL is configured
-  if (!API_URL) {
-    console.warn('[API] API URL is not configured. Please set VITE_API_URL environment variable.');
-    throw new Error('API URL is not configured');
-  }
-  
-  const executeRequest = async (): Promise<T> => {
-    try {
-      const headers = {
-        ...getAuthHeaders(),
-        ...(options.headers || {})
-      };
-
-      // Only set Content-Type if it's not already set and not FormData
-      if (
-        !options.headers?.hasOwnProperty('Content-Type') && 
-        !(options.body instanceof FormData)
-      ) {
-        headers['Content-Type'] = 'application/json';
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-
-      const response = await fetch(`${API_URL}/${endpoint}`, {
-        ...options,
-        headers,
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API returned ${response.status}: ${errorText}`);
-      }
-
-      // For responses that should return JSON
-      if (response.headers.get('content-type')?.includes('application/json')) {
-        const data = await response.json();
-        return data as T;
-      }
-
-      return {} as T;
-    } catch (error) {
-      if (ENABLE_DETAILED_LOGGING) {
-        console.error(`[API] Error in fetch (attempt ${retries + 1}):`, error);
-      }
-      
-      // Retry logic for network errors or server errors (5xx)
-      if (retries < MAX_RETRY_ATTEMPTS) {
-        retries++;
-        // Exponential backoff
-        const delay = Math.min(1000 * 2 ** retries, 10000);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        return executeRequest();
-      }
-      
-      throw error;
+  // Simple mapping for backward compatibility
+  // This should handle basic fetch operations until they can be properly migrated
+  try {
+    console.log(`[API] Redirecting call to Supabase: ${endpoint}`);
+    
+    // This is a very simple fallback that might not work for all endpoints
+    // It's intended to keep basic functionality until proper migration
+    if (endpoint.includes('contact-lists')) {
+      const { data, error } = await supabase.from('contact_lists').select('*');
+      if (error) throw error;
+      return data as unknown as T;
+    } else if (endpoint.includes('campaigns')) {
+      const { data, error } = await supabase.from('campaigns').select('*');
+      if (error) throw error;
+      return data as unknown as T;
+    } else if (endpoint.includes('transfer-numbers')) {
+      const { data, error } = await supabase.from('transfer_numbers').select('*');
+      if (error) throw error;
+      return data as unknown as T;
+    } else if (endpoint.includes('sip-providers')) {
+      const { data, error } = await supabase.from('sip_providers').select('*');
+      if (error) throw error;
+      return data as unknown as T;
+    } else if (endpoint.includes('greeting-files')) {
+      const { data, error } = await supabase.from('greeting_files').select('*');
+      if (error) throw error;
+      return data as unknown as T;
     }
-  };
-
-  return executeRequest();
+    
+    throw new Error(`Endpoint not implemented in Supabase migration: ${endpoint}`);
+  } catch (error) {
+    console.error(`[API] Error in Supabase migration:`, error);
+    throw error;
+  }
 };

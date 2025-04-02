@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, XCircle, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { API_URL } from "@/services/api/apiConfig";
 import { ASTERISK_API_URL, ASTERISK_API_USERNAME, ASTERISK_API_PASSWORD, asteriskService } from "@/utils/asteriskService";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
@@ -18,7 +17,6 @@ const LaunchReadinessChecker = () => {
   const { user } = useAuth();
   const [checks, setChecks] = useState<SystemCheck[]>([
     { name: "Supabase Connection", status: "checking", message: "Checking connection..." },
-    { name: "API Connection", status: "checking", message: "Checking API..." },
     { name: "Asterisk Connection", status: "checking", message: "Checking Asterisk server..." },
     { name: "Environment Variables", status: "checking", message: "Checking configuration..." },
     { name: "Authentication", status: "checking", message: "Verifying authentication..." }
@@ -26,13 +24,11 @@ const LaunchReadinessChecker = () => {
   const [isRetrying, setIsRetrying] = useState(false);
   const [serverInstructions, setServerInstructions] = useState<string | null>(null);
   const [troubleshootInstructions, setTroubleshootInstructions] = useState<string | null>(null);
-  const [apiConfigInstructions, setApiConfigInstructions] = useState<string | null>(null);
 
   const runChecks = async () => {
     setIsRetrying(true);
     setServerInstructions(null);
     setTroubleshootInstructions(null);
-    setApiConfigInstructions(null);
     
     // Reset checks to "checking" state
     setChecks(prev => 
@@ -51,35 +47,6 @@ const LaunchReadinessChecker = () => {
       updateCheck("Supabase Connection", "success", "Connected to Supabase successfully");
     } catch (error) {
       updateCheck("Supabase Connection", "error", `Failed to connect: ${error.message}`);
-    }
-
-    // Check API Connection
-    try {
-      // Get stored API URL from localStorage or use environment variable
-      const storedApiUrl = localStorage.getItem("api_url");
-      const effectiveApiUrl = storedApiUrl || API_URL;
-      
-      // Check if API URL is configured
-      if (!effectiveApiUrl) {
-        updateCheck("API Connection", "error", "API URL not configured. Set VITE_API_URL environment variable or configure in settings.");
-        setApiConfigInstructions(getApiConfigInstructions());
-      } else {
-        try {
-          const response = await fetch(`${effectiveApiUrl}/health`, { 
-            method: 'GET',
-            // Set a shorter timeout for the health check
-            signal: AbortSignal.timeout(5000)
-          });
-          if (!response.ok) throw new Error(`Status: ${response.status}`);
-          updateCheck("API Connection", "success", "API is reachable");
-        } catch (fetchError) {
-          updateCheck("API Connection", "error", `API unreachable: ${fetchError.message}`);
-          setApiConfigInstructions(getApiConfigInstructions());
-        }
-      }
-    } catch (error) {
-      updateCheck("API Connection", "error", `Error checking API: ${error.message}`);
-      setApiConfigInstructions(getApiConfigInstructions());
     }
 
     // Check Asterisk Connection
@@ -131,7 +98,6 @@ const LaunchReadinessChecker = () => {
     const requiredVars = [
       { name: "VITE_SUPABASE_URL", value: import.meta.env.VITE_SUPABASE_URL }, 
       { name: "VITE_SUPABASE_PUBLISHABLE_KEY", value: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, 
-      { name: "VITE_API_URL", value: import.meta.env.VITE_API_URL }, 
       { name: "VITE_ASTERISK_API_URL", value: import.meta.env.VITE_ASTERISK_API_URL },
       { name: "VITE_ASTERISK_API_USERNAME", value: import.meta.env.VITE_ASTERISK_API_USERNAME },
       { name: "VITE_ASTERISK_API_PASSWORD", value: import.meta.env.VITE_ASTERISK_API_PASSWORD }
@@ -162,28 +128,6 @@ const LaunchReadinessChecker = () => {
       title: "Checks completed",
       description: "System configuration verification finished.",
     });
-  };
-
-  const getApiConfigInstructions = (): string => {
-    return `
-1. Set the API URL in one of these ways:
-
-   Option 1: Environment Variable
-   Add VITE_API_URL to your environment with your API endpoint URL
-   Example: VITE_API_URL=http://your-api-server:5000/api
-
-   Option 2: Local Storage Configuration
-   You can set the API URL directly in your browser's local storage:
-   - Open browser developer tools (F12)
-   - Go to Application tab > Local Storage
-   - Add a key 'api_url' with your API endpoint value
-   
-   Option 3: Backend Server
-   If you're running the included Node.js backend:
-   - Make sure it's running (cd backend && npm start)
-   - Use http://localhost:5000/api as your API URL
-   - The backend should have a /health endpoint available
-   `;
   };
 
   const getAsteriskSetupInstructions = (url: string): string => {
@@ -324,15 +268,6 @@ COMMON ASTERISK TROUBLESHOOTING:
             </div>
           ))}
           
-          {apiConfigInstructions && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-              <h3 className="text-lg font-medium text-blue-800 mb-2">API Configuration Instructions</h3>
-              <pre className="whitespace-pre-wrap text-sm bg-white p-3 rounded border border-blue-100 overflow-x-auto text-blue-900">
-                {apiConfigInstructions}
-              </pre>
-            </div>
-          )}
-          
           {serverInstructions && (
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
               <h3 className="text-lg font-medium text-blue-800 mb-2">Server Setup Instructions</h3>
@@ -350,6 +285,22 @@ COMMON ASTERISK TROUBLESHOOTING:
               </pre>
             </div>
           )}
+          
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <h3 className="text-lg font-medium text-blue-800 mb-2">Supabase Setup</h3>
+            <p className="text-sm mb-2">
+              Your application is now configured to use Supabase exclusively as the backend. The Supabase integration provides:
+            </p>
+            <ul className="list-disc pl-5 text-sm space-y-1">
+              <li>Database storage (PostgreSQL)</li>
+              <li>User authentication</li>
+              <li>File storage</li>
+              <li>Real-time functionality</li>
+            </ul>
+            <p className="text-sm mt-3">
+              All necessary API endpoints are handled through the Supabase client, removing the need for a separate API server.
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>
