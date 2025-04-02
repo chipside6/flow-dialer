@@ -68,8 +68,8 @@ const SignUp = () => {
   };
 
   return (
-    <div className="container flex flex-col items-center min-h-screen px-4 mx-auto pt-4">
-      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden mt-8">
+    <div className="container flex flex-col items-center min-h-screen px-4 mx-auto pt-0">
+      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden mt-4">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 z-0 rounded-xl"></div>
         <CardHeader className="space-y-1 relative z-10 pb-2 text-left">
           <div className="flex justify-center mb-4">
@@ -89,7 +89,7 @@ const SignUp = () => {
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
-          <form onSubmit={handleSubmit} className="space-y-4 text-left">
+          <form onSubmit={handleSubmit} className="space-y-6 text-left">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-left block font-medium text-sm">Email address</Label>
               <div className="relative">
@@ -112,7 +112,7 @@ const SignUp = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Create a password (min. 6 characters)"
+                  placeholder="Create a password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
