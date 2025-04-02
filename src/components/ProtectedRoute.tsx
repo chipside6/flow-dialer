@@ -27,7 +27,8 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     requireAdmin,
     userId: user?.id,
     path: location.pathname,
-    forceRender
+    forceRender,
+    storedAdminStatus: localStorage.getItem('isUserAdmin') === 'true'
   });
   
   // Force render after shorter timeout to prevent infinite loading state
@@ -84,8 +85,12 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     );
   }
   
+  // Check localStorage for admin status as a fallback for better persistence
+  const storedAdminStatus = localStorage.getItem('isUserAdmin') === 'true';
+  const effectiveAdminStatus = isAdmin || (requireAdmin && storedAdminStatus);
+  
   // If user is authenticated but route requires admin privileges and user is not admin
-  if (isAuthenticated && requireAdmin === true && isAdmin !== true) {
+  if (isAuthenticated && requireAdmin === true && !effectiveAdminStatus) {
     console.log("User is authenticated but lacks admin privileges, redirecting to unauthorized");
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }

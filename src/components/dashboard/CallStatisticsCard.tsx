@@ -34,7 +34,7 @@ export const CallStatisticsCard = () => {
   
   // Get phone numbers from campaigns data
   const getPhoneNumbers = (type: 'total' | 'transferred' | 'failed' | 'voicemail') => {
-    if (!campaigns.length) return ['No phone numbers available'];
+    if (!campaigns.length) return [];
     
     // Get actual phone numbers from campaign data when available
     // This is just for demo purposes - in production, replace with real data
@@ -52,7 +52,7 @@ export const CallStatisticsCard = () => {
       );
     });
     
-    return phoneNumbers.length ? phoneNumbers : ['No phone numbers available'];
+    return phoneNumbers;
   };
 
   const callStats: CallStatistic[] = [

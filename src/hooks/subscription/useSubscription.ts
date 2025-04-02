@@ -15,6 +15,27 @@ export const useSubscription = (): UseSubscriptionReturn => {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [trialExpired, setTrialExpired] = useState<boolean>(false);
 
+  // On mount, try to initialize from localStorage for faster UI rendering
+  useEffect(() => {
+    const cachedPlan = localStorage.getItem('userSubscriptionPlan');
+    const cachedSubscription = localStorage.getItem('userSubscription');
+    
+    if (cachedPlan) {
+      setCurrentPlan(cachedPlan);
+      console.log("Initialized subscription plan from cache:", cachedPlan);
+    }
+    
+    if (cachedSubscription) {
+      try {
+        const parsedSubscription = JSON.parse(cachedSubscription);
+        setSubscription(parsedSubscription);
+        console.log("Initialized subscription from cache");
+      } catch (e) {
+        console.error("Error parsing cached subscription:", e);
+      }
+    }
+  }, []);
+
   // Use cached fetch for subscription data
   const { 
     data: subscriptionData,
@@ -34,6 +55,10 @@ export const useSubscription = (): UseSubscriptionReturn => {
           setCurrentPlan(data.plan_id);
           setSubscription(data);
           
+          // Cache subscription data in localStorage
+          localStorage.setItem('userSubscriptionPlan', data.plan_id);
+          localStorage.setItem('userSubscription', JSON.stringify(data));
+          
           // Check if trial has expired
           if (data.plan_id === 'trial' && data.current_period_end) {
             const endDate = new Date(data.current_period_end);
@@ -43,6 +68,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
               console.log("Trial has expired");
               setTrialExpired(true);
               setCurrentPlan('free'); // Downgrade to free plan
+              localStorage.setItem('userSubscriptionPlan', 'free');
             } else {
               setTrialExpired(false);
             }
@@ -53,6 +79,10 @@ export const useSubscription = (): UseSubscriptionReturn => {
           setCurrentPlan('free');
           setSubscription(null);
           setTrialExpired(false);
+          
+          // Cache default free plan
+          localStorage.setItem('userSubscriptionPlan', 'free');
+          localStorage.removeItem('userSubscription');
         }
       },
       onError: (err) => {
@@ -60,6 +90,10 @@ export const useSubscription = (): UseSubscriptionReturn => {
         setCurrentPlan('free');
         setSubscription(null);
         setTrialExpired(false);
+        
+        // Cache default free plan on error
+        localStorage.setItem('userSubscriptionPlan', 'free');
+        localStorage.removeItem('userSubscription');
         
         toast({
           title: "Subscription Error",
@@ -76,6 +110,8 @@ export const useSubscription = (): UseSubscriptionReturn => {
       setCurrentPlan('free');
       setSubscription(null);
       setTrialExpired(false);
+      localStorage.setItem('userSubscriptionPlan', 'free');
+      localStorage.removeItem('userSubscription');
       return null;
     }
     

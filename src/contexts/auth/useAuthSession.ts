@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
@@ -11,7 +12,7 @@ export function useAuthSession() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false); // Default to false instead of null
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [authError, setAuthError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const { isOnline } = useNetworkStatus();
@@ -22,6 +23,8 @@ export function useAuthSession() {
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
   // Track timeout IDs for cleanup
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Add a ref to store admin status to prevent loss between renders
+  const adminStatusRef = useRef<boolean>(false);
 
   // Function to process user and profile data - optimized with debouncing
   const processUserAndProfile = useCallback(async (sessionUser: User | null, currentSession: Session | null) => {
@@ -47,19 +50,32 @@ export function useAuthSession() {
               console.log("useAuthSession - Profile data:", profileData);
               setProfile(profileData);
               
-              // Check admin role - explicitly set to boolean
-              setIsAdmin(profileData.is_admin === true);
-              console.log("useAuthSession - Setting isAdmin to:", profileData.is_admin === true);
+              // Check admin role - explicitly set to boolean and store in ref
+              const isAdminValue = profileData.is_admin === true;
+              adminStatusRef.current = isAdminValue;
+              setIsAdmin(isAdminValue);
+              console.log("useAuthSession - Setting isAdmin to:", isAdminValue);
+              
+              // Store admin status in localStorage for persistence across sessions
+              if (isAdminValue) {
+                localStorage.setItem('isUserAdmin', 'true');
+              } else {
+                localStorage.removeItem('isUserAdmin');
+              }
             } else if (isMounted.current) {
               console.log("useAuthSession - No profile found for user");
               setProfile(null);
               setIsAdmin(false);
+              adminStatusRef.current = false;
+              localStorage.removeItem('isUserAdmin');
             }
           } catch (profileError) {
             console.error("Error fetching profile:", profileError);
             if (isMounted.current) {
               setProfile(null);
               setIsAdmin(false);
+              adminStatusRef.current = false;
+              localStorage.removeItem('isUserAdmin');
             }
           }
         }, 0);
@@ -69,6 +85,8 @@ export function useAuthSession() {
         setSession(null);
         setProfile(null);
         setIsAdmin(false);
+        adminStatusRef.current = false;
+        localStorage.removeItem('isUserAdmin');
       }
       
       if (isMounted.current) {
@@ -93,8 +111,20 @@ export function useAuthSession() {
     setSession(null);
     setProfile(null);
     setIsAdmin(false);
+    adminStatusRef.current = false;
+    localStorage.removeItem('isUserAdmin');
     setIsLoading(false);
     setSessionChecked(true);
+  }, []);
+
+  // Initial load check for admin status from localStorage
+  useEffect(() => {
+    const savedAdminStatus = localStorage.getItem('isUserAdmin') === 'true';
+    if (savedAdminStatus) {
+      console.log("useAuthSession - Found stored admin status");
+      adminStatusRef.current = true;
+      setIsAdmin(true);
+    }
   }, []);
 
   // Setup auth state listener - with improved timeout handling
@@ -187,6 +217,11 @@ export function useAuthSession() {
               clearSessionData();
               return;
             }
+            
+            // If we have a stored admin status and a valid session, maintain it until profile is loaded
+            if (adminStatusRef.current) {
+              setIsAdmin(true);
+            }
           }
           
           await processUserAndProfile(session?.user || null, session);
@@ -255,7 +290,7 @@ export function useAuthSession() {
     profile,
     isLoading,
     isAuthenticated: !!user,
-    isAdmin, // This is now a boolean, not nullable
+    isAdmin,
     authError,
     sessionChecked,
     setProfile
