@@ -1,25 +1,10 @@
-
 import { Check } from "lucide-react";
 
 const features = [
-  {
-    title: "Campaign Automation",
-    description: "Set up and forget with our automated campaign system that handles calls without manual intervention.",
-    icon: "🤖",
-    imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&h=600&q=80"
-  },
-  {
-    title: "Real-time Analytics",
-    description: "Track campaign performance with comprehensive analytics dashboards showing conversion rates and call metrics.",
-    icon: "📊",
-    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&h=600&q=80"
-  },
-  {
-    title: "Compliance Management",
-    description: "Stay compliant with calling regulations with built-in compliance tools and do-not-call list integration.",
-    icon: "✅",
-    imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&h=600&q=80"
-  }
+  // The three features below have been removed as requested:
+  // - Campaign Automation
+  // - Real-time Analytics
+  // - Compliance Management
 ];
 
 export const FeaturesSection = () => {
@@ -42,17 +27,11 @@ export const FeaturesSection = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <FeatureCard 
-              key={index}
-              title={feature.title}
-              description={feature.description}
-              icon={feature.icon}
-              imageUrl={feature.imageUrl}
-              delay={index * 100}
-            />
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+          {/* Empty features grid since we removed all features */}
+          <div className="text-center text-muted-foreground">
+            Custom calling solutions that work for your business
+          </div>
         </div>
       </div>
     </section>
