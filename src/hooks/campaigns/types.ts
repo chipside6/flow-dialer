@@ -1,6 +1,6 @@
 
 // Original imports
-import { User } from "../auth/types";
+import { User } from "@/contexts/auth/types";
 
 export interface Campaign {
   id: string;
