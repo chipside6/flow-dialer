@@ -1,5 +1,6 @@
 
 import { CampaignData, WizardStep } from "../types";
+import { useMemo } from "react";
 
 // Function to validate each step of the campaign creation wizard
 export const validateStep = (step: WizardStep, campaign: CampaignData): boolean => {
@@ -68,4 +69,28 @@ export const getPreviousStep = (currentStep: WizardStep): WizardStep => {
     default:
       return "basics";
   }
+};
+
+// Added function to determine if a step is available based on previous step completion
+export const getStepAvailability = (campaign: CampaignData) => {
+  return {
+    basics: true, // Always available
+    contacts: validateStep("basics", campaign),
+    audio: validateStep("basics", campaign) && validateStep("contacts", campaign),
+    transfers: validateStep("basics", campaign) && validateStep("contacts", campaign) && validateStep("audio", campaign),
+    sipProvider: validateStep("basics", campaign) && validateStep("contacts", campaign) && validateStep("audio", campaign) && validateStep("transfers", campaign),
+    review: validateStep("basics", campaign) && validateStep("contacts", campaign) && validateStep("audio", campaign) && validateStep("transfers", campaign) && validateStep("sipProvider", campaign)
+  };
+};
+
+// Custom hook to provide form validation functions
+export const useFormValidation = () => {
+  return useMemo(() => {
+    return {
+      validateStep,
+      getNextStep,
+      getPreviousStep,
+      getStepAvailability
+    };
+  }, []);
 };
