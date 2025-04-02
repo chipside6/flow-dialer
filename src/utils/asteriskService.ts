@@ -3,9 +3,9 @@ import { asteriskService as originalAsteriskService } from './asterisk';
 
 // Environment variables or configuration constants would normally be imported
 // We're providing fallbacks for now
-const ASTERISK_API_URL = process.env.ASTERISK_API_URL || 'http://localhost:8088/ari';
-const ASTERISK_API_USERNAME = process.env.ASTERISK_API_USERNAME || 'admin';
-const ASTERISK_API_PASSWORD = process.env.ASTERISK_API_PASSWORD || 'password';
+const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || 'http://localhost:8088/ari';
+const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || 'admin';
+const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || 'password';
 
 // Default Asterisk configuration
 export const asteriskConfig = {

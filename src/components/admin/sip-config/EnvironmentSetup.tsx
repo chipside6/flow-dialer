@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +13,9 @@ interface EnvironmentSetupProps {
 }
 
 export const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({ onComplete }) => {
-    const [apiUrl, setApiUrl] = useState(process.env.NEXT_PUBLIC_ASTERISK_API_URL || '');
-    const [username, setUsername] = useState(process.env.NEXT_PUBLIC_ASTERISK_API_USERNAME || '');
-    const [password, setPassword] = useState(process.env.NEXT_PUBLIC_ASTERISK_API_PASSWORD || '');
+    const [apiUrl, setApiUrl] = useState(import.meta.env.VITE_ASTERISK_API_URL || '');
+    const [username, setUsername] = useState(import.meta.env.VITE_ASTERISK_API_USERNAME || '');
+    const [password, setPassword] = useState(import.meta.env.VITE_ASTERISK_API_PASSWORD || '');
     const [isReady, setIsReady] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
