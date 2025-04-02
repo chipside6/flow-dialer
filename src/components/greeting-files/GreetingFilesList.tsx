@@ -11,9 +11,10 @@ import { Play, Trash } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AudioFileCard } from './AudioFileCard';
 import { LoadingState } from '@/components/upgrade/LoadingState';
+import { GreetingFile } from '@/hooks/useGreetingFiles';
 
 interface GreetingFilesListProps {
-  greetingFiles: any[];
+  greetingFiles: GreetingFile[];
   isLoading: boolean;
   error: Error | null;
   isError: boolean;
