@@ -1,6 +1,4 @@
 
-import { Campaign } from "@/hooks/useCampaigns";
-
 export interface SipProvider {
   id: string;
   name: string;
@@ -12,18 +10,18 @@ export interface ContactList {
   contactCount: number;
 }
 
-export interface DialStatus {
-  status: 'idle' | 'running' | 'completed' | 'failed' | 'stopped';
-  totalCalls: number;
-  completedCalls: number;
-  answeredCalls: number;
-  failedCalls: number;
-}
-
 export interface DialerFormData {
   sipProviderId: string;
   contactListId: string;
   transferNumber: string;
-  maxConcurrentCalls: string;
-  greetingFile: string;
+  greetingFile?: string;
+  maxConcurrentCalls?: number;
+}
+
+export interface DialStatus {
+  status: 'idle' | 'running' | 'stopped' | 'completed' | 'failed';
+  totalCalls: number;
+  completedCalls: number;
+  answeredCalls: number;
+  failedCalls: number;
 }

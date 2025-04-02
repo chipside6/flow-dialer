@@ -76,13 +76,16 @@ export const useDialerActions = (
     }
     
     try {
+      // Get the maximum concurrent calls from the form, allowing campaign parallelism
+      const maxConcurrentCalls = formData.maxConcurrentCalls || 1;
+      
       const response = await asteriskService.startDialing({
         contactListId: formData.contactListId,
         campaignId,
         transferNumber: formData.transferNumber,
         sipProviderId: formData.sipProviderId,
         greetingFile: formData.greetingFile,
-        maxConcurrentCalls: 1 // Force this to be 1 regardless of user input
+        maxConcurrentCalls // Use the user's desired number of concurrent calls
       });
       
       setCurrentJobId(response.jobId);
