@@ -1,10 +1,9 @@
-
 // This file provides Asterisk API integration
 
-// Default values for Asterisk API (if not provided in env vars)
-export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || localStorage.getItem("asterisk_api_url") || '';
-export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || localStorage.getItem("asterisk_api_username") || '';
-export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || localStorage.getItem("asterisk_api_password") || '';
+// Get values directly from env variables for production
+export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || '';
+export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || '';
+export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || '';
 
 /**
  * Helper function to create basic auth header
@@ -77,7 +76,7 @@ export const asteriskService = {
   async testConnection() {
     try {
       if (!ASTERISK_API_URL || !ASTERISK_API_USERNAME || !ASTERISK_API_PASSWORD) {
-        throw new Error('Asterisk API configuration missing');
+        throw new Error('Asterisk API configuration missing. Please set all required environment variables.');
       }
       
       const basicAuth = btoa(`${ASTERISK_API_USERNAME}:${ASTERISK_API_PASSWORD}`);
@@ -96,7 +95,11 @@ export const asteriskService = {
       return { success: true };
     } catch (error) {
       console.error('Error testing Asterisk connection:', error);
-      return { success: false, error };
+      return { 
+        success: false, 
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
     }
   },
   
