@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/use-toast";
 import { User, Session, API_URL } from './types';
 import { storeSession, clearSession, getStoredSession } from './session';
@@ -259,3 +258,5 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     return { success: true, error: null };
   }
 };
+
+export * from './profileApi';
