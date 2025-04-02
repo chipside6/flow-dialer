@@ -5,6 +5,7 @@ import { RotateCcw, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
+import { clearAllAuthData, forceAppReload } from "@/utils/sessionCleanup";
 
 export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
   const { signOut } = useAuth();
@@ -18,16 +19,8 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
     setIsLoggingOut(true);
     
     try {
-      // Clear any auth-related data from localStorage preemptively
-      try {
-        for (const key of Object.keys(localStorage)) {
-          if (key.includes('supabase') || key.includes('auth') || key.includes('session') || key.includes('token')) {
-            localStorage.removeItem(key);
-          }
-        }
-      } catch (e) {
-        console.warn("Error during pre-emptive cleanup:", e);
-      }
+      // IMMEDIATELY clear all auth data to prevent automatic re-login
+      clearAllAuthData();
       
       // First navigate to login page immediately for better UX
       navigate("/login", { replace: true });
@@ -43,7 +36,7 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
         
         // Force page reload after a short delay
         setTimeout(() => {
-          window.location.href = '/login';
+          forceAppReload();
         }, 100);
       } else if (error) {
         console.error("DiagnosticActions - Error during sign out:", error);
@@ -55,7 +48,7 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
         
         // Force page reload even on error
         setTimeout(() => {
-          window.location.href = '/login';
+          forceAppReload();
         }, 100);
       }
     } catch (error: any) {
@@ -68,7 +61,7 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
       
       // Force page reload even on error
       setTimeout(() => {
-        window.location.href = '/login';
+        forceAppReload();
       }, 100);
     } finally {
       setIsLoggingOut(false);

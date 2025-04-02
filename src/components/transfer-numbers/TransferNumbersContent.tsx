@@ -7,7 +7,8 @@ import { ErrorAlert } from "./ErrorAlert";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface TransferNumbersContentProps {
   transferNumbers: TransferNumber[];
@@ -52,7 +53,7 @@ export const TransferNumbersContent = ({
           });
         }
       }
-    }, 2000); // Reduced from 3 seconds to 2 seconds
+    }, 1500); // Reduced from 2 seconds to 1.5 seconds for faster UI feedback
     
     return () => clearTimeout(timer);
   }, [isLoading, isInitialLoad]);
@@ -74,7 +75,7 @@ export const TransferNumbersContent = ({
           variant: "destructive"
         });
       }
-    }, 5000); // 5 seconds timeout (reduced from 8s)
+    }, 4000); // 4 seconds timeout (reduced from 5s)
     
     return () => clearTimeout(longLoadingTimer);
   }, [isLoading, forceShowContent]);
@@ -84,7 +85,7 @@ export const TransferNumbersContent = ({
     return (
       <LoadingState 
         message="Loading your transfer numbers, please wait..." 
-        timeout={2000} // 2 seconds timeout (reduced from 3s)
+        timeout={1500} // 1.5 seconds timeout (reduced from 2s)
         onRetry={onRefresh}
       />
     );
@@ -97,8 +98,16 @@ export const TransferNumbersContent = ({
       {loadingTimedOut && isLoading && (
         <Alert variant="warning" className="mb-6">
           <AlertCircle className="h-4 w-4 text-amber-500" />
-          <AlertDescription className="text-amber-800">
-            Loading is taking longer than expected. You can continue to use the application, but some data may not be up-to-date.
+          <AlertDescription className="text-amber-800 flex items-center justify-between w-full">
+            <span>Loading is taking longer than expected. You can continue to use the application.</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onRefresh} 
+              className="ml-2 bg-amber-50"
+            >
+              <RefreshCw className="h-3 w-3 mr-1" /> Retry
+            </Button>
           </AlertDescription>
         </Alert>
       )}

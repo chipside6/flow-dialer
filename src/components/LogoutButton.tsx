@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { clearAllAuthData, forceAppReload } from "@/utils/sessionCleanup";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -46,17 +47,8 @@ const LogoutButton = ({
         });
       }
       
-      // Clear any Supabase or auth-related data from localStorage preemptively
-      // This helps prevent auto sign-in on page reload
-      try {
-        for (const key of Object.keys(localStorage)) {
-          if (key.includes('supabase') || key.includes('auth') || key.includes('session') || key.includes('token')) {
-            localStorage.removeItem(key);
-          }
-        }
-      } catch (e) {
-        console.warn("Error during pre-emptive cleanup:", e);
-      }
+      // IMMEDIATELY clear all auth data to prevent automatic re-login
+      clearAllAuthData();
       
       // Navigate to login page first for better UX
       navigate("/login", { replace: true });
@@ -70,10 +62,9 @@ const LogoutButton = ({
           description: "You have been signed out of your account",
         });
         
-        // Force page reload to clear any in-memory state
-        // This ensures a complete reset of the application state
+        // Force complete page reload with cache clearing
         setTimeout(() => {
-          window.location.href = '/login';
+          forceAppReload();
         }, 100);
       } else if (error) {
         console.error("LogoutButton - Error during logout:", error);
@@ -85,7 +76,7 @@ const LogoutButton = ({
         
         // Force reload even on error
         setTimeout(() => {
-          window.location.href = '/login';
+          forceAppReload();
         }, 100);
       }
     } catch (error: any) {
@@ -98,7 +89,7 @@ const LogoutButton = ({
       
       // Force reload even on error
       setTimeout(() => {
-        window.location.href = '/login';
+        forceAppReload();
       }, 100);
     } finally {
       setIsLoggingOut(false);

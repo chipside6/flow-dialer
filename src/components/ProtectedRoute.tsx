@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/auth';
+import { toast } from '@/components/ui/use-toast';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -28,14 +29,20 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     forceRender
   });
   
-  // Force render after timeout to prevent infinite loading state
+  // Force render after shorter timeout to prevent infinite loading state
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if ((isLoading || !initialized) && !error) {
         console.log("Protected Route: Forcing render after timeout");
         setForceRender(true);
+        
+        toast({
+          title: "Loading timeout reached",
+          description: "Authentication check is taking longer than expected. Proceeding with available data.",
+          variant: "warning"
+        });
       }
-    }, 3000); // 3 seconds timeout
+    }, 2000); // Reduced to 2 seconds from 3 seconds for faster feedback
     
     return () => clearTimeout(timeoutId);
   }, [isLoading, initialized, error]);
@@ -61,7 +68,20 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
           </AlertDescription>
         </Alert>
         <button 
-          onClick={() => window.location.href = '/login'} 
+          onClick={() => {
+            // Clear any stale auth data before redirecting
+            try {
+              for (const key of Object.keys(localStorage)) {
+                if (key.includes('supabase') || key.includes('auth') || key.includes('session') || key.includes('token')) {
+                  localStorage.removeItem(key);
+                }
+              }
+            } catch (e) {
+              console.warn("Error clearing auth data:", e);
+            }
+            
+            window.location.href = '/login';
+          }} 
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md mt-4 hover:bg-primary/90 transition-colors"
         >
           Go to Login

@@ -1,5 +1,6 @@
 
 import { Session } from './types';
+import { clearAllAuthData } from '@/utils/sessionCleanup';
 
 // Storage key for local session data
 const SESSION_STORAGE_KEY = 'user_session';
@@ -92,59 +93,19 @@ export const storeSession = (session: Session): void => {
 };
 
 /**
- * Clear session with improved error handling and clear memory cache
+ * Clear session with comprehensive cleanup approach
  */
 export const clearSession = (): void => {
   try {
-    localStorage.removeItem(SESSION_STORAGE_KEY);
-    
-    // Clear memory cache
+    // Clear in-memory cache first
     sessionCache = null;
     sessionCacheExpiry = 0;
     
-    // Enhanced cleanup - clear all potential auth-related items in localStorage
-    const authRelatedKeys = [
-      'sb-', 
-      'supabase', 
-      'auth', 
-      'token', 
-      'user_session',
-      'session'
-    ];
+    // Remove specific session key
+    localStorage.removeItem(SESSION_STORAGE_KEY);
     
-    // Iterate through localStorage and remove any keys that match our patterns
-    for (const key of Object.keys(localStorage)) {
-      if (authRelatedKeys.some(pattern => key.includes(pattern))) {
-        try {
-          console.log(`Removing session-related item: ${key}`);
-          localStorage.removeItem(key);
-        } catch (e) {
-          console.warn(`Failed to remove potential auth key ${key}:`, e);
-        }
-      }
-    }
-    
-    // Also try session storage
-    if (typeof sessionStorage !== 'undefined') {
-      for (const key of Object.keys(sessionStorage)) {
-        if (authRelatedKeys.some(pattern => key.includes(pattern))) {
-          try {
-            sessionStorage.removeItem(key);
-          } catch (e) {
-            console.warn(`Failed to remove session storage key ${key}:`, e);
-          }
-        }
-      }
-    }
-    
-    // Try to clear auth-related cookies too
-    document.cookie.split(';').forEach(cookie => {
-      const [name] = cookie.trim().split('=');
-      if (authRelatedKeys.some(pattern => name.includes(pattern))) {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      }
-    });
-    
+    // Use our enhanced cleanup utility for thorough session clearing
+    clearAllAuthData();
   } catch (error) {
     console.error('Error clearing session:', error);
     

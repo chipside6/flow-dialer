@@ -1,0 +1,75 @@
+
+/**
+ * Comprehensive session and token cleanup utilities
+ * Used to ensure complete logout and prevent automatic sign-in
+ */
+
+/**
+ * Aggressively clears all authentication-related data from browser storage
+ */
+export const clearAllAuthData = (): void => {
+  console.log("Performing aggressive session cleanup");
+  
+  try {
+    // Clear localStorage items
+    const localStorageKeys = Object.keys(localStorage);
+    for (const key of localStorageKeys) {
+      if (key.includes('supabase') || 
+          key.includes('auth') || 
+          key.includes('session') || 
+          key.includes('token') || 
+          key.includes('user')) {
+        console.log(`Removing localStorage item: ${key}`);
+        localStorage.removeItem(key);
+      }
+    }
+    
+    // Clear sessionStorage items
+    const sessionStorageKeys = Object.keys(sessionStorage);
+    for (const key of sessionStorageKeys) {
+      if (key.includes('supabase') || 
+          key.includes('auth') || 
+          key.includes('session') || 
+          key.includes('token') || 
+          key.includes('user')) {
+        console.log(`Removing sessionStorage item: ${key}`);
+        sessionStorage.removeItem(key);
+      }
+    }
+    
+    // Clear authentication cookies
+    document.cookie.split(';').forEach(cookie => {
+      const [name] = cookie.trim().split('=');
+      if (name.includes('supabase') || 
+          name.includes('auth') || 
+          name.includes('sb-') || 
+          name.includes('token') || 
+          name.includes('session')) {
+        console.log(`Removing cookie: ${name}`);
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      }
+    });
+    
+    // As a last resort, clear all browser storage if running in development
+    if (import.meta.env.DEV) {
+      console.log("Development mode: Clearing all storage");
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+  } catch (error) {
+    console.error("Error during aggressive session cleanup:", error);
+  }
+};
+
+/**
+ * Force reload the application to ensure a clean slate
+ */
+export const forceAppReload = (): void => {
+  console.log("Forcing application reload");
+  
+  // Add cache-busting parameter to prevent browser cache issues
+  const cacheBuster = `?cache=${Date.now()}`;
+  
+  // Replace current URL with cache-busting parameter and force reload
+  window.location.href = window.location.pathname + cacheBuster;
+};
