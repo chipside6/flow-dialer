@@ -31,10 +31,18 @@ export const useFetchCampaigns = () => {
     console.log("Fetching campaigns for user:", user.id);
     
     try {
+      // Set a timeout for the fetch operation
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 5000); // 5 second timeout
+      
       const { data, error } = await supabase
         .from('campaigns')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .abortSignal(abortController.signal);
+      
+      // Clear timeout
+      clearTimeout(timeoutId);
 
       if (error) {
         logSupabaseOperation({
@@ -65,6 +73,17 @@ export const useFetchCampaigns = () => {
       return { data: transformedData, error: null };
     } catch (error: any) {
       console.error('Error fetching campaigns:', error.message);
+      
+      // Check if this is an AbortError (timeout)
+      if (error.name === 'AbortError') {
+        console.log('Fetch operation timed out');
+        return { 
+          data: [], 
+          error: new Error('Connection timed out. Please try again later.'),
+          isTimeoutError: true
+        };
+      }
+      
       const authIssue = isAuthError(error);
       
       return { 
@@ -73,7 +92,7 @@ export const useFetchCampaigns = () => {
         isAuthError: authIssue
       };
     }
-  }, []);
+  }, [transformCampaignData]);
 
   return { fetchCampaigns };
 };
