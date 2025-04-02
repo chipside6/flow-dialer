@@ -26,10 +26,12 @@ const LaunchReadinessChecker = () => {
   ]);
   const [isRetrying, setIsRetrying] = useState(false);
   const [serverInstructions, setServerInstructions] = useState<string | null>(null);
+  const [troubleshootInstructions, setTroubleshootInstructions] = useState<string | null>(null);
 
   const runChecks = async () => {
     setIsRetrying(true);
     setServerInstructions(null);
+    setTroubleshootInstructions(null);
     
     // Reset checks to "checking" state
     setChecks(prev => 
@@ -89,14 +91,17 @@ const LaunchReadinessChecker = () => {
           } else {
             updateCheck("Asterisk Connection", "error", result.message);
             setServerInstructions(getAsteriskSetupInstructions(ASTERISK_API_URL));
+            setTroubleshootInstructions(getAsteriskTroubleshootingInstructions());
           }
         } catch (connectionError) {
           updateCheck("Asterisk Connection", "error", `Error testing connection: ${connectionError.message}`);
           setServerInstructions(getAsteriskSetupInstructions(ASTERISK_API_URL));
+          setTroubleshootInstructions(getAsteriskTroubleshootingInstructions());
         }
       }
     } catch (error) {
       updateCheck("Asterisk Connection", "error", `Error testing Asterisk connection: ${error.message}`);
+      setTroubleshootInstructions(getAsteriskTroubleshootingInstructions());
     }
 
     // Check Environment Variables
@@ -153,6 +158,45 @@ const LaunchReadinessChecker = () => {
 4. Make sure Asterisk is running and the ARI endpoint is accessible at ${url}
 5. Open required ports in your firewall (typically 8088 for ARI)
     `;
+  };
+
+  const getAsteriskTroubleshootingInstructions = (): string => {
+    return `
+COMMON ASTERISK TROUBLESHOOTING:
+
+1. Check Asterisk is running:
+   systemctl status asterisk
+
+2. Check Asterisk version (different commands based on version):
+   asterisk -rx "core show version"
+
+3. Check which SIP stack you're using:
+   For PJSIP (newer Asterisk versions):
+   - asterisk -rx "module show like pjsip"
+   - asterisk -rx "pjsip show endpoints" 
+   - asterisk -rx "pjsip show registrations"
+
+   For chan_sip (older Asterisk versions):
+   - asterisk -rx "module show like chan_sip"
+   - asterisk -rx "sip show peers"
+
+4. Verify your dialplan is loaded properly:
+   asterisk -rx "dialplan show"
+
+5. Check if ARI is enabled and ARI endpoints:
+   asterisk -rx "ari show status"
+   asterisk -rx "ari show users"
+
+6. Common error solutions:
+   - "No such command": Using command for the wrong SIP stack or module not loaded
+   - "No object found": Resource doesn't exist or path is incorrect 
+   - Connection refused: Firewall blocking access or service not running
+
+7. After making configuration changes, reload Asterisk modules:
+   asterisk -rx "module reload"
+   asterisk -rx "dialplan reload"
+   asterisk -rx "pjsip reload" or "sip reload" (based on your SIP stack)
+`;
   };
 
   useEffect(() => {
@@ -222,6 +266,15 @@ const LaunchReadinessChecker = () => {
               <h3 className="text-lg font-medium text-blue-800 mb-2">Server Setup Instructions</h3>
               <pre className="whitespace-pre-wrap text-sm bg-white p-3 rounded border border-blue-100 overflow-x-auto text-blue-900">
                 {serverInstructions}
+              </pre>
+            </div>
+          )}
+
+          {troubleshootInstructions && (
+            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
+              <h3 className="text-lg font-medium text-amber-800 mb-2">Troubleshooting Guide</h3>
+              <pre className="whitespace-pre-wrap text-sm bg-white p-3 rounded border border-amber-100 overflow-x-auto text-amber-900">
+                {troubleshootInstructions}
               </pre>
             </div>
           )}
