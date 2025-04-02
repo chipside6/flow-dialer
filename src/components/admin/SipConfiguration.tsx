@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { CheckCircle2, Loader2, Save, TestTube, AlertTriangle, Copy, Clipboard } from "lucide-react";
-import { asteriskService } from "@/utils/asteriskService";
+import { asteriskService, asteriskConfig } from "@/utils/asteriskService";
 
 const SipConfiguration = () => {
   // Initialize state from either env variables or localStorage for development purposes
@@ -128,7 +127,7 @@ const SipConfiguration = () => {
     setIsGenerating(true);
     
     try {
-      const sipConfig = asteriskService.generateSipTrunkConfig(
+      const sipConfig = asteriskConfig.generateSipTrunkConfig(
         providerName,
         host,
         port,

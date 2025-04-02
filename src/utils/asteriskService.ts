@@ -6,8 +6,74 @@ export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || localSt
 export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || localStorage.getItem("asterisk_api_username") || '';
 export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || localStorage.getItem("asterisk_api_password") || '';
 
+/**
+ * Helper function to create basic auth header
+ */
+const createBasicAuthHeader = (username: string, password: string) => {
+  return `Basic ${btoa(`${username}:${password}`)}`;
+};
+
+/**
+ * Configuration generators for Asterisk
+ */
+export const asteriskConfig = {
+  /**
+   * Generate a SIP trunk configuration for Asterisk
+   */
+  generateSipTrunkConfig(
+    providerName: string,
+    host: string,
+    port: string,
+    username: string,
+    password: string
+  ) {
+    return `
+[${providerName}]
+type=peer
+host=${host}
+port=${port}
+username=${username}
+secret=${password}
+fromuser=${username}
+context=from-trunk
+disallow=all
+allow=ulaw
+allow=alaw
+dtmfmode=rfc2833
+insecure=port,invite
+nat=force_rport,comedia
+qualify=yes
+directmedia=no
+`.trim();
+  },
+  
+  /**
+   * Generate a basic dialplan configuration for Asterisk
+   */
+  generateDialplan(campaignId: string, greetingFileUrl: string, transferNumber: string) {
+    return `
+[campaign-${campaignId}]
+exten => s,1,Answer()
+exten => s,n,Wait(1)
+exten => s,n,Playback(${greetingFileUrl || 'greeting'})
+exten => s,n,WaitExten(5)
+exten => s,n,Hangup()
+
+; Handle keypress 1 for transfer
+exten => 1,1,NoOp(Transferring call to ${transferNumber || ''})
+exten => 1,n,Dial(SIP/${transferNumber || ''},30)
+exten => 1,n,Hangup()
+`.trim();
+  }
+};
+
+/**
+ * Service for interacting with Asterisk API
+ */
 export const asteriskService = {
-  // Method to test Asterisk connection
+  /**
+   * Test the connection to Asterisk API
+   */
   async testConnection() {
     try {
       if (!ASTERISK_API_URL || !ASTERISK_API_USERNAME || !ASTERISK_API_PASSWORD) {
@@ -34,7 +100,9 @@ export const asteriskService = {
     }
   },
   
-  // Method to get dialing status
+  /**
+   * Get the status of a dialing job
+   */
   async getDialingStatus(jobId: string) {
     // This is a stub implementation - in real implementation, 
     // this would fetch status from Asterisk
@@ -49,7 +117,9 @@ export const asteriskService = {
     };
   },
   
-  // Method to start dialing
+  /**
+   * Start a dialing job
+   */
   async startDialing(params: any) {
     // This is a stub implementation - in real implementation, 
     // this would initiate dialing through Asterisk
@@ -61,7 +131,9 @@ export const asteriskService = {
     };
   },
   
-  // Method to stop dialing
+  /**
+   * Stop a dialing job
+   */
   async stopDialing(jobId: string) {
     // This is a stub implementation - in real implementation, 
     // this would stop dialing through Asterisk
@@ -72,7 +144,10 @@ export const asteriskService = {
     };
   },
 
-  // Method to generate SIP trunk configuration
+  /**
+   * Generate SIP trunk configuration
+   * @deprecated Use asteriskConfig.generateSipTrunkConfig instead
+   */
   generateSipTrunkConfig(
     providerName: string,
     host: string,
@@ -80,24 +155,7 @@ export const asteriskService = {
     username: string,
     password: string
   ) {
-    // Generate a basic SIP trunk configuration for Asterisk
-    return `
-[${providerName}]
-type=peer
-host=${host}
-port=${port}
-username=${username}
-secret=${password}
-fromuser=${username}
-context=from-trunk
-disallow=all
-allow=ulaw
-allow=alaw
-dtmfmode=rfc2833
-insecure=port,invite
-nat=force_rport,comedia
-qualify=yes
-directmedia=no
-`.trim();
+    console.warn('asteriskService.generateSipTrunkConfig is deprecated. Use asteriskConfig.generateSipTrunkConfig instead.');
+    return asteriskConfig.generateSipTrunkConfig(providerName, host, port, username, password);
   }
 };
