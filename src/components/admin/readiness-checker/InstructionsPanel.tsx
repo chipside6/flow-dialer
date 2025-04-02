@@ -5,8 +5,8 @@ import { Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface InstructionsPanelProps {
-  serverInstructions?: string | null;
-  troubleshootInstructions?: string | null;
+  serverInstructions?: string | string[] | null;
+  troubleshootInstructions?: string | string[] | null;
   missingEnvVars?: string[];
   showConfigButton?: boolean;
 }
@@ -22,6 +22,16 @@ const InstructionsPanel = ({
   const goToSipConfig = () => {
     navigate("/asterisk-config", { state: { tab: "config" } });
   };
+
+  // Format instructions to handle both string and string[]
+  const formatInstructions = (instructions: string | string[] | null | undefined): string | null => {
+    if (!instructions) return null;
+    if (Array.isArray(instructions)) return instructions.join("\n");
+    return instructions;
+  };
+
+  const formattedServerInstructions = formatInstructions(serverInstructions);
+  const formattedTroubleshootInstructions = formatInstructions(troubleshootInstructions);
 
   return (
     <>
@@ -57,20 +67,20 @@ const InstructionsPanel = ({
         </div>
       )}
       
-      {serverInstructions && (
+      {formattedServerInstructions && (
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
           <h3 className="text-lg font-medium text-blue-800 mb-2">Server Setup Instructions</h3>
           <pre className="whitespace-pre-wrap text-sm bg-white p-3 rounded border border-blue-100 overflow-x-auto text-blue-900">
-            {serverInstructions}
+            {formattedServerInstructions}
           </pre>
         </div>
       )}
 
-      {troubleshootInstructions && (
+      {formattedTroubleshootInstructions && (
         <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
           <h3 className="text-lg font-medium text-amber-800 mb-2">Troubleshooting Guide</h3>
           <pre className="whitespace-pre-wrap text-sm bg-white p-3 rounded border border-amber-100 overflow-x-auto text-amber-900">
-            {troubleshootInstructions}
+            {formattedTroubleshootInstructions}
           </pre>
         </div>
       )}

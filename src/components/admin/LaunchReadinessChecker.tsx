@@ -38,8 +38,8 @@ const LaunchReadinessChecker = () => {
           <ChecksList checks={checks} />
           
           <InstructionsPanel 
-            serverInstructions={serverInstructions}
-            troubleshootInstructions={troubleshootInstructions}
+            serverInstructions={serverInstructions.join("\n")}
+            troubleshootInstructions={troubleshootInstructions.join("\n")}
             missingEnvVars={missingEnvVars}
             showConfigButton={showConfigButtonEnvVars}
           />

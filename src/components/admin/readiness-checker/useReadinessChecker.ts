@@ -1,8 +1,13 @@
 
 import { useState, useEffect, useCallback } from "react";
-import { User } from "@supabase/supabase-js";
 import { SystemCheck } from "./SystemCheckItem";
 import { asteriskService } from "@/utils/asteriskService";
+
+// Handle both local User type and Supabase User type
+type UserWithId = {
+  id: string;
+  [key: string]: any;
+};
 
 // Helper function to check if Asterisk API environment variables are set
 const checkAsteriskEnvVars = () => {
@@ -18,7 +23,7 @@ const checkAsteriskEnvVars = () => {
   };
 };
 
-export const useReadinessChecker = (user: User | null) => {
+export const useReadinessChecker = (user: UserWithId | null) => {
   const [checks, setChecks] = useState<SystemCheck[]>([]);
   const [isRetrying, setIsRetrying] = useState(false);
   const [serverInstructions, setServerInstructions] = useState<string[]>([]);
