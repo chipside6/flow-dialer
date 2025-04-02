@@ -10,32 +10,20 @@ import { CallStatisticsCard } from '@/components/dashboard/CallStatisticsCard';
 
 export const DashboardContent = () => {
   const { user, profile } = useAuth();
-  const { showLimitDialog, closeLimitDialog, currentPlan, subscription, getPlanById } = useSubscription();
+  const { showLimitDialog, closeLimitDialog, currentPlan, subscription } = useSubscription();
   
   // Check if the user has a lifetime subscription
   const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
-  const activePlan = currentPlan ? getPlanById(currentPlan) : null;
 
   return (
     <>
       <div className="grid gap-6">
         <Card>
           <CardHeader className="pb-3">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <CardTitle>Welcome!</CardTitle>
-                <CardDescription>
-                  {user?.email ? `Hello, ${user.email}` : 'Welcome to the Dashboard'}
-                </CardDescription>
-              </div>
-              
-              {activePlan && (
-                <div className="mt-2 md:mt-0 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium inline-flex items-center">
-                  Current Plan: {activePlan.name}
-                  {activePlan.price ? ` ($${activePlan.price}${isLifetimePlan ? ' one-time' : '/month'})` : ''}
-                </div>
-              )}
-            </div>
+            <CardTitle>Welcome!</CardTitle>
+            <CardDescription>
+              {user?.email ? `Hello, ${user.email}` : 'Welcome to the Dashboard'}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <p>
@@ -44,7 +32,7 @@ export const DashboardContent = () => {
           </CardContent>
         </Card>
 
-        {/* Call Statistics Card */}
+        {/* New Call Statistics Card */}
         <CallStatisticsCard />
 
         <Card>
