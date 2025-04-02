@@ -33,7 +33,7 @@ export const PasswordInput = ({
         onChange={onChange}
         required={required}
         minLength={minLength}
-        className="h-12 pr-10"
+        className="h-12"
         placeholder={placeholder}
       />
       <button 
