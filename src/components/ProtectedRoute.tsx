@@ -31,18 +31,20 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
   
   // Force render after shorter timeout to prevent infinite loading state
   useEffect(() => {
+    // Use a shorter timeout (1 second) for better user experience
     const timeoutId = setTimeout(() => {
       if ((isLoading || !initialized) && !error) {
         console.log("Protected Route: Forcing render after timeout");
         setForceRender(true);
         
+        // Use a more subtle toast with default variant
         toast({
-          title: "Loading timeout reached",
-          description: "Authentication check is taking longer than expected. Proceeding with available data.",
-          variant: "default" // Changed from "warning" to "default"
+          title: "Loading taking longer than expected",
+          description: "Proceeding with available authentication data",
+          variant: "default" 
         });
       }
-    }, 2000); // Reduced to 2 seconds from 3 seconds for faster feedback
+    }, 1000); // Reduced to 1 second for faster feedback
     
     return () => clearTimeout(timeoutId);
   }, [isLoading, initialized, error]);

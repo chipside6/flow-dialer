@@ -97,7 +97,7 @@ export function useAuthSession() {
     setSessionChecked(true);
   }, []);
 
-  // Setup auth state listener - optimized with proper cleanup and network awareness
+  // Setup auth state listener - with improved timeout handling
   useEffect(() => {
     // Reset isMounted ref on mount
     isMounted.current = true;
@@ -110,7 +110,7 @@ export function useAuthSession() {
           setIsLoading(false);
           setSessionChecked(true);
         }
-      }, 2000); // Shorter timeout for better UX
+      }, 1000); // Reduced to 1 second from 2 seconds for faster feedback
     };
     
     // Set up auth state change listener FIRST to catch all events
@@ -205,6 +205,15 @@ export function useAuthSession() {
     setupAuthListener();
     checkSession();
     
+    // Add a hard timeout to ensure we always complete initialization
+    const hardTimeoutId = setTimeout(() => {
+      if (isMounted.current && isLoading) {
+        console.log("useAuthSession - Hard timeout reached, forcing initialization completion");
+        setIsLoading(false);
+        setSessionChecked(true);
+      }
+    }, 2000); // 2 second hard timeout as a fallback
+    
     // Periodic session check with network awareness
     const periodicCheckInterval = setInterval(() => {
       if (!isOnline) {
@@ -230,6 +239,8 @@ export function useAuthSession() {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      
+      clearTimeout(hardTimeoutId);
       
       if (subscriptionRef.current) {
         subscriptionRef.current.unsubscribe();
