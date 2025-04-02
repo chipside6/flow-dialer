@@ -12,12 +12,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from "react-router-dom";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { useSubscription } from "@/hooks/subscription";
+import { TrialExpiredNotice } from "@/components/campaign/TrialExpiredNotice";
 
 const CampaignPage = () => {
   const location = useLocation();
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const { user } = useAuth();
   const { campaigns, isLoading, refreshCampaigns } = useCampaigns();
+  const { trialExpired, currentPlan } = useSubscription();
+  
+  // Free users can't access campaigns if not on trial or lifetime
+  const canAccessCampaigns = currentPlan === 'lifetime' || 
+                           (currentPlan === 'trial' && !trialExpired);
   
   // Check for state passed from navigation to determine if we should show the wizard
   useEffect(() => {
@@ -54,7 +61,9 @@ const CampaignPage = () => {
         <div className="flex flex-1 w-full">
           <DashboardLayout>
             <div className="max-w-6xl mx-auto w-full px-2 md:px-4 pt-4 campaign-content">
-              {showCreateWizard ? (
+              {!canAccessCampaigns ? (
+                <TrialExpiredNotice />
+              ) : showCreateWizard ? (
                 <CampaignCreationWizard 
                   onComplete={handleCreateCampaign}
                   onCancel={() => setShowCreateWizard(false)}

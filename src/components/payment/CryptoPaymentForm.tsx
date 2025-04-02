@@ -20,6 +20,8 @@ export const CryptoPaymentForm = ({ planPrice, planName, onPaymentComplete }: Cr
   const [txHash, setTxHash] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
   const [isWalletInfoOpen, setIsWalletInfoOpen] = useState(false);
+  const [autoVerifying, setAutoVerifying] = useState(false);
+  const [verificationCount, setVerificationCount] = useState(0);
   const { toast } = useToast();
 
   // Example crypto addresses - these would be replaced with your actual wallet addresses
@@ -36,6 +38,15 @@ export const CryptoPaymentForm = ({ planPrice, planName, onPaymentComplete }: Cr
     supportEmail: "support@example.com"
   };
 
+  // Automatically start verification checks when a transaction hash is entered
+  React.useEffect(() => {
+    // Only start auto-verification if we have a transaction hash with at least 10 characters
+    if (txHash.length >= 10 && !autoVerifying && !isVerifying) {
+      setAutoVerifying(true);
+      autoVerifyTransaction();
+    }
+  }, [txHash]);
+
   const handleCopy = (address: string, type: string) => {
     navigator.clipboard.writeText(address);
     setCopied(type);
@@ -46,6 +57,84 @@ export const CryptoPaymentForm = ({ planPrice, planName, onPaymentComplete }: Cr
     });
     
     setTimeout(() => setCopied(null), 3000);
+  };
+
+  // Function to automatically verify transactions
+  const autoVerifyTransaction = async () => {
+    if (!txHash.trim() || isVerifying) return;
+    
+    if (verificationCount >= 5) {
+      // Stop trying after 5 attempts
+      setAutoVerifying(false);
+      toast({
+        title: "Verification stopped",
+        description: "We couldn't verify your transaction after multiple attempts. Please verify manually or contact support.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsVerifying(true);
+    
+    try {
+      // In a real implementation, you would check this transaction on the blockchain
+      // For demo purposes, we'll simulate verification
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Simulate a successful verification with a 80% chance
+      const isSuccessful = Math.random() < 0.8;
+      
+      if (isSuccessful) {
+        // Successful payment simulation
+        toast({
+          title: "Payment verified",
+          description: "Your cryptocurrency payment has been verified. Your account will be upgraded shortly.",
+        });
+        
+        onPaymentComplete({
+          planName,
+          amount: planPrice,
+          txHash,
+          currency: "USDT",
+          timestamp: new Date().toISOString(),
+        });
+        
+        setAutoVerifying(false);
+      } else {
+        // Transaction not found yet or error
+        console.log("Transaction not found in verification attempt", verificationCount + 1);
+        
+        // Increment count and try again if not reached the maximum
+        setVerificationCount(prev => prev + 1);
+        
+        // Wait longer between each attempt
+        setTimeout(() => {
+          setIsVerifying(false);
+          if (autoVerifying) {
+            autoVerifyTransaction();
+          }
+        }, 5000); // 5 seconds between retries
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      
+      // Increment count and try again if not reached the maximum
+      setVerificationCount(prev => prev + 1);
+      
+      toast({
+        title: "Verification attempt failed",
+        description: "We're still checking your transaction. Please wait...",
+        variant: "default"
+      });
+      
+      // Wait longer between each attempt
+      setTimeout(() => {
+        setIsVerifying(false);
+        if (autoVerifying) {
+          autoVerifyTransaction();
+        }
+      }, 5000); // 5 seconds between retries
+    }
   };
 
   const handleVerifyPayment = async () => {
@@ -59,6 +148,7 @@ export const CryptoPaymentForm = ({ planPrice, planName, onPaymentComplete }: Cr
     }
 
     setIsVerifying(true);
+    setAutoVerifying(false); // Stop auto-verification if manual verify is clicked
     
     try {
       // In a real implementation, you would check this transaction on the blockchain
@@ -88,6 +178,15 @@ export const CryptoPaymentForm = ({ planPrice, planName, onPaymentComplete }: Cr
     } finally {
       setIsVerifying(false);
     }
+  };
+
+  const handleCancelAutoVerification = () => {
+    setAutoVerifying(false);
+    setIsVerifying(false);
+    toast({
+      title: "Auto-verification cancelled",
+      description: "You can still verify your payment manually when ready.",
+    });
   };
 
   return (
@@ -199,13 +298,32 @@ export const CryptoPaymentForm = ({ planPrice, planName, onPaymentComplete }: Cr
           <p className="text-xs text-muted-foreground">
             After sending payment, enter the transaction hash/ID to verify your payment
           </p>
+          
+          {autoVerifying && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                <p className="text-sm text-blue-700">
+                  Auto-verifying your transaction... Attempt {verificationCount + 1}/5
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 h-7 text-xs" 
+                onClick={handleCancelAutoVerification}
+              >
+                Cancel auto-verification
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
       <CardFooter>
         <Button 
           className="w-full" 
           onClick={handleVerifyPayment}
-          disabled={isVerifying}
+          disabled={isVerifying || !txHash.trim()}
         >
           {isVerifying ? (
             <>

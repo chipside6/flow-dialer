@@ -1,65 +1,74 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { fetchUserCallCount } from "./subscriptionApi";
-import { pricingPlans } from "@/data/pricingPlans";
-import { useCachedFetch } from "@/hooks/useCachedFetch";
+import { useToast } from "@/components/ui/use-toast";
 
-/**
- * Hook for checking subscription limits like call count
- */
-export const useSubscriptionLimit = (userId: string | undefined, currentPlan: string | null) => {
-  const [showLimitDialog, setShowLimitDialog] = useState(false);
-  const [callLimit, setCallLimit] = useState(0);
-
-  // Get the call limit for the current plan
+export const useSubscriptionLimit = (userId: string | undefined, planId: string | null) => {
+  const { toast } = useToast();
+  const [callCount, setCallCount] = useState<number>(0);
+  const [showLimitDialog, setShowLimitDialog] = useState<boolean>(false);
+  const [hasReachedLimit, setHasReachedLimit] = useState<boolean>(false);
+  const [trialExpired, setTrialExpired] = useState<boolean>(false);
+  
+  // Define call limits based on plan
+  const callLimit = planId === 'free' ? 500 : 
+                    planId === 'trial' ? 1000 : 
+                    planId === 'lifetime' ? Infinity : 500;
+  
+  // Fetch call count
   useEffect(() => {
-    if (currentPlan) {
-      const plan = pricingPlans.find(p => p.id === currentPlan);
-      setCallLimit(plan?.featuresObj?.maxCalls || 0);
-    } else {
-      // Default to free plan limit
-      const freePlan = pricingPlans.find(p => p.id === 'free');
-      setCallLimit(freePlan?.featuresObj?.maxCalls || 0);
+    if (!userId) return;
+    
+    const fetchCalls = async () => {
+      try {
+        const count = await fetchUserCallCount(userId);
+        setCallCount(count);
+        
+        // Check if user has reached the limit
+        if (count >= callLimit && planId !== 'lifetime') {
+          setHasReachedLimit(true);
+        } else {
+          setHasReachedLimit(false);
+        }
+      } catch (error) {
+        console.error("Error fetching call count:", error);
+      }
+    };
+    
+    fetchCalls();
+  }, [userId, planId, callLimit]);
+  
+  // Check if the user's trial has expired
+  useEffect(() => {
+    // If not on trial plan, this doesn't apply
+    if (planId !== 'trial') {
+      setTrialExpired(false);
+      return;
     }
-  }, [currentPlan]);
-
-  // Use cached fetch for call count with automatic retries
-  const { 
-    data: callCount = 0, 
-    refetch: fetchCallCount,
-    isLoading: isLoadingCallCount,
-    error: callCountError
-  } = useCachedFetch(
-    () => fetchUserCallCount(userId), 
-    {
-      cacheKey: userId ? `call-count-${userId}` : undefined,
-      cacheDuration: 5 * 60 * 1000, // 5 minutes
-      enabled: !!userId,
-      retry: 2,
-      retryDelay: 1500,
-    }
-  );
-
-  // Close the limit dialog
-  const closeLimitDialog = () => {
+    
+    // For trial plans, we rely on the subscription logic to determine if it's expired
+    // This will be handled in the useSubscription hook
+  }, [planId]);
+  
+  const closeLimitDialog = useCallback(() => {
     setShowLimitDialog(false);
-  };
-
-  // Check if user has reached call limit
-  useEffect(() => {
-    if (callLimit > 0 && callCount >= callLimit) {
+  }, []);
+  
+  const checkAndShowLimitDialog = useCallback(() => {
+    if (hasReachedLimit) {
       setShowLimitDialog(true);
+      return true; // Limit reached
     }
-  }, [callCount, callLimit]);
-
+    return false; // Limit not reached
+  }, [hasReachedLimit]);
+  
   return {
     callCount,
     showLimitDialog,
     closeLimitDialog,
-    fetchCallCount,
-    isLoadingCallCount,
-    callCountError,
+    hasReachedLimit,
     callLimit,
-    hasReachedLimit: callLimit > 0 && callCount >= callLimit
+    checkAndShowLimitDialog,
+    trialExpired
   };
 };

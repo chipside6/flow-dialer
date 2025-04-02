@@ -13,6 +13,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
   const { toast } = useToast();
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [trialExpired, setTrialExpired] = useState<boolean>(false);
 
   // Use cached fetch for subscription data
   const { 
@@ -32,15 +33,33 @@ export const useSubscription = (): UseSubscriptionReturn => {
         if (data) {
           setCurrentPlan(data.plan_id);
           setSubscription(data);
+          
+          // Check if trial has expired
+          if (data.plan_id === 'trial' && data.current_period_end) {
+            const endDate = new Date(data.current_period_end);
+            const now = new Date();
+            
+            if (now > endDate) {
+              console.log("Trial has expired");
+              setTrialExpired(true);
+              setCurrentPlan('free'); // Downgrade to free plan
+            } else {
+              setTrialExpired(false);
+            }
+          } else {
+            setTrialExpired(false);
+          }
         } else {
           setCurrentPlan('free');
           setSubscription(null);
+          setTrialExpired(false);
         }
       },
       onError: (err) => {
         console.error("Error in fetchCurrentSubscription:", err);
         setCurrentPlan('free');
         setSubscription(null);
+        setTrialExpired(false);
         
         toast({
           title: "Subscription Error",
@@ -56,6 +75,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
     if (!user) {
       setCurrentPlan('free');
       setSubscription(null);
+      setTrialExpired(false);
       return null;
     }
     
@@ -69,7 +89,8 @@ export const useSubscription = (): UseSubscriptionReturn => {
     showLimitDialog, 
     closeLimitDialog,
     hasReachedLimit,
-    callLimit
+    callLimit,
+    checkAndShowLimitDialog
   } = useSubscriptionLimit(user?.id, currentPlan);
 
   // Use the lifetime plan activation hook
@@ -87,6 +108,8 @@ export const useSubscription = (): UseSubscriptionReturn => {
     getPlanById,
     error,
     hasReachedLimit,
-    callLimit
+    callLimit,
+    trialExpired,
+    checkAndShowLimitDialog
   };
 };
