@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2, AlertCircle, ShieldAlert, Mail, Lock, LogIn } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -107,7 +109,7 @@ const Login = () => {
         </CardHeader>
         <CardContent className="space-y-3 relative z-10 pt-0">
           {isAdminRedirect && (
-            <Alert className="bg-amber-50 border-amber-200">
+            <Alert className="bg-amber-50 border-amber-200 text-left">
               <ShieldAlert className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-800">
                 This area requires administrator privileges
@@ -116,13 +118,14 @@ const Login = () => {
           )}
           
           {errorMessage && (
-            <Alert variant="destructive" className="animate-fade-in">
+            <Alert variant="destructive" className="animate-fade-in text-left">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="space-y-1">
+          <form onSubmit={handleSubmit} className="space-y-4 text-left">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-left block">Email address</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input 
@@ -136,7 +139,8 @@ const Login = () => {
                 />
               </div>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-left block">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input 
@@ -150,7 +154,7 @@ const Login = () => {
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full font-semibold transition-all group mt-2" disabled={isLoading}>
+            <Button type="submit" className="w-full font-semibold transition-all group mt-4" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
