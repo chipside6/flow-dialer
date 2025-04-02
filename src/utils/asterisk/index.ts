@@ -1,5 +1,13 @@
 
-import { ASTERISK_API_URL, ASTERISK_API_USERNAME, ASTERISK_API_PASSWORD } from './config';
+import { 
+  ASTERISK_API_URL, 
+  ASTERISK_API_USERNAME, 
+  ASTERISK_API_PASSWORD,
+  isHostedEnvironment,
+  hasConfiguredEnvironment,
+  getConfigFromStorage,
+  saveConfigToStorage
+} from './config';
 import { asteriskConfig, generateCompleteConfig } from './configGenerators';
 import { connectionService } from './connectionService';
 import { dialingService } from './dialingService';
@@ -27,5 +35,9 @@ export {
   ASTERISK_API_URL, 
   ASTERISK_API_USERNAME, 
   ASTERISK_API_PASSWORD,
+  isHostedEnvironment,
+  hasConfiguredEnvironment,
+  getConfigFromStorage,
+  saveConfigToStorage,
   asteriskConfig
 };

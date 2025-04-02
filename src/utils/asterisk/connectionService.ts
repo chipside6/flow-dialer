@@ -1,5 +1,10 @@
-
-import { ASTERISK_API_URL, ASTERISK_API_USERNAME, ASTERISK_API_PASSWORD, isHostedEnvironment } from './config';
+import { 
+  ASTERISK_API_URL, 
+  ASTERISK_API_USERNAME, 
+  ASTERISK_API_PASSWORD, 
+  isHostedEnvironment,
+  getConfigFromStorage 
+} from './config';
 
 /**
  * Service for handling Asterisk connection and system operations
@@ -10,10 +15,11 @@ export const connectionService = {
    */
   async testConnection(credentials?: { apiUrl: string; username: string; password: string }) {
     try {
-      // Use provided credentials or fall back to environment variables
-      const apiUrl = credentials?.apiUrl || ASTERISK_API_URL;
-      const username = credentials?.username || ASTERISK_API_USERNAME;
-      const password = credentials?.password || ASTERISK_API_PASSWORD;
+      // Use provided credentials or fall back to stored/environment variables
+      const storedConfig = getConfigFromStorage();
+      const apiUrl = credentials?.apiUrl || storedConfig.apiUrl;
+      const username = credentials?.username || storedConfig.username;
+      const password = credentials?.password || storedConfig.password;
       
       if (!apiUrl || !username || !password) {
         throw new Error('Asterisk API configuration missing. Please set all required credentials.');
@@ -23,12 +29,39 @@ export const connectionService = {
       // This allows users to set up their configuration before their server is reachable
       if (isHostedEnvironment()) {
         console.log("Running in Lovable environment - accepting configuration without strict connection test");
-        return { 
-          success: true,
-          message: "Configuration accepted (running in hosted environment)"
-        };
+        
+        // We still try to connect, but don't fail if we can't
+        try {
+          const basicAuth = btoa(`${username}:${password}`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          
+          const response = await fetch(`${apiUrl}/ping`, {
+            headers: {
+              'Authorization': `Basic ${basicAuth}`,
+              'Content-Type': 'application/json',
+            },
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          console.log("Successfully connected to Asterisk server in hosted environment");
+          
+          return { 
+            success: true,
+            message: "Connected successfully (running in hosted environment)"
+          };
+        } catch (error) {
+          // In hosted environment, we accept the configuration anyway
+          console.log("Connection failed, but accepting configuration in hosted environment");
+          return { 
+            success: true,
+            message: "Configuration accepted despite connection error (running in hosted environment)"
+          };
+        }
       }
       
+      // For non-hosted environments, do a strict connection test
       const basicAuth = btoa(`${username}:${password}`);
       
       // Try to connect with a shorter timeout for better user experience
@@ -56,15 +89,6 @@ export const connectionService = {
         // If it's a timeout error, give a more specific message
         if (fetchError.name === 'AbortError') {
           console.error('Connection to Asterisk server timed out');
-          
-          // For Lovable hosting, we'll accept the configuration anyway
-          if (isHostedEnvironment()) {
-            return { 
-              success: true,
-              message: "Configuration accepted despite timeout (running in hosted environment)"
-            };
-          }
-          
           return { 
             success: false, 
             error: fetchError,
@@ -74,15 +98,6 @@ export const connectionService = {
         
         // If it's a network error, probably the server isn't running or reachable
         console.error('Network error connecting to Asterisk server:', fetchError);
-        
-        // For Lovable hosting, we'll accept the configuration anyway
-        if (isHostedEnvironment()) {
-          return { 
-            success: true,
-            message: "Configuration accepted despite network error (running in hosted environment)"
-          };
-        }
-        
         return { 
           success: false, 
           error: fetchError,
@@ -91,15 +106,6 @@ export const connectionService = {
       }
     } catch (error) {
       console.error('Error testing Asterisk connection:', error);
-      
-      // For Lovable hosting, accept configuration despite errors
-      if (isHostedEnvironment()) {
-        return { 
-          success: true,
-          message: "Configuration accepted despite errors (running in hosted environment)"
-        };
-      }
-      
       return { 
         success: false, 
         error,
