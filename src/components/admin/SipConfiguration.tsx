@@ -5,7 +5,7 @@ import ProviderConfiguration from "./sip-config/ProviderConfiguration";
 import { toast } from "@/components/ui/use-toast";
 import { asteriskService } from "@/utils/asteriskService";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CheckCircle2, AlertTriangle } from "lucide-react";
+import { CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const SipConfiguration = () => {
@@ -21,6 +21,7 @@ const SipConfiguration = () => {
   const [connectionTested, setConnectionTested] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isEnvironmentSaved, setIsEnvironmentSaved] = useState(false);
+  const [isReloading, setIsReloading] = useState({ pjsip: false, extensions: false });
 
   // Test connection on component mount
   useEffect(() => {
@@ -72,6 +73,72 @@ const SipConfiguration = () => {
     });
   };
 
+  const reloadPjsip = async () => {
+    setIsReloading(prev => ({ ...prev, pjsip: true }));
+    try {
+      const result = await asteriskService.reloadPjsip({
+        apiUrl,
+        username,
+        password
+      });
+      
+      if (result.success) {
+        toast({
+          title: "PJSIP Reloaded",
+          description: "Successfully reloaded PJSIP module",
+        });
+      } else {
+        toast({
+          title: "Reload Failed",
+          description: result.message || "Failed to reload PJSIP. Please check your Asterisk server.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error reloading PJSIP:", error);
+      toast({
+        title: "Reload Error",
+        description: "An error occurred while reloading PJSIP",
+        variant: "destructive"
+      });
+    } finally {
+      setIsReloading(prev => ({ ...prev, pjsip: false }));
+    }
+  };
+
+  const reloadExtensions = async () => {
+    setIsReloading(prev => ({ ...prev, extensions: true }));
+    try {
+      const result = await asteriskService.reloadExtensions({
+        apiUrl,
+        username,
+        password
+      });
+      
+      if (result.success) {
+        toast({
+          title: "Extensions Reloaded",
+          description: "Successfully reloaded Asterisk extensions",
+        });
+      } else {
+        toast({
+          title: "Reload Failed",
+          description: result.message || "Failed to reload extensions. Please check your Asterisk server.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error reloading extensions:", error);
+      toast({
+        title: "Reload Error",
+        description: "An error occurred while reloading extensions",
+        variant: "destructive"
+      });
+    } finally {
+      setIsReloading(prev => ({ ...prev, extensions: false }));
+    }
+  };
+
   return (
     <div className="space-y-6">
       {isEnvironmentSaved && (
@@ -117,7 +184,29 @@ const SipConfiguration = () => {
         setProviderPassword={setProviderPassword}
       />
 
-      <div className="flex justify-end pt-4">
+      <div className="flex flex-col md:flex-row gap-4 pt-4">
+        <Button 
+          variant="outline"
+          onClick={reloadPjsip}
+          disabled={isReloading.pjsip || !isConnected}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isReloading.pjsip ? 'animate-spin' : ''}`} />
+          Reload PJSIP
+        </Button>
+        
+        <Button 
+          variant="outline"
+          onClick={reloadExtensions}
+          disabled={isReloading.extensions || !isConnected}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isReloading.extensions ? 'animate-spin' : ''}`} />
+          Reload Extensions
+        </Button>
+        
+        <div className="flex-grow"></div>
+        
         <Button 
           size="lg" 
           onClick={saveEnvironmentVariables}

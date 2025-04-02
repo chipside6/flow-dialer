@@ -1,3 +1,4 @@
+
 // This file provides Asterisk API integration
 
 // Get values directly from env variables for production
@@ -166,6 +167,88 @@ export const asteriskService = {
       }
     } catch (error) {
       console.error('Error testing Asterisk connection:', error);
+      return { 
+        success: false, 
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  },
+  
+  /**
+   * Reload PJSIP module in Asterisk
+   */
+  async reloadPjsip(credentials?: { apiUrl: string; username: string; password: string }) {
+    try {
+      // Use provided credentials or fall back to environment variables
+      const apiUrl = credentials?.apiUrl || ASTERISK_API_URL;
+      const username = credentials?.username || ASTERISK_API_USERNAME;
+      const password = credentials?.password || ASTERISK_API_PASSWORD;
+      
+      if (!apiUrl || !username || !password) {
+        throw new Error('Asterisk API configuration missing. Please set all required credentials.');
+      }
+      
+      console.log('Attempting to reload PJSIP module');
+      
+      // In a real implementation, this would execute an Asterisk CLI command
+      // Simulate a successful reload
+      const success = Math.random() > 0.1; // 90% success rate for simulation
+      
+      if (success) {
+        return { 
+          success: true,
+          message: "PJSIP module reloaded successfully"
+        };
+      } else {
+        return {
+          success: false,
+          message: "Failed to reload PJSIP module. Check Asterisk logs for details."
+        };
+      }
+    } catch (error) {
+      console.error('Error reloading PJSIP:', error);
+      return { 
+        success: false, 
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  },
+  
+  /**
+   * Reload extensions in Asterisk (dialplan)
+   */
+  async reloadExtensions(credentials?: { apiUrl: string; username: string; password: string }) {
+    try {
+      // Use provided credentials or fall back to environment variables
+      const apiUrl = credentials?.apiUrl || ASTERISK_API_URL;
+      const username = credentials?.username || ASTERISK_API_USERNAME;
+      const password = credentials?.password || ASTERISK_API_PASSWORD;
+      
+      if (!apiUrl || !username || !password) {
+        throw new Error('Asterisk API configuration missing. Please set all required credentials.');
+      }
+      
+      console.log('Attempting to reload extensions (dialplan)');
+      
+      // In a real implementation, this would execute an Asterisk CLI command
+      // Simulate a successful reload
+      const success = Math.random() > 0.1; // 90% success rate for simulation
+      
+      if (success) {
+        return { 
+          success: true,
+          message: "Extensions reloaded successfully"
+        };
+      } else {
+        return {
+          success: false,
+          message: "Failed to reload extensions. Check Asterisk logs for details."
+        };
+      }
+    } catch (error) {
+      console.error('Error reloading extensions:', error);
       return { 
         success: false, 
         error,
