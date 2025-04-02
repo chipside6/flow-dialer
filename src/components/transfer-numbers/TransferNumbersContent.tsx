@@ -32,6 +32,12 @@ export const TransferNumbersContent = ({
   onRefresh
 }: TransferNumbersContentProps) => {
   const [forceShowContent, setForceShowContent] = useState(false);
+  const [localTransferNumbers, setLocalTransferNumbers] = useState<TransferNumber[]>(transferNumbers);
+  
+  // Update local transfer numbers when prop changes
+  useEffect(() => {
+    setLocalTransferNumbers(transferNumbers);
+  }, [transferNumbers]);
   
   // Force show content after a short timeout for better UX
   useEffect(() => {
@@ -43,6 +49,58 @@ export const TransferNumbersContent = ({
     
     return () => clearTimeout(timer);
   }, [isLoading, isInitialLoad]);
+  
+  // Handle adding a transfer number with optimistic update
+  const handleAddTransferNumber = async (name: string, number: string, description: string) => {
+    try {
+      const result = await addTransferNumber(name, number, description);
+      if (result) {
+        // Optimistically add the new transfer number to the local state
+        const newNumber: TransferNumber = {
+          ...result,
+          dateAdded: new Date()
+        };
+        
+        setLocalTransferNumbers(prev => [newNumber, ...prev]);
+        
+        // Force refresh after a short delay to get the real data from the server
+        setTimeout(() => {
+          onRefresh();
+        }, 500);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error adding transfer number:", error);
+      return null;
+    }
+  };
+  
+  // Handle deleting a transfer number with optimistic update
+  const handleDeleteTransferNumber = async (id: string) => {
+    try {
+      // Optimistically remove the transfer number from the local state
+      setLocalTransferNumbers(prev => prev.filter(tn => tn.id !== id));
+      
+      const result = await deleteTransferNumber(id);
+      
+      // If the deletion failed, revert the optimistic update
+      if (!result) {
+        setLocalTransferNumbers(transferNumbers);
+      } else {
+        // Force refresh after a short delay to get the real data from the server
+        setTimeout(() => {
+          onRefresh();
+        }, 500);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error("Error deleting transfer number:", error);
+      // Revert the optimistic update on error
+      setLocalTransferNumbers(transferNumbers);
+      return false;
+    }
+  };
   
   // If this is the initial load and we're still loading (and haven't forced content)
   if (isInitialLoad && isLoading && !forceShowContent) {
@@ -78,15 +136,15 @@ export const TransferNumbersContent = ({
       )}
       
       <AddTransferNumberForm 
-        onAddTransferNumber={addTransferNumber} 
+        onAddTransferNumber={handleAddTransferNumber} 
         isSubmitting={isSubmitting}
       />
       
       <TransferNumbersList 
-        transferNumbers={transferNumbers}
+        transferNumbers={localTransferNumbers}
         isLoading={isLoading && !isInitialLoad && !forceShowContent}
         error={error}
-        onDeleteTransferNumber={deleteTransferNumber}
+        onDeleteTransferNumber={handleDeleteTransferNumber}
         onRefresh={onRefresh}
       />
       

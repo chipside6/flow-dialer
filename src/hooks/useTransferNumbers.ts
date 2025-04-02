@@ -35,16 +35,21 @@ export function useTransferNumbers() {
     setError
   });
   
+  // We should force refresh after adding a transfer number
   const { addTransferNumber } = useAddTransferNumber(
     setIsSubmitting,
     async () => {
-      await refreshTransferNumbers(); // Return Promise
+      console.log("Force refreshing transfer numbers after add");
+      // Clear any cached data
+      await refreshTransferNumbers();
     }
   );
   
   const { handleDeleteTransferNumber } = useDeleteTransferNumber(
     async () => {
-      await refreshTransferNumbers(); // Return Promise
+      console.log("Force refreshing transfer numbers after delete");
+      // Clear any cached data
+      await refreshTransferNumbers();
     }
   );
   
@@ -95,6 +100,21 @@ export function useTransferNumbers() {
     };
   }, [hasTimedOut, isLoading, transferNumbers.length, retryCount, fetchTransferNumbers, incrementRetry]);
   
+  // Add explicit refresh function that bypasses cache
+  const forceRefreshTransferNumbers = async () => {
+    console.log("Force refreshing transfer numbers");
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Add a small delay to ensure database consistency
+      await new Promise(resolve => setTimeout(resolve, 300));
+      await refreshTransferNumbers();
+    } catch (error) {
+      console.error("Error during force refresh:", error);
+    }
+  };
+  
   return {
     transferNumbers,
     isLoading,
@@ -102,6 +122,6 @@ export function useTransferNumbers() {
     error,
     addTransferNumber,
     deleteTransferNumber: handleDeleteTransferNumber,
-    refreshTransferNumbers
+    refreshTransferNumbers: forceRefreshTransferNumbers
   };
 }

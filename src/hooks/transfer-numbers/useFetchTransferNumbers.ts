@@ -35,7 +35,7 @@ export const useFetchTransferNumbers = ({
       try {
         // Set a timeout for the fetch operation (implemented at the service level)
         const abortController = new AbortController();
-        const timeoutId = setTimeout(() => abortController.abort(), 8000); // 8 second timeout
+        const timeoutId = setTimeout(() => abortController.abort(), 10000); // Increase timeout to 10 seconds
         
         // Fetch transfer numbers
         const data = await fetchUserTransferNumbers(user.id, abortController.signal);
@@ -66,11 +66,11 @@ export const useFetchTransferNumbers = ({
           setError(errorMessage);
         }
         
-        // Set empty array for safety
+        // Always set an empty array for safety
         setTransferNumbers([]);
         setIsLoading(false);
         
-        // Only show toast for non-timeout errors to prevent UI clutter
+        // Only show toast for non-timeout errors to prevent UI clutter during retries
         if (err.name !== 'AbortError') {
           toast({
             title: "Error loading transfer numbers",
@@ -84,10 +84,10 @@ export const useFetchTransferNumbers = ({
     },
     {
       cacheKey: user?.id ? `transfer-numbers-${user.id}` : undefined,
-      cacheDuration: 15 * 1000, // 15 seconds (reduced from 30 seconds)
+      cacheDuration: 5 * 1000, // Reduce cache time to 5 seconds for more frequent updates
       enabled: false, // Don't fetch automatically, we'll call it explicitly
-      retry: 1, // One retry is sufficient
-      retryDelay: 500, // Reduced retry delay to 500ms
+      retry: 1, 
+      retryDelay: 500,
       onSuccess: () => setIsLoading(false),
       onError: () => setIsLoading(false)
     }
@@ -95,9 +95,9 @@ export const useFetchTransferNumbers = ({
 
   // Return the fetch function
   return { 
-    fetchTransferNumbers: useCallback((signal?: AbortSignal) => {
+    fetchTransferNumbers: useCallback(() => {
       setIsLoading(true);
-      fetchTransferNumbers(true);
+      fetchTransferNumbers(true); // Force refresh to bypass cache
     }, [fetchTransferNumbers, setIsLoading])
   };
 };

@@ -17,10 +17,10 @@ export const fetchUserTransferNumbers = async (userId: string, signal?: AbortSig
     // Add a separate timeout if needed
     let timeoutId: NodeJS.Timeout | null = null;
     if (!signal) {
-      timeoutId = setTimeout(() => controller?.abort(), 8000);
+      timeoutId = setTimeout(() => controller?.abort(), 10000); // Increase timeout to 10 seconds
     }
     
-    // Fetch transfer numbers for this user
+    // Fetch transfer numbers for this user, disable caching to ensure fresh data
     const { data, error } = await supabase
       .from('transfer_numbers')
       .select('*')
@@ -85,13 +85,17 @@ export const addTransferNumber = async (
       throw new Error('Authentication required to add transfer numbers');
     }
     
+    // Make sure phone number formatting is correct
+    const formattedNumber = number.trim();
+    
+    // Insert the new transfer number
     const { data, error } = await supabase
       .from('transfer_numbers')
       .insert({
         user_id: userId,
-        name,
-        phone_number: number,
-        description: description || null,
+        name: name.trim(),
+        phone_number: formattedNumber,
+        description: description ? description.trim() : null,
         call_count: 0
       })
       .select()
@@ -104,26 +108,25 @@ export const addTransferNumber = async (
     
     console.log(`[TransferNumbersService] Insert successful:`, data);
     
-    toast({
-      title: "Transfer number added",
-      description: `"${name}" has been added successfully.`
-    });
-    
     return {
       id: data.id,
-      name,
-      number,
-      description: description || "No description provided",
-      dateAdded: new Date(),
+      name: data.name,
+      number: data.phone_number,
+      description: data.description || "No description provided",
+      dateAdded: new Date(data.created_at),
       callCount: 0
     };
   } catch (error: any) {
     console.error(`[TransferNumbersService] Error in addTransferNumber:`, error);
+    
+    // Provide a user-friendly error message
+    const errorMessage = error.message || "There was an error adding your transfer number.";
     toast({
       title: "Error adding transfer number",
-      description: error.message || "There was an error adding your transfer number.",
+      description: errorMessage,
       variant: "destructive"
     });
+    
     throw error;
   }
 };
@@ -168,11 +171,13 @@ export const deleteTransferNumber = async (
     return true;
   } catch (error: any) {
     console.error(`[TransferNumbersService] Error in deleteTransferNumber:`, error);
+    
     toast({
       title: "Error deleting transfer number",
       description: error.message || "There was an error deleting your transfer number.",
       variant: "destructive"
     });
+    
     throw error;
   }
 };

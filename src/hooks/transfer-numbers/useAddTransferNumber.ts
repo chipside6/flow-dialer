@@ -27,13 +27,21 @@ export const useAddTransferNumber = (
     
     setIsSubmitting(true);
     try {
+      console.log("Adding transfer number:", { name, number, description });
       const result = await addTransferNumber(user.id, name, number, description);
+      
+      // Wait for a short delay before refreshing to allow the database to update
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Explicitly refresh the transfer numbers
+      await refreshTransferNumbers();
+      
+      // Show success message
       toast({
         title: "Transfer number added",
         description: "The transfer number has been added successfully",
       });
       
-      await refreshTransferNumbers();
       return result;
     } catch (err: any) {
       console.error("Error adding transfer number:", err);
