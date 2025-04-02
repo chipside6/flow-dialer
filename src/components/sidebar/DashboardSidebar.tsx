@@ -47,8 +47,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
     { name: "SIP Providers", path: "/sip-providers", icon: <Server className="h-5 w-5" /> },
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
-    // Add Asterisk Config to regular navigation items available to all users
-    { name: "Asterisk Config", path: "/asterisk-config", icon: <PhoneCall className="h-5 w-5" /> }
+    // Remove Asterisk Config from regular navigation items
   ];
   
   // Show upgrade link for free users
@@ -66,8 +65,13 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
       name: "Admin Panel",
       path: "/admin",
       icon: <ShieldCheck className="h-5 w-5" />
+    },
+    // Move Asterisk Config to admin-only items
+    {
+      name: "Asterisk Config",
+      path: "/asterisk-config",
+      icon: <PhoneCall className="h-5 w-5" />
     }
-    // Removed Asterisk Config from admin-only items
   ];
   
   return (

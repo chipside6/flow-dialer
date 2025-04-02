@@ -146,11 +146,11 @@ const App = () => (
               } 
             />
             
-            {/* Asterisk Configuration route - no longer requires admin privileges */}
+            {/* Update Asterisk Configuration route to require admin privileges */}
             <Route 
               path="/asterisk-config" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireAdmin>
                   <AsteriskConfigPage />
                 </ProtectedRoute>
               } 
