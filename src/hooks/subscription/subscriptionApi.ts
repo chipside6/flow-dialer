@@ -2,14 +2,17 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Subscription } from "./types";
 import { PricingPlan, pricingPlans } from "@/data/pricingPlans";
+import { toast } from "@/components/ui/use-toast";
 
 // Maximum number of retry attempts
 const MAX_RETRIES = 3;
 // Initial delay before retrying (in ms)
 const INITIAL_RETRY_DELAY = 1000;
+// Request timeout (in ms)
+const REQUEST_TIMEOUT = 15000;
 
 /**
- * Fetches the subscription data for a user with retry logic
+ * Fetches the subscription data for a user with enhanced retry logic and timeouts
  */
 export const fetchSubscription = async (userId: string | undefined): Promise<Subscription | null> => {
   if (!userId) {
@@ -18,6 +21,12 @@ export const fetchSubscription = async (userId: string | undefined): Promise<Sub
   }
   
   let retryAttempt = 0;
+  const abortController = new AbortController();
+  
+  // Set timeout for the request
+  const timeoutId = setTimeout(() => {
+    abortController.abort();
+  }, REQUEST_TIMEOUT);
   
   const executeWithRetry = async (): Promise<Subscription | null> => {
     try {
@@ -61,7 +70,18 @@ export const fetchSubscription = async (userId: string | undefined): Promise<Sub
       }
       
       return null;
-    } catch (error) {
+    } catch (error: any) {
+      // Check if the request was aborted due to timeout
+      if (error.name === 'AbortError' || error.message?.includes('timeout')) {
+        console.error("Request timed out while fetching subscription");
+        toast({
+          title: "Request timed out",
+          description: "The server is taking too long to respond. Please try again later.",
+          variant: "destructive"
+        });
+        throw new Error("Request timed out");
+      }
+      
       // If we haven't exceeded max retries, try again with exponential backoff
       if (retryAttempt < MAX_RETRIES) {
         retryAttempt++;
@@ -76,16 +96,29 @@ export const fetchSubscription = async (userId: string | undefined): Promise<Sub
     }
   };
   
-  return executeWithRetry();
+  try {
+    const result = await executeWithRetry();
+    clearTimeout(timeoutId);
+    return result;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
 };
 
 /**
- * Fetches the user's call count with retry logic
+ * Fetches the user's call count with enhanced retry logic and timeouts
  */
 export const fetchUserCallCount = async (userId: string | undefined): Promise<number> => {
   if (!userId) return 0;
   
   let retryAttempt = 0;
+  const abortController = new AbortController();
+  
+  // Set timeout for the request
+  const timeoutId = setTimeout(() => {
+    abortController.abort();
+  }, REQUEST_TIMEOUT);
   
   const executeWithRetry = async (): Promise<number> => {
     try {
@@ -100,7 +133,13 @@ export const fetchUserCallCount = async (userId: string | undefined): Promise<nu
       }
       
       return data.reduce((sum, campaign) => sum + (campaign.total_calls || 0), 0);
-    } catch (error) {
+    } catch (error: any) {
+      // Check if the request was aborted due to timeout
+      if (error.name === 'AbortError' || error.message?.includes('timeout')) {
+        console.error("Request timed out while fetching call count");
+        return 0; // Return 0 as fallback on timeout for this non-critical data
+      }
+      
       // If we haven't exceeded max retries, try again with exponential backoff
       if (retryAttempt < MAX_RETRIES) {
         retryAttempt++;
@@ -111,15 +150,22 @@ export const fetchUserCallCount = async (userId: string | undefined): Promise<nu
       }
       
       console.error("Max retries exceeded in fetchUserCallCount:", error);
-      throw error;
+      return 0; // Return 0 as fallback after max retries
     }
   };
   
-  return executeWithRetry();
+  try {
+    const result = await executeWithRetry();
+    clearTimeout(timeoutId);
+    return result;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    return 0; // Return 0 as ultimate fallback
+  }
 };
 
 /**
- * Creates a lifetime subscription with retry logic
+ * Creates a lifetime subscription with enhanced retry logic and timeouts
  */
 export const createLifetimeSubscription = async (
   userId: string | undefined, 
@@ -128,6 +174,12 @@ export const createLifetimeSubscription = async (
   if (!userId) return false;
   
   let retryAttempt = 0;
+  const abortController = new AbortController();
+  
+  // Set timeout for the request
+  const timeoutId = setTimeout(() => {
+    abortController.abort();
+  }, REQUEST_TIMEOUT);
   
   const executeWithRetry = async (): Promise<boolean> => {
     try {
@@ -188,7 +240,18 @@ export const createLifetimeSubscription = async (
       
       console.log("Plan activated successfully");
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      // Check if the request was aborted due to timeout
+      if (error.name === 'AbortError' || error.message?.includes('timeout')) {
+        console.error("Request timed out while creating subscription");
+        toast({
+          title: "Request timed out",
+          description: "The server is taking too long to respond. Please try again.",
+          variant: "destructive"
+        });
+        throw new Error("Request timed out");
+      }
+      
       // If we haven't exceeded max retries, try again with exponential backoff
       if (retryAttempt < MAX_RETRIES) {
         retryAttempt++;
@@ -203,7 +266,14 @@ export const createLifetimeSubscription = async (
     }
   };
   
-  return executeWithRetry();
+  try {
+    const result = await executeWithRetry();
+    clearTimeout(timeoutId);
+    return result;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
 };
 
 export const getPlanById = (planId: string): PricingPlan | undefined => {
