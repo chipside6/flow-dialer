@@ -1,33 +1,17 @@
 
-import React from "react";
-import { DashboardContent } from "@/components/dashboard/DashboardContent";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Suspense } from "react";
-import { Loader2 } from "lucide-react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-
-const DashboardFallback = () => (
-  <div className="w-full h-96 flex items-center justify-center">
-    <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-    <span className="text-lg">Loading dashboard...</span>
-  </div>
-);
+import React from 'react';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { DashboardContent } from '@/components/dashboard/DashboardContent';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <SidebarProvider>
-        <div className="min-h-screen bg-background flex flex-col w-full">
-          <div className="flex flex-1 w-full max-w-full overflow-hidden">
-            <DashboardLayout>
-              <Suspense fallback={<DashboardFallback />}>
-                <DashboardContent />
-              </Suspense>
-            </DashboardLayout>
-          </div>
-        </div>
-      </SidebarProvider>
-    </div>
+    <DashboardLayout>
+      <div className="container mx-auto px-4 py-6">
+        <DashboardHeader />
+        <DashboardContent />
+      </div>
+    </DashboardLayout>
   );
 };
 

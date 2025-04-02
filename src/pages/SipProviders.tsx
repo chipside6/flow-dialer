@@ -27,23 +27,6 @@ const SipProviders = () => {
   } = useSipProviders();
   
   const isMobile = useIsMobile();
-  const [forceShowContent, setForceShowContent] = useState(false);
-  
-  // Force show content after shorter timeout to prevent infinite loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isLoading) {
-        setForceShowContent(true);
-        toast({
-          title: "Still loading data",
-          description: "We're showing you the UI while provider data continues to load",
-          variant: "default"
-        });
-      }
-    }, 5000); // Reduced from 6 seconds to 5 seconds
-    
-    return () => clearTimeout(timer);
-  }, [isLoading]);
   
   const isNetworkError = error && 
     (error.message?.includes("NetworkError") || 
@@ -116,7 +99,7 @@ const SipProviders = () => {
           </Alert>
         )}
         
-        {isLoading && !forceShowContent && !hasInitiallyLoaded ? (
+        {isLoading && !hasInitiallyLoaded ? (
           <LoadingState 
             message="Loading SIP providers..." 
             onRetry={handleManualRefresh}
@@ -137,20 +120,13 @@ const SipProviders = () => {
               />
               
               {isLoading && (
-                <div className="mt-4 bg-blue-50 p-4 rounded border border-blue-200 flex items-center">
-                  <Loader2 className="h-5 w-5 text-blue-500 mr-2 animate-spin" />
-                  <span className="text-blue-700">Refreshing provider data...</span>
+                <div className="mt-4 flex items-center justify-center py-2">
+                  <Loader2 className="h-5 w-5 text-primary mr-2 animate-spin" />
+                  <span className="text-muted-foreground">Refreshing data...</span>
                 </div>
               )}
             </>
           )
-        )}
-        
-        {(forceShowContent && isLoading && !hasInitiallyLoaded) && (
-          <div className="mt-4 bg-orange-50 p-4 rounded border border-orange-200 flex items-center">
-            <AlertCircle className="h-5 w-5 text-orange-500 mr-2" />
-            <span className="text-orange-700">Still loading... You can use the form above to add a new provider while we finish loading your data.</span>
-          </div>
         )}
       </div>
     </DashboardLayout>
