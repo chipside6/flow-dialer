@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { 
@@ -11,7 +12,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, CreditCard, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -19,7 +19,6 @@ export function SubscriptionDetails() {
   const { isLoading, currentPlan, subscription, getPlanById } = useSubscription();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [isCancelling, setIsCancelling] = React.useState(false);
   
   const activePlan = currentPlan ? getPlanById(currentPlan) : null;
 
@@ -65,7 +64,12 @@ export function SubscriptionDetails() {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Lifetime Access</CardTitle>
+            <CardTitle>
+              {activePlan.name}
+              <span className="ml-2 text-muted-foreground text-sm font-normal">
+                (${activePlan.price} one-time payment)
+              </span>
+            </CardTitle>
             <Badge variant="outline" className="bg-primary/10 text-primary">
               Lifetime
             </Badge>
@@ -76,11 +80,6 @@ export function SubscriptionDetails() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div>
-              <h3 className="text-xl font-semibold">{activePlan.name} Plan</h3>
-              <p className="text-muted-foreground">One-time payment of ${activePlan.price}</p>
-            </div>
-            
             <div className="space-y-2">
               <h4 className="font-medium">Plan Features:</h4>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
@@ -112,7 +111,7 @@ export function SubscriptionDetails() {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>3-Day Trial</CardTitle>
+            <CardTitle>{activePlan.name}</CardTitle>
             <Badge variant="outline" className="bg-primary/10 text-primary">
               Trial
             </Badge>
@@ -123,11 +122,6 @@ export function SubscriptionDetails() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div>
-              <h3 className="text-xl font-semibold">{activePlan.name}</h3>
-              <p className="text-muted-foreground">Full access until {endDate}</p>
-            </div>
-            
             <div className="space-y-2">
               <h4 className="font-medium">Plan Features:</h4>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
@@ -157,7 +151,7 @@ export function SubscriptionDetails() {
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Free Plan</CardTitle>
+          <CardTitle>{activePlan.name} Plan</CardTitle>
           <Badge variant="outline" className="bg-muted/50 text-muted-foreground">
             Limited
           </Badge>
@@ -168,11 +162,6 @@ export function SubscriptionDetails() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div>
-            <h3 className="text-xl font-semibold">{activePlan.name} Plan</h3>
-            <p className="text-muted-foreground">Free access with limitations</p>
-          </div>
-          
           <div className="space-y-2">
             <h4 className="font-medium">Plan Features:</h4>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
