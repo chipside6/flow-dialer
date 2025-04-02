@@ -93,8 +93,27 @@ export const useSubscription = (): UseSubscriptionReturn => {
     checkAndShowLimitDialog
   } = useSubscriptionLimit(user?.id, currentPlan);
 
-  // Use the lifetime plan activation hook
-  const { activateLifetimePlan } = useLifetimePlan(user?.id, fetchCurrentSubscription);
+  // Use the lifetime plan activation hook and ensure it returns the correct type
+  const { activateLifetimePlan: activatePlan } = useLifetimePlan(user?.id, fetchCurrentSubscription);
+  
+  // Wrapper to ensure correct type is returned
+  const activateLifetimePlan = useCallback(async (planId?: string): Promise<{ success: boolean; error?: Error }> => {
+    try {
+      const result = await activatePlan();
+      
+      if (!result.success && result.error) {
+        // Convert the plain error object to a proper Error instance
+        const error = new Error(result.error.message);
+        return { success: false, error };
+      }
+      
+      return { success: result.success };
+    } catch (err) {
+      // Ensure any caught error is returned as a proper Error instance
+      const error = err instanceof Error ? err : new Error(String(err));
+      return { success: false, error };
+    }
+  }, [activatePlan]);
 
   return {
     isLoading,
