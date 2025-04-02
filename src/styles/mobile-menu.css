@@ -17,7 +17,7 @@ body.mobile-menu-open {
   width: 100%;
   height: 100vh;
   background-color: white;
-  z-index: 40;
+  z-index: 100; /* Higher z-index to ensure it's above everything */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -112,13 +112,13 @@ body.mobile-menu-open {
     height: 24px !important;
   }
   
-  /* Ensure content has proper top padding to account for navbar */
+  /* Adjust content padding to account for fixed navbar */
   .dashboard-content-wrapper {
-    padding-top: 70px;
+    padding-top: 70px !important;
   }
   
   /* Fix content positioning */
   [data-sidebar-inset] {
-    padding-top: 60px;
+    padding-top: 70px !important;
   }
 }

@@ -1,10 +1,15 @@
-
 /* Mobile layout styles */
 
 @media screen and (max-width: 768px) {
   /* Better styling for navbar */
   header {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 50;
   }
   
   /* Adjust container padding */
@@ -13,9 +18,9 @@
     padding-right: 16px;
   }
   
-  /* Remove top padding to prevent content being hidden under header */
-  .dashboard-content-wrapper {
-    padding-top: 0 !important;
+  /* Add padding to main content to prevent overlap with fixed navbar */
+  main {
+    padding-top: 60px !important;
   }
   
   body {
@@ -34,11 +39,16 @@
     max-width: 100%;
   }
   
-  /* Remove padding for fixed headers */
-  .content-with-fixed-header {
-    padding-top: 0 !important;
+  /* Proper content spacing for auth pages */
+  .container.flex.flex-col.items-center.justify-center {
+    padding-top: 70px;
   }
 
+  /* Adjust content padding for dashboard pages with sidebar */
+  [data-sidebar-inset] > div {
+    padding-top: 60px !important;
+  }
+  
   /* Ensure main content doesn't cause overflow */
   [data-sidebar-inset] > div {
     max-width: 100% !important;

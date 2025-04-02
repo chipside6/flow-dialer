@@ -22,6 +22,13 @@
   /* Make the header background more visible */
   header {
     background-color: var(--background);
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   
   /* Improve menu button touch target */
@@ -33,5 +40,10 @@
   /* Fix Get Started button styling */
   header a[href="/signup"] {
     padding: 8px 16px !important;
+  }
+
+  /* Fixed content padding to account for navbar height */
+  main {
+    padding-top: 4rem !important;
   }
 }
