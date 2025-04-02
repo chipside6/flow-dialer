@@ -6,6 +6,7 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
   try {
     console.log("Fetching user profile for:", userId);
     
+    // First get the profile data
     const { data, error } = await supabase
       .from('profiles')
       .select('id, is_admin')
@@ -24,15 +25,20 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     
     console.log("Profile data from DB:", data);
     
-    // Get email from auth.users since it's not in the profiles table
-    const { data: userData } = await supabase.auth.admin.getUserById(userId);
+    // Now get the user's email from auth.users using admin API
+    const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
+    
+    if (userError) {
+      console.error("Error fetching user email:", userError.message);
+    }
+    
     const userEmail = userData?.user?.email || '';
     
-    // Create a UserProfile object with only required fields
+    // Create a UserProfile object with required fields
     const profile: UserProfile = {
       id: data.id,
-      email: userEmail, // Use email from auth.users
-      is_admin: !!data.is_admin // Ensure this is a boolean
+      email: userEmail,
+      is_admin: !!data.is_admin // Force to boolean
     };
     
     console.log("Constructed profile object:", profile);

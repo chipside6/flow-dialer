@@ -65,7 +65,7 @@ serve(async (req) => {
     } else {
       // User exists, update password
       userId = user.user.id;
-      console.log(`Found existing user with ID: ${userId}`);
+      console.log(`User exists with ID: ${userId} - updating password`);
       
       const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
         userId,
