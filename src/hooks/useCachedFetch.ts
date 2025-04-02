@@ -30,7 +30,7 @@ export function useCachedFetch<T>(
     cacheKey,
     cacheDuration = 5 * 60 * 1000, // 5 minutes default
     enabled = true,
-    dedupingInterval = 2000, // 2 seconds
+    dedupingInterval = 1000, // Reduced from 2000ms to 1000ms
     onSuccess,
     onError,
     retry = 1,
@@ -82,7 +82,7 @@ export function useCachedFetch<T>(
           setError(null);
           onSuccess?.(cached.data);
         }
-        return;
+        return cached.data;
       }
     }
 
@@ -111,15 +111,21 @@ export function useCachedFetch<T>(
         setIsLoading(false);
         onSuccess?.(result);
       }
+      
+      fetchingRef.current = false;
+      return result;
     } catch (err) {
       console.error("Fetch error:", err);
+      
+      fetchingRef.current = false;
+      
       if (isMountedRef.current) {
         setError(err instanceof Error ? err : new Error(String(err)));
         setIsLoading(false);
         onError?.(err instanceof Error ? err : new Error(String(err)));
       }
-    } finally {
-      fetchingRef.current = false;
+      
+      throw err;
     }
   }, [cacheKey, cacheDuration, dedupingInterval, enabled, fetcher, executeWithRetry, onSuccess, onError]);
 

@@ -1,9 +1,10 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { TransferNumber } from '@/types/transferNumber';
 import { toast } from '@/components/ui/use-toast';
 
 /**
- * Fetches all transfer numbers for a specific user
+ * Fetches all transfer numbers for a specific user with optimized performance
  */
 export const fetchUserTransferNumbers = async (userId: string): Promise<TransferNumber[]> => {
   console.log(`[TransferNumbersService] Fetching transfer numbers for user: ${userId}`);
@@ -11,7 +12,7 @@ export const fetchUserTransferNumbers = async (userId: string): Promise<Transfer
   try {
     // Set a reasonable timeout for the query
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 7000); // 7 second timeout (reduced from 15s)
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout (reduced from 7s)
     
     // Fetch transfer numbers for this user
     const { data, error } = await supabase

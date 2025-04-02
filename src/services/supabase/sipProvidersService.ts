@@ -2,16 +2,24 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Fetches all SIP providers for a specific user
+ * Fetches all SIP providers for a specific user with optimized performance
  */
 export const fetchSipProviders = async (userId: string) => {
   console.log(`[SipProvidersService] Fetching SIP providers for user: ${userId}`);
   
   try {
+    // Set a reasonable timeout for the query
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
     const { data, error } = await supabase
       .from('sip_providers')
       .select('*')
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .abortSignal(controller.signal);
+    
+    // Clear the timeout
+    clearTimeout(timeoutId);
     
     if (error) {
       console.error(`[SipProvidersService] Error in fetchSipProviders:`, error);
@@ -32,7 +40,13 @@ export const fetchSipProviders = async (userId: string) => {
       dateAdded: new Date(item.created_at),
       isActive: item.active
     }));
-  } catch (error) {
+  } catch (error: any) {
+    // Handle timeout errors
+    if (error.name === 'AbortError') {
+      console.error("[SipProvidersService] Timeout error fetching SIP providers");
+      throw new Error("Request timed out when fetching SIP providers. Please try again.");
+    }
+    
     console.error(`[SipProvidersService] Error in fetchSipProviders:`, error);
     throw error;
   }
