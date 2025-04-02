@@ -1,6 +1,4 @@
 
-import { PricingPlan } from "@/data/pricingPlans";
-
 export interface Subscription {
   id: string;
   user_id: string;
@@ -12,28 +10,17 @@ export interface Subscription {
   updated_at: string;
 }
 
-export interface SubscriptionState {
+export interface UseSubscriptionReturn {
   isLoading: boolean;
   currentPlan: string | null;
   subscription: Subscription | null;
   callCount: number;
   showLimitDialog: boolean;
-  error: Error | null;
+  closeLimitDialog: () => void;
+  fetchCurrentSubscription: () => Promise<Subscription | null>;
+  activateLifetimePlan: () => Promise<any>;
+  getPlanById: (planId: string) => any;
+  error: any;
   hasReachedLimit: boolean;
   callLimit: number;
 }
-
-export interface SubscriptionActions {
-  closeLimitDialog: () => void;
-  fetchCurrentSubscription: () => Promise<Subscription | null>;
-  activateLifetimePlan: () => Promise<{ 
-    success: boolean; 
-    plan?: PricingPlan;
-    error?: { 
-      message: string 
-    };
-  }>;
-  getPlanById: (planId: string) => PricingPlan | undefined;
-}
-
-export type UseSubscriptionReturn = SubscriptionState & SubscriptionActions;
