@@ -138,22 +138,52 @@ export const createLifetimeSubscription = async (
         ? plan.trialEndDate 
         : null;
       
-      // Upsert the subscription record
-      const { error } = await supabase
+      // First, check if user already has a subscription
+      const { data: existingSubscription, error: fetchError } = await supabase
         .from('subscriptions')
-        .upsert({
-          user_id: userId,
-          plan_id: plan.id,
-          plan_name: plan.name,
-          status: 'active',
-          current_period_end: currentPeriodEnd
-        }, { 
-          onConflict: 'user_id'
-        });
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
       
-      if (error) {
-        console.error("Error creating subscription:", error);
-        throw new Error(error.message || 'Database error');
+      if (fetchError) {
+        console.error("Error fetching existing subscription:", fetchError);
+        throw new Error(fetchError.message || 'Database error');
+      }
+      
+      if (existingSubscription) {
+        // Update existing subscription
+        const { error: updateError } = await supabase
+          .from('subscriptions')
+          .update({
+            plan_id: plan.id,
+            plan_name: plan.name,
+            status: 'active',
+            current_period_end: currentPeriodEnd,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+        
+        if (updateError) {
+          console.error("Error updating subscription:", updateError);
+          throw new Error(updateError.message || 'Database error');
+        }
+      } else {
+        // Insert new subscription
+        const { error: insertError } = await supabase
+          .from('subscriptions')
+          .insert({
+            user_id: userId,
+            plan_id: plan.id,
+            plan_name: plan.name,
+            status: 'active',
+            current_period_end: currentPeriodEnd,
+            updated_at: new Date().toISOString()
+          });
+        
+        if (insertError) {
+          console.error("Error creating subscription:", insertError);
+          throw new Error(insertError.message || 'Database error');
+        }
       }
       
       console.log("Plan activated successfully");

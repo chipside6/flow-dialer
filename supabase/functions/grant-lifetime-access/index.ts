@@ -70,24 +70,62 @@ serve(async (req) => {
     
     console.log(`Admin user ${authData.user.id} is granting lifetime access to user ${targetUserId}`);
     
-    // Create or update lifetime subscription for the target user
-    const { data: subscription, error: subscriptionError } = await supabaseClient
+    // First check if the user already has a subscription
+    const { data: existingSubscription, error: checkError } = await supabaseClient
       .from('subscriptions')
-      .upsert({
-        user_id: targetUserId,
-        plan_id: 'lifetime',
-        plan_name: 'Lifetime Access',
-        status: 'active',
-        current_period_end: null, // Null for lifetime plans
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id'
-      })
-      .select();
+      .select('*')
+      .eq('user_id', targetUserId)
+      .maybeSingle();
+      
+    if (checkError) {
+      console.error(`Error checking existing subscription: ${checkError.message}`);
+      throw new Error(`Error checking subscription: ${checkError.message}`);
+    }
     
-    if (subscriptionError) {
-      console.error(`Error granting lifetime access: ${subscriptionError.message}`);
-      throw new Error(`Error granting lifetime access: ${subscriptionError.message}`);
+    let subscriptionResult;
+    
+    if (existingSubscription) {
+      // Update existing subscription
+      console.log(`Updating existing subscription for user ${targetUserId}`);
+      const { data, error } = await supabaseClient
+        .from('subscriptions')
+        .update({
+          plan_id: 'lifetime',
+          plan_name: 'Lifetime Access',
+          status: 'active',
+          current_period_end: null, // Null for lifetime plans
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', targetUserId)
+        .select();
+        
+      if (error) {
+        console.error(`Error updating subscription: ${error.message}`);
+        throw new Error(`Error updating subscription: ${error.message}`);
+      }
+      
+      subscriptionResult = data;
+    } else {
+      // Insert new subscription
+      console.log(`Creating new subscription for user ${targetUserId}`);
+      const { data, error } = await supabaseClient
+        .from('subscriptions')
+        .insert({
+          user_id: targetUserId,
+          plan_id: 'lifetime',
+          plan_name: 'Lifetime Access',
+          status: 'active',
+          current_period_end: null, // Null for lifetime plans
+          updated_at: new Date().toISOString()
+        })
+        .select();
+        
+      if (error) {
+        console.error(`Error creating subscription: ${error.message}`);
+        throw new Error(`Error creating subscription: ${error.message}`);
+      }
+      
+      subscriptionResult = data;
     }
     
     console.log(`Successfully granted lifetime access to user ${targetUserId}`);
@@ -116,7 +154,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         message: 'Lifetime access granted successfully', 
-        success: true
+        success: true,
+        subscription: subscriptionResult
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );

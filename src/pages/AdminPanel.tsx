@@ -150,6 +150,8 @@ const AdminPanel = () => {
     try {
       setIsProcessing(userId);
       
+      console.log(`Attempting to grant lifetime access to user ${userId}`);
+      
       const { data, error } = await supabase.functions.invoke('grant-lifetime-access', {
         body: {
           targetUserId: userId,
@@ -157,9 +159,17 @@ const AdminPanel = () => {
         }
       });
       
-      if (error || !data?.success) {
-        throw new Error(error?.message || data?.error || "Failed to grant lifetime access");
+      if (error) {
+        console.error(`Error invoking function: ${error.message}`);
+        throw new Error(error.message || "Failed to grant lifetime access");
       }
+      
+      if (!data?.success) {
+        console.error(`Function returned error: ${data?.error}`);
+        throw new Error(data?.error || "Failed to grant lifetime access");
+      }
+      
+      console.log(`Successfully granted lifetime access to user ${userId}`);
       
       toast({
         title: "Success!",
