@@ -1,3 +1,4 @@
+
 import { 
   createDialerError, 
   DialerErrorType, 
@@ -14,9 +15,10 @@ interface DialContactsOptions {
 }
 
 // Export Asterisk API credentials so they can be accessed by other components
-export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || "http://your-asterisk-server:8088/ari";
-export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || "asterisk";
-export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || "asterisk";
+// Changed default values to empty strings to better detect missing configuration
+export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || "";
+export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || "";
+export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || "";
 
 // SIP Configuration defaults
 export const SIP_CONFIG = {
@@ -31,6 +33,13 @@ export const SIP_CONFIG = {
 
 // Authentication headers for Asterisk REST Interface
 const getAuthHeaders = () => {
+  if (!ASTERISK_API_USERNAME || !ASTERISK_API_PASSWORD) {
+    console.warn('Asterisk API credentials not configured');
+    return {
+      'Content-Type': 'application/json',
+    };
+  }
+  
   const basicAuth = btoa(`${ASTERISK_API_USERNAME}:${ASTERISK_API_PASSWORD}`);
   return {
     'Authorization': `Basic ${basicAuth}`,
@@ -46,6 +55,18 @@ export const asteriskService = {
     const { contactListId, campaignId, transferNumber, sipProviderId, greetingFile } = options;
     
     console.log("Starting dial job with options:", options);
+    
+    // Check if Asterisk configuration is valid
+    if (!ASTERISK_API_URL || ASTERISK_API_URL === "") {
+      console.error("Asterisk API URL not configured");
+      handleDialerError(createDialerError(
+        DialerErrorType.CONFIGURATION,
+        "Asterisk API URL not configured. Please set VITE_ASTERISK_API_URL environment variable.",
+        new Error("Missing configuration")
+      ));
+      
+      return { jobId: `offline-${Date.now()}` };
+    }
     
     try {
       // Make an actual API call to your Asterisk server
@@ -239,9 +260,27 @@ qualify=yes
   testConnection: async (): Promise<{ success: boolean; message: string }> => {
     console.log("Testing connection to Asterisk server:", ASTERISK_API_URL);
     
+    // Check if Asterisk API URL is configured
+    if (!ASTERISK_API_URL || ASTERISK_API_URL === "") {
+      return {
+        success: false,
+        message: "Asterisk API URL not configured. Please set VITE_ASTERISK_API_URL environment variable."
+      };
+    }
+    
+    // Check if credentials are configured
+    if (!ASTERISK_API_USERNAME || !ASTERISK_API_PASSWORD) {
+      return {
+        success: false,
+        message: "Asterisk API credentials not configured. Please set VITE_ASTERISK_API_USERNAME and VITE_ASTERISK_API_PASSWORD environment variables."
+      };
+    }
+    
     try {
       const response = await fetch(`${ASTERISK_API_URL}/applications`, {
         headers: getAuthHeaders(),
+        // Set a shorter timeout for the test
+        signal: AbortSignal.timeout(5000)
       });
       
       if (!response.ok) {

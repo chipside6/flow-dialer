@@ -39,26 +39,43 @@ const LaunchReadinessChecker = () => {
 
     // Check API Connection
     try {
-      const response = await fetch(`${API_URL}/health`, { method: 'GET' });
-      if (!response.ok) throw new Error(`Status: ${response.status}`);
-      updateCheck("API Connection", "success", "API is reachable");
+      // Check if API URL is configured
+      if (!API_URL) {
+        updateCheck("API Connection", "error", "API URL not configured. Set VITE_API_URL environment variable.");
+      } else {
+        try {
+          const response = await fetch(`${API_URL}/health`, { 
+            method: 'GET',
+            // Set a shorter timeout for the health check
+            signal: AbortSignal.timeout(5000)
+          });
+          if (!response.ok) throw new Error(`Status: ${response.status}`);
+          updateCheck("API Connection", "success", "API is reachable");
+        } catch (fetchError) {
+          updateCheck("API Connection", "error", `API unreachable: ${fetchError.message}`);
+        }
+      }
     } catch (error) {
-      updateCheck("API Connection", "error", `API unreachable: ${error.message}`);
+      updateCheck("API Connection", "error", `Error checking API: ${error.message}`);
     }
 
-    // Check Asterisk Connection - Now we do a real test using the service
+    // Check Asterisk Connection
     try {
-      if (!ASTERISK_API_URL || ASTERISK_API_URL === "http://your-asterisk-server:8088/ari") {
-        updateCheck("Asterisk Connection", "error", "Asterisk URL not configured");
+      if (!ASTERISK_API_URL || ASTERISK_API_URL === "" || ASTERISK_API_URL === "http://your-asterisk-server:8088/ari") {
+        updateCheck("Asterisk Connection", "error", "Asterisk URL not configured. Set VITE_ASTERISK_API_URL environment variable.");
       } else if (!ASTERISK_API_USERNAME || !ASTERISK_API_PASSWORD) {
-        updateCheck("Asterisk Connection", "error", "Asterisk credentials not configured");
+        updateCheck("Asterisk Connection", "error", "Asterisk credentials not configured. Set VITE_ASTERISK_API_USERNAME and VITE_ASTERISK_API_PASSWORD environment variables.");
       } else {
         // Use the service to test the connection
-        const result = await asteriskService.testConnection();
-        if (result.success) {
-          updateCheck("Asterisk Connection", "success", result.message);
-        } else {
-          updateCheck("Asterisk Connection", "error", result.message);
+        try {
+          const result = await asteriskService.testConnection();
+          if (result.success) {
+            updateCheck("Asterisk Connection", "success", result.message);
+          } else {
+            updateCheck("Asterisk Connection", "error", result.message);
+          }
+        } catch (connectionError) {
+          updateCheck("Asterisk Connection", "error", `Error testing connection: ${connectionError.message}`);
         }
       }
     } catch (error) {
@@ -67,20 +84,24 @@ const LaunchReadinessChecker = () => {
 
     // Check Environment Variables
     const requiredVars = [
-      "VITE_SUPABASE_URL", 
-      "VITE_SUPABASE_PUBLISHABLE_KEY", 
-      "VITE_API_URL", 
-      "VITE_ASTERISK_API_URL",
-      "VITE_ASTERISK_API_USERNAME",
-      "VITE_ASTERISK_API_PASSWORD"
+      { name: "VITE_SUPABASE_URL", value: import.meta.env.VITE_SUPABASE_URL }, 
+      { name: "VITE_SUPABASE_PUBLISHABLE_KEY", value: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, 
+      { name: "VITE_API_URL", value: import.meta.env.VITE_API_URL }, 
+      { name: "VITE_ASTERISK_API_URL", value: import.meta.env.VITE_ASTERISK_API_URL },
+      { name: "VITE_ASTERISK_API_USERNAME", value: import.meta.env.VITE_ASTERISK_API_USERNAME },
+      { name: "VITE_ASTERISK_API_PASSWORD", value: import.meta.env.VITE_ASTERISK_API_PASSWORD }
     ];
     
-    const missingVars = requiredVars.filter(v => !import.meta.env[v]);
+    const missingVars = requiredVars.filter(v => !v.value);
     
     if (missingVars.length === 0) {
       updateCheck("Environment Variables", "success", "All required environment variables are set");
     } else {
-      updateCheck("Environment Variables", "error", `Missing variables: ${missingVars.join(', ')}`);
+      updateCheck(
+        "Environment Variables", 
+        "error", 
+        `Missing variables: ${missingVars.map(v => v.name).join(', ')}`
+      );
     }
 
     // Check Authentication

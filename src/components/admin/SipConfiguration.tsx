@@ -1,18 +1,31 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { CheckCircle2, Loader2, Save, TestTube } from "lucide-react";
-import { asteriskService, ASTERISK_API_URL, ASTERISK_API_USERNAME, ASTERISK_API_PASSWORD } from "@/utils/asteriskService";
+import { CheckCircle2, Loader2, Save, TestTube, AlertTriangle } from "lucide-react";
+import { asteriskService } from "@/utils/asteriskService";
 
 const SipConfiguration = () => {
-  const [apiUrl, setApiUrl] = useState(ASTERISK_API_URL);
-  const [username, setUsername] = useState(ASTERISK_API_USERNAME);
-  const [password, setPassword] = useState(ASTERISK_API_PASSWORD);
+  // Initialize state from either env variables or localStorage for development purposes
+  const [apiUrl, setApiUrl] = useState(
+    import.meta.env.VITE_ASTERISK_API_URL || 
+    localStorage.getItem("asterisk_api_url") || 
+    "http://your-asterisk-server:8088/ari"
+  );
+  const [username, setUsername] = useState(
+    import.meta.env.VITE_ASTERISK_API_USERNAME || 
+    localStorage.getItem("asterisk_api_username") || 
+    "asterisk"
+  );
+  const [password, setPassword] = useState(
+    import.meta.env.VITE_ASTERISK_API_PASSWORD || 
+    localStorage.getItem("asterisk_api_password") || 
+    "asterisk"
+  );
   const [providerName, setProviderName] = useState("my-sip-provider");
   const [host, setHost] = useState("sip.provider.com");
   const [port, setPort] = useState("5060");
@@ -22,6 +35,18 @@ const SipConfiguration = () => {
   const [isTesting, setIsTesting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"untested" | "success" | "error">("untested");
+  const [showEnvHelp, setShowEnvHelp] = useState(false);
+
+  // Load stored values from localStorage on component mount
+  useEffect(() => {
+    const storedApiUrl = localStorage.getItem("asterisk_api_url");
+    const storedUsername = localStorage.getItem("asterisk_api_username");
+    const storedPassword = localStorage.getItem("asterisk_api_password");
+    
+    if (storedApiUrl) setApiUrl(storedApiUrl);
+    if (storedUsername) setUsername(storedUsername);
+    if (storedPassword) setPassword(storedPassword);
+  }, []);
 
   const testConnection = async () => {
     setIsTesting(true);
@@ -44,6 +69,7 @@ const SipConfiguration = () => {
                 'Authorization': `Basic ${basicAuth}`,
                 'Content-Type': 'application/json',
               },
+              signal: AbortSignal.timeout(5000) // 5 second timeout
             });
             
             if (!response.ok) {
@@ -151,7 +177,23 @@ exten => _X.,n,Hangup()
     
     toast({
       title: "Settings Saved",
-      description: "Asterisk API settings have been saved. These will be used for this session, but you should set environment variables for production.",
+      description: "Asterisk API settings have been saved locally. For production use, set these as environment variables.",
+    });
+    
+    setShowEnvHelp(true);
+  };
+
+  const copyEnvVars = () => {
+    const envVarText = `
+VITE_ASTERISK_API_URL=${apiUrl}
+VITE_ASTERISK_API_USERNAME=${username}
+VITE_ASTERISK_API_PASSWORD=${password}
+`.trim();
+
+    navigator.clipboard.writeText(envVarText);
+    toast({
+      title: "Environment Variables Copied",
+      description: "Environment variables have been copied to clipboard",
     });
   };
 
@@ -229,6 +271,36 @@ exten => _X.,n,Hangup()
               </div>
             )}
           </div>
+          
+          {showEnvHelp && (
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
+              <div className="flex items-start gap-2 mb-2">
+                <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+                <div>
+                  <h4 className="font-medium">For Production Use</h4>
+                  <p className="text-sm text-amber-700">
+                    The settings have been saved to your browser storage for development,
+                    but for production use, you should set the following environment variables:
+                  </p>
+                </div>
+              </div>
+              <div className="font-mono text-sm bg-gray-800 text-white p-2 rounded mt-2">
+                <pre className="whitespace-pre-wrap">
+                  VITE_ASTERISK_API_URL={apiUrl}<br/>
+                  VITE_ASTERISK_API_USERNAME={username}<br/>
+                  VITE_ASTERISK_API_PASSWORD=********
+                </pre>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={copyEnvVars}
+                className="mt-2"
+              >
+                Copy Environment Variables
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
       

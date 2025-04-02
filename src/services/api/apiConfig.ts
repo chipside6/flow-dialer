@@ -7,8 +7,9 @@ import {
   ENABLE_DETAILED_LOGGING 
 } from "./productionConfig";
 
-// Use the configured production URL or fallback to development URL
-export const API_URL = import.meta.env.VITE_API_URL || PRODUCTION_API_URL;
+// Use the configured production URL or fallback to an empty string to prevent connection errors
+// Changed from using a specific fallback URL that might not exist
+export const API_URL = import.meta.env.VITE_API_URL || '';
 
 // Log configuration on startup (only in development)
 if (import.meta.env.DEV) {
@@ -31,6 +32,12 @@ export const apiFetch = async <T>(
   options: RequestInit = {}
 ): Promise<T> => {
   let retries = 0;
+  
+  // Check if API URL is configured
+  if (!API_URL) {
+    console.warn('[API] API URL is not configured. Please set VITE_API_URL environment variable.');
+    throw new Error('API URL is not configured');
+  }
   
   const executeRequest = async (): Promise<T> => {
     try {

@@ -5,7 +5,8 @@
  */
 
 // API base URL - should be set to your production API endpoint
-export const PRODUCTION_API_URL = import.meta.env.VITE_API_URL || 'https://api.yourproductionsite.com/api';
+// Set to empty string by default to avoid connection errors
+export const PRODUCTION_API_URL = import.meta.env.VITE_API_URL || '';
 
 // Maximum retry attempts for API calls
 export const MAX_RETRY_ATTEMPTS = 3;
