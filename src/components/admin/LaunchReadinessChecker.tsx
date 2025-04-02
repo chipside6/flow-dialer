@@ -26,11 +26,13 @@ const LaunchReadinessChecker = () => {
   const [isRetrying, setIsRetrying] = useState(false);
   const [serverInstructions, setServerInstructions] = useState<string | null>(null);
   const [troubleshootInstructions, setTroubleshootInstructions] = useState<string | null>(null);
+  const [apiConfigInstructions, setApiConfigInstructions] = useState<string | null>(null);
 
   const runChecks = async () => {
     setIsRetrying(true);
     setServerInstructions(null);
     setTroubleshootInstructions(null);
+    setApiConfigInstructions(null);
     
     // Reset checks to "checking" state
     setChecks(prev => 
@@ -53,12 +55,17 @@ const LaunchReadinessChecker = () => {
 
     // Check API Connection
     try {
+      // Get stored API URL from localStorage or use environment variable
+      const storedApiUrl = localStorage.getItem("api_url");
+      const effectiveApiUrl = storedApiUrl || API_URL;
+      
       // Check if API URL is configured
-      if (!API_URL) {
-        updateCheck("API Connection", "error", "API URL not configured. Set VITE_API_URL environment variable.");
+      if (!effectiveApiUrl) {
+        updateCheck("API Connection", "error", "API URL not configured. Set VITE_API_URL environment variable or configure in settings.");
+        setApiConfigInstructions(getApiConfigInstructions());
       } else {
         try {
-          const response = await fetch(`${API_URL}/health`, { 
+          const response = await fetch(`${effectiveApiUrl}/health`, { 
             method: 'GET',
             // Set a shorter timeout for the health check
             signal: AbortSignal.timeout(5000)
@@ -67,10 +74,12 @@ const LaunchReadinessChecker = () => {
           updateCheck("API Connection", "success", "API is reachable");
         } catch (fetchError) {
           updateCheck("API Connection", "error", `API unreachable: ${fetchError.message}`);
+          setApiConfigInstructions(getApiConfigInstructions());
         }
       }
     } catch (error) {
       updateCheck("API Connection", "error", `Error checking API: ${error.message}`);
+      setApiConfigInstructions(getApiConfigInstructions());
     }
 
     // Check Asterisk Connection
@@ -153,6 +162,28 @@ const LaunchReadinessChecker = () => {
       title: "Checks completed",
       description: "System configuration verification finished.",
     });
+  };
+
+  const getApiConfigInstructions = (): string => {
+    return `
+1. Set the API URL in one of these ways:
+
+   Option 1: Environment Variable
+   Add VITE_API_URL to your environment with your API endpoint URL
+   Example: VITE_API_URL=http://your-api-server:5000/api
+
+   Option 2: Local Storage Configuration
+   You can set the API URL directly in your browser's local storage:
+   - Open browser developer tools (F12)
+   - Go to Application tab > Local Storage
+   - Add a key 'api_url' with your API endpoint value
+   
+   Option 3: Backend Server
+   If you're running the included Node.js backend:
+   - Make sure it's running (cd backend && npm start)
+   - Use http://localhost:5000/api as your API URL
+   - The backend should have a /health endpoint available
+   `;
   };
 
   const getAsteriskSetupInstructions = (url: string): string => {
@@ -292,6 +323,15 @@ COMMON ASTERISK TROUBLESHOOTING:
               </div>
             </div>
           ))}
+          
+          {apiConfigInstructions && (
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+              <h3 className="text-lg font-medium text-blue-800 mb-2">API Configuration Instructions</h3>
+              <pre className="whitespace-pre-wrap text-sm bg-white p-3 rounded border border-blue-100 overflow-x-auto text-blue-900">
+                {apiConfigInstructions}
+              </pre>
+            </div>
+          )}
           
           {serverInstructions && (
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
