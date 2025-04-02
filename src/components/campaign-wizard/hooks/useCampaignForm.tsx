@@ -31,23 +31,6 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     }));
   };
 
-  const handleScheduleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
-    // If attempting to change maxConcurrentCalls, keep it as 1
-    if (name === "maxConcurrentCalls") {
-      return;
-    }
-    
-    setCampaign(prev => ({
-      ...prev,
-      schedule: {
-        ...prev.schedule,
-        [name]: value
-      }
-    }));
-  };
-
   const handleSelectChange = (name: string, value: string) => {
     setCampaign(prev => ({
       ...prev,
@@ -128,7 +111,6 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     step,
     setStep,
     handleInputChange,
-    handleScheduleChange,
     handleSelectChange,
     handleComplete
   };

@@ -2,7 +2,7 @@
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WizardStep } from "./types";
-import { FileText, Users, Radio, PhoneForwarded, CalendarClock, ClipboardCheck, Server } from "lucide-react";
+import { FileText, Users, Radio, PhoneForwarded, ClipboardCheck, Server } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface WizardStepTabsProps {
@@ -22,7 +22,6 @@ export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
     { id: "audio", label: "Audio", icon: <Radio className="h-4 w-4" /> },
     { id: "transfers", label: "Transfers", icon: <PhoneForwarded className="h-4 w-4" /> },
     { id: "sipProvider", label: "SIP Provider", icon: <Server className="h-4 w-4" /> },
-    { id: "schedule", label: "Schedule", icon: <CalendarClock className="h-4 w-4" /> },
     { id: "review", label: "Review", icon: <ClipboardCheck className="h-4 w-4" /> }
   ];
 

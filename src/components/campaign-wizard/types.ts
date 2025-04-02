@@ -21,7 +21,7 @@ export interface CampaignData {
   user_id?: string;
 }
 
-export type WizardStep = "basics" | "contacts" | "audio" | "transfers" | "sipProvider" | "schedule" | "review";
+export type WizardStep = "basics" | "contacts" | "audio" | "transfers" | "sipProvider" | "review";
 
 export interface ContactList {
   id: string;
