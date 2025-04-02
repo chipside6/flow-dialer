@@ -75,4 +75,3 @@ url = ""
 [functions]
 # Port to use for Functions server.
 serve_port = 54321
-

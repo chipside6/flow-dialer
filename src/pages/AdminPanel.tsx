@@ -20,15 +20,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Info, ShieldCheck, Users } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Loader2, Info, ShieldCheck, Users, Star, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
+interface UserWithProfile {
+  id: string;
+  email?: string;
+  created_at?: string;
+  profile?: {
+    full_name: string | null;
+    is_admin: boolean;
+  };
+  subscription?: {
+    plan_id: string;
+    plan_name: string;
+    status: string;
+  };
+}
+
 const AdminPanel = () => {
-  const { isAdmin, isAuthenticated, isLoading, initialized } = useAuth();
-  const [users, setUsers] = useState<any[]>([]);
+  const { isAdmin, isAuthenticated, isLoading, initialized, user } = useAuth();
+  const [users, setUsers] = useState<UserWithProfile[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
   
@@ -40,14 +57,40 @@ const AdminPanel = () => {
         setIsLoadingUsers(true);
         setError(null);
         
-        // Fetch profiles (more reliable than auth.users)
+        // Fetch profiles
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select("*");
         
         if (profilesError) throw profilesError;
         
-        setUsers(profiles || []);
+        // Fetch active subscriptions
+        const { data: subscriptions, error: subscriptionsError } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("status", "active");
+          
+        if (subscriptionsError) throw subscriptionsError;
+        
+        // Merge data
+        const usersWithData = profiles.map(profile => {
+          const userSubscription = subscriptions.find(sub => sub.user_id === profile.id);
+          
+          return {
+            id: profile.id,
+            profile: {
+              full_name: profile.full_name,
+              is_admin: profile.is_admin
+            },
+            subscription: userSubscription ? {
+              plan_id: userSubscription.plan_id,
+              plan_name: userSubscription.plan_name,
+              status: userSubscription.status
+            } : undefined
+          };
+        });
+        
+        setUsers(usersWithData || []);
       } catch (err: any) {
         console.error("Error fetching users:", err);
         setError(new Error(err.message || "Failed to load users"));
@@ -101,6 +144,65 @@ const AdminPanel = () => {
     }
   };
   
+  const grantLifetimeAccess = async (userId: string) => {
+    if (!user) return;
+    
+    try {
+      setIsProcessing(userId);
+      
+      const { data, error } = await supabase.functions.invoke('grant-lifetime-access', {
+        body: {
+          targetUserId: userId,
+          adminToken: user.id  // Use the admin's user ID as the token
+        }
+      });
+      
+      if (error || !data?.success) {
+        throw new Error(error?.message || data?.error || "Failed to grant lifetime access");
+      }
+      
+      toast({
+        title: "Success!",
+        description: "Lifetime access granted to user",
+      });
+      
+      // Refresh the users list to show updated subscription status
+      const { data: profiles } = await supabase.from("profiles").select("*");
+      const { data: subscriptions } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("status", "active");
+        
+      const updatedUsers = profiles?.map(profile => {
+        const userSubscription = subscriptions?.find(sub => sub.user_id === profile.id);
+        
+        return {
+          id: profile.id,
+          profile: {
+            full_name: profile.full_name,
+            is_admin: profile.is_admin
+          },
+          subscription: userSubscription ? {
+            plan_id: userSubscription.plan_id,
+            plan_name: userSubscription.plan_name,
+            status: userSubscription.status
+          } : undefined
+        };
+      });
+      
+      setUsers(updatedUsers || []);
+    } catch (err: any) {
+      console.error("Error granting lifetime access:", err);
+      toast({
+        variant: "destructive",
+        title: "Failed to grant access",
+        description: err.message || "An unexpected error occurred"
+      });
+    } finally {
+      setIsProcessing(null);
+    }
+  };
+  
   // Show loading state while checking permissions
   if (isLoading || !initialized) {
     return (
@@ -127,13 +229,15 @@ const AdminPanel = () => {
             </p>
           </div>
           
-          <Button onClick={createAdminUser}>
-            <ShieldCheck className="w-4 h-4 mr-2" />
-            Create Admin User
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={createAdminUser}>
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              Create Admin User
+            </Button>
+          </div>
         </div>
         
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium">
@@ -155,7 +259,21 @@ const AdminPanel = () => {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">
-                {users.filter(user => user.is_admin).length}
+                {users.filter(user => user.profile?.is_admin).length}
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium">
+                <Star className="w-4 h-4 inline mr-2" />
+                Lifetime Users
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">
+                {users.filter(user => user.subscription?.plan_id === 'lifetime').length}
               </p>
             </CardContent>
           </Card>
@@ -192,7 +310,8 @@ const AdminPanel = () => {
                     <TableHead>User ID</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
+                    <TableHead>Subscription</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -201,20 +320,80 @@ const AdminPanel = () => {
                       <TableCell className="font-mono text-xs">
                         {user.id.substring(0, 8)}...
                       </TableCell>
-                      <TableCell>{user.full_name || 'N/A'}</TableCell>
+                      <TableCell>{user.profile?.full_name || 'N/A'}</TableCell>
                       <TableCell>
-                        {user.is_admin && (
+                        {user.profile?.is_admin && (
                           <Badge className="bg-primary">Admin</Badge>
                         )}
-                        {!user.is_admin && (
+                        {!user.profile?.is_admin && (
                           <Badge variant="outline">User</Badge>
                         )}
                       </TableCell>
                       <TableCell>
-                        {user.created_at 
-                          ? new Date(user.created_at).toLocaleDateString() 
-                          : 'N/A'
-                        }
+                        {user.subscription ? (
+                          <Badge 
+                            className={user.subscription.plan_id === 'lifetime' ? 
+                              'bg-gradient-to-r from-purple-400 to-pink-500 text-white' : 
+                              'bg-green-100 text-green-800'
+                            }
+                          >
+                            {user.subscription.plan_name}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-gray-100">
+                            Free
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              disabled={
+                                isProcessing === user.id || 
+                                user.subscription?.plan_id === 'lifetime'
+                              }
+                              className={
+                                user.subscription?.plan_id === 'lifetime' ? 
+                                'opacity-50 cursor-not-allowed' : ''
+                              }
+                            >
+                              {isProcessing === user.id ? (
+                                <>
+                                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                  Processing
+                                </>
+                              ) : (
+                                <>
+                                  <Star className="mr-2 h-3 w-3" />
+                                  {user.subscription?.plan_id === 'lifetime' ? 
+                                    'Has Lifetime' : 
+                                    'Grant Lifetime'
+                                  }
+                                </>
+                              )}
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Grant Lifetime Access</DialogTitle>
+                              <DialogDescription>
+                                Are you sure you want to grant lifetime access to this user?
+                                This cannot be undone.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                              <Button
+                                variant="default"
+                                onClick={() => grantLifetimeAccess(user.id)}
+                              >
+                                Yes, Grant Lifetime Access
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}
