@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +14,23 @@ interface SipProviderStepProps {
 
 export const SipProviderStep: React.FC<SipProviderStepProps> = ({ campaign, onSelectChange }) => {
   const { providers, isLoading, error, hasInitiallyLoaded } = useSipProviders();
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
+  
+  // Add timeout to handle persistent loading state
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (isLoading) {
+      timeoutId = setTimeout(() => {
+        setLoadingTimeout(true);
+      }, 5000); // Show timeout message after 5 seconds
+    } else {
+      setLoadingTimeout(false);
+    }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isLoading]);
   
   // Filter to only show active providers
   const activeProviders = providers.filter(provider => provider.isActive);
@@ -36,7 +53,7 @@ export const SipProviderStep: React.FC<SipProviderStepProps> = ({ campaign, onSe
           {isLoading ? (
             <div className="flex items-center justify-center py-6">
               <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
-              <span>Loading SIP providers...</span>
+              <span>{loadingTimeout ? "Still loading... This is taking longer than expected." : "Loading SIP providers..."}</span>
             </div>
           ) : error ? (
             <div className="bg-destructive/10 p-4 rounded-md flex items-start">

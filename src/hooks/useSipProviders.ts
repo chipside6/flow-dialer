@@ -4,7 +4,7 @@ import { useProviderState } from "./sip/useProviderState";
 import { useAddUpdateProvider } from "./sip/useAddUpdateProvider";
 import { useDeleteProvider } from "./sip/useDeleteProvider";
 import { useToggleProviderStatus } from "./sip/useToggleProviderStatus";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "@/components/ui/use-toast";
 
 export const useSipProviders = () => {
@@ -14,6 +14,9 @@ export const useSipProviders = () => {
   const { handleDeleteProvider } = useDeleteProvider(providers, setProviders);
   const { toggleProviderStatus } = useToggleProviderStatus(providers, setProviders);
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+  
+  // Use a ref to track if refetch has been called manually to prevent excessive refetches
+  const refetchCalledRef = useRef(false);
 
   // Mark as initially loaded once loading completes
   useEffect(() => {
@@ -24,11 +27,12 @@ export const useSipProviders = () => {
 
   // Add a timeout to prevent infinite loading state
   useEffect(() => {
-    if (!isLoading) return;
+    if (!isLoading || refetchCalledRef.current) return;
 
     const timeout = setTimeout(() => {
       if (isLoading) {
         console.log("SIP providers loading timeout reached");
+        refetchCalledRef.current = true;
         // Force refetch to attempt data retrieval again
         refetch();
         
@@ -46,12 +50,13 @@ export const useSipProviders = () => {
 
   // Add a second, longer timeout to force reset loading state if nothing happens
   useEffect(() => {
-    if (!isLoading) return;
+    if (!isLoading || refetchCalledRef.current) return;
     
     const finalTimeout = setTimeout(() => {
       if (isLoading) {
         console.log("SIP providers loading final timeout reached - forcing state reset");
         // Force a refetch and reset loading indicators in the UI
+        refetchCalledRef.current = true;
         refetch();
         toast({
           title: "Unable to load providers",
@@ -64,6 +69,18 @@ export const useSipProviders = () => {
     return () => clearTimeout(finalTimeout);
   }, [isLoading, refetch]);
 
+  // Clean up the ref value when component unmounts
+  useEffect(() => {
+    return () => {
+      refetchCalledRef.current = false;
+    };
+  }, []);
+
+  const safeRefetch = () => {
+    refetchCalledRef.current = true;
+    return refetch();
+  };
+
   return {
     // Data
     providers,
@@ -73,7 +90,7 @@ export const useSipProviders = () => {
     error,
     
     // Actions
-    refetch,
+    refetch: safeRefetch,
     handleAddProvider: addOrUpdateProvider,
     handleEditProvider,
     handleCancelEdit,

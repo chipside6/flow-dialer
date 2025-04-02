@@ -66,7 +66,7 @@ export const useFetchSipProviders = () => {
     }, 10000); // 10 second hard timeout
     
     return () => clearTimeout(fallbackTimer);
-  }, [fetchData, isLoading]);
+  }, [fetchData]); // Remove isLoading from dependencies to prevent infinite loop
 
   return { providers, setProviders, isLoading, error, refetch };
 };
