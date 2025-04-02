@@ -2,42 +2,65 @@
 # A string used to distinguish different Supabase projects on the same host. Defaults to the project ID.
 project_id = "grhvoclalziyjbjlhpml"
 
-# The port that the API Gateway listens on. Defaults to 54321.
-api_port = 54321
-
-# The port that the Authentication server listens on. Defaults to 54322.
-auth_port = 54322
-
-# The port that the Realtime server listens on. Defaults to 54323.
-realtime_port = 54323
-
-# The port that the Studio listens on. Defaults to 54324.
-studio_port = 54324
-
-# Email testing server. Defaults to 54325.
-inbucket_port = 54325
-
-# The port that the DB listens on. Defaults to 54322.
-db_port = 54322
-
-# The port that the Edge Functions server listens on. Defaults to 54323.
-functions_port = 54321
-
-# The minimum log level to output. Defaults to "warn".
-log_level = "warn"
-
-# Enable/disable JWT verification for APIs and Functions. Defaults to true.
+[api]
+# Port to use for the API URL.
+port = 54321
+# Enable JWT verification for APIs. Defaults to true.
 jwt_verification = true
 
-# Configure database pooler option settings.
-[pooler]
-enabled = false
-pool_mode = "transaction"
-default_pool_size = 15
-pool_size = 15
+[db]
+# Port to use for the local database URL.
+port = 54322
 
-# Configure Edge Functions server options.
+[realtime]
+# Port to use for the local Realtime URL.
+port = 54323
+
+[studio]
+# Port to use for the local Studio URL.
+port = 54324
+
+[inbucket]
+# Port to use for the local Inbucket URL.
+port = 54325
+
+[auth]
+# The base URL of your website. Used as an allow-list for redirects and for constructing URLs used in emails.
+site_url = "http://localhost:3000"
+# A comma separated list of URLs that auth providers are permitted to redirect to post authentication.
+additional_redirect_urls = ["https://localhost:3000"]
+# How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
+jwt_expiry = 3600
+# If disabled, the refresh token will never expire.
+enable_refresh_token_rotation = true
+# Allows refresh tokens to be reused after expiry, up to the specified interval in seconds.
+refresh_token_reuse_interval = 10
+# Allow/disallow new user signups to your project.
+enable_signup = true
+
+[auth.email]
+# Allow/disallow new user signups via email to your project.
+enable_signup = true
+# If enabled, a user will be required to confirm any email change on both the old, and new email addresses.
+# If disabled, only the new email is required to confirm.
+double_confirm_changes = true
+# If enabled, users need to confirm their email address before signing in.
+enable_confirmations = false
+
+[storage]
+# The maximum file size allowed (e.g. "5MB", "500KB").
+file_size_limit = "50MiB"
+
+[analytics]
+# Enable/disable Analytics.
+enabled = false
+
+# Set the log level.
+log_level = "warn"
+
 [functions]
+# Port that the Edge Functions server listens on.
+port = 54321
 # Function timeout in seconds. Defaults to 30.
 function_timeout = 30
 # Serve functions from the filesystem rather than the Database. Defaults to false.
@@ -46,5 +69,9 @@ serve_from_fs = false
 max_retries = 1
 # The delay between retries in milliseconds. Defaults to 0.
 retry_interval = 500
-# The port that the Edge Functions server listens on. Defaults to 54321.
-serve_port = 54321
+
+[pooler]
+enabled = false
+pool_mode = "transaction"
+default_pool_size = 15
+pool_size = 15

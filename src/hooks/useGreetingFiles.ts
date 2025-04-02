@@ -103,8 +103,12 @@ export function useGreetingFiles() {
     enabled: !!user, // Only run query when user is available
     refetchOnWindowFocus: true,
     // Add fallbacks to prevent blocking UI
-    placeholderData: [],
-    onError: (error: any) => {
+    placeholderData: []
+  });
+
+  // Set up error handling separately using onSuccess/onError callbacks in useEffect
+  useEffect(() => {
+    if (error) {
       console.error("Error in greeting files query:", error);
       toast({
         variant: "destructive",
@@ -112,7 +116,7 @@ export function useGreetingFiles() {
         description: error.message || "Failed to load greeting files. Please try again."
       });
     }
-  });
+  }, [error]);
 
   // Mutation for deleting greeting files with improved error handling
   const deleteGreetingFile = useMutation({
