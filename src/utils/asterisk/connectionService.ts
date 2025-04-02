@@ -34,8 +34,8 @@ export const connectionService = {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         
-        // Use the API URL directly without prepending any protocol
-        // This allows users to provide the full URL including the protocol
+        // Use the API URL exactly as provided without any manipulation
+        // This allows users to provide the full URL including any protocol
         const pingUrl = apiUrl.includes('/ping') ? apiUrl : `${apiUrl}/ping`;
         
         const response = await fetch(pingUrl, {

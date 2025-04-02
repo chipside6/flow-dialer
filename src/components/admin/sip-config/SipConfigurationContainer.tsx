@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import EnvironmentSetup from "./EnvironmentSetup";
 import ProviderConfiguration from "./ProviderConfiguration";
@@ -7,8 +8,8 @@ import { toast } from "@/components/ui/use-toast";
 import { asteriskService } from "@/utils/asterisk";
 
 const SipConfigurationContainer = () => {
-  // Initialize state with your Asterisk server credentials
-  const [apiUrl, setApiUrl] = useState("http://127.0.0.1:8088/ari");
+  // Initialize state with your Asterisk server credentials - no automatic protocol
+  const [apiUrl, setApiUrl] = useState("127.0.0.1:8088/ari");
   const [username, setUsername] = useState("asterisk");
   const [password, setPassword] = useState("asterisk");
   const [providerName, setProviderName] = useState("my-sip-provider");

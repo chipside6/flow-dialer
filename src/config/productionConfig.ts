@@ -18,7 +18,7 @@ export const API_CONFIG = {
 
 // Asterisk Configuration
 export const ASTERISK_CONFIG = {
-  // Asterisk API URL - do not include protocol by default
+  // Asterisk API URL - do not include protocol by default, let user decide
   apiUrl: import.meta.env.VITE_ASTERISK_API_URL || '127.0.0.1:8088/ari',
   
   // Authentication credentials

@@ -83,7 +83,7 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
         saveConfigToStorage(apiUrl, username, password);
       }
       
-      // Test connection with current values - no manipulation of the URL
+      // Test connection with current values - passing URL exactly as entered
       const result = await asteriskService.testConnection({
         apiUrl, 
         username, 
@@ -207,7 +207,8 @@ VITE_ASTERISK_API_PASSWORD=${password}
             className="focus:ring-2 focus:ring-primary focus:border-primary"
           />
           <p className="text-xs text-muted-foreground mt-1">
-            Enter the full URL with protocol if needed (e.g., http://127.0.0.1:8088/ari) or just the address (e.g., 127.0.0.1:8088/ari)
+            Enter the full URL exactly as needed (e.g., http://127.0.0.1:8088/ari or just 127.0.0.1:8088/ari).
+            No automatic protocol will be added.
           </p>
         </div>
         
