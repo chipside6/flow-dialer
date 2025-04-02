@@ -132,4 +132,19 @@
     text-overflow: ellipsis !important;
     font-size: 12px !important;
   }
+  
+  /* Fix view details button text and alignment */
+  .shadow-sm .grid-cols-2 > div .mt-1 button span {
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* Ensure view details button is centered with proper spacing */
+  .shadow-sm .grid-cols-2 > div .mt-1 {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
 }

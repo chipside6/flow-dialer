@@ -120,12 +120,12 @@ export const CallStatisticsCard = () => {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="w-full h-8 text-xs flex justify-center items-center"
+                    className="w-full h-8 text-xs flex justify-center items-center gap-1"
                     onClick={() => handleViewDetails(stat)}
                     aria-label={`View ${stat.title} details`}
                   >
-                    <Eye className="h-3 w-3 mr-1" />
-                    <span>View Details</span>
+                    <Eye className="h-3 w-3" />
+                    <span className="whitespace-nowrap overflow-hidden text-ellipsis">View Details</span>
                   </Button>
                 </div>
               </div>
