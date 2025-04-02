@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { logSupabaseOperation, OperationType, isAuthError } from "@/utils/supabaseDebug";
 import { FetchCampaignsParams } from "./types";
 import { useTransformCampaigns } from "./useTransformCampaigns";
+import { User } from "@/contexts/auth/types"; // Import our own User type
 
 /**
  * Hook for fetching campaigns from Supabase

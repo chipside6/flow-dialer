@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/components/ui/use-toast";
 import { useFetchCampaigns } from "./useFetchCampaigns";
 import { Campaign, CampaignState, UseCampaignsResult } from "./types";
+import { User } from "@/contexts/auth/types"; // Import our own User type
 
 /**
  * Primary hook for managing campaigns data

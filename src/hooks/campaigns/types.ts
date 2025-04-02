@@ -1,5 +1,6 @@
 
-import { User } from "@supabase/supabase-js";
+// Original imports
+import { User } from "../auth/types";
 
 export interface Campaign {
   id: string;
