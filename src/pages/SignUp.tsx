@@ -1,17 +1,21 @@
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, Eye, EyeOff, ChevronLeft, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
+
+import { AuthContainer } from '@/components/auth/AuthContainer';
+import { AuthHeader } from '@/components/auth/AuthHeader';
+import { AuthAlert } from '@/components/auth/AuthAlert';
+import { PasswordInput } from '@/components/auth/PasswordInput';
+import { AuthButton } from '@/components/auth/AuthButton';
+import { AuthFooter } from '@/components/auth/AuthFooter';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -63,97 +67,46 @@ const SignUp = () => {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="max-w-md w-full mx-auto">
-        <div className="absolute top-6 left-4">
-          <button 
-            onClick={() => navigate('/')} 
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-          >
-            <ChevronLeft className="h-6 w-6 text-gray-700" />
-          </button>
+    <AuthContainer>
+      <AuthHeader title="Create your account" />
+      
+      {errorMessage && (
+        <AuthAlert 
+          type="error" 
+          message={errorMessage}
+        />
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full h-12 px-3 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base placeholder:text-gray-500"
+            placeholder="Enter your email"
+          />
+          
+          <PasswordInput
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Create a password"
+            minLength={6}
+          />
         </div>
-        
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-bold text-gray-800">Create your account</h1>
-          <p className="text-gray-600 mt-2">Get started with Flow Dialer today</p>
-        </div>
 
-        {errorMessage && (
-          <Alert variant="destructive" className="mb-6 animate-fade-in text-left">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{errorMessage}</AlertDescription>
-          </Alert>
-        )}
+        <AuthButton 
+          isLoading={isLoading} 
+          buttonText="Create Account" 
+          loadingText="Creating account..."
+        />
+      </form>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full h-12 px-3 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base placeholder:text-gray-500"
-              placeholder="Enter your email"
-            />
-            
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full h-12 px-3 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base placeholder:text-gray-500"
-                placeholder="Create a password"
-              />
-              <button 
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute right-2 bottom-2 text-primary focus:outline-none"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full h-12 py-3 px-4 bg-gray-200 hover:bg-gray-300 rounded-full text-gray-800 font-medium transition-colors"
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Creating account...
-              </span>
-            ) : (
-              <span>Create Account</span>
-            )}
-          </button>
-        </form>
-
-        <div className="mt-8 text-center">
-          <p className="text-gray-600">
-            Already have an account?{" "}
-            <Link to="/login" className="text-primary font-medium hover:underline">
-              Sign in
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+      <AuthFooter type="signup" />
+    </AuthContainer>
   );
 };
 
