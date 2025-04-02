@@ -6,9 +6,7 @@ import { TransferNumbersList } from "./TransferNumbersList";
 import { ErrorAlert } from "./ErrorAlert";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { toast } from "@/components/ui/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface TransferNumbersContentProps {
   transferNumbers: TransferNumber[];
@@ -117,23 +115,6 @@ export const TransferNumbersContent = ({
   return (
     <>
       <ErrorAlert error={error} onRetry={onRefresh} />
-      
-      {isLoading && forceShowContent && (
-        <Alert variant="warning" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
-            <span>Loading your transfer numbers...</span>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onRefresh} 
-              className="ml-2"
-            >
-              <RefreshCw className="h-3 w-3 mr-1" /> Retry
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
       
       <AddTransferNumberForm 
         onAddTransferNumber={handleAddTransferNumber} 
