@@ -1,21 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, AlertCircle, ShieldAlert, Mail, Lock, LogIn } from 'lucide-react';
+import { Loader2, Eye, EyeOff, ChevronLeft } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, ShieldAlert } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
-import { Logo } from '@/components/ui/Logo';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -89,94 +87,137 @@ const Login = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <div className="container flex flex-col items-center min-h-screen px-4 mx-auto pt-4">
-      <Card className="w-full max-w-md border border-border/40 shadow-lg rounded-xl overflow-hidden mt-8">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 z-0 rounded-xl"></div>
-        <CardHeader className="space-y-1 relative z-10 pb-2 text-left">
-          <div className="flex justify-center mb-4">
-            <Logo size="lg" className="animate-fade-in" />
+    <div className="min-h-screen bg-white px-4 pt-6">
+      <div className="max-w-md mx-auto">
+        <div className="mb-6">
+          <button 
+            onClick={() => navigate('/')} 
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <ChevronLeft className="h-6 w-6 text-gray-700" />
+          </button>
+        </div>
+        
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+            <span className="text-2xl">👋</span> Welcome back
+          </h1>
+        </div>
+
+        {isAdminRedirect && (
+          <Alert className="mb-6 bg-amber-50 border-amber-200 text-left">
+            <ShieldAlert className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800">
+              This area requires administrator privileges
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {errorMessage && (
+          <Alert variant="destructive" className="mb-6 animate-fade-in text-left">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-1">
+            <label htmlFor="email" className="block text-sm font-medium text-primary">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full pb-2 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base"
+              placeholder="Enter your email"
+            />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">
-            {isAdminRedirect ? "Administrator Login" : "Welcome back"}
-          </CardTitle>
-          <CardDescription className="text-center text-base">
-            {isAdminRedirect 
-              ? "Enter your administrator credentials" 
-              : "Sign in to your Flow Dialer account"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3 relative z-10 pt-0">
-          {isAdminRedirect && (
-            <Alert className="bg-amber-50 border-amber-200 text-left">
-              <ShieldAlert className="h-4 w-4 text-amber-600" />
-              <AlertDescription className="text-amber-800">
-                This area requires administrator privileges
-              </AlertDescription>
-            </Alert>
-          )}
           
-          {errorMessage && (
-            <Alert variant="destructive" className="animate-fade-in text-left">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4 text-left">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-left block font-medium text-sm">Email address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="Enter your email address" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
+          <div className="space-y-1">
+            <label htmlFor="password" className="block text-sm font-medium text-primary">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full pb-2 bg-transparent border-0 border-b-2 border-gray-300 focus:border-primary focus:ring-0 text-gray-700 text-base"
+                placeholder="Enter your password"
+              />
+              <button 
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-2 bottom-2 text-primary focus:outline-none"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-left block font-medium text-sm">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input 
-                  id="password" 
-                  type="password" 
-                  placeholder="Enter your password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox id="terms" className="data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
+            <div className="text-sm text-gray-600">
+              I acknowledge and agree to the{' '}
+              <Link to="/terms" className="text-primary hover:underline">
+                Terms of Use
+              </Link>
+              , <Link to="/disclosure" className="text-primary hover:underline">
+                911 Disclosures
+              </Link>{' '}
+              and{' '}
+              <Link to="/privacy" className="text-primary hover:underline">
+                Privacy Policy
+              </Link>
+              .
             </div>
-            <Button type="submit" className="w-full font-medium transition-all mt-4 h-10 px-4 py-2" disabled={isLoading}>
-              {isLoading ? (
-                <span className="flex items-center justify-center">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </span>
-              ) : (
-                <span className="flex items-center justify-center">
-                  {isAdminRedirect ? "Sign in as Administrator" : "Sign in"} 
-                  <LogIn className="ml-2 h-4 w-4" />
-                </span>
-              )}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex justify-center pt-0 pb-6 relative z-10">
-          <p className="text-sm text-center text-muted-foreground">
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3 px-4 bg-gray-200 hover:bg-gray-300 rounded-full text-gray-800 font-medium transition-colors"
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Signing in...
+              </span>
+            ) : (
+              <span>Log In</span>
+            )}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <Link to="/forgot-password" className="text-primary hover:underline text-sm">
+            Forgot Password?
+          </Link>
+        </div>
+
+        <div className="mt-8 text-center">
+          <p className="text-gray-600">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-primary font-medium hover:underline transition-colors">
+            <Link to="/signup" className="text-primary font-medium hover:underline">
               Create an account
             </Link>
           </p>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
