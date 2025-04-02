@@ -113,9 +113,6 @@ export const CallStatisticsCard = () => {
                 </div>
                 <div className="text-2xl font-bold mb-1">{stat.count}</div>
                 <div className="mt-2 pt-2 border-t text-xs">
-                  <div className="text-muted-foreground">
-                    Phone numbers available
-                  </div>
                   <Button 
                     variant="ghost" 
                     size="sm" 
