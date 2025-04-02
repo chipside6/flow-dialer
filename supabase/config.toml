@@ -74,4 +74,5 @@ url = ""
 
 [functions]
 # Port to use for Functions server.
-port = 54321
+serve_port = 54321
+
