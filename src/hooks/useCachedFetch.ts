@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
-// Simple in-memory cache
+// Advanced in-memory cache with time-to-live
 const cache: Record<string, {
   data: any;
   timestamp: number;
@@ -20,7 +20,7 @@ interface UseCachedFetchOptions {
 }
 
 /**
- * A hook for fetching data with caching capabilities
+ * A hook for fetching data with enhanced caching capabilities
  */
 export function useCachedFetch<T>(
   fetcher: () => Promise<T>,
@@ -30,7 +30,7 @@ export function useCachedFetch<T>(
     cacheKey,
     cacheDuration = 5 * 60 * 1000, // 5 minutes default
     enabled = true,
-    dedupingInterval = 1000, // Reduced from 2000ms to 1000ms
+    dedupingInterval = 500, // Reduced from 1000ms to 500ms for faster operations
     onSuccess,
     onError,
     retry = 1,
@@ -43,6 +43,14 @@ export function useCachedFetch<T>(
   const lastFetchTimeRef = useRef<number>(0);
   const isMountedRef = useRef<boolean>(true);
   const fetchingRef = useRef<boolean>(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Pre-load from cache on mount
+  useEffect(() => {
+    if (cacheKey && cache[cacheKey] && cache[cacheKey].expiresAt > Date.now()) {
+      setData(cache[cacheKey].data);
+    }
+  }, [cacheKey]);
 
   const executeWithRetry = useCallback(async (attempt: number = 0): Promise<T> => {
     try {
@@ -67,15 +75,21 @@ export function useCachedFetch<T>(
     const shouldDedupe = !force && now - lastFetchTimeRef.current < dedupingInterval;
     
     if (shouldDedupe) {
-      console.log("Request deduped due to deduping interval");
       return;
     }
 
-    // Check cache if we have a cacheKey
+    // Cancel any existing fetch
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Create new abort controller
+    abortControllerRef.current = new AbortController();
+
+    // Check cache if we have a cacheKey and not forcing refresh
     if (cacheKey && !force) {
       const cached = cache[cacheKey];
       if (cached && cached.expiresAt > now) {
-        console.log(`Using cached data for key: ${cacheKey}`);
         if (isMountedRef.current) {
           setData(cached.data);
           setIsLoading(false);
@@ -145,6 +159,7 @@ export function useCachedFetch<T>(
     });
   }, []);
 
+  // Cleanup function for component unmount
   useEffect(() => {
     isMountedRef.current = true;
     
@@ -154,6 +169,9 @@ export function useCachedFetch<T>(
     
     return () => {
       isMountedRef.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, [enabled, fetchData]);
 
