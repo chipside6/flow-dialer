@@ -1,16 +1,18 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import { Shield, AlertCircle, LogIn, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Shield, AlertCircle, LogIn, ArrowLeft, RefreshCw, UserPlus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, isAdmin, initialized, user, profile, updateProfile } = useAuth();
+  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
   
   // Check if user came from admin panel
   const isFromAdmin = location.state?.from?.pathname === '/admin';
@@ -49,6 +51,45 @@ const UnauthorizedPage = () => {
       }
     } catch (err) {
       console.error("Error in refreshAdminStatus:", err);
+    }
+  };
+  
+  // Create admin user function
+  const createAdminUser = async () => {
+    setIsCreatingAdmin(true);
+    
+    try {
+      toast.info("Creating admin user...");
+      console.log("Creating admin user with email: cchips474@gmail.com");
+      
+      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+        body: {
+          email: 'cchips474@gmail.com',
+          password: 'admin123'
+        }
+      });
+      
+      if (error) {
+        throw new Error(error.message || "Error invoking function");
+      }
+      
+      if (!data?.success) {
+        throw new Error(data?.error || "Unknown error");
+      }
+      
+      toast.success("Admin user created successfully!");
+      console.log("Admin creation response:", data);
+      
+      // If currently logged in user matches the email, refresh admin status
+      if (user?.email === 'cchips474@gmail.com') {
+        await refreshAdminStatus();
+        toast.info("Your admin privileges have been updated. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Error creating admin:", err);
+      toast.error("Failed to create admin: " + (err.message || "Unknown error"));
+    } finally {
+      setIsCreatingAdmin(false);
     }
   };
   
@@ -114,6 +155,15 @@ const UnauthorizedPage = () => {
                   </Button>
                 </div>
               )}
+              <Button 
+                onClick={createAdminUser} 
+                variant="default" 
+                className="w-full"
+                disabled={isCreatingAdmin}
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                {isCreatingAdmin ? 'Creating Admin...' : 'Make cchips474@gmail.com Admin'}
+              </Button>
               <Button 
                 onClick={() => navigate(-1)} 
                 variant="outline" 
