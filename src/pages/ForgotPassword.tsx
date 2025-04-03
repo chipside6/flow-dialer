@@ -76,7 +76,7 @@ const ForgotPassword = () => {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 text-center">
+      <form onSubmit={handleSubmit} className="space-y-6 text-center px-1">
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">
             Enter your email address and we'll send you instructions to reset your password.

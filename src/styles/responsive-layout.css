@@ -1,5 +1,4 @@
 
-
 /* Responsive layout styles for mobile devices */
 
 /* Import refactored mobile CSS files */
@@ -12,8 +11,27 @@
 @import './mobile-navigation.css';
 @import './mobile-sidebar-items.css';
 
-/* Toast styling for mobile */
+/* Auth pages specific padding */
 @media (max-width: 768px) {
+  /* Add consistent padding for auth components */
+  .min-h-screen .max-w-md {
+    padding-left: 16px;
+    padding-right: 16px;
+    width: 100%;
+  }
+  
+  /* Center auth content properly */
+  .min-h-screen form {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  /* Fix login and signup pages alignment */
+  .min-h-screen .text-center {
+    text-align: center !important;
+  }
+  
+  /* Toast styling for mobile */
   div[data-radix-toast-viewport] {
     width: 100% !important;
     max-width: none !important;

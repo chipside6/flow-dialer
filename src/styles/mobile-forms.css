@@ -34,6 +34,14 @@
   .form-container,
   .form-content {
     text-align: left !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Auth container specific padding for login/signup */
+  .min-h-screen .max-w-md {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
   }
 
   /* Fix card header alignment */

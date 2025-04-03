@@ -79,7 +79,7 @@ const SignUp = () => {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 text-center">
+      <form onSubmit={handleSubmit} className="space-y-6 text-center px-1">
         <div className="space-y-4">
           <Input
             id="email"
