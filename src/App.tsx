@@ -35,7 +35,8 @@ const Profile = lazy(() => import("./pages/Profile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const DiagnosticPage = lazy(() => import("./pages/DiagnosticPage"));
 const UnauthorizedPage = lazy(() => import("./pages/UnauthorizedPage"));
-const AsteriskConfigPage = lazy(() => import("./pages/AsteriskConfigPage"));
+// Fix the import to ensure proper loading
+const AsteriskConfigPage = lazy(() => import("@/pages/AsteriskConfigPage"));
 const QuickAdminSetup = lazy(() => import("./pages/QuickAdminSetup"));
 
 // Loading fallback for lazy-loaded components
