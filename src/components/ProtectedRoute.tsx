@@ -1,161 +1,106 @@
 
-import { Navigate, useLocation } from 'react-router-dom';
-import { useEffect, useState, useRef, useMemo } from 'react';
-import { Loader2 } from 'lucide-react';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
-import { clearAllAuthData } from '@/utils/sessionCleanup';
+import { Loader2 } from 'lucide-react';
+import { isAuthDataStale, refreshAuthDataIfStale } from '@/utils/sessionCleanup';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  fallbackPath?: string;
 }
 
-const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, sessionChecked, initialized, error, isAdmin, user } = useAuth();
-  const location = useLocation();
-  const [forceRender, setForceRender] = useState(false);
-  const adminStatusCheckedRef = useRef(false);
-  const initialCheckTimeRef = useRef<number>(Date.now());
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requireAdmin = false,
+  fallbackPath = '/login'
+}) => {
+  const { isAuthenticated, isAdmin, initialized, refreshSession } = useAuth();
+  const navigate = useNavigate();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
   
-  // On component mount, check if there's a stored admin status
+  // Effect to handle authentication check with retry logic
   useEffect(() => {
-    if (user?.id && !adminStatusCheckedRef.current) {
-      // Update localStorage with current admin status if we have it from the server
-      if (typeof isAdmin === 'boolean') {
-        // Batch localStorage operations
-        const updates = {
-          'isUserAdmin': isAdmin ? 'true' : 'false',
-          'adminLastUpdated': Date.now().toString()
-        };
-        
-        // Perform batch update in next tick to avoid blocking
-        setTimeout(() => {
-          Object.entries(updates).forEach(([key, value]) => {
-            localStorage.setItem(key, value);
-          });
-          adminStatusCheckedRef.current = true;
-        }, 0);
+    if (!initialized) return;
+    
+    const checkAuth = async () => {
+      setIsCheckingAuth(true);
+      
+      // First check - basic authentication status from context
+      if (!isAuthenticated) {
+        console.log('User is not authenticated, redirecting to login');
+        navigate(fallbackPath, { replace: true });
+        setIsCheckingAuth(false);
+        setAuthChecked(true);
+        return;
       }
-      // If we don't have admin status yet, we'll use cached value temporarily
-      else if (localStorage.getItem('isUserAdmin') === 'true') {
-        // If cached admin status is older than 24 hours, consider it stale
-        const lastUpdated = parseInt(localStorage.getItem('adminLastUpdated') || '0');
-        const isStale = Date.now() - lastUpdated > 24 * 60 * 60 * 1000;
-        
-        if (!isStale) {
-          console.log("Using cached admin status until server data arrives");
+      
+      // Second check - if we need admin privileges
+      if (requireAdmin && !isAdmin) {
+        console.log('Admin privileges required but user is not admin');
+        // If user is authenticated but not admin, redirect to unauthorized page
+        navigate('/unauthorized', { 
+          replace: true,
+          state: { from: { pathname: window.location.pathname } }
+        });
+        setIsCheckingAuth(false);
+        setAuthChecked(true);
+        return;
+      }
+      
+      // Third check - if auth data is stale, refresh it
+      if (isAuthDataStale()) {
+        console.log('Auth data is stale, refreshing...');
+        try {
+          // Try to refresh auth data from server
+          const refreshed = await refreshAuthDataIfStale();
+          
+          if (!refreshed) {
+            // If refresh failed, try refreshSession as a backup
+            console.log('Attempting direct session refresh as backup');
+            const sessionRefreshed = await refreshSession(true);
+            
+            if (!sessionRefreshed && requireAdmin) {
+              // If session refresh failed and we need admin privileges
+              navigate('/unauthorized', { 
+                replace: true,
+                state: { from: { pathname: window.location.pathname } }
+              });
+              setIsCheckingAuth(false);
+              setAuthChecked(true);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error refreshing auth data:', error);
+          // Continue anyway - we'll use what we have
         }
       }
-    }
-  }, [user, isAdmin]);
-  
-  // Log state only when it changes to reduce console noise
-  const stateSnapshot = useMemo(() => ({
-    isAuthenticated, 
-    isLoading, 
-    sessionChecked, 
-    initialized, 
-    hasError: !!error,
-    isAdmin,
-    requireAdmin,
-    userId: user?.id,
-    path: location.pathname,
-    forceRender,
-    storedAdminStatus: localStorage.getItem('isUserAdmin') === 'true'
-  }), [isAuthenticated, isLoading, sessionChecked, initialized, error, isAdmin, requireAdmin, user?.id, location.pathname, forceRender]);
-  
-  useEffect(() => {
-    console.log("Protected Route State:", stateSnapshot);
-  }, [stateSnapshot]);
-  
-  // Progressive loading strategy
-  useEffect(() => {
-    // Short timeout to handle loading state
-    const timeoutId = setTimeout(() => {
-      if ((isLoading || !initialized) && !error) {
-        console.log("Protected Route: Forcing render after timeout");
-        setForceRender(true);
-      }
-    }, 300);
-    
-    // Very long timeout as a fallback for extreme cases
-    const emergencyTimeoutId = setTimeout(() => {
-      const timeElapsed = Date.now() - initialCheckTimeRef.current;
-      if ((isLoading || !initialized) && !error && timeElapsed > 3000) {
-        console.log("Protected Route: Emergency timeout triggered after", timeElapsed, "ms");
-        setForceRender(true);
-      }
-    }, 3000);
-    
-    return () => {
-      clearTimeout(timeoutId);
-      clearTimeout(emergencyTimeoutId);
+      
+      // Auth checks passed
+      setIsCheckingAuth(false);
+      setAuthChecked(true);
     };
-  }, [isLoading, initialized, error]);
+    
+    checkAuth();
+  }, [isAuthenticated, isAdmin, initialized, navigate, fallbackPath, requireAdmin, refreshSession]);
   
-  // If we're still initializing and haven't completed auth check, but force render triggered
-  if ((isLoading || !initialized) && !error && !forceRender) {
+  // If still initializing auth state, show loading
+  if (!initialized || isCheckingAuth) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <span className="text-xl font-medium">Loading...</span>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+          <p className="mt-2 text-lg text-muted-foreground">Verifying authentication...</p>
+        </div>
       </div>
     );
   }
   
-  // If we've detected an auth error
-  if (error) {
-    return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-background p-4">
-        <Alert variant="destructive" className="max-w-md mb-4">
-          <AlertTitle>Authentication Error</AlertTitle>
-          <AlertDescription>
-            {error.message || "There was a problem verifying your authentication status. Please try logging in again."}
-          </AlertDescription>
-        </Alert>
-        <button 
-          onClick={() => {
-            // Clear any stale auth data before redirecting
-            clearAllAuthData();
-            window.location.href = '/login';
-          }} 
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md mt-4 hover:bg-primary/90 transition-colors"
-        >
-          Go to Login
-        </button>
-      </div>
-    );
-  }
-  
-  // Check localStorage for admin status as a fallback for better persistence
-  const storedAdminStatus = localStorage.getItem('isUserAdmin') === 'true';
-  const effectiveAdminStatus = isAdmin || (requireAdmin && storedAdminStatus);
-  
-  // If user is authenticated but route requires admin privileges and user is not admin
-  if (isAuthenticated && requireAdmin === true && !effectiveAdminStatus) {
-    console.log("User is authenticated but lacks admin privileges, redirecting to unauthorized");
-    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
-  }
-  
-  // If user is authenticated or we force render after timeout, render children
-  if (isAuthenticated || (forceRender && initialized)) {
-    return <>{children}</>;
-  }
-  
-  // If initialization is complete and user is not authenticated, redirect to login
-  if ((initialized || forceRender) && !isAuthenticated) {
-    console.log("User not authenticated, redirecting to login");
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-  
-  // Fallback loading state (should rarely reach here)
-  return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
-      <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-      <span className="text-xl font-medium">Loading...</span>
-    </div>
-  );
+  // If checks have completed and we're still here, render children
+  return authChecked ? <>{children}</> : null;
 };
 
 export default ProtectedRoute;

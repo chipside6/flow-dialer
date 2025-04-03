@@ -12,6 +12,7 @@ export const clearAllAuthData = () => {
     localStorage.removeItem('userSubscriptionPlan');
     localStorage.removeItem('userSubscription');
     localStorage.removeItem('subscriptionLastUpdated');
+    localStorage.removeItem('sessionLastUpdated');
     
     // Clear any other auth-related storage items
     const authKeys = Object.keys(localStorage).filter(key => 
@@ -66,6 +67,16 @@ export const clearAllAuthData = () => {
         console.warn(`Failed to remove key ${key}:`, e);
       }
     });
+    
+    // Clear all API cache entries
+    try {
+      const cacheKeys = Object.keys(localStorage).filter(key => key.startsWith('cache_'));
+      cacheKeys.forEach(key => {
+        localStorage.removeItem(key);
+      });
+    } catch (e) {
+      console.warn('Error clearing API cache:', e);
+    }
     
     console.log('Successfully cleared all auth data');
   } catch (error) {
@@ -190,6 +201,25 @@ export const refreshAuthDataIfStale = async (): Promise<boolean> => {
     return false;
   } catch (e) {
     console.error('Error refreshing auth data:', e);
+    return false;
+  }
+};
+
+// Function to check if a user is anonymous or temporary user
+export const isTemporaryOrAnonymousUser = (): boolean => {
+  try {
+    // Check for recently created anonymous sessions
+    const { supabase } = require('@/integrations/supabase/client');
+    const session = supabase.auth.session();
+    
+    if (!session) return true;
+    
+    // Check for missing user attributes that would indicate a proper account
+    if (!session.user?.email) return true;
+    
+    return false;
+  } catch (e) {
+    console.error('Error checking anonymous user status:', e);
     return false;
   }
 };
