@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/auth';
-import { toast } from '@/components/ui/use-toast';
 import { clearAllAuthData } from '@/utils/sessionCleanup';
 
 interface ProtectedRouteProps {
@@ -55,22 +54,15 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     storedAdminStatus: localStorage.getItem('isUserAdmin') === 'true'
   });
   
-  // Force render after shorter timeout to prevent infinite loading state
+  // Force render after timeout to prevent infinite loading state
   useEffect(() => {
-    // Use a shorter timeout (0.3 seconds) for better user experience
+    // Short timeout to handle loading state
     const timeoutId = setTimeout(() => {
       if ((isLoading || !initialized) && !error) {
         console.log("Protected Route: Forcing render after timeout");
         setForceRender(true);
-        
-        // Use a more subtle toast
-        toast({
-          title: "Verifying authentication...",
-          description: "Almost ready",
-          variant: "default"
-        });
       }
-    }, 300); // Reduced to 0.3 seconds for faster feedback
+    }, 300);
     
     return () => clearTimeout(timeoutId);
   }, [isLoading, initialized, error]);
@@ -80,7 +72,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <span className="text-xl font-medium">Verifying authentication...</span>
+        <span className="text-xl font-medium">Loading...</span>
       </div>
     );
   }
@@ -134,7 +126,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
   return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
       <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-      <span className="text-xl font-medium">Checking authentication status...</span>
+      <span className="text-xl font-medium">Loading...</span>
     </div>
   );
 };
