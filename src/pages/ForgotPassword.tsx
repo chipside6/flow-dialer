@@ -26,19 +26,14 @@ const ForgotPassword = () => {
     setSuccessMessage(null);
 
     try {
-      console.log("Attempting to send password reset email to:", email);
-      
-      // Use Supabase to send password reset email
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) {
-        console.error("Password reset error:", error);
         throw error;
       }
 
-      // Success message
       setSuccessMessage("Password reset instructions have been sent to your email.");
       toast({
         title: "Email sent",

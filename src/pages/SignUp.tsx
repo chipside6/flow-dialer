@@ -26,10 +26,7 @@ const SignUp = () => {
     setErrorMessage(null);
 
     try {
-      console.log("Attempting to sign up with email:", email);
-      
-      // Use Supabase directly for signup
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
       });
@@ -40,21 +37,10 @@ const SignUp = () => {
 
       toast({
         title: "Account created",
-        description: "Your account has been created successfully with Supabase.",
+        description: "Your account has been created successfully.",
       });
-
-      // Check if email confirmation is required
-      if (data.session) {
-        // User is already confirmed and logged in
-        navigate('/dashboard');
-      } else {
-        // User needs to confirm email
-        toast({
-          title: "Email verification required",
-          description: "Please check your email to verify your account before logging in.",
-        });
-        navigate('/login');
-      }
+      
+      navigate('/login');
     } catch (error: any) {
       console.error("Signup error:", error);
       setErrorMessage(error.message || "An unexpected error occurred");

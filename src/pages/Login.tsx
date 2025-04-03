@@ -1,10 +1,8 @@
 
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/auth';
-import { Link } from 'react-router-dom';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
 import { AuthHeader } from '@/components/auth/AuthHeader';
@@ -20,62 +18,24 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
-  const { isAuthenticated, isAdmin, initialized } = useAuth();
   
-  // Get the intended destination from location state, or default to dashboard
-  const from = location.state?.from?.pathname || '/dashboard';
-  const isAdminRedirect = from === '/admin';
-
-  // Redirect authenticated users to appropriate pages
-  useEffect(() => {
-    if (isAuthenticated && initialized) {
-      if (isAdminRedirect && !isAdmin) {
-        // If trying to reach admin but not an admin
-        navigate('/unauthorized', { 
-          state: { from: { pathname: '/admin' } },
-          replace: true 
-        });
-      } else {
-        // Normal authenticated redirect
-        console.log("User is already authenticated, redirecting to:", from);
-        navigate(from, { replace: true });
-      }
-    }
-  }, [isAuthenticated, navigate, from, isAdmin, isAdminRedirect, initialized]);
-
-  // handleSubmit function
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
-      console.log("Attempting to sign in with:", email);
-      
-      // Use Supabase directly for authentication
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
-        console.error("Login error:", error);
         throw error;
       }
 
-      console.log("Login successful, user:", data.user);
-      
-      // Removed success toast notification 
-      
-      // For admin redirects, we'll let the useEffect handle it based on isAdmin status
-      // For regular redirects, navigate directly
-      if (!isAdminRedirect) {
-        navigate(from, { replace: true });
-      }
-      // Otherwise the useEffect will handle redirecting when auth state updates
-      
+      navigate('/dashboard');
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage(error.message || "Failed to login");
@@ -93,10 +53,12 @@ const Login = () => {
     <AuthContainer>
       <AuthHeader title="Welcome back" emoji="👋" />
       
-      <AuthAlert 
-        type={isAdminRedirect ? 'admin-redirect' : 'error'} 
-        message={errorMessage || undefined}
-      />
+      {errorMessage && (
+        <AuthAlert 
+          type="error" 
+          message={errorMessage}
+        />
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6 text-center px-1">
         <div className="space-y-4">
