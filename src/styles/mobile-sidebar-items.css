@@ -68,17 +68,4 @@
     width: 100% !important;
     overflow-x: hidden !important;
   }
-  
-  /* IMPORTANT: Additional fixes to prevent horizontal layout issues */
-  [data-sidebar="content"] nav > a, 
-  [data-sidebar="content"] nav > div {
-    flex-direction: column !important;
-    display: flex !important;
-    width: 100% !important;
-  }
-  
-  /* Fix potential flex-row issues in children */
-  [data-sidebar="content"] [class*="flex-row"] {
-    flex-direction: column !important;
-  }
 }
