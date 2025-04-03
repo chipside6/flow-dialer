@@ -38,8 +38,8 @@ const SipConfigurationContainer = () => {
       setConfigOutput(masterConfig);
       
       toast({
-        title: "Master Configuration Generated",
-        description: "Asterisk master configuration has been generated successfully",
+        title: "Supabase Master Configuration Generated",
+        description: "Asterisk configuration for Supabase has been generated successfully",
       });
       
       // Try to automatically reload the Asterisk configuration

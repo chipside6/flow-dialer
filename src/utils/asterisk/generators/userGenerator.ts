@@ -84,9 +84,9 @@ export const userGenerator = {
    * Generate a complete server configuration that supports all users in the system
    * This creates one master config file that can be installed on Asterisk once
    */
-  generateMasterServerConfig(apiServerUrl = "http://localhost:8000", apiToken = "") {
-    // If no token is provided, generate a secure one
-    const token = apiToken || this.generateSecureToken();
+  generateMasterServerConfig(supabaseUrl = "https://grhvoclalziyjbjlhpml.supabase.co", supabaseAnonKey = "") {
+    // If no key is provided, generate a placeholder
+    const anonKey = supabaseAnonKey || "your-supabase-anon-key-here";
     
     return `
 ; =================================================================
@@ -99,12 +99,11 @@ export const userGenerator = {
 ; GLOBAL API SETTINGS
 ; ------------------------
 [globals]
-; Your application's backend API URL (where Asterisk can fetch campaign configurations)
-; This is NOT Supabase credentials - it's your own application's backend API URL
-API_SERVER=${apiServerUrl}
-; A secure token to authenticate requests to your backend API
-; Keep this token secure and make sure it matches what you configure in your backend
-API_TOKEN=${token}
+; Your Supabase project URL (where Asterisk can fetch campaign configurations)
+SUPABASE_URL=${supabaseUrl}
+; Your Supabase anon key for API authentication
+; Keep this key secure as it provides access to your database
+SUPABASE_KEY=${anonKey}
 RETRY_COUNT=3
 CALL_TIMEOUT=30
 
@@ -112,12 +111,12 @@ CALL_TIMEOUT=30
 ; DATABASE CONNECTOR SETUP
 ; ------------------------
 [database-connector]
-; This context handles all database operations
+; This context handles all database operations with Supabase
 exten => s,1,NoOp(Database connector activated)
 exten => s,n,Set(DB_REQUEST=\${ARG1})
 exten => s,n,Set(USER_ID=\${ARG2})
 exten => s,n,Set(CAMPAIGN_ID=\${ARG3})
-exten => s,n,System(curl -s "\${API_SERVER}/api/configs/asterisk-campaign/\${USER_ID}/\${CAMPAIGN_ID}?token=\${API_TOKEN}" -o /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json)
+exten => s,n,System(curl -s "\${SUPABASE_URL}/rest/v1/campaigns?user_id=eq.\${USER_ID}&id=eq.\${CAMPAIGN_ID}&select=id,greeting_file_url,transfer_number" -H "apikey: \${SUPABASE_KEY}" -H "Authorization: Bearer \${SUPABASE_KEY}" -o /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json)
 exten => s,n,NoOp(Database request complete)
 exten => s,n,Return
 
@@ -138,15 +137,15 @@ exten => _X.,n,Hangup()
 ; DYNAMIC CAMPAIGN RUNNER
 ; -------------------------
 [campaign-runner]
-; This macro runs any user's campaign with dynamic configuration
+; This macro runs any user's campaign with dynamic configuration from Supabase
 exten => s,1,NoOp(Running campaign for user \${ARG1}, campaign \${ARG2})
 exten => s,n,Set(USER_ID=\${ARG1})
 exten => s,n,Set(CAMPAIGN_ID=\${ARG2})
 exten => s,n,Answer()
 exten => s,n,Wait(1)
 
-; Get greeting file from database or API
-exten => s,n,Set(GREETING_FILE=\${SHELL(cat /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json | jq -r .greeting_file)})
+; Extract greeting file URL from Supabase JSON response (array format)
+exten => s,n,Set(GREETING_FILE=\${SHELL(cat /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json | jq -r '.[0].greeting_file_url')})
 exten => s,n,NoOp(Playing greeting: \${GREETING_FILE})
 exten => s,n,Playback(\${GREETING_FILE})
 
@@ -156,7 +155,7 @@ exten => s,n,Hangup()
 
 ; Handle transfer request
 exten => 1,1,NoOp(Transfer requested)
-exten => 1,n,Set(TRANSFER_NUMBER=\${SHELL(cat /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json | jq -r .transfer_number)})
+exten => 1,n,Set(TRANSFER_NUMBER=\${SHELL(cat /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json | jq -r '.[0].transfer_number')})
 exten => 1,n,NoOp(Transferring to: \${TRANSFER_NUMBER})
 exten => 1,n,Dial(SIP/\${TRANSFER_NUMBER},30,g)
 exten => 1,n,Hangup()
@@ -184,9 +183,10 @@ exten => s,n,Hangup()
 ; 4. Set up a cron job for maintenance:
 ;    0 2 * * * /usr/sbin/asterisk -rx "dialplan reload" && /usr/sbin/asterisk -rx "originate Local/s@system-maintenance extension s@system-maintenance"
 ; 5. Reload Asterisk configuration: asterisk -rx "dialplan reload"
-; 6. Configure your backend API to handle requests to: ${apiServerUrl}/api/configs/asterisk-campaign/{userId}/{campaignId}?token=${token}
+; 6. Replace the SUPABASE_KEY value with your actual Supabase anon key
 ; 
-; IMPORTANT: This is NOT related to Supabase credentials - the API_SERVER and API_TOKEN are for your own backend API
+; IMPORTANT: This configuration directly accesses your Supabase database using the REST API
+; Make sure your RLS (Row Level Security) policies are configured correctly for the campaigns table
 `.trim();
   },
   
