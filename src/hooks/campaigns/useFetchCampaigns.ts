@@ -33,7 +33,7 @@ export const useFetchCampaigns = () => {
     try {
       // Set a timeout for the fetch operation
       const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => abortController.abort(), 10000); // Increased timeout from 5s to 10s
       
       const { data, error } = await supabase
         .from('campaigns')
@@ -67,7 +67,7 @@ export const useFetchCampaigns = () => {
       });
 
       // Transform data to match the Campaign interface
-      const transformedData = transformCampaignData(data);
+      const transformedData = transformCampaignData(data || []);
       console.log("Campaigns fetched:", transformedData);
       
       return { data: transformedData, error: null };
@@ -79,7 +79,7 @@ export const useFetchCampaigns = () => {
         console.log('Fetch operation timed out');
         return { 
           data: [], 
-          error: new Error('Connection timed out. Please try again later.'),
+          error: new Error('Connection timed out. Please check your internet connection and try again.'),
           isTimeoutError: true
         };
       }
