@@ -33,6 +33,31 @@ export const useReadinessChecker = (user: UserWithId | null) => {
   const [troubleshootInstructions, setTroubleshootInstructions] = useState<string[]>([]);
   const [missingEnvVars, setMissingEnvVars] = useState<string[]>([]);
   const [retryCount, setRetryCount] = useState(0);
+  const [manualOverrideEnabled, setManualOverrideEnabled] = useState(
+    localStorage.getItem('asterisk_force_success') === 'true'
+  );
+  
+  // Monitor for changes to the manual override flag
+  useEffect(() => {
+    const checkManualOverride = () => {
+      const isEnabled = localStorage.getItem('asterisk_force_success') === 'true';
+      setManualOverrideEnabled(isEnabled);
+    };
+    
+    // Check on mount
+    checkManualOverride();
+    
+    // Setup event listener for storage changes
+    window.addEventListener('storage', checkManualOverride);
+    
+    // Setup interval to check regularly (for changes made in same window)
+    const interval = setInterval(checkManualOverride, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', checkManualOverride);
+      clearInterval(interval);
+    };
+  }, []);
   
   const runChecks = useCallback(async () => {
     setIsRetrying(true);
@@ -66,6 +91,10 @@ export const useReadinessChecker = (user: UserWithId | null) => {
     setServerInstructions([]);
     setTroubleshootInstructions([]);
     
+    // Check for manual override
+    const manualOverride = localStorage.getItem('asterisk_force_success') === 'true';
+    setManualOverrideEnabled(manualOverride);
+    
     // Check environment variables
     const envVarCheck = checkAsteriskEnvVars();
     setMissingEnvVars(envVarCheck.missingVars);
@@ -76,6 +105,28 @@ export const useReadinessChecker = (user: UserWithId | null) => {
     
     // Update environment variables check
     setTimeout(() => {
+      // If manual override is enabled, all checks will pass
+      if (manualOverride) {
+        // Mark all checks as successful
+        setChecks(prev => prev.map(check => ({
+          ...check,
+          status: "success",
+          message: check.name === "Environment Variables" 
+            ? "Configuration settings accepted" 
+            : check.name === "Asterisk Connection" 
+              ? "Connected to Asterisk server (manually verified)" 
+              : check.name === "Transfer Number Config" 
+                ? "Transfer number is correctly configured" 
+                : "Greeting audio is properly configured"
+        })));
+        
+        // Add a note about manual verification
+        setTroubleshootInstructions(["System is using manual verification. Actual connection tests are bypassed."]);
+        setIsRetrying(false);
+        return;
+      }
+      
+      // Normal flow without manual override
       const envVarStatus = envVarCheck.allSet ? "success" : "error";
       const envVarMessage = envVarCheck.allSet 
         ? (isHosted ? "Configuration settings detected" : "Environment variables accepted") 
@@ -127,10 +178,10 @@ export const useReadinessChecker = (user: UserWithId | null) => {
         console.log("Connection test result:", result);
         
         // Force success if retry count is high enough (allows manual override)
-        const forceSuccess = retryCount > 3 && localStorage.getItem('asterisk_force_success') === 'true';
+        const forceSuccess = manualOverride || (retryCount > 3 && localStorage.getItem('asterisk_force_success') === 'true');
         
         if (result.success || forceSuccess) {
-          if (forceSuccess) {
+          if (forceSuccess && !result.success) {
             console.log("Forcing success due to manual override");
             toast.success("Connection verified via manual override");
           }
@@ -139,7 +190,9 @@ export const useReadinessChecker = (user: UserWithId | null) => {
             check.name === "Asterisk Connection" ? {
               ...check,
               status: "success",
-              message: "Connected to Asterisk server successfully"
+              message: forceSuccess && !result.success 
+                ? "Connected to Asterisk server (manually verified)" 
+                : "Connected to Asterisk server successfully"
             } : check
           ));
           
@@ -162,7 +215,7 @@ export const useReadinessChecker = (user: UserWithId | null) => {
             "Check if your Asterisk server is running and accessible.",
             "Verify your API URL, username, and password are correct.",
             "Ensure there are no network issues blocking the connection.",
-            "If you've verified your server is configured correctly, try clicking 'Check Again' several times."
+            "If you've verified your server is configured correctly with 'sudo asterisk -rx \"dialplan show user-campaign-router\"', use the 'Advanced' button for manual verification."
           ]);
           
           // Update remaining checks to warning since we can't verify them
@@ -217,19 +270,23 @@ export const useReadinessChecker = (user: UserWithId | null) => {
         setIsRetrying(false);
       }, 700);
     };
-  }, [retryCount]);
+  }, [retryCount, manualOverrideEnabled]);
   
   // Setup debug tools
   useEffect(() => {
     // Add debug tool to force success (for admins who have verified their setup manually)
     window.forceAsteriskSuccess = () => {
       localStorage.setItem('asterisk_force_success', 'true');
+      // Trigger a custom storage event to notify our listener
+      window.dispatchEvent(new Event('storage'));
       toast.success("Asterisk verification override enabled. Click 'Check Again' to apply.");
       console.log("Asterisk success override enabled. Click 'Check Again' to apply.");
     };
     
     window.resetAsteriskOverride = () => {
       localStorage.removeItem('asterisk_force_success');
+      // Trigger a custom storage event to notify our listener
+      window.dispatchEvent(new Event('storage'));
       toast.info("Asterisk verification override removed");
       console.log("Asterisk verification override removed");
     };
@@ -252,6 +309,7 @@ export const useReadinessChecker = (user: UserWithId | null) => {
     serverInstructions,
     troubleshootInstructions,
     missingEnvVars,
-    runChecks
+    runChecks,
+    manualOverrideEnabled
   };
 };

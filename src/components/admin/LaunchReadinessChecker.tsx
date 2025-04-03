@@ -15,14 +15,17 @@ const LaunchReadinessChecker = () => {
     serverInstructions,
     troubleshootInstructions,
     missingEnvVars,
-    runChecks
+    runChecks,
+    manualOverrideEnabled
   } = useReadinessChecker(user);
 
   // Determine if we should show the config button in the header
-  const showConfigButtonHeader = checks.some(check => check.status === "error" && check.name === "Asterisk Connection");
+  // Don't show it if manual override is enabled, since we're bypassing real checks
+  const showConfigButtonHeader = !manualOverrideEnabled && 
+    checks.some(check => check.status === "error" && check.name === "Asterisk Connection");
   
   // Determine if we should show the config button in the missing env vars panel
-  const showConfigButtonEnvVars = missingEnvVars.length > 0;
+  const showConfigButtonEnvVars = !manualOverrideEnabled && missingEnvVars.length > 0;
 
   return (
     <Card className="shadow-md">
