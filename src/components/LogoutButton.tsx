@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/auth";
-import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { clearAllAuthData, forceAppReload } from "@/utils/sessionCleanup";
+import { supabase } from "@/integrations/supabase/client";
+import { clearAllAuthData } from "@/utils/sessionCleanup";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -25,8 +24,6 @@ const LogoutButton = ({
 }: LogoutButtonProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signOut } = useAuth();
-  const { isOnline } = useNetworkStatus();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = useCallback(async () => {
@@ -38,63 +35,44 @@ const LogoutButton = ({
       // Call optional callback if provided
       if (onClick) onClick();
       
-      // Check network status and show appropriate message
-      if (!isOnline) {
-        toast({
-          title: "You're offline",
-          description: "Your session will be cleared locally, but server logout will occur when you're back online.",
-          variant: "destructive" 
-        });
-      }
-      
-      // IMMEDIATELY clear all auth data to prevent automatic re-login
+      // Clear all auth data first
       clearAllAuthData();
       
-      // Navigate to login page first for better UX
+      // Navigate to login page
       navigate("/login", { replace: true });
       
-      // Then attempt to sign out
-      const { success, error } = await signOut();
+      // Then attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
       
-      if (success) {
+      if (error) {
+        console.error("Error during logout:", error);
+        toast({
+          title: "Logout issue",
+          description: "You've been signed out, but there was an issue cleaning up session data.",
+          variant: "destructive"
+        });
+      } else {
         toast({
           title: "Logged out successfully",
           description: "You have been signed out of your account",
         });
-        
-        // Force complete page reload with cache clearing
-        setTimeout(() => {
-          forceAppReload();
-        }, 100);
-      } else if (error) {
-        console.error("LogoutButton - Error during logout:", error);
-        // Still consider it a successful logout for UX purposes
-        toast({
-          title: "Logged out",
-          description: "You've been signed out, but there was an issue cleaning up session data.",
-        });
-        
-        // Force reload even on error
-        setTimeout(() => {
-          forceAppReload();
-        }, 100);
       }
+      
+      // Force page reload to clear any remaining state
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (error: any) {
-      console.error("LogoutButton - Unexpected error during logout:", error);
+      console.error("Unexpected error during logout:", error);
       toast({
         title: "An error occurred",
         description: "There was an issue during logout, but you've been signed out.",
         variant: "destructive"
       });
-      
-      // Force reload even on error
-      setTimeout(() => {
-        forceAppReload();
-      }, 100);
     } finally {
       setIsLoggingOut(false);
     }
-  }, [isLoggingOut, onClick, navigate, signOut, toast, isOnline]);
+  }, [isLoggingOut, onClick, navigate, toast]);
   
   const buttonClasses = `${className} ${position === "left" ? "justify-start" : "justify-center"}`;
   

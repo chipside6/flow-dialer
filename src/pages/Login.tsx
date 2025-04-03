@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +20,18 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate('/dashboard');
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -34,6 +46,14 @@ const Login = () => {
       if (error) {
         throw error;
       }
+
+      // Set a timestamp for session tracking
+      localStorage.setItem('sessionLastUpdated', Date.now().toString());
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
 
       navigate('/dashboard');
     } catch (error: any) {

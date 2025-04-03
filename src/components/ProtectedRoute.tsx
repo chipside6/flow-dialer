@@ -6,9 +6,10 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requireAdmin?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = React.useState(true);
   
@@ -18,13 +19,29 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       
       if (!data.session) {
         navigate('/login', { replace: true });
+        return;
+      }
+      
+      // If admin access is required, check the user's profile
+      if (requireAdmin) {
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', data.session.user.id)
+          .single();
+        
+        if (error || !profileData || !profileData.is_admin) {
+          console.log('User is not an admin, redirecting to unauthorized page');
+          navigate('/unauthorized', { replace: true });
+          return;
+        }
       }
       
       setIsLoading(false);
     };
     
     checkAuth();
-  }, [navigate]);
+  }, [navigate, requireAdmin]);
   
   if (isLoading) {
     return (

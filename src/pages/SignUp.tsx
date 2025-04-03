@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,16 +16,30 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate('/dashboard');
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage(null);
+    setSuccessMessage(null);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
@@ -35,12 +48,24 @@ const SignUp = () => {
         throw error;
       }
 
-      toast({
-        title: "Account created",
-        description: "Your account has been created successfully.",
-      });
-      
-      navigate('/login');
+      if (data?.user) {
+        setSuccessMessage("Your account has been created. You can now log in.");
+        toast({
+          title: "Account created",
+          description: "Your account has been created successfully.",
+        });
+        
+        // If email confirmation is disabled in Supabase, we can redirect immediately
+        if (data.session) {
+          localStorage.setItem('sessionLastUpdated', Date.now().toString());
+          navigate('/dashboard');
+        } else {
+          // Otherwise, redirect to login after a short delay
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
+        }
+      }
     } catch (error: any) {
       console.error("Signup error:", error);
       setErrorMessage(error.message || "An unexpected error occurred");
@@ -62,6 +87,13 @@ const SignUp = () => {
         <AuthAlert 
           type="error" 
           message={errorMessage}
+        />
+      )}
+      
+      {successMessage && (
+        <AuthAlert 
+          type="success" 
+          message={successMessage}
         />
       )}
 
