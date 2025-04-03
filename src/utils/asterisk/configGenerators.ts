@@ -1,3 +1,4 @@
+
 /**
  * Configuration generators for Asterisk
  */
@@ -109,6 +110,39 @@ ${dialplan}
 ; 3. Reload Asterisk configuration with: 'asterisk -rx "core reload"'
 ; 4. Test your configuration with: 'asterisk -rx "dialplan show campaign-${campaignId}"'
 `.trim();
+  },
+
+  /**
+   * Generate a configuration using the first available SIP provider, greeting file, and transfer number
+   * This eliminates the need for manual selection
+   */
+  generateAutoConfig(
+    providers: any[],
+    greetingFiles: any[],
+    transferNumbers: any[]
+  ) {
+    // If any required resource is missing, return an empty string
+    if (providers.length === 0 || greetingFiles.length === 0 || transferNumbers.length === 0) {
+      return "";
+    }
+
+    // Use the first active provider
+    const provider = providers.find(p => p.isActive) || providers[0];
+    // Use the first greeting file
+    const greeting = greetingFiles[0];
+    // Use the first transfer number
+    const transfer = transferNumbers[0];
+
+    return this.generateFullConfig(
+      "auto-campaign",
+      provider.name,
+      provider.host,
+      provider.port,
+      provider.username,
+      provider.password,
+      greeting.file_path || greeting.url,
+      transfer.number || transfer.phone_number
+    );
   }
 };
 

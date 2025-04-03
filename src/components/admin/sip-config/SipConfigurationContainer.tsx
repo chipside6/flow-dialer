@@ -11,8 +11,6 @@ import { useSipProviders } from "@/hooks/useSipProviders";
 import { Loader2, Server } from "lucide-react";
 import { ConfigOutput } from "./components/ConfigOutput";
 import { GenerateConfigButton } from "./components/GenerateConfigButton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
@@ -22,29 +20,20 @@ const SipConfigurationContainer = () => {
   const { transferNumbers, isLoading: isLoadingTransferNumbers } = useTransferNumbers();
   const { providers, isLoading: isLoadingProviders } = useSipProviders();
   
-  const [selectedProviderId, setSelectedProviderId] = useState<string>("");
-  const [selectedGreetingId, setSelectedGreetingId] = useState<string>("");
-  const [selectedTransferId, setSelectedTransferId] = useState<string>("");
   const [configOutput, setConfigOutput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   
   // Filter for active providers only
   const activeProviders = providers.filter(p => p.isActive);
   
-  // Reset selections if data changes
+  // Auto-generate config when resources are loaded
   useEffect(() => {
-    if (activeProviders.length > 0 && !selectedProviderId) {
-      setSelectedProviderId(activeProviders[0].id);
+    if (!isLoadingGreetingFiles && !isLoadingTransferNumbers && !isLoadingProviders) {
+      if (activeProviders.length > 0 && greetingFiles.length > 0 && transferNumbers.length > 0) {
+        generateConfig();
+      }
     }
-    
-    if (greetingFiles.length > 0 && !selectedGreetingId) {
-      setSelectedGreetingId(greetingFiles[0].id);
-    }
-    
-    if (transferNumbers.length > 0 && !selectedTransferId) {
-      setSelectedTransferId(transferNumbers[0].id);
-    }
-  }, [activeProviders, greetingFiles, transferNumbers, selectedProviderId, selectedGreetingId, selectedTransferId]);
+  }, [isLoadingGreetingFiles, isLoadingTransferNumbers, isLoadingProviders]);
   
   const isLoading = isLoadingProviders || isLoadingGreetingFiles || isLoadingTransferNumbers;
   const isReady = !isLoading && activeProviders.length > 0 && greetingFiles.length > 0 && transferNumbers.length > 0;
@@ -52,38 +41,19 @@ const SipConfigurationContainer = () => {
     (activeProviders.length === 0 || greetingFiles.length === 0 || transferNumbers.length === 0);
   
   const generateConfig = () => {
-    if (!selectedProviderId || !selectedGreetingId || !selectedTransferId) {
-      toast({
-        title: "Missing selection",
-        description: "Please select a provider, greeting file, and transfer number",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     setIsGenerating(true);
     
     try {
-      // Find the selected resources
-      const provider = activeProviders.find(p => p.id === selectedProviderId);
-      const greeting = greetingFiles.find(g => g.id === selectedGreetingId);
-      const transfer = transferNumbers.find(t => t.id === selectedTransferId);
-      
-      if (!provider || !greeting || !transfer) {
-        throw new Error("Could not find selected resources");
-      }
-      
-      // Generate the configuration
-      const configText = asteriskConfig.generateFullConfig(
-        "auto-campaign",
-        provider.name,
-        provider.host,
-        provider.port,
-        provider.username,
-        provider.password,
-        greeting.file_path || greeting.url,
-        transfer.number || transfer.phone_number
+      // Generate the configuration automatically using the first available resources
+      const configText = asteriskConfig.generateAutoConfig(
+        activeProviders,
+        greetingFiles,
+        transferNumbers
       );
+      
+      if (!configText) {
+        throw new Error("Could not generate configuration with available resources");
+      }
       
       setConfigOutput(configText);
       
@@ -129,7 +99,7 @@ const SipConfigurationContainer = () => {
           Asterisk Configuration Generator
         </CardTitle>
         <CardDescription>
-          Generate Asterisk configuration using your existing SIP providers, greeting files, and transfer numbers
+          Automatically generates Asterisk configuration using your existing SIP providers, greeting files, and transfer numbers
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -157,55 +127,14 @@ const SipConfigurationContainer = () => {
         
         {isReady && (
           <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="provider">SIP Provider</Label>
-                <Select value={selectedProviderId} onValueChange={setSelectedProviderId}>
-                  <SelectTrigger id="provider">
-                    <SelectValue placeholder="Select a SIP provider" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {activeProviders.map(provider => (
-                      <SelectItem key={provider.id} value={provider.id}>
-                        {provider.name} ({provider.host})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="greeting">Greeting File</Label>
-                <Select value={selectedGreetingId} onValueChange={setSelectedGreetingId}>
-                  <SelectTrigger id="greeting">
-                    <SelectValue placeholder="Select a greeting file" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {greetingFiles.map(file => (
-                      <SelectItem key={file.id} value={file.id}>
-                        {file.filename}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="transfer">Transfer Number</Label>
-                <Select value={selectedTransferId} onValueChange={setSelectedTransferId}>
-                  <SelectTrigger id="transfer">
-                    <SelectValue placeholder="Select a transfer number" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {transferNumbers.map(number => (
-                      <SelectItem key={number.id} value={number.id}>
-                        {number.name}: {number.number || number.phone_number}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            <p className="text-muted-foreground">
+              Using the first available resources from your account to generate configuration:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+              <li><strong>SIP Provider:</strong> {activeProviders[0]?.name}</li>
+              <li><strong>Greeting File:</strong> {greetingFiles[0]?.filename}</li>
+              <li><strong>Transfer Number:</strong> {transferNumbers[0]?.name}: {transferNumbers[0]?.number || transferNumbers[0]?.phone_number}</li>
+            </ul>
             
             <GenerateConfigButton 
               onGenerate={generateConfig}
