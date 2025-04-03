@@ -11,6 +11,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const SipConfigurationContainer = () => {
   const { user } = useAuth();
@@ -18,6 +20,10 @@ const SipConfigurationContainer = () => {
   const [configOutput, setConfigOutput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState("master");
+
+  // Add state for API server and token
+  const [apiServerUrl, setApiServerUrl] = useState("https://yourapi.example.com");
+  const [apiToken, setApiToken] = useState("");
   
   // Generate the master configuration for all users
   const generateMasterConfig = () => {
@@ -25,7 +31,8 @@ const SipConfigurationContainer = () => {
     
     try {
       // Generate the master configuration that should be installed once
-      const masterConfig = userGenerator.generateMasterServerConfig();
+      // Pass the API server URL and token to the generator
+      const masterConfig = userGenerator.generateMasterServerConfig(apiServerUrl, apiToken);
       
       setConfigOutput(masterConfig);
       
@@ -120,6 +127,7 @@ const SipConfigurationContainer = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="master">Master Configuration</TabsTrigger>
+            <TabsTrigger value="api-settings">API Settings</TabsTrigger>
             <TabsTrigger value="instructions">Installation Instructions</TabsTrigger>
           </TabsList>
           
@@ -151,17 +159,59 @@ const SipConfigurationContainer = () => {
               )}
             </Button>
           </TabsContent>
+
+          <TabsContent value="api-settings" className="space-y-4">
+            <Alert variant="default" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>API Configuration</AlertTitle>
+              <AlertDescription>
+                These settings will be included in your Asterisk configuration file.
+                Make sure your API server is properly secured and can handle requests from Asterisk.
+              </AlertDescription>
+            </Alert>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="api-server">API Server URL</Label>
+                <Input
+                  id="api-server"
+                  value={apiServerUrl}
+                  onChange={(e) => setApiServerUrl(e.target.value)}
+                  placeholder="https://yourapi.example.com"
+                />
+                <p className="text-xs text-muted-foreground">
+                  The full URL of your API server that Asterisk will communicate with
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="api-token">API Security Token</Label>
+                <Input
+                  id="api-token"
+                  value={apiToken}
+                  onChange={(e) => setApiToken(e.target.value)}
+                  placeholder="YourSecureAPITokenHere"
+                  type="password"
+                />
+                <p className="text-xs text-muted-foreground">
+                  A secure token that your API server will validate to ensure requests are authorized
+                </p>
+              </div>
+            </div>
+          </TabsContent>
           
           <TabsContent value="instructions" className="space-y-4">
             <Alert variant="default">
               <AlertTitle>Installation Instructions</AlertTitle>
               <AlertDescription>
                 <ol className="list-decimal pl-5 space-y-2">
+                  <li>Configure your API settings in the "API Settings" tab</li>
                   <li>Generate the master configuration using the button on the "Master Configuration" tab</li>
                   <li>Copy the generated configuration or download it as a file</li>
                   <li>On your Asterisk server, save the configuration to <code>/etc/asterisk/extensions.conf</code> (or include it in your existing file)</li>
                   <li>Reload the dialplan with: <code>asterisk -rx "dialplan reload"</code></li>
                   <li>Set up your API server to handle requests from Asterisk (see configuration for details)</li>
+                  <li>Ensure your backend API validates the API token you configured</li>
                   <li>User campaigns will now automatically work without additional configuration</li>
                 </ol>
               </AlertDescription>

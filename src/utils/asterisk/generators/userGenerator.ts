@@ -84,7 +84,7 @@ export const userGenerator = {
    * Generate a complete server configuration that supports all users in the system
    * This creates one master config file that can be installed on Asterisk once
    */
-  generateMasterServerConfig() {
+  generateMasterServerConfig(apiServerUrl = "https://yourapi.example.com", apiToken = "YourSecureAPITokenHere") {
     return `
 ; =================================================================
 ; GLOBAL AUTOMATED CAMPAIGN SYSTEM - MASTER SERVER CONFIGURATION
@@ -96,8 +96,10 @@ export const userGenerator = {
 ; GLOBAL DATABASE SETTINGS
 ; ------------------------
 [globals]
-API_SERVER=https://yourapi.example.com
-API_TOKEN=YourSecureAPITokenHere
+API_SERVER=${apiServerUrl}
+API_TOKEN=${apiToken}
+RETRY_COUNT=3
+CALL_TIMEOUT=30
 
 ; ------------------------
 ; DATABASE CONNECTOR SETUP
@@ -108,7 +110,7 @@ exten => s,1,NoOp(Database connector activated)
 exten => s,n,Set(DB_REQUEST=\${ARG1})
 exten => s,n,Set(USER_ID=\${ARG2})
 exten => s,n,Set(CAMPAIGN_ID=\${ARG3})
-exten => s,n,System(curl -s "\${API_SERVER}/api/asterisk-data?request=\${DB_REQUEST}&user_id=\${USER_ID}&campaign_id=\${CAMPAIGN_ID}&token=\${API_TOKEN}" -o /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json)
+exten => s,n,System(curl -s "\${API_SERVER}/api/configs/asterisk-campaign/\${USER_ID}/\${CAMPAIGN_ID}?token=\${API_TOKEN}" -o /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json)
 exten => s,n,NoOp(Database request complete)
 exten => s,n,Return
 
@@ -175,7 +177,7 @@ exten => s,n,Hangup()
 ; 4. Set up a cron job for maintenance:
 ;    0 2 * * * /usr/sbin/asterisk -rx "dialplan reload" && /usr/sbin/asterisk -rx "originate Local/s@system-maintenance extension s@system-maintenance"
 ; 5. Reload Asterisk configuration: asterisk -rx "dialplan reload"
-; 6. Ensure your API server can provide campaign configuration data in JSON format
+; 6. Configure your backend API to handle requests to: ${apiServerUrl}/api/configs/asterisk-campaign/{userId}/{campaignId}?token=${apiToken}
 `.trim();
   }
 };
