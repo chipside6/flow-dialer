@@ -1,38 +1,106 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import { Shield, AlertCircle, LogIn, ArrowLeft } from 'lucide-react';
+import { Shield, AlertCircle, LogIn, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { withExponentialBackoff } from '@/utils/apiHelpers';
+import { toast } from '@/components/ui/use-toast';
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isAdmin, initialized, user, profile } = useAuth();
+  const { isAuthenticated, isAdmin, initialized, user, profile, refreshUser } = useAuth();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   
   // Check if user came from admin panel
-  const isFromAdmin = location.state?.from?.pathname === '/admin';
+  const isFromAdmin = location.state?.from?.pathname?.includes('/admin');
   
-  // Auto-refresh on page load
+  // Auto-refresh admin status when coming from admin panel
   useEffect(() => {
-    if (user?.id && !isAdmin) {
+    if (user?.id && isFromAdmin && !isAdmin && retryCount < 1) {
       refreshAdminStatus();
     }
-  }, [user?.id, isAdmin]);
+  }, [user?.id, isAdmin, isFromAdmin, retryCount]);
+
+  // Advanced error detection for auth state
+  useEffect(() => {
+    // Check for inconsistent auth state
+    if (isAuthenticated && !user) {
+      console.warn("Inconsistent auth state detected: authenticated but no user");
+      toast({
+        title: "Session Issue Detected",
+        description: "Your session appears to be in an inconsistent state. Try refreshing the page.",
+        variant: "destructive"
+      });
+    }
+  }, [isAuthenticated, user]);
 
   // Debug function to refresh profile data
   const refreshAdminStatus = async () => {
-    if (!user?.id) return;
+    if (!user?.id || isRefreshing) return;
+    
+    setIsRefreshing(true);
+    setRetryCount(prev => prev + 1);
     
     try {
       console.log("Manually refreshing admin status for user:", user.id);
-      // This is kept as a placeholder for the refresh functionality
-      // but actual implementation is simplified
+      
+      await withExponentialBackoff(async () => {
+        if (refreshUser) {
+          await refreshUser();
+        }
+      }, { maxRetries: 2 });
+      
+      // If user is now admin, redirect back to admin page
+      if (isAdmin) {
+        toast({
+          title: "Admin Access Verified",
+          description: "Your administrator access has been confirmed.",
+        });
+        
+        setTimeout(() => {
+          navigate('/admin');
+        }, 1000);
+      }
     } catch (err) {
       console.error("Error in refreshAdminStatus:", err);
+      toast({
+        title: "Refresh Failed",
+        description: "Unable to refresh your permissions. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
     }
   };
+  
+  // Fallback case - if the user has been stuck on this page for too long
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (document.visibilityState === 'visible' && isAuthenticated && !location.state) {
+        // If user has been on this page for a while without context, offer dashboard
+        toast({
+          title: "Need help?",
+          description: "You've been on this page for a while. Would you like to go to the dashboard?",
+          action: (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate('/dashboard')}
+              className="mt-2"
+            >
+              Go to Dashboard
+            </Button>
+          ),
+        });
+      }
+    }, 15000); // 15 seconds
+    
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, navigate, location.state]);
   
   return (
     <div className="flex flex-col items-center justify-center min-h-[100vh] p-6">
@@ -79,6 +147,24 @@ const UnauthorizedPage = () => {
                     Your account doesn't have administrator privileges. 
                     Please contact an administrator for access.
                   </p>
+                  <Button
+                    onClick={refreshAdminStatus}
+                    variant="outline"
+                    disabled={isRefreshing || retryCount >= 3}
+                    className="w-full max-w-xs"
+                  >
+                    {isRefreshing ? (
+                      <>
+                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        Refreshing...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Refresh Admin Status
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
               <Button 
@@ -88,6 +174,12 @@ const UnauthorizedPage = () => {
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Go Back
+              </Button>
+              <Button 
+                onClick={() => navigate('/dashboard')} 
+                className="w-full max-w-xs"
+              >
+                Go to Dashboard
               </Button>
             </>
           ) : (
@@ -102,15 +194,15 @@ const UnauthorizedPage = () => {
                 <LogIn className="mr-2 h-4 w-4" />
                 Sign in as Administrator
               </Button>
+              <Button 
+                onClick={() => navigate('/')} 
+                variant="outline" 
+                className="w-full max-w-xs"
+              >
+                Go to Home
+              </Button>
             </>
           )}
-          <Button 
-            onClick={() => navigate('/')} 
-            variant="outline" 
-            className="w-full max-w-xs"
-          >
-            Go to Home
-          </Button>
         </div>
       </div>
     </div>

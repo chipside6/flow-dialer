@@ -1,6 +1,6 @@
 
 /**
- * Resource optimization service to prioritize critical assets
+ * Enhanced resource optimization service to prioritize critical assets
  */
 
 // Script loading priorities
@@ -14,14 +14,57 @@ export enum LoadPriority {
 
 // Track loaded scripts to avoid duplicates
 const loadedScripts: Set<string> = new Set();
+const loadedStyles: Set<string> = new Set();
+
+// Performance metrics tracking
+interface PerformanceMetrics {
+  resourceLoadTimes: Record<string, number>;
+  navigationStart: number;
+  domContentLoaded: number | null;
+  firstPaint: number | null;
+  firstContentfulPaint: number | null;
+}
+
+const metrics: PerformanceMetrics = {
+  resourceLoadTimes: {},
+  navigationStart: performance.now(),
+  domContentLoaded: null,
+  firstPaint: null,
+  firstContentfulPaint: null
+};
+
+// Track DOM content loaded
+document.addEventListener('DOMContentLoaded', () => {
+  metrics.domContentLoaded = performance.now();
+});
+
+// Try to capture paint metrics if available
+if ('performance' in window && 'getEntriesByType' in performance) {
+  const observer = new PerformanceObserver((entryList) => {
+    for (const entry of entryList.getEntries()) {
+      if (entry.name === 'first-paint') {
+        metrics.firstPaint = entry.startTime;
+      } else if (entry.name === 'first-contentful-paint') {
+        metrics.firstContentfulPaint = entry.startTime;
+      }
+    }
+  });
+  
+  try {
+    observer.observe({ type: 'paint', buffered: true });
+  } catch (e) {
+    console.warn('Paint timing API not supported:', e);
+  }
+}
 
 /**
- * Dynamically load a script with specified priority
+ * Dynamically load a script with specified priority and improved error handling
  */
 export const loadScript = (
   src: string,
   priority: LoadPriority = LoadPriority.MEDIUM,
-  attributes: Record<string, string> = {}
+  attributes: Record<string, string> = {},
+  timeout: number = 10000
 ): Promise<void> => {
   if (loadedScripts.has(src)) {
     return Promise.resolve();
@@ -51,16 +94,76 @@ export const loadScript = (
       script.defer = true;
     }
     
+    // Track load time
+    const startTime = performance.now();
+    
     script.onload = () => {
       loadedScripts.add(src);
+      metrics.resourceLoadTimes[src] = performance.now() - startTime;
       resolve();
     };
     
-    script.onerror = () => {
+    script.onerror = (error) => {
+      console.error(`Failed to load script: ${src}`, error);
       reject(new Error(`Failed to load script: ${src}`));
     };
     
+    // Add timeout protection
+    const timeoutId = setTimeout(() => {
+      if (!loadedScripts.has(src)) {
+        console.warn(`Script load timeout for: ${src}`);
+        reject(new Error(`Script load timeout: ${src}`));
+      }
+    }, timeout);
+    
+    script.onload = () => {
+      clearTimeout(timeoutId);
+      loadedScripts.add(src);
+      metrics.resourceLoadTimes[src] = performance.now() - startTime;
+      resolve();
+    };
+    
     document.head.appendChild(script);
+  });
+};
+
+/**
+ * Dynamically load a CSS stylesheet with specified priority
+ */
+export const loadStylesheet = (
+  href: string,
+  priority: LoadPriority = LoadPriority.MEDIUM
+): Promise<void> => {
+  if (loadedStyles.has(href)) {
+    return Promise.resolve();
+  }
+  
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.type = 'text/css';
+    
+    // Set priority attribute if supported
+    if (priority === LoadPriority.CRITICAL || priority === LoadPriority.HIGH) {
+      link.setAttribute('fetchpriority', 'high');
+    }
+    
+    // Track load time
+    const startTime = performance.now();
+    
+    link.onload = () => {
+      loadedStyles.add(href);
+      metrics.resourceLoadTimes[href] = performance.now() - startTime;
+      resolve();
+    };
+    
+    link.onerror = (error) => {
+      console.error(`Failed to load stylesheet: ${href}`, error);
+      reject(new Error(`Failed to load stylesheet: ${href}`));
+    };
+    
+    document.head.appendChild(link);
   });
 };
 
@@ -69,10 +172,36 @@ export const loadScript = (
  */
 export const setupPreconnect = (domains: string[]) => {
   domains.forEach(domain => {
+    if (domain) {
+      const link = document.createElement('link');
+      link.rel = 'preconnect';
+      link.href = domain;
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+      
+      // Also add dns-prefetch as fallback for browsers that don't support preconnect
+      const dnsLink = document.createElement('link');
+      dnsLink.rel = 'dns-prefetch';
+      dnsLink.href = domain;
+      document.head.appendChild(dnsLink);
+    }
+  });
+};
+
+/**
+ * Preload critical resources
+ */
+export const preloadCriticalResources = (resources: {url: string, as: 'script' | 'style' | 'image' | 'font'}[]) => {
+  resources.forEach(resource => {
     const link = document.createElement('link');
-    link.rel = 'preconnect';
-    link.href = domain;
-    link.crossOrigin = 'anonymous';
+    link.rel = 'preload';
+    link.href = resource.url;
+    link.as = resource.as;
+    
+    if (resource.as === 'font') {
+      link.crossOrigin = 'anonymous';
+    }
+    
     document.head.appendChild(link);
   });
 };
@@ -101,6 +230,11 @@ const isSlowConnection = (): boolean => {
            (connection.saveData === true);
   }
   
+  // Fallback: check if we're in a reduced motion preference
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return true;
+  }
+  
   // Fallback: if we can't detect, assume it's not a slow connection
   return false;
 };
@@ -113,13 +247,64 @@ export const initResourceOptimizations = () => {
   setupPreconnect([
     'https://fonts.googleapis.com',
     'https://fonts.gstatic.com',
-    // Add your Supabase URL here if used frequently
-    // Add any other API domains used frequently
+    window.location.origin,
+    import.meta.env.VITE_SUPABASE_URL,
   ]);
   
   // Detect slow connections and reduce resource loading
   if (isSlowConnection()) {
     // Set up reduced quality resources for slow connections
     document.documentElement.classList.add('slow-connection');
+    
+    // Disable animations on slow connections
+    document.documentElement.classList.add('no-animations');
+    
+    // Apply lower resolution images for slow connections
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .slow-connection img:not([data-high-priority]) {
+        image-rendering: auto;
+        filter: brightness(1.03);
+      }
+      .no-animations * {
+        transition: none !important;
+        animation: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  // Listen for route changes to update metrics
+  window.addEventListener('popstate', () => {
+    metrics.navigationStart = performance.now();
+  });
+};
+
+/**
+ * Get performance metrics for optimization analysis
+ */
+export const getPerformanceMetrics = (): PerformanceMetrics => {
+  return { ...metrics };
+};
+
+/**
+ * Register a custom performance mark
+ */
+export const markPerformance = (name: string) => {
+  if ('performance' in window && 'mark' in performance) {
+    try {
+      performance.mark(name);
+    } catch (e) {
+      console.warn(`Failed to create performance mark "${name}":`, e);
+    }
   }
 };
+
+// Initialize optimizations automatically
+if (typeof window !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initResourceOptimizations);
+  } else {
+    initResourceOptimizations();
+  }
+}

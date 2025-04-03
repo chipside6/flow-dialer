@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/subscription';
@@ -15,7 +16,7 @@ export function SubscriptionCheck({
   requireSubscription = true,
   children 
 }: SubscriptionCheckProps) {
-  const { currentPlan, subscription, isLoading, refetch } = useSubscription();
+  const { currentPlan, subscription, isLoading, fetchCurrentSubscription } = useSubscription();
   const navigate = useNavigate();
   const [retryCount, setRetryCount] = useState(0);
   const [hasValidSubscription, setHasValidSubscription] = useState<boolean | null>(null);
@@ -59,7 +60,7 @@ export function SubscriptionCheck({
           // refetch subscription data to sync local state
           if (subData && !subscriptionValid) {
             console.log("Found valid subscription in database despite cache miss, refetching");
-            refetch();
+            fetchCurrentSubscription();
             setRetryCount(prev => prev + 1);
             return;
           }
@@ -95,7 +96,7 @@ export function SubscriptionCheck({
     navigate, 
     redirectTo, 
     retryCount, 
-    refetch, 
+    fetchCurrentSubscription, 
     hasValidSubscription
   ]);
 
