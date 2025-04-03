@@ -20,7 +20,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Check if user is already logged in
+  // Simple check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
@@ -47,7 +47,7 @@ const Login = () => {
         throw error;
       }
 
-      // Set a timestamp for session tracking
+      // Store session timestamp
       localStorage.setItem('sessionLastUpdated', Date.now().toString());
       
       toast({

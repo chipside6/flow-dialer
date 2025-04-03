@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -20,7 +21,7 @@ const SignUp = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Check if user is already logged in
+  // Simple check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
@@ -49,18 +50,24 @@ const SignUp = () => {
       }
 
       if (data?.user) {
-        setSuccessMessage("Your account has been created. You can now log in.");
-        toast({
-          title: "Account created",
-          description: "Your account has been created successfully.",
-        });
-        
-        // If email confirmation is disabled in Supabase, we can redirect immediately
+        // Store session immediately if available
         if (data.session) {
           localStorage.setItem('sessionLastUpdated', Date.now().toString());
+          
+          toast({
+            title: "Account created",
+            description: "Your account has been created successfully.",
+          });
+          
           navigate('/dashboard');
         } else {
-          // Otherwise, redirect to login after a short delay
+          setSuccessMessage("Your account has been created. You can now log in.");
+          toast({
+            title: "Account created",
+            description: "Your account has been created successfully.",
+          });
+          
+          // Redirect to login after a short delay
           setTimeout(() => {
             navigate('/login');
           }, 2000);

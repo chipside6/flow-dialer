@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,33 +11,38 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      
-      if (!data.session) {
-        navigate('/login', { replace: true });
-        return;
-      }
-      
-      // If admin access is required, check the user's profile
-      if (requireAdmin) {
-        const { data: profileData, error } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', data.session.user.id)
-          .single();
+      try {
+        // Simple session check
+        const { data } = await supabase.auth.getSession();
         
-        if (error || !profileData || !profileData.is_admin) {
-          console.log('User is not an admin, redirecting to unauthorized page');
-          navigate('/unauthorized', { replace: true });
+        if (!data.session) {
+          navigate('/login', { replace: true });
           return;
         }
+        
+        // Only do a basic admin check if required
+        if (requireAdmin) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', data.session.user.id)
+            .single();
+          
+          if (!profileData?.is_admin) {
+            navigate('/unauthorized', { replace: true });
+            return;
+          }
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Auth check error:", error);
+        navigate('/login', { replace: true });
       }
-      
-      setIsLoading(false);
     };
     
     checkAuth();
