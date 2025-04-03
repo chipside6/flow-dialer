@@ -113,6 +113,49 @@ ${dialplan}
   },
 
   /**
+   * Generate configurations for all user campaigns
+   * This automatically creates configurations for each campaign using its associated resources
+   */
+  generateAllCampaignsConfig(
+    campaigns: any[],
+    providers: any[],
+    greetingFiles: any[],
+    transferNumbers: any[]
+  ) {
+    // If any required resources are missing, return an empty string
+    if (campaigns.length === 0 || providers.length === 0 || greetingFiles.length === 0 || transferNumbers.length === 0) {
+      return "";
+    }
+
+    // Generate configs for each campaign with its associated resources
+    const configs = campaigns.map(campaign => {
+      // Use the specified provider for this campaign or default to the first active one
+      const provider = campaign.sipProviderId 
+        ? providers.find(p => p.id === campaign.sipProviderId) 
+        : providers.find(p => p.isActive) || providers[0];
+      
+      // Use the specified greeting file or default to the first one
+      const greetingUrl = campaign.greetingFileUrl || (greetingFiles[0]?.file_path || greetingFiles[0]?.url);
+      
+      // Use the specified transfer number or default to the first one
+      const transferNumber = campaign.transferNumber || (transferNumbers[0]?.number || transferNumbers[0]?.phone_number);
+      
+      return this.generateFullConfig(
+        campaign.id,
+        provider.name,
+        provider.host,
+        provider.port,
+        provider.username,
+        provider.password,
+        greetingUrl,
+        transferNumber
+      );
+    }).join('\n\n');
+    
+    return configs;
+  },
+
+  /**
    * Generate a configuration using the first available SIP provider, greeting file, and transfer number
    * This eliminates the need for manual selection
    */

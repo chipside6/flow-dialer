@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth";
@@ -8,6 +7,7 @@ import { asteriskConfig } from "@/utils/asterisk/configGenerators";
 import { useGreetingFiles } from "@/hooks/useGreetingFiles";
 import { useTransferNumbers } from "@/hooks/useTransferNumbers";
 import { useSipProviders } from "@/hooks/useSipProviders";
+import { useCampaigns } from "@/hooks/useCampaigns";
 import { Loader2, Server } from "lucide-react";
 import { ConfigOutput } from "./components/ConfigOutput";
 import { GenerateConfigButton } from "./components/GenerateConfigButton";
@@ -19,6 +19,7 @@ const SipConfigurationContainer = () => {
   const { greetingFiles, isLoading: isLoadingGreetingFiles } = useGreetingFiles();
   const { transferNumbers, isLoading: isLoadingTransferNumbers } = useTransferNumbers();
   const { providers, isLoading: isLoadingProviders } = useSipProviders();
+  const { campaigns, isLoading: isLoadingCampaigns } = useCampaigns();
   
   const [configOutput, setConfigOutput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -28,14 +29,14 @@ const SipConfigurationContainer = () => {
   
   // Auto-generate config when resources are loaded
   useEffect(() => {
-    if (!isLoadingGreetingFiles && !isLoadingTransferNumbers && !isLoadingProviders) {
+    if (!isLoadingGreetingFiles && !isLoadingTransferNumbers && !isLoadingProviders && !isLoadingCampaigns) {
       if (activeProviders.length > 0 && greetingFiles.length > 0 && transferNumbers.length > 0) {
         generateConfig();
       }
     }
-  }, [isLoadingGreetingFiles, isLoadingTransferNumbers, isLoadingProviders]);
+  }, [isLoadingGreetingFiles, isLoadingTransferNumbers, isLoadingProviders, isLoadingCampaigns]);
   
-  const isLoading = isLoadingProviders || isLoadingGreetingFiles || isLoadingTransferNumbers;
+  const isLoading = isLoadingProviders || isLoadingGreetingFiles || isLoadingTransferNumbers || isLoadingCampaigns;
   const isReady = !isLoading && activeProviders.length > 0 && greetingFiles.length > 0 && transferNumbers.length > 0;
   const isMissingResources = !isLoading && 
     (activeProviders.length === 0 || greetingFiles.length === 0 || transferNumbers.length === 0);
@@ -44,12 +45,24 @@ const SipConfigurationContainer = () => {
     setIsGenerating(true);
     
     try {
-      // Generate the configuration automatically using the first available resources
-      const configText = asteriskConfig.generateAutoConfig(
-        activeProviders,
-        greetingFiles,
-        transferNumbers
-      );
+      let configText = "";
+      
+      // If we have campaigns, generate configurations for all of them
+      if (campaigns && campaigns.length > 0) {
+        configText = asteriskConfig.generateAllCampaignsConfig(
+          campaigns,
+          activeProviders,
+          greetingFiles,
+          transferNumbers
+        );
+      } else {
+        // Otherwise, generate a default configuration
+        configText = asteriskConfig.generateAutoConfig(
+          activeProviders,
+          greetingFiles,
+          transferNumbers
+        );
+      }
       
       if (!configText) {
         throw new Error("Could not generate configuration with available resources");
@@ -99,7 +112,7 @@ const SipConfigurationContainer = () => {
           Asterisk Configuration Generator
         </CardTitle>
         <CardDescription>
-          Automatically generates Asterisk configuration using your existing SIP providers, greeting files, and transfer numbers
+          Automatically generates Asterisk configuration for all your campaigns using your existing resources
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -128,12 +141,16 @@ const SipConfigurationContainer = () => {
         {isReady && (
           <div className="space-y-6">
             <p className="text-muted-foreground">
-              Using the first available resources from your account to generate configuration:
+              {campaigns && campaigns.length > 0 
+                ? `Automatically generating configuration for ${campaigns.length} campaign(s) using your resources:`
+                : "Using your available resources to generate configuration:"}
             </p>
+            
             <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-              <li><strong>SIP Provider:</strong> {activeProviders[0]?.name}</li>
-              <li><strong>Greeting File:</strong> {greetingFiles[0]?.filename}</li>
-              <li><strong>Transfer Number:</strong> {transferNumbers[0]?.name}: {transferNumbers[0]?.number || transferNumbers[0]?.phone_number}</li>
+              <li><strong>SIP Providers:</strong> {activeProviders.length} active provider(s)</li>
+              <li><strong>Greeting Files:</strong> {greetingFiles.length} file(s) available</li>
+              <li><strong>Transfer Numbers:</strong> {transferNumbers.length} number(s) available</li>
+              <li><strong>Campaigns:</strong> {campaigns?.length || 0} configured</li>
             </ul>
             
             <GenerateConfigButton 
