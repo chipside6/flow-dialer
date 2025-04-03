@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth";
@@ -190,7 +191,7 @@ const SipConfigurationContainer = () => {
           </TabsContent>
 
           <TabsContent value="api-settings" className="space-y-4">
-            <Alert variant="info" className="mb-4 bg-blue-50 border-blue-200">
+            <Alert className="mb-4 bg-blue-50 border-blue-200">
               <Info className="h-4 w-4 text-blue-600" />
               <AlertTitle className="text-blue-800">Backend API Configuration</AlertTitle>
               <AlertDescription className="text-blue-700">
