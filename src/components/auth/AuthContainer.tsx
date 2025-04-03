@@ -7,8 +7,8 @@ interface AuthContainerProps {
 
 export const AuthContainer = ({ children }: AuthContainerProps) => {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full mx-auto py-6 sm:py-8 px-4 sm:px-0">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-0">
+      <div className="max-w-md w-full mx-auto py-4 sm:py-6 px-4 sm:px-0">
         {children}
       </div>
     </div>
