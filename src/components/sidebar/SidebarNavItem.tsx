@@ -10,9 +10,10 @@ interface SidebarNavItemProps {
     icon: React.ReactNode;
   };
   onClick?: () => void;
+  className?: string; // Add className support here as well
 }
 
-export const SidebarNavItem = ({ item, onClick }: SidebarNavItemProps) => {
+export const SidebarNavItem = ({ item, onClick, className }: SidebarNavItemProps) => {
   const location = useLocation();
   // Check if current path starts with item path for nested routes
   // For example, /campaign/new should highlight the Campaign nav item
@@ -25,7 +26,7 @@ export const SidebarNavItem = ({ item, onClick }: SidebarNavItemProps) => {
       item={item} 
       isActive={isActive}
       onClick={onClick}
-      className="w-full"
+      className={className || "w-full"}
     />
   );
 };

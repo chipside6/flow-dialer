@@ -11,11 +11,12 @@ export interface NavItemProps {
   };
   isActive: boolean;
   onClick?: () => void;
+  className?: string; // Add className prop to interface
 }
 
-export function NavItem({ item, isActive, onClick }: NavItemProps) {
+export function NavItem({ item, isActive, onClick, className }: NavItemProps) {
   return (
-    <Link to={item.path} className="block w-full" onClick={onClick}>
+    <Link to={item.path} className={`block w-full ${className || ''}`} onClick={onClick}>
       <div
         className={`w-full flex items-center py-3 px-4 border-b border-gray-100 transition-colors duration-200 
           ${isActive 
