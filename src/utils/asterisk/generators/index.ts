@@ -3,6 +3,7 @@ import { baseGenerator } from './baseGenerator';
 import { campaignGenerator } from './campaignGenerator';
 import { userGenerator } from './userGenerator';
 import { apiGenerator } from './apiGenerator';
+import { masterConfigGenerator } from './masterConfigGenerator';
 
 /**
  * Configuration generators for Asterisk
@@ -21,7 +22,10 @@ export const asteriskConfig = {
   generateUserCampaignConfig: userGenerator.generateUserCampaignConfig,
   
   // Re-export API generators
-  generateConfigFromApi: apiGenerator.generateConfigFromApi
+  generateConfigFromApi: apiGenerator.generateConfigFromApi,
+  
+  // Re-export master config generator
+  generateMasterServerConfig: masterConfigGenerator.generateMasterConfig
 };
 
 /**

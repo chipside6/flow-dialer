@@ -11,6 +11,7 @@ import {
 import { asteriskConfig, generateCompleteConfig } from './generators';
 import { connectionService } from './connectionService';
 import { dialingService } from './dialingService';
+import { securityUtils } from './utils/securityUtils';
 
 // Export everything through a single service object to maintain the original API
 export const asteriskService = {
@@ -27,7 +28,11 @@ export const asteriskService = {
   
   // Re-export config generators for backward compatibility
   generateSipTrunkConfig: asteriskConfig.generateSipTrunkConfig,
-  generateCompleteConfig
+  generateCompleteConfig,
+  
+  // Security utilities
+  generateSecureToken: securityUtils.generateSecureToken,
+  createBasicAuthHeader: securityUtils.createBasicAuthHeader
 };
 
 // Re-export constants and the configuration object
@@ -39,5 +44,6 @@ export {
   hasConfiguredEnvironment,
   getConfigFromStorage,
   saveConfigToStorage,
-  asteriskConfig
+  asteriskConfig,
+  securityUtils
 };
