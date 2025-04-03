@@ -42,6 +42,11 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     }
   };
   
+  const handleClose = () => {
+    setOpenMobile(false);
+    if (onCloseMobile) onCloseMobile();
+  };
+  
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },
     { name: "Campaigns", path: "/campaign", icon: <BarChart3 className="h-5 w-5" /> },
@@ -83,18 +88,17 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
         <div className="flex items-center p-4 justify-between">
           <Logo withText={true} className="text-white" />
           
-          {/* Only show close button for mobile and only when we're in sidebar mode */}
+          {/* Only show close button for mobile */}
           {isMobile && (
             <Button 
               variant="ghost" 
               size="icon" 
               className="text-white hover:bg-white/20" 
-              onClick={() => {
-                setOpenMobile(false);
-                if (onCloseMobile) onCloseMobile();
-              }}
+              onClick={handleClose}
+              data-sidebar-close-button
             >
               <X size={20} />
+              <span className="sr-only">Close Sidebar</span>
             </Button>
           )}
         </div>

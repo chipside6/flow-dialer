@@ -17,4 +17,16 @@
   .mobile-menu-open {
     overflow: hidden !important;
   }
+  
+  /* Hide the default Radix close button in mobile sidebars */
+  .SheetPrimitive-Close,
+  [data-sidebar][data-mobile="true"] .SheetContent-root > button {
+    display: none !important;
+  }
+  
+  /* Keep only our custom close button */
+  [data-sidebar-close-button],
+  [data-mobile-menu-close] {
+    display: flex !important;
+  }
 }

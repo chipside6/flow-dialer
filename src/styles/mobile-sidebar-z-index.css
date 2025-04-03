@@ -66,4 +66,11 @@
     visibility: visible !important;
     opacity: 1 !important;
   }
+  
+  /* Remove duplicated close buttons */
+  .SheetPrimitive-Close, 
+  [role="dialog"] > button:first-of-type,
+  .SheetContent-root > button:first-of-type {
+    display: none !important;
+  }
 }

@@ -24,6 +24,7 @@ export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
           onClick={onClose}
           className="p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/20"
           aria-label="Close mobile menu"
+          data-mobile-menu-close
         >
           <X size={24} />
         </button>
