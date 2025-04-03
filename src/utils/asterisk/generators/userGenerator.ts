@@ -1,4 +1,3 @@
-
 import { campaignGenerator } from './campaignGenerator';
 
 /**
@@ -85,8 +84,8 @@ export const userGenerator = {
    * This creates one master config file that can be installed on Asterisk once
    */
   generateMasterServerConfig(supabaseUrl = "https://grhvoclalziyjbjlhpml.supabase.co", supabaseAnonKey = "") {
-    // If no key is provided, generate a placeholder
-    const anonKey = supabaseAnonKey || "your-supabase-anon-key-here";
+    // Use the actual provided key without fallback to placeholder
+    const anonKey = supabaseAnonKey;
     
     return `
 ; =================================================================
@@ -131,7 +130,7 @@ exten => _X.,n,Set(USER_ID=\${CUT(REQUEST_DATA,_,1)})
 exten => _X.,n,Set(CAMPAIGN_ID=\${CUT(REQUEST_DATA,_,2)})
 exten => _X.,n,Gosub(database-connector,s,1(campaign,\${USER_ID},\${CAMPAIGN_ID}))
 exten => _X.,n,Gosub(campaign-runner,s,1(\${USER_ID},\${CAMPAIGN_ID}))
-exten => _X.,n,Hangup()
+exten => s,n,Hangup()
 
 ; -------------------------
 ; DYNAMIC CAMPAIGN RUNNER
@@ -183,7 +182,6 @@ exten => s,n,Hangup()
 ; 4. Set up a cron job for maintenance:
 ;    0 2 * * * /usr/sbin/asterisk -rx "dialplan reload" && /usr/sbin/asterisk -rx "originate Local/s@system-maintenance extension s@system-maintenance"
 ; 5. Reload Asterisk configuration: asterisk -rx "dialplan reload"
-; 6. Replace the SUPABASE_KEY value with your actual Supabase anon key if it's not already set correctly 
 ; 
 ; IMPORTANT: This configuration directly accesses your Supabase database using the REST API
 ; Make sure your RLS (Row Level Security) policies are configured correctly for the campaigns table
