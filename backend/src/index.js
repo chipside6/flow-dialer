@@ -1,3 +1,4 @@
+
 const express = require('express');
 const cors = require('cors');
 const { pool } = require('./config/database');
@@ -38,7 +39,7 @@ const greetingFilesRoutes = require('./routes/greetingFiles');
 const transferNumbersRoutes = require('./routes/transferNumbers');
 const sipProvidersRoutes = require('./routes/sipProviders');
 const subscriptionsRoutes = require('./routes/subscriptions');
-const configsRoutes = require('./routes/configs');
+const configsRoutes = require('./routes/configs/index');
 
 // Use authentication middleware (example, apply to specific routes)
 // app.use('/api/profiles', authMiddleware);
