@@ -186,6 +186,115 @@ ${dialplan}
       greeting.file_path || greeting.url,
       transfer.number || transfer.phone_number
     );
+  },
+  
+  /**
+   * Generate configuration for a specific user's campaign by user ID and campaign ID
+   * This allows targeted generation of configuration for specific users
+   */
+  generateUserCampaignConfig(
+    userId: string,
+    campaignId: string,
+    fetchUserResources: (userId: string) => Promise<any>,
+    fetchCampaignDetails: (campaignId: string) => Promise<any>
+  ) {
+    return async () => {
+      try {
+        // Fetch all resources for this user
+        const resources = await fetchUserResources(userId);
+        
+        // Fetch specific campaign details
+        const campaign = await fetchCampaignDetails(campaignId);
+        
+        if (!resources || !campaign) {
+          throw new Error(`Could not fetch data for user ${userId} or campaign ${campaignId}`);
+        }
+        
+        // Extract resources
+        const { providers, greetingFiles, transferNumbers } = resources;
+        
+        // Ensure we have required resources
+        if (!providers?.length || !greetingFiles?.length || !transferNumbers?.length) {
+          throw new Error("Missing required resources for campaign configuration");
+        }
+        
+        // Find the provider specified for this campaign or use default
+        const provider = campaign.sipProviderId 
+          ? providers.find((p: any) => p.id === campaign.sipProviderId) 
+          : providers.find((p: any) => p.isActive) || providers[0];
+        
+        // Get greeting file and transfer number from campaign or defaults
+        const greetingUrl = campaign.greetingFileUrl || 
+          (greetingFiles[0]?.file_path || greetingFiles[0]?.url);
+        
+        const transferNumber = campaign.transferNumber || 
+          (transferNumbers[0]?.number || transferNumbers[0]?.phone_number);
+        
+        // Generate the full configuration
+        return this.generateFullConfig(
+          campaign.id,
+          provider.name,
+          provider.host,
+          provider.port,
+          provider.username,
+          provider.password,
+          greetingUrl,
+          transferNumber
+        );
+      } catch (error) {
+        console.error(`Error generating configuration for user ${userId}, campaign ${campaignId}:`, error);
+        return `
+; Error generating configuration
+; -----------------------------
+; Could not generate configuration for user ${userId}, campaign ${campaignId}
+; Error: ${error instanceof Error ? error.message : 'Unknown error'}
+; Please ensure the user and campaign exist and have proper resources configured.
+        `.trim();
+      }
+    };
+  },
+  
+  /**
+   * API endpoint function to generate configuration by API call
+   * This can be used to integrate with external systems
+   */
+  generateConfigFromApi(params: any) {
+    const {
+      user_id,
+      campaign_id,
+      provider_id,
+      greeting_id,
+      transfer_id
+    } = params;
+    
+    return async (fetchFunction: (url: string) => Promise<any>) => {
+      try {
+        // Construct API endpoint URL with parameters
+        const apiUrl = `/api/asterisk/generate-config?user_id=${user_id}` + 
+          (campaign_id ? `&campaign_id=${campaign_id}` : '') +
+          (provider_id ? `&provider_id=${provider_id}` : '') +
+          (greeting_id ? `&greeting_id=${greeting_id}` : '') +
+          (transfer_id ? `&transfer_id=${transfer_id}` : '');
+        
+        // Fetch configuration from API
+        const result = await fetchFunction(apiUrl);
+        
+        if (!result || !result.config) {
+          throw new Error("API returned empty configuration");
+        }
+        
+        return result.config;
+      } catch (error) {
+        console.error("Error fetching config from API:", error);
+        return `
+; Error fetching configuration from API
+; -----------------------------------
+; Could not fetch configuration for user ${user_id}
+; Error: ${error instanceof Error ? error.message : 'Unknown error'}
+; Please check the API endpoint and parameters.
+        `.trim();
+      }
+    };
   }
 };
 
