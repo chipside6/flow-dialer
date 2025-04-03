@@ -1,8 +1,4 @@
 
-// Add the missing export for debouncedClearAllAuthData
-// Note: Since we don't have the original file, we're creating a placeholder implementation.
-// This should be updated based on the actual implementation details of the file.
-
 /**
  * Clears all authentication related data
  */
@@ -10,21 +6,65 @@ export const clearAllAuthData = () => {
   try {
     // Remove auth data from localStorage
     localStorage.removeItem('supabase.auth.token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('session');
+    localStorage.removeItem('user_session');
+    localStorage.removeItem('isUserAdmin');
+    localStorage.removeItem('adminLastUpdated');
     
     // Clear any other auth-related storage items
     const authKeys = Object.keys(localStorage).filter(key => 
-      key.includes('auth') || key.includes('token') || key.includes('user')
+      key.includes('auth') || key.includes('token') || key.includes('user') || 
+      key.includes('session') || key.includes('supabase')
     );
     
     authKeys.forEach(key => {
-      localStorage.removeItem(key);
+      try {
+        localStorage.removeItem(key);
+      } catch (e) {
+        console.warn(`Failed to remove key ${key}:`, e);
+      }
     });
+    
+    // Also clear sessionStorage
+    try {
+      // Clear auth-related items from sessionStorage
+      const sessionAuthKeys = Object.keys(sessionStorage).filter(key => 
+        key.includes('auth') || key.includes('token') || key.includes('user') || 
+        key.includes('session') || key.includes('supabase')
+      );
+      
+      sessionAuthKeys.forEach(key => {
+        sessionStorage.removeItem(key);
+      });
+    } catch (e) {
+      console.warn('Error clearing sessionStorage:', e);
+    }
+    
+    // Clear auth-related cookies
+    try {
+      document.cookie.split(';').forEach(cookie => {
+        const [name] = cookie.trim().split('=');
+        if (name && (
+          name.includes('auth') || name.includes('token') || 
+          name.includes('user') || name.includes('session') || 
+          name.includes('supabase')
+        )) {
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
+      });
+    } catch (e) {
+      console.warn('Error clearing cookies:', e);
+    }
     
     console.log('Successfully cleared all auth data');
   } catch (error) {
     console.error('Error clearing auth data:', error);
+    // Last resort - try to clear everything
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      console.error('Failed to clear storage as last resort:', e);
+    }
   }
 };
 
@@ -54,4 +94,26 @@ export const forceAppReload = () => {
   setTimeout(() => {
     window.location.reload();
   }, 100);
+};
+
+/**
+ * Perform a complete session reset by clearing all auth data and reloading the page
+ */
+export const resetAppSession = () => {
+  try {
+    console.log('Performing complete app session reset');
+    
+    // Try to clear all browsing data we can access
+    clearAllAuthData();
+    
+    // Wait a moment to ensure clearing finishes
+    setTimeout(() => {
+      // Navigate to login with clean state
+      window.location.href = '/login?reset=1';
+    }, 200);
+  } catch (error) {
+    console.error('Error during app reset:', error);
+    // Last resort - just reload
+    window.location.reload();
+  }
 };
