@@ -1,8 +1,6 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Settings, Terminal, Check, AlertTriangle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { RefreshCw, Terminal, Check, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -14,14 +12,9 @@ interface ReadinessCheckerHeaderProps {
 }
 
 const ReadinessCheckerHeader = ({ isRetrying, onRetry, showConfigButton }: ReadinessCheckerHeaderProps) => {
-  const navigate = useNavigate();
   const [manualVerified, setManualVerified] = React.useState<boolean>(
     localStorage.getItem('asterisk_force_success') === 'true'
   );
-  
-  const handleConfigClick = () => {
-    navigate('/asterisk-config', { state: { tab: 'config' } });
-  };
   
   const handleManualVerification = () => {
     // This function enables the manual verification override
@@ -60,17 +53,6 @@ const ReadinessCheckerHeader = ({ isRetrying, onRetry, showConfigButton }: Readi
         </div>
         
         <div className="flex flex-col md:flex-row gap-2">
-          {showConfigButton && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center gap-2"
-              onClick={handleConfigClick}
-            >
-              <Settings className="h-4 w-4" />
-              <span>Configure</span>
-            </Button>
-          )}
           
           <Dialog>
             <DialogTrigger asChild>

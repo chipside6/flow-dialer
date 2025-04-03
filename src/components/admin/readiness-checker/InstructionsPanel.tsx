@@ -1,8 +1,6 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 interface InstructionsPanelProps {
   serverInstructions?: string | string[] | null;
@@ -17,11 +15,7 @@ const InstructionsPanel = ({
   missingEnvVars = [],
   showConfigButton = false
 }: InstructionsPanelProps) => {
-  const navigate = useNavigate();
-  
-  const goToSipConfig = () => {
-    navigate("/asterisk-config", { state: { tab: "config" } });
-  };
+  // Removed navigate and goToSipConfig since we no longer have that tab
 
   // Format instructions to handle both string and string[]
   const formatInstructions = (instructions: string | string[] | null | undefined): string | null => {
@@ -49,21 +43,11 @@ const InstructionsPanel = ({
                 ))}
               </ul>
               <p className="text-sm text-amber-700 mt-2">
-                You can either set these as environment variables or configure them through the SIP Configuration tab.
+                You need to set these as environment variables for proper Asterisk integration.
               </p>
             </div>
           </div>
-          {showConfigButton && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={goToSipConfig}
-              className="mt-2 flex items-center gap-2"
-            >
-              <Settings className="h-4 w-4" />
-              Go to SIP Configuration
-            </Button>
-          )}
+          {/* Removed the Config Button since we no longer have that tab */}
         </div>
       )}
       

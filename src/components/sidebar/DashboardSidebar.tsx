@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Sidebar, SidebarContent, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 import { 
@@ -73,9 +74,9 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
       path: "/admin",
       icon: <ShieldCheck className="h-5 w-5" />
     },
-    // Move Asterisk Config to admin-only items
+    // Renamed to make it clearer this is just configuration, not checking
     {
-      name: "Asterisk Config",
+      name: "Asterisk Configuration",
       path: "/asterisk-config",
       icon: <PhoneCall className="h-5 w-5" />
     }
