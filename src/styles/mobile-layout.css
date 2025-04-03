@@ -39,19 +39,13 @@
     max-width: 100%;
   }
   
-  /* Center content on pages */
-  .container, 
-  .container-fluid {
-    text-align: center;
-  }
-  
   /* Position auth cards higher on mobile */
-  .min-h-screen.bg-white.flex {
-    padding-top: 1rem !important;
+  .container.flex.flex-col.items-center {
+    padding-top: 0 !important;
   }
   
   /* Auth card specific positioning */
-  .min-h-screen.bg-white.flex .max-w-md {
+  .container.flex.flex-col.items-center .card {
     margin-top: 0 !important;
   }
 
@@ -96,14 +90,7 @@
     box-sizing: border-box !important;
   }
   
-  /* Auth form elements centering */
-  .auth-form input,
-  .auth-form button {
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-  
-  /* Fix profile page on mobile */
+  /* Fix profile page padding */
   .profile-container {
     padding-left: 8px !important;
     padding-right: 8px !important;
