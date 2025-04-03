@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth";
@@ -31,8 +32,7 @@ const SipConfigurationContainer = () => {
     setIsGenerating(true);
     
     try {
-      // Generate the master configuration with Supabase settings
-      // Pass the actual Supabase key to ensure it's included in the configuration
+      // Pass the Supabase key directly - never use a placeholder
       const masterConfig = userGenerator.generateMasterServerConfig(supabaseUrl, supabaseKey);
       
       setConfigOutput(masterConfig);

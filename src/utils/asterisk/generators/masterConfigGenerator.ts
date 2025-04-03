@@ -9,8 +9,12 @@ export const masterConfigGenerator = {
    * This provides a single Asterisk config that handles all users automatically
    */
   generateMasterConfig(supabaseUrl = "https://grhvoclalziyjbjlhpml.supabase.co", supabaseAnonKey = "") {
-    // Make sure we're using the actual key, not a placeholder
-    const anonKey = supabaseAnonKey || "your-key-here";
+    // Always use the provided key, never fall back to a placeholder
+    const anonKey = supabaseAnonKey;
+    
+    if (!anonKey || anonKey === "your-key-here") {
+      console.warn("WARNING: No Supabase key provided. Configuration will not work properly.");
+    }
     
     return `
 ; =================================================================
@@ -113,3 +117,4 @@ exten => s,n,Hangup()
 `.trim();
   }
 };
+
