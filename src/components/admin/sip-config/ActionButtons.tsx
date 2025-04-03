@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface ActionButtonsProps {
   retestConnection: () => void;
@@ -20,48 +20,56 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   saveEnvironmentVariables,
   isReloading,
   isConnected,
-  isHostedEnvironment
+  isHostedEnvironment,
 }) => {
   return (
-    <div className="flex flex-col md:flex-row gap-4 pt-4">
-      <Button 
-        variant="outline"
-        onClick={retestConnection}
-        disabled={isReloading.pjsip || isReloading.extensions}
-        className="flex items-center gap-2"
-      >
-        <RefreshCw className={`h-4 w-4`} />
-        Test Connection
-      </Button>
-      
-      <Button 
+    <div className="flex flex-wrap gap-3 justify-end">
+      {!isHostedEnvironment && (
+        <Button
+          variant="outline"
+          onClick={retestConnection}
+          disabled={isReloading.pjsip || isReloading.extensions}
+        >
+          Test Connection
+        </Button>
+      )}
+
+      <Button
         variant="outline"
         onClick={reloadPjsip}
-        disabled={isReloading.pjsip || (!isConnected && !isHostedEnvironment)}
-        className="flex items-center gap-2"
+        disabled={isReloading.pjsip || isReloading.extensions || !isConnected}
       >
-        <RefreshCw className={`h-4 w-4 ${isReloading.pjsip ? 'animate-spin' : ''}`} />
-        Reload PJSIP
+        {isReloading.pjsip ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Reloading PJSIP...
+          </>
+        ) : (
+          "Reload PJSIP"
+        )}
       </Button>
-      
-      <Button 
+
+      <Button
         variant="outline"
         onClick={reloadExtensions}
-        disabled={isReloading.extensions || (!isConnected && !isHostedEnvironment)}
-        className="flex items-center gap-2"
+        disabled={isReloading.pjsip || isReloading.extensions || !isConnected}
       >
-        <RefreshCw className={`h-4 w-4 ${isReloading.extensions ? 'animate-spin' : ''}`} />
-        Reload Extensions
+        {isReloading.extensions ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Reloading Extensions...
+          </>
+        ) : (
+          "Reload Extensions"
+        )}
       </Button>
-      
-      <div className="flex-grow"></div>
-      
-      <Button 
-        size="lg" 
+
+      <Button
+        variant="default"
         onClick={saveEnvironmentVariables}
-        className="bg-green-600 hover:bg-green-700 text-white"
+        disabled={isReloading.pjsip || isReloading.extensions}
       >
-        Save All Configuration
+        Save Configuration
       </Button>
     </div>
   );

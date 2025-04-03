@@ -5,7 +5,7 @@ import { SipProviderTable } from "@/components/sip/SipProviderTable";
 import { useSipProviders } from "@/hooks/useSipProviders";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Loader2, AlertCircle, WifiOff, RefreshCw } from "lucide-react";
+import { Loader2, AlertCircle, WifiOff } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
@@ -33,33 +33,12 @@ const SipProviders = () => {
      error.message?.includes("network") || 
      error.message?.includes("fetch") ||
      !navigator.onLine);
-
-  // Handle manual refresh
-  const handleManualRefresh = () => {
-    toast({
-      title: "Refreshing providers",
-      description: "Attempting to reload your SIP providers"
-    });
-    refetch();
-  };
   
   return (
     <DashboardLayout>
       <div className="container-fluid">
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-6">
           <h1 className={`text-3xl font-bold ${isMobile ? 'pl-2' : ''}`}>SIP Providers</h1>
-          
-          {!isLoading && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleManualRefresh}
-              className="gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
-            </Button>
-          )}
         </div>
         
         <SipProviderForm 
@@ -91,7 +70,6 @@ const SipProviders = () => {
                   onClick={refetch}
                   className="mt-2"
                 >
-                  <RefreshCw className="mr-2 h-4 w-4" />
                   Retry Connection
                 </Button>
               </div>
@@ -102,7 +80,7 @@ const SipProviders = () => {
         {isLoading && !hasInitiallyLoaded ? (
           <LoadingState 
             message="Loading SIP providers..." 
-            onRetry={handleManualRefresh}
+            onRetry={refetch}
           />
         ) : (
           !error && (

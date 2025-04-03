@@ -86,7 +86,7 @@ export const useSipProviders = () => {
     providers,
     editingProvider,
     isLoading,
-    hasInitiallyLoaded, // Add this so components can know if initial load completed
+    hasInitiallyLoaded,
     error,
     
     // Actions
