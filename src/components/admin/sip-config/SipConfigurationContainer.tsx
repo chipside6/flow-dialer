@@ -11,9 +11,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_CONFIG } from "@/config/productionConfig";
 
 const SipConfigurationContainer = () => {
   const { user } = useAuth();
@@ -22,20 +20,17 @@ const SipConfigurationContainer = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState("master");
 
-  // Get the Supabase URL and anon key from the client
-  const supabaseUrl = supabase.supabaseUrl;
-  const supabaseKey = supabase.supabaseKey;
+  // Get the Supabase URL and anon key from config
+  const supabaseUrl = SUPABASE_CONFIG.url;
+  const supabaseKey = SUPABASE_CONFIG.publicKey;
   
   // Generate the master configuration for all users
   const generateMasterConfig = () => {
     setIsGenerating(true);
     
     try {
-      // Generate a token if one doesn't exist
-      const token = supabaseKey;
-      
       // Generate the master configuration with Supabase settings
-      const masterConfig = userGenerator.generateMasterServerConfig(supabaseUrl, token);
+      const masterConfig = userGenerator.generateMasterServerConfig(supabaseUrl, supabaseKey);
       
       setConfigOutput(masterConfig);
       
@@ -134,7 +129,7 @@ const SipConfigurationContainer = () => {
           </TabsList>
           
           <TabsContent value="master" className="space-y-4">
-            <Alert className="mb-4 bg-blue-50 border-blue-200">
+            <Alert className="bg-blue-50 border-blue-200">
               <Info className="h-4 w-4 text-blue-600" />
               <AlertTitle className="text-blue-800">Supabase Integration</AlertTitle>
               <AlertDescription className="text-blue-700">
