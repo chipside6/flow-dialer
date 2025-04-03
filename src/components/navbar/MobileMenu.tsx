@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import LogoutButton from '@/components/LogoutButton';
+import { Logo } from '@/components/ui/Logo';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -19,10 +20,10 @@ export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto mobile-menu">
       <div className="px-6 py-4 border-b flex items-center justify-between bg-primary text-white">
-        <h2 className="text-xl font-bold">Menu</h2>
+        <Logo size="lg" withText={true} className="text-white" />
         <button
           onClick={onClose}
-          className="p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/20"
+          className="p-2 flex items-center justify-center w-12 h-12 rounded-full hover:bg-white/20 ml-2"
           aria-label="Close mobile menu"
           data-mobile-menu-close
         >

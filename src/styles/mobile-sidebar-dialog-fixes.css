@@ -29,4 +29,17 @@
   [data-mobile-menu-close] {
     display: flex !important;
   }
+  
+  /* Improve header spacing */
+  [data-sidebar="header"] > div {
+    padding: 16px !important;
+  }
+  
+  /* Make sure the close button has proper spacing */
+  [data-sidebar-close-button],
+  [data-mobile-menu-close] {
+    margin-left: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
 }
