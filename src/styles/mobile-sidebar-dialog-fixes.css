@@ -32,14 +32,27 @@
   
   /* Improve header spacing */
   [data-sidebar="header"] > div {
-    padding: 16px !important;
+    padding: 20px !important;
   }
   
   /* Make sure the close button has proper spacing */
   [data-sidebar-close-button],
   [data-mobile-menu-close] {
-    margin-left: 12px !important;
-    width: 44px !important;
-    height: 44px !important;
+    margin-left: 20px !important;
+    width: 54px !important;
+    height: 54px !important;
+  }
+  
+  /* Ensure logo text is properly visible */
+  .font-display.text-3xl, 
+  .font-display.text-2xl {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+  
+  /* Make sure the logo and close button have enough space between them */
+  [data-sidebar="header"] > div,
+  .mobile-menu > div:first-child {
+    gap: 16px !important;
   }
 }

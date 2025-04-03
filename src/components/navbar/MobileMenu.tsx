@@ -19,15 +19,15 @@ export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto mobile-menu">
-      <div className="px-6 py-4 border-b flex items-center justify-between bg-primary text-white">
-        <Logo size="lg" withText={true} className="text-white" />
+      <div className="px-6 py-6 border-b flex items-center justify-between bg-primary text-white">
+        <Logo size="xl" withText={true} className="text-white" />
         <button
           onClick={onClose}
-          className="p-2 flex items-center justify-center w-12 h-12 rounded-full hover:bg-white/20 ml-2"
+          className="p-2 flex items-center justify-center w-14 h-14 rounded-full hover:bg-white/20 ml-4"
           aria-label="Close mobile menu"
           data-mobile-menu-close
         >
-          <X size={24} />
+          <X size={28} />
         </button>
       </div>
       
