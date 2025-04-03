@@ -45,3 +45,13 @@ export const debouncedClearAllAuthData = (() => {
     }, 100);
   };
 })();
+
+/**
+ * Forces the application to reload after clearing auth data
+ */
+export const forceAppReload = () => {
+  clearAllAuthData();
+  setTimeout(() => {
+    window.location.reload();
+  }, 100);
+};

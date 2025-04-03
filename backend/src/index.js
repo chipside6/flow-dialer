@@ -33,7 +33,7 @@ app.use(async (req, res, next) => {
 // Import routes
 const authRoutes = require('./routes/auth');
 const profilesRoutes = require('./routes/profiles');
-const campaignsRoutes = require('./routes/campaigns');
+const campaignsRoutes = require('./routes/campaigns/index');
 const contactListsRoutes = require('./routes/contactLists');
 const greetingFilesRoutes = require('./routes/greetingFiles');
 const transferNumbersRoutes = require('./routes/transferNumbers');
