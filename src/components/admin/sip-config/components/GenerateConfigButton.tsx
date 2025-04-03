@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, TestTube } from "lucide-react";
+import { Loader2, Server } from "lucide-react";
 
 interface GenerateConfigButtonProps {
   onGenerate: () => void;
@@ -16,14 +16,16 @@ export const GenerateConfigButton: React.FC<GenerateConfigButtonProps> = ({
     <Button 
       onClick={onGenerate} 
       disabled={isGenerating}
-      className="flex items-center gap-2 active:scale-95 transition-transform"
+      className="w-full"
     >
       {isGenerating ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Generating...
+        </>
       ) : (
-        <TestTube className="h-4 w-4" />
+        'Generate Master Configuration'
       )}
-      Generate Configuration
     </Button>
   );
 };
