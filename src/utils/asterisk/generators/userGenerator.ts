@@ -183,7 +183,7 @@ exten => s,n,Hangup()
 ; 4. Set up a cron job for maintenance:
 ;    0 2 * * * /usr/sbin/asterisk -rx "dialplan reload" && /usr/sbin/asterisk -rx "originate Local/s@system-maintenance extension s@system-maintenance"
 ; 5. Reload Asterisk configuration: asterisk -rx "dialplan reload"
-; 6. Replace the SUPABASE_KEY value with your actual Supabase anon key
+; 6. Replace the SUPABASE_KEY value with your actual Supabase anon key if it's not already set correctly 
 ; 
 ; IMPORTANT: This configuration directly accesses your Supabase database using the REST API
 ; Make sure your RLS (Row Level Security) policies are configured correctly for the campaigns table
