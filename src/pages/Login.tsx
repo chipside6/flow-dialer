@@ -11,11 +11,13 @@ import { PasswordInput } from '@/components/auth/PasswordInput';
 import { AuthButton } from '@/components/auth/AuthButton';
 import { AuthFooter } from '@/components/auth/AuthFooter';
 import { Input } from '@/components/ui/input';
+import { Loader2 } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -23,10 +25,12 @@ const Login = () => {
   // Simple check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
+      setCheckingSession(true);
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         navigate('/dashboard');
       }
+      setCheckingSession(false);
     };
     
     checkAuth();
@@ -68,6 +72,17 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+  
+  if (checkingSession) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+          <p className="mt-2 text-lg text-muted-foreground">Checking session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthContainer>
