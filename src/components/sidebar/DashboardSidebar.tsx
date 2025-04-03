@@ -83,7 +83,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
         <div className="flex items-center p-4 justify-between">
           <Logo withText={true} className="text-white" />
           
-          {/* Only show close button for mobile */}
+          {/* Only show close button for mobile and only when we're in sidebar mode */}
           {isMobile && (
             <Button 
               variant="ghost" 

@@ -121,4 +121,16 @@ body.mobile-menu-open {
   [data-sidebar-inset] {
     padding-top: 70px !important;
   }
+  
+  /* Hide duplicate close buttons */
+  .SheetContent-root > button,
+  .SheetContent > button {
+    display: none !important;
+  }
+  
+  /* Ensure we only have one close button in dialogs */
+  .mobile-menu-header > button + button,
+  [data-sidebar="header"] > div > button + button {
+    display: none !important;
+  }
 }
