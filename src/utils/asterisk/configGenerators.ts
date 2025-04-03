@@ -1,4 +1,3 @@
-
 /**
  * Configuration generators for Asterisk
  */
