@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 
 const SipConfigurationContainer = () => {
   const { user } = useAuth();
@@ -21,21 +22,9 @@ const SipConfigurationContainer = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState("master");
 
-  // Get the backend URL from window.location or use a default
-  const defaultApiUrl = (() => {
-    // If we're running on localhost, assume backend is on port 8000
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      return `http://${window.location.hostname}:8000`;
-    }
-    // Otherwise use the same domain but ensure we target /api
-    const baseUrl = `${window.location.protocol}//${window.location.host}`;
-    return baseUrl;
-  })();
-
-  // State for API server and token
-  const [apiServerUrl, setApiServerUrl] = useState(defaultApiUrl);
-  const [apiToken, setApiToken] = useState("");
-  const [generatedToken, setGeneratedToken] = useState("");
+  // Get the Supabase URL and anon key from the client
+  const supabaseUrl = supabase.supabaseUrl;
+  const supabaseKey = supabase.supabaseKey;
   
   // Generate the master configuration for all users
   const generateMasterConfig = () => {
@@ -43,14 +32,10 @@ const SipConfigurationContainer = () => {
     
     try {
       // Generate a token if one doesn't exist
-      const token = apiToken || userGenerator.generateSecureToken();
-      if (!apiToken) {
-        setApiToken(token);
-        setGeneratedToken(token);
-      }
+      const token = supabaseKey;
       
-      // Generate the master configuration with API settings
-      const masterConfig = userGenerator.generateMasterServerConfig(apiServerUrl, token);
+      // Generate the master configuration with Supabase settings
+      const masterConfig = userGenerator.generateMasterServerConfig(supabaseUrl, token);
       
       setConfigOutput(masterConfig);
       
@@ -120,18 +105,6 @@ const SipConfigurationContainer = () => {
     });
   };
 
-  // Generate a secure token to use with the API
-  const generateToken = () => {
-    const token = userGenerator.generateSecureToken();
-    setApiToken(token);
-    setGeneratedToken(token);
-    
-    toast({
-      title: "Secure Token Generated",
-      description: "A new secure token has been generated for your API"
-    });
-  };
-
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -149,7 +122,7 @@ const SipConfigurationContainer = () => {
           <AlertTitle>One-Time Installation Required</AlertTitle>
           <AlertDescription>
             This master configuration only needs to be installed <strong>once</strong> on your Asterisk server. 
-            After installation, your server will automatically fetch user and campaign configurations from your API
+            After installation, your server will automatically fetch user and campaign configurations from your Supabase API
             without requiring manual updates for each campaign.
           </AlertDescription>
         </Alert>
@@ -157,17 +130,25 @@ const SipConfigurationContainer = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="master">Master Configuration</TabsTrigger>
-            <TabsTrigger value="api-settings">API Settings</TabsTrigger>
             <TabsTrigger value="instructions">Installation Instructions</TabsTrigger>
           </TabsList>
           
           <TabsContent value="master" className="space-y-4">
+            <Alert className="mb-4 bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-600" />
+              <AlertTitle className="text-blue-800">Supabase Integration</AlertTitle>
+              <AlertDescription className="text-blue-700">
+                The master configuration uses your Supabase URL: <strong>{supabaseUrl}</strong> and the anonymous API key 
+                to connect to your Supabase backend. No additional configuration is needed.
+              </AlertDescription>
+            </Alert>
+            
             <p className="text-muted-foreground">
               This master configuration creates a complete Asterisk setup that will:
             </p>
             
             <ul className="list-disc pl-5 space-y-1 text-sm">
-              <li>Automatically fetch user campaigns from your API</li>
+              <li>Automatically fetch user campaigns from your Supabase API</li>
               <li>Handle dynamic routing for all users' campaigns</li>
               <li>Support SIP trunks for all configured providers</li>
               <li>Manage call transfers and IVR menus</li>
@@ -189,69 +170,16 @@ const SipConfigurationContainer = () => {
               )}
             </Button>
           </TabsContent>
-
-          <TabsContent value="api-settings" className="space-y-4">
-            <Alert className="mb-4 bg-blue-50 border-blue-200">
-              <Info className="h-4 w-4 text-blue-600" />
-              <AlertTitle className="text-blue-800">Backend API Configuration</AlertTitle>
-              <AlertDescription className="text-blue-700">
-                These settings configure how Asterisk connects to your application's backend API.
-                This is <strong>not</strong> related to Supabase - it's your own backend API that serves campaign configurations.
-              </AlertDescription>
-            </Alert>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="api-server">Backend API URL</Label>
-                <Input
-                  id="api-server"
-                  value={apiServerUrl}
-                  onChange={(e) => setApiServerUrl(e.target.value)}
-                  placeholder="http://yourdomain.com or http://localhost:8000"
-                />
-                <p className="text-xs text-muted-foreground">
-                  The URL where your backend API is hosted. This is where Asterisk will request campaign configurations.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="api-token">API Security Token</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    id="api-token"
-                    value={apiToken}
-                    onChange={(e) => setApiToken(e.target.value)}
-                    placeholder="Enter or generate a secure token"
-                    type="text"
-                    className="flex-1"
-                  />
-                  <Button 
-                    variant="outline" 
-                    onClick={generateToken}
-                    type="button"
-                  >
-                    Generate
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  A secure token that your API server will validate to ensure requests are authorized.
-                  {generatedToken && <span className="block mt-1 font-medium text-primary"> Token generated! Remember to save this value in your backend configuration.</span>}
-                </p>
-              </div>
-            </div>
-          </TabsContent>
           
           <TabsContent value="instructions" className="space-y-4">
             <Alert variant="default">
               <AlertTitle>Installation Instructions</AlertTitle>
               <AlertDescription>
                 <ol className="list-decimal pl-5 space-y-2">
-                  <li>Configure your Backend API URL and Security Token in the "API Settings" tab</li>
                   <li>Generate the master configuration using the button on the "Master Configuration" tab</li>
                   <li>Copy the generated configuration or download it as a file</li>
                   <li>On your Asterisk server, save the configuration to <code>/etc/asterisk/extensions.conf</code> (or include it in your existing file)</li>
                   <li>Reload the dialplan with: <code>asterisk -rx "dialplan reload"</code></li>
-                  <li>Configure your backend API (Node.js server) to validate the security token and serve campaign configurations</li>
                   <li>User campaigns will now automatically work without additional configuration</li>
                 </ol>
               </AlertDescription>
