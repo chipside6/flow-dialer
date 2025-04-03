@@ -8,7 +8,7 @@ import {
   getConfigFromStorage,
   saveConfigToStorage
 } from './config';
-import { asteriskConfig, generateCompleteConfig } from './configGenerators';
+import { asteriskConfig, generateCompleteConfig } from './generators';
 import { connectionService } from './connectionService';
 import { dialingService } from './dialingService';
 
