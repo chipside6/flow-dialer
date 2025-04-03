@@ -84,7 +84,10 @@ export const userGenerator = {
    * Generate a complete server configuration that supports all users in the system
    * This creates one master config file that can be installed on Asterisk once
    */
-  generateMasterServerConfig(apiServerUrl = "https://yourapi.example.com", apiToken = "YourSecureAPITokenHere") {
+  generateMasterServerConfig(apiServerUrl = "http://localhost:8000", apiToken = "") {
+    // If no token is provided, generate a secure one
+    const token = apiToken || this.generateSecureToken();
+    
     return `
 ; =================================================================
 ; GLOBAL AUTOMATED CAMPAIGN SYSTEM - MASTER SERVER CONFIGURATION
@@ -93,11 +96,15 @@ export const userGenerator = {
 ; Configure this ONCE and all users' campaigns will work automatically
 
 ; ------------------------
-; GLOBAL DATABASE SETTINGS
+; GLOBAL API SETTINGS
 ; ------------------------
 [globals]
+; Your application's backend API URL (where Asterisk can fetch campaign configurations)
+; This is NOT Supabase credentials - it's your own application's backend API URL
 API_SERVER=${apiServerUrl}
-API_TOKEN=${apiToken}
+; A secure token to authenticate requests to your backend API
+; Keep this token secure and make sure it matches what you configure in your backend
+API_TOKEN=${token}
 RETRY_COUNT=3
 CALL_TIMEOUT=30
 
@@ -177,7 +184,36 @@ exten => s,n,Hangup()
 ; 4. Set up a cron job for maintenance:
 ;    0 2 * * * /usr/sbin/asterisk -rx "dialplan reload" && /usr/sbin/asterisk -rx "originate Local/s@system-maintenance extension s@system-maintenance"
 ; 5. Reload Asterisk configuration: asterisk -rx "dialplan reload"
-; 6. Configure your backend API to handle requests to: ${apiServerUrl}/api/configs/asterisk-campaign/{userId}/{campaignId}?token=${apiToken}
+; 6. Configure your backend API to handle requests to: ${apiServerUrl}/api/configs/asterisk-campaign/{userId}/{campaignId}?token=${token}
+; 
+; IMPORTANT: This is NOT related to Supabase credentials - the API_SERVER and API_TOKEN are for your own backend API
 `.trim();
+  },
+  
+  /**
+   * Generate a cryptographically secure token for API security
+   * @private
+   */
+  generateSecureToken() {
+    // Generate a reasonably secure token
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const length = 32;
+    let token = '';
+    
+    // Use cryptographically secure random values if available
+    if (window.crypto && window.crypto.getRandomValues) {
+      const values = new Uint8Array(length);
+      window.crypto.getRandomValues(values);
+      for (let i = 0; i < length; i++) {
+        token += characters.charAt(values[i] % characters.length);
+      }
+    } else {
+      // Fallback to less secure but still reasonable Math.random()
+      for (let i = 0; i < length; i++) {
+        token += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+    }
+    
+    return token;
   }
 };
