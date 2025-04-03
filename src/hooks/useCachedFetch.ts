@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { isAuthError, isOfflineError } from '@/utils/apiHelpers';
+import { toast } from '@/components/ui/use-toast';
 
 // Type for the cached data
 interface CachedItem<T> {
@@ -18,6 +19,7 @@ interface UseCachedFetchOptions<T> {
   retryDelay?: number;
   onSuccess?: (data: T) => void;
   onError?: (error: Error) => void;
+  showErrorToast?: boolean; // New option to control error toast display
 }
 
 /**
@@ -38,7 +40,8 @@ export function useCachedFetch<T>(
     retry = 3,
     retryDelay = 1000,
     onSuccess,
-    onError
+    onError,
+    showErrorToast = true // Default to showing error toasts
   } = options;
   
   const [data, setData] = useState<T | undefined>(initialData);
@@ -125,6 +128,15 @@ export function useCachedFetch<T>(
       const error = err instanceof Error ? err : new Error(String(err));
       setError(error);
       
+      // Show error toast if enabled
+      if (showErrorToast) {
+        toast({
+          title: "Data fetch error",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
+      
       // Don't retry auth errors
       if (isAuthError(error)) {
         onError?.(error);
@@ -158,7 +170,7 @@ export function useCachedFetch<T>(
     }
   }, [
     enabled, isLoading, cacheKey, getFromCache, fetchFn, saveToCache, 
-    attemptCount, retry, retryDelay, onSuccess, onError
+    attemptCount, retry, retryDelay, onSuccess, onError, showErrorToast
   ]);
   
   // Refetch data function to expose

@@ -18,7 +18,7 @@ export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-background z-50 overflow-y-auto mobile-menu">
+    <div className="fixed inset-0 bg-background z-50 overflow-y-auto overflow-x-hidden mobile-menu">
       <div className="px-6 py-6 border-b flex items-center justify-between bg-primary text-white">
         <Logo size="xl" withText={true} className="text-white" />
         <button
@@ -31,12 +31,12 @@ export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
         </button>
       </div>
       
-      <nav className="px-6 py-8 flex flex-col gap-8">
-        <div className="flex flex-col gap-6 text-xl">
+      <nav className="px-6 py-8 flex flex-col gap-8 w-full">
+        <div className="flex flex-col gap-6 text-xl w-full">
           <NavLinks mobile onClick={onClose} />
         </div>
         
-        <div className="flex flex-col gap-4 mt-6">
+        <div className="flex flex-col gap-4 mt-6 w-full">
           {isAuthenticated ? (
             <>
               <Button asChild variant="default" size="lg" className="w-full">

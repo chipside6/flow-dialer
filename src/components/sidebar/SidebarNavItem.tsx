@@ -25,6 +25,7 @@ export const SidebarNavItem = ({ item, onClick }: SidebarNavItemProps) => {
       item={item} 
       isActive={isActive}
       onClick={onClick}
+      className="w-full"
     />
   );
 };

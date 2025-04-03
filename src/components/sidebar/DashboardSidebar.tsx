@@ -103,8 +103,8 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           )}
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-0 py-0">
-        <nav className="w-full">
+      <SidebarContent className="px-0 py-0 overflow-y-auto overflow-x-hidden">
+        <nav className="w-full flex flex-col">
           {navItems.map((item) => (
             <SidebarNavItem 
               key={item.path}
@@ -127,7 +127,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           )}
           
           {/* Logout button */}
-          <div className="border-t border-border mt-2 pt-2">
+          <div className="border-t border-border mt-2 pt-2 w-full">
             <LogoutButton 
               variant="ghost" 
               className="w-full justify-start py-3 px-4 text-left" 
