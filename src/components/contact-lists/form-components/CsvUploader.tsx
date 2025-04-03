@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useCallback, memo } from "react";
 import { FormControl, FormDescription, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Upload, Loader2 } from "lucide-react";
@@ -12,16 +12,19 @@ interface CsvUploaderProps {
   required?: boolean;
 }
 
+// File validation constants
 const FILE_TYPES = ["text/csv", "application/vnd.ms-excel"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-const CsvUploader: React.FC<CsvUploaderProps> = ({
+// Use memo to prevent unnecessary re-renders
+const CsvUploader: React.FC<CsvUploaderProps> = memo(({
   selectedFile,
   setSelectedFile,
   isDisabled,
   required = false
 }) => {
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Use useCallback to memoize the file change handler
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
@@ -46,7 +49,7 @@ const CsvUploader: React.FC<CsvUploaderProps> = ({
     }
     
     setSelectedFile(file);
-  };
+  }, [setSelectedFile]);
 
   return (
     <FormItem>
@@ -84,6 +87,9 @@ const CsvUploader: React.FC<CsvUploaderProps> = ({
       </FormDescription>
     </FormItem>
   );
-};
+});
+
+// Add display name for debugging purposes
+CsvUploader.displayName = "CsvUploader";
 
 export default CsvUploader;

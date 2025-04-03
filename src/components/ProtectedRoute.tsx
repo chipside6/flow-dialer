@@ -1,6 +1,6 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/auth';
@@ -16,17 +16,27 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
   const location = useLocation();
   const [forceRender, setForceRender] = useState(false);
   const adminStatusCheckedRef = useRef(false);
+  const initialCheckTimeRef = useRef<number>(Date.now());
   
   // On component mount, check if there's a stored admin status
   useEffect(() => {
     if (user?.id && !adminStatusCheckedRef.current) {
       // Update localStorage with current admin status if we have it from the server
       if (typeof isAdmin === 'boolean') {
-        localStorage.setItem('isUserAdmin', isAdmin ? 'true' : 'false');
-        localStorage.setItem('adminLastUpdated', Date.now().toString());
-        adminStatusCheckedRef.current = true;
+        // Batch localStorage operations
+        const updates = {
+          'isUserAdmin': isAdmin ? 'true' : 'false',
+          'adminLastUpdated': Date.now().toString()
+        };
+        
+        // Perform batch update in next tick to avoid blocking
+        setTimeout(() => {
+          Object.entries(updates).forEach(([key, value]) => {
+            localStorage.setItem(key, value);
+          });
+          adminStatusCheckedRef.current = true;
+        }, 0);
       }
-      
       // If we don't have admin status yet, we'll use cached value temporarily
       else if (localStorage.getItem('isUserAdmin') === 'true') {
         // If cached admin status is older than 24 hours, consider it stale
@@ -40,21 +50,26 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
     }
   }, [user, isAdmin]);
   
-  console.log("Protected Route State:", { 
+  // Log state only when it changes to reduce console noise
+  const stateSnapshot = useMemo(() => ({
     isAuthenticated, 
     isLoading, 
     sessionChecked, 
     initialized, 
-    error,
+    hasError: !!error,
     isAdmin,
     requireAdmin,
     userId: user?.id,
     path: location.pathname,
     forceRender,
     storedAdminStatus: localStorage.getItem('isUserAdmin') === 'true'
-  });
+  }), [isAuthenticated, isLoading, sessionChecked, initialized, error, isAdmin, requireAdmin, user?.id, location.pathname, forceRender]);
   
-  // Force render after timeout to prevent infinite loading state
+  useEffect(() => {
+    console.log("Protected Route State:", stateSnapshot);
+  }, [stateSnapshot]);
+  
+  // Progressive loading strategy
   useEffect(() => {
     // Short timeout to handle loading state
     const timeoutId = setTimeout(() => {
@@ -64,7 +79,19 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
       }
     }, 300);
     
-    return () => clearTimeout(timeoutId);
+    // Very long timeout as a fallback for extreme cases
+    const emergencyTimeoutId = setTimeout(() => {
+      const timeElapsed = Date.now() - initialCheckTimeRef.current;
+      if ((isLoading || !initialized) && !error && timeElapsed > 3000) {
+        console.log("Protected Route: Emergency timeout triggered after", timeElapsed, "ms");
+        setForceRender(true);
+      }
+    }, 3000);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(emergencyTimeoutId);
+    };
   }, [isLoading, initialized, error]);
   
   // If we're still initializing and haven't completed auth check, but force render triggered

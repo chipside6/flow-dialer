@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { 
   Card, 
   CardContent, 
@@ -17,7 +17,8 @@ interface ContactListsDisplayProps {
   onDelete: (id: string) => void;
 }
 
-const ContactListsDisplay: React.FC<ContactListsDisplayProps> = ({ lists, onDelete }) => {
+// Use memo to prevent unnecessary re-renders when props haven't changed
+const ContactListsDisplay: React.FC<ContactListsDisplayProps> = memo(({ lists, onDelete }) => {
   const isMobile = useIsMobile();
   
   return (
@@ -38,6 +39,9 @@ const ContactListsDisplay: React.FC<ContactListsDisplayProps> = ({ lists, onDele
       </CardContent>
     </Card>
   );
-};
+});
+
+// Add display name for debugging purposes
+ContactListsDisplay.displayName = "ContactListsDisplay";
 
 export default ContactListsDisplay;
