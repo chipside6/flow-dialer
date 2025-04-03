@@ -1,4 +1,5 @@
 
+
 /* Responsive layout styles for mobile devices */
 
 /* Import refactored mobile CSS files */
@@ -10,3 +11,25 @@
 @import './mobile-tabs-wizards.css';
 @import './mobile-navigation.css';
 @import './mobile-sidebar-items.css';
+
+/* Toast styling for mobile */
+@media (max-width: 768px) {
+  div[data-radix-toast-viewport] {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 8px !important;
+  }
+  
+  div[role="status"] {
+    padding: 12px !important;
+    padding-right: 32px !important;
+  }
+  
+  div[role="status"] h2 {
+    font-size: 15px !important;
+  }
+  
+  div[role="status"] div {
+    font-size: 13px !important;
+  }
+}
