@@ -9,8 +9,8 @@ export const masterConfigGenerator = {
    * This provides a single Asterisk config that handles all users automatically
    */
   generateMasterConfig(supabaseUrl = "https://grhvoclalziyjbjlhpml.supabase.co", supabaseAnonKey = "") {
-    // Use the actual provided key without fallback to placeholder
-    const anonKey = supabaseAnonKey;
+    // Make sure we're using the actual key, not a placeholder
+    const anonKey = supabaseAnonKey || "your-key-here";
     
     return `
 ; =================================================================
@@ -55,7 +55,7 @@ exten => _X.,n,Set(USER_ID=\${CUT(REQUEST_DATA,_,1)})
 exten => _X.,n,Set(CAMPAIGN_ID=\${CUT(REQUEST_DATA,_,2)})
 exten => _X.,n,Gosub(database-connector,s,1(campaign,\${USER_ID},\${CAMPAIGN_ID}))
 exten => _X.,n,Gosub(campaign-runner,s,1(\${USER_ID},\${CAMPAIGN_ID}))
-exten => s,n,Hangup()
+exten => _X.,n,Hangup()
 
 ; -------------------------
 ; DYNAMIC CAMPAIGN RUNNER
