@@ -41,7 +41,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   
   if (isTimedOut) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen w-full">
+      <div className="flex items-center justify-center min-h-screen">
         <Alert variant={errorVariant} className="mb-6 max-w-md">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex flex-col gap-4">
@@ -63,7 +63,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   }
   
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen w-full">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="text-center p-6 max-w-md">
         <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
         <p className="text-base text-gray-600">{message}</p>
