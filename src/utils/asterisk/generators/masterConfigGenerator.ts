@@ -103,18 +103,40 @@ exten => s,n,System(find /tmp -name "asterisk-data-*" -mtime +1 -delete)
 exten => s,n,Hangup()
 
 ; -------------------------
-; INSTALLATION INSTRUCTIONS
+; DETAILED INSTALLATION INSTRUCTIONS
 ; -------------------------
-; 1. Place this file in /etc/asterisk/extensions.conf or include it
-; 2. Create directory for dynamic SIP trunks: mkdir -p /etc/asterisk/dynamic_sip_trunks
-; 3. Install jq for JSON parsing: apt-get install jq
-; 4. Set up a cron job for maintenance:
-;    0 2 * * * /usr/sbin/asterisk -rx "dialplan reload" && /usr/sbin/asterisk -rx "originate Local/s@system-maintenance extension s@system-maintenance"
-; 5. Reload Asterisk configuration: asterisk -rx "dialplan reload"
+; 1. Save this file as /etc/asterisk/campaign-master.conf
+; 
+; 2. Add this line to your /etc/asterisk/extensions.conf:
+;    #include "campaign-master.conf"
+; 
+; 3. Create directory for dynamic SIP trunks:
+;    mkdir -p /etc/asterisk/dynamic_sip_trunks
+;
+; 4. Install jq for JSON parsing:
+;    apt-get install jq
+;
+; 5. Make sure curl is installed:
+;    apt-get install curl
+;
+; 6. Set up a cron job for maintenance (add to /etc/crontab):
+;    0 2 * * * asterisk /usr/sbin/asterisk -rx "dialplan reload" && /usr/sbin/asterisk -rx "originate Local/s@system-maintenance extension s@system-maintenance"
+;
+; 7. Reload Asterisk configuration:
+;    asterisk -rx "dialplan reload"
+;
+; 8. IMPORTANT: Verify installation with:
+;    asterisk -rx "dialplan show user-campaign-router"
+;    (You should see the dialplan for user-campaign-router context)
+;
+; 9. If the context is not showing, check:
+;    - Did you include campaign-master.conf in extensions.conf?
+;    - Did you reload the dialplan with "dialplan reload"?
+;    - Is the file in the correct location?
+;    - Try restarting Asterisk completely: systemctl restart asterisk
 ; 
 ; IMPORTANT: This configuration directly accesses your Supabase database using the REST API
 ; Make sure your RLS (Row Level Security) policies are configured correctly for the campaigns table
 `.trim();
   }
 };
-
