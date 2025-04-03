@@ -1,37 +1,45 @@
 
 /**
- * Security utilities for Asterisk integration
+ * Security utilities for Asterisk configuration
  */
 export const securityUtils = {
   /**
-   * Generates a cryptographically secure random token
-   * Used for API security and authentication
+   * Generates a secure token for API authentication
+   * Uses cryptographically secure random values
    */
-  generateSecureToken(length = 32): string {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let token = '';
+  generateSecureToken: (): string => {
+    // Generate a random string of characters
+    const randomBytes = new Uint8Array(32);
+    window.crypto.getRandomValues(randomBytes);
     
-    // Use cryptographically secure random values if available
-    if (window.crypto && window.crypto.getRandomValues) {
-      const values = new Uint8Array(length);
-      window.crypto.getRandomValues(values);
-      for (let i = 0; i < length; i++) {
-        token += characters.charAt(values[i] % characters.length);
-      }
-    } else {
-      // Fallback to less secure but still reasonable Math.random()
-      for (let i = 0; i < length; i++) {
-        token += characters.charAt(Math.floor(Math.random() * characters.length));
-      }
-    }
-    
-    return token;
+    // Convert to a hex string
+    return Array.from(randomBytes)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
   },
   
   /**
-   * Creates a Base64 encoded basic auth header
+   * Sanitizes input to prevent command injection in Asterisk configs
+   * @param input String to sanitize
    */
-  createBasicAuthHeader(username: string, password: string): string {
-    return `Basic ${btoa(`${username}:${password}`)}`;
+  sanitizeInput: (input: string): string => {
+    if (!input) return '';
+    
+    // Remove characters that could be used for command injection
+    return input.replace(/[;&|`$(){}[\]<>]/g, '');
+  },
+  
+  /**
+   * Validates a hostname or IP address for SIP configuration
+   * @param host Hostname or IP to validate
+   */
+  validateHost: (host: string): boolean => {
+    if (!host) return false;
+    
+    // Check for valid hostname or IP address format
+    const hostnameRegex = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/;
+    const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    
+    return hostnameRegex.test(host) || ipv4Regex.test(host);
   }
 };
