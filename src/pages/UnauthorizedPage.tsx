@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import { toast } from '@/components/ui/use-toast';
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isAdmin, initialized, user, profile, refreshUser } = useAuth();
+  const { isAuthenticated, isAdmin, initialized, user, profile } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   
@@ -49,9 +48,11 @@ const UnauthorizedPage = () => {
       console.log("Manually refreshing admin status for user:", user.id);
       
       await withExponentialBackoff(async () => {
-        if (refreshUser) {
-          await refreshUser();
-        }
+        // Instead of calling refreshUser which doesn't exist, we'll use a different approach
+        // We'll reload the current page which will trigger a re-fetch of the user profile
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }, { maxRetries: 2 });
       
       // If user is now admin, redirect back to admin page

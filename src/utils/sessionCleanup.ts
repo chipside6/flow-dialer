@@ -128,11 +128,14 @@ export const resetAppSession = () => {
     
     // Clear supabase-specific auth state
     try {
-      if (window.supabase) {
-        window.supabase.auth.signOut().catch(e => 
+      // Import supabase dynamically to avoid window reference
+      import('@/integrations/supabase/client').then(({ supabase }) => {
+        supabase.auth.signOut().catch(e => 
           console.warn('Error during Supabase sign out:', e)
         );
-      }
+      }).catch(err => {
+        console.warn('Error importing Supabase client:', err);
+      });
     } catch (e) {
       console.warn('Error accessing Supabase client:', e);
     }
