@@ -57,16 +57,16 @@ export const useFetchSipProviders = () => {
   useEffect(() => {
     fetchData();
     
-    // Add a fallback timeout to ensure loading state is reset
-    const fallbackTimer = setTimeout(() => {
+    // Add a failsafe timeout to ensure loading state is reset
+    const failsafeTimer = setTimeout(() => {
       if (isLoading) {
-        console.log("Forcing isLoading to false after timeout");
+        console.log("Failsafe timer triggered - resetting loading state");
         setIsLoading(false);
       }
-    }, 10000); // 10 second hard timeout
+    }, 15000); // 15 second failsafe
     
-    return () => clearTimeout(fallbackTimer);
-  }, [fetchData]); // Remove isLoading from dependencies to prevent infinite loop
+    return () => clearTimeout(failsafeTimer);
+  }, [fetchData]); 
 
   return { providers, setProviders, isLoading, error, refetch };
 };

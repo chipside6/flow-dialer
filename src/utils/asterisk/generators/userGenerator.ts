@@ -17,11 +17,20 @@ export const userGenerator = {
   ) {
     return async () => {
       try {
-        // Fetch all resources for this user
-        const resources = await fetchUserResources(userId);
+        // Add timeout to prevent infinite loading
+        const resourcesPromise = fetchUserResources(userId);
+        const campaignPromise = fetchCampaignDetails(campaignId);
         
-        // Fetch specific campaign details
-        const campaign = await fetchCampaignDetails(campaignId);
+        // Set a timeout for fetch operations
+        const timeout = new Promise<null>((_, reject) => 
+          setTimeout(() => reject(new Error('Request timed out after 10 seconds')), 10000)
+        );
+        
+        // Race between fetch and timeout
+        const [resources, campaign] = await Promise.all([
+          Promise.race([resourcesPromise, timeout]) as Promise<any>,
+          Promise.race([campaignPromise, timeout]) as Promise<any>
+        ]);
         
         if (!resources || !campaign) {
           throw new Error(`Could not fetch data for user ${userId} or campaign ${campaignId}`);
