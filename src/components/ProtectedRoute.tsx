@@ -16,7 +16,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAdmin = false,
   fallbackPath = '/login'
 }) => {
-  const { isAuthenticated, isAdmin, initialized, refreshSession } = useAuth();
+  const { isAuthenticated, isAdmin, initialized } = useAuth();
   const navigate = useNavigate();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
@@ -57,21 +57,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           // Try to refresh auth data from server
           const refreshed = await refreshAuthDataIfStale();
           
-          if (!refreshed) {
-            // If refresh failed, try refreshSession as a backup
-            console.log('Attempting direct session refresh as backup');
-            const sessionRefreshed = await refreshSession(true);
-            
-            if (!sessionRefreshed && requireAdmin) {
-              // If session refresh failed and we need admin privileges
-              navigate('/unauthorized', { 
-                replace: true,
-                state: { from: { pathname: window.location.pathname } }
-              });
-              setIsCheckingAuth(false);
-              setAuthChecked(true);
-              return;
-            }
+          if (!refreshed && requireAdmin) {
+            // If refresh failed and we need admin privileges
+            navigate('/unauthorized', { 
+              replace: true,
+              state: { from: { pathname: window.location.pathname } }
+            });
+            setIsCheckingAuth(false);
+            setAuthChecked(true);
+            return;
           }
         } catch (error) {
           console.error('Error refreshing auth data:', error);
@@ -85,7 +79,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     };
     
     checkAuth();
-  }, [isAuthenticated, isAdmin, initialized, navigate, fallbackPath, requireAdmin, refreshSession]);
+  }, [isAuthenticated, isAdmin, initialized, navigate, fallbackPath, requireAdmin]);
   
   // If still initializing auth state, show loading
   if (!initialized || isCheckingAuth) {
