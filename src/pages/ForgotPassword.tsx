@@ -76,7 +76,7 @@ const ForgotPassword = () => {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 text-center">
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">
             Enter your email address and we'll send you instructions to reset your password.
@@ -87,7 +87,7 @@ const ForgotPassword = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="h-12"
+            className="h-12 text-center"
             placeholder="Enter your email"
           />
         </div>

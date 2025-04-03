@@ -79,7 +79,7 @@ const SignUp = () => {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 text-center">
         <div className="space-y-4">
           <Input
             id="email"
@@ -87,7 +87,7 @@ const SignUp = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="h-12"
+            className="h-12 text-center"
             placeholder="Enter your email"
           />
           
@@ -96,6 +96,7 @@ const SignUp = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a password"
             minLength={6}
+            className="text-center"
           />
         </div>
 
