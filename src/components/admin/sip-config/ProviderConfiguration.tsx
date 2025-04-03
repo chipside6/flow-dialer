@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { CheckCircle2, Loader2, TestTube, Copy } from "lucide-react";
-import { generateSipConfig } from "./configUtils";
+import { AlertCircle, CheckCircle2, Loader2, TestTube, Copy, HelpCircle } from "lucide-react";
+import { generateSipConfig, validateSipConfigParams } from "./configUtils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProviderConfigurationProps {
   providerName: string;
@@ -37,8 +38,29 @@ const ProviderConfiguration: React.FC<ProviderConfigurationProps> = ({
   const [configOutput, setConfigOutput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [copyingToClipboard, setCopyingToClipboard] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const generateConfig = () => {
+    // Validate inputs before generating config
+    const error = validateSipConfigParams(
+      providerName,
+      host,
+      port,
+      providerUsername,
+      providerPassword
+    );
+    
+    if (error) {
+      setValidationError(error);
+      toast({
+        title: "Validation Error",
+        description: error,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setValidationError(null);
     setIsGenerating(true);
     
     try {
@@ -85,6 +107,22 @@ const ProviderConfiguration: React.FC<ProviderConfigurationProps> = ({
     setTimeout(() => setCopyingToClipboard(false), 1000);
   };
 
+  const FieldLabel = ({ label, tooltip }: { label: string; tooltip: string }) => (
+    <div className="flex items-center space-x-1">
+      <Label>{label}</Label>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-xs">{tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -95,8 +133,18 @@ const ProviderConfiguration: React.FC<ProviderConfigurationProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {validationError && (
+          <div className="bg-destructive/10 p-3 rounded-md flex items-start mb-4">
+            <AlertCircle className="h-5 w-5 text-destructive mt-0.5 mr-2 flex-shrink-0" />
+            <p className="text-sm text-destructive">{validationError}</p>
+          </div>
+        )}
+        
         <div className="space-y-2">
-          <Label htmlFor="provider-name">Provider Name</Label>
+          <FieldLabel 
+            label="Provider Name" 
+            tooltip="A short, unique identifier for this SIP provider (e.g., twilio, vonage). Avoid spaces and special characters."
+          />
           <Input
             id="provider-name"
             value={providerName}
@@ -108,7 +156,10 @@ const ProviderConfiguration: React.FC<ProviderConfigurationProps> = ({
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="host">Host/Server</Label>
+            <FieldLabel 
+              label="Host/Server" 
+              tooltip="The hostname or IP address of your SIP provider's server (e.g., sip.provider.com)."
+            />
             <Input
               id="host"
               value={host}
@@ -119,7 +170,10 @@ const ProviderConfiguration: React.FC<ProviderConfigurationProps> = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="port">Port</Label>
+            <FieldLabel 
+              label="Port" 
+              tooltip="The port used by your SIP provider. Default is 5060 for unencrypted SIP, 5061 for TLS."
+            />
             <Input
               id="port"
               value={port}
@@ -132,7 +186,10 @@ const ProviderConfiguration: React.FC<ProviderConfigurationProps> = ({
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="provider-username">Username/Account ID</Label>
+            <FieldLabel 
+              label="Username/Account ID" 
+              tooltip="The username or account ID provided by your SIP provider."
+            />
             <Input
               id="provider-username"
               value={providerUsername}
@@ -143,7 +200,10 @@ const ProviderConfiguration: React.FC<ProviderConfigurationProps> = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="provider-password">Password/API Key</Label>
+            <FieldLabel 
+              label="Password/API Key" 
+              tooltip="The password or API key provided by your SIP provider."
+            />
             <Input
               id="provider-password"
               type="password"
@@ -170,7 +230,23 @@ const ProviderConfiguration: React.FC<ProviderConfigurationProps> = ({
         
         {configOutput && (
           <div className="space-y-2 pt-4">
-            <Label htmlFor="config-output">Configuration Output</Label>
+            <div className="flex justify-between items-center">
+              <Label htmlFor="config-output">Configuration Output</Label>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleCopyConfig}
+                className="active:scale-95 transition-transform"
+                disabled={copyingToClipboard}
+              >
+                {copyingToClipboard ? (
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                ) : (
+                  <Copy className="h-4 w-4 mr-2" />
+                )}
+                {copyingToClipboard ? "Copied!" : "Copy to Clipboard"}
+              </Button>
+            </div>
             <Textarea
               id="config-output"
               value={configOutput}
@@ -178,19 +254,16 @@ const ProviderConfiguration: React.FC<ProviderConfigurationProps> = ({
               rows={15}
               className="font-mono text-sm focus:ring-2 focus:ring-primary focus:border-primary"
             />
-            <Button 
-              variant="outline" 
-              onClick={handleCopyConfig}
-              className="active:scale-95 transition-transform"
-              disabled={copyingToClipboard}
-            >
-              {copyingToClipboard ? (
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-              ) : (
-                <Copy className="h-4 w-4 mr-2" />
-              )}
-              {copyingToClipboard ? "Copied!" : "Copy to Clipboard"}
-            </Button>
+            
+            <div className="bg-muted p-4 rounded-md mt-2">
+              <h4 className="text-sm font-medium mb-1">How to use this configuration</h4>
+              <ol className="list-decimal list-inside text-sm space-y-1 text-muted-foreground">
+                <li>Copy the SIP Provider section to your pjsip.conf or sip.conf file</li>
+                <li>Copy the Dialplan section to your extensions.conf file</li>
+                <li>Replace the placeholders with your actual greeting file path and transfer number</li>
+                <li>Reload Asterisk with: <code className="bg-muted-foreground/20 px-1 rounded">asterisk -rx "core reload"</code></li>
+              </ol>
+            </div>
           </div>
         )}
       </CardContent>

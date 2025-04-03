@@ -5,6 +5,7 @@
 export const asteriskConfig = {
   /**
    * Generate a SIP trunk configuration for Asterisk
+   * Updated with improved parameters and comments for better reliability
    */
   generateSipTrunkConfig(
     providerName: string,
@@ -13,11 +14,15 @@ export const asteriskConfig = {
     username: string,
     password: string
   ) {
+    // Sanitize provider name to prevent config issues
+    const sanitizedName = providerName.replace(/[^a-zA-Z0-9_-]/g, "");
+    const portNumber = port ? parseInt(port) : 5060;
+    
     return `
-[${providerName}]
+[${sanitizedName}]
 type=peer
 host=${host}
-port=${port}
+port=${portNumber}
 username=${username}
 secret=${password}
 fromuser=${username}
@@ -30,32 +35,39 @@ insecure=port,invite
 nat=force_rport,comedia
 qualify=yes
 directmedia=no
+rtp_timeout=30
+transport=udp
 `.trim();
   },
   
   /**
    * Generate a basic dialplan configuration for Asterisk
-   * Updated to include transfer number and greeting file
+   * Updated to include more detailed comments and instructions
    */
   generateDialplan(campaignId: string, greetingFileUrl: string, transferNumber: string) {
     return `
 [campaign-${campaignId}]
+; Answer the call
 exten => s,1,Answer()
+; Wait for the audio channel to be ready
 exten => s,n,Wait(1)
+; Play greeting message
 exten => s,n,Playback(${greetingFileUrl || 'greeting'})
+; Wait for keypress (5 seconds)
 exten => s,n,WaitExten(5)
+; If no keypress, hang up
 exten => s,n,Hangup()
 
-; Handle keypress 1 for transfer
+; Handle keypress 1 for transfer to agent
 exten => 1,1,NoOp(Transferring call to ${transferNumber || ''})
-exten => 1,n,Dial(SIP/${transferNumber || ''},30)
+exten => 1,n,Dial(SIP/${transferNumber || ''},30,g)
 exten => 1,n,Hangup()
 `.trim();
   },
   
   /**
    * Generate a complete configuration for a campaign
-   * Combines SIP trunk config and dialplan with user's transfer number and greeting file
+   * Combines SIP trunk config and dialplan with actual values rather than placeholders
    */
   generateFullConfig(
     campaignId: string,
@@ -83,10 +95,20 @@ exten => 1,n,Hangup()
     
     return `
 ; SIP Provider Configuration
+; --------------------------
+; This section should be placed in your pjsip.conf or sip.conf file
 ${sipConfig}
 
 ; Dialplan Configuration
+; ---------------------
+; This section should be placed in your extensions.conf file
 ${dialplan}
+
+; Installation Instructions:
+; 1. Add the SIP Provider section to your pjsip.conf or sip.conf
+; 2. Add the Dialplan section to your extensions.conf
+; 3. Reload Asterisk configuration with: 'asterisk -rx "core reload"'
+; 4. Test your configuration with: 'asterisk -rx "dialplan show campaign-${campaignId}"'
 `.trim();
   }
 };
