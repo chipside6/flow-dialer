@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth";
 import ReadinessCheckerHeader from "./readiness-checker/ReadinessCheckerHeader";
@@ -26,6 +26,20 @@ const LaunchReadinessChecker = () => {
   
   // Determine if we should show the config button in the missing env vars panel
   const showConfigButtonEnvVars = !manualOverrideEnabled && missingEnvVars.length > 0;
+
+  // Only run checks on mount, not on every render
+  useEffect(() => {
+    // Initial check when component mounts
+    if (manualOverrideEnabled) {
+      // If manual override is enabled, don't need to run actual checks
+      console.log("Manual override enabled, skipping automatic checks");
+    } else {
+      console.log("Running initial readiness checks");
+      runChecks();
+    }
+    // We intentionally only want this to run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Card className="shadow-md">

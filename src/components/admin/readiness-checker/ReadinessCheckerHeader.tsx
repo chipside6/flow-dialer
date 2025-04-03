@@ -25,16 +25,28 @@ const ReadinessCheckerHeader = ({ isRetrying, onRetry, showConfigButton }: Readi
   
   const handleManualVerification = () => {
     // This function enables the manual verification override
-    window.forceAsteriskSuccess?.();
-    setManualVerified(true);
-    toast.info("Manual verification enabled. Click 'Check Again' to apply.");
+    if (window.forceAsteriskSuccess) {
+      window.forceAsteriskSuccess();
+      localStorage.setItem('asterisk_force_success', 'true');
+      setManualVerified(true);
+      toast.info("Manual verification enabled. Click 'Check Again' to apply.");
+    } else {
+      console.error("forceAsteriskSuccess is not defined");
+      toast.error("Unable to enable manual verification. Try refreshing the page.");
+    }
   };
   
   const handleResetVerification = () => {
     // This function removes the manual verification override
-    window.resetAsteriskOverride?.();
-    setManualVerified(false);
-    toast.info("Manual verification reset. Checks will run normally.");
+    if (window.resetAsteriskOverride) {
+      window.resetAsteriskOverride();
+      localStorage.removeItem('asterisk_force_success');
+      setManualVerified(false);
+      toast.info("Manual verification reset. Checks will run normally.");
+    } else {
+      console.error("resetAsteriskOverride is not defined");
+      toast.error("Unable to reset verification. Try refreshing the page.");
+    }
   };
 
   return (
