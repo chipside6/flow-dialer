@@ -42,13 +42,13 @@
   .min-h-screen .max-w-md {
     padding-left: 16px !important;
     padding-right: 16px !important;
-    padding-top: 12px !important;
-    padding-bottom: 36px !important;
+    padding-top: 0 !important;
+    padding-bottom: 24px !important;
   }
 
   /* Auth title needs more spacing */
   .min-h-screen h2 {
-    margin-bottom: 28px !important;
+    margin-bottom: 20px !important;
     margin-top: 0 !important;
   }
 

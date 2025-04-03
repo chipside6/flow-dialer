@@ -12,7 +12,7 @@ export const AuthHeader = ({ title, emoji }: AuthHeaderProps) => {
   
   return (
     <>
-      <div className="absolute top-6 left-4">
+      <div className="absolute top-4 left-4">
         <button 
           onClick={() => navigate('/')} 
           className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -21,7 +21,7 @@ export const AuthHeader = ({ title, emoji }: AuthHeaderProps) => {
         </button>
       </div>
       
-      <div className="mb-8 text-center">
+      <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold text-gray-800 flex items-center justify-center gap-2">
           {emoji && <span className="text-2xl">{emoji}</span>} {title}
         </h1>

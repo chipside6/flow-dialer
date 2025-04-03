@@ -18,7 +18,7 @@
     padding-left: 16px;
     padding-right: 16px;
     width: 100%;
-    margin-top: -80px; /* Move content up more to reduce bottom space */
+    margin-top: 0; /* Remove negative margin that was pushing content up */
   }
   
   /* Center auth content properly */
