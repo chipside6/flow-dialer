@@ -9,6 +9,7 @@ interface CsvUploaderProps {
   selectedFile: File | null;
   setSelectedFile: (file: File | null) => void;
   isDisabled: boolean;
+  required?: boolean;
 }
 
 const FILE_TYPES = ["text/csv", "application/vnd.ms-excel"];
@@ -17,7 +18,8 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const CsvUploader: React.FC<CsvUploaderProps> = ({
   selectedFile,
   setSelectedFile,
-  isDisabled
+  isDisabled,
+  required = false
 }) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,23 +50,31 @@ const CsvUploader: React.FC<CsvUploaderProps> = ({
 
   return (
     <FormItem>
-      <FormLabel>Upload Contacts (CSV)</FormLabel>
+      <FormLabel>
+        Upload Contacts (CSV) {required && <span className="text-red-500">*</span>}
+      </FormLabel>
       <FormControl>
-        <div className="border border-input bg-background rounded-md px-3 py-2">
+        <div className={`border ${selectedFile ? 'border-green-500' : required && !selectedFile ? 'border-red-500' : 'border-input'} bg-background rounded-md px-3 py-2`}>
           <label className="flex flex-col items-center justify-center cursor-pointer py-4">
             <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-            <span className="text-sm font-medium mb-1">
+            <span className="text-sm font-medium mb-1 text-center">
               {selectedFile ? selectedFile.name : "Click to upload or drag and drop"}
             </span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground text-center">
               CSV files only (max 5MB)
             </span>
+            {required && !selectedFile && (
+              <span className="text-xs text-red-500 mt-1 text-center">
+                Required - Please upload a contact file
+              </span>
+            )}
             <Input
               type="file"
               accept=".csv"
               onChange={handleFileChange}
               className="hidden"
               disabled={isDisabled}
+              required={required}
             />
           </label>
         </div>

@@ -9,13 +9,15 @@ interface FormActionsProps {
   isUploading: boolean;
   uploadMode: "manual" | "csv";
   hasSelectedFile: boolean;
+  requireFile?: boolean;
 }
 
 const FormActions: React.FC<FormActionsProps> = ({
   isSubmitting,
   isUploading,
   uploadMode,
-  hasSelectedFile
+  hasSelectedFile,
+  requireFile = false
 }) => {
   const [isStuck, setIsStuck] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -42,7 +44,9 @@ const FormActions: React.FC<FormActionsProps> = ({
     };
   }, [isSubmitting, isUploading]);
   
-  const isDisabled = (isSubmitting || isUploading) && !isStuck || (uploadMode === "csv" && !hasSelectedFile);
+  const isDisabled = ((isSubmitting || isUploading) && !isStuck) || 
+                     (requireFile && !hasSelectedFile) || 
+                     (uploadMode === "csv" && !hasSelectedFile);
   
   return (
     <Button 
@@ -58,7 +62,7 @@ const FormActions: React.FC<FormActionsProps> = ({
       ) : isStuck ? (
         "Retry Submission"
       ) : (
-        uploadMode === "csv" ? "Create & Upload Contacts" : "Create Contact List"
+        requireFile || uploadMode === "csv" ? "Create & Upload Contacts" : "Create Contact List"
       )}
     </Button>
   );

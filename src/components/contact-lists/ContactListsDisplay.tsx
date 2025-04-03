@@ -10,6 +10,7 @@ import {
 import ContactListsTable from "./table/ContactListsTable";
 import { ContactList } from "@/hooks/useContactLists";
 import { Badge } from "@/components/ui/badge";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ContactListsDisplayProps {
   lists: ContactList[];
@@ -17,9 +18,11 @@ interface ContactListsDisplayProps {
 }
 
 const ContactListsDisplay: React.FC<ContactListsDisplayProps> = ({ lists, onDelete }) => {
+  const isMobile = useIsMobile();
+  
   return (
-    <Card className="mt-6">
-      <CardHeader>
+    <Card className={`mt-6 ${isMobile ? 'px-0' : ''}`}>
+      <CardHeader className={isMobile ? 'px-3 py-4' : ''}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <CardTitle>Your Contact Lists</CardTitle>
@@ -30,7 +33,7 @@ const ContactListsDisplay: React.FC<ContactListsDisplayProps> = ({ lists, onDele
           </Badge>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className={isMobile ? 'px-2' : ''}>
         <ContactListsTable lists={lists} onDelete={onDelete} />
       </CardContent>
     </Card>
