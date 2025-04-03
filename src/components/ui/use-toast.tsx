@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import {
   Toast,
@@ -7,8 +8,8 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-  useToast as useToastHook,
-} from "@/components/ui/toast/use-toast"
+} from "@/components/ui/toast"
+import { useToast as useToastHook, toast as toastFunction } from "@/hooks/use-toast"
 
 import { cn } from "@/lib/utils"
 
@@ -22,15 +23,11 @@ export {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-  useToastHook,
 }
 
 // Update the toast function to properly handle error toasts
 export function toast(props: ToastProps) {
   const { title, description, variant, duration, action, cancel, ...toastProps } = props
-
-  // Create a unique ID for each toast
-  const id = Math.random().toString(36).substring(2, 9)
 
   // Special handling for error toasts on mobile
   const isMobile = window.innerWidth < 768
@@ -43,7 +40,7 @@ export function toast(props: ToastProps) {
   const errorDuration = isErrorVariant ? 6000 : duration
   
   // Create and update toast
-  return TOAST_METHODS.create({
+  return toastFunction({
     title: title,
     description: description,
     duration: errorDuration,
@@ -54,7 +51,6 @@ export function toast(props: ToastProps) {
     position: mobileErrorPosition,
     ...toastProps,
     action,
-    cancel,
   })
 }
 
@@ -77,7 +73,7 @@ const Toaster = ({ children }: ToasterProps) => {
   }
 
   return (
-    <ToastProvider limit={TOAST_LIMIT} removeDelay={TOAST_REMOVE_DELAY}>
+    <ToastProvider>
       {children}
       <ToastViewport />
     </ToastProvider>
@@ -91,14 +87,14 @@ const useToast = useToastHook
 export { useToast }
 
 const ToastContext = React.createContext({
-  ...useToast.getState(),
+  ...useToast(),
   toast,
 })
 
 export { ToastContext }
 
 const TOAST_METHODS = {
-  ...useToast,
+  ...useToast(),
   toast,
 }
 
