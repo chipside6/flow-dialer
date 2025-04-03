@@ -41,5 +41,21 @@ export const securityUtils = {
     const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
     
     return hostnameRegex.test(host) || ipv4Regex.test(host);
+  },
+
+  /**
+   * Creates a basic auth header for API authentication
+   * @param username Username for basic auth
+   * @param password Password for basic auth
+   * @returns Base64 encoded basic auth header
+   */
+  createBasicAuthHeader: (username: string, password: string): string => {
+    if (!username || !password) {
+      throw new Error('Username and password are required for basic authentication');
+    }
+    
+    // Create the basic auth string and encode it in base64
+    const auth = `${username}:${password}`;
+    return btoa(auth);
   }
 };
