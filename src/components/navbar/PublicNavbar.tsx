@@ -33,7 +33,7 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
             to={isAuthenticated ? "/dashboard" : "/"} 
             className="flex items-center gap-2"
           >
-            <Logo />
+            <Logo size="sm" />
           </Link>
         </div>
         

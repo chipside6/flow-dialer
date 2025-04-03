@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Sidebar, SidebarContent, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 import { 
@@ -86,7 +85,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="bg-primary text-white dark:bg-primary/90">
         <div className="flex items-center p-5 justify-between">
-          <Logo size="xl" withText={true} className="text-white" />
+          <Logo size="lg" withText={true} className="text-white" />
           
           {/* Only show close button for mobile */}
           {isMobile && (

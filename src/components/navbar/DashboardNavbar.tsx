@@ -44,7 +44,7 @@ export const DashboardNavbar = ({ toggleSidebar }: DashboardNavbarProps) => {
             to="/dashboard" 
             className="flex items-center gap-2"
           >
-            <Logo size="md" withText={true} />
+            <Logo size="sm" withText={true} />
           </Link>
         </div>
         
