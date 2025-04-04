@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { RotateCcw, LogOut } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
 import { clearAllAuthData } from "@/utils/sessionCleanup";
@@ -10,7 +9,6 @@ import { clearAllAuthData } from "@/utils/sessionCleanup";
 export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleSignOut = async () => {

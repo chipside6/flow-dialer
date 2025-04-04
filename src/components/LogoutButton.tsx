@@ -37,11 +37,13 @@ const LogoutButton = ({
       // First clear all auth data immediately
       clearAllAuthData();
       
-      // Then attempt to sign out through auth context
-      await signOut();
-      
-      // Navigate to login page directly, don't rely on auth context redirection
+      // Navigate to login page directly
       navigate("/login", { replace: true });
+      
+      // Then attempt to sign out through auth context as background operation
+      signOut().catch(error => {
+        console.warn("Logout error in background:", error);
+      });
     } catch (error: any) {
       console.error("Logout error:", error);
       

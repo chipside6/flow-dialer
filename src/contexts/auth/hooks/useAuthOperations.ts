@@ -6,7 +6,6 @@ import {
   signOutUser,
   updateUserProfileAction
 } from '../authActions';
-import { toast } from '@/components/ui/use-toast';
 import { clearAllAuthData } from '@/utils/sessionCleanup';
 
 export function useAuthOperations() {
@@ -16,11 +15,6 @@ export function useAuthOperations() {
       
       if (result.error) {
         console.error("Signup error:", result.error.message);
-      } else {
-        toast({
-          title: "Account created successfully",
-          description: "Please check your email to verify your account.",
-        });
       }
       
       return result;
@@ -57,9 +51,6 @@ export function useAuthOperations() {
       });
       
       // Consider logout successful regardless of server response
-      toast({
-        title: "Signed out successfully",
-      });
       
       // Force page reload to clear any remaining state
       window.location.href = '/login';
@@ -82,10 +73,6 @@ export function useAuthOperations() {
       
       if (result.error) {
         console.error("Profile update error:", result.error.message);
-      } else {
-        toast({
-          title: "Profile updated successfully",
-        });
       }
       
       return result;
