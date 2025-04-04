@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState } from 'react';
-import { Campaign } from '@/hooks/useCampaigns';
+import { Campaign } from '@/types/campaign';
 import { useCampaignSimulation } from '@/hooks/useCampaignSimulation';
 
 type CampaignContextType = {

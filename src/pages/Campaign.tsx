@@ -40,7 +40,7 @@ const CampaignPage = () => {
     // Ensure the campaign has a user_id property and matches the Campaign type
     const campaignWithRequiredFields: Campaign = {
       id: newCampaign.id || uuidv4(),
-      name: newCampaign.title || 'Untitled Campaign', // Add the required name property
+      name: newCampaign.title || 'Untitled Campaign', // Add name for Campaign type
       title: newCampaign.title,
       status: (newCampaign.status as Campaign["status"]) || "draft",
       progress: newCampaign.progress || 0,
@@ -49,7 +49,7 @@ const CampaignPage = () => {
       transferredCalls: newCampaign.transferredCalls || 0,
       failedCalls: newCampaign.failedCalls || 0,
       user_id: user?.id || '',
-      created_at: new Date().toISOString() // Add the required created_at property
+      created_at: new Date().toISOString() // Add created_at for Campaign type
     };
     
     setShowCreateWizard(false);
@@ -58,24 +58,32 @@ const CampaignPage = () => {
     await refreshCampaigns();
   };
   
-  // Show loading state when campaigns are being fetched
-  if (isLoading) {
+  // Only show loading state for initial load, not for subsequent refreshes
+  if (isLoading && campaigns.length === 0) {
     return (
-      <LoadingState 
-        message="Loading your campaigns..." 
-        onRetry={() => refreshCampaigns()}
-      />
+      <DashboardLayout>
+        <div className="max-w-6xl mx-auto w-full px-4 pt-4">
+          <LoadingState 
+            message="Loading your campaigns..." 
+            onRetry={() => refreshCampaigns()}
+          />
+        </div>
+      </DashboardLayout>
     );
   }
   
   // Show error state if there was an error fetching campaigns
   if (error) {
     return (
-      <LoadingState 
-        message={`Error loading campaigns: ${error.message}`} 
-        onRetry={() => refreshCampaigns()}
-        errorVariant="destructive"
-      />
+      <DashboardLayout>
+        <div className="max-w-6xl mx-auto w-full px-4 pt-4">
+          <LoadingState 
+            message={`Error loading campaigns: ${error.message}`} 
+            onRetry={() => refreshCampaigns()}
+            errorVariant="destructive"
+          />
+        </div>
+      </DashboardLayout>
     );
   }
   
