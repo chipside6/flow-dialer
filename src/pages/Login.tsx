@@ -12,13 +12,12 @@ import { PasswordInput } from '@/components/auth/PasswordInput';
 import { AuthButton } from '@/components/auth/AuthButton';
 import { AuthFooter } from '@/components/auth/AuthFooter';
 import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -38,7 +37,7 @@ const Login = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        setCheckingSession(true);
+        setIsCheckingSession(true);
         
         // Add a timeout for the session check
         const sessionPromise = supabase.auth.getSession();
@@ -52,7 +51,7 @@ const Login = () => {
           data = result.data;
         } catch (error) {
           console.warn("Session check timed out, assuming no session");
-          setCheckingSession(false);
+          setIsCheckingSession(false);
           return;
         }
         
@@ -67,7 +66,7 @@ const Login = () => {
             if (error) {
               console.warn("Session appears invalid, clearing:", error);
               clearAllAuthData();
-              setCheckingSession(false);
+              setIsCheckingSession(false);
               return;
             }
             
@@ -79,10 +78,10 @@ const Login = () => {
           }
         }
         
-        setCheckingSession(false);
+        setIsCheckingSession(false);
       } catch (error) {
         console.error("Auth check error:", error);
-        setCheckingSession(false);
+        setIsCheckingSession(false);
       }
     };
     
@@ -126,17 +125,7 @@ const Login = () => {
     }
   };
   
-  if (checkingSession) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-          <p className="mt-2 text-lg text-muted-foreground">Checking session...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Render the login form immediately, without showing a loading screen
   return (
     <AuthContainer>
       <AuthHeader title="Welcome back" emoji="👋" />
@@ -158,17 +147,20 @@ const Login = () => {
             required
             className="h-12"
             placeholder="Enter your email"
+            disabled={isLoading || isCheckingSession}
           />
           
           <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading || isCheckingSession}
           />
         </div>
 
         <AuthButton 
           isLoading={isLoading} 
-          buttonText="Log In" 
+          buttonText={isCheckingSession ? "Checking session..." : "Log In"}
+          disabled={isCheckingSession}
         />
       </form>
 

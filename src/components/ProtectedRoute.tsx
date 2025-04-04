@@ -70,11 +70,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
   }, [navigate, requireAdmin, isLoading]);
   
   if (isLoading) {
+    // Instead of a popup, show a subtle loading indicator or nothing
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-          <p className="mt-2 text-lg text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
