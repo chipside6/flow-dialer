@@ -24,6 +24,17 @@ export const clearAllAuthData = () => {
       }
     });
     
+    // Clear session storage items too
+    try {
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.includes('auth') || key.includes('supabase') || key.includes('session')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    } catch (e) {
+      console.error('Error clearing sessionStorage:', e);
+    }
+    
     cleanupInProgress = false;
     console.log('All auth data has been cleared');
   } catch (e) {

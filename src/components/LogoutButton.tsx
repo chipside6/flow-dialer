@@ -5,6 +5,7 @@ import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { clearAllAuthData } from "@/utils/sessionCleanup";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -34,8 +35,8 @@ const LogoutButton = ({
       // Call optional callback if provided
       if (onClick) onClick();
       
-      // Clear local storage items
-      localStorage.clear();
+      // Clear local storage items first to prevent auto-login loops
+      clearAllAuthData();
       
       // Sign out from Supabase
       await supabase.auth.signOut();

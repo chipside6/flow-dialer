@@ -70,11 +70,14 @@ export const useFetchCampaigns = () => {
           };
         }
         
+        // Check if this is an auth error
+        const authIssue = isAuthError(error);
+        
         return { 
           data: [], 
           error, 
           isTimeoutError: false,
-          isAuthError: false
+          isAuthError: authIssue
         };
       }
       
