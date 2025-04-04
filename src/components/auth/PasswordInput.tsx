@@ -9,6 +9,7 @@ interface PasswordInputProps {
   placeholder?: string;
   minLength?: number;
   className?: string;
+  disabled?: boolean;
 }
 
 export const PasswordInput = ({ 
@@ -16,7 +17,8 @@ export const PasswordInput = ({
   onChange, 
   placeholder = "Enter your password", 
   minLength,
-  className = ""
+  className = "",
+  disabled = false
 }: PasswordInputProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -31,11 +33,13 @@ export const PasswordInput = ({
         placeholder={placeholder}
         minLength={minLength}
         className={`h-12 pr-10 ${className}`}
+        disabled={disabled}
       />
       <button
         type="button"
         onClick={() => setShowPassword(!showPassword)}
         className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-500"
+        disabled={disabled}
       >
         {showPassword ? (
           <EyeOff className="h-5 w-5" />
