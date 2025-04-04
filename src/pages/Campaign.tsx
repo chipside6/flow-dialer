@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
 import { CampaignCreationWizard } from "@/components/campaign-wizard/CampaignCreationWizard";
-import { PlusCircle, RefreshCw } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CampaignData } from "@/components/campaign-wizard/types";
 import { useAuth } from "@/contexts/auth/useAuth";
@@ -65,25 +65,6 @@ const CampaignPage = () => {
     setShowCreateWizard(false);
   };
   
-  const handleRefresh = async () => {
-    if (!isOnline) {
-      toast({
-        title: "Network offline",
-        description: "Cannot refresh campaigns while offline",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const success = await refreshCampaigns();
-    if (success) {
-      toast({
-        title: "Campaigns refreshed",
-        description: "Campaign data has been updated",
-      });
-    }
-  };
-  
   // Only show loading state for initial load, not for subsequent refreshes
   if (isLoading && campaigns.length === 0 && !hasAttemptedInitialLoad) {
     return (
@@ -121,15 +102,6 @@ const CampaignPage = () => {
                   <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                     <h1 className="text-2xl md:text-3xl font-bold">Campaigns</h1>
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        onClick={handleRefresh}
-                        disabled={isLoading}
-                        className="whitespace-nowrap"
-                      >
-                        <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                        Refresh
-                      </Button>
                       <Button 
                         variant="success"
                         onClick={() => setShowCreateWizard(true)}
