@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -18,7 +18,11 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Extract returnTo from location state if available
+  const returnTo = location.state?.returnTo || '/dashboard';
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +42,8 @@ const Login = () => {
       // Simple session storage - just record that we're logged in
       localStorage.setItem('sessionLastUpdated', Date.now().toString());
       
-      navigate('/dashboard');
+      // Redirect to returnTo if available, otherwise to dashboard
+      navigate(returnTo);
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage(error.message || "Failed to login");

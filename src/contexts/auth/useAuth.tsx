@@ -32,29 +32,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [sessionChecked, setSessionChecked] = useState(true); // Set to true by default
+  const [sessionChecked, setSessionChecked] = useState(true);
 
   useEffect(() => {
+    // Simple one-time session check
     const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      
-      if (data.session?.user) {
-        setUser(data.session.user);
+      try {
+        const { data } = await supabase.auth.getSession();
         
-        // Fetch profile data
-        const userProfile = await fetchUserProfile(data.session.user.id);
-        if (userProfile) {
-          setProfile(userProfile);
-          setIsAdmin(!!userProfile.is_admin);
+        if (data.session?.user) {
+          setUser(data.session.user);
+          
+          // Fetch profile data
+          const userProfile = await fetchUserProfile(data.session.user.id);
+          if (userProfile) {
+            setProfile(userProfile);
+            setIsAdmin(!!userProfile.is_admin);
+          }
         }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Auth session check error:", error);
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
     
     getSession();
     
-    // Subscribe to auth changes
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {

@@ -40,7 +40,7 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
     onChange(syntheticEvent);
   };
 
-  // If user is not authenticated, show a message
+  // If user is not authenticated, show a simple message
   if (!user) {
     return (
       <Alert variant="warning" className="mb-6">
@@ -52,75 +52,6 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
     );
   }
 
-  // Show timeout error with retry button
-  if (error && error.includes("timed out")) {
-    return (
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="transferNumber">Transfer Number</Label>
-          <Alert variant="destructive" className="mt-2">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Connection Timeout</AlertTitle>
-            <AlertDescription className="flex flex-col gap-2">
-              <span>We couldn't load your transfer numbers due to a connection timeout.</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRetry} 
-                className="w-fit mt-2 bg-destructive/10 text-destructive hover:bg-destructive/20"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Retry
-              </Button>
-            </AlertDescription>
-          </Alert>
-          <Input
-            id="transferNumber"
-            name="transferNumber"
-            value={campaign.transferNumber}
-            onChange={onChange}
-            placeholder="Enter a phone number for transfers (e.g., +1 555-123-4567)"
-            className="w-full mt-2"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // If there's a different error loading transfer numbers
-  if (error && !isLoading) {
-    return (
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="transferNumber">Transfer Number</Label>
-          <Alert variant="destructive" className="mt-2">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription className="flex flex-col gap-2">
-              <span>{error}</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRetry} 
-                className="w-fit mt-2"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Retry
-              </Button>
-            </AlertDescription>
-          </Alert>
-          <Input
-            id="transferNumber"
-            name="transferNumber"
-            value={campaign.transferNumber}
-            onChange={onChange}
-            placeholder="Enter a phone number for transfers (e.g., +1 555-123-4567)"
-            className="w-full mt-2"
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div>
@@ -129,6 +60,32 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
           <div className="flex items-center mt-2">
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             <span className="text-sm text-muted-foreground">Loading transfer numbers...</span>
+          </div>
+        ) : error ? (
+          <div className="space-y-2">
+            <Alert variant="destructive" className="mt-2">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="flex flex-col gap-2">
+                <span>{error}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRetry} 
+                  className="w-fit mt-2"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+            <Input
+              id="transferNumber"
+              name="transferNumber"
+              value={campaign.transferNumber}
+              onChange={onChange}
+              placeholder="Enter a phone number for transfers (e.g., +1 555-123-4567)"
+              className="w-full mt-2"
+            />
           </div>
         ) : transferNumbers && transferNumbers.length > 0 ? (
           <Select

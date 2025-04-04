@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -10,14 +10,10 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const navigate = useNavigate();
-  const [checking, setChecking] = useState(false);
   
-  // Simplified auth check
+  // Simple one-time auth check without state
   useEffect(() => {
     const checkAuth = async () => {
-      if (checking) return;
-      setChecking(true);
-      
       try {
         const { data } = await supabase.auth.getSession();
         
@@ -26,31 +22,27 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
           return;
         }
         
-        // Only do a basic admin check if required
+        // Only do admin check if required
         if (requireAdmin) {
-          try {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('is_admin')
-              .eq('id', data.session.user.id)
-              .maybeSingle();
-            
-            if (!profileData?.is_admin) {
-              navigate('/unauthorized', { replace: true });
-            }
-          } catch (error) {
-            console.error("Admin check error:", error);
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', data.session.user.id)
+            .maybeSingle();
+          
+          if (!profileData?.is_admin) {
+            navigate('/unauthorized', { replace: true });
           }
         }
       } catch (error) {
-        console.error("Authentication check error:", error);
+        console.error("Auth check error:", error);
       }
     };
     
     checkAuth();
-  }, [navigate, requireAdmin, checking]);
+  }, [navigate, requireAdmin]);
   
-  // Always render children - no loading state
+  // Always render children immediately
   return <>{children}</>;
 };
 
