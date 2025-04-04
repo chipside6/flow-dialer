@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/auth";
 import { fetchSubscription, getPlanById } from "@/hooks/subscription/subscriptionApi";
@@ -14,6 +13,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [trialExpired, setTrialExpired] = useState<boolean>(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const initializedRef = useRef(false);
 
   // On mount, try to initialize from localStorage for faster UI rendering
@@ -45,6 +45,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
       }
       
       initializedRef.current = true;
+      // Keep isInitializing true until the API call completes
     }
   }, []);
 
@@ -97,6 +98,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
           localStorage.setItem('userSubscriptionPlan', 'free');
           localStorage.removeItem('userSubscription');
         }
+        setIsInitializing(false);
       },
       onError: (err) => {
         console.error("Error in fetchCurrentSubscription:", err);
@@ -127,6 +129,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
             variant: "destructive"
           });
         }
+        setIsInitializing(false);
       }
     }
   );
@@ -139,6 +142,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
       setTrialExpired(false);
       localStorage.setItem('userSubscriptionPlan', 'free');
       localStorage.removeItem('userSubscription');
+      setIsInitializing(false);
       return null;
     }
     
@@ -184,8 +188,11 @@ export const useSubscription = (): UseSubscriptionReturn => {
     }
   }, [activatePlan]);
 
+  // Combine isLoading with isInitializing for more accurate loading state
+  const combinedIsLoading = isLoading || isInitializing;
+
   return {
-    isLoading,
+    isLoading: combinedIsLoading,
     currentPlan,
     subscription,
     callCount,

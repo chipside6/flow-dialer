@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
@@ -21,9 +22,10 @@ const CampaignPage = () => {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const { user } = useAuth();
   const { campaigns, isLoading, error, refreshCampaigns } = useCampaigns();
-  const { trialExpired, currentPlan } = useSubscription();
+  const { trialExpired, currentPlan, isLoading: subscriptionLoading } = useSubscription();
   const { isOnline } = useNetworkStatus();
   const [hasAttemptedInitialLoad, setHasAttemptedInitialLoad] = useState(false);
+  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
   
   // Check if user can create campaigns based on subscription status
   const canAccessCampaigns = currentPlan === 'lifetime' || 
@@ -37,6 +39,13 @@ const CampaignPage = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+  
+  // Mark when subscription check is complete to prevent UI flashing
+  useEffect(() => {
+    if (!subscriptionLoading) {
+      setSubscriptionChecked(true);
+    }
+  }, [subscriptionLoading]);
   
   // Mark when first load attempt has occurred
   useEffect(() => {
@@ -65,7 +74,7 @@ const CampaignPage = () => {
   };
   
   // Only show loading state for initial load, not for subsequent refreshes
-  if (isLoading && campaigns.length === 0 && !hasAttemptedInitialLoad) {
+  if ((isLoading && campaigns.length === 0 && !hasAttemptedInitialLoad) || !subscriptionChecked) {
     return (
       <DashboardLayout>
         <div className="max-w-6xl mx-auto w-full px-4 pt-8">
@@ -86,7 +95,7 @@ const CampaignPage = () => {
         <div className="flex flex-1 w-full">
           <DashboardLayout>
             <div className="max-w-6xl mx-auto w-full px-2 md:px-4 pt-4 campaign-content">
-              {!canAccessCampaigns ? (
+              {!canAccessCampaigns && subscriptionChecked ? (
                 <TrialExpiredNotice />
               ) : showCreateWizard ? (
                 <CampaignCreationWizard 
