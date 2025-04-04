@@ -7,37 +7,27 @@ import { Button } from "@/components/ui/button";
 interface ErrorAlertProps {
   error: string | null;
   onRetry: () => void;
-  className?: string;
 }
 
-export const ErrorAlert = ({ error, onRetry, className = "" }: ErrorAlertProps) => {
+export const ErrorAlert = ({ error, onRetry }: ErrorAlertProps) => {
   if (!error) return null;
   
   const isTimeout = error.toLowerCase().includes("timeout") || 
                     error.toLowerCase().includes("timed out");
   
   const isNetworkError = error.toLowerCase().includes("network") || 
-                         error.toLowerCase().includes("connection") ||
-                         error.toLowerCase().includes("internet");
-  
-  const isAuthError = error.toLowerCase().includes("auth") ||
-                      error.toLowerCase().includes("login") ||
-                      error.toLowerCase().includes("session");
-                      
-  let title = "Error";
-  let variant: "warning" | "destructive" = "destructive";
-  
-  if (isTimeout || isNetworkError) {
-    title = "Connection Error";
-    variant = "warning";
-  } else if (isAuthError) {
-    title = "Authentication Error";
-  }
+                         error.toLowerCase().includes("connection");
   
   return (
-    <Alert variant={variant} className={`mb-6 text-left ${className}`}>
+    <Alert variant={isTimeout || isNetworkError ? "warning" : "destructive"} className="mb-6 text-left">
       <AlertTriangle className="h-4 w-4" />
-      <AlertTitle>{title}</AlertTitle>
+      <AlertTitle>
+        {isTimeout 
+          ? "Connection Timeout" 
+          : isNetworkError 
+            ? "Network Error" 
+            : "Error"}
+      </AlertTitle>
       <AlertDescription className="flex flex-col gap-2">
         <span>{error}</span>
         <Button 

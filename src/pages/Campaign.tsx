@@ -7,7 +7,7 @@ import { PlusCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CampaignData } from "@/components/campaign-wizard/types";
 import { useAuth } from "@/contexts/auth/useAuth";
-import { Campaign } from "@/types/campaign";
+import { Campaign } from "@/hooks/useCampaigns";
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from "react-router-dom";
 import { useCampaigns } from "@/hooks/useCampaigns";
