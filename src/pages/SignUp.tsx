@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -119,7 +118,7 @@ const SignUp = () => {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 text-center px-1">
+      <form onSubmit={handleSubmit} className="space-y-6 px-1">
         <div className="space-y-4">
           <Input
             id="email"
@@ -127,7 +126,7 @@ const SignUp = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="h-12 text-center"
+            className="h-12"
             placeholder="Enter your email"
           />
           
@@ -136,7 +135,6 @@ const SignUp = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a password"
             minLength={6}
-            className="text-center"
           />
         </div>
 
