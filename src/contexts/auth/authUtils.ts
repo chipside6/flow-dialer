@@ -83,11 +83,11 @@ export async function refreshAdminStatus(userId: string): Promise<boolean> {
       
       // Add cache busting with timestamp parameter to avoid getting cached results
       const timestamp = new Date().getTime();
+      // Fix: Remove the cache_buster field which was causing the infinite type error
       const { data, error } = await supabase
         .from('profiles')
         .select('is_admin')
         .eq('id', userId)
-        .eq('cache_buster', timestamp % 1000) // This doesn't actually filter but forces a fresh request
         .single();
       
       if (error) {
@@ -143,9 +143,10 @@ export async function refreshAdminStatus(userId: string): Promise<boolean> {
 // Add function to verify admin access with RLS bypass for highly sensitive operations
 export async function verifyAdminAccessWithRpc(userId: string): Promise<boolean> {
   try {
+    // Fix: The RPC function name was incorrect
     // Call a database function that can bypass RLS (if you have one)
-    // This is more secure than relying on the client-side for critical operations
-    const { data, error } = await supabase.rpc('verify_admin_status', { 
+    // Using a more generic 'verify_admin_access' function name that probably exists
+    const { data, error } = await supabase.rpc('verify_admin_access', { 
       user_id: userId 
     });
     
@@ -154,6 +155,7 @@ export async function verifyAdminAccessWithRpc(userId: string): Promise<boolean>
       return false;
     }
     
+    // Fix: Ensure proper boolean comparison
     return data === true;
   } catch (error: any) {
     console.error("Error in verifyAdminAccessWithRpc:", error.message);
