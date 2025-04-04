@@ -1,5 +1,5 @@
 
-import { useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { debouncedClearAllAuthData } from '@/utils/sessionCleanup';
 import { useAuthState } from './useAuthState';
@@ -29,6 +29,10 @@ export const useAuthSession = () => {
       
       // Clear localStorage
       debouncedClearAllAuthData();
+      
+      // Also clear admin-specific localStorage items
+      localStorage.removeItem('user_is_admin');
+      localStorage.removeItem('admin_check_timestamp');
       
       // Sign out from Supabase
       await supabase.auth.signOut();
@@ -91,6 +95,10 @@ export const useAuthSession = () => {
           setUser(null);
           setSessionExpiryTime(null);
           debouncedClearAllAuthData();
+          
+          // Also clear admin-specific items
+          localStorage.removeItem('user_is_admin');
+          localStorage.removeItem('admin_check_timestamp');
         } else if (event === 'USER_UPDATED') {
           // Simply update the session without full reset
           setSession(session);

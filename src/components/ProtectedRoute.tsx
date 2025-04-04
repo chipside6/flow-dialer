@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
+import { refreshAdminStatus } from '@/contexts/auth/authUtils';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,9 +11,10 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
-  const { isAuthenticated, isAdmin, isLoading, initialized } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading, initialized, user } = useAuth();
   const location = useLocation();
   const [showSkeleton, setShowSkeleton] = useState(true);
+  const [isRefreshingAdmin, setIsRefreshingAdmin] = useState(false);
   
   // Add a timeout to show skeleton for at least 300ms to prevent flashing
   useEffect(() => {
@@ -23,8 +25,34 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     return () => clearTimeout(timer);
   }, []);
   
+  // For admin routes, verify admin status on each access
+  useEffect(() => {
+    const verifyAdminStatus = async () => {
+      if (requireAdmin && user?.id && isAuthenticated && !isRefreshingAdmin) {
+        try {
+          setIsRefreshingAdmin(true);
+          // Double-check admin status from the server for sensitive routes
+          const isUserAdmin = await refreshAdminStatus(user.id);
+          
+          // If the status changed on the server but not locally, refresh the page
+          // to ensure proper permissions are applied
+          if (isUserAdmin !== isAdmin) {
+            console.log("Admin status mismatch detected, reloading page");
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error("Error verifying admin status:", error);
+        } finally {
+          setIsRefreshingAdmin(false);
+        }
+      }
+    };
+    
+    verifyAdminStatus();
+  }, [requireAdmin, user?.id, isAuthenticated, isAdmin]);
+  
   // Show loading state while auth is being determined, but only if we're initialized or loading
-  if ((isLoading || !initialized) && showSkeleton) {
+  if ((isLoading || !initialized || isRefreshingAdmin) && showSkeleton) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="w-full max-w-md space-y-4 p-4">
@@ -46,7 +74,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
   
   // If admin required but user is not admin, redirect to unauthorized
   if (requireAdmin && !isAdmin) {
-    return <Navigate to="/unauthorized" replace />;
+    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
   
   // User is authenticated (and admin if required), render children

@@ -30,3 +30,18 @@ export interface UserProfile {
   created_at?: string;
   updated_at?: string;
 }
+
+// Define the AuthContext interface
+export interface AuthContextType {
+  user: User | null;
+  profile: UserProfile | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  error: Error | null;
+  sessionChecked: boolean;
+  initialized: boolean;
+  setProfile: (profile: UserProfile | null) => void;
+  updateProfile: (profile: UserProfile | null) => void;
+  signOut: () => Promise<{ success: boolean, error: Error | null }>;
+}

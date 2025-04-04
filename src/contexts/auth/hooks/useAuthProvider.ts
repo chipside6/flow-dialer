@@ -11,6 +11,7 @@ export function useAuthProvider() {
 
   // Use the dedicated hooks for auth session and profile state
   const authSession = useAuthSession();
+  
   // Convert Supabase User to our custom User type when needed
   const userForProfile = authSession.user ? {
     id: authSession.user.id,
@@ -42,7 +43,9 @@ export function useAuthProvider() {
         
         // Activate trial plan for new user using setTimeout to prevent blocking
         setTimeout(() => {
-          activateTrialForNewUser(authSession.user!.id);
+          if (authSession.user) {
+            activateTrialForNewUser(authSession.user.id);
+          }
         }, 0);
       }
       
@@ -57,8 +60,20 @@ export function useAuthProvider() {
 
   // Combine loading states
   useEffect(() => {
-    setIsLoading(authSession.loading);
-  }, [authSession.loading]);
+    setIsLoading(authSession.loading || authSession.isLoading);
+  }, [authSession.loading, authSession.isLoading]);
+  
+  // Periodically refresh admin status for logged-in users
+  useEffect(() => {
+    if (!authSession.user || !initialized) return;
+    
+    // Check admin status every 15 minutes for active sessions
+    const adminRefreshInterval = setInterval(() => {
+      profileState.checkAdminStatus();
+    }, 15 * 60 * 1000);
+    
+    return () => clearInterval(adminRefreshInterval);
+  }, [authSession.user, initialized, profileState]);
 
   return {
     user: authSession.user,
@@ -66,7 +81,7 @@ export function useAuthProvider() {
     isLoading,
     isAuthenticated: !!authSession.user,
     isAdmin: profileState.isAdmin,
-    error: authSession.error,
+    error: authSession.error || authSession.refreshError,
     sessionChecked: authSession.sessionChecked,
     initialized: initialized && authSession.initialized,
     updateProfile: profileState.updateProfile,

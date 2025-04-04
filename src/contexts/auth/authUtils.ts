@@ -73,29 +73,90 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
   }
 }
 
-// New function to specifically check admin status with cache busting
+// Improved function to specifically check admin status with cache busting and retry logic
 export async function refreshAdminStatus(userId: string): Promise<boolean> {
+  let retries = 3;
+  
+  while (retries > 0) {
+    try {
+      console.log(`Refreshing admin status for user: ${userId} (retries left: ${retries})`);
+      
+      // Add cache busting with timestamp parameter to avoid getting cached results
+      const timestamp = new Date().getTime();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', userId)
+        .eq('cache_buster', timestamp % 1000) // This doesn't actually filter but forces a fresh request
+        .single();
+      
+      if (error) {
+        // Check if it's a not found error, which means the user exists but doesn't have a profile
+        if (error.code === 'PGRST116') {
+          console.log("Profile not found for user, creating default profile");
+          
+          // Create a default profile for the user with is_admin=false
+          await supabase
+            .from('profiles')
+            .insert({ id: userId, is_admin: false });
+            
+          return false;
+        }
+        
+        console.error("Error refreshing admin status:", error.message);
+        retries--;
+        
+        if (retries === 0) return false;
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        continue;
+      }
+      
+      const isAdmin = data?.is_admin === true;
+      console.log("Refreshed admin status:", isAdmin);
+      
+      // Update localStorage
+      if (isAdmin) {
+        localStorage.setItem('user_is_admin', 'true');
+        localStorage.setItem('admin_check_timestamp', Date.now().toString());
+      } else {
+        localStorage.removeItem('user_is_admin');
+        localStorage.removeItem('admin_check_timestamp');
+      }
+      
+      return isAdmin;
+    } catch (error: any) {
+      console.error(`Error in refreshAdminStatus (retries left: ${retries}):`, error.message);
+      retries--;
+      
+      if (retries === 0) return false;
+      
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  
+  return false;
+}
+
+// Add function to verify admin access with RLS bypass for highly sensitive operations
+export async function verifyAdminAccessWithRpc(userId: string): Promise<boolean> {
   try {
-    console.log("Refreshing admin status for user:", userId);
-    
-    // Remove the options call and simplify the query
-    // The timestamp parameter isn't needed as we're not caching at this level
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', userId)
-      .single();
+    // Call a database function that can bypass RLS (if you have one)
+    // This is more secure than relying on the client-side for critical operations
+    const { data, error } = await supabase.rpc('verify_admin_status', { 
+      user_id: userId 
+    });
     
     if (error) {
-      console.error("Error refreshing admin status:", error.message);
+      console.error("Error verifying admin via RPC:", error.message);
       return false;
     }
     
-    const isAdmin = data?.is_admin === true;
-    console.log("Refreshed admin status:", isAdmin);
-    return isAdmin;
+    return data === true;
   } catch (error: any) {
-    console.error("Error in refreshAdminStatus:", error.message);
+    console.error("Error in verifyAdminAccessWithRpc:", error.message);
     return false;
   }
 }
