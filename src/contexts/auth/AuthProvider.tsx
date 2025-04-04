@@ -8,6 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 import { ensureVoiceAppUploadsBucket } from '@/services/supabase/greetingFilesService';
 import { createLifetimeSubscription } from '@/hooks/subscription/subscriptionApi';
 import { pricingPlans } from '@/data/pricingPlans';
+import { forceAppReload, clearAllAuthData } from '@/utils/sessionCleanup';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -17,7 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [initialized, setInitialized] = useState(false);
-
+  
   useEffect(() => {
     console.log("AuthProvider: Checking for existing session");
     
@@ -25,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let authStateChangeComplete = false;
     let sessionCheckComplete = false;
     
-    // Set a timeout to prevent infinite loading
+    // Set a timeout to prevent infinite loading - REDUCED from 5s to 3s
     const timeout = setTimeout(() => {
       if (isMounted && !initialized) {
         console.log("AuthProvider: Timeout reached, forcing initialization");
@@ -33,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSessionChecked(true);
         setInitialized(true);
       }
-    }, 5000); // 5 second timeout
+    }, 3000); // 3 second timeout (reduced from 5)
     
     // Helper function to activate trial plan for new users
     const activateTrialForNewUser = async (userId: string) => {
@@ -155,15 +156,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
     
-    // THEN check for existing session
+    // THEN check for existing session - with a fallback timeout
     const checkSession = async () => {
       try {
+        // Add timeout for getting session
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session fetch timeout')), 2500)
+        );
+        
+        const { data, error: sessionError } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]) as any;
+        
         if (!isMounted) return;
         
         console.log("AuthProvider: Getting current session");
-        
-        // Get current user session
-        const { data, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error('AuthProvider: Error checking session:', sessionError);
@@ -230,6 +239,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('AuthProvider: Error checking session:', error);
         setError(error instanceof Error ? error : new Error('Unknown error during session check'));
         setIsAdmin(false); // Default to non-admin on error
+        
+        // IMPORTANT: On session check error, we need to clear state
+        setUser(null);
+        setProfile(null);
       } finally {
         if (isMounted) {
           sessionCheckComplete = true;
@@ -264,44 +277,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
   
-  // Handler for signing out
+  // Improved signOut function with immediate state reset
   const signOut = async () => {
     try {
       setIsLoading(true);
       
-      // Immediately reset state for better UX
+      // IMMEDIATELY clear all session state
       setUser(null);
       setProfile(null);
       setIsAdmin(false);
       
-      // Clear any Supabase session and token
+      // Aggressively clear all storage before calling API
+      clearAllAuthData();
+      
+      // Now attempt to clear server-side session
       try {
         // Sign out from Supabase directly
         await supabase.auth.signOut();
-        
-        // Clear localStorage and sessionStorage
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // Clear auth-related cookies
-        document.cookie.split(';').forEach(cookie => {
-          const [name] = cookie.trim().split('=');
-          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-        });
       } catch (e) {
         console.warn("Error during Supabase signout:", e);
       }
       
-      // Call our signOutUser function
-      const result = await signOutUser();
+      // Force app reload to clear any remaining state
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 100);
       
-      if (!result.success) {
-        console.error("AuthProvider: Error during sign out:", result.error);
-      }
-      
-      return result;
+      return { success: true, error: null };
     } catch (error) {
       console.error("AuthProvider: Unexpected error during sign out:", error);
+      
+      // Force reload even on error
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 100);
+      
       return { success: true, error };
     } finally {
       setIsLoading(false);

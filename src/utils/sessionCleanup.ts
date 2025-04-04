@@ -16,10 +16,15 @@ export const clearAllAuthData = () => {
     localStorage.removeItem('user_session');
     localStorage.removeItem('sessionLastUpdated');
     localStorage.removeItem('userSubscriptionPlan');
+    localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
     
     // Try to clear any other auth-related keys (prefix-based approach)
     Object.keys(localStorage).forEach(key => {
-      if (key.includes('auth') || key.includes('supabase') || key.includes('session')) {
+      if (key.includes('auth') || 
+          key.includes('supabase') || 
+          key.includes('session') || 
+          key.includes('sb-') ||
+          key.includes('user_')) {
         localStorage.removeItem(key);
       }
     });
@@ -27,13 +32,25 @@ export const clearAllAuthData = () => {
     // Clear session storage items too
     try {
       Object.keys(sessionStorage).forEach(key => {
-        if (key.includes('auth') || key.includes('supabase') || key.includes('session')) {
+        if (key.includes('auth') || 
+            key.includes('supabase') || 
+            key.includes('session') ||
+            key.includes('sb-') ||
+            key.includes('user_')) {
           sessionStorage.removeItem(key);
         }
       });
     } catch (e) {
       console.error('Error clearing sessionStorage:', e);
     }
+    
+    // Clear any auth cookies
+    document.cookie.split(';').forEach(cookie => {
+      const [name] = cookie.trim().split('=');
+      if (name.includes('sb-') || name.includes('supabase') || name.includes('auth')) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      }
+    });
     
     cleanupInProgress = false;
     console.log('All auth data has been cleared');

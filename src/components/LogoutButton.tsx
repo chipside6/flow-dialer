@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/auth/useAuth";
 import { clearAllAuthData } from "@/utils/sessionCleanup";
 
 interface LogoutButtonProps {
@@ -25,6 +25,7 @@ const LogoutButton = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { signOut } = useAuth();
   
   const handleLogout = async () => {
     if (isLoggingOut) return;
@@ -38,8 +39,8 @@ const LogoutButton = ({
       // Clear local storage items first to prevent auto-login loops
       clearAllAuthData();
       
-      // Sign out from Supabase
-      await supabase.auth.signOut();
+      // Use Auth context signOut function
+      await signOut();
       
       toast({
         title: "Logged out successfully",

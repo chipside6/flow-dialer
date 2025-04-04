@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { clearAllAuthData } from '@/utils/sessionCleanup';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,8 +17,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Add a timeout to prevent infinite loading
+        const authCheckTimeout = setTimeout(() => {
+          console.warn("Auth check timed out, redirecting to login");
+          clearAllAuthData();
+          navigate('/login', { replace: true });
+        }, 3000); // 3 second timeout
+        
         // Simple session check
         const { data } = await supabase.auth.getSession();
+        
+        clearTimeout(authCheckTimeout);
         
         if (!data.session) {
           navigate('/login', { replace: true });
@@ -26,13 +36,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
         
         // Only do a basic admin check if required
         if (requireAdmin) {
-          const { data: profileData } = await supabase
+          const { data: profileData, error } = await supabase
             .from('profiles')
             .select('is_admin')
             .eq('id', data.session.user.id)
-            .single();
+            .maybeSingle();
           
-          if (!profileData?.is_admin) {
+          if (error || !profileData?.is_admin) {
             navigate('/unauthorized', { replace: true });
             return;
           }
@@ -41,12 +51,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
         setIsLoading(false);
       } catch (error) {
         console.error("Auth check error:", error);
+        clearAllAuthData();
         navigate('/login', { replace: true });
       }
     };
     
     checkAuth();
-  }, [navigate, requireAdmin]);
+    
+    // Add a backup timeout as a fallback
+    const backupTimeout = setTimeout(() => {
+      if (isLoading) {
+        console.warn("Protected route still loading after timeout, forcing state change");
+        setIsLoading(false);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(backupTimeout);
+  }, [navigate, requireAdmin, isLoading]);
   
   if (isLoading) {
     return (

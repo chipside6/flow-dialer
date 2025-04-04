@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { clearAllAuthData } from '@/utils/sessionCleanup';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
 import { AuthHeader } from '@/components/auth/AuthHeader';
@@ -21,15 +23,67 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Simple check if user is already logged in
+  // Clear existing session on login page load to prevent auth loops
+  useEffect(() => {
+    // Only clear on initial mount
+    const shouldClearAuth = Boolean(localStorage.getItem('sb-grhvoclalziyjbjlhpml-auth-token'));
+    
+    if (shouldClearAuth) {
+      console.log("Clearing existing auth data on login page load");
+      clearAllAuthData();
+    }
+  }, []);
+  
+  // Check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
-      setCheckingSession(true);
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate('/dashboard');
+      try {
+        setCheckingSession(true);
+        
+        // Add a timeout for the session check
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session check timeout')), 2500)
+        );
+        
+        let data;
+        try {
+          const result = await Promise.race([sessionPromise, timeoutPromise]) as any;
+          data = result.data;
+        } catch (error) {
+          console.warn("Session check timed out, assuming no session");
+          setCheckingSession(false);
+          return;
+        }
+        
+        if (data.session) {
+          // Verify the session is valid by making a simple API call
+          try {
+            const { error } = await supabase
+              .from('profiles')
+              .select('id')
+              .limit(1);
+              
+            if (error) {
+              console.warn("Session appears invalid, clearing:", error);
+              clearAllAuthData();
+              setCheckingSession(false);
+              return;
+            }
+            
+            // Session is valid, redirect to dashboard
+            navigate('/dashboard');
+          } catch (e) {
+            console.warn("Error validating session, clearing:", e);
+            clearAllAuthData();
+          }
+        }
+        
+        setCheckingSession(false);
+      } catch (error) {
+        console.error("Auth check error:", error);
+        setCheckingSession(false);
       }
-      setCheckingSession(false);
     };
     
     checkAuth();
