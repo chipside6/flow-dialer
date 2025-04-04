@@ -13,6 +13,7 @@ interface AuthContextType {
   error: Error | null;
   sessionChecked: boolean;
   setProfile: (profile: UserProfile | null) => void;
+  signOut: () => Promise<{ success: boolean, error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,55 +29,34 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [sessionChecked, setSessionChecked] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(true); // Set to true by default
 
   useEffect(() => {
-    // Check for existing session
-    const checkSession = async () => {
-      try {
-        setIsLoading(true);
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      
+      if (data.session?.user) {
+        setUser(data.session.user);
         
-        // Get current user session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          throw sessionError;
+        // Fetch profile data
+        const userProfile = await fetchUserProfile(data.session.user.id);
+        if (userProfile) {
+          setProfile(userProfile);
+          setIsAdmin(!!userProfile.is_admin);
         }
-        
-        if (session?.user) {
-          setUser(session.user);
-          
-          // Fetch user profile
-          const userProfile = await fetchUserProfile(session.user.id);
-          if (userProfile) {
-            setProfile(userProfile);
-            setIsAdmin(!!userProfile.is_admin);
-          }
-        } else {
-          // No active session
-          setUser(null);
-          setProfile(null);
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-        setError(error instanceof Error ? error : new Error('Unknown error during session check'));
-      } finally {
-        setIsLoading(false);
-        setSessionChecked(true);
       }
+      
+      setIsLoading(false);
     };
     
-    checkSession();
+    getSession();
     
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event);
-        
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user);
           
@@ -91,17 +71,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setProfile(null);
           setIsAdmin(false);
         }
-        
-        setIsLoading(false);
-        setSessionChecked(true);
       }
     );
     
-    // Clean up subscription
     return () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  const signOut = async () => {
+    try {
+      // Clear user state immediately
+      setUser(null);
+      setProfile(null);
+      
+      // Simple cleanup
+      localStorage.removeItem('sessionLastUpdated');
+      
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      
+      return { success: true, error: null };
+    } catch (error) {
+      console.error("Error during sign out:", error);
+      return { success: false, error: error instanceof Error ? error : new Error(String(error)) };
+    }
+  };
 
   const value = {
     user,
@@ -111,7 +106,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin,
     error,
     sessionChecked,
-    setProfile
+    setProfile,
+    signOut
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

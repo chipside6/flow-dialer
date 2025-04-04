@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
 import { AuthHeader } from '@/components/auth/AuthHeader';
@@ -20,23 +20,6 @@ const SignUp = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  
-  // Simple check if user is already logged in, but without showing loading state
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
-          navigate('/dashboard');
-        }
-      } catch (error) {
-        console.error("Session check error:", error);
-        // Fail silently - don't show errors for session checks
-      }
-    };
-    
-    checkAuth();
-  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,9 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { clearAllAuthData } from '@/utils/sessionCleanup';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
 import { AuthHeader } from '@/components/auth/AuthHeader';
@@ -21,66 +20,6 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Clear existing session on login page load to prevent auth loops
-  useEffect(() => {
-    // Only clear on initial mount
-    const shouldClearAuth = Boolean(localStorage.getItem('sb-grhvoclalziyjbjlhpml-auth-token'));
-    
-    if (shouldClearAuth) {
-      console.log("Clearing existing auth data on login page load");
-      clearAllAuthData();
-    }
-  }, []);
-  
-  // Check if user is already logged in - but do it silently in the background
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Add a timeout for the session check
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session check timeout')), 2500)
-        );
-        
-        let data;
-        try {
-          const result = await Promise.race([sessionPromise, timeoutPromise]) as any;
-          data = result.data;
-        } catch (error) {
-          console.warn("Session check timed out, assuming no session");
-          return;
-        }
-        
-        if (data.session) {
-          // Verify the session is valid by making a simple API call
-          try {
-            const { error } = await supabase
-              .from('profiles')
-              .select('id')
-              .limit(1);
-              
-            if (error) {
-              console.warn("Session appears invalid, clearing:", error);
-              clearAllAuthData();
-              return;
-            }
-            
-            // Session is valid, redirect to dashboard
-            navigate('/dashboard');
-          } catch (e) {
-            console.warn("Error validating session, clearing:", e);
-            clearAllAuthData();
-          }
-        }
-      } catch (error) {
-        console.error("Auth check error:", error);
-      }
-    };
-    
-    // Execute the check but don't show any UI for it
-    checkAuth();
-  }, [navigate]);
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -96,11 +35,9 @@ const Login = () => {
         throw error;
       }
 
-      // Store session timestamp
+      // Simple session storage - just record that we're logged in
       localStorage.setItem('sessionLastUpdated', Date.now().toString());
       
-      // Removed success toast message
-
       navigate('/dashboard');
     } catch (error: any) {
       console.error("Login error:", error);
@@ -115,7 +52,6 @@ const Login = () => {
     }
   };
   
-  // Render the login form without any session checking indicators
   return (
     <AuthContainer>
       <AuthHeader title="Welcome back" emoji="👋" />

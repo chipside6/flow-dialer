@@ -1,9 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { clearAllAuthData } from '@/utils/sessionCleanup';
-import { useToast } from '@/components/ui/use-toast';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,109 +10,39 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const navigate = useNavigate();
-  const [retryCount, setRetryCount] = useState(0);
-  const { toast } = useToast();
-  const maxRetries = 2;
   
-  useEffect(() => {
-    let isMounted = true;
-    
+  // Simple auth check without loading state or background checking
+  React.useEffect(() => {
     const checkAuth = async () => {
-      try {
-        // Add a timeout to prevent infinite loading
-        const authCheckTimeout = setTimeout(() => {
-          if (isMounted) {
-            console.warn("Auth check timed out, redirecting to login");
-            clearAllAuthData();
-            navigate('/login', { replace: true });
-          }
-        }, 3000); // Reduced to 3 second timeout
-        
-        // Simple session check
-        const { data, error } = await supabase.auth.getSession();
-        
-        clearTimeout(authCheckTimeout);
-        
-        if (error) {
-          console.error("Auth session error:", error);
+      const { data } = await supabase.auth.getSession();
+      
+      if (!data.session) {
+        navigate('/login', { replace: true });
+        return;
+      }
+      
+      // Only do a basic admin check if required
+      if (requireAdmin) {
+        try {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', data.session.user.id)
+            .maybeSingle();
           
-          // Network errors shouldn't immediately log out the user
-          if (error.message.includes('network') || error.message.includes('abort')) {
-            if (retryCount < maxRetries) {
-              setRetryCount(prev => prev + 1);
-              return;
-            }
+          if (!profileData?.is_admin) {
+            navigate('/unauthorized', { replace: true });
           }
-          
-          // Only show toast for non-network errors
-          if (!error.message.includes('network') && !error.message.includes('abort')) {
-            toast({
-              title: "Authentication error",
-              description: "Your session has expired. Please log in again.",
-              variant: "destructive",
-            });
-          }
-          
-          clearAllAuthData();
-          navigate('/login', { replace: true });
-          return;
-        }
-        
-        if (!data.session) {
-          // Don't show a toast, just redirect silently
-          navigate('/login', { replace: true });
-          return;
-        }
-        
-        // Only do a basic admin check if required
-        if (requireAdmin) {
-          try {
-            const { data: profileData, error: profileError } = await supabase
-              .from('profiles')
-              .select('is_admin')
-              .eq('id', data.session.user.id)
-              .maybeSingle();
-            
-            if (profileError) {
-              console.error("Error fetching admin status:", profileError);
-              // Don't redirect, just continue
-            } else if (!profileData?.is_admin) {
-              navigate('/unauthorized', { replace: true });
-              return;
-            }
-          } catch (adminCheckError) {
-            console.error("Admin check error:", adminCheckError);
-            // Continue showing the page even if admin check fails
-          }
-        }
-      } catch (error) {
-        console.error("Auth check error:", error);
-        
-        // Only attempt retries for network errors
-        if (error instanceof Error && 
-            (error.message.includes('network') || error.message.includes('abort'))) {
-          if (retryCount < maxRetries) {
-            setRetryCount(prev => prev + 1);
-            return;
-          }
-        }
-        
-        if (isMounted) {
-          clearAllAuthData();
-          navigate('/login', { replace: true });
+        } catch (error) {
+          console.error("Admin check error:", error);
         }
       }
     };
     
     checkAuth();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [navigate, requireAdmin, retryCount, toast]);
+  }, [navigate, requireAdmin]);
   
-  // Always show children - no loading state
-  // This prevents UI flickering during authentication checks
+  // Always render children - no loading state
   return <>{children}</>;
 };
 
