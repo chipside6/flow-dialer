@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,7 @@ const UnauthorizedPage = () => {
   // Auto-refresh admin status when coming from admin panel
   useEffect(() => {
     if (user?.id && isFromAdmin && !isAdmin && retryCount < 1) {
-      refreshAdminStatus();
+      handleRefreshAdminStatus();
     }
   }, [user?.id, isAdmin, isFromAdmin, retryCount]);
 
@@ -49,7 +48,7 @@ const UnauthorizedPage = () => {
     try {
       console.log("Manually refreshing admin status for user:", user.id);
       
-      // Use the new refreshAdminStatus function
+      // Pass the user.id to the refreshAdminStatus function
       const isUserAdmin = await refreshAdminStatus(user.id);
       
       if (isUserAdmin) {

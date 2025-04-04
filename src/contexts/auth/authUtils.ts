@@ -78,17 +78,13 @@ export async function refreshAdminStatus(userId: string): Promise<boolean> {
   try {
     console.log("Refreshing admin status for user:", userId);
     
-    // Add a cache-busting query parameter to force a fresh DB read
-    const timestamp = new Date().getTime();
-    
+    // Remove the options call and simplify the query
+    // The timestamp parameter isn't needed as we're not caching at this level
     const { data, error } = await supabase
       .from('profiles')
       .select('is_admin')
       .eq('id', userId)
-      .single()
-      .options({ head: false, count: 'exact' })
-      // Add timestamp to force cache invalidation
-      .filter('updated_at', 'gte', '2000-01-01');
+      .single();
     
     if (error) {
       console.error("Error refreshing admin status:", error.message);
