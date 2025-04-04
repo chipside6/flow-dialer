@@ -1,26 +1,53 @@
-export async function activateTrialPlan(userId: string): Promise<boolean> {
-  if (!userId) {
-    console.warn("TrialActivation: Cannot activate trial without user ID");
-    return false;
-  }
-  
+
+import { createLifetimeSubscription } from '@/services/subscriptionService';
+import { toast } from '@/components/ui/use-toast';
+import { getPlanById } from '@/services/subscriptionService';
+
+// Calculate a trial end date 3 days from now
+const calculateTrialEndDate = () => {
+  const date = new Date();
+  date.setDate(date.getDate() + 3);
+  return date.toISOString();
+};
+
+// Activate a trial plan for a new user
+export const activateTrialPlan = async (userId: string): Promise<boolean> => {
   try {
-    console.log("TrialActivation: Attempting to activate trial for user:", userId);
+    console.log("Activating trial plan for new user:", userId);
     
-    // This would typically involve making an API call to your backend
-    // to start a trial for this user
+    // Get the trial plan from the pricing plans
+    const trialPlan = getPlanById('trial');
     
-    // For demonstration purposes, we're just logging the attempt
-    console.log("TrialActivation: Trial activation would happen here");
+    if (!trialPlan) {
+      console.error("Trial plan not found");
+      return false;
+    }
     
-    // In a real implementation, you would:
-    // 1. Call your subscription service to create a trial
-    // 2. Update the user's subscription status in the database
-    // 3. Return success or failure based on the result
+    // Add the trial end date to the plan
+    const planWithEndDate = {
+      ...trialPlan,
+      trialEndDate: calculateTrialEndDate()
+    };
     
-    return true;
+    // Create a trial subscription
+    const success = await createLifetimeSubscription(userId, planWithEndDate);
+    
+    if (success) {
+      console.log("Trial plan activated successfully");
+      localStorage.setItem('userSubscriptionPlan', 'trial');
+      
+      toast({
+        title: "Welcome!",
+        description: "Your 3-day trial has been activated. Enjoy full access to all features!",
+      });
+      
+      return true;
+    } else {
+      console.error("Failed to activate trial plan");
+      return false;
+    }
   } catch (error) {
-    console.error("TrialActivation: Error activating trial plan:", error);
+    console.error("Error activating trial plan:", error);
     return false;
   }
-}
+};

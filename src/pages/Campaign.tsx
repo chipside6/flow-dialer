@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
@@ -16,7 +15,6 @@ import { useSubscription } from "@/hooks/subscription";
 import { TrialExpiredNotice } from "@/components/campaign/TrialExpiredNotice";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { toast } from "@/components/ui/use-toast";
 
 const CampaignPage = () => {
   const location = useLocation();
@@ -27,8 +25,9 @@ const CampaignPage = () => {
   const { isOnline } = useNetworkStatus();
   const [hasAttemptedInitialLoad, setHasAttemptedInitialLoad] = useState(false);
   
-  // All users can access campaigns without subscription check
-  const canAccessCampaigns = true;
+  // Check if user can create campaigns based on subscription status
+  const canAccessCampaigns = currentPlan === 'lifetime' || 
+                             (currentPlan === 'trial' && !trialExpired);
   
   // Check for state passed from navigation to determine if we should show the wizard
   useEffect(() => {
@@ -80,9 +79,6 @@ const CampaignPage = () => {
       </DashboardLayout>
     );
   }
-  
-  // Even if there's an error, we should render the campaign UI if we have campaigns data
-  // This prevents error messages from showing when there's actually usable data
   
   return (
     <div className="min-h-screen bg-background flex flex-col">

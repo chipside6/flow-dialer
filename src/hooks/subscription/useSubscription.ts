@@ -162,7 +162,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
   // Wrapper to ensure correct type is returned
   const activateLifetimePlan = useCallback(async (planId?: string): Promise<{ success: boolean; error?: Error }> => {
     try {
-      const result = await activatePlan();
+      const result = await activatePlan(planId);
       
       if (!result.success && result.error) {
         // Convert the plain error object to a proper Error instance
