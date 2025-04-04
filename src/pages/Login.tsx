@@ -34,13 +34,6 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate, returnTo]);
   
-  // Reset loading state after component unmounts
-  useEffect(() => {
-    return () => {
-      setIsLoading(false);
-    };
-  }, []);
-  
   // Clear error when user changes inputs
   useEffect(() => {
     if (errorMessage) {
@@ -51,25 +44,14 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isLoading) return; // Prevent multiple submissions
+    if (isLoading) return;
     
     setIsLoading(true);
     setErrorMessage(null);
 
-    // Hard timeout to prevent UI from being stuck
-    const timeoutId = setTimeout(() => {
-      if (isLoading) {
-        setIsLoading(false);
-        setErrorMessage("Login request timed out. Please try again.");
-      }
-    }, 10000); // 10 second timeout
-
     try {
       // Call the signIn function
       const { error } = await signIn(email, password);
-
-      // Clear the timeout since we got a response
-      clearTimeout(timeoutId);
 
       if (error) {
         throw error;
@@ -81,24 +63,7 @@ const Login = () => {
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage(error.message || "Failed to login");
-      
-      // Show appropriate error message based on error type
-      if (error.message?.includes('timeout') || error.message?.includes('network')) {
-        toast({
-          title: "Connection issue",
-          description: "Please check your internet connection and try again",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Login failed",
-          description: error.message || "Invalid credentials or server error",
-          variant: "destructive",
-        });
-      }
     } finally {
-      // Always clear the timeout and reset loading state
-      clearTimeout(timeoutId);
       setIsLoading(false);
     }
   };

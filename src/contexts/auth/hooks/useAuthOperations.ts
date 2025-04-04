@@ -38,19 +38,7 @@ export function useAuthOperations() {
   const signIn = async (email: string, password: string) => {
     try {
       console.log("useAuthOperations - Signing in user:", email);
-      
-      // Create a promise that will reject after a timeout
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error("Login request timed out. Please try again."));
-        }, 8000); // 8 second timeout (reduced from 10)
-      });
-      
-      // Race the sign in request against the timeout
-      const result = await Promise.race([
-        signInUser(email, password),
-        timeoutPromise
-      ]) as { error: Error | null, session?: any };
+      const result = await signInUser(email, password);
       
       if (result.error) {
         console.error("useAuthOperations - Login error:", result.error.message);
@@ -64,20 +52,11 @@ export function useAuthOperations() {
       return result;
     } catch (error: any) {
       console.error("useAuthOperations - Unexpected login error:", error);
-      
-      // Provide more specific error messages
-      const errorMessage = error.message?.includes('timeout') 
-        ? "Login request timed out. Please try again." 
-        : error.message?.includes('network') 
-          ? "Network error. Please check your internet connection." 
-          : error.message || "Please try again later";
-      
       toast({
         title: "Login failed",
-        description: errorMessage,
+        description: error.message || "Please try again later",
         variant: "destructive",
       });
-      
       return { error };
     }
   };
