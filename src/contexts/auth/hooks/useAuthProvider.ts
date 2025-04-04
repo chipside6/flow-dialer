@@ -74,46 +74,73 @@ export function useAuthProvider() {
   };
 
   useEffect(() => {
-    console.log("AuthProvider: Checking for existing session");
-    
     let isMounted = true;
-    let authStateChangeComplete = false;
-    let sessionCheckComplete = false;
     
-    // Set a timeout to prevent infinite loading - REDUCED from 5s to 2s
-    const timeout = setTimeout(() => {
-      if (isMounted && !initialized) {
-        console.log("AuthProvider: Timeout reached, forcing initialization");
-        setIsLoading(false);
-        setSessionChecked(true);
-        setInitialized(true);
-      }
-    }, 2000); // 2 second timeout (reduced from 3)
-    
-    // Set up auth state change listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+    const initializeAuth = async () => {
+      console.log("AuthProvider: Checking for existing session");
+      
+      try {
+        // Check for existing session first
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        
         if (!isMounted) return;
         
-        console.log('AuthProvider: Auth state changed:', event);
-        authStateChangeComplete = true;
+        if (sessionError) {
+          console.error('AuthProvider: Error checking session:', sessionError);
+          setError(sessionError);
+          setIsLoading(false);
+          setSessionChecked(true);
+          setInitialized(true);
+          return;
+        }
         
-        if (event === 'SIGNED_IN' && session?.user) {
-          await handleSignIn(session.user);
-        } else if (event === 'SIGNED_OUT') {
+        if (sessionData.session?.user) {
+          console.log("AuthProvider: Found active session for user:", sessionData.session.user.email);
+          await handleSignIn(sessionData.session.user);
+        } else {
+          console.log("AuthProvider: No active session found");
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
         }
         
-        if (sessionCheckComplete && isMounted) {
+        // Set up auth state change listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            if (!isMounted) return;
+            
+            console.log('AuthProvider: Auth state changed:', event);
+            
+            if (event === 'SIGNED_IN' && session?.user) {
+              await handleSignIn(session.user);
+            } else if (event === 'SIGNED_OUT') {
+              setUser(null);
+              setProfile(null);
+              setIsAdmin(false);
+            }
+          }
+        );
+        
+        // Cleanup function
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('AuthProvider: Error during initialization:', error);
+        if (isMounted) {
+          setError(error instanceof Error ? error : new Error('Unknown error during auth initialization'));
+          setIsAdmin(false);
+          setUser(null);
+          setProfile(null);
+        }
+      } finally {
+        if (isMounted) {
           setIsLoading(false);
           setSessionChecked(true);
           setInitialized(true);
-          clearTimeout(timeout);
         }
       }
-    );
+    };
     
     // Helper function to handle user sign in
     const handleSignIn = async (supabaseUser: any) => {
@@ -169,71 +196,23 @@ export function useAuthProvider() {
       }
     };
     
-    // THEN check for existing session - with a fallback timeout
-    const checkSession = async () => {
-      try {
-        // Add timeout for getting session - REDUCED from 2.5s to 1.5s
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session fetch timeout')), 1500)
-        );
-        
-        const { data, error: sessionError } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]) as any;
-        
-        if (!isMounted) return;
-        
-        console.log("AuthProvider: Getting current session");
-        
-        if (sessionError) {
-          console.error('AuthProvider: Error checking session:', sessionError);
-          setError(sessionError instanceof Error ? sessionError : new Error('Unknown error during session check'));
-          setIsLoading(false);
-          setSessionChecked(true);
-          setInitialized(true);
-          return;
-        }
-        
-        if (data.session?.user) {
-          console.log("AuthProvider: Found active session for user:", data.session.user.email);
-          await handleSignIn(data.session.user);
-        } else {
-          console.log("AuthProvider: No active session found");
-          setUser(null);
-          setProfile(null);
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        console.error('AuthProvider: Error checking session:', error);
-        setError(error instanceof Error ? error : new Error('Unknown error during session check'));
-        setIsAdmin(false); // Default to non-admin on error
-        
-        // IMPORTANT: On session check error, we need to clear state
-        setUser(null);
-        setProfile(null);
-      } finally {
-        if (isMounted) {
-          sessionCheckComplete = true;
-          
-          if (authStateChangeComplete) {
-            setIsLoading(false);
-            setSessionChecked(true);
-            setInitialized(true);
-            clearTimeout(timeout);
-          }
-        }
+    // Set timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (isMounted && !initialized) {
+        console.log("AuthProvider: Timeout reached, forcing initialization");
+        setIsLoading(false);
+        setSessionChecked(true);
+        setInitialized(true);
       }
-    };
+    }, 2000);
     
-    checkSession();
+    setIsLoading(true);
+    initializeAuth();
     
-    // Clean up
+    // Cleanup function
     return () => {
       isMounted = false;
       clearTimeout(timeout);
-      subscription.unsubscribe();
     };
   }, []);
 

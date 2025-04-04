@@ -19,16 +19,17 @@ const TransferNumbers = () => {
     refreshTransferNumbers
   } = useTransferNumbers();
   
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   
   // Load data once when component mounts and user is authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      refreshTransferNumbers().catch(err => {
-        console.error("Failed to load transfer numbers:", err);
-      });
+    if (isAuthenticated && user?.id) {
+      console.log("TransferNumbers: User is authenticated, loading transfer numbers");
+      refreshTransferNumbers();
+    } else {
+      console.log("TransferNumbers: User not authenticated yet, waiting...");
     }
-  }, [isAuthenticated, refreshTransferNumbers]);
+  }, [isAuthenticated, user?.id, refreshTransferNumbers]);
   
   return (
     <DashboardLayout>
