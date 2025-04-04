@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/subscription';
-import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SubscriptionCheckProps {
@@ -99,19 +98,7 @@ export function SubscriptionCheck({
     hasValidSubscription
   ]);
 
-  // While checking subscription status, show loading
-  if (isLoading || (requireSubscription && !subscriptionValid && retryCount < 3 && hasValidSubscription === null)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-          <p className="mt-2 text-lg text-muted-foreground">Verifying subscription status...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If children are provided, render them when subscription is valid
+  // Don't show any loading state - just render children if appropriate
   if (children) {
     return subscriptionValid ? <>{children}</> : null;
   }

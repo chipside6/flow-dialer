@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,7 +14,7 @@ import { forceAppReload, clearAllAuthData } from '@/utils/sessionCleanup';
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Changed to false by default to avoid showing loading indicator
   const [isAdmin, setIsAdmin] = useState<boolean>(false); // Default to false, not null
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -26,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let authStateChangeComplete = false;
     let sessionCheckComplete = false;
     
-    // Set a timeout to prevent infinite loading - REDUCED from 5s to 3s
+    // Set a timeout to prevent infinite loading - REDUCED from 5s to 2s
     const timeout = setTimeout(() => {
       if (isMounted && !initialized) {
         console.log("AuthProvider: Timeout reached, forcing initialization");
@@ -34,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSessionChecked(true);
         setInitialized(true);
       }
-    }, 3000); // 3 second timeout (reduced from 5)
+    }, 2000); // 2 second timeout (reduced from 3)
     
     // Helper function to activate trial plan for new users
     const activateTrialForNewUser = async (userId: string) => {
@@ -159,10 +160,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // THEN check for existing session - with a fallback timeout
     const checkSession = async () => {
       try {
-        // Add timeout for getting session
+        // Add timeout for getting session - REDUCED from 2.5s to 1.5s
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session fetch timeout')), 2500)
+          setTimeout(() => reject(new Error('Session fetch timeout')), 1500)
         );
         
         const { data, error: sessionError } = await Promise.race([

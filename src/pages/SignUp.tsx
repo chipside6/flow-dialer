@@ -16,21 +16,23 @@ const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Simple check if user is already logged in
+  // Simple check if user is already logged in, but without showing loading state
   useEffect(() => {
     const checkAuth = async () => {
-      setCheckingSession(true);
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate('/dashboard');
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+        // Fail silently - don't show errors for session checks
       }
-      setCheckingSession(false);
     };
     
     checkAuth();
@@ -88,17 +90,6 @@ const SignUp = () => {
       setIsLoading(false);
     }
   };
-  
-  if (checkingSession) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-          <p className="mt-2 text-lg text-muted-foreground">Checking session...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <AuthContainer>

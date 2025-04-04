@@ -12,9 +12,8 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
+  const { toast } = useToast();
   const maxRetries = 2;
   
   useEffect(() => {
@@ -29,7 +28,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
             clearAllAuthData();
             navigate('/login', { replace: true });
           }
-        }, 5000); // 5 second timeout
+        }, 3000); // Reduced to 3 second timeout
         
         // Simple session check
         const { data, error } = await supabase.auth.getSession();
@@ -43,7 +42,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
           if (error.message.includes('network') || error.message.includes('abort')) {
             if (retryCount < maxRetries) {
               setRetryCount(prev => prev + 1);
-              setIsLoading(false); // Allow rendering content during retry
               return;
             }
           }
@@ -89,10 +87,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
             // Continue showing the page even if admin check fails
           }
         }
-        
-        if (isMounted) {
-          setIsLoading(false);
-        }
       } catch (error) {
         console.error("Auth check error:", error);
         
@@ -101,7 +95,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
             (error.message.includes('network') || error.message.includes('abort'))) {
           if (retryCount < maxRetries) {
             setRetryCount(prev => prev + 1);
-            setIsLoading(false); // Allow rendering content during retry
             return;
           }
         }

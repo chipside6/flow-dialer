@@ -8,7 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 export const useAuthSession = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setIsLoading] = useState(true);
+  const [loading, setIsLoading] = useState(false); // Changed to false by default
   const [initialized, setInitialized] = useState(false);
   const [sessionExpiryTime, setSessionExpiryTime] = useState<number | null>(null);
   const [refreshError, setRefreshError] = useState<Error | null>(null);
@@ -175,7 +175,7 @@ export const useAuthSession = () => {
   return {
     session,
     user,
-    loading,  // Changed from isLoading to loading to match the state variable name
+    loading,
     initialized,
     refreshSession,
     refreshError,
