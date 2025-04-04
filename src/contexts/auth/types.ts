@@ -4,7 +4,7 @@
 // Base user interface
 export interface User {
   id: string;
-  email: string;
+  email?: string; // Make this optional to match Supabase User type
   created_at?: string;
   last_sign_in_at?: string;
 }

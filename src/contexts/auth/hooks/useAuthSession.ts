@@ -18,6 +18,30 @@ export const useAuthSession = () => {
     refreshSession, refreshError,
     getSessionTimeRemaining, isSessionAboutToExpire 
   } = useSessionManagement();
+  
+  // Provide signOut functionality
+  const signOut = useCallback(async (): Promise<{ success: boolean; error: Error | null }> => {
+    try {
+      // Clear user state
+      setUser(null);
+      setSession(null);
+      setSessionExpiryTime(null);
+      
+      // Clear localStorage
+      debouncedClearAllAuthData();
+      
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      
+      return { success: true, error: null };
+    } catch (error) {
+      console.error("Error during sign out:", error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error : new Error(String(error)) 
+      };
+    }
+  }, [setUser, setSession, setSessionExpiryTime]);
 
   // Check session expiry and refresh if needed
   useEffect(() => {
@@ -86,9 +110,13 @@ export const useAuthSession = () => {
     session,
     user,
     loading,
+    isLoading: loading, // Alias for compatibility
     initialized,
     refreshSession,
     refreshError,
+    error: refreshError, // Alias for compatibility
+    sessionChecked: initialized, // Alias for compatibility
+    signOut,
     getSessionTimeRemaining,
     isSessionAboutToExpire
   };

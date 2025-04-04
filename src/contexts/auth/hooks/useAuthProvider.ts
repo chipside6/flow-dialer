@@ -11,7 +11,15 @@ export function useAuthProvider() {
 
   // Use the dedicated hooks for auth session and profile state
   const authSession = useAuthSession();
-  const profileState = useProfileState(authSession.user);
+  // Convert Supabase User to our custom User type when needed
+  const userForProfile = authSession.user ? {
+    id: authSession.user.id,
+    email: authSession.user.email || '',
+    created_at: authSession.user.created_at,
+    last_sign_in_at: authSession.user.last_sign_in_at
+  } as User : null;
+  
+  const profileState = useProfileState(userForProfile);
 
   // Helper function to activate trial plan for new users
   const activateTrialForNewUser = async (userId: string) => {
@@ -49,8 +57,8 @@ export function useAuthProvider() {
 
   // Combine loading states
   useEffect(() => {
-    setIsLoading(authSession.isLoading);
-  }, [authSession.isLoading]);
+    setIsLoading(authSession.loading);
+  }, [authSession.loading]);
 
   return {
     user: authSession.user,
