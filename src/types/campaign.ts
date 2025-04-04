@@ -20,6 +20,14 @@ export interface Campaign {
   answer_count?: number;
   transfer_count?: number;
   updated_at?: string;
+  
+  // Add these properties to support CallStatisticsCard component 
+  totalCalls?: number;
+  answeredCalls?: number;
+  transferredCalls?: number;
+  failedCalls?: number;
+  title?: string;
+  progress?: number;
 }
 
 export interface CampaignState {

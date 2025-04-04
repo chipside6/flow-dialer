@@ -3,7 +3,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/components/ui/use-toast";
 import { useFetchCampaigns } from "./useFetchCampaigns";
-import { Campaign, CampaignState, UseCampaignsResult } from "../types/campaign";
+import { CampaignState, UseCampaignsResult } from "../types/campaign";
+import { Campaign } from "@/types/campaign";
 
 /**
  * Primary hook for managing campaigns data
@@ -30,7 +31,7 @@ export const useCampaigns = (): UseCampaignsResult => {
       });
       
       setState({
-        campaigns: data,
+        campaigns: data as Campaign[],
         isLoading: false,
         error
       });
@@ -87,7 +88,7 @@ export const useCampaigns = (): UseCampaignsResult => {
         // If component is still mounted, update state
         if (isMounted) {
           setState({
-            campaigns: data,
+            campaigns: data as Campaign[],
             isLoading: false,
             error
           });

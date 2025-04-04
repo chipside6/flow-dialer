@@ -3,8 +3,8 @@
  * Utility functions for API requests with enhanced error handling and retry logic
  */
 
-import { toast } from '@/components/ui/use-toast';
 import { forceAppReload } from './sessionCleanup';
+import { toast } from '@/components/ui/use-toast';
 
 // Type for function that can be retried
 type RetryableFunction<T> = () => Promise<T>;

@@ -43,3 +43,25 @@ export const debouncedClearAllAuthData = () => {
     clearAllAuthData();
   }, 100);
 };
+
+/**
+ * Force the application to reload, clearing any state
+ */
+export const forceAppReload = () => {
+  // First clear any cached auth data to prevent auto-login loops
+  clearAllAuthData();
+  
+  // Force page reload
+  try {
+    window.location.href = '/login';
+    
+    // If the redirect doesn't work for some reason, try a hard reload
+    setTimeout(() => {
+      window.location.reload(true);
+    }, 100);
+  } catch (e) {
+    console.error('Error during app reload:', e);
+    // Fallback to basic reload
+    window.location.reload();
+  }
+};

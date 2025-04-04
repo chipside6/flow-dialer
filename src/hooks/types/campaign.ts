@@ -25,3 +25,6 @@ export interface FetchCampaignsResult {
   isAuthError?: boolean;
   isTimeoutError?: boolean;
 }
+
+// Re-export Campaign type for backward compatibility
+export type { Campaign };
