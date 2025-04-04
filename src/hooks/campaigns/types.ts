@@ -22,8 +22,9 @@ export interface FetchCampaignsParams {
 export interface FetchCampaignsResult {
   data: Campaign[];
   error: Error | null;
-  isAuthError: boolean;
-  isTimeoutError: boolean;
+  isAuthError?: boolean;
+  isTimeoutError?: boolean;
+  isOfflineError?: boolean;
 }
 
 // Re-export Campaign type for backward compatibility
