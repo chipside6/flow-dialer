@@ -175,7 +175,7 @@ export const useAuthSession = () => {
   return {
     session,
     user,
-    loading: isLoading,
+    loading,  // Changed from isLoading to loading to match the state variable name
     initialized,
     refreshSession,
     refreshError,
