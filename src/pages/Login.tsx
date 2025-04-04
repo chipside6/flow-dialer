@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,10 +24,33 @@ const Login = () => {
   // Extract returnTo from location state if available
   const returnTo = location.state?.returnTo || '/dashboard';
   
+  // Reset loading state after component unmounts or if there was an error
+  useEffect(() => {
+    return () => {
+      // Ensure loading state is reset when component unmounts
+      setIsLoading(false);
+    };
+  }, []);
+  
+  // Clear error when user changes inputs
+  useEffect(() => {
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
+  }, [email, password, errorMessage]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage(null);
+
+    // Set a timeout to automatically reset loading state if it takes too long
+    const timeoutId = setTimeout(() => {
+      if (isLoading) {
+        setIsLoading(false);
+        setErrorMessage("Login request timed out. Please try again.");
+      }
+    }, 10000); // 10 second timeout
 
     try {
       // Simple login with Supabase
@@ -35,6 +58,9 @@ const Login = () => {
         email,
         password
       });
+
+      // Clear the timeout since we got a response
+      clearTimeout(timeoutId);
 
       if (error) {
         throw error;
@@ -48,16 +74,27 @@ const Login = () => {
       // Redirect to dashboard or requested page
       navigate(returnTo);
       
-      // Removed welcome back toast
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage(error.message || "Failed to login");
-      toast({
-        title: "Login failed",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
+      
+      // Show appropriate error message based on error type
+      if (error.message?.includes('timeout') || error.message?.includes('network')) {
+        toast({
+          title: "Connection issue",
+          description: "Please check your internet connection and try again",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Login failed",
+          description: error.message || "Invalid credentials or server error",
+          variant: "destructive",
+        });
+      }
     } finally {
+      // Always clear the timeout and reset loading state
+      clearTimeout(timeoutId);
       setIsLoading(false);
     }
   };

@@ -21,11 +21,6 @@ export function useAuthOperations() {
           description: result.error.message,
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Signup successful",
-          description: "Your account has been created successfully",
-        });
       }
       
       return result;
@@ -43,7 +38,19 @@ export function useAuthOperations() {
   const signIn = async (email: string, password: string) => {
     try {
       console.log("useAuthOperations - Signing in user:", email);
-      const result = await signInUser(email, password);
+      
+      // Set a timeout for the sign in request
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("Login request timed out. Please try again."));
+        }, 15000); // 15 second timeout
+      });
+      
+      // Race the sign in request against the timeout
+      const result = await Promise.race([
+        signInUser(email, password),
+        timeoutPromise
+      ]) as { error: Error | null, session?: any };
       
       if (result.error) {
         console.error("useAuthOperations - Login error:", result.error.message);
@@ -53,16 +60,24 @@ export function useAuthOperations() {
           variant: "destructive",
         });
       }
-      // Success toast removed for login
       
       return result;
     } catch (error: any) {
       console.error("useAuthOperations - Unexpected login error:", error);
+      
+      // Provide more specific error messages
+      const errorMessage = error.message?.includes('timeout') 
+        ? "Login request timed out. Please try again." 
+        : error.message?.includes('network') 
+          ? "Network error. Please check your internet connection." 
+          : error.message || "Please try again later";
+      
       toast({
-        title: "Unexpected error during login",
-        description: error.message || "Please try again later",
+        title: "Login failed",
+        description: errorMessage,
         variant: "destructive",
       });
+      
       return { error };
     }
   };
