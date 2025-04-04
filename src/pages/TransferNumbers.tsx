@@ -22,14 +22,13 @@ const TransferNumbers = () => {
   const { isAuthenticated, user } = useAuth();
   
   // Load data once when component mounts and user is authenticated
+  // Use a more stable dependency array to avoid refresh loops
   useEffect(() => {
-    if (isAuthenticated && user?.id) {
-      console.log("TransferNumbers: User is authenticated, loading transfer numbers");
+    if (isAuthenticated && user?.id && isInitialLoad) {
+      console.log("TransferNumbers: Initial load triggered for user", user.id);
       refreshTransferNumbers();
-    } else {
-      console.log("TransferNumbers: User not authenticated yet, waiting...");
     }
-  }, [isAuthenticated, user?.id, refreshTransferNumbers]);
+  }, [isAuthenticated, user?.id, isInitialLoad, refreshTransferNumbers]);
   
   return (
     <DashboardLayout>

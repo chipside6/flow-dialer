@@ -14,78 +14,45 @@ export function useTransferNumbers() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const initialFetchDone = useRef(false);
   
-  // Function to force a refresh
-  const refreshTransferNumbers = useCallback(() => {
-    setRefreshTrigger(prev => prev + 1);
-  }, []);
-  
-  // Load transfer numbers when user or refresh trigger changes
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchData = async () => {
-      // Only fetch if authenticated and we have a user
-      if (!isAuthenticated || !user?.id) {
-        setTransferNumbers([]);
-        setIsLoading(false);
-        setError(null);
-        return;
-      }
-      
-      // Prevent redundant fetches
-      if (isLoading) return;
-      
-      console.log("useTransferNumbers: Fetching transfer numbers for user", user.id);
-      setIsLoading(true);
+  // Function to fetch transfer numbers - defined outside useEffect to avoid recreation
+  const fetchData = useCallback(async () => {
+    // Only fetch if authenticated and we have a user
+    if (!isAuthenticated || !user?.id) {
+      setTransferNumbers([]);
+      setIsLoading(false);
       setError(null);
-      
-      try {
-        const data = await fetchUserTransferNumbers(user.id);
-        
-        if (isMounted) {
-          console.log(`useTransferNumbers: Fetched ${data.length} transfer numbers`);
-          setTransferNumbers(data);
-          setIsLoading(false);
-          if (isInitialLoad) setIsInitialLoad(false);
-        }
-      } catch (err: any) {
-        console.error("useTransferNumbers: Error fetching transfer numbers:", err);
-        
-        if (isMounted) {
-          setError(err.message || "Failed to load transfer numbers");
-          setIsLoading(false);
-          if (isInitialLoad) setIsInitialLoad(false);
-        }
-      }
-    };
-    
-    // Set a timeout to prevent hanging on loading state
-    const timeoutId = setTimeout(() => {
-      if (isMounted && isLoading) {
-        console.log("useTransferNumbers: Loading timeout reached");
-        setIsLoading(false);
-        if (!error) {
-          setError("Loading timed out. Please try again.");
-        }
-      }
-    }, 8000);
-    
-    // Only fetch if we have a user and either:
-    // 1. It's our initial fetch
-    // 2. A refresh was triggered
-    if (isAuthenticated && user?.id && (!initialFetchDone.current || refreshTrigger > 0)) {
-      fetchData();
-      initialFetchDone.current = true;
+      return;
     }
     
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-    };
-  }, [isAuthenticated, user, refreshTrigger, isLoading, isInitialLoad, error]);
+    if (isLoading) return; // Prevent concurrent fetches
+    
+    console.log("useTransferNumbers: Fetching transfer numbers for user", user.id);
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const data = await fetchUserTransferNumbers(user.id);
+      console.log(`useTransferNumbers: Fetched ${data.length} transfer numbers`);
+      setTransferNumbers(data);
+    } catch (err: any) {
+      console.error("useTransferNumbers: Error fetching transfer numbers:", err);
+      setError(err.message || "Failed to load transfer numbers");
+    } finally {
+      setIsLoading(false);
+      if (isInitialLoad) setIsInitialLoad(false);
+    }
+  }, [user?.id, isAuthenticated, isLoading, isInitialLoad]);
+  
+  // Memoized refresh function that doesn't change on every render
+  const refreshTransferNumbers = useCallback(() => {
+    // Only trigger a fetch if we haven't already fetched or explicitly request a refresh
+    if (!initialFetchDone.current || !isLoading) {
+      initialFetchDone.current = true;
+      fetchData();
+    }
+  }, [fetchData, isLoading]);
   
   // Add a new transfer number
   const addTransferNumber = useCallback(async (name: string, number: string, description: string) => {
@@ -103,8 +70,8 @@ export function useTransferNumbers() {
     try {
       const newTransferNumber = await addNumber(user.id, name, number, description);
       
-      // Force refresh after adding
-      refreshTransferNumbers();
+      // Update local state immediately for better UX
+      setTransferNumbers(prev => [newTransferNumber, ...prev]);
       
       return newTransferNumber;
     } catch (err: any) {
@@ -113,7 +80,7 @@ export function useTransferNumbers() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [isAuthenticated, user, refreshTransferNumbers]);
+  }, [isAuthenticated, user, setTransferNumbers]);
   
   // Delete a transfer number
   const handleDeleteTransferNumber = useCallback(async (id: string) => {
@@ -131,9 +98,9 @@ export function useTransferNumbers() {
     try {
       const success = await deleteNumber(user.id, id);
       
-      // Force refresh after deletion
+      // Update local state immediately for better UX
       if (success) {
-        refreshTransferNumbers();
+        setTransferNumbers(prev => prev.filter(item => item.id !== id));
       }
       
       return success;
@@ -143,7 +110,7 @@ export function useTransferNumbers() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [isAuthenticated, user, refreshTransferNumbers]);
+  }, [isAuthenticated, user, setTransferNumbers]);
   
   return {
     transferNumbers,
