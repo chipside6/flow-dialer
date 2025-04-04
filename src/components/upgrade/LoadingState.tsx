@@ -41,11 +41,11 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   
   if (isTimedOut) {
     return (
-      <div className="flex flex-col justify-center items-center p-8 w-full">
+      <div className="flex flex-col justify-center items-center p-8 w-full min-h-[200px]">
         <Alert variant={errorVariant} className="mb-6 max-w-md">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex flex-col gap-4">
-            <span>Loading timeout reached. The server might be busy or there could be a connection issue.</span>
+            <span>Connection issue detected. The server might be busy or there could be a network problem.</span>
             {onRetry && (
               <Button 
                 variant="outline" 
@@ -53,7 +53,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
                 className="flex items-center w-fit"
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Retry Loading
+                Retry Connection
               </Button>
             )}
           </AlertDescription>
@@ -63,7 +63,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   }
   
   return (
-    <div className="flex flex-col justify-center items-center p-8 w-full">
+    <div className="flex flex-col justify-center items-center p-8 w-full min-h-[200px]">
       <div className="text-center p-6 max-w-md">
         <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
         <p className="text-base text-gray-600">{message}</p>

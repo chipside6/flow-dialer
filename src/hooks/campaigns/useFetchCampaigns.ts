@@ -31,9 +31,9 @@ export const useFetchCampaigns = () => {
     console.log("Fetching campaigns for user:", user.id);
     
     try {
-      // Set a timeout for the fetch operation
+      // Set a timeout for the fetch operation - increased from 5 to 15 seconds
       const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => abortController.abort(), 15000); // 15 second timeout
       
       const { data, error } = await supabase
         .from('campaigns')
@@ -45,6 +45,7 @@ export const useFetchCampaigns = () => {
       clearTimeout(timeoutId);
 
       if (error) {
+        // Log operation failure
         logSupabaseOperation({
           operation: OperationType.READ,
           table: "campaigns",
@@ -53,6 +54,16 @@ export const useFetchCampaigns = () => {
           success: false,
           error
         });
+        
+        // Check if this was a connection error
+        if (error.message?.includes('abort') || error.message?.includes('signal')) {
+          return { 
+            data: [], 
+            error: new Error('Connection timed out. Please check your internet connection and try again.'),
+            isTimeoutError: true
+          };
+        }
+        
         return { data: [], error };
       }
       
@@ -75,11 +86,11 @@ export const useFetchCampaigns = () => {
       console.error('Error fetching campaigns:', error.message);
       
       // Check if this is an AbortError (timeout)
-      if (error.name === 'AbortError') {
+      if (error.name === 'AbortError' || error.message?.includes('abort')) {
         console.log('Fetch operation timed out');
         return { 
           data: [], 
-          error: new Error('Connection timed out. Please try again later.'),
+          error: new Error('Connection timed out. Please check your internet connection and try again.'),
           isTimeoutError: true
         };
       }

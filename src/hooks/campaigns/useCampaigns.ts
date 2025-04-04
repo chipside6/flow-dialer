@@ -18,14 +18,15 @@ export const useCampaigns = (): UseCampaignsResult => {
     error: null
   });
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const retryCountRef = useRef(0);
   const { fetchCampaigns } = useFetchCampaigns();
 
   // Define refreshCampaigns as a callback function
   const refreshCampaigns = useCallback(async () => {
-    setState(prev => ({ ...prev, isLoading: true }));
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
-      const { data, error } = await fetchCampaigns({ 
+      const { data, error, isTimeoutError } = await fetchCampaigns({ 
         user, 
         isAuthenticated 
       });
@@ -37,9 +38,13 @@ export const useCampaigns = (): UseCampaignsResult => {
       });
       
       if (error) {
+        const message = isTimeoutError 
+          ? "Connection timed out. Please check your internet connection and try again."
+          : error.message;
+          
         toast({
           title: "Error refreshing campaigns",
-          description: error.message,
+          description: message,
           variant: "destructive"
         });
         return false;
@@ -55,7 +60,7 @@ export const useCampaigns = (): UseCampaignsResult => {
       
       toast({
         title: "Error refreshing campaigns",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive"
       });
       return false;
@@ -78,33 +83,68 @@ export const useCampaigns = (): UseCampaignsResult => {
             console.log("Campaigns loading timeout reached, ending loading state");
             setState(prev => ({ ...prev, isLoading: false }));
           }
-        }, 8000);
+        }, 12000); // Increased from 8 to 12 seconds
 
-        const { data, error, isAuthError } = await fetchCampaigns({ 
-          user, 
-          isAuthenticated 
-        });
+        // Implement retry logic for network errors
+        let result = { data: [] as Campaign[], error: null as any, isAuthError: false, isTimeoutError: false };
+        const maxRetries = 2;
+        
+        while (retryCountRef.current <= maxRetries) {
+          result = await fetchCampaigns({ 
+            user, 
+            isAuthenticated 
+          });
+          
+          // If successful or not a timeout error, break the retry loop
+          if (!result.error || !result.isTimeoutError) {
+            break;
+          }
+          
+          console.log(`Retrying fetch (attempt ${retryCountRef.current + 1} of ${maxRetries})...`);
+          retryCountRef.current++;
+          
+          // Only show retry toast on first retry
+          if (retryCountRef.current === 1 && isMounted) {
+            toast({
+              title: "Connection issue",
+              description: "We're having trouble connecting to the server. Retrying...",
+              variant: "default"
+            });
+          }
+          
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        
+        // Reset retry counter
+        retryCountRef.current = 0;
         
         // If component is still mounted, update state
         if (isMounted) {
           setState({
-            campaigns: data as Campaign[],
+            campaigns: result.data as Campaign[],
             isLoading: false,
-            error
+            error: result.error
           });
           
           // Show error toast if needed
-          if (error) {
-            if (isAuthError) {
+          if (result.error) {
+            if (result.isAuthError) {
               toast({
                 title: "Authentication Error",
                 description: "Your session may have expired. Please try logging in again.",
                 variant: "destructive"
               });
+            } else if (result.isTimeoutError) {
+              toast({
+                title: "Connection Error",
+                description: "We couldn't connect to the server. Please check your internet connection and try again.",
+                variant: "destructive"
+              });
             } else {
               toast({
                 title: "Error loading campaigns",
-                description: error.message,
+                description: result.error.message || "An unexpected error occurred",
                 variant: "destructive"
               });
             }

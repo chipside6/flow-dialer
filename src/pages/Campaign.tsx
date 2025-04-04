@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
 import { CampaignCreationWizard } from "@/components/campaign-wizard/CampaignCreationWizard";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, RefreshCw } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CampaignData } from "@/components/campaign-wizard/types";
 import { useAuth } from "@/contexts/auth/useAuth";
@@ -15,6 +15,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { useSubscription } from "@/hooks/subscription";
 import { TrialExpiredNotice } from "@/components/campaign/TrialExpiredNotice";
 import { LoadingState } from "@/components/upgrade/LoadingState";
+import { toast } from "@/components/ui/use-toast";
 
 const CampaignPage = () => {
   const location = useLocation();
@@ -58,14 +59,25 @@ const CampaignPage = () => {
     await refreshCampaigns();
   };
   
+  // Handle manual refresh button click
+  const handleManualRefresh = async () => {
+    toast({
+      title: "Refreshing campaigns",
+      description: "Reconnecting to the server...",
+    });
+    
+    await refreshCampaigns();
+  };
+  
   // Only show loading state for initial load, not for subsequent refreshes
   if (isLoading && campaigns.length === 0) {
     return (
       <DashboardLayout>
-        <div className="max-w-6xl mx-auto w-full px-4 pt-4">
+        <div className="max-w-6xl mx-auto w-full px-4 pt-8">
           <LoadingState 
             message="Loading your campaigns..." 
-            onRetry={() => refreshCampaigns()}
+            onRetry={handleManualRefresh}
+            timeout={10000}
           />
         </div>
       </DashboardLayout>
@@ -74,14 +86,24 @@ const CampaignPage = () => {
   
   // Show error state if there was an error fetching campaigns
   if (error) {
+    const errorMessage = error.message?.includes('abort') || error.message?.includes('timeout')
+      ? "Connection timed out. Please check your internet connection."
+      : `Error loading campaigns: ${error.message}`;
+      
     return (
       <DashboardLayout>
-        <div className="max-w-6xl mx-auto w-full px-4 pt-4">
-          <LoadingState 
-            message={`Error loading campaigns: ${error.message}`} 
-            onRetry={() => refreshCampaigns()}
-            errorVariant="destructive"
-          />
+        <div className="max-w-6xl mx-auto w-full px-4 pt-8">
+          <div className="text-center py-12">
+            <h2 className="text-xl font-semibold mb-4">Connection Error</h2>
+            <p className="text-gray-600 mb-6">{errorMessage}</p>
+            <Button 
+              variant="outline" 
+              onClick={handleManualRefresh} 
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" /> Try Again
+            </Button>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -104,14 +126,24 @@ const CampaignPage = () => {
                 <>
                   <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                     <h1 className="text-2xl md:text-3xl font-bold">Campaigns</h1>
-                    <Button 
-                      variant="success"
-                      onClick={() => setShowCreateWizard(true)}
-                      className="whitespace-nowrap"
-                    >
-                      <PlusCircle className="h-4 w-4 mr-2" />
-                      Create Campaign
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={handleManualRefresh}
+                        size="icon"
+                        title="Refresh campaigns"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="success"
+                        onClick={() => setShowCreateWizard(true)}
+                        className="whitespace-nowrap"
+                      >
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        Create Campaign
+                      </Button>
+                    </div>
                   </div>
                   <div className="w-full">
                     <CampaignDashboard initialCampaigns={campaigns} />
