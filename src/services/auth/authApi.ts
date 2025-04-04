@@ -1,3 +1,4 @@
+
 import { toast } from "@/components/ui/use-toast";
 import { User, Session, API_URL } from './types';
 import { storeSession, clearSession, getStoredSession } from './session';
@@ -134,14 +135,14 @@ export const signIn = async (email: string, password: string): Promise<{ error: 
   } catch (error: any) {
     console.error("Sign in error:", error);
     
-    // Provide more helpful error messages based on error type
+    // Network errors should not show database error popups
     if (error.name === 'AbortError') {
-      return { error: new Error('Network request timed out. Please check your internet connection and try again.') };
-    } else if (error.message === 'Failed to fetch') {
-      return { error: new Error('Could not connect to the server. Please make sure you have an internet connection and the backend server is running.') };
+      return { error: new Error('Network request timed out. Please try again later.') };
+    } else if (error.message === 'Failed to fetch' || error.message.includes('network')) {
+      return { error: new Error('Connection issue. Please check your internet connection.') };
     }
     
-    return { error: new Error(error.message || 'Network error occurred during login') };
+    return { error: new Error(error.message || 'Error during login') };
   }
 };
 
@@ -200,35 +201,8 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     // Always clear the local session regardless of API call result
     clearSession();
     
-    // Now aggressively clear ALL session-related data
-    try {
-      // Clear all local storage items that might contain auth data
-      for (const key of Object.keys(localStorage)) {
-        if (key.includes('auth') || key.includes('session') || key.includes('token') || 
-            key.includes('user') || key.includes('supabase')) {
-          localStorage.removeItem(key);
-        }
-      }
-      
-      // Clear session storage too in case it's being used
-      for (const key of Object.keys(sessionStorage)) {
-        if (key.includes('auth') || key.includes('session') || key.includes('token') || 
-            key.includes('user') || key.includes('supabase')) {
-          sessionStorage.removeItem(key);
-        }
-      }
-      
-      // Clear any cookies related to authentication
-      document.cookie.split(';').forEach(cookie => {
-        const [name] = cookie.trim().split('=');
-        if (name.includes('auth') || name.includes('session') || name.includes('token') || 
-            name.includes('user') || name.includes('supabase')) {
-          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-        }
-      });
-    } catch (clearError) {
-      console.warn("Error during aggressive cleanup:", clearError);
-    }
+    // Do NOT show any error toasts during logout
+    // This avoids confusing the user since they're leaving the app anyway
     
     // Log the outcome for debugging
     if (!apiCallSucceeded) {
@@ -243,16 +217,6 @@ export const signOut = async (): Promise<{ success: boolean, error: Error | null
     
     // Still clear the session even if API call fails
     clearSession();
-    
-    // Attempt aggressive cleanup here too
-    try {
-      // Clear local storage
-      localStorage.clear();
-      // Clear session storage
-      sessionStorage.clear();
-    } catch (e) {
-      console.warn("Error during emergency cleanup:", e);
-    }
     
     // Return success true even on error since we cleared the session
     return { success: true, error: null };

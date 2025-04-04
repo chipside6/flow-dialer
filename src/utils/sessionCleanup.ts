@@ -11,49 +11,65 @@ let cleanupInProgress = false;
  */
 export const clearAllAuthData = () => {
   try {
-    // Clear session-specific keys first
-    localStorage.removeItem('supabase.auth.token');
-    localStorage.removeItem('user_session');
-    localStorage.removeItem('sessionLastUpdated');
-    localStorage.removeItem('userSubscriptionPlan');
-    localStorage.removeItem('sb-grhvoclalziyjbjlhpml-auth-token');
+    if (cleanupInProgress) {
+      console.log('Session cleanup already in progress, skipping');
+      return;
+    }
     
-    // Try to clear any other auth-related keys (prefix-based approach)
-    Object.keys(localStorage).forEach(key => {
-      if (key.includes('auth') || 
-          key.includes('supabase') || 
-          key.includes('session') || 
-          key.includes('sb-') ||
-          key.includes('user_')) {
+    cleanupInProgress = true;
+    
+    // Clear session-specific keys first
+    const keysToRemove = [
+      'supabase.auth.token',
+      'user_session',
+      'sessionLastUpdated',
+      'userSubscriptionPlan',
+      'sb-grhvoclalziyjbjlhpml-auth-token'
+    ];
+    
+    keysToRemove.forEach(key => {
+      try {
         localStorage.removeItem(key);
+      } catch (e) {
+        console.warn(`Failed to remove key ${key}:`, e);
       }
     });
     
-    // Clear session storage items too
+    // Try to clear any other auth-related keys (prefix-based approach)
+    // More conservative approach - only clear keys with specific prefixes
+    const prefixesToClear = ['auth.', 'supabase.auth.', 'sb-', 'user_session'];
+    
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (prefixesToClear.some(prefix => key.startsWith(prefix))) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (e) {
+      console.warn('Error clearing localStorage:', e);
+    }
+    
+    // Clear specific session storage items too
     try {
       Object.keys(sessionStorage).forEach(key => {
-        if (key.includes('auth') || 
-            key.includes('supabase') || 
-            key.includes('session') ||
-            key.includes('sb-') ||
-            key.includes('user_')) {
+        if (prefixesToClear.some(prefix => key.startsWith(prefix))) {
           sessionStorage.removeItem(key);
         }
       });
     } catch (e) {
-      console.error('Error clearing sessionStorage:', e);
+      console.warn('Error clearing sessionStorage:', e);
     }
     
-    // Clear any auth cookies
+    // Clear specific auth cookies
     document.cookie.split(';').forEach(cookie => {
       const [name] = cookie.trim().split('=');
-      if (name.includes('sb-') || name.includes('supabase') || name.includes('auth')) {
+      if (prefixesToClear.some(prefix => name.startsWith(prefix))) {
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
       }
     });
     
     cleanupInProgress = false;
-    console.log('All auth data has been cleared');
+    console.log('Auth data has been cleared');
   } catch (e) {
     console.error('Error during auth data cleanup:', e);
     cleanupInProgress = false;

@@ -43,7 +43,7 @@ export const getStoredSession = (): Session | null => {
       session = JSON.parse(storedSession) as Session;
     } catch (parseError) {
       console.error('Error parsing stored session:', parseError);
-      localStorage.removeItem(SESSION_STORAGE_KEY);
+      // Don't remove the session on parse error - it might be a temporary issue
       sessionCache = null;
       return null;
     }
@@ -51,6 +51,7 @@ export const getStoredSession = (): Session | null => {
     // Validate session structure
     if (!isValidSession(session)) {
       console.error('Invalid session structure:', session);
+      // Invalid sessions should be removed
       localStorage.removeItem(SESSION_STORAGE_KEY);
       sessionCache = null;
       return null;
@@ -85,7 +86,7 @@ export const getStoredSession = (): Session | null => {
     return session;
   } catch (error) {
     console.error('Error retrieving stored session:', error);
-    localStorage.removeItem(SESSION_STORAGE_KEY);
+    // Don't clear local storage on retrieval errors
     sessionCache = null;
     return null;
   }
@@ -140,16 +141,6 @@ export const clearSession = (): void => {
     debouncedClearAllAuthData();
   } catch (error) {
     console.error('Error clearing session:', error);
-    
-    // Last resort - try to clear everything
-    try {
-      localStorage.clear();
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.clear();
-      }
-    } catch (e) {
-      console.error('Failed to clear storage as last resort:', e);
-    }
   }
 };
 
