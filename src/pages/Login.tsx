@@ -48,10 +48,7 @@ const Login = () => {
       // Redirect to dashboard or requested page
       navigate(returnTo);
       
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
+      // Removed welcome back toast
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage(error.message || "Failed to login");

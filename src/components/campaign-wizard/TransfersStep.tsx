@@ -3,10 +3,9 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { CampaignData } from "./types";
 import { useAuth } from "@/contexts/auth";
-import { Loader2, AlertTriangle, RefreshCw } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { useTransferNumbers } from "@/hooks/useTransferNumbers";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -20,13 +19,8 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
   const { 
     transferNumbers, 
     isLoading,
-    error,
-    refreshTransferNumbers
+    error
   } = useTransferNumbers();
-
-  const handleRetry = async () => {
-    await refreshTransferNumbers();
-  };
 
   const handleSelectTransferNumber = (value: string) => {
     // Create a synthetic event object to pass to onChange
@@ -65,17 +59,8 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
           <div className="space-y-2">
             <Alert variant="destructive" className="mt-2">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="flex flex-col gap-2">
+              <AlertDescription>
                 <span>{error}</span>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleRetry} 
-                  className="w-fit mt-2"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry
-                </Button>
               </AlertDescription>
             </Alert>
             <Input
