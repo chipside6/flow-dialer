@@ -18,54 +18,18 @@ export const clearAllAuthData = () => {
     
     cleanupInProgress = true;
     
-    // Clear session-specific keys first
-    const keysToRemove = [
-      'supabase.auth.token',
-      'user_session',
-      'sessionLastUpdated',
-      'userSubscriptionPlan',
-      'sb-grhvoclalziyjbjlhpml-auth-token'
-    ];
-    
-    keysToRemove.forEach(key => {
-      try {
-        localStorage.removeItem(key);
-      } catch (e) {
-        console.warn(`Failed to remove key ${key}:`, e);
-      }
-    });
-    
-    // Try to clear any other auth-related keys (prefix-based approach)
-    // More conservative approach - only clear keys with specific prefixes
-    const prefixesToClear = ['auth.', 'supabase.auth.', 'sb-', 'user_session'];
-    
+    // Aggressively clear all storage without checking keys first
     try {
-      Object.keys(localStorage).forEach(key => {
-        if (prefixesToClear.some(prefix => key.startsWith(prefix))) {
-          localStorage.removeItem(key);
-        }
-      });
+      localStorage.clear();
+      sessionStorage.clear();
     } catch (e) {
-      console.warn('Error clearing localStorage:', e);
+      console.warn('Error clearing storage:', e);
     }
     
-    // Clear specific session storage items too
-    try {
-      Object.keys(sessionStorage).forEach(key => {
-        if (prefixesToClear.some(prefix => key.startsWith(prefix))) {
-          sessionStorage.removeItem(key);
-        }
-      });
-    } catch (e) {
-      console.warn('Error clearing sessionStorage:', e);
-    }
-    
-    // Clear specific auth cookies
+    // Clear all cookies as fallback
     document.cookie.split(';').forEach(cookie => {
       const [name] = cookie.trim().split('=');
-      if (prefixesToClear.some(prefix => name.startsWith(prefix))) {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      }
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     });
     
     cleanupInProgress = false;
@@ -98,11 +62,6 @@ export const forceAppReload = () => {
   // Force page reload
   try {
     window.location.href = '/login';
-    
-    // If the redirect doesn't work for some reason, try a hard reload
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
   } catch (e) {
     console.error('Error during app reload:', e);
     // Fallback to basic reload

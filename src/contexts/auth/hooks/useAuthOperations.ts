@@ -7,6 +7,7 @@ import {
   updateUserProfileAction
 } from '../authActions';
 import { toast } from '@/components/ui/use-toast';
+import { clearAllAuthData } from '@/utils/sessionCleanup';
 
 export function useAuthOperations() {
   const signUp = async (email: string, password: string) => {
@@ -46,20 +47,32 @@ export function useAuthOperations() {
 
   const signOut = async () => {
     try {
-      const { success, error } = await signOutUser();
+      // First clear all local auth data
+      clearAllAuthData();
       
-      if (error) {
-        console.error("Sign out error:", error);
-      } else {
-        toast({
-          title: "Signed out successfully",
-        });
-      }
+      // Then try to sign out from the server as a background operation
+      signOutUser().catch(error => {
+        console.warn("Error during server sign out:", error);
+        // Still consider it a successful logout for UX purposes
+      });
       
-      return { success, error };
+      // Consider logout successful regardless of server response
+      toast({
+        title: "Signed out successfully",
+      });
+      
+      // Force page reload to clear any remaining state
+      window.location.href = '/login';
+      
+      return { success: true, error: null };
     } catch (error: any) {
       console.error("Unexpected error during sign out:", error);
-      return { success: false, error };
+      
+      // Still clear data and redirect on error
+      clearAllAuthData();
+      window.location.href = '/login';
+      
+      return { success: true, error };
     }
   };
 

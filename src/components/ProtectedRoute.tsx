@@ -1,7 +1,7 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/auth/useAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,44 +9,20 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
-  const navigate = useNavigate();
+  const { isAuthenticated, isAdmin } = useAuth();
+  const location = useLocation();
   
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        
-        if (!data.session) {
-          navigate('/login', { 
-            replace: true, 
-            state: { returnTo: window.location.pathname } 
-          });
-          return;
-        }
-        
-        // Only check admin status if required
-        if (requireAdmin) {
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', data.session.user.id)
-            .maybeSingle();
-          
-          if (profileError || !profileData?.is_admin) {
-            navigate('/unauthorized', { replace: true });
-            return;
-          }
-        }
-      } catch (error) {
-        console.error("Auth check error:", error);
-        navigate('/login');
-      }
-    };
-    
-    checkAuth();
-  }, [navigate, requireAdmin]);
+  // If not authenticated, redirect to login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ returnTo: location.pathname }} replace />;
+  }
   
-  // No loading state, immediately render children
+  // If admin required but user is not admin, redirect to unauthorized
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+  
+  // User is authenticated (and admin if required), render children
   return <>{children}</>;
 };
 

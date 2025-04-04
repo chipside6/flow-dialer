@@ -5,7 +5,7 @@ import { RotateCcw, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
-import { clearAllAuthData, forceAppReload } from "@/utils/sessionCleanup";
+import { clearAllAuthData } from "@/utils/sessionCleanup";
 
 export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
   const { signOut } = useAuth();
@@ -19,52 +19,21 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
     setIsLoggingOut(true);
     
     try {
-      // IMMEDIATELY clear all auth data to prevent automatic re-login
+      // IMMEDIATELY clear all auth data
       clearAllAuthData();
       
       // First navigate to login page immediately for better UX
       navigate("/login", { replace: true });
       
-      // Then attempt to sign out
-      const { success, error } = await signOut();
-      
-      if (success) {
-        toast({
-          title: "Signed out successfully",
-          description: "You have been logged out of your account"
-        });
-        
-        // Force page reload after a short delay
-        setTimeout(() => {
-          forceAppReload();
-        }, 100);
-      } else if (error) {
-        console.error("DiagnosticActions - Error during sign out:", error);
-        // Still consider it a successful logout for UX purposes
-        toast({
-          title: "Signed out",
-          description: "You've been signed out, but there was an issue cleaning up session data"
-        });
-        
-        // Force page reload even on error
-        setTimeout(() => {
-          forceAppReload();
-        }, 100);
-      }
+      // Then attempt to sign out as a background operation
+      signOut().catch(error => {
+        console.warn("DiagnosticActions - Error during sign out:", error);
+      });
     } catch (error: any) {
       console.error("DiagnosticActions - Error signing out:", error);
-      toast({
-        title: "An error occurred",
-        description: "There was an issue during logout, but you've been signed out.",
-        variant: "destructive"
-      });
       
-      // Force page reload even on error
-      setTimeout(() => {
-        forceAppReload();
-      }, 100);
-    } finally {
-      setIsLoggingOut(false);
+      // Force navigation even on error
+      navigate("/login", { replace: true });
     }
   };
   
