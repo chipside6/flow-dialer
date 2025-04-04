@@ -93,6 +93,7 @@ export const useCampaigns = (): UseCampaignsResult => {
     }
   }, [user, isAuthenticated, toast, fetchCampaigns, isOnline]);
 
+  // Create a useInitialFetch hook to handle the initial fetch
   useEffect(() => {
     let isMounted = true;
     
