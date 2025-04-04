@@ -19,12 +19,10 @@ const Dashboard = () => {
   
   // Handle retry
   const handleRetry = () => {
-    console.log("Manual retry triggered");
     setRetryCount(prev => prev + 1);
     refreshCampaigns();
   };
   
-  // Always render the dashboard layout, even if loading or error
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">

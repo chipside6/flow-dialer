@@ -50,7 +50,6 @@ const Login = () => {
     setErrorMessage(null);
 
     try {
-      // Call the signIn function
       const { error } = await signIn(email, password);
 
       if (error) {
@@ -59,7 +58,7 @@ const Login = () => {
         return;
       }
       
-      // Success - will be redirected by the auth state effect
+      // Success will be handled by the auth state effect
       toast({
         title: "Login successful",
         description: "Redirecting to dashboard...",

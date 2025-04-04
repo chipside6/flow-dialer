@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -10,7 +10,6 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -38,26 +37,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
             return;
           }
         }
-        
-        setIsAuthenticated(true);
       } catch (error) {
         console.error("Auth check error:", error);
-        navigate('/login', { 
-          replace: true, 
-          state: { returnTo: window.location.pathname } 
-        });
+        navigate('/login');
       }
     };
     
     checkAuth();
   }, [navigate, requireAdmin]);
   
-  // Show loading state briefly to prevent flashing
-  if (isAuthenticated === null) {
-    return null; // Return null while checking - no loader shown to user
-  }
-  
-  // Render children when authenticated
+  // No loading state, immediately render children
   return <>{children}</>;
 };
 
