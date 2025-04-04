@@ -25,6 +25,7 @@ const CampaignPage = () => {
   const { campaigns, isLoading, error, refreshCampaigns } = useCampaigns();
   const { trialExpired, currentPlan } = useSubscription();
   const { isOnline } = useNetworkStatus();
+  const [hasAttemptedInitialLoad, setHasAttemptedInitialLoad] = useState(false);
   
   // All users can access campaigns without subscription check
   const canAccessCampaigns = true;
@@ -37,6 +38,13 @@ const CampaignPage = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+  
+  // Mark when first load attempt has occurred
+  useEffect(() => {
+    if (isLoading) {
+      setHasAttemptedInitialLoad(true);
+    }
+  }, [isLoading]);
   
   const handleCreateCampaign = async (newCampaign: CampaignData) => {
     // Ensure the campaign has a user_id property and matches the Campaign type
@@ -77,46 +85,23 @@ const CampaignPage = () => {
   };
   
   // Only show loading state for initial load, not for subsequent refreshes
-  if (isLoading && campaigns.length === 0) {
+  if (isLoading && campaigns.length === 0 && !hasAttemptedInitialLoad) {
     return (
       <DashboardLayout>
         <div className="max-w-6xl mx-auto w-full px-4 pt-8">
           <LoadingState 
             message="Loading your campaigns..." 
             onRetry={refreshCampaigns}
-            timeout={6000}
+            timeout={10000} // Longer timeout to prevent flickering
+            showTimeoutError={false} // Don't show timeout errors on initial load
           />
         </div>
       </DashboardLayout>
     );
   }
   
-  // Show error state if there was an error fetching campaigns
-  if (error) {
-    const errorMessage = error.message?.includes('abort') || error.message?.includes('timeout')
-      ? "Connection timed out. The server may be busy or there might be a network issue."
-      : `Error loading campaigns: ${error.message}`;
-      
-    return (
-      <DashboardLayout>
-        <div className="max-w-6xl mx-auto w-full px-4 pt-8">
-          <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-4">Connection Error</h2>
-            <p className="text-gray-600 mb-6">{errorMessage}</p>
-            <Button 
-              onClick={refreshCampaigns} 
-              variant="outline"
-              disabled={!isOnline}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Retry
-            </Button>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  // Even if there's an error, we should render the campaign UI if we have campaigns data
+  // This prevents error messages from showing when there's actually usable data
   
   return (
     <div className="min-h-screen bg-background flex flex-col">

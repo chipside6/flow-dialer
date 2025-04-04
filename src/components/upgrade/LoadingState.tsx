@@ -9,13 +9,15 @@ interface LoadingStateProps {
   timeout?: number; // Timeout in milliseconds
   onRetry?: () => void; // Optional retry callback
   errorVariant?: "default" | "destructive" | "warning"; // Added error styling options
+  showTimeoutError?: boolean; // New prop to control error visibility
 }
 
 export const LoadingState: React.FC<LoadingStateProps> = ({ 
   message, 
   timeout = 8000, // 8 seconds default timeout
   onRetry,
-  errorVariant = "destructive" // Default to destructive red for timeouts
+  errorVariant = "destructive", // Default to destructive red for timeouts
+  showTimeoutError = true // By default, show timeout errors
 }) => {
   const [isTimedOut, setIsTimedOut] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -24,12 +26,17 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   useEffect(() => {
     setIsTimedOut(false);
     
-    const timer = setTimeout(() => {
-      setIsTimedOut(true);
-    }, timeout);
+    // Only set timeout if showTimeoutError is true
+    if (showTimeoutError) {
+      const timer = setTimeout(() => {
+        setIsTimedOut(true);
+      }, timeout);
+      
+      return () => clearTimeout(timer);
+    }
     
-    return () => clearTimeout(timer);
-  }, [timeout, message, onRetry, retryCount]);
+    return undefined;
+  }, [timeout, message, onRetry, retryCount, showTimeoutError]);
   
   // Handle retry with count tracking
   const handleRetry = () => {
@@ -39,7 +46,7 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
     }
   };
   
-  if (isTimedOut) {
+  if (isTimedOut && showTimeoutError) {
     return (
       <div className="flex flex-col justify-center items-center p-8 w-full min-h-[200px]">
         <Alert variant={errorVariant} className="mb-6 max-w-md">

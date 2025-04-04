@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/components/ui/use-toast";
@@ -25,6 +24,7 @@ export const useCampaigns = (): UseCampaignsResult => {
   const { fetchCampaigns } = useFetchCampaigns();
   const errorToastShownRef = useRef(false);
   const fetchAttemptedRef = useRef(false);
+  const silentErrorsRef = useRef(false);
 
   // Define refreshCampaigns as a callback function
   const refreshCampaigns = useCallback(async () => {
@@ -45,13 +45,15 @@ export const useCampaigns = (): UseCampaignsResult => {
         isAuthenticated 
       });
       
-      setState({
-        campaigns: result.data as Campaign[],
+      // Even if there's an error, save any data we received
+      setState(prev => ({
+        campaigns: result.data as Campaign[] || prev.campaigns,
         isLoading: false,
-        error: result.error
-      });
+        // Only set error if we have no campaigns data at all
+        error: prev.campaigns.length === 0 && result.data.length === 0 ? result.error : null
+      }));
       
-      if (result.error && !errorToastShownRef.current) {
+      if (result.error && !errorToastShownRef.current && !silentErrorsRef.current) {
         // Only show error toast once to avoid duplicates
         errorToastShownRef.current = true;
         setTimeout(() => {
@@ -59,25 +61,30 @@ export const useCampaigns = (): UseCampaignsResult => {
         }, 5000);
         
         // Don't show error toast for timeout errors, let the UI handle it
-        if (!result.isTimeoutError) {
+        if (!result.isTimeoutError && !result.isOfflineError) {
           toast({
             title: "Error refreshing campaigns",
             description: result.error.message,
             variant: "destructive"
           });
         }
-        return false;
+        
+        // If we have data, still return true to indicate success
+        return result.data.length > 0;
       }
       return true;
     } catch (error: any) {
       console.error('Error refreshing campaigns:', error.message);
+      
+      // Keep any existing data
       setState(prev => ({ 
         ...prev, 
         isLoading: false, 
-        error 
+        // Only set error if we have no campaigns data
+        error: prev.campaigns.length === 0 ? error : null
       }));
       
-      if (!errorToastShownRef.current) {
+      if (!errorToastShownRef.current && !silentErrorsRef.current) {
         errorToastShownRef.current = true;
         setTimeout(() => {
           errorToastShownRef.current = false;
@@ -93,13 +100,14 @@ export const useCampaigns = (): UseCampaignsResult => {
     }
   }, [user, isAuthenticated, toast, fetchCampaigns, isOnline]);
 
-  // Create a useInitialFetch hook to handle the initial fetch
+  // First time data load - handle silently without error messages
   useEffect(() => {
     let isMounted = true;
     
     // Only fetch if we haven't tried yet, or we have auth details and we're online
     if (!fetchAttemptedRef.current && isAuthenticated && user?.id && isOnline) {
       fetchAttemptedRef.current = true;
+      silentErrorsRef.current = true; // Suppress errors for initial load
       
       const loadCampaigns = async () => {
         try {
@@ -126,10 +134,11 @@ export const useCampaigns = (): UseCampaignsResult => {
             setState({
               campaigns: result.data as Campaign[],
               isLoading: false,
-              error: result.error
+              // Only set error if we have no campaigns data
+              error: result.data.length === 0 ? result.error : null
             });
             
-            // Only show error toast if this is an auth error and not already shown
+            // Only show error toast if this is an auth error
             if (result.error && result.isAuthError && !errorToastShownRef.current) {
               errorToastShownRef.current = true;
               setTimeout(() => {
@@ -149,6 +158,11 @@ export const useCampaigns = (): UseCampaignsResult => {
             clearTimeout(loadingTimeoutRef.current);
             loadingTimeoutRef.current = null;
           }
+          
+          // Re-enable error messages after initial load
+          setTimeout(() => {
+            silentErrorsRef.current = false;
+          }, 1000);
         }
       };
 

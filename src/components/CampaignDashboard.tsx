@@ -6,14 +6,19 @@ import { CampaignTable } from "@/components/campaigns/CampaignTable";
 import { CampaignDetails } from "@/components/campaigns/CampaignDetails";
 import { CampaignStats } from "@/components/campaigns/CampaignStats";
 import { CampaignProvider, useCampaignContext } from "@/contexts/campaign/CampaignContext";
+import { RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 interface CampaignDashboardProps {
   initialCampaigns?: Campaign[];
+  onRefresh?: () => void;
 }
 
 // Inner component that uses the context
-const CampaignDashboardContent = () => {
+const CampaignDashboardContent = ({ onRefresh }: { onRefresh?: () => void }) => {
   const { selectedCampaign } = useCampaignContext();
+  const { isOnline } = useNetworkStatus();
 
   return (
     <div className="space-y-6 w-full">
@@ -39,10 +44,10 @@ const CampaignDashboardContent = () => {
 };
 
 // Wrapper component that provides the context
-const CampaignDashboard = ({ initialCampaigns = [] }: CampaignDashboardProps) => {
+const CampaignDashboard = ({ initialCampaigns = [], onRefresh }: CampaignDashboardProps) => {
   return (
     <CampaignProvider initialCampaigns={initialCampaigns}>
-      <CampaignDashboardContent />
+      <CampaignDashboardContent onRefresh={onRefresh} />
     </CampaignProvider>
   );
 };
