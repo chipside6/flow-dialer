@@ -1,142 +1,95 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User } from '../types';
-import { clearAllAuthData } from '@/utils/sessionCleanup';
+import { debouncedClearAllAuthData } from '@/utils/sessionCleanup';
+import { useAuthState } from './useAuthState';
+import { useSessionManagement } from './useSessionManagement';
 
-export function useAuthSession() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [sessionChecked, setSessionChecked] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+export const useAuthSession = () => {
+  const { 
+    user, setUser, 
+    loading, setIsLoading, 
+    initialized, setInitialized 
+  } = useAuthState();
+  
+  const { 
+    session, setSession, 
+    sessionExpiryTime, setSessionExpiryTime,
+    refreshSession, refreshError,
+    getSessionTimeRemaining, isSessionAboutToExpire 
+  } = useSessionManagement();
 
+  // Check session expiry and refresh if needed
   useEffect(() => {
-    let isMounted = true;
-    let authStateSubscription: { unsubscribe: () => void } | null = null;
-    
-    const initializeAuth = async () => {
-      console.log("AuthSession: Checking for existing session");
+    // Setup session refresh before expiry
+    if (sessionExpiryTime) {
+      const now = Date.now();
+      const timeUntilExpiry = sessionExpiryTime - now;
       
-      try {
-        // First set up auth state change listener to catch any changes during initialization
-        authStateSubscription = supabase.auth.onAuthStateChange(
-          (event, session) => {
-            if (!isMounted) return;
-            
-            console.log('AuthSession: Auth state changed:', event);
-            
-            if (event === 'SIGNED_IN' && session?.user) {
-              setUser(session.user as User);
-            } else if (event === 'SIGNED_OUT') {
-              setUser(null);
-            }
-          }
-        ).data.subscription;
+      // If session is expired or will expire in less than 5 minutes
+      if (timeUntilExpiry < 5 * 60 * 1000) {
+        refreshSession(true);
+      } else {
+        // Schedule refresh for 5 minutes before expiry
+        const refreshTime = timeUntilExpiry - 5 * 60 * 1000;
+        const refreshTimer = setTimeout(() => {
+          refreshSession(true);
+        }, refreshTime);
         
-        // Check for existing session
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        
-        if (!isMounted) return;
-        
-        if (sessionError) {
-          console.error('AuthSession: Error checking session:', sessionError);
-          setError(sessionError);
-          setIsLoading(false);
-          setSessionChecked(true);
-          setInitialized(true);
-          return;
-        }
-        
-        if (sessionData.session?.user) {
-          console.log("AuthSession: Found active session for user:", sessionData.session.user.email);
-          setUser(sessionData.session.user as User);
-        } else {
-          console.log("AuthSession: No active session found");
-          setUser(null);
-        }
-        
-        setIsLoading(false);
-        setSessionChecked(true);
-        setInitialized(true);
-      } catch (error) {
-        console.error('AuthSession: Error during initialization:', error);
-        if (isMounted) {
-          setError(error instanceof Error ? error : new Error('Unknown error during auth initialization'));
-          setUser(null);
-          setIsLoading(false);
-          setSessionChecked(true);
-          setInitialized(true);
-        }
+        return () => clearTimeout(refreshTimer);
       }
-    };
-    
-    // Set timeout to prevent infinite loading
-    const timeout = setTimeout(() => {
-      if (isMounted && !initialized) {
-        console.log("AuthSession: Timeout reached, forcing initialization");
-        setIsLoading(false);
-        setSessionChecked(true);
-        setInitialized(true);
-      }
-    }, 2000);
-    
-    initializeAuth();
-    
-    // Cleanup function
-    return () => {
-      isMounted = false;
-      clearTimeout(timeout);
-      if (authStateSubscription) {
-        authStateSubscription.unsubscribe();
-      }
-    };
-  }, []);
-
-  const signOut = async () => {
-    try {
-      setIsLoading(true);
-      
-      // IMMEDIATELY clear all session state
-      setUser(null);
-      
-      // Aggressively clear all storage before calling API
-      clearAllAuthData();
-      
-      // Now attempt to clear server-side session
-      try {
-        // Sign out from Supabase directly
-        await supabase.auth.signOut();
-      } catch (e) {
-        console.warn("Error during Supabase signout:", e);
-      }
-      
-      // Force app reload to clear any remaining state
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 100);
-      
-      return { success: true, error: null };
-    } catch (error) {
-      console.error("AuthSession: Unexpected error during sign out:", error);
-      
-      // Force reload even on error
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 100);
-      
-      return { success: true, error };
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [sessionExpiryTime, refreshSession]);
+
+  // Initial session fetch
+  useEffect(() => {
+    const fetchInitialSession = async () => {
+      await refreshSession(true);
+    };
+    
+    fetchInitialSession();
+    
+    // Listen for auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event);
+        
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setSessionExpiryTime(session?.expires_at ? session.expires_at * 1000 : null);
+          setInitialized(true);
+          
+          // Update the session last updated time
+          localStorage.setItem('sessionLastUpdated', Date.now().toString());
+        } else if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
+          setSessionExpiryTime(null);
+          debouncedClearAllAuthData();
+        } else if (event === 'USER_UPDATED') {
+          // Simply update the session without full reset
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+        
+        setIsLoading(false);
+      }
+    );
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, [refreshSession, setInitialized, setIsLoading, setSession, setSessionExpiryTime, setUser]);
 
   return {
+    session,
     user,
-    isLoading,
-    error,
-    sessionChecked,
+    loading,
     initialized,
-    signOut
+    refreshSession,
+    refreshError,
+    getSessionTimeRemaining,
+    isSessionAboutToExpire
   };
-}
+};
