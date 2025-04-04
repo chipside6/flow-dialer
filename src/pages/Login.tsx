@@ -99,10 +99,7 @@ const Login = () => {
       // Store session timestamp
       localStorage.setItem('sessionLastUpdated', Date.now().toString());
       
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
+      // Removed success toast message
 
       navigate('/dashboard');
     } catch (error: any) {
