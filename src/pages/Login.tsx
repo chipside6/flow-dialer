@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/auth/useAuth';
 import { useAuthOperations } from '@/contexts/auth/hooks/useAuthOperations';
 
@@ -20,7 +19,6 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const { signIn } = useAuthOperations();
   
@@ -59,10 +57,7 @@ const Login = () => {
       }
       
       // Success will be handled by the auth state effect
-      toast({
-        title: "Login successful",
-        description: "Redirecting to dashboard...",
-      });
+      // Removed toast notification here
       
     } catch (error: any) {
       console.error("Login error:", error);

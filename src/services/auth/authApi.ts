@@ -1,5 +1,4 @@
 
-import { toast } from "@/components/ui/use-toast";
 import { User, Session, API_URL } from './types';
 import { storeSession, clearSession, getStoredSession } from './session';
 
