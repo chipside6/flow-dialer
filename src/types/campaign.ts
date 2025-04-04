@@ -8,7 +8,7 @@ export interface Campaign {
   name: string;
   user_id: string;
   created_at: string;
-  status: 'draft' | 'active' | 'paused' | 'completed' | 'failed';
+  status: 'draft' | 'active' | 'paused' | 'completed' | 'failed' | 'running' | 'pending';
   description?: string;
   greeting_file_id?: string;
   contact_list_id?: string;

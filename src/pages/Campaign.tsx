@@ -40,7 +40,7 @@ const CampaignPage = () => {
     const campaignWithRequiredFields: Campaign = {
       id: newCampaign.id || uuidv4(),
       title: newCampaign.title,
-      status: (newCampaign.status as Campaign["status"]) || "pending",
+      status: (newCampaign.status as Campaign["status"]) || "draft",
       progress: newCampaign.progress || 0,
       totalCalls: newCampaign.totalCalls || 0,
       answeredCalls: newCampaign.answeredCalls || 0,

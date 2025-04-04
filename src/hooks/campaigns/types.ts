@@ -5,7 +5,7 @@ import { User } from "@/contexts/auth/types";
 export interface Campaign {
   id: string;
   title: string;
-  status: "pending" | "running" | "completed" | "paused";
+  status: "pending" | "running" | "completed" | "paused" | "draft" | "active" | "failed";
   progress: number;
   totalCalls: number;
   answeredCalls: number;

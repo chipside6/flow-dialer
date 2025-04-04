@@ -57,7 +57,7 @@ export const forceAppReload = () => {
     
     // If the redirect doesn't work for some reason, try a hard reload
     setTimeout(() => {
-      window.location.reload(true);
+      window.location.reload();
     }, 100);
   } catch (e) {
     console.error('Error during app reload:', e);
