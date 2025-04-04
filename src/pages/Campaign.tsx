@@ -39,6 +39,7 @@ const CampaignPage = () => {
     // Ensure the campaign has a user_id property and matches the Campaign type
     const campaignWithRequiredFields: Campaign = {
       id: newCampaign.id || uuidv4(),
+      name: newCampaign.title || 'Untitled Campaign', // Add the required name property
       title: newCampaign.title,
       status: (newCampaign.status as Campaign["status"]) || "draft",
       progress: newCampaign.progress || 0,
@@ -46,7 +47,8 @@ const CampaignPage = () => {
       answeredCalls: newCampaign.answeredCalls || 0,
       transferredCalls: newCampaign.transferredCalls || 0,
       failedCalls: newCampaign.failedCalls || 0,
-      user_id: user?.id || ''
+      user_id: user?.id || '',
+      created_at: new Date().toISOString() // Add the required created_at property
     };
     
     setShowCreateWizard(false);
