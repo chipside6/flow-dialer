@@ -17,7 +17,6 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -33,12 +32,10 @@ const Login = () => {
     }
   }, []);
   
-  // Check if user is already logged in
+  // Check if user is already logged in - but do it silently in the background
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        setIsCheckingSession(true);
-        
         // Add a timeout for the session check
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
@@ -51,7 +48,6 @@ const Login = () => {
           data = result.data;
         } catch (error) {
           console.warn("Session check timed out, assuming no session");
-          setIsCheckingSession(false);
           return;
         }
         
@@ -66,7 +62,6 @@ const Login = () => {
             if (error) {
               console.warn("Session appears invalid, clearing:", error);
               clearAllAuthData();
-              setIsCheckingSession(false);
               return;
             }
             
@@ -77,14 +72,12 @@ const Login = () => {
             clearAllAuthData();
           }
         }
-        
-        setIsCheckingSession(false);
       } catch (error) {
         console.error("Auth check error:", error);
-        setIsCheckingSession(false);
       }
     };
     
+    // Execute the check but don't show any UI for it
     checkAuth();
   }, [navigate]);
   
@@ -125,7 +118,7 @@ const Login = () => {
     }
   };
   
-  // Render the login form immediately, without showing a loading screen
+  // Render the login form without any session checking indicators
   return (
     <AuthContainer>
       <AuthHeader title="Welcome back" emoji="👋" />
@@ -147,20 +140,19 @@ const Login = () => {
             required
             className="h-12"
             placeholder="Enter your email"
-            disabled={isLoading || isCheckingSession}
+            disabled={isLoading}
           />
           
           <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading || isCheckingSession}
+            disabled={isLoading}
           />
         </div>
 
         <AuthButton 
           isLoading={isLoading} 
-          buttonText={isCheckingSession ? "Checking session..." : "Log In"}
-          disabled={isCheckingSession}
+          buttonText="Log In"
         />
       </form>
 

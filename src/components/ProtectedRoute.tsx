@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { clearAllAuthData } from '@/utils/sessionCleanup';
 
@@ -69,15 +68,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     return () => clearTimeout(backupTimeout);
   }, [navigate, requireAdmin, isLoading]);
   
+  // Show children while checking session in the background
   if (isLoading) {
-    // Instead of a popup, show a subtle loading indicator or nothing
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-        </div>
-      </div>
-    );
+    // Return null during loading to not show any loader
+    return null;
   }
   
   return <>{children}</>;
