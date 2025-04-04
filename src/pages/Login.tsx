@@ -30,6 +30,7 @@ const Login = () => {
     setErrorMessage(null);
 
     try {
+      // Simple login with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -39,11 +40,18 @@ const Login = () => {
         throw error;
       }
 
-      // Simple session storage - just record that we're logged in
-      localStorage.setItem('sessionLastUpdated', Date.now().toString());
+      console.log("Login successful:", data);
       
-      // Redirect to returnTo if available, otherwise to dashboard
+      // Set a simple flag in localStorage
+      localStorage.setItem('isAuthenticated', 'true');
+      
+      // Redirect to dashboard or requested page
       navigate(returnTo);
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage(error.message || "Failed to login");

@@ -11,7 +11,6 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   error: Error | null;
-  sessionChecked: boolean;
   setProfile: (profile: UserProfile | null) => void;
   signOut: () => Promise<{ success: boolean, error: Error | null }>;
 }
@@ -32,11 +31,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [sessionChecked, setSessionChecked] = useState(true);
 
+  // Simple one-time session check on mount
   useEffect(() => {
-    // Simple one-time session check
     const getSession = async () => {
+      setIsLoading(true);
+      
       try {
         const { data } = await supabase.auth.getSession();
         
@@ -50,10 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsAdmin(!!userProfile.is_admin);
           }
         }
-        
-        setIsLoading(false);
       } catch (error) {
         console.error("Auth session check error:", error);
+        setError(error instanceof Error ? error : new Error('Unknown error'));
+      } finally {
         setIsLoading(false);
       }
     };
@@ -63,6 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("Auth state changed:", event);
+        
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user);
           
@@ -87,12 +89,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Clear user state immediately
+      // Clear user state
       setUser(null);
       setProfile(null);
+      setIsAdmin(false);
       
-      // Simple cleanup
-      localStorage.removeItem('sessionLastUpdated');
+      // Clear localStorage
+      localStorage.removeItem('isAuthenticated');
       
       // Sign out from Supabase
       await supabase.auth.signOut();
@@ -100,7 +103,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { success: true, error: null };
     } catch (error) {
       console.error("Error during sign out:", error);
-      return { success: false, error: error instanceof Error ? error : new Error(String(error)) };
+      return { 
+        success: false, 
+        error: error instanceof Error ? error : new Error(String(error)) 
+      };
     }
   };
 
@@ -111,7 +117,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: !!user,
     isAdmin,
     error,
-    sessionChecked,
     setProfile,
     signOut
   };

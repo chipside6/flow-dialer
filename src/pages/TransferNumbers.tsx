@@ -1,8 +1,7 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useTransferNumbers } from "@/hooks/useTransferNumbers";
-import { LoadingState } from "@/components/upgrade/LoadingState";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { TransferNumbersHeader } from "@/components/transfer-numbers/TransferNumbersHeader";
@@ -10,8 +9,6 @@ import { AuthRequiredAlert } from "@/components/transfer-numbers/AuthRequiredAle
 import { TransferNumbersContent } from "@/components/transfer-numbers/TransferNumbersContent";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
 
 const TransferNumbers = () => {
   const { 
@@ -24,22 +21,22 @@ const TransferNumbers = () => {
     refreshTransferNumbers
   } = useTransferNumbers();
   
-  const { user } = useAuth();
-  const [refreshDisabled, setRefreshDisabled] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const [refreshDisabled, setRefreshDisabled] = React.useState(false);
   const { toast } = useToast();
   
-  // Load data once when component mounts and user is available
+  // Load data once when component mounts and user is authenticated
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       refreshTransferNumbers().catch(err => {
         console.error("Failed to load transfer numbers:", err);
       });
     }
-  }, [user, refreshTransferNumbers]);
+  }, [isAuthenticated, refreshTransferNumbers]);
   
   // Handler for manual refresh
   const handleManualRefresh = async () => {
-    if (refreshDisabled || !user) return;
+    if (refreshDisabled) return;
     
     // Prevent multiple rapid refreshes
     setRefreshDisabled(true);
@@ -70,7 +67,7 @@ const TransferNumbers = () => {
       <div className="flex justify-between items-center mb-6">
         <TransferNumbersHeader />
         
-        {user && (
+        {isAuthenticated && (
           <Button 
             variant="outline" 
             size="sm" 
@@ -84,19 +81,9 @@ const TransferNumbers = () => {
         )}
       </div>
       
-      <AuthRequiredAlert isVisible={!user} />
+      <AuthRequiredAlert isVisible={!isAuthenticated} />
       
-      {user && error && error.includes("auth") && (
-        <Alert variant="destructive" className="mb-6 text-left">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Authentication Error</AlertTitle>
-          <AlertDescription>
-            There was an issue with your login session. Please try signing out and back in.
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      {user && (
+      {isAuthenticated && (
         <TransferNumbersContent
           transferNumbers={transferNumbers}
           isLoading={isLoading}

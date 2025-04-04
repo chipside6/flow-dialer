@@ -16,7 +16,7 @@ interface TransfersStepProps {
 }
 
 export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
-  const { user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { 
     transferNumbers, 
     isLoading,
@@ -41,7 +41,7 @@ export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
   };
 
   // If user is not authenticated, show a simple message
-  if (!user) {
+  if (!isAuthenticated) {
     return (
       <Alert variant="warning" className="mb-6">
         <AlertTriangle className="h-4 w-4" />
