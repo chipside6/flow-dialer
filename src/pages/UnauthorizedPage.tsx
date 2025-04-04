@@ -7,11 +7,12 @@ import { Shield, AlertCircle, LogIn, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { withExponentialBackoff } from '@/utils/apiHelpers';
 import { toast } from '@/components/ui/use-toast';
+import { refreshAdminStatus } from '@/contexts/auth/authUtils';
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isAdmin, initialized, user, profile } = useAuth();
+  const { isAuthenticated, isAdmin, initialized, user, profile, updateProfile } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   
@@ -38,8 +39,8 @@ const UnauthorizedPage = () => {
     }
   }, [isAuthenticated, user]);
 
-  // Debug function to refresh profile data
-  const refreshAdminStatus = async () => {
+  // Improved and more reliable admin status refresh
+  const handleRefreshAdminStatus = async () => {
     if (!user?.id || isRefreshing) return;
     
     setIsRefreshing(true);
@@ -48,24 +49,29 @@ const UnauthorizedPage = () => {
     try {
       console.log("Manually refreshing admin status for user:", user.id);
       
-      await withExponentialBackoff(async () => {
-        // Instead of calling refreshUser which doesn't exist, we'll use a different approach
-        // We'll reload the current page which will trigger a re-fetch of the user profile
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      }, { maxRetries: 2 });
+      // Use the new refreshAdminStatus function
+      const isUserAdmin = await refreshAdminStatus(user.id);
       
-      // If user is now admin, redirect back to admin page
-      if (isAdmin) {
+      if (isUserAdmin) {
+        // Update the profile in context to reflect admin status
+        updateProfile({
+          ...profile!,
+          is_admin: true
+        });
+        
         toast({
           title: "Admin Access Verified",
           description: "Your administrator access has been confirmed.",
         });
         
+        // Redirect back to admin page
         setTimeout(() => {
           navigate('/admin');
         }, 1000);
+      } else {
+        toast({
+          description: "You don't have administrator privileges. If this is unexpected, contact support.",
+        });
       }
     } catch (err) {
       console.error("Error in refreshAdminStatus:", err);
@@ -150,7 +156,7 @@ const UnauthorizedPage = () => {
                     Please contact an administrator for access.
                   </p>
                   <Button
-                    onClick={refreshAdminStatus}
+                    onClick={handleRefreshAdminStatus}
                     variant="outline"
                     disabled={isRefreshing || retryCount >= 3}
                     className="w-full max-w-xs"

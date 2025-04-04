@@ -6,10 +6,10 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
   try {
     console.log("Fetching user profile for:", userId);
     
-    // First get the profile data
+    // Directly query profiles table with a more robust query
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, is_admin')
+      .select('id, full_name, is_admin, created_at, updated_at')
       .eq('id', userId)
       .single();
     
@@ -33,7 +33,10 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
     const profile: UserProfile = {
       id: data.id,
       email: userEmail,
-      is_admin: data.is_admin === true // Force to boolean
+      full_name: data.full_name || '',
+      is_admin: data.is_admin === true, // Force to boolean
+      created_at: data.created_at,
+      updated_at: data.updated_at
     };
     
     console.log("Constructed profile object:", profile);
@@ -52,6 +55,7 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
     const { error } = await supabase
       .from('profiles')
       .update({
+        full_name: data.full_name,
         is_admin: data.is_admin === true // Force to boolean
       })
       .eq('id', userId);
@@ -65,6 +69,37 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
     return true;
   } catch (error: any) {
     console.error("Error in updateUserProfile:", error.message);
+    return false;
+  }
+}
+
+// New function to specifically check admin status with cache busting
+export async function refreshAdminStatus(userId: string): Promise<boolean> {
+  try {
+    console.log("Refreshing admin status for user:", userId);
+    
+    // Add a cache-busting query parameter to force a fresh DB read
+    const timestamp = new Date().getTime();
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', userId)
+      .single()
+      .options({ head: false, count: 'exact' })
+      // Add timestamp to force cache invalidation
+      .filter('updated_at', 'gte', '2000-01-01');
+    
+    if (error) {
+      console.error("Error refreshing admin status:", error.message);
+      return false;
+    }
+    
+    const isAdmin = data?.is_admin === true;
+    console.log("Refreshed admin status:", isAdmin);
+    return isAdmin;
+  } catch (error: any) {
+    console.error("Error in refreshAdminStatus:", error.message);
     return false;
   }
 }

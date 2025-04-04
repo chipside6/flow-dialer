@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, UserProfile } from '../types';
@@ -22,11 +21,14 @@ export function useAuthProvider() {
     return activateTrialPlan(userId);
   };
 
-  // Handler for updating the profile
+  // Handler for updating the profile with improved admin handling
   const updateProfile = (newProfile: UserProfile | null) => {
     setProfile(newProfile);
     if (newProfile) {
-      setIsAdmin(!!newProfile.is_admin);
+      // Explicitly convert is_admin to boolean to avoid type issues
+      const adminFlag = newProfile.is_admin === true;
+      setIsAdmin(adminFlag);
+      console.log("AuthProvider: Updated isAdmin flag to:", adminFlag);
     } else {
       setIsAdmin(false);
     }
@@ -141,7 +143,7 @@ export function useAuthProvider() {
       }
     };
     
-    // Helper function to handle user sign in
+    // Helper function to handle user sign in with improved admin flag handling
     const handleSignIn = async (supabaseUser: any) => {
       try {
         // Convert Supabase User to our User type
@@ -162,9 +164,10 @@ export function useAuthProvider() {
           // Don't block the auth flow for storage issues
         }
         
-        // Fetch profile data
+        // Fetch profile data with admin status
         const userProfile = await fetchUserProfile(supabaseUser.id);
         console.log("AuthProvider: Fetched user profile:", userProfile);
+        
         if (userProfile) {
           // Make sure to set the email from the auth user
           const updatedProfile = {
@@ -173,7 +176,7 @@ export function useAuthProvider() {
           };
           setProfile(updatedProfile);
           
-          // Explicitly convert to boolean to avoid null
+          // Explicitly convert is_admin to boolean to prevent type issues
           const isAdminFlag = updatedProfile.is_admin === true;
           setIsAdmin(isAdminFlag);
           console.log("AuthProvider: Set isAdmin flag to:", isAdminFlag);
