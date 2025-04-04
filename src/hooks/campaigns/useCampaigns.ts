@@ -20,6 +20,7 @@ export const useCampaigns = (): UseCampaignsResult => {
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const retryCountRef = useRef(0);
   const { fetchCampaigns } = useFetchCampaigns();
+  const errorToastShownRef = useRef(false);
 
   // Define refreshCampaigns as a callback function
   const refreshCampaigns = useCallback(async () => {
@@ -37,16 +38,21 @@ export const useCampaigns = (): UseCampaignsResult => {
         error: result.error
       });
       
-      if (result.error) {
-        const message = result.isTimeoutError 
-          ? "Connection timed out. Please check your internet connection and try again."
-          : result.error.message;
-          
-        toast({
-          title: "Error refreshing campaigns",
-          description: message,
-          variant: "destructive"
-        });
+      if (result.error && !errorToastShownRef.current) {
+        // Only show error toast once to avoid duplicates
+        errorToastShownRef.current = true;
+        setTimeout(() => {
+          errorToastShownRef.current = false;
+        }, 5000);
+        
+        // Don't show error toast for timeout errors, let the UI handle it
+        if (!result.isTimeoutError) {
+          toast({
+            title: "Error refreshing campaigns",
+            description: result.error.message,
+            variant: "destructive"
+          });
+        }
         return false;
       }
       return true;
@@ -58,11 +64,18 @@ export const useCampaigns = (): UseCampaignsResult => {
         error 
       }));
       
-      toast({
-        title: "Error refreshing campaigns",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive"
-      });
+      if (!errorToastShownRef.current) {
+        errorToastShownRef.current = true;
+        setTimeout(() => {
+          errorToastShownRef.current = false;
+        }, 5000);
+        
+        toast({
+          title: "Error refreshing campaigns",
+          description: error.message || "An unexpected error occurred",
+          variant: "destructive"
+        });
+      }
       return false;
     }
   }, [user, isAuthenticated, toast, fetchCampaigns]);
@@ -83,7 +96,7 @@ export const useCampaigns = (): UseCampaignsResult => {
             console.log("Campaigns loading timeout reached, ending loading state");
             setState(prev => ({ ...prev, isLoading: false }));
           }
-        }, 12000); // Increased from 8 to 12 seconds
+        }, 12000); // 12 seconds timeout
 
         // Implement retry logic for network errors
         let result: FetchCampaignsResult = {
@@ -108,15 +121,6 @@ export const useCampaigns = (): UseCampaignsResult => {
           console.log(`Retrying fetch (attempt ${retryCountRef.current + 1} of ${maxRetries})...`);
           retryCountRef.current++;
           
-          // Only show retry toast on first retry
-          if (retryCountRef.current === 1 && isMounted) {
-            toast({
-              title: "Connection issue",
-              description: "We're having trouble connecting to the server. Retrying...",
-              variant: "default"
-            });
-          }
-          
           // Wait before retrying
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
@@ -132,27 +136,18 @@ export const useCampaigns = (): UseCampaignsResult => {
             error: result.error
           });
           
-          // Show error toast if needed
-          if (result.error) {
-            if (result.isAuthError) {
-              toast({
-                title: "Authentication Error",
-                description: "Your session may have expired. Please try logging in again.",
-                variant: "destructive"
-              });
-            } else if (result.isTimeoutError) {
-              toast({
-                title: "Connection Error",
-                description: "We couldn't connect to the server. Please check your internet connection and try again.",
-                variant: "destructive"
-              });
-            } else {
-              toast({
-                title: "Error loading campaigns",
-                description: result.error.message || "An unexpected error occurred",
-                variant: "destructive"
-              });
-            }
+          // Only show error toast if this is an auth error and not already shown
+          if (result.error && result.isAuthError && !errorToastShownRef.current) {
+            errorToastShownRef.current = true;
+            setTimeout(() => {
+              errorToastShownRef.current = false;
+            }, 5000);
+            
+            toast({
+              title: "Authentication Error",
+              description: "Your session may have expired. Please try logging in again.",
+              variant: "destructive"
+            });
           }
         }
       } finally {
@@ -173,7 +168,7 @@ export const useCampaigns = (): UseCampaignsResult => {
         clearTimeout(loadingTimeoutRef.current);
       }
     };
-  }, [user, isAuthenticated, toast, fetchCampaigns]);
+  }, [user, isAuthenticated, fetchCampaigns]);
 
   return {
     campaigns: state.campaigns,

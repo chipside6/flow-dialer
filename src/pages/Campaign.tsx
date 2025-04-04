@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
 import { CampaignCreationWizard } from "@/components/campaign-wizard/CampaignCreationWizard";
-import { PlusCircle, RefreshCw } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CampaignData } from "@/components/campaign-wizard/types";
 import { useAuth } from "@/contexts/auth/useAuth";
@@ -15,18 +15,16 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { useSubscription } from "@/hooks/subscription";
 import { TrialExpiredNotice } from "@/components/campaign/TrialExpiredNotice";
 import { LoadingState } from "@/components/upgrade/LoadingState";
-import { toast } from "@/components/ui/use-toast";
 
 const CampaignPage = () => {
   const location = useLocation();
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const { user } = useAuth();
-  const { campaigns, isLoading, refreshCampaigns, error } = useCampaigns();
+  const { campaigns, isLoading, error } = useCampaigns();
   const { trialExpired, currentPlan } = useSubscription();
   
-  // Free users can't access campaigns if not on trial or lifetime
-  const canAccessCampaigns = currentPlan === 'lifetime' || 
-                           (currentPlan === 'trial' && !trialExpired);
+  // All users can access campaigns without subscription check
+  const canAccessCampaigns = true;
   
   // Check for state passed from navigation to determine if we should show the wizard
   useEffect(() => {
@@ -54,19 +52,6 @@ const CampaignPage = () => {
     };
     
     setShowCreateWizard(false);
-    
-    // Refresh campaigns to show the newly created one
-    await refreshCampaigns();
-  };
-  
-  // Handle manual refresh button click
-  const handleManualRefresh = async () => {
-    toast({
-      title: "Refreshing campaigns",
-      description: "Reconnecting to the server...",
-    });
-    
-    await refreshCampaigns();
   };
   
   // Only show loading state for initial load, not for subsequent refreshes
@@ -76,7 +61,7 @@ const CampaignPage = () => {
         <div className="max-w-6xl mx-auto w-full px-4 pt-8">
           <LoadingState 
             message="Loading your campaigns..." 
-            onRetry={handleManualRefresh}
+            onRetry={null}
             timeout={10000}
           />
         </div>
@@ -96,13 +81,6 @@ const CampaignPage = () => {
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-4">Connection Error</h2>
             <p className="text-gray-600 mb-6">{errorMessage}</p>
-            <Button 
-              variant="outline" 
-              onClick={handleManualRefresh} 
-              className="gap-2"
-            >
-              <RefreshCw className="h-4 w-4" /> Try Again
-            </Button>
           </div>
         </div>
       </DashboardLayout>
@@ -127,14 +105,6 @@ const CampaignPage = () => {
                   <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                     <h1 className="text-2xl md:text-3xl font-bold">Campaigns</h1>
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        onClick={handleManualRefresh}
-                        size="icon"
-                        title="Refresh campaigns"
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                      </Button>
                       <Button 
                         variant="success"
                         onClick={() => setShowCreateWizard(true)}
