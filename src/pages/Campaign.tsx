@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
 import { CampaignCreationWizard } from "@/components/campaign-wizard/CampaignCreationWizard";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, RefreshCw } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CampaignData } from "@/components/campaign-wizard/types";
 import { useAuth } from "@/contexts/auth/useAuth";
@@ -15,13 +15,16 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { useSubscription } from "@/hooks/subscription";
 import { TrialExpiredNotice } from "@/components/campaign/TrialExpiredNotice";
 import { LoadingState } from "@/components/upgrade/LoadingState";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { toast } from "@/components/ui/use-toast";
 
 const CampaignPage = () => {
   const location = useLocation();
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const { user } = useAuth();
-  const { campaigns, isLoading, error } = useCampaigns();
+  const { campaigns, isLoading, error, refreshCampaigns } = useCampaigns();
   const { trialExpired, currentPlan } = useSubscription();
+  const { isOnline } = useNetworkStatus();
   
   // All users can access campaigns without subscription check
   const canAccessCampaigns = true;
@@ -54,6 +57,25 @@ const CampaignPage = () => {
     setShowCreateWizard(false);
   };
   
+  const handleRefresh = async () => {
+    if (!isOnline) {
+      toast({
+        title: "Network offline",
+        description: "Cannot refresh campaigns while offline",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const success = await refreshCampaigns();
+    if (success) {
+      toast({
+        title: "Campaigns refreshed",
+        description: "Campaign data has been updated",
+      });
+    }
+  };
+  
   // Only show loading state for initial load, not for subsequent refreshes
   if (isLoading && campaigns.length === 0) {
     return (
@@ -61,8 +83,8 @@ const CampaignPage = () => {
         <div className="max-w-6xl mx-auto w-full px-4 pt-8">
           <LoadingState 
             message="Loading your campaigns..." 
-            onRetry={null}
-            timeout={10000}
+            onRetry={refreshCampaigns}
+            timeout={6000}
           />
         </div>
       </DashboardLayout>
@@ -72,7 +94,7 @@ const CampaignPage = () => {
   // Show error state if there was an error fetching campaigns
   if (error) {
     const errorMessage = error.message?.includes('abort') || error.message?.includes('timeout')
-      ? "Connection timed out. Please check your internet connection."
+      ? "Connection timed out. The server may be busy or there might be a network issue."
       : `Error loading campaigns: ${error.message}`;
       
     return (
@@ -81,6 +103,15 @@ const CampaignPage = () => {
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-4">Connection Error</h2>
             <p className="text-gray-600 mb-6">{errorMessage}</p>
+            <Button 
+              onClick={refreshCampaigns} 
+              variant="outline"
+              disabled={!isOnline}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Retry
+            </Button>
           </div>
         </div>
       </DashboardLayout>
@@ -105,6 +136,15 @@ const CampaignPage = () => {
                   <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                     <h1 className="text-2xl md:text-3xl font-bold">Campaigns</h1>
                     <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={handleRefresh}
+                        disabled={isLoading}
+                        className="whitespace-nowrap"
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                        Refresh
+                      </Button>
                       <Button 
                         variant="success"
                         onClick={() => setShowCreateWizard(true)}

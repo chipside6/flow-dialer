@@ -4,23 +4,36 @@ import { supabase } from "@/integrations/supabase/client";
 import { logSupabaseOperation, OperationType, isAuthError } from "@/utils/supabaseDebug";
 import { FetchCampaignsParams, FetchCampaignsResult } from "./types";
 import { useTransformCampaigns } from "./useTransformCampaigns";
-import { User } from "@/contexts/auth/types"; // Import our own User type
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 /**
  * Hook for fetching campaigns from Supabase
  */
 export const useFetchCampaigns = () => {
   const { transformCampaignData } = useTransformCampaigns();
+  const { isOnline } = useNetworkStatus();
 
   const fetchCampaigns = useCallback(async ({ user, isAuthenticated }: FetchCampaignsParams): Promise<FetchCampaignsResult> => {
+    // If network is offline, return appropriate error immediately
+    if (!isOnline) {
+      console.log("Network is offline, cannot fetch campaigns");
+      return { 
+        data: [], 
+        error: new Error('You appear to be offline. Please check your internet connection.'),
+        isOfflineError: true,
+        isTimeoutError: false,
+        isAuthError: false
+      };
+    }
+    
     // If no user is logged in, fetch all campaigns instead of returning empty array
     if (!user || !isAuthenticated) {
       console.log("No authenticated user, fetching all campaigns");
       
       try {
-        // Set a timeout for the fetch operation - reduced to improve performance
+        // Set a timeout for the fetch operation - using a reasonable 5 second timeout
         const abortController = new AbortController();
-        const timeoutId = setTimeout(() => abortController.abort(), 8000); // 8 second timeout (reduced from 15s)
+        const timeoutId = setTimeout(() => abortController.abort(), 5000);
         
         const { data, error } = await supabase
           .from('campaigns')
@@ -45,9 +58,10 @@ export const useFetchCampaigns = () => {
           if (error.message?.includes('abort') || error.message?.includes('signal')) {
             return { 
               data: [], 
-              error: new Error('Connection timed out. Please check your internet connection and try again.'),
+              error: new Error('Connection timed out. The server may be busy or there might be a network issue.'),
               isTimeoutError: true,
-              isAuthError: false
+              isAuthError: false,
+              isOfflineError: false
             };
           }
           
@@ -55,7 +69,8 @@ export const useFetchCampaigns = () => {
             data: [], 
             error, 
             isTimeoutError: false,
-            isAuthError: false
+            isAuthError: false,
+            isOfflineError: false
           };
         }
         
@@ -71,13 +86,13 @@ export const useFetchCampaigns = () => {
         
         // Transform data to match the Campaign interface
         const transformedData = transformCampaignData(data);
-        console.log("Campaigns fetched:", transformedData);
         
         return { 
           data: transformedData, 
           error: null, 
           isTimeoutError: false,
-          isAuthError: false
+          isAuthError: false,
+          isOfflineError: false
         };
       } catch (error: any) {
         console.error('Error fetching campaigns:', error.message);
@@ -87,9 +102,10 @@ export const useFetchCampaigns = () => {
           console.log('Fetch operation timed out');
           return { 
             data: [], 
-            error: new Error('Connection timed out. Please check your internet connection and try again.'),
+            error: new Error('Connection timed out. The server may be busy or there might be a network issue.'),
             isTimeoutError: true,
-            isAuthError: false
+            isAuthError: false,
+            isOfflineError: false
           };
         }
         
@@ -97,7 +113,8 @@ export const useFetchCampaigns = () => {
           data: [], 
           error,
           isAuthError: false,
-          isTimeoutError: false
+          isTimeoutError: false,
+          isOfflineError: false
         };
       }
     }
@@ -105,9 +122,9 @@ export const useFetchCampaigns = () => {
     console.log("Fetching campaigns for user:", user.id);
     
     try {
-      // Reduced timeout from 15 to 8 seconds to improve performance
+      // Use a reasonable 5 second timeout to improve user experience
       const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), 8000); // 8 second timeout
+      const timeoutId = setTimeout(() => abortController.abort(), 5000);
       
       const { data, error } = await supabase
         .from('campaigns')
@@ -133,9 +150,10 @@ export const useFetchCampaigns = () => {
         if (error.message?.includes('abort') || error.message?.includes('signal')) {
           return { 
             data: [], 
-            error: new Error('Connection timed out. Please check your internet connection and try again.'),
+            error: new Error('Connection timed out. The server may be busy or there might be a network issue.'),
             isTimeoutError: true,
-            isAuthError: false
+            isAuthError: false,
+            isOfflineError: false
           };
         }
         
@@ -146,7 +164,8 @@ export const useFetchCampaigns = () => {
           data: [], 
           error, 
           isTimeoutError: false,
-          isAuthError: authIssue
+          isAuthError: authIssue,
+          isOfflineError: false
         };
       }
       
@@ -162,13 +181,13 @@ export const useFetchCampaigns = () => {
 
       // Transform data to match the Campaign interface
       const transformedData = transformCampaignData(data);
-      console.log("Campaigns fetched:", transformedData);
       
       return { 
         data: transformedData, 
         error: null, 
         isTimeoutError: false,
-        isAuthError: false
+        isAuthError: false,
+        isOfflineError: false
       };
     } catch (error: any) {
       console.error('Error fetching campaigns:', error.message);
@@ -178,9 +197,10 @@ export const useFetchCampaigns = () => {
         console.log('Fetch operation timed out');
         return { 
           data: [], 
-          error: new Error('Connection timed out. Please check your internet connection and try again.'),
+          error: new Error('Connection timed out. The server may be busy or there might be a network issue.'),
           isTimeoutError: true,
-          isAuthError: false
+          isAuthError: false,
+          isOfflineError: false
         };
       }
       
@@ -190,10 +210,11 @@ export const useFetchCampaigns = () => {
         data: [], 
         error,
         isAuthError: authIssue,
-        isTimeoutError: false
+        isTimeoutError: false,
+        isOfflineError: false
       };
     }
-  }, [transformCampaignData]);
+  }, [transformCampaignData, isOnline]);
 
   return { fetchCampaigns };
 };
