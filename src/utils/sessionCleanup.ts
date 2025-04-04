@@ -3,6 +3,44 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 /**
+ * Debounced version of clearAllAuthData to prevent multiple calls
+ */
+let clearAllAuthDataTimeout: NodeJS.Timeout | null = null;
+export const debouncedClearAllAuthData = () => {
+  if (clearAllAuthDataTimeout) {
+    clearTimeout(clearAllAuthDataTimeout);
+  }
+  
+  clearAllAuthDataTimeout = setTimeout(() => {
+    clearAllAuthData();
+    clearAllAuthDataTimeout = null;
+  }, 300);
+};
+
+/**
+ * Clear all authentication related data from storage
+ */
+export const clearAllAuthData = () => {
+  try {
+    // Clear auth-related localStorage items
+    localStorage.removeItem('sessionLastUpdated');
+    localStorage.removeItem('user_session');
+    localStorage.removeItem('supabase.auth.token');
+    
+    // Clear any other potential auth caches
+    Object.keys(localStorage).forEach(key => {
+      if (key.includes('auth') || key.includes('session') || key.includes('token')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    console.log("All auth data cleared");
+  } catch (err) {
+    console.error("Error clearing auth data:", err);
+  }
+};
+
+/**
  * Force reload the application and clear any cached state
  */
 export const forceAppReload = () => {

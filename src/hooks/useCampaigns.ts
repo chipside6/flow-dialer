@@ -60,7 +60,10 @@ export const useCampaigns = () => {
     }
   }, [loadCampaigns]);
 
-  return { campaigns, isLoading, error, refetch };
+  // Alias refetch as refreshCampaigns for backwards compatibility
+  const refreshCampaigns = refetch;
+
+  return { campaigns, isLoading, error, refetch, refreshCampaigns };
 };
 
 export type { Campaign };
