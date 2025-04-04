@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/auth/useAuth';
+import { useAuthOperations } from '@/contexts/auth/hooks/useAuthOperations';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
 import { AuthHeader } from '@/components/auth/AuthHeader';
@@ -20,11 +21,20 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
+  const { signIn } = useAuthOperations();
   
   // Extract returnTo from location state if available
   const returnTo = location.state?.returnTo || '/dashboard';
   
-  // Reset loading state after component unmounts or if there was an error
+  // If already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(returnTo, { replace: true });
+    }
+  }, [isAuthenticated, navigate, returnTo]);
+  
+  // Reset loading state after component unmounts
   useEffect(() => {
     return () => {
       // Ensure loading state is reset when component unmounts
@@ -41,6 +51,9 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isLoading) return; // Prevent multiple submissions
+    
     setIsLoading(true);
     setErrorMessage(null);
 
@@ -53,11 +66,8 @@ const Login = () => {
     }, 10000); // 10 second timeout
 
     try {
-      // Simple login with Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      // Use the signIn function from useAuthOperations
+      const { error } = await signIn(email, password);
 
       // Clear the timeout since we got a response
       clearTimeout(timeoutId);
@@ -65,14 +75,9 @@ const Login = () => {
       if (error) {
         throw error;
       }
-
-      console.log("Login successful:", data);
       
-      // Set a simple flag in localStorage
-      localStorage.setItem('isAuthenticated', 'true');
-      
-      // Redirect to dashboard or requested page
-      navigate(returnTo);
+      // If we get here, the login was successful
+      // (redirection will be handled by the auth state effect)
       
     } catch (error: any) {
       console.error("Login error:", error);

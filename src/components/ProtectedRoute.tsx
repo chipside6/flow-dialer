@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,6 +16,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAuth = async () => {
       try {
         // Set a timeout for the auth check
@@ -26,6 +29,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
         
         // Clear timeout since we got a response
         clearTimeout(timeoutId);
+        
+        if (!isMounted) return;
         
         if (error) {
           console.error("Auth check error:", error);
@@ -80,6 +85,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
         // Handle timeout errors specifically
         if (error.name === 'AbortError') {
           setError("Authentication check timed out. Please try again.");
+          toast({
+            title: "Authentication Error",
+            description: "Check timed out. Redirecting to login page.",
+            variant: "destructive"
+          });
         } else {
           setError(error.message || "Authentication check failed");
         }
@@ -95,14 +105,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     
     // Add a fallback timeout to prevent getting stuck in checking state
     const fallbackTimeout = setTimeout(() => {
-      if (isChecking) {
+      if (isMounted && isChecking) {
         setIsChecking(false);
         setError("Authentication check took too long. Please try again.");
         navigate('/login', { replace: true });
       }
     }, 10000); // 10 second fallback
     
-    return () => clearTimeout(fallbackTimeout);
+    return () => {
+      isMounted = false;
+      clearTimeout(fallbackTimeout);
+    };
   }, [navigate, requireAdmin]);
   
   // If still checking, show a loader

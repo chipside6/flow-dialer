@@ -39,11 +39,11 @@ export function useAuthOperations() {
     try {
       console.log("useAuthOperations - Signing in user:", email);
       
-      // Set a timeout for the sign in request
+      // Create a promise that will reject after a timeout
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
           reject(new Error("Login request timed out. Please try again."));
-        }, 15000); // 15 second timeout
+        }, 10000); // 10 second timeout
       });
       
       // Race the sign in request against the timeout
@@ -108,9 +108,36 @@ export function useAuthOperations() {
     }
   };
 
+  const updateUserProfile = async (userId: string, profileData: any) => {
+    try {
+      console.log("useAuthOperations - Updating user profile:", userId);
+      const result = await updateUserProfileAction(userId, profileData);
+      
+      if (result.error) {
+        console.error("useAuthOperations - Profile update error:", result.error.message);
+        toast({
+          title: "Profile update failed",
+          description: result.error.message,
+          variant: "destructive",
+        });
+      }
+      
+      return result;
+    } catch (error: any) {
+      console.error("useAuthOperations - Unexpected profile update error:", error);
+      toast({
+        title: "Error updating profile",
+        description: error.message || "Please try again later",
+        variant: "destructive",
+      });
+      return { error };
+    }
+  };
+
   return {
     signUp,
     signIn,
-    signOut
+    signOut,
+    updateUserProfile
   };
 }
