@@ -1,10 +1,9 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/components/ui/use-toast";
 import { useFetchCampaigns } from "./useFetchCampaigns";
-import { Campaign, CampaignState, UseCampaignsResult } from "./types";
-import { User } from "@/contexts/auth/types"; // Import our own User type
+import { Campaign, CampaignState, UseCampaignsResult } from "../types/campaign";
 
 /**
  * Primary hook for managing campaigns data
@@ -19,6 +18,48 @@ export const useCampaigns = (): UseCampaignsResult => {
   });
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { fetchCampaigns } = useFetchCampaigns();
+
+  // Define refreshCampaigns as a callback function
+  const refreshCampaigns = useCallback(async () => {
+    setState(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      const { data, error } = await fetchCampaigns({ 
+        user, 
+        isAuthenticated 
+      });
+      
+      setState({
+        campaigns: data,
+        isLoading: false,
+        error
+      });
+      
+      if (error) {
+        toast({
+          title: "Error refreshing campaigns",
+          description: error.message,
+          variant: "destructive"
+        });
+        return false;
+      }
+      return true;
+    } catch (error: any) {
+      console.error('Error refreshing campaigns:', error.message);
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error 
+      }));
+      
+      toast({
+        title: "Error refreshing campaigns",
+        description: error.message,
+        variant: "destructive"
+      });
+      return false;
+    }
+  }, [user, isAuthenticated, toast, fetchCampaigns]);
 
   useEffect(() => {
     let isMounted = true;
@@ -88,47 +129,10 @@ export const useCampaigns = (): UseCampaignsResult => {
     };
   }, [user, isAuthenticated, toast, fetchCampaigns]);
 
-  // Function to manually refresh campaigns
-  const refreshCampaigns = async () => {
-    setState(prev => ({ ...prev, isLoading: true }));
-    
-    try {
-      const { data, error } = await fetchCampaigns({ 
-        user, 
-        isAuthenticated 
-      });
-      
-      setState({
-        campaigns: data,
-        isLoading: false,
-        error
-      });
-      
-      if (error) {
-        toast({
-          title: "Error refreshing campaigns",
-          description: error.message,
-          variant: "destructive"
-        });
-      }
-    } catch (error: any) {
-      console.error('Error refreshing campaigns:', error.message);
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error 
-      }));
-      
-      toast({
-        title: "Error refreshing campaigns",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  };
-
   return {
-    ...state,
+    campaigns: state.campaigns,
+    isLoading: state.isLoading,
+    error: state.error,
     refreshCampaigns
   };
 };
