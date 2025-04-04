@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/components/ui/use-toast";
 import { useFetchCampaigns } from "./useFetchCampaigns";
-import { CampaignState, UseCampaignsResult } from "../types/campaign";
+import { CampaignState, UseCampaignsResult, FetchCampaignsResult } from "./types";
 import { Campaign } from "@/types/campaign";
 
 /**
@@ -26,21 +26,21 @@ export const useCampaigns = (): UseCampaignsResult => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
-      const { data, error, isTimeoutError } = await fetchCampaigns({ 
+      const result: FetchCampaignsResult = await fetchCampaigns({ 
         user, 
         isAuthenticated 
       });
       
       setState({
-        campaigns: data as Campaign[],
+        campaigns: result.data as Campaign[],
         isLoading: false,
-        error
+        error: result.error
       });
       
-      if (error) {
-        const message = isTimeoutError 
+      if (result.error) {
+        const message = result.isTimeoutError 
           ? "Connection timed out. Please check your internet connection and try again."
-          : error.message;
+          : result.error.message;
           
         toast({
           title: "Error refreshing campaigns",
@@ -86,7 +86,12 @@ export const useCampaigns = (): UseCampaignsResult => {
         }, 12000); // Increased from 8 to 12 seconds
 
         // Implement retry logic for network errors
-        let result = { data: [] as Campaign[], error: null as any, isAuthError: false, isTimeoutError: false };
+        let result: FetchCampaignsResult = {
+          data: [],
+          error: null,
+          isAuthError: false,
+          isTimeoutError: false
+        };
         const maxRetries = 2;
         
         while (retryCountRef.current <= maxRetries) {

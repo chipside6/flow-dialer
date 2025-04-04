@@ -2,7 +2,7 @@
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { logSupabaseOperation, OperationType, isAuthError } from "@/utils/supabaseDebug";
-import { FetchCampaignsParams } from "./types";
+import { FetchCampaignsParams, FetchCampaignsResult } from "./types";
 import { useTransformCampaigns } from "./useTransformCampaigns";
 import { User } from "@/contexts/auth/types"; // Import our own User type
 
@@ -12,7 +12,7 @@ import { User } from "@/contexts/auth/types"; // Import our own User type
 export const useFetchCampaigns = () => {
   const { transformCampaignData } = useTransformCampaigns();
 
-  const fetchCampaigns = useCallback(async ({ user, isAuthenticated }: FetchCampaignsParams) => {
+  const fetchCampaigns = useCallback(async ({ user, isAuthenticated }: FetchCampaignsParams): Promise<FetchCampaignsResult> => {
     // If no user is logged in, return empty array
     if (!user || !isAuthenticated) {
       console.log("No authenticated user, returning empty campaigns array");
@@ -25,7 +25,12 @@ export const useFetchCampaigns = () => {
         data: []
       });
       
-      return { data: [], error: null };
+      return { 
+        data: [], 
+        error: null, 
+        isAuthError: false, 
+        isTimeoutError: false 
+      };
     }
 
     console.log("Fetching campaigns for user:", user.id);
@@ -60,11 +65,17 @@ export const useFetchCampaigns = () => {
           return { 
             data: [], 
             error: new Error('Connection timed out. Please check your internet connection and try again.'),
-            isTimeoutError: true
+            isTimeoutError: true,
+            isAuthError: false
           };
         }
         
-        return { data: [], error };
+        return { 
+          data: [], 
+          error, 
+          isTimeoutError: false,
+          isAuthError: false
+        };
       }
       
       // Log successful operation
@@ -81,7 +92,12 @@ export const useFetchCampaigns = () => {
       const transformedData = transformCampaignData(data);
       console.log("Campaigns fetched:", transformedData);
       
-      return { data: transformedData, error: null };
+      return { 
+        data: transformedData, 
+        error: null, 
+        isTimeoutError: false,
+        isAuthError: false
+      };
     } catch (error: any) {
       console.error('Error fetching campaigns:', error.message);
       
@@ -91,7 +107,8 @@ export const useFetchCampaigns = () => {
         return { 
           data: [], 
           error: new Error('Connection timed out. Please check your internet connection and try again.'),
-          isTimeoutError: true
+          isTimeoutError: true,
+          isAuthError: false
         };
       }
       
@@ -100,7 +117,8 @@ export const useFetchCampaigns = () => {
       return { 
         data: [], 
         error,
-        isAuthError: authIssue
+        isAuthError: authIssue,
+        isTimeoutError: false
       };
     }
   }, [transformCampaignData]);

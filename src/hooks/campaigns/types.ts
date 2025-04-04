@@ -1,18 +1,8 @@
 
-// Original imports
-import { User } from "@/contexts/auth/types";
-
-export interface Campaign {
-  id: string;
-  title: string;
-  status: "pending" | "running" | "completed" | "paused" | "draft" | "active" | "failed";
-  progress: number;
-  totalCalls: number;
-  answeredCalls: number;
-  transferredCalls: number;
-  failedCalls: number;
-  user_id: string;
-}
+/**
+ * Campaign types for hooks
+ */
+import { Campaign } from '@/types/campaign';
 
 export interface CampaignState {
   campaigns: Campaign[];
@@ -21,10 +11,20 @@ export interface CampaignState {
 }
 
 export interface UseCampaignsResult extends CampaignState {
-  refreshCampaigns: () => Promise<void>;
+  refreshCampaigns: () => Promise<boolean>;
 }
 
-export type FetchCampaignsParams = {
-  user: User | null;
+export interface FetchCampaignsParams {
+  user: any;
   isAuthenticated: boolean;
-};
+}
+
+export interface FetchCampaignsResult {
+  data: Campaign[];
+  error: Error | null;
+  isAuthError: boolean;
+  isTimeoutError: boolean;
+}
+
+// Re-export Campaign type for backward compatibility
+export type { Campaign };
