@@ -18,9 +18,9 @@ export const useFetchCampaigns = () => {
       console.log("No authenticated user, fetching all campaigns");
       
       try {
-        // Set a timeout for the fetch operation
+        // Set a timeout for the fetch operation - reduced to improve performance
         const abortController = new AbortController();
-        const timeoutId = setTimeout(() => abortController.abort(), 15000); // 15 second timeout
+        const timeoutId = setTimeout(() => abortController.abort(), 8000); // 8 second timeout (reduced from 15s)
         
         const { data, error } = await supabase
           .from('campaigns')
@@ -105,9 +105,9 @@ export const useFetchCampaigns = () => {
     console.log("Fetching campaigns for user:", user.id);
     
     try {
-      // Set a timeout for the fetch operation - increased from 5 to 15 seconds
+      // Reduced timeout from 15 to 8 seconds to improve performance
       const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => abortController.abort(), 8000); // 8 second timeout
       
       const { data, error } = await supabase
         .from('campaigns')

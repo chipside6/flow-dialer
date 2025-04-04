@@ -9,7 +9,7 @@ import { clearAllAuthData } from '@/utils/sessionCleanup';
 export function useAuthProvider() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -75,12 +75,30 @@ export function useAuthProvider() {
 
   useEffect(() => {
     let isMounted = true;
+    let authStateSubscription: { unsubscribe: () => void } | null = null;
     
     const initializeAuth = async () => {
       console.log("AuthProvider: Checking for existing session");
       
       try {
-        // Check for existing session first
+        // First set up auth state change listener to catch any changes during initialization
+        authStateSubscription = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            if (!isMounted) return;
+            
+            console.log('AuthProvider: Auth state changed:', event);
+            
+            if (event === 'SIGNED_IN' && session?.user) {
+              await handleSignIn(session.user);
+            } else if (event === 'SIGNED_OUT') {
+              setUser(null);
+              setProfile(null);
+              setIsAdmin(false);
+            }
+          }
+        ).data.subscription;
+        
+        // Check for existing session
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         
         if (!isMounted) return;
@@ -102,29 +120,13 @@ export function useAuthProvider() {
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
+          setIsLoading(false); // Make sure to set loading to false when no session
         }
         
-        // Set up auth state change listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            if (!isMounted) return;
-            
-            console.log('AuthProvider: Auth state changed:', event);
-            
-            if (event === 'SIGNED_IN' && session?.user) {
-              await handleSignIn(session.user);
-            } else if (event === 'SIGNED_OUT') {
-              setUser(null);
-              setProfile(null);
-              setIsAdmin(false);
-            }
-          }
-        );
-        
-        // Cleanup function
-        return () => {
-          subscription.unsubscribe();
-        };
+        if (isMounted) {
+          setSessionChecked(true);
+          setInitialized(true);
+        }
       } catch (error) {
         console.error('AuthProvider: Error during initialization:', error);
         if (isMounted) {
@@ -132,9 +134,6 @@ export function useAuthProvider() {
           setIsAdmin(false);
           setUser(null);
           setProfile(null);
-        }
-      } finally {
-        if (isMounted) {
           setIsLoading(false);
           setSessionChecked(true);
           setInitialized(true);
@@ -189,10 +188,13 @@ export function useAuthProvider() {
           activateTrialForNewUser(supabaseUser.id);
         }, 0);
         
+        setIsLoading(false); // Set loading to false after everything is loaded
+        
       } catch (error) {
         console.error("AuthProvider: Error during sign in:", error);
         setError(error instanceof Error ? error : new Error('Unknown error during sign in'));
         setIsAdmin(false); // Default to non-admin on error
+        setIsLoading(false); // Set loading to false on error
       }
     };
     
@@ -206,13 +208,15 @@ export function useAuthProvider() {
       }
     }, 2000);
     
-    setIsLoading(true);
     initializeAuth();
     
     // Cleanup function
     return () => {
       isMounted = false;
       clearTimeout(timeout);
+      if (authStateSubscription) {
+        authStateSubscription.unsubscribe();
+      }
     };
   }, []);
 
