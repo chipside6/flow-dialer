@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Play, Pause } from "lucide-react";
-import { Campaign } from "@/hooks/useCampaigns";
+import { Campaign } from "@/types/campaign";
 import { useCampaignContext } from "@/contexts/campaign/CampaignContext";
 
 interface CampaignDetailsProps {
@@ -43,7 +43,7 @@ export const CampaignDetails: React.FC<CampaignDetailsProps> = ({
               <Button variant="outline" onClick={() => pauseCampaign(campaign.id)}>
                 <Pause className="h-4 w-4 mr-2" /> Pause Campaign
               </Button>
-            ) : campaign.status === "paused" || campaign.status === "pending" ? (
+            ) : (campaign.status === "paused" || campaign.status === "pending" || campaign.status === "draft") ? (
               <Button variant="default" onClick={() => startCampaign(campaign.id)}>
                 <Play className="h-4 w-4 mr-2" /> Start Campaign
               </Button>

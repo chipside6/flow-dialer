@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Campaign } from "@/hooks/useCampaigns";
+import { Campaign } from "@/types/campaign";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
@@ -44,7 +44,7 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
       prev.map(campaign => {
         if (campaign.id === campaignId) {
           // Select this campaign to view its details
-          const updatedCampaign = {...campaign, status: "running" as const};
+          const updatedCampaign = {...campaign, status: "running" as Campaign["status"]};
           setSelectedCampaign(updatedCampaign);
           
           // Start the simulation for the campaign
@@ -89,7 +89,7 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
     setCampaigns(prev => 
       prev.map(campaign => {
         if (campaign.id === campaignId) {
-          const updatedCampaign = {...campaign, status: "paused" as const};
+          const updatedCampaign = {...campaign, status: "paused" as Campaign["status"]};
           setSelectedCampaign(updatedCampaign);
           return updatedCampaign;
         }

@@ -4,7 +4,7 @@ import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Play, Pause, BarChart, Eye } from "lucide-react";
-import { Campaign } from "@/hooks/useCampaigns";
+import { Campaign } from "@/types/campaign";
 import { useCampaignContext } from "@/contexts/campaign/CampaignContext";
 import { StatisticsModal } from "./StatisticsModal";
 

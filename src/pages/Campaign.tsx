@@ -7,19 +7,20 @@ import { PlusCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CampaignData } from "@/components/campaign-wizard/types";
 import { useAuth } from "@/contexts/auth/useAuth";
-import { Campaign } from "@/hooks/useCampaigns";
+import { Campaign } from "@/types/campaign";
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from "react-router-dom";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useSubscription } from "@/hooks/subscription";
 import { TrialExpiredNotice } from "@/components/campaign/TrialExpiredNotice";
+import { LoadingState } from "@/components/upgrade/LoadingState";
 
 const CampaignPage = () => {
   const location = useLocation();
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const { user } = useAuth();
-  const { campaigns, isLoading, refreshCampaigns } = useCampaigns();
+  const { campaigns, isLoading, refreshCampaigns, error } = useCampaigns();
   const { trialExpired, currentPlan } = useSubscription();
   
   // Free users can't access campaigns if not on trial or lifetime
@@ -56,6 +57,27 @@ const CampaignPage = () => {
     // Refresh campaigns to show the newly created one
     await refreshCampaigns();
   };
+  
+  // Show loading state when campaigns are being fetched
+  if (isLoading) {
+    return (
+      <LoadingState 
+        message="Loading your campaigns..." 
+        onRetry={() => refreshCampaigns()}
+      />
+    );
+  }
+  
+  // Show error state if there was an error fetching campaigns
+  if (error) {
+    return (
+      <LoadingState 
+        message={`Error loading campaigns: ${error.message}`} 
+        onRetry={() => refreshCampaigns()}
+        errorVariant="destructive"
+      />
+    );
+  }
   
   return (
     <div className="min-h-screen bg-background flex flex-col">
