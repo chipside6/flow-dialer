@@ -6,6 +6,8 @@ import { TransferNumbersList } from "./TransferNumbersList";
 import { ErrorAlert } from "./ErrorAlert";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { toast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface TransferNumbersContentProps {
   transferNumbers: TransferNumber[];
@@ -30,6 +32,7 @@ export const TransferNumbersContent = ({
 }: TransferNumbersContentProps) => {
   const [forceShowContent, setForceShowContent] = useState(false);
   const [localTransferNumbers, setLocalTransferNumbers] = useState<TransferNumber[]>(transferNumbers);
+  const [loadingTimeoutReached, setLoadingTimeoutReached] = useState(false);
   
   // Update local transfer numbers when prop changes
   useEffect(() => {
@@ -41,10 +44,18 @@ export const TransferNumbersContent = ({
     const timer = setTimeout(() => {
       if (isLoading) {
         setForceShowContent(true);
+        setLoadingTimeoutReached(true);
       }
     }, 3000); // Show content after 3 seconds even if still loading
     
     return () => clearTimeout(timer);
+  }, [isLoading]);
+
+  // Reset loading timeout state whenever loading state changes
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingTimeoutReached(false);
+    }
   }, [isLoading]);
   
   // Handle adding a transfer number with optimistic update
@@ -80,29 +91,21 @@ export const TransferNumbersContent = ({
           } : tn)
         );
         
-        // Force refresh after a short delay to get the real data from the server
+        // Request a refresh for the latest data
         setTimeout(() => {
-          console.log("Triggering refresh after add");
           onRefresh();
         }, 800);
       } else {
         // If failed, remove the optimistic entry
         setLocalTransferNumbers(prev => prev.filter(tn => tn.id !== tempId));
-        toast({
-          title: "Error adding transfer number",
-          description: "Server returned an invalid response",
-          variant: "destructive"
-        });
       }
       
       return result;
     } catch (error) {
       console.error("Error adding transfer number:", error);
-      toast({
-        title: "Error adding transfer number",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
-      });
+      
+      // Remove the optimistic entry on error
+      setLocalTransferNumbers(transferNumbers);
       return null;
     }
   };
@@ -121,15 +124,9 @@ export const TransferNumbersContent = ({
       // If the deletion failed, revert the optimistic update
       if (!result) {
         setLocalTransferNumbers(previousState);
-        toast({
-          title: "Error deleting transfer number",
-          description: "Failed to delete the transfer number",
-          variant: "destructive"
-        });
       } else {
-        // Force refresh after a short delay to get the real data from the server
+        // Request a refresh after successful deletion
         setTimeout(() => {
-          console.log("Triggering refresh after delete");
           onRefresh();
         }, 800);
       }
@@ -137,26 +134,21 @@ export const TransferNumbersContent = ({
       return result;
     } catch (error) {
       console.error("Error deleting transfer number:", error);
+      
       // Revert the optimistic update on error
       setLocalTransferNumbers(transferNumbers);
-      toast({
-        title: "Error deleting transfer number",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
-      });
       return false;
     }
   };
   
-  // If we're loading but have forced showing content or have numbers already
-  if (isLoading && !forceShowContent && transferNumbers.length === 0) {
+  // Show simple loading indicator for very quick loads (under 3 seconds)
+  if (isLoading && !forceShowContent && localTransferNumbers.length === 0) {
     return (
-      <LoadingState 
-        message="Loading your transfer numbers, please wait..." 
-        timeout={5000} // 5 seconds timeout
-        onRetry={onRefresh}
-        errorVariant="warning"
-      />
+      <Card className="mb-8">
+        <CardContent className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 text-primary animate-spin" />
+        </CardContent>
+      </Card>
     );
   }
 
@@ -171,11 +163,18 @@ export const TransferNumbersContent = ({
       
       <TransferNumbersList 
         transferNumbers={localTransferNumbers}
-        isLoading={isLoading && transferNumbers.length === 0 && !forceShowContent}
+        isLoading={isLoading && localTransferNumbers.length === 0}
         error={error}
         onDeleteTransferNumber={handleDeleteTransferNumber}
         onRefresh={onRefresh}
       />
+      
+      {/* Show an indicator if loading is taking too long */}
+      {isLoading && loadingTimeoutReached && transferNumbers.length === 0 && (
+        <div className="text-center text-muted-foreground text-sm mt-4">
+          Loading is taking longer than expected. Please wait...
+        </div>
+      )}
     </>
   );
 };

@@ -30,22 +30,8 @@ export const TransferNumbersList = ({
   onDeleteTransferNumber,
   onRefresh
 }: TransferNumbersListProps) => {
-  // Special case for loading state with no numbers
-  if (isLoading && transferNumbers.length === 0) {
-    return (
-      <Card>
-        <CardHeader className="text-left">
-          <CardTitle>Your Transfer Numbers</CardTitle>
-        </CardHeader>
-        <CardContent className="flex justify-center items-center py-8">
-          <Loader2 className="h-8 w-8 text-primary animate-spin" />
-        </CardContent>
-      </Card>
-    );
-  }
-  
   // Handle empty state
-  if (transferNumbers.length === 0) {
+  if (!isLoading && transferNumbers.length === 0) {
     return (
       <Card>
         <CardHeader className="text-left">
@@ -65,40 +51,54 @@ export const TransferNumbersList = ({
   return (
     <Card>
       <CardHeader className="text-left">
-        <CardTitle>Your Transfer Numbers</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          <span>Your Transfer Numbers</span>
+          {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+        </CardTitle>
       </CardHeader>
       <CardContent className="px-0 sm:px-6">
-        <div className="divide-y">
-          {transferNumbers.map((transferNumber) => (
-            <div key={transferNumber.id} className="py-4 px-6 hover:bg-muted/30 transition-colors">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1 text-left">
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-primary" />
-                    <h3 className="font-semibold">{transferNumber.name}</h3>
+        {transferNumbers.length > 0 ? (
+          <div className="divide-y">
+            {transferNumbers.map((transferNumber) => (
+              <div key={transferNumber.id} className="py-4 px-6 hover:bg-muted/30 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1 text-left">
+                    <div className="flex items-center">
+                      <Phone className="h-4 w-4 mr-2 text-primary" />
+                      <h3 className="font-semibold">{transferNumber.name}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{transferNumber.number}</p>
+                    {transferNumber.description && (
+                      <p className="text-sm">{transferNumber.description}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Added {formatDate(new Date(transferNumber.dateAdded))}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{transferNumber.number}</p>
-                  {transferNumber.description && (
-                    <p className="text-sm">{transferNumber.description}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Added {formatDate(new Date(transferNumber.dateAdded))}
-                  </p>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 self-start sm:self-center"
+                    onClick={() => onDeleteTransferNumber(transferNumber.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    <span>Delete</span>
+                  </Button>
                 </div>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10 self-start sm:self-center"
-                  onClick={() => onDeleteTransferNumber(transferNumber.id)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  <span>Delete</span>
-                </Button>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+          </div>
+        ) : (
+          <EmptyTransferNumbersState 
+            hasError={!!error}
+            onRefresh={onRefresh}
+          />
+        )}
       </CardContent>
     </Card>
   );

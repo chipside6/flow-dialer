@@ -2,7 +2,6 @@
 import React, { useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useTransferNumbers } from "@/hooks/useTransferNumbers";
-import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { TransferNumbersHeader } from "@/components/transfer-numbers/TransferNumbersHeader";
 import { AuthRequiredAlert } from "@/components/transfer-numbers/AuthRequiredAlert";
@@ -14,13 +13,13 @@ const TransferNumbers = () => {
     isLoading, 
     isSubmitting,
     error,
+    isInitialLoad,
     addTransferNumber, 
     deleteTransferNumber,
     refreshTransferNumbers
   } = useTransferNumbers();
   
   const { isAuthenticated } = useAuth();
-  const { toast } = useToast();
   
   // Load data once when component mounts and user is authenticated
   useEffect(() => {
@@ -45,7 +44,7 @@ const TransferNumbers = () => {
           isLoading={isLoading}
           isSubmitting={isSubmitting}
           error={error}
-          isInitialLoad={false}
+          isInitialLoad={isInitialLoad}
           addTransferNumber={addTransferNumber}
           deleteTransferNumber={deleteTransferNumber}
           onRefresh={refreshTransferNumbers}

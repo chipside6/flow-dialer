@@ -1,12 +1,11 @@
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { TransferNumber } from "@/types/transferNumber";
 import { useTransferNumbersState } from "./transfer-numbers/useTransferNumbersState";
 import { useFetchTransferNumbers } from "./transfer-numbers/useFetchTransferNumbers";
 import { useAddTransferNumber } from "./transfer-numbers/useAddTransferNumber";
 import { useDeleteTransferNumber } from "./transfer-numbers/useDeleteTransferNumber";
-import { toast } from "@/components/ui/use-toast";
 
 export type { TransferNumber } from "@/types/transferNumber";
 
@@ -23,6 +22,7 @@ export function useTransferNumbers() {
     lastRefresh,
     error,
     setError,
+    isInitialLoad,
     refreshTransferNumbers
   } = useTransferNumbersState();
   
@@ -62,10 +62,9 @@ export function useTransferNumbers() {
     // Prevent multiple concurrent fetches
     if (!isLoading && user) {
       console.log("User or refresh trigger changed, fetching transfer numbers");
-      setIsLoading(true);
       fetchTransferNumbers();
     }
-  }, [user, lastRefresh, isAuthenticated]);
+  }, [user, lastRefresh, isAuthenticated, isLoading, fetchTransferNumbers, setTransferNumbers, setIsLoading, setError]);
   
   // Add a timeout to automatically set loading to false if it takes too long
   useEffect(() => {
@@ -74,13 +73,13 @@ export function useTransferNumbers() {
     if (isLoading) {
       timeout = setTimeout(() => {
         if (isLoading) {
-          console.log("Loading timed out after 10 seconds, forcing state to false");
+          console.log("Loading timed out after 8 seconds, forcing state to false");
           setIsLoading(false);
           if (!error && transferNumbers.length === 0) {
-            setError("Failed to load transfer numbers. Please try again later.");
+            setError("Loading timed out. Please try again.");
           }
         }
-      }, 10000); // 10 second timeout
+      }, 8000); // 8 second timeout
     }
     
     return () => {
@@ -88,10 +87,10 @@ export function useTransferNumbers() {
         clearTimeout(timeout);
       }
     };
-  }, [isLoading, error, transferNumbers.length]);
+  }, [isLoading, error, transferNumbers.length, setIsLoading, setError]);
   
   // Add explicit refresh function that bypasses cache
-  const forceRefreshTransferNumbers = async () => {
+  const forceRefreshTransferNumbers = useCallback(async () => {
     console.log("Force refreshing transfer numbers");
     setIsLoading(true);
     setError(null);
@@ -102,13 +101,14 @@ export function useTransferNumbers() {
       console.error("Error during force refresh:", error);
       setIsLoading(false);
     }
-  };
+  }, [refreshTransferNumbers, setIsLoading, setError]);
   
   return {
     transferNumbers,
     isLoading,
     isSubmitting,
     error,
+    isInitialLoad,
     addTransferNumber,
     deleteTransferNumber: handleDeleteTransferNumber,
     refreshTransferNumbers: forceRefreshTransferNumbers

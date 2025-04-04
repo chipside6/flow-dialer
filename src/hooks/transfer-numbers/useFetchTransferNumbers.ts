@@ -58,21 +58,14 @@ export const useFetchTransferNumbers = ({
       // Check if this is an AbortError (timeout)
       if (err.name === 'AbortError') {
         setError('Connection timed out. Please try again later.');
+      } else if (err.message?.includes('network') || err.message?.includes('connection')) {
+        setError(`Network error: ${err.message || "Unable to connect to the server"}`);
       } else {
         setError(err.message || "Failed to load transfer numbers");
       }
       
       setTransferNumbers([]);
       setIsLoading(false);
-      
-      // Only show toast for non-network errors to reduce UI noise
-      if (err.name !== 'AbortError' && !err.message?.includes('network')) {
-        toast({
-          title: "Error loading transfer numbers",
-          description: err.message || "Failed to load transfer numbers",
-          variant: "destructive",
-        });
-      }
       
       return [];
     }
