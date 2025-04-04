@@ -43,7 +43,7 @@ export function useAuthOperations() {
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
           reject(new Error("Login request timed out. Please try again."));
-        }, 10000); // 10 second timeout
+        }, 8000); // 8 second timeout (reduced from 10)
       });
       
       // Race the sign in request against the timeout

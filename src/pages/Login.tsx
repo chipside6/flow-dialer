@@ -37,7 +37,6 @@ const Login = () => {
   // Reset loading state after component unmounts
   useEffect(() => {
     return () => {
-      // Ensure loading state is reset when component unmounts
       setIsLoading(false);
     };
   }, []);
@@ -57,7 +56,7 @@ const Login = () => {
     setIsLoading(true);
     setErrorMessage(null);
 
-    // Set a timeout to automatically reset loading state if it takes too long
+    // Hard timeout to prevent UI from being stuck
     const timeoutId = setTimeout(() => {
       if (isLoading) {
         setIsLoading(false);
@@ -66,7 +65,7 @@ const Login = () => {
     }, 10000); // 10 second timeout
 
     try {
-      // Use the signIn function from useAuthOperations
+      // Call the signIn function
       const { error } = await signIn(email, password);
 
       // Clear the timeout since we got a response

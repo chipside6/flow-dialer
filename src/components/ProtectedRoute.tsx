@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const navigate = useNavigate();
-  const [isChecking, setIsChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
@@ -35,7 +35,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
         if (error) {
           console.error("Auth check error:", error);
           setError(error.message);
-          setIsChecking(false);
+          
+          // Silently redirect to login
           navigate('/login', { 
             replace: true, 
             state: { from: window.location.pathname } 
@@ -45,6 +46,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
         
         if (!data.session) {
           console.log("No session found, redirecting to login");
+          
+          // Silently redirect to login
           navigate('/login', { 
             replace: true, 
             state: { returnTo: window.location.pathname } 
@@ -73,27 +76,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
           } catch (profileError: any) {
             console.error("Admin check error:", profileError);
             setError(profileError.message);
-            setIsChecking(false);
             return;
           }
         }
         
-        setIsChecking(false);
+        setIsAuthenticated(true);
       } catch (error: any) {
         console.error("Auth check error:", error);
         
         // Handle timeout errors specifically
         if (error.name === 'AbortError') {
+          console.error("Authentication check timed out");
           setError("Authentication check timed out. Please try again.");
-          toast({
-            title: "Authentication Error",
-            description: "Check timed out. Redirecting to login page.",
-            variant: "destructive"
-          });
         } else {
           setError(error.message || "Authentication check failed");
         }
         
+        // Silently redirect to login on error
         navigate('/login', { 
           replace: true, 
           state: { returnTo: window.location.pathname } 
@@ -103,14 +102,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     
     checkAuth();
     
-    // Add a fallback timeout to prevent getting stuck in checking state
+    // Add a fallback timeout to prevent getting stuck
     const fallbackTimeout = setTimeout(() => {
-      if (isMounted && isChecking) {
-        setIsChecking(false);
+      if (isMounted && isAuthenticated === null) {
         setError("Authentication check took too long. Please try again.");
         navigate('/login', { replace: true });
       }
-    }, 10000); // 10 second fallback
+    }, 8000); // 8 second fallback
     
     return () => {
       isMounted = false;
@@ -118,36 +116,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     };
   }, [navigate, requireAdmin]);
   
-  // If still checking, show a loader
-  if (isChecking) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Checking authentication...</span>
-      </div>
-    );
-  }
-  
   // If there was an error and we're not redirecting, show error
-  if (error && !isChecking) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen text-center p-4">
-        <div className="bg-destructive/10 rounded-lg p-6 max-w-md">
-          <h2 className="text-xl font-semibold text-destructive mb-2">Authentication Error</h2>
-          <p className="text-gray-700 mb-4">{error}</p>
-          <button 
-            onClick={() => navigate('/login', { replace: true })}
-            className="px-4 py-2 bg-primary text-white rounded-md"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
+  if (error && isAuthenticated === null) {
+    console.error("Authentication error:", error);
+    return null; // Return null to avoid showing loading state
   }
   
-  // If we get here, user is authenticated and authorized
-  return <>{children}</>;
+  // Show children only when authenticated
+  if (isAuthenticated) {
+    return <>{children}</>;
+  }
+  
+  // For all other states, render nothing (or a minimal placeholder if needed)
+  return null;
 };
 
 export default ProtectedRoute;
