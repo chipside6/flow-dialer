@@ -11,7 +11,7 @@ import { toast } from "@/components/ui/use-toast";
 export type { TransferNumber } from "@/types/transferNumber";
 
 export function useTransferNumbers() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   
   const {
     transferNumbers,
@@ -23,9 +23,6 @@ export function useTransferNumbers() {
     lastRefresh,
     error,
     setError,
-    hasTimedOut,
-    retryCount,
-    incrementRetry,
     refreshTransferNumbers
   } = useTransferNumbersState();
   
@@ -55,50 +52,43 @@ export function useTransferNumbers() {
   
   // Load transfer numbers when user or refresh trigger changes
   useEffect(() => {
-    let isMounted = true;
-    
-    if (user) {
-      // Prevent multiple concurrent fetches
-      if (!isLoading) {
-        console.log("User or refresh trigger changed, fetching transfer numbers");
-        setIsLoading(true);
-        fetchTransferNumbers();
-      }
-    } else {
+    if (!isAuthenticated) {
       setTransferNumbers([]);
       setIsLoading(false);
       setError(null);
+      return;
     }
     
-    return () => {
-      isMounted = false;
-    };
-  }, [user, lastRefresh]);
+    // Prevent multiple concurrent fetches
+    if (!isLoading && user) {
+      console.log("User or refresh trigger changed, fetching transfer numbers");
+      setIsLoading(true);
+      fetchTransferNumbers();
+    }
+  }, [user, lastRefresh, isAuthenticated]);
   
-  // Add progressive retry logic for persistent loading issues
+  // Add a timeout to automatically set loading to false if it takes too long
   useEffect(() => {
-    let retryTimeout: number | undefined;
+    let timeout: NodeJS.Timeout | null = null;
     
-    // If loading has timed out but we're still in loading state and under retry limit
-    if (hasTimedOut && isLoading && transferNumbers.length === 0 && retryCount < 3) {
-      // Exponential backoff: 1s, 2s, 4s
-      const backoffDelay = Math.pow(2, retryCount) * 1000;
-      
-      retryTimeout = window.setTimeout(() => {
-        console.log(`Auto-retry for transfer numbers (attempt ${retryCount + 1})`);
-        incrementRetry();
-        fetchTransferNumbers();
-      }, backoffDelay);
-      
-      console.log(`Scheduled retry in ${backoffDelay}ms`);
+    if (isLoading) {
+      timeout = setTimeout(() => {
+        if (isLoading) {
+          console.log("Loading timed out after 10 seconds, forcing state to false");
+          setIsLoading(false);
+          if (!error && transferNumbers.length === 0) {
+            setError("Failed to load transfer numbers. Please try again later.");
+          }
+        }
+      }, 10000); // 10 second timeout
     }
     
     return () => {
-      if (retryTimeout) {
-        window.clearTimeout(retryTimeout);
+      if (timeout) {
+        clearTimeout(timeout);
       }
     };
-  }, [hasTimedOut, isLoading, transferNumbers.length, retryCount, fetchTransferNumbers, incrementRetry]);
+  }, [isLoading, error, transferNumbers.length]);
   
   // Add explicit refresh function that bypasses cache
   const forceRefreshTransferNumbers = async () => {
@@ -107,11 +97,10 @@ export function useTransferNumbers() {
     setError(null);
     
     try {
-      // Add a small delay to ensure database consistency
-      await new Promise(resolve => setTimeout(resolve, 300));
       await refreshTransferNumbers();
     } catch (error) {
       console.error("Error during force refresh:", error);
+      setIsLoading(false);
     }
   };
   

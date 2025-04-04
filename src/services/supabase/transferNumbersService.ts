@@ -6,41 +6,53 @@ import { toast } from '@/components/ui/use-toast';
 /**
  * Fetches all transfer numbers for a specific user with optimized performance
  */
-export const fetchUserTransferNumbers = async (userId: string, signal?: AbortSignal): Promise<TransferNumber[]> => {
+export const fetchUserTransferNumbers = async (userId: string): Promise<TransferNumber[]> => {
   console.log(`[TransferNumbersService] Fetching transfer numbers for user: ${userId}`);
   
+  if (!userId) {
+    console.error('[TransferNumbersService] No user ID provided');
+    throw new Error('User ID is required to fetch transfer numbers');
+  }
+  
   try {
-    // Use the provided signal or create a new one
-    const controller = signal ? null : new AbortController();
-    const activeSignal = signal || (controller?.signal);
+    // Check if we have a valid session
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     
-    // Add a separate timeout if needed
-    let timeoutId: NodeJS.Timeout | null = null;
-    if (!signal) {
-      timeoutId = setTimeout(() => controller?.abort(), 10000); // Increase timeout to 10 seconds
+    if (sessionError) {
+      console.error('[TransferNumbersService] Session error:', sessionError);
+      throw new Error('Authentication error: ' + sessionError.message);
     }
     
-    // Fetch transfer numbers for this user, disable caching to ensure fresh data
+    if (!sessionData.session) {
+      console.error('[TransferNumbersService] No active session');
+      throw new Error('Authentication required to fetch transfer numbers');
+    }
+    
+    console.log(`[TransferNumbersService] Executing supabase query for user ${userId}`);
+    
+    const startTime = Date.now();
     const { data, error } = await supabase
       .from('transfer_numbers')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .abortSignal(activeSignal);
+      .order('created_at', { ascending: false });
     
-    // Clear the timeout if we set one
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
+    const queryTime = Date.now() - startTime;
+    console.log(`[TransferNumbersService] Query completed in ${queryTime}ms`);
     
     if (error) {
-      console.error(`[TransferNumbersService] Error in fetchUserTransferNumbers:`, error);
-      throw error;
+      console.error(`[TransferNumbersService] Database error when fetching transfer numbers:`, error);
+      throw new Error(`Database error: ${error.message}`);
     }
     
-    console.log(`[TransferNumbersService] Fetched ${data?.length || 0} transfer numbers successfully`);
+    if (!data) {
+      console.log(`[TransferNumbersService] No data returned from query`);
+      return [];
+    }
     
-    return (data || []).map(item => ({
+    console.log(`[TransferNumbersService] Fetched ${data.length} transfer numbers successfully`);
+    
+    return data.map(item => ({
       id: item.id,
       name: item.name,
       number: item.phone_number,
@@ -49,12 +61,6 @@ export const fetchUserTransferNumbers = async (userId: string, signal?: AbortSig
       callCount: item.call_count !== null ? Number(item.call_count) : 0
     }));
   } catch (error: any) {
-    // Handle timeout errors
-    if (error.name === 'AbortError') {
-      console.error("[TransferNumbersService] Timeout error fetching transfer numbers");
-      throw new Error("Connection timed out when fetching transfer numbers. Please try again.");
-    }
-    
     console.error(`[TransferNumbersService] Error in fetchUserTransferNumbers:`, error);
     throw error;
   }
@@ -162,11 +168,6 @@ export const deleteTransferNumber = async (
     }
     
     console.log(`[TransferNumbersService] Successfully deleted transfer number ${transferNumberId}`);
-    
-    toast({
-      title: "Transfer number deleted",
-      description: "The transfer number has been deleted successfully."
-    });
     
     return true;
   } catch (error: any) {

@@ -39,13 +39,13 @@ export const TransferNumbersContent = ({
   // Force show content after a short timeout for better UX
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (isLoading && isInitialLoad) {
+      if (isLoading) {
         setForceShowContent(true);
       }
-    }, 1000); // Show content after 1 second even if still loading
+    }, 3000); // Show content after 3 seconds even if still loading
     
     return () => clearTimeout(timer);
-  }, [isLoading, isInitialLoad]);
+  }, [isLoading]);
   
   // Handle adding a transfer number with optimistic update
   const handleAddTransferNumber = async (name: string, number: string, description: string) => {
@@ -148,12 +148,12 @@ export const TransferNumbersContent = ({
     }
   };
   
-  // If this is the initial load and we're still loading (and haven't forced content)
-  if (isInitialLoad && isLoading && !forceShowContent) {
+  // If we're loading but have forced showing content or have numbers already
+  if (isLoading && !forceShowContent && transferNumbers.length === 0) {
     return (
       <LoadingState 
         message="Loading your transfer numbers, please wait..." 
-        timeout={5000} // 5 seconds timeout for initial load
+        timeout={5000} // 5 seconds timeout
         onRetry={onRefresh}
         errorVariant="warning"
       />
@@ -171,7 +171,7 @@ export const TransferNumbersContent = ({
       
       <TransferNumbersList 
         transferNumbers={localTransferNumbers}
-        isLoading={isLoading && !isInitialLoad && !forceShowContent}
+        isLoading={isLoading && transferNumbers.length === 0 && !forceShowContent}
         error={error}
         onDeleteTransferNumber={handleDeleteTransferNumber}
         onRefresh={onRefresh}
