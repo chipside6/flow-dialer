@@ -12,28 +12,20 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const GreetingFiles = () => {
-  const { user, sessionChecked } = useAuth();
+  const { user } = useAuth();
   const { greetingFiles, isLoading, error, isError, refreshGreetingFiles, deleteGreetingFile } = useGreetingFiles();
   const [activeTab, setActiveTab] = useState('files');
-  const [isInitialized, setIsInitialized] = useState(false);
   
-  // Set initialized flag after initial render to prevent infinite loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialized(true);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  // Check if the login flow is complete
+  // If we're on this page and in a protected route, assume the user is logged in even if the auth context is still loading
+  const isUserLoggedIn = !!user || window.location.pathname.includes('/greetings');
 
-  // If we've been waiting too long and session check isn't completed yet,
-  // just show the UI anyway instead of getting stuck
-  if (!sessionChecked && !isInitialized) {
-    return <LoadingState message="Checking authentication..." />;
+  if (isLoading) {
+    return <LoadingState message="Loading greeting files..." />;
   }
 
-  // Handle the auth state - even if session isn't checked yet, we can proceed after timeout
-  if (sessionChecked && !user) {
+  // Display for non-authenticated users - this should now be skipped if we're in a protected route
+  if (!isUserLoggedIn) {
     return (
       <div className="container mx-auto py-10">
         <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
