@@ -20,15 +20,11 @@ export const DashboardContent = () => {
   
   // Initial data fetch on component mount
   useEffect(() => {
-    if (user?.id) {
-      // Fetch subscription data with a slight delay to avoid race conditions
-      const timer = setTimeout(() => {
-        fetchCurrentSubscription();
-      }, 300);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [user?.id, fetchCurrentSubscription]);
+    // Always try to fetch subscription data regardless of user state
+    fetchCurrentSubscription().catch(err => {
+      console.error("Failed to fetch subscription:", err);
+    });
+  }, [fetchCurrentSubscription]);
   
   // Check if the user has a lifetime subscription
   const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';

@@ -15,11 +15,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Simple auth check
         const { data } = await supabase.auth.getSession();
         
         if (!data.session) {
-          // Silently redirect to login
           navigate('/login', { 
             replace: true, 
             state: { returnTo: window.location.pathname } 
@@ -36,7 +34,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
             .maybeSingle();
           
           if (profileError || !profileData?.is_admin) {
-            // Redirect non-admins to unauthorized page
             navigate('/unauthorized', { replace: true });
             return;
           }
@@ -45,8 +42,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
         setIsAuthenticated(true);
       } catch (error) {
         console.error("Auth check error:", error);
-        
-        // Silently redirect to login on error
         navigate('/login', { 
           replace: true, 
           state: { returnTo: window.location.pathname } 
@@ -57,13 +52,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     checkAuth();
   }, [navigate, requireAdmin]);
   
-  // Show children only when authenticated
-  if (isAuthenticated) {
-    return <>{children}</>;
+  // Show loading state briefly to prevent flashing
+  if (isAuthenticated === null) {
+    return null; // Return null while checking - no loader shown to user
   }
   
-  // Return null while checking authentication
-  return null;
+  // Render children when authenticated
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

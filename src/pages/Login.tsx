@@ -54,16 +54,20 @@ const Login = () => {
       const { error } = await signIn(email, password);
 
       if (error) {
-        throw error;
+        setErrorMessage(error.message || "Failed to login");
+        setIsLoading(false);
+        return;
       }
       
-      // If we get here, the login was successful
-      // (redirection will be handled by the auth state effect)
+      // Success - will be redirected by the auth state effect
+      toast({
+        title: "Login successful",
+        description: "Redirecting to dashboard...",
+      });
       
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage(error.message || "Failed to login");
-    } finally {
       setIsLoading(false);
     }
   };

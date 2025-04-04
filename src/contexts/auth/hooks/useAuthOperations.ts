@@ -16,21 +16,16 @@ export function useAuthOperations() {
       
       if (result.error) {
         console.error("useAuthOperations - Signup error:", result.error.message);
+      } else {
         toast({
-          title: "Signup failed",
-          description: result.error.message,
-          variant: "destructive",
+          title: "Account created successfully",
+          description: "Please check your email to verify your account.",
         });
       }
       
       return result;
     } catch (error: any) {
       console.error("useAuthOperations - Unexpected signup error:", error);
-      toast({
-        title: "Unexpected error during signup",
-        description: error.message || "Please try again later",
-        variant: "destructive",
-      });
       return { error };
     }
   };
@@ -42,21 +37,13 @@ export function useAuthOperations() {
       
       if (result.error) {
         console.error("useAuthOperations - Login error:", result.error.message);
-        toast({
-          title: "Login failed",
-          description: result.error.message,
-          variant: "destructive",
-        });
+      } else {
+        console.log("useAuthOperations - Login successful");
       }
       
       return result;
     } catch (error: any) {
       console.error("useAuthOperations - Unexpected login error:", error);
-      toast({
-        title: "Login failed",
-        description: error.message || "Please try again later",
-        variant: "destructive",
-      });
       return { error };
     }
   };
@@ -68,21 +55,15 @@ export function useAuthOperations() {
       
       if (error) {
         console.error("useAuthOperations - Sign out error:", error);
+      } else {
         toast({
-          title: "Error signing out",
-          description: error.message,
-          variant: "destructive",
+          title: "Signed out successfully",
         });
       }
       
       return { success, error };
     } catch (error: any) {
       console.error("useAuthOperations - Unexpected error during sign out:", error);
-      toast({
-        title: "Error signing out",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
       return { success: false, error };
     }
   };
@@ -94,21 +75,15 @@ export function useAuthOperations() {
       
       if (result.error) {
         console.error("useAuthOperations - Profile update error:", result.error.message);
+      } else {
         toast({
-          title: "Profile update failed",
-          description: result.error.message,
-          variant: "destructive",
+          title: "Profile updated successfully",
         });
       }
       
       return result;
     } catch (error: any) {
       console.error("useAuthOperations - Unexpected profile update error:", error);
-      toast({
-        title: "Error updating profile",
-        description: error.message || "Please try again later",
-        variant: "destructive",
-      });
       return { error };
     }
   };
