@@ -1,4 +1,3 @@
-
 /* Mobile layout styles */
 
 @media screen and (max-width: 768px) {
@@ -13,8 +12,6 @@
   .sip-header {
     position: sticky;
     top: 0;
-    display: block !important;
-    visibility: visible !important;
   }
   
   /* Adjust container padding */
@@ -26,11 +23,6 @@
   /* Add padding to main content to prevent overlap with fixed navbar */
   main {
     padding-top: 0 !important;
-  }
-  
-  /* All pages should have proper spacing below the header */
-  section:first-of-type {
-    padding-top: 6rem !important;
   }
   
   body {

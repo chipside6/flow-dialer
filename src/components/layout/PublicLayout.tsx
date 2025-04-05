@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import { Navbar } from '@/components/Navbar';
 import { SipHeader } from '@/components/header/SipHeader';
 
 interface PublicLayoutProps {
@@ -8,10 +9,13 @@ interface PublicLayoutProps {
 }
 
 const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
+  const location = useLocation();
+  const isHomepage = location.pathname === '/';
+  
   return (
     <div className="flex flex-col min-h-screen">
-      <SipHeader />
-      <main className="flex-1 pt-0">
+      {isHomepage ? <SipHeader /> : <Navbar />}
+      <main className={`flex-1 ${isHomepage ? 'pt-0' : ''}`}>
         {children || <Outlet />}
       </main>
     </div>

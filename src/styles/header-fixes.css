@@ -12,15 +12,6 @@ header, .navbar, .sip-header {
   position: relative;
 }
 
-/* Ensure header is sticky at the top */
-.sip-header {
-  position: sticky;
-  top: 0;
-  width: 100%;
-  z-index: 50;
-  background-color: white;
-}
-
 /* Fix for mobile menu overlay */
 .mobile-menu {
   z-index: 100;
