@@ -37,18 +37,18 @@ export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
   
   return (
     <div 
-      className={`fixed top-3 right-3 z-50 transition-all duration-300 ${
+      className={`fixed top-5 right-4 z-50 transition-all duration-300 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-16'
       }`}
     >
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-background rounded-full shadow-lg w-10 h-10 flex items-center justify-center mobile-sidebar-button border border-gray-200" 
+        className="bg-background rounded-full shadow-lg w-12 h-12 flex items-center justify-center mobile-sidebar-button border border-gray-200" 
         onClick={handleClick}
         aria-label="Open sidebar"
       >
-        <Menu size={18} />
+        <Menu size={24} />
       </Button>
     </div>
   );

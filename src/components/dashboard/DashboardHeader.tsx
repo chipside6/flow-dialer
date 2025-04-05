@@ -12,7 +12,7 @@ export interface DashboardHeaderProps {
 export const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
   return (
     <div className="flex flex-col gap-3 mb-4 w-full max-w-full overflow-hidden">
-      <h1 className="text-xl sm:text-2xl font-bold pr-12">Campaign Analytics</h1>
+      <h1 className="text-xl sm:text-2xl font-bold">Campaign Analytics</h1>
       
       {/* Mobile-optimized tabs using the shadcn Tabs component */}
       <div className="overflow-x-auto -mx-0 px-0 tab-container w-full">

@@ -15,7 +15,7 @@ export const DashboardContent = ({ children }: DashboardContentProps) => {
       isMobile ? 'pt-2' : 'pt-4'
     } w-full max-w-full h-full overflow-hidden flex-1`}>
       <div className={`mx-auto w-full h-full overflow-auto ${
-        isMobile ? 'px-3 pb-20' : 'max-w-6xl px-4'
+        isMobile ? 'px-2 text-center' : 'max-w-6xl px-4'
       }`}>
         {children}
       </div>
