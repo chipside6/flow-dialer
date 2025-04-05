@@ -1,0 +1,23 @@
+
+/* Mobile button container styles */
+
+@media screen and (max-width: 768px) {
+  /* Center button containers */
+  .button-container,
+  .action-buttons,
+  .form-actions,
+  .button-group,
+  .flex-col > button,
+  .space-y-4 > button,
+  div[class*="space-y"] > button,
+  .space-y-4,
+  .unauthorized-page-buttons {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    justify-content: center !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+}

@@ -1,0 +1,22 @@
+
+/* Mobile error message styles */
+
+@media screen and (max-width: 768px) {
+  /* FIX: Ensure error messages don't appear as popups at the bottom */
+  .error-toast,
+  .data-error-message,
+  .error-notification {
+    position: fixed !important;
+    top: 20px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 90% !important;
+    max-width: 400px !important;
+    z-index: 9999 !important;
+    background-color: white !important;
+    border: 1px solid #f44336 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    padding: 16px !important;
+  }
+}

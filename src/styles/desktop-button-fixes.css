@@ -1,0 +1,29 @@
+
+/* Desktop specific button fixes */
+
+@media screen and (min-width: 769px) {
+  /* Proper icon and text alignment for auth buttons */
+  .login-button,
+  .signup-button,
+  [type="submit"] {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  
+  /* Fix icon sizing on desktop */
+  button svg,
+  .button svg {
+    flex-shrink: 0 !important;
+    height: 16px !important;
+    width: 16px !important;
+  }
+  
+  /* Fix for authentication page buttons - ensure max width and centering */
+  .unauthorized-page button,
+  .auth-page button {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 320px;
+  }
+}

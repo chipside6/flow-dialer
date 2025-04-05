@@ -1,0 +1,49 @@
+
+/* Mobile navigation menu styles */
+
+@media screen and (max-width: 768px) {
+  /* Fix navigation links */
+  .nav-links,
+  .menu-links,
+  header ul,
+  .header ul,
+  nav ul,
+  .navbar ul {
+    display: none !important;
+  }
+  
+  /* Show mobile menu when active */
+  .mobile-menu-active .nav-links,
+  .menu-open .menu-links,
+  .mobile-menu-active header ul,
+  .mobile-menu-active .header ul,
+  .mobile-menu-active nav ul,
+  .mobile-menu-active .navbar ul {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: calc(100vh - 60px) !important;
+    background-color: white !important;
+    z-index: 30 !important;
+    padding: 20px !important;
+    gap: 16px !important;
+  }
+  
+  /* Improved mobile menu transitions */
+  .mobile-menu,
+  .mobile-nav,
+  .mobile-sidebar {
+    transition: transform 0.3s ease, opacity 0.3s ease !important;
+  }
+  
+  /* Mobile menu active state transitions */
+  .mobile-menu-active .mobile-menu,
+  .menu-open .mobile-nav,
+  .sidebar-open .mobile-sidebar {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+  }
+}

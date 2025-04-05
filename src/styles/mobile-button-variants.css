@@ -1,0 +1,27 @@
+
+/* Mobile button variants */
+
+@media screen and (max-width: 768px) {
+  /* Make action buttons more visible */
+  button[variant="success"],
+  .button[variant="success"],
+  [class*="success"] {
+    font-weight: 500 !important;
+    padding: 12px 20px !important;
+  }
+  
+  /* Full width buttons on very small screens */
+  @media screen and (max-width: 480px) {
+    .sm\:w-auto {
+      width: 100% !important;
+    }
+    
+    /* Ensure text wraps properly on small screens */
+    button span,
+    .button span {
+      max-width: 100% !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+  }
+}

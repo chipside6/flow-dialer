@@ -1,0 +1,28 @@
+
+/* Mobile bottom navigation styles */
+
+@media screen and (max-width: 768px) {
+  /* Fixed position for bottom navigation on mobile */
+  .bottom-nav,
+  .bottom-navigation,
+  .mobile-bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 60px !important;
+    background-color: white !important;
+    border-top: 1px solid #eee !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    z-index: 50 !important;
+    padding: 0 !important;
+  }
+  
+  /* Ensure content doesn't get hidden behind bottom nav */
+  .has-bottom-nav,
+  .with-bottom-navigation {
+    padding-bottom: 70px !important;
+  }
+}

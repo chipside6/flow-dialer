@@ -1,0 +1,51 @@
+
+/* Mobile button base styles */
+
+@media screen and (max-width: 768px) {
+  /* Fix spacing between button text and icons */
+  button, 
+  .button,
+  [class*="btn"] {
+    gap: 8px !important;
+    padding: 10px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    height: auto !important;
+    min-height: 40px !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    width: auto !important;
+    font-size: 14px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  /* Fix icon sizing and alignment */
+  button svg,
+  .button svg,
+  [class*="btn"] svg {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Ensure button text and icons align horizontally */
+  button span,
+  .button span {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Improve touch targets */
+  button,
+  .button,
+  [class*="btn"],
+  a[role="button"] {
+    border-radius: 6px !important;
+  }
+}
