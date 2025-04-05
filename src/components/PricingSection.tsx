@@ -6,9 +6,9 @@ import { pricingPlans } from "@/data/pricingPlans";
 
 export const PricingSection = () => {
   return (
-    <section className="py-12 md:py-16 px-6 md:px-10">
+    <section className="py-6 md:py-10 px-6 md:px-10">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight mb-6">
             Simple, One-Time Payment
           </h2>
