@@ -14,6 +14,15 @@ header, .navbar, .sip-header {
   visibility: visible !important;
 }
 
+/* Force header to display on all pages */
+.sip-header-container,
+header.sip-header {
+  display: block !important;
+  visibility: visible !important;
+  width: 100%;
+  z-index: 50;
+}
+
 /* Fix for mobile menu overlay */
 .mobile-menu {
   z-index: 100;
@@ -114,5 +123,19 @@ header, .navbar, .sip-header {
   
   .sip-header .flex {
     display: flex !important;
+  }
+  
+  /* Public page specific header fixes */
+  .public-page .sip-header {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+  
+  /* Fix content padding for pages with header */
+  .public-page main {
+    padding-top: 0;
   }
 }

@@ -11,6 +11,14 @@
     visibility: visible !important;
   }
   
+  /* Force header to display on all screen sizes */
+  header.sip-header,
+  .sip-header-container {
+    display: block !important;
+    visibility: visible !important;
+    width: 100% !important;
+  }
+  
   /* Position SipHeader properly */
   .sip-header {
     position: relative;
@@ -128,6 +136,15 @@
   /* SipHeader specific adjustments */
   .sip-header + main {
     padding-top: 0 !important;
+  }
+  
+  /* Make sure the header is visible in the public-page */
+  .public-page header.sip-header,
+  .public-page .sip-header {
+    display: block !important;
+    visibility: visible !important;
+    z-index: 50;
+    width: 100%;
   }
   
   /* Align logo to extreme left and menu/button to extreme right */

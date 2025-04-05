@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Logo } from '@/components/ui/Logo';
 import { SipMobileMenu } from './SipMobileMenu';
 
-export const SipHeader = () => {
+interface SipHeaderProps {
+  className?: string;
+}
+
+export const SipHeader: React.FC<SipHeaderProps> = ({ className }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Close mobile menu when route changes
@@ -34,8 +38,11 @@ export const SipHeader = () => {
     console.log('Mobile menu toggled:', !isMobileMenuOpen);
   };
 
+  // Console log to help debug
+  console.log("SipHeader rendering");
+
   return (
-    <div className="w-full flex flex-col">
+    <header className={`w-full flex flex-col sip-header ${className || ''}`}>
       {/* Top info bar */}
       <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
@@ -89,6 +96,6 @@ export const SipHeader = () => {
 
       {/* Mobile Menu */}
       <SipMobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
-    </div>
+    </header>
   );
 };
