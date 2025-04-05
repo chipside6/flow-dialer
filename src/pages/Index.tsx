@@ -19,11 +19,10 @@ const Index = () => {
     }
   }, [isAuthenticated, navigate, initialized]);
 
-  // Adding console log to debug header display
-  console.log("Index page rendered");
+  console.log("Index page rendered - header should be visible");
 
   return (
-    <div className="bg-background min-h-screen flex flex-col public-page">
+    <div className="bg-background public-page">
       <main className="flex-1"> 
         <HeroSection />
         <FeaturesSection />

@@ -17,13 +17,15 @@
     display: block !important;
     visibility: visible !important;
     width: 100% !important;
+    position: relative !important;
   }
   
   /* Position SipHeader properly */
   .sip-header {
-    position: relative;
+    position: relative !important;
     top: 0;
     background-color: white;
+    opacity: 1 !important;
   }
   
   /* Adjust container padding */
@@ -145,6 +147,8 @@
     visibility: visible !important;
     z-index: 50;
     width: 100%;
+    position: relative !important;
+    opacity: 1 !important;
   }
   
   /* Align logo to extreme left and menu/button to extreme right */
@@ -238,6 +242,7 @@
   .public-page .sip-header {
     display: block !important;
     visibility: visible !important;
+    opacity: 1 !important; 
   }
 }
 

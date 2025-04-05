@@ -54,12 +54,14 @@ header.sip-header {
   background-color: #0284c7;
 }
 
-/* Ensure SipHeader is always visible */
+/* Ensure SipHeader is always visible - CRITICAL FIX */
 .sip-header {
   display: block !important;
   visibility: visible !important;
+  opacity: 1 !important;
   background-color: white;
   width: 100%;
+  position: relative !important;
 }
 
 /* Fix logo display */

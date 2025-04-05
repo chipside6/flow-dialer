@@ -16,13 +16,11 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                          location.pathname.includes('/billing') ||
                          location.pathname.includes('/admin');
   
-  // Force SipHeader to show on homepage
-  const isHomePage = location.pathname === '/' || location.pathname === '';
-  
+  // Always show SipHeader on public pages
   return (
     <div className="flex flex-col min-h-screen">
       {isDashboardPage ? <Navbar /> : <SipHeader className="sip-header-container" />}
-      <main className={`flex-1 ${isDashboardPage ? 'pt-16 md:pt-20' : (isHomePage ? 'pt-0' : 'pt-4')}`}>
+      <main className={`flex-1 ${isDashboardPage ? 'pt-16 md:pt-20' : 'pt-0'}`}>
         {children || <Outlet />}
       </main>
     </div>

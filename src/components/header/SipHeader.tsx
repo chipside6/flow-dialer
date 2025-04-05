@@ -33,16 +33,20 @@ export const SipHeader: React.FC<SipHeaderProps> = ({ className }) => {
     };
   }, [isMobileMenuOpen]);
 
+  // Log on mount to confirm the component is rendering
+  useEffect(() => {
+    console.log('SipHeader mounted and visible');
+  }, []);
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
     console.log('Mobile menu toggled:', !isMobileMenuOpen);
   };
 
-  // Console log to help debug
   console.log("SipHeader rendering");
 
   return (
-    <header className={`w-full flex flex-col sip-header ${className || ''}`}>
+    <header className={`w-full flex flex-col sip-header ${className || ''}`} style={{display: 'block', visibility: 'visible'}}>
       {/* Top info bar */}
       <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
