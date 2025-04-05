@@ -1,6 +1,6 @@
 
-import React, { createContext } from 'react';
-import { User, UserProfile } from './types';
+import { createContext } from 'react';
+import type { User, UserProfile } from './types';
 
 export interface AuthContextType {
   user: User | null;
@@ -10,10 +10,23 @@ export interface AuthContextType {
   isAdmin: boolean;
   error: Error | null;
   sessionChecked: boolean;
-  initialized: boolean; // Add this flag to track complete initialization
+  initialized: boolean;
   setProfile: (profile: UserProfile | null) => void;
-  signOut: () => Promise<{ success: boolean; error: any | null }>;
   updateProfile: (profile: UserProfile | null) => void;
+  signOut: () => Promise<{ success: boolean; error: Error | null }>;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Create context with default values
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  profile: null,
+  isLoading: true,
+  isAuthenticated: false,
+  isAdmin: false,
+  error: null,
+  sessionChecked: false,
+  initialized: false,
+  setProfile: () => {},
+  updateProfile: () => {},
+  signOut: async () => ({ success: false, error: null }),
+});

@@ -14,13 +14,15 @@ import "./App.css";
 // Import the header-fixes.css for header and logout button fixes
 import "./styles/header-fixes.css";
 
-// Lazy load components for improved performance
+// Import Login directly instead of lazy loading it
+import Login from "./pages/Login";
+
+// Lazy load other components for improved performance
 const Index = lazy(() => import("./pages/Index"));
 const Features = lazy(() => import("./pages/Features"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const Support = lazy(() => import("./pages/Support"));
 const SignUp = lazy(() => import("./pages/SignUp"));
-const Login = lazy(() => import("./pages/Login"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Campaign = lazy(() => import("./pages/Campaign"));

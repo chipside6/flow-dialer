@@ -1,85 +1,29 @@
 
-/* Header and logout button fixes */
+/* Header fixes */
 
-/* Fix navbar spacing when on mobile */
-.navbar-dashboard {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
+/* Fix for logout button positioning */
+.user-menu-trigger {
+  position: relative;
 }
 
-/* Ensure the logout button text is visible */
-.menu-open button[disabled] {
-  opacity: 0.7;
+/* Fix for header stacking and z-index issues */
+header, .navbar, .sip-header {
+  z-index: 50;
+  position: relative;
 }
 
-/* Ensure dropdown menus appear above other elements */
-.dropdown-menu-content {
+/* Fix for mobile menu overlay */
+.mobile-menu {
   z-index: 100;
 }
 
-/* Fix sidebar header on mobile */
-@media (max-width: 768px) {
-  [data-sidebar="header"] {
-    padding: 0.5rem !important;
-  }
-  
-  /* Make sure logout button text stays visible */
-  button:has(.logout-icon) span {
-    display: inline-block !important;
-    white-space: nowrap;
-  }
-}
-
-/* Improve logo visibility in header */
-.navbar-dashboard .logo, 
-[data-sidebar="header"] .logo {
+/* Ensure proper vertical alignment in navigation items */
+.nav-items {
   display: flex;
   align-items: center;
 }
 
-/* Make sure auth menu is clickable */
-.auth-menu-trigger {
-  position: relative;
-  z-index: 50;
-}
-
-/* Fix content overlap and scrolling issues */
-body, html {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-}
-
-/* Ensure fixed header stays on top */
-header.fixed {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  z-index: 50 !important;
-}
-
-/* Ensure proper content spacing with sidebar */
-[data-sidebar-inset] {
-  padding-top: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
-}
-
-/* Fix dashboard container scrolling */
-.dashboard-content-wrapper {
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
-}
-
-/* Fix campaign page spacing */
-.campaign-content {
-  padding-top: 0 !important;
-  padding-bottom: 2rem !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
+/* Fix for header dropdowns */
+.header-dropdown {
+  z-index: 60;
 }

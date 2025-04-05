@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth/useAuth';
+import { useAuth } from '@/contexts/auth';
 import { useAuthOperations } from '@/contexts/auth/hooks/useAuthOperations';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
@@ -57,7 +57,6 @@ const Login = () => {
       }
       
       // Success will be handled by the auth state effect
-      // Removed toast notification here
       
     } catch (error: any) {
       console.error("Login error:", error);
