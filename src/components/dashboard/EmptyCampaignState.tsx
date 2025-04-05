@@ -45,13 +45,13 @@ export const EmptyCampaignState = () => {
               </p>
               <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:space-x-3 mt-6">
                 <Button 
-                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+                  className="bg-green-600 hover:bg-green-700 w-auto px-4 py-2 h-auto"
                   onClick={handleCreateCampaign}
                 >
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Create First Campaign
                 </Button>
-                <Button variant="outline" className="w-full sm:w-auto" onClick={() => navigate('/features')}>
+                <Button variant="outline" className="w-auto px-4 py-2 h-auto" onClick={() => navigate('/features')}>
                   Learn about campaigns
                 </Button>
               </div>

@@ -40,4 +40,24 @@
   td, th {
     padding: 0.75rem !important;
   }
+  
+  /* Fix for Create Campaign button display */
+  td button.w-full {
+    width: auto !important;
+    min-width: 150px !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    margin: 0 auto !important;
+  }
 }
+
+/* Full content button fixes */
+td .mx-auto button,
+td button.mx-auto {
+  display: inline-flex !important;
+  width: auto !important;
+  white-space: nowrap !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+

@@ -121,7 +121,7 @@
     margin-right: auto !important;
   }
   
-  /* Ensure "Create Campaign" button is centered */
+  /* Ensure "Create Campaign" button is centered and fully visible */
   .gap-2 {
     display: flex;
     justify-content: center;
@@ -131,6 +131,25 @@
   /* Center empty state content */
   .text-center p, .text-center button {
     margin: 0 auto;
+  }
+  
+  /* Fix for Create Campaign button in empty state */
+  td button[variant="success"],
+  button[variant="success"] {
+    max-width: 100% !important;
+    width: auto !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    display: inline-flex !important;
+  }
+  
+  /* Ensure Create Campaign button text is visible */
+  button[variant="success"] span,
+  td button[variant="success"] span {
+    display: inline-block !important;
+    white-space: nowrap !important;
   }
 }
 

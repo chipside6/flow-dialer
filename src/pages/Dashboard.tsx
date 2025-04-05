@@ -8,20 +8,26 @@ import { CampaignTable } from '@/components/campaigns/CampaignTable';
 import { useCampaigns } from '@/hooks/useCampaigns';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CampaignDashboard from '@/components/CampaignDashboard';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("overview");
   const { campaigns, isLoading, error, refreshCampaigns } = useCampaigns();
   const { isOnline } = useNetworkStatus();
   const [retryCount, setRetryCount] = useState(0);
+  const navigate = useNavigate();
   
   // Handle retry
   const handleRetry = () => {
     setRetryCount(prev => prev + 1);
     refreshCampaigns();
+  };
+  
+  const handleCreateCampaign = () => {
+    navigate('/campaign', { state: { showCreateWizard: true } });
   };
   
   return (
@@ -90,6 +96,18 @@ const Dashboard = () => {
                     </div>
                   </div>
                   
+                  {/* Create Campaign Button */}
+                  <div className="flex justify-center my-6">
+                    <Button 
+                      variant="success" 
+                      onClick={handleCreateCampaign}
+                      className="w-auto px-6 py-2 h-auto"
+                    >
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Create Campaign
+                    </Button>
+                  </div>
+                  
                   {/* Recent Campaigns Section */}
                   <div className="mt-6 w-full text-center">
                     <h3 className="text-lg font-semibold mb-4 text-center">Recent Campaigns</h3>
@@ -103,9 +121,10 @@ const Dashboard = () => {
                         <p className="text-muted-foreground mb-4 text-center">You haven't created any campaigns yet</p>
                         <Button 
                           variant="success" 
-                          onClick={() => window.location.href = '/campaign'}
-                          className="mx-auto"
+                          onClick={handleCreateCampaign}
+                          className="mx-auto w-auto px-6"
                         >
+                          <PlusCircle className="h-4 w-4 mr-2" />
                           Create Your First Campaign
                         </Button>
                       </div>
@@ -139,6 +158,18 @@ const Dashboard = () => {
           {activeTab === "campaigns" && (
             <div className="w-full h-full overflow-auto">
               <DashboardContent>
+                {/* Add create campaign button at the top */}
+                <div className="flex justify-center mb-4 pt-4">
+                  <Button 
+                    variant="success" 
+                    onClick={handleCreateCampaign}
+                    className="w-auto px-6 py-2 h-auto"
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Create Campaign
+                  </Button>
+                </div>
+                
                 <CampaignProvider initialCampaigns={campaigns || []}>
                   <div className="campaign-table-container w-full p-4 mx-auto">
                     <CampaignTable />

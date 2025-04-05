@@ -66,7 +66,7 @@ export const CampaignTable: React.FC = () => {
                         </p>
                         <Button 
                           variant="success" 
-                          className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium mx-auto"
+                          className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium mx-auto w-full sm:w-auto"
                           onClick={handleCreateCampaign}
                           size="lg"
                         >
