@@ -20,10 +20,23 @@ const Index = () => {
     }
   }, [isAuthenticated, navigate, initialized]);
 
+  // Ensure body has proper overflow settings
+  useEffect(() => {
+    // Allow scrolling on the index page
+    document.body.style.overflowY = 'auto';
+    document.body.style.height = 'auto';
+    
+    return () => {
+      // Restore default settings when unmounting
+      document.body.style.overflowY = '';
+      document.body.style.height = '';
+    };
+  }, []);
+
   return (
     <div className="bg-background min-h-screen flex flex-col">
       <SipHeader />
-      <main className="flex-1 pt-0"> 
+      <main className="flex-1 pt-0 overflow-y-auto"> 
         <HeroSection />
         <FeaturesSection />
         <PricingSection />

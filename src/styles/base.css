@@ -19,12 +19,13 @@
   box-sizing: border-box;
 }
 
-/* Ensure all content fits within viewport */
+/* Ensure all content fits within viewport but allows scrolling */
 body, html {
   overflow-x: hidden;
   max-width: 100vw;
   margin: 0;
   padding: 0;
+  overflow-y: auto; /* Allow vertical scrolling */
 }
 
 /* Fix for campaign page specific issues */
