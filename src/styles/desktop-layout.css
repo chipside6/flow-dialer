@@ -33,7 +33,7 @@
   
   /* Public pages with SipHeader should have reduced spacing */
   .sip-header ~ main section:first-child {
-    padding-top: 0;
+    padding-top: 2rem;
   }
   
   /* Ensure buttons in tables don't overflow */
