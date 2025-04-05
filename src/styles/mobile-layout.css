@@ -133,6 +133,11 @@
     margin-top: 0 !important;
   }
   
+  /* Public pages with SipHeader should remove extra spacing */
+  .sip-header ~ main section:first-child {
+    padding-top: 0 !important;
+  }
+  
   /* Align logo to extreme left and menu/button to extreme right */
   .sip-header .max-w-7xl {
     justify-content: space-between !important;
@@ -233,6 +238,11 @@
   .sip-header + main {
     padding-top: 0;
     margin-top: 0;
+  }
+  
+  /* Public pages with SipHeader should have reduced spacing */
+  .sip-header ~ main section:first-child {
+    padding-top: 24px;
   }
   
   /* Ensure buttons in tables don't overflow */
