@@ -5,7 +5,6 @@ import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { PricingSection } from "@/components/PricingSection";
 import { CTASection } from "@/components/CTASection";
-import { SipHeader } from "@/components/header/SipHeader";
 import { useAuth } from "@/contexts/auth";
 
 const Index = () => {
@@ -22,8 +21,7 @@ const Index = () => {
 
   return (
     <div className="bg-background min-h-screen flex flex-col">
-      <SipHeader />
-      <main className="flex-1 pt-16 md:pt-0"> 
+      <main className="flex-1"> 
         <HeroSection />
         <FeaturesSection />
         <PricingSection />

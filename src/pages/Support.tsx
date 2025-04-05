@@ -1,13 +1,11 @@
 
-import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const Support = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="min-h-screen bg-background public-page">
       <main className="pt-20 md:pt-32">
         <section className="pb-16 md:pb-20 px-6 md:px-10">
           <div className="max-w-7xl mx-auto text-center">

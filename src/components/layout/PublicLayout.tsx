@@ -10,12 +10,16 @@ interface PublicLayoutProps {
 
 const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const location = useLocation();
-  const isHomepage = location.pathname === '/';
+  const isDashboardPage = location.pathname.includes('/dashboard') || 
+                         location.pathname.includes('/campaign') || 
+                         location.pathname.includes('/profile') ||
+                         location.pathname.includes('/billing') ||
+                         location.pathname.includes('/admin');
   
   return (
     <div className="flex flex-col min-h-screen">
-      {isHomepage ? <SipHeader /> : <Navbar />}
-      <main className={`flex-1 ${isHomepage ? 'pt-0' : ''}`}>
+      {isDashboardPage ? <Navbar /> : <SipHeader />}
+      <main className={`flex-1 ${isDashboardPage ? 'pt-16 md:pt-20' : 'pt-0'}`}>
         {children || <Outlet />}
       </main>
     </div>
