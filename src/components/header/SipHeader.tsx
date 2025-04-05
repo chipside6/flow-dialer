@@ -65,8 +65,8 @@ export const SipHeader: React.FC<SipHeaderProps> = ({ className }) => {
     <header 
       className={`w-full flex flex-col sip-header ${className || ''}`} 
       style={{
-        display: 'block !important', 
-        visibility: 'visible !important', 
+        display: 'block', 
+        visibility: 'visible', 
         opacity: '1',
         position: 'relative',
         zIndex: 50

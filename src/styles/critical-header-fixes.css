@@ -51,3 +51,13 @@ html body .sip-header-container {
   visibility: visible !important;
   opacity: 1 !important;
 }
+
+/* Ensure direct styling takes precedence for all header components */
+body:not([data-hide-header]) .sip-header,
+body:not([data-hide-header]) .sip-header-container,
+body:not([data-hide-header]) header.sip-header {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+}
