@@ -33,10 +33,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       
       {/* DashboardSidebar contains its own header on mobile */}
       <DashboardSidebar />
-      <div className="flex-1 w-full max-w-full h-full overflow-hidden">
-        <div className="w-full max-w-full h-full overflow-hidden">
-          {children}
-        </div>
+      <div className="flex-1 w-full max-w-full h-full overflow-hidden flex flex-col">
+        {children}
       </div>
     </div>
   );

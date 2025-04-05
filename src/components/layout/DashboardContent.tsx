@@ -13,8 +13,8 @@ export const DashboardContent = ({ children }: DashboardContentProps) => {
   return (
     <SidebarInset className={`bg-background/50 dark:bg-background/10 ${
       isMobile ? 'pt-2' : 'pt-4'
-    } w-full max-w-full h-full overflow-hidden`}>
-      <div className={`mx-auto w-full h-full ${isMobile ? 'px-2' : 'max-w-6xl px-4'}`}>
+    } w-full max-w-full h-full overflow-hidden flex-1`}>
+      <div className={`mx-auto w-full h-full overflow-auto ${isMobile ? 'px-2' : 'max-w-6xl px-4'}`}>
         {children}
       </div>
     </SidebarInset>

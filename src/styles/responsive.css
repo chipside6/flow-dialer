@@ -3,14 +3,14 @@
 @media (max-width: 768px) {
   /* Add padding for all page headers to avoid overlap with sidebar button */
   h1, h2 {
-    padding-left: 32px;
+    padding-left: 20px;
   }
   
   /* Center content on pages */
   .container, 
   .container-fluid,
   [data-sidebar-inset] > div {
-    text-align: center;
+    text-align: left;
   }
   
   /* Fix card centering on mobile */
@@ -27,5 +27,47 @@
   /* Extra space between mobile sidebar button and content */
   .mobile-sidebar-button + * {
     margin-left: 16px;
+  }
+  
+  /* Improve table readability on mobile */
+  table th, table td {
+    padding: 8px !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Fix for data tables */
+  .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* Fix table responsiveness */
+  table {
+    min-width: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Better spacing for dashboard overview content */
+  .dashboard-overview-content {
+    padding: 16px !important;
+  }
+  
+  /* Fix campaign analytics grid */
+  .grid-cols-1.md\:grid-cols-3 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Ensure stats are readable */
+  .grid-cols-1.md\:grid-cols-3 > div {
+    margin-bottom: 8px !important;
+  }
+  
+  /* Fix Recent Campaigns section */
+  .mt-6 {
+    margin-top: 1.25rem !important;
   }
 }
