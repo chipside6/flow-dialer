@@ -5,9 +5,9 @@ import { Link } from "react-router-dom";
 
 export const CTASection = () => {
   return (
-    <section className="py-24 px-6 md:px-10 bg-primary text-primary-foreground">
+    <section className="py-24 px-6 md:px-10 bg-sky-500 text-white">
       <div className="max-w-7xl mx-auto relative overflow-hidden rounded-3xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-90"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-sky-500 to-blue-600 opacity-90"></div>
         <div className="absolute inset-0 backdrop-blur-[100px]"></div>
         
         {/* Decorative elements */}
@@ -33,13 +33,13 @@ export const CTASection = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
-              <Button size="lg" variant="default" className="rounded-full px-8 bg-white text-primary hover:bg-white/90 group" asChild>
+              <Button size="lg" variant="default" className="rounded-full px-8 bg-white text-sky-600 hover:bg-white/90 group" asChild>
                 <Link to="/signup">
                   Get Started for Free
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 text-primary-foreground border-white/30 bg-primary/20 hover:bg-white/20 hover:text-white" asChild>
+              <Button size="lg" variant="outline" className="rounded-full px-8 text-white border-white/30 bg-sky-500/20 hover:bg-white/20 hover:text-white" asChild>
                 <Link to="/support">
                   Contact Sales
                 </Link>

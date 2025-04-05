@@ -67,7 +67,7 @@ export const SipHeader = () => {
           {/* Button and menu aligned to the extreme right */}
           <div className="flex items-center gap-4 ml-auto">
             <Button 
-              className="bg-[#0EA5E9] hover:bg-[#0284c7] text-white rounded-full px-6 py-2 font-medium transition-colors"
+              className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-6 py-2 font-medium transition-colors"
               asChild
               variant="skyblue"
             >

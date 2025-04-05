@@ -1,3 +1,4 @@
+
 import { Check } from "lucide-react";
 
 // Empty features array since all features were removed
@@ -5,12 +6,12 @@ const features = [];
 
 export const FeaturesSection = () => {
   return (
-    <section className="py-16 px-6 md:px-10 bg-secondary/10 relative overflow-hidden">
+    <section className="py-16 px-6 md:px-10 bg-sky-50/70 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden -z-10">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 to-secondary/5"></div>
-        <div className="absolute -top-40 right-20 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-20 w-80 h-80 bg-secondary/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-sky-50 to-blue-50"></div>
+        <div className="absolute -top-40 right-20 w-80 h-80 bg-sky-100 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-20 w-80 h-80 bg-blue-50 rounded-full blur-3xl"></div>
       </div>
       
       <div className="max-w-7xl mx-auto">
