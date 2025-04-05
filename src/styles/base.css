@@ -50,6 +50,19 @@ button:focus, a:focus {
   outline-offset: 2px;
 }
 
+/* Fix for SipHeader z-index and visibility */
+.sip-header {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 50 !important;
+  position: sticky !important;
+  top: 0 !important;
+  width: 100% !important;
+  background-color: white !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
 @media (max-width: 768px) {
   .container-fluid {
     padding-right: 1rem;

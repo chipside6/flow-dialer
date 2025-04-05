@@ -13,6 +13,8 @@
   .sip-header {
     position: sticky;
     top: 0;
+    display: block !important;
+    visibility: visible !important;
   }
   
   /* Adjust container padding */

@@ -3,6 +3,9 @@
 
 .sip-header {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: block !important;
+  visibility: visible !important;
+  background-color: white;
 }
 
 .phone-number {
