@@ -59,7 +59,7 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
                   <span>Log In</span>
                 </Link>
               </Button>
-              <Button className="bg-primary rounded-full" asChild>
+              <Button className="bg-[#0EA5E9] hover:bg-[#0284c7] text-white rounded-full" asChild>
                 <Link to="/signup">Get Started</Link>
               </Button>
             </>

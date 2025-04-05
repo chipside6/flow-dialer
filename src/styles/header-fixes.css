@@ -27,3 +27,40 @@ header, .navbar, .sip-header {
 .header-dropdown {
   z-index: 60;
 }
+
+/* Sky blue styling for Get Started button */
+.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"] {
+  background-color: #0EA5E9;
+  color: white;
+  border-radius: 9999px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"]:hover {
+  background-color: #0284c7;
+}
+
+/* Fix mobile positioning for menu and button */
+@media (max-width: 768px) {
+  .sip-header .max-w-7xl {
+    padding: 0 0.5rem;
+  }
+  
+  .sip-header .max-w-7xl .flex.items-center.gap-4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem !important;
+  }
+  
+  .sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"] {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  /* Ensure phone number and links are properly sized on mobile */
+  .sip-header .text-sm {
+    font-size: 0.75rem;
+  }
+}

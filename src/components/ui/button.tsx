@@ -20,7 +20,8 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         success: "bg-green-600 text-white hover:bg-green-700 shadow-sm",
-        orange: "bg-[#ff6c2c] text-white hover:bg-[#e95d1e]", // Added orange variant
+        orange: "bg-[#ff6c2c] text-white hover:bg-[#e95d1e]",
+        skyblue: "bg-[#0EA5E9] text-white hover:bg-[#0284c7]", // Added sky blue variant
       },
       size: {
         default: "h-10 px-4 py-2",

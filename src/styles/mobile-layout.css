@@ -2,14 +2,16 @@
 
 @media screen and (max-width: 768px) {
   /* Better styling for navbar */
-  header {
+  header, .sip-header {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
     width: 100%;
     z-index: 50;
+  }
+  
+  /* Position SipHeader properly */
+  .sip-header {
+    position: sticky;
+    top: 0;
   }
   
   /* Adjust container padding */
@@ -20,7 +22,7 @@
   
   /* Add padding to main content to prevent overlap with fixed navbar */
   main {
-    padding-top: 60px !important;
+    padding-top: 0 !important;
   }
   
   body {
@@ -123,6 +125,33 @@
     padding-top: 16px !important;
   }
   
+  /* SipHeader specific adjustments */
+  .sip-header + main {
+    padding-top: 0 !important;
+  }
+  
+  /* Align menu and Get Started button to right */
+  .sip-header .max-w-7xl .flex.items-center.gap-4 {
+    display: flex;
+    align-items: center;
+    gap: 8px !important;
+    margin-left: auto;
+  }
+  
+  /* Match styling from reference */
+  .sip-header .bg-gray-100 {
+    padding: 6px 12px;
+  }
+  
+  .sip-header .bg-white {
+    padding: 8px 12px;
+  }
+  
+  /* Make Get Started button more prominent */
+  .sip-header a[href="/signup"] {
+    font-weight: 500;
+  }
+  
   /* Remove extra padding from campaign content */
   .campaign-content {
     padding-top: 16px !important;
@@ -182,6 +211,11 @@
   .content-with-fixed-header,
   [data-sidebar-inset] {
     padding-top: 0 !important;
+  }
+  
+  /* SipHeader desktop spacing */
+  .sip-header + main {
+    padding-top: 0;
   }
   
   /* Ensure buttons in tables don't overflow */

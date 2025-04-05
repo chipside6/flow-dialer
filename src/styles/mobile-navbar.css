@@ -14,8 +14,8 @@
     margin-right: auto;
   }
   
-  /* Ensure Get Started button stays on the right */
-  header .flex.items-center.gap-2:last-child {
+  /* Position menu button and Get Started button on right side */
+  .sip-header .flex.items-center.gap-4 {
     margin-left: auto;
   }
   
@@ -32,9 +32,9 @@
   }
   
   /* Improve menu button touch target */
-  header button[aria-label="Open mobile menu"] {
+  header button[aria-label="Menu"] {
     padding: 8px;
-    margin-right: 8px;
+    border-radius: 4px;
   }
   
   /* Fix Get Started button styling */
@@ -45,5 +45,24 @@
   /* Fixed content padding to account for navbar height */
   main {
     padding-top: 4rem !important;
+  }
+  
+  /* Ensure top info bar is responsive */
+  .top-info-bar {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+  
+  /* Stack info bar items on very small screens */
+  @media (max-width: 480px) {
+    .top-info-bar .flex.items-center {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .top-info-bar .mx-2 {
+      display: none;
+    }
   }
 }

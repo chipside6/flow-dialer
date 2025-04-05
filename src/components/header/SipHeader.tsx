@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Logo } from '@/components/ui/Logo';
 
@@ -35,9 +35,9 @@ export const SipHeader = () => {
             <Logo size="lg" />
           </Link>
           
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             <Button 
-              className="bg-[#ff6c2c] hover:bg-[#e95d1e] text-white rounded-full px-8 py-6 text-lg font-medium transition-colors"
+              className="bg-[#0EA5E9] hover:bg-[#0284c7] text-white rounded-full px-6 py-2 font-medium transition-colors"
               asChild
             >
               <Link to="/signup">
@@ -45,13 +45,9 @@ export const SipHeader = () => {
               </Link>
             </Button>
             
-            <button className="lg:hidden p-2" aria-label="Menu">
+            <button className="p-2" aria-label="Menu">
               <Menu size={28} className="text-slate-700" />
             </button>
-            
-            <nav className="hidden lg:flex items-center gap-8">
-              {/* Desktop menu would go here */}
-            </nav>
           </div>
         </div>
       </div>
