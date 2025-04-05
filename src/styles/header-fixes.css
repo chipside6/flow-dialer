@@ -29,7 +29,7 @@ header, .navbar, .sip-header {
 }
 
 /* Sky blue styling for Get Started button */
-.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"] {
+.sip-header .max-w-7xl .flex.items-center.gap-6 a[href="/signup"] {
   background-color: #0EA5E9;
   color: white;
   border-radius: 9999px;
@@ -38,7 +38,7 @@ header, .navbar, .sip-header {
   transition: background-color 0.2s ease;
 }
 
-.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"]:hover {
+.sip-header .max-w-7xl .flex.items-center.gap-6 a[href="/signup"]:hover {
   background-color: #0284c7;
 }
 
@@ -48,15 +48,15 @@ header, .navbar, .sip-header {
     padding: 0 0.5rem;
   }
   
-  .sip-header .max-w-7xl .flex.items-center.gap-4 {
+  .sip-header .max-w-7xl .flex.items-center.gap-6 {
     display: flex;
     align-items: center;
-    gap: 0.5rem !important;
+    gap: 1rem !important;
   }
   
-  .sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"] {
+  .sip-header .max-w-7xl .flex.items-center.gap-6 a[href="/signup"] {
     font-size: 0.875rem;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.25rem;
   }
   
   /* Ensure phone number and links are properly sized on mobile */

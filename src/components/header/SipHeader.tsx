@@ -35,10 +35,11 @@ export const SipHeader = () => {
             <Logo size="lg" />
           </Link>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <Button 
               className="bg-[#0EA5E9] hover:bg-[#0284c7] text-white rounded-full px-6 py-2 font-medium transition-colors"
               asChild
+              variant="skyblue"
             >
               <Link to="/signup">
                 Get Started
