@@ -15,3 +15,7 @@
 @import './styles/mobile-layout.css';
 @import './styles/mobile-navbar.css';
 @import './styles/mobile-typography.css';
+@import './styles/critical-header-fixes.css';
+@import './styles/header.css';
+@import './styles/mobile-sidebar-transitions.css';
+

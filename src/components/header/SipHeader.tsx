@@ -75,17 +75,27 @@ export const SipHeader: React.FC<SipHeaderProps> = ({ className }) => {
     >
       {/* Top info bar */}
       <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm">
-        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
-          <div className="flex items-center">
-            <span className="text-gray-600">Phone: </span>
-            <a href="tel:+18002506510" className="text-[#ff6c2c] hover:underline ml-1 font-medium">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <span className="text-gray-600">Phone:</span>
+            <a href="tel:+18002506510" className="text-[#ff6c2c] hover:underline font-medium">
               (800) 250-6510
             </a>
-            <span className="mx-2 text-gray-400">|</span>
+            <span className="hidden md:inline mx-2 text-gray-400">|</span>
+            <Link to="/support" className="hidden md:inline text-[#ff6c2c] hover:underline font-medium">
+              Support
+            </Link>
+            <span className="hidden md:inline mx-2 text-gray-400">|</span>
+            <Link to="/login" className="hidden md:inline text-[#ff6c2c] hover:underline font-medium">
+              Customer Login
+            </Link>
+          </div>
+          
+          <div className="md:hidden flex items-center space-x-4">
             <Link to="/support" className="text-[#ff6c2c] hover:underline font-medium">
               Support
             </Link>
-            <span className="mx-2 text-gray-400">|</span>
+            <span className="text-gray-400">|</span>
             <Link to="/login" className="text-[#ff6c2c] hover:underline font-medium">
               Customer Login
             </Link>
@@ -96,13 +106,13 @@ export const SipHeader: React.FC<SipHeaderProps> = ({ className }) => {
       {/* Main header */}
       <div className="w-full bg-white py-4 px-4 md:px-8 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          {/* Logo aligned to the extreme left */}
-          <Link to="/" className="flex items-center mr-auto">
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
             <Logo size="lg" />
           </Link>
           
-          {/* Button and menu aligned to the extreme right */}
-          <div className="flex items-center gap-4 ml-auto">
+          {/* Button and menu */}
+          <div className="flex items-center gap-4">
             <Button 
               className="bg-[#0EA5E9] hover:bg-[#0284c7] text-white rounded-full px-6 py-2 font-medium transition-colors"
               asChild
