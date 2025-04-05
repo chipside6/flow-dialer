@@ -32,14 +32,17 @@
   /* Align logo to extreme left and menu/button to extreme right */
   .sip-header .max-w-7xl {
     justify-content: space-between !important;
+    width: 100% !important;
   }
   
   .sip-header .max-w-7xl a:first-child {
     margin-right: auto !important;
+    flex-shrink: 0 !important;
   }
   
   .sip-header .max-w-7xl .flex.items-center {
     margin-left: auto !important;
+    flex-shrink: 0 !important;
   }
   
   /* Match styling from reference */
@@ -68,9 +71,18 @@
     margin-left: auto;
   }
   
-  /* Reduce logo size on mobile */
+  /* Ensure logo and text stay on the same line */
   .sip-header .logo, 
   .sip-header .max-w-7xl a:first-child .logo {
-    transform: scale(0.85);
+    transform: scale(0.9);
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Ensure logo container doesn't wrap */
+  .sip-header .max-w-7xl a:first-child,
+  .sip-header .max-w-7xl a:first-child div {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 }

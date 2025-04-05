@@ -35,7 +35,7 @@ export const SipHeader = () => {
   };
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full flex flex-col sip-header">
       {/* Top info bar */}
       <div className="w-full bg-gray-100 py-1 px-3 md:px-8 text-xs">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
@@ -60,7 +60,7 @@ export const SipHeader = () => {
       <div className="w-full bg-white py-2 px-3 md:px-8 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo aligned to the extreme left */}
-          <Link to="/" className="flex items-center mr-auto">
+          <Link to="/" className="flex-shrink-0 mr-auto">
             <Logo size="sm" />
           </Link>
           
