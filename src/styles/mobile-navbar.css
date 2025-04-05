@@ -9,70 +9,48 @@
   }
   
   /* Fix logo and menu button positioning */
-  header .flex.items-center {
-    justify-content: center;
-    align-items: center;
+  header .flex.items-center.gap-2 {
+    justify-content: flex-start;
+    margin-right: auto;
   }
   
   /* Position menu button and Get Started button on right side */
   .sip-header .flex.items-center.gap-4 {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.75rem !important;
+    margin-left: auto;
   }
   
   /* Make the header background more visible */
   header {
     background-color: var(--background);
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 50;
+    padding: 0.5rem 1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   
   /* Improve menu button touch target */
   header button[aria-label="Menu"] {
     padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border-radius: 4px;
   }
   
   /* Fix Get Started button styling */
   header a[href="/signup"] {
     padding: 8px 16px !important;
-    text-align: center;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
   }
 
   /* Fixed content padding to account for navbar height */
   main {
-    padding-top: 0 !important;
+    padding-top: 4rem !important;
   }
   
   /* Ensure top info bar is responsive */
-  .bg-gray-100 {
+  .top-info-bar {
     font-size: 0.75rem;
     padding: 4px 8px;
-  }
-  
-  /* Properly display information in the top bar */
-  .sip-header .bg-gray-100 .max-w-7xl {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-  }
-  
-  /* Fix the logo size */
-  .sip-header .logo-container img,
-  .sip-header .logo img {
-    height: 32px;
-    width: auto;
-  }
-  
-  /* Ensure the Flow Dialer text has proper spacing */
-  .sip-header .font-display {
-    margin-left: 8px;
   }
   
   /* Stack info bar items on very small screens */
@@ -81,6 +59,10 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
+    }
+    
+    .top-info-bar .mx-2 {
+      display: none;
     }
   }
 }

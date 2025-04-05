@@ -1,9 +1,6 @@
 
 /* Responsive layout styles for mobile devices */
 
-/* Import critical header fixes first to ensure they take precedence */
-@import './critical-header-fixes.css';
-
 /* Import refactored mobile CSS files */
 @import './mobile-buttons.css';
 @import './mobile-forms.css';
@@ -53,15 +50,5 @@
   
   div[role="status"] div {
     font-size: 13px !important;
-  }
-  
-  /* Critical header fixes for mobile */
-  .sip-header,
-  .sip-header-container,
-  header.sip-header {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
   }
 }

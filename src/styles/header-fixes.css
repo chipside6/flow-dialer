@@ -8,23 +8,8 @@
 
 /* Fix for header stacking and z-index issues */
 header, .navbar, .sip-header {
-  z-index: 50 !important;
-  position: relative !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Force header to display on all pages */
-.sip-header-container,
-header.sip-header,
-.sip-header-wrapper {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  width: 100%;
   z-index: 50;
-  position: relative !important;
+  position: relative;
 }
 
 /* Fix for mobile menu overlay */
@@ -51,87 +36,37 @@ header.sip-header,
   padding: 0.5rem 1.5rem;
   font-weight: 500;
   transition: background-color 0.2s ease;
-  display: flex !important;
 }
 
 .sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"]:hover {
   background-color: #0284c7;
 }
 
-/* Ensure SipHeader is always visible - CRITICAL FIX */
-.sip-header {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  background-color: white;
-  width: 100%;
-  position: relative !important;
-  z-index: 50 !important;
-}
-
-/* Public layout specific fixes */
-.public-layout .sip-header,
-.public-layout .sip-header-container,
-.public-page .sip-header,
-.public-page-active .sip-header {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-}
-
-/* Highest priority rules for the header */
-body:not([data-sidebar]) .sip-header,
-html body .sip-header-container,
-html body header.sip-header {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-}
-
-/* Fix logo display */
-.sip-header a:first-child {
-  display: flex !important;
-}
-
 /* Fix mobile positioning for menu and button */
 @media (max-width: 768px) {
-  /* Top info bar styling for mobile */
-  .sip-header .bg-gray-100 .max-w-7xl {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-  }
-  
-  /* Main header layout */
   .sip-header .max-w-7xl {
-    padding: 0;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
+    padding: 0 0.5rem;
+    display: flex;
+    justify-content: space-between;
     width: 100%;
   }
   
-  /* Logo positioning */
+  /* Push logo to extreme left */
   .sip-header .max-w-7xl a:first-child {
-    margin-right: 0 !important;
-    display: flex !important;
+    margin-right: auto;
   }
   
-  /* Button and menu alignment */
+  /* Push button and menu to extreme right */
   .sip-header .max-w-7xl .flex.items-center.gap-4 {
-    display: flex !important;
-    align-items: center !important;
+    display: flex;
+    align-items: center;
     gap: 0.75rem !important;
-    margin-left: 0 !important;
+    margin-left: auto;
   }
   
-  /* Get Started button styling */
   .sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"] {
     font-size: 0.875rem;
     padding: 0.5rem 1.25rem;
-    display: flex !important;
   }
   
   /* Ensure phone number and links are properly sized on mobile */
@@ -152,41 +87,5 @@ html body header.sip-header {
   /* Prevent scrolling when menu is open */
   body.menu-open {
     overflow: hidden;
-  }
-
-  /* Ensure all header elements are visible */
-  .sip-header * {
-    display: block;
-  }
-  
-  .sip-header .flex {
-    display: flex !important;
-  }
-  
-  /* Public page specific header fixes */
-  .public-page .sip-header,
-  .public-page-active .sip-header {
-    position: relative !important;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  /* Fix content padding for pages with header */
-  .public-page main,
-  .public-page-active main {
-    padding-top: 0 !important;
-  }
-  
-  /* Header wrapper specific styles */
-  .sip-header-wrapper {
-    display: block !important;
-    position: relative !important;
-    z-index: 50 !important;
-    width: 100% !important;
   }
 }
