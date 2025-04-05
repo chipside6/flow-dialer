@@ -34,7 +34,7 @@ export const Logo = ({ size = "md", withText = true, className }: LogoProps) => 
         <img 
           src="/lovable-uploads/3b232783-6db7-4692-bf2e-eeadcc07ea17.png" 
           alt="Flow Dialer" 
-          className="w-full h-full object-contain" 
+          className="w-full h-full object-contain p-0.5" 
         />
       </div>
       {withText && (
