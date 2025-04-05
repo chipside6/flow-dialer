@@ -3,7 +3,6 @@ import React from "react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardSidebar } from "@/components/sidebar/DashboardSidebar";
-import { DashboardContent } from "@/components/layout/DashboardContent";
 import { MobileSidebarButton } from "@/components/sidebar/MobileSidebarButton";
 
 interface DashboardLayoutProps {
@@ -35,7 +34,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* DashboardSidebar contains its own header on mobile */}
       <DashboardSidebar />
       <div className="flex-1 w-full max-w-full overflow-hidden">
-        {/* No extra padding needed here - let child components handle their own spacing */}
         <div className="w-full max-w-full overflow-hidden">
           {children}
         </div>

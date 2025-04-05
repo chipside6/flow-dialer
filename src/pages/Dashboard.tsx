@@ -67,7 +67,6 @@ const Dashboard = () => {
           {activeTab === "overview" && (
             <div className="w-full overflow-hidden">
               <DashboardContent>
-                {/* Add the required children */}
                 <div className="dashboard-overview-content">
                   {/* Dashboard overview content will be rendered inside DashboardContent */}
                 </div>
@@ -76,7 +75,7 @@ const Dashboard = () => {
           )}
           
           {activeTab === "dialer" && (
-            <div className="mt-2 overflow-hidden">
+            <div className="mt-2 px-2 sm:px-4">
               <h2 className="text-xl font-semibold mb-3">Quick Dialer</h2>
               <p className="text-muted-foreground text-sm">
                 The quick dialer feature allows you to make calls without setting up a full campaign.
@@ -86,9 +85,9 @@ const Dashboard = () => {
           )}
           
           {activeTab === "campaigns" && (
-            <div className="mt-2 w-full overflow-hidden">
+            <div className="mt-2 w-full">
               <CampaignProvider initialCampaigns={campaigns || []}>
-                <div className="campaign-table-container w-full overflow-hidden">
+                <div className="campaign-table-container w-full">
                   <CampaignTable />
                 </div>
               </CampaignProvider>
