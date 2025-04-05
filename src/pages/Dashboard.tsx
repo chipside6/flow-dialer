@@ -66,7 +66,12 @@ const Dashboard = () => {
         <div className="w-full overflow-hidden dashboard-content">
           {activeTab === "overview" && (
             <div className="w-full overflow-hidden">
-              <DashboardContent />
+              <DashboardContent>
+                {/* Add the required children */}
+                <div className="dashboard-overview-content">
+                  {/* Dashboard overview content will be rendered inside DashboardContent */}
+                </div>
+              </DashboardContent>
             </div>
           )}
           
