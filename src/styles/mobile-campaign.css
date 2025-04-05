@@ -22,6 +22,7 @@
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
   }
   
   /* Font size adjustments for better mobile display */
@@ -62,6 +63,8 @@
     min-width: 100%;
     overflow-x: auto;
     white-space: nowrap;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
   }
   
   /* Fix for tables */
@@ -75,4 +78,30 @@
   .campaign-content button {
     white-space: nowrap;
   }
+
+  /* Fix for dashboard content overflow */
+  .dashboard-content-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Fix campaign dashboard view */
+  .campaign-dashboard {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Fix card spacing */
+  .card {
+    margin-bottom: 1rem;
+  }
 }
+
+/* Dashboard content fixes for all screen sizes */
+.dashboard-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+

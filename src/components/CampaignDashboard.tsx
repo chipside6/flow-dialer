@@ -19,7 +19,7 @@ const CampaignDashboardContent = ({ onRefresh }: { onRefresh?: () => void }) => 
   const { isOnline } = useNetworkStatus();
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-4 w-full max-w-full overflow-hidden campaign-dashboard">
       <Card className="w-full overflow-hidden">
         <CardHeader className="bg-muted/40 px-4 py-3">
           <CardTitle className="text-base md:text-lg">Active Campaigns</CardTitle>
@@ -32,7 +32,7 @@ const CampaignDashboardContent = ({ onRefresh }: { onRefresh?: () => void }) => 
       </Card>
 
       {selectedCampaign && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full overflow-hidden">
           <CampaignDetails campaign={selectedCampaign} />
           <CampaignStats campaign={selectedCampaign} />
         </div>

@@ -28,18 +28,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [isMobile, openMobile]);
   
   return (
-    <div className="flex flex-1 w-full overflow-x-hidden">
+    <div className="flex flex-1 w-full overflow-hidden">
       {/* Mobile menu button - only show when sidebar is not open */}
       {isMobile && !openMobile && <MobileSidebarButton onClick={toggleSidebar} />}
       
       {/* DashboardSidebar contains its own header on mobile */}
       <DashboardSidebar />
-      <DashboardContent>
+      <div className="flex-1 w-full max-w-full overflow-hidden">
         {/* No extra padding needed here - let child components handle their own spacing */}
-        <div className="w-full max-w-full overflow-x-hidden">
+        <div className="w-full max-w-full overflow-hidden">
           {children}
         </div>
-      </DashboardContent>
+      </div>
     </div>
   );
 }

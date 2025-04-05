@@ -11,11 +11,11 @@ export interface DashboardHeaderProps {
 
 export const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
   return (
-    <div className="flex flex-col gap-3 mb-4">
+    <div className="flex flex-col gap-3 mb-4 w-full max-w-full overflow-hidden">
       <h1 className="text-xl sm:text-2xl font-bold">Campaign Analytics</h1>
       
       {/* Mobile-optimized tabs using the shadcn Tabs component */}
-      <div className="overflow-x-auto -mx-2 px-2 tab-container">
+      <div className="overflow-x-auto -mx-0 px-0 tab-container w-full">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full max-w-md bg-muted/70 rounded-full p-1">
             <TabsTrigger 

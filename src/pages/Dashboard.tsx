@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { DashboardContent } from '@/components/dashboard/DashboardContent';
+import { DashboardContent } from '@/components/layout/DashboardContent';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { CampaignProvider } from '@/contexts/campaign/CampaignContext';
 import { CampaignTable } from '@/components/campaigns/CampaignTable';
@@ -25,7 +25,7 @@ const Dashboard = () => {
   
   return (
     <DashboardLayout>
-      <div className="w-full px-2 sm:px-4 py-4">
+      <div className="w-full overflow-hidden px-0 sm:px-2 py-2">
         <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
         
         {/* Show error alert if offline or error */}
@@ -63,31 +63,33 @@ const Dashboard = () => {
           </Alert>
         )}
 
-        {activeTab === "overview" && (
-          <div className="w-full overflow-hidden">
-            <DashboardContent />
-          </div>
-        )}
-        
-        {activeTab === "dialer" && (
-          <div className="mt-4 overflow-hidden">
-            <h2 className="text-xl font-semibold mb-3">Quick Dialer</h2>
-            <p className="text-muted-foreground text-sm">
-              The quick dialer feature allows you to make calls without setting up a full campaign.
-              This feature is coming soon.
-            </p>
-          </div>
-        )}
-        
-        {activeTab === "campaigns" && (
-          <div className="mt-4 w-full overflow-hidden">
-            <CampaignProvider initialCampaigns={campaigns || []}>
-              <div className="campaign-table-container">
-                <CampaignTable />
-              </div>
-            </CampaignProvider>
-          </div>
-        )}
+        <div className="w-full overflow-hidden dashboard-content">
+          {activeTab === "overview" && (
+            <div className="w-full overflow-hidden">
+              <DashboardContent />
+            </div>
+          )}
+          
+          {activeTab === "dialer" && (
+            <div className="mt-2 overflow-hidden">
+              <h2 className="text-xl font-semibold mb-3">Quick Dialer</h2>
+              <p className="text-muted-foreground text-sm">
+                The quick dialer feature allows you to make calls without setting up a full campaign.
+                This feature is coming soon.
+              </p>
+            </div>
+          )}
+          
+          {activeTab === "campaigns" && (
+            <div className="mt-2 w-full overflow-hidden">
+              <CampaignProvider initialCampaigns={campaigns || []}>
+                <div className="campaign-table-container w-full overflow-hidden">
+                  <CampaignTable />
+                </div>
+              </CampaignProvider>
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );

@@ -10,7 +10,7 @@ interface CampaignStatsProps {
 
 export const CampaignStats: React.FC<CampaignStatsProps> = ({ campaign }) => {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden campaign-stats-card w-full">
       <CardHeader className="bg-muted/40 px-4 py-3">
         <CardTitle className="text-base md:text-lg">Live Statistics</CardTitle>
       </CardHeader>
