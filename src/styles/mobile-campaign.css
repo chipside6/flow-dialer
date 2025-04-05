@@ -6,6 +6,9 @@
   .campaign-content h1 {
     font-size: 1.5rem;
     line-height: 1.2;
+    text-align: center;
+    width: 100%;
+    margin: 0 auto;
   }
 
   /* Fix campaign table text overflow */
@@ -22,40 +25,48 @@
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    margin-bottom: 1rem;
+    margin: 0 auto;
+    padding: 0 8px;
   }
   
   /* Font size adjustments for better mobile display */
   .card-header .card-title {
     font-size: 1rem;
+    text-align: center;
   }
   
   /* Prevent horizontal overflow in cards */
   .card, .card-content {
     max-width: 100%;
     box-sizing: border-box;
+    margin: 0 auto;
   }
   
   /* Better spacing for mobile */
   .campaign-content {
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
+    margin: 0 auto !important;
+    text-align: center !important;
   }
   
   /* Fix spacing in stats cards */
   .campaign-stats-card .card-content {
     padding: 0.75rem !important;
+    text-align: center !important;
   }
   
   /* Better sizing for stat icons */
   .campaign-stats-card svg {
     height: 1.25rem !important;
     width: 1.25rem !important;
+    margin: 0 auto !important; 
   }
   
   /* Fix spacing in grid layouts */
   .grid.grid-cols-1.md\:grid-cols-2 {
     gap: 0.75rem !important;
+    margin: 0 auto !important;
   }
   
   /* Better tabs display */
@@ -65,6 +76,7 @@
     white-space: nowrap;
     padding-bottom: 0.5rem !important;
     margin-bottom: 0.5rem !important;
+    justify-content: center !important;
   }
   
   /* Fix for tables */
@@ -72,11 +84,18 @@
     display: table;
     width: 100%;
     table-layout: fixed;
+    margin: 0 auto !important;
+  }
+  
+  /* Center table headers */
+  th {
+    text-align: center !important;
   }
   
   /* Prevent buttons from wrapping */
   .campaign-content button {
     white-space: nowrap;
+    margin: 0 auto;
   }
 
   /* Fix for dashboard content overflow */
@@ -84,17 +103,34 @@
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    margin: 0 auto;
+    text-align: center;
   }
   
   /* Fix campaign dashboard view */
   .campaign-dashboard {
     max-width: 100%;
     overflow-x: hidden;
+    margin: 0 auto;
   }
 
   /* Fix card spacing */
   .card {
     margin-bottom: 1rem;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  /* Ensure "Create Campaign" button is centered */
+  .gap-2 {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+  }
+  
+  /* Center empty state content */
+  .text-center p, .text-center button {
+    margin: 0 auto;
   }
 }
 
@@ -103,5 +139,5 @@
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  margin: 0 auto;
 }
-

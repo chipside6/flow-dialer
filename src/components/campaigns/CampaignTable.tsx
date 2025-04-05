@@ -24,65 +24,67 @@ export const CampaignTable: React.FC = () => {
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[30%]">Name</TableHead>
-          <TableHead className="w-[15%]">Execution</TableHead>
-          <TableHead className="w-[30%]">Progress</TableHead>
-          <TableHead className="text-right w-[25%]">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {campaigns.length === 0 ? (
+    <div className="w-full flex flex-col items-center">
+      <Table>
+        <TableHeader>
           <TableRow>
-            <TableCell colSpan={4} className="text-center py-8">
-              <div className="flex flex-col items-center justify-center space-y-4 mx-auto px-4">
-                <p className="text-muted-foreground">No campaigns found</p>
-                
-                {subscriptionChecked && !canCreateCampaigns ? (
-                  <div className="text-center space-y-2 max-w-md">
-                    <div className="flex items-center justify-center gap-2 text-amber-500">
-                      <AlertTriangle className="h-4 w-4" />
-                      <p className="text-sm font-medium">Your trial has expired</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Upgrade to lifetime access to create and run campaigns
-                    </p>
-                    <Button 
-                      className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium"
-                      onClick={() => navigate('/upgrade')}
-                      size="lg"
-                    >
-                      Upgrade Now
-                    </Button>
-                  </div>
-                ) : (
-                  subscriptionChecked && (
-                    <>
-                      <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto">
-                        Create your first campaign to start making calls
+            <TableHead className="w-[30%]">Name</TableHead>
+            <TableHead className="w-[15%] text-center">Execution</TableHead>
+            <TableHead className="w-[30%] text-center">Progress</TableHead>
+            <TableHead className="text-right w-[25%]">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {campaigns.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center py-8">
+                <div className="flex flex-col items-center justify-center space-y-4 mx-auto px-4">
+                  <p className="text-muted-foreground">No campaigns found</p>
+                  
+                  {subscriptionChecked && !canCreateCampaigns ? (
+                    <div className="text-center space-y-2 max-w-md mx-auto">
+                      <div className="flex items-center justify-center gap-2 text-amber-500">
+                        <AlertTriangle className="h-4 w-4" />
+                        <p className="text-sm font-medium">Your trial has expired</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Upgrade to lifetime access to create and run campaigns
                       </p>
                       <Button 
-                        variant="success" 
-                        className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium"
-                        onClick={handleCreateCampaign}
+                        className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium mx-auto"
+                        onClick={() => navigate('/upgrade')}
                         size="lg"
                       >
-                        <PlusCircle className="h-5 w-5" /> Create Campaign
+                        Upgrade Now
                       </Button>
-                    </>
-                  )
-                )}
-              </div>
-            </TableCell>
-          </TableRow>
-        ) : (
-          campaigns.map((campaign) => (
-            <CampaignItem key={campaign.id} campaign={campaign} />
-          ))
-        )}
-      </TableBody>
-    </Table>
+                    </div>
+                  ) : (
+                    subscriptionChecked && (
+                      <div className="text-center mx-auto">
+                        <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto">
+                          Create your first campaign to start making calls
+                        </p>
+                        <Button 
+                          variant="success" 
+                          className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium mx-auto"
+                          onClick={handleCreateCampaign}
+                          size="lg"
+                        >
+                          <PlusCircle className="h-5 w-5" /> Create Campaign
+                        </Button>
+                      </div>
+                    )
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : (
+            campaigns.map((campaign) => (
+              <CampaignItem key={campaign.id} campaign={campaign} />
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 };

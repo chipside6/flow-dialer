@@ -40,6 +40,9 @@ main {
   [data-sidebar-inset] > div {
     max-width: 100vw !important;
     overflow-x: hidden !important;
+    margin: 0 auto !important; /* Center content */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
   
   /* Better sizing for page container */
@@ -56,6 +59,7 @@ main {
   /* Fix header spacing */
   .dashboard-header {
     padding: 0.75rem 1rem !important;
+    justify-content: center !important;
   }
   
   /* Proper sizing for tab panels */
@@ -64,6 +68,21 @@ main {
     min-height: 0 !important;
     flex: 1 !important;
     overflow: auto !important;
+  }
+  
+  /* Center table content */
+  table {
+    margin: 0 auto !important;
+    width: 100% !important;
+  }
+  
+  /* Center all content in the dashboard */
+  .dashboard-content > div,
+  .campaign-table-container,
+  [data-sidebar-inset] > div > div {
+    margin: 0 auto !important;
+    width: 100% !important;
+    padding: 0 8px !important;
   }
 }
 

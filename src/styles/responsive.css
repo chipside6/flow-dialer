@@ -3,14 +3,17 @@
 @media (max-width: 768px) {
   /* Add padding for all page headers to avoid overlap with sidebar button */
   h1, h2 {
-    padding-left: 20px;
+    padding-left: 0;
+    text-align: center;
   }
   
   /* Center content on pages */
   .container, 
   .container-fluid,
   [data-sidebar-inset] > div {
-    text-align: left;
+    text-align: center;
+    margin: 0 auto;
+    width: 100%;
   }
   
   /* Fix card centering on mobile */
@@ -21,12 +24,12 @@
   
   /* Fix for greeting files page */
   .tabs-content {
-    text-align: left;
+    text-align: center;
   }
   
   /* Extra space between mobile sidebar button and content */
   .mobile-sidebar-button + * {
-    margin-left: 16px;
+    margin-left: 0;
   }
   
   /* Improve table readability on mobile */
@@ -40,7 +43,8 @@
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
     max-width: 100% !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
+    width: 100% !important;
   }
   
   /* Fix table responsiveness */
@@ -48,26 +52,67 @@
     min-width: 100% !important;
     width: 100% !important;
     max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Center all paragraphs on mobile */
+  p {
+    text-align: center;
   }
   
   /* Better spacing for dashboard overview content */
   .dashboard-overview-content {
     padding: 16px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
   }
   
   /* Fix campaign analytics grid */
   .grid-cols-1.md\:grid-cols-3 {
     display: grid !important;
     grid-template-columns: 1fr !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
   }
   
   /* Ensure stats are readable */
   .grid-cols-1.md\:grid-cols-3 > div {
     margin-bottom: 8px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  
+  /* Center all content on mobile */
+  div[role="tabpanel"] > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
   }
   
   /* Fix Recent Campaigns section */
   .mt-6 {
     margin-top: 1.25rem !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+  
+  /* Center tab buttons */
+  [role="tablist"] {
+    justify-content: center !important;
+    display: flex !important;
+    width: 100% !important;
+  }
+  
+  /* Fix Campaign Analytics title */
+  h2.text-xl {
+    text-align: center !important;
+    margin: 0 auto !important;
+    padding-left: 0 !important;
+  }
+  
+  /* Center welcome text */
+  .text-muted-foreground {
+    text-align: center !important;
   }
 }

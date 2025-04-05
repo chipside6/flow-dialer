@@ -5,6 +5,7 @@
   /* Adjust content padding for dashboard pages with sidebar */
   [data-sidebar-inset] > div {
     padding-top: 60px !important;
+    margin: 0 auto !important;
   }
   
   /* Ensure main content doesn't cause overflow */
@@ -12,8 +13,9 @@
     max-width: 100% !important;
     width: 100% !important;
     overflow-x: hidden;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    margin: 0 auto !important;
   }
   
   /* Ensure the main content area is properly positioned */
@@ -26,6 +28,7 @@
     overflow-x: hidden !important;
     display: flex !important;
     flex-direction: column !important;
+    align-items: center !important; /* Center content */
   }
   
   /* Fix campaign cards layout */
@@ -52,6 +55,8 @@
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
+    width: 100% !important;
+    margin: 0 auto !important;
   }
   
   .dashboard-content > div {
@@ -59,6 +64,7 @@
     height: 100% !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
+    margin: 0 auto !important;
   }
   
   /* Fix campaign overview content */
@@ -66,12 +72,21 @@
     padding: 16px !important;
     height: 100% !important;
     overflow-y: auto !important;
+    margin: 0 auto !important;
   }
   
   /* Fix table overflow */
   table {
     width: 100% !important;
     table-layout: fixed !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Center table content container */
+  .campaign-table-container {
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 8px !important;
   }
   
   /* Better cell text handling */
@@ -80,6 +95,16 @@
     overflow-wrap: break-word !important;
     padding: 8px !important;
     font-size: 0.875rem !important;
+    text-align: center !important;
+  }
+  
+  /* Text alignment for specific cells */
+  th:first-child, td:first-child {
+    text-align: left !important;
+  }
+  
+  th:last-child, td:last-child {
+    text-align: right !important;
   }
   
   /* Prevent text overflow in all headings */
@@ -88,6 +113,7 @@
     word-wrap: break-word !important;
     hyphens: auto !important;
     max-width: 100% !important;
+    text-align: center !important;
   }
   
   /* Fix campaign analytics title */
@@ -95,6 +121,7 @@
     font-size: 1.25rem !important;
     line-height: 1.75rem !important;
     margin-bottom: 0.5rem !important;
+    text-align: center !important;
   }
   
   /* Better tab buttons */
@@ -105,6 +132,7 @@
     white-space: nowrap !important;
     display: flex !important;
     gap: 0 !important;
+    justify-content: center !important;
   }
   
   [role="tablist"] button {
@@ -114,6 +142,13 @@
     padding-right: 12px !important;
     font-size: 0.875rem !important;
   }
+  
+  /* Center empty state content */
+  .text-center {
+    text-align: center !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+  }
 }
 
 /* General dashboard content fixes for all screen sizes */
@@ -122,17 +157,30 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .dashboard-content > div {
   flex: 1;
   overflow-y: auto;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .dashboard-overview-content {
   padding: 24px;
   height: 100%;
   overflow-y: auto;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Center empty state text and button */
+.text-center {
+  text-align: center !important;
+  margin: 0 auto !important;
+  width: 100% !important;
 }
 
 /* Fix stat cards on mobile */
