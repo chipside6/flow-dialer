@@ -7,7 +7,7 @@ interface AuthFooterProps {
 
 export const AuthFooter = ({ type }: AuthFooterProps) => {
   return (
-    <div className="mt-8 text-center">
+    <div className={`${type === 'signup' ? 'mt-12' : 'mt-8'} text-center`}>
       {type === 'login' ? (
         <div className="space-y-2">
           <div>
