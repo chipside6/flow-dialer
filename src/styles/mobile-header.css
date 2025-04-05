@@ -1,4 +1,5 @@
 
+
 /* Mobile header styles */
 
 @media screen and (max-width: 768px) {
@@ -32,8 +33,6 @@
   /* Align logo to extreme left and menu/button to extreme right */
   .sip-header .max-w-7xl {
     justify-content: space-between !important;
-    width: 100% !important;
-    padding: 0 12px !important;
   }
   
   .sip-header .max-w-7xl a:first-child {
@@ -66,3 +65,4 @@
     margin-left: auto;
   }
 }
+
