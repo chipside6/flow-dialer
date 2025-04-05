@@ -4,7 +4,7 @@
  */
 
 // Array to track preloaded components
-const preloadedComponents: string[] = new Set();
+const preloadedComponents: string[] = [];
 
 /**
  * Preload components in the background during idle times
