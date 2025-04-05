@@ -1,0 +1,60 @@
+
+/* Mobile dashboard layout styles */
+
+@media screen and (max-width: 768px) {
+  /* Ensure main content doesn't cause overflow */
+  [data-sidebar-inset] > div {
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Fix campaign cards layout */
+  .space-y-4 {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Better tab content display */
+  .dashboard-content {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+  
+  .dashboard-content > div {
+    flex: 1 !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Fix campaign overview content */
+  .dashboard-overview-content {
+    padding: 8px !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Ensure cards are properly centered */
+  .card, .grid > div {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Fix dashboard cards */
+  .grid.gap-6 {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 8px !important;
+  }
+}

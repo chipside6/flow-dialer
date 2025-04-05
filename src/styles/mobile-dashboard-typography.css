@@ -1,0 +1,38 @@
+
+/* Mobile dashboard typography styles */
+
+@media screen and (max-width: 768px) {
+  /* Prevent text overflow in all headings */
+  h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    hyphens: auto !important;
+    max-width: 100% !important;
+    text-align: center !important;
+    padding-right: 42px !important; /* Make room for the sidebar button */
+  }
+  
+  /* Fix campaign analytics title */
+  .dashboard-content h2.text-xl {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+    margin-bottom: 0.5rem !important;
+    text-align: center !important;
+  }
+  
+  /* Center empty state text and button */
+  .text-center {
+    text-align: center !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure content is centered and not overlapped by sidebar button */
+  .dashboard-content > div > * {
+    text-align: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}

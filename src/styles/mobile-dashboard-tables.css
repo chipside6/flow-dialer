@@ -1,0 +1,36 @@
+
+/* Mobile dashboard table styles */
+
+@media screen and (max-width: 768px) {
+  /* Fix table overflow */
+  table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Center table content container */
+  .campaign-table-container {
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 8px !important;
+  }
+  
+  /* Better cell text handling */
+  th, td {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    padding: 8px !important;
+    font-size: 0.875rem !important;
+    text-align: center !important;
+  }
+  
+  /* Text alignment for specific cells */
+  th:first-child, td:first-child {
+    text-align: left !important;
+  }
+  
+  th:last-child, td:last-child {
+    text-align: right !important;
+  }
+}

@@ -1,0 +1,53 @@
+
+/* Mobile dashboard spacing and padding styles */
+
+@media screen and (max-width: 768px) {
+  /* Adjust content padding for dashboard pages with sidebar */
+  [data-sidebar-inset] > div {
+    padding-top: 48px !important;
+    margin: 0 auto !important;
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+    padding-bottom: 24px !important;
+  }
+  
+  /* Ensure the main content area is properly positioned */
+  [data-sidebar-inset] {
+    padding: 0 !important;
+    min-height: 100% !important;
+    height: 100% !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; /* Center content */
+  }
+  
+  /* Fix form containers */
+  .form-wrapper,
+  .card-body,
+  .card-content,
+  .card-container {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Fix containers that may cause overflow */
+  .container, .container-fluid {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Fix card padding */
+  .card-content {
+    padding: 1rem !important;
+  }
+}
