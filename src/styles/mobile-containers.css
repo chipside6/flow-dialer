@@ -1,0 +1,41 @@
+
+/* Mobile container styles */
+
+@media screen and (max-width: 768px) {
+  /* Adjust container padding */
+  .container-fluid {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  /* Fix page title on mobile - prevent truncation */
+  h1.text-3xl, h1.text-2xl {
+    font-size: 1.75rem;
+    line-height: 2.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  
+  /* Position auth cards higher on mobile */
+  .container.flex.flex-col.items-center {
+    padding-top: 0 !important;
+  }
+  
+  /* Auth card specific positioning */
+  .container.flex.flex-col.items-center .card {
+    margin-top: 0 !important;
+  }
+  
+  /* Add padding to main content to prevent overlap with fixed navbar */
+  main {
+    padding-top: 0 !important;
+  }
+  
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+}

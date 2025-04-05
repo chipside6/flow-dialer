@@ -7,7 +7,7 @@
 @import './sidebar-mobile.css';
 @import './mobile-buttons.css';
 @import './mobile-forms.css';
-@import './mobile-layout.css';
+@import './mobile-layout.css'; /* This now imports all the refactored modules */
 @import './mobile-cards.css';
 @import './mobile-typography.css';
 @import './mobile-tabs-wizards.css';
@@ -35,4 +35,3 @@
     gap: 8px !important;
   }
 }
-

@@ -1,0 +1,27 @@
+
+/* Mobile campaign specific styles */
+
+@media screen and (max-width: 768px) {
+  /* Make sure campaign title doesn't overflow */
+  .campaign-content h1 {
+    max-width: 240px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Fix campaign table text overflow */
+  .table-cell-content {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+  }
+  
+  /* Ensure that campaign content is not hidden by the mobile button */
+  .campaign-content, 
+  .dashboard-content {
+    padding-left: 64px !important;
+  }
+}

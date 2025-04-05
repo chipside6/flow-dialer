@@ -1,0 +1,71 @@
+
+/* Web view specific fixes */
+
+@media screen and (min-width: 769px) {
+  /* Full height centered content for specific pages */
+  .unauthorized-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  
+  /* Center authentication content */
+  .unauthorized-page > div,
+  .auth-page > div {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  /* Remove duplicate padding */
+  .dashboard-content-wrapper,
+  .content-with-fixed-header,
+  [data-sidebar-inset] {
+    padding-top: 0 !important;
+  }
+  
+  /* SipHeader desktop spacing */
+  .sip-header + main {
+    padding-top: 0;
+    margin-top: 0;
+  }
+  
+  /* Public pages with SipHeader should have reduced spacing */
+  .sip-header ~ main section:first-child {
+    padding-top: 0;
+  }
+  
+  /* Ensure buttons in tables don't overflow */
+  .table-row-action button {
+    white-space: nowrap;
+  }
+  
+  /* Fix campaign table empty state in web view */
+  tbody td div.flex.flex-col {
+    max-width: 100%;
+  }
+  
+  tbody td p {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+  
+  /* Prevent button text overflow */
+  button {
+    white-space: nowrap;
+  }
+  
+  /* Fix campaign table cell content */
+  tbody td {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Fix empty state message container */
+  tbody td div.flex.flex-col.items-center.justify-center {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
