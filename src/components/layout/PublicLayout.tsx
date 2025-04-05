@@ -23,6 +23,9 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       // Add a class to the body to help with CSS targeting
       document.body.classList.add('public-page-active');
       
+      // Add a data attribute to help with CSS targeting
+      document.body.setAttribute('data-current-route', location.pathname);
+      
       // Force header to be visible with direct DOM manipulation
       const forceHeaderVisibility = () => {
         const headers = document.querySelectorAll('.sip-header, .sip-header-container');
@@ -39,9 +42,14 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       forceHeaderVisibility();
       const timer = setTimeout(forceHeaderVisibility, 100);
       
+      // Re-run after component has fully rendered
+      const renderTimer = setTimeout(forceHeaderVisibility, 500);
+      
       return () => {
         document.body.classList.remove('public-page-active');
+        document.body.removeAttribute('data-current-route');
         clearTimeout(timer);
+        clearTimeout(renderTimer);
       };
     }
   }, [isDashboardPage, location.pathname]);

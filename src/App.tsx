@@ -8,11 +8,14 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SubscriptionCheck } from "@/components/SubscriptionCheck";
 import { Skeleton } from "@/components/ui/skeleton";
+import PublicLayout from "@/components/layout/PublicLayout";
 
 // Import the App.css for styling
 import "./App.css"; 
 // Import the header-fixes.css for header and logout button fixes
 import "./styles/header-fixes.css";
+// Import critical header fixes
+import "./styles/critical-header-fixes.css";
 
 // Import Login directly instead of lazy loading it
 import Login from "./pages/Login";
@@ -64,11 +67,15 @@ const App = () => (
           <Sonner />
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/support" element={<Support />} />
+              {/* Public routes wrapped in PublicLayout */}
+              <Route element={<PublicLayout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/features" element={<Features />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/support" element={<Support />} />
+              </Route>
+              
+              {/* Auth routes */}
               <Route path="/signup" element={<SignUp />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />

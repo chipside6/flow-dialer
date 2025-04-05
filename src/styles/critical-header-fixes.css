@@ -61,3 +61,22 @@ body:not([data-hide-header]) header.sip-header {
   opacity: 1 !important;
   position: relative !important;
 }
+
+/* Root page specific fixes - target the homepage explicitly */
+body[data-current-route="/"] .sip-header,
+body[data-current-route="/"] .sip-header-container,
+body[data-current-route="/"] header.sip-header {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 50 !important;
+}
+
+/* Target Index page container to ensure header is shown */
+body[data-current-route="/"] > div > .sip-header-wrapper,
+body[data-current-route="/"] > div > div > .sip-header-container {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}

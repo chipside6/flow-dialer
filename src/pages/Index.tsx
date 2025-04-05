@@ -19,9 +19,11 @@ const Index = () => {
     }
   }, [isAuthenticated, navigate, initialized]);
 
-  // Header debugging
+  // Header visibility enforcement
   useEffect(() => {
     console.log("Index page mounted - ensuring header is visible");
+    document.body.setAttribute('data-current-route', '/');
+    
     const checkHeader = () => {
       const header = document.querySelector('.sip-header');
       if (header) {
@@ -29,16 +31,29 @@ const Index = () => {
         if (header instanceof HTMLElement) {
           console.log("Header display style:", window.getComputedStyle(header).display);
           console.log("Header visibility style:", window.getComputedStyle(header).visibility);
+          
+          // Force header visibility
+          header.style.display = 'block';
+          header.style.visibility = 'visible';
+          header.style.opacity = '1';
         }
       } else {
         console.log("Header element NOT found");
       }
     };
     
-    // Check immediately and after a delay
+    // Check immediately and after delays to ensure header is visible
     checkHeader();
-    const timer = setTimeout(checkHeader, 500);
-    return () => clearTimeout(timer);
+    const timer1 = setTimeout(checkHeader, 100);
+    const timer2 = setTimeout(checkHeader, 500);
+    const timer3 = setTimeout(checkHeader, 1000);
+    
+    return () => {
+      document.body.removeAttribute('data-current-route');
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
   }, []);
 
   console.log("Index page rendered - header should be visible");
