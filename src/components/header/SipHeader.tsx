@@ -35,7 +35,7 @@ export const SipHeader = () => {
   };
 
   return (
-    <div className="w-full flex flex-col">
+    <header className="w-full flex flex-col sticky top-0 z-50 sip-header">
       {/* Top info bar */}
       <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
@@ -89,6 +89,6 @@ export const SipHeader = () => {
 
       {/* Mobile Menu */}
       <SipMobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
-    </div>
+    </header>
   );
 };
