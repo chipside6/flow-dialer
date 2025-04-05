@@ -5,7 +5,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { PricingSection } from "@/components/PricingSection";
 import { CTASection } from "@/components/CTASection";
-import PublicLayout from "@/components/layout/PublicLayout";
+import { SipHeader } from "@/components/header/SipHeader";
 import { useAuth } from "@/contexts/auth";
 
 const Index = () => {
@@ -21,14 +21,15 @@ const Index = () => {
   }, [isAuthenticated, navigate, initialized]);
 
   return (
-    <PublicLayout>
-      <div className="bg-background"> 
+    <div className="bg-background min-h-screen flex flex-col">
+      <SipHeader />
+      <main className="flex-1"> 
         <HeroSection />
         <FeaturesSection />
         <PricingSection />
         <CTASection />
-      </div>
-    </PublicLayout>
+      </main>
+    </div>
   );
 };
 
