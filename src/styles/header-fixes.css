@@ -8,19 +8,23 @@
 
 /* Fix for header stacking and z-index issues */
 header, .navbar, .sip-header {
-  z-index: 50;
-  position: relative;
+  z-index: 50 !important;
+  position: relative !important;
   display: block !important;
   visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Force header to display on all pages */
 .sip-header-container,
-header.sip-header {
+header.sip-header,
+.sip-header-wrapper {
   display: block !important;
   visibility: visible !important;
+  opacity: 1 !important;
   width: 100%;
   z-index: 50;
+  position: relative !important;
 }
 
 /* Fix for mobile menu overlay */
@@ -61,6 +65,28 @@ header.sip-header {
   opacity: 1 !important;
   background-color: white;
   width: 100%;
+  position: relative !important;
+  z-index: 50 !important;
+}
+
+/* Public layout specific fixes */
+.public-layout .sip-header,
+.public-layout .sip-header-container,
+.public-page .sip-header,
+.public-page-active .sip-header {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+}
+
+/* Highest priority rules for the header */
+body:not([data-sidebar]) .sip-header,
+html body .sip-header-container,
+html body header.sip-header {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   position: relative !important;
 }
 
@@ -128,16 +154,29 @@ header.sip-header {
   }
   
   /* Public page specific header fixes */
-  .public-page .sip-header {
-    position: relative;
+  .public-page .sip-header,
+  .public-page-active .sip-header {
+    position: relative !important;
     top: 0;
     left: 0;
     right: 0;
     width: 100%;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   /* Fix content padding for pages with header */
-  .public-page main {
-    padding-top: 0;
+  .public-page main,
+  .public-page-active main {
+    padding-top: 0 !important;
+  }
+  
+  /* Header wrapper specific styles */
+  .sip-header-wrapper {
+    display: block !important;
+    position: relative !important;
+    z-index: 50 !important;
+    width: 100% !important;
   }
 }

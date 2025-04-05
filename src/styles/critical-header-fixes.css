@@ -1,0 +1,53 @@
+
+/* CRITICAL HEADER FIXES - DO NOT MODIFY */
+
+/* Force header to display on all pages with !important flags */
+header.sip-header,
+.sip-header-container,
+.sip-header-wrapper,
+.sip-header {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 50 !important;
+  width: 100% !important;
+}
+
+/* Ensure header container is properly positioned */
+.sip-header-wrapper {
+  display: block !important;
+  position: relative !important;
+}
+
+/* Fix for public pages specifically */
+.public-page .sip-header,
+.public-page-active .sip-header,
+.public-layout .sip-header {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Make sure header elements like logo and buttons are visible */
+.sip-header * {
+  display: block;
+}
+
+.sip-header .flex {
+  display: flex !important;
+}
+
+/* Ensure specific header classes override any other styling */
+[class*="sip-header"] {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Prevent header from being hidden by other elements */
+html body .sip-header,
+html body .sip-header-container {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}

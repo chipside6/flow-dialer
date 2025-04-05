@@ -19,11 +19,33 @@ const Index = () => {
     }
   }, [isAuthenticated, navigate, initialized]);
 
+  // Header debugging
+  useEffect(() => {
+    console.log("Index page mounted - ensuring header is visible");
+    const checkHeader = () => {
+      const header = document.querySelector('.sip-header');
+      if (header) {
+        console.log("Header element found:", header);
+        if (header instanceof HTMLElement) {
+          console.log("Header display style:", window.getComputedStyle(header).display);
+          console.log("Header visibility style:", window.getComputedStyle(header).visibility);
+        }
+      } else {
+        console.log("Header element NOT found");
+      }
+    };
+    
+    // Check immediately and after a delay
+    checkHeader();
+    const timer = setTimeout(checkHeader, 500);
+    return () => clearTimeout(timer);
+  }, []);
+
   console.log("Index page rendered - header should be visible");
 
   return (
-    <div className="bg-background public-page">
-      <main className="flex-1"> 
+    <div className="bg-background public-page" style={{position: 'relative'}}>
+      <main className="flex-1" style={{paddingTop: 0}}> 
         <HeroSection />
         <FeaturesSection />
         <PricingSection />

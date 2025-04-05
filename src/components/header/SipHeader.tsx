@@ -36,6 +36,22 @@ export const SipHeader: React.FC<SipHeaderProps> = ({ className }) => {
   // Log on mount to confirm the component is rendering
   useEffect(() => {
     console.log('SipHeader mounted and visible');
+    
+    // Force display after component mounts
+    const forceDisplay = () => {
+      const header = document.querySelector('.sip-header');
+      if (header) {
+        (header as HTMLElement).style.display = 'block';
+        (header as HTMLElement).style.visibility = 'visible';
+        (header as HTMLElement).style.opacity = '1';
+        console.log('Force applied to header element');
+      }
+    };
+    
+    // Run immediately and after a small delay to ensure it takes effect
+    forceDisplay();
+    const timer = setTimeout(forceDisplay, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   const toggleMobileMenu = () => {
@@ -43,10 +59,20 @@ export const SipHeader: React.FC<SipHeaderProps> = ({ className }) => {
     console.log('Mobile menu toggled:', !isMobileMenuOpen);
   };
 
-  console.log("SipHeader rendering");
+  console.log("SipHeader rendering with className:", className);
 
   return (
-    <header className={`w-full flex flex-col sip-header ${className || ''}`} style={{display: 'block', visibility: 'visible'}}>
+    <header 
+      className={`w-full flex flex-col sip-header ${className || ''}`} 
+      style={{
+        display: 'block !important', 
+        visibility: 'visible !important', 
+        opacity: '1',
+        position: 'relative',
+        zIndex: 50
+      }}
+      data-header-element="true"
+    >
       {/* Top info bar */}
       <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
