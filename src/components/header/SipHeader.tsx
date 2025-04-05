@@ -1,11 +1,39 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Logo } from '@/components/ui/Logo';
+import { SipMobileMenu } from './SipMobileMenu';
 
 export const SipHeader = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    const handleRouteChange = () => setIsMobileMenuOpen(false);
+    window.addEventListener('popstate', handleRouteChange);
+    return () => window.removeEventListener('popstate', handleRouteChange);
+  }, []);
+
+  // Add a body class when menu is open to prevent scrolling
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.classList.remove('menu-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('menu-open');
+    };
+  }, [isMobileMenuOpen]);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+    console.log('Mobile menu toggled:', !isMobileMenuOpen);
+  };
+
   return (
     <div className="w-full flex flex-col">
       {/* Top info bar */}
@@ -48,12 +76,19 @@ export const SipHeader = () => {
               </Link>
             </Button>
             
-            <button className="p-2" aria-label="Menu">
+            <button 
+              className="p-2" 
+              aria-label="Menu" 
+              onClick={toggleMobileMenu}
+            >
               <Menu size={28} className="text-slate-700" />
             </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      <SipMobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </div>
   );
 };
