@@ -67,11 +67,11 @@ export const TransferNumbersList = ({
                       <Phone className="h-4 w-4 mr-2 text-primary" />
                       <h3 className="font-semibold">{transferNumber.name}</h3>
                     </div>
-                    <p className="text-sm text-muted-foreground">{transferNumber.number}</p>
+                    <p className="text-sm text-muted-foreground whitespace-normal">{transferNumber.number}</p>
                     {transferNumber.description && (
-                      <p className="text-sm">{transferNumber.description}</p>
+                      <p className="text-sm whitespace-normal">{transferNumber.description}</p>
                     )}
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground whitespace-nowrap">
                       Added {formatDate(new Date(transferNumber.dateAdded))}
                     </p>
                   </div>
@@ -79,7 +79,7 @@ export const TransferNumbersList = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 self-start sm:self-center"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 self-start sm:self-center whitespace-nowrap"
                     onClick={() => onDeleteTransferNumber(transferNumber.id)}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />

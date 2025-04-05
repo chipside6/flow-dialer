@@ -38,12 +38,12 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Host</TableHead>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Added</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="whitespace-nowrap">Name</TableHead>
+                  <TableHead className="whitespace-nowrap">Host</TableHead>
+                  <TableHead className="whitespace-nowrap">Username</TableHead>
+                  <TableHead className="whitespace-nowrap">Added</TableHead>
+                  <TableHead className="whitespace-nowrap">Status</TableHead>
+                  <TableHead className="whitespace-nowrap">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

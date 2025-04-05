@@ -23,8 +23,8 @@ export const CampaignItem: React.FC<CampaignItemProps> = ({ campaign }) => {
         className="cursor-pointer hover:bg-muted/50"
         onClick={() => setSelectedCampaign(campaign)}
       >
-        <TableCell className="font-medium">{campaign.title}</TableCell>
-        <TableCell>
+        <TableCell className="font-medium whitespace-nowrap">{campaign.title}</TableCell>
+        <TableCell className="whitespace-nowrap">
           <span className={`px-2 py-1 rounded-full text-xs ${
             campaign.status === "running" ? "bg-green-100 text-green-800" : 
             campaign.status === "paused" ? "bg-yellow-100 text-yellow-800" : 
@@ -40,7 +40,7 @@ export const CampaignItem: React.FC<CampaignItemProps> = ({ campaign }) => {
             <span className="text-xs whitespace-nowrap">{campaign.progress}%</span>
           </div>
         </TableCell>
-        <TableCell className="text-right">
+        <TableCell className="text-right whitespace-nowrap">
           <div className="flex justify-end gap-2">
             <Button
               variant="ghost"

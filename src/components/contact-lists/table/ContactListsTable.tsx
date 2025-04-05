@@ -19,15 +19,15 @@ interface ContactListsTableProps {
 
 const ContactListsTable: React.FC<ContactListsTableProps> = ({ lists, onDelete }) => {
   return (
-    <Table>
+    <Table className="min-w-full">
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Description</TableHead>
-          <TableHead>Contacts</TableHead>
-          <TableHead>Created</TableHead>
-          <TableHead>Last Modified</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead className="whitespace-nowrap">Name</TableHead>
+          <TableHead className="whitespace-nowrap">Description</TableHead>
+          <TableHead className="whitespace-nowrap">Contacts</TableHead>
+          <TableHead className="whitespace-nowrap">Created</TableHead>
+          <TableHead className="whitespace-nowrap">Last Modified</TableHead>
+          <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

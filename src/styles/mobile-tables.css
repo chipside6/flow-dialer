@@ -1,0 +1,43 @@
+
+/* Mobile table styles to ensure horizontal text display */
+
+@media (max-width: 768px) {
+  /* Make sure table headers and cells are displayed horizontally */
+  th, td {
+    white-space: nowrap !important;
+  }
+  
+  /* Add horizontal scrolling for tables */
+  .table-container,
+  div:has(> table) {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Ensure tables take full width */
+  table {
+    min-width: max-content !important;
+    width: 100% !important;
+  }
+  
+  /* Prevent text wrapping in buttons within tables */
+  td button {
+    white-space: nowrap !important;
+  }
+  
+  /* Style for action buttons in tables */
+  .action-buttons,
+  td:has(> button),
+  td:has(> .flex) {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0.5rem !important;
+    align-items: center !important;
+  }
+  
+  /* Ensure consistent padding in table cells */
+  td, th {
+    padding: 0.75rem !important;
+  }
+}

@@ -26,6 +26,7 @@ export const PhoneListActions: React.FC<PhoneListActionsProps> = ({
         variant="outline"
         onClick={() => setShowBulkInput(!showBulkInput)}
         disabled={isActionInProgress}
+        className="whitespace-nowrap"
       >
         {showBulkInput ? (
           <>Hide Bulk Input</>
@@ -41,6 +42,7 @@ export const PhoneListActions: React.FC<PhoneListActionsProps> = ({
         variant="outline"
         onClick={handleExportCSV}
         disabled={phoneNumbers.length === 0 || isActionInProgress}
+        className="whitespace-nowrap"
       >
         {isActionInProgress ? (
           <>
@@ -59,6 +61,7 @@ export const PhoneListActions: React.FC<PhoneListActionsProps> = ({
         variant="outline"
         onClick={handleExportForAsterisk}
         disabled={phoneNumbers.length === 0 || isActionInProgress}
+        className="whitespace-nowrap"
       >
         {isActionInProgress ? (
           <>

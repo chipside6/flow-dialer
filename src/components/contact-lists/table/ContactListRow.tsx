@@ -14,12 +14,12 @@ interface ContactListRowProps {
 const ContactListRow: React.FC<ContactListRowProps> = ({ list, onDelete }) => {
   return (
     <TableRow key={list.id}>
-      <TableCell className="font-medium">{list.name}</TableCell>
-      <TableCell>{list.description}</TableCell>
-      <TableCell>{list.contactCount}</TableCell>
-      <TableCell>{format(list.dateCreated, 'PP')}</TableCell>
-      <TableCell>{format(list.lastModified, 'PP')}</TableCell>
-      <TableCell className="text-right">
+      <TableCell className="font-medium whitespace-nowrap">{list.name}</TableCell>
+      <TableCell className="whitespace-nowrap">{list.description}</TableCell>
+      <TableCell className="whitespace-nowrap">{list.contactCount}</TableCell>
+      <TableCell className="whitespace-nowrap">{format(list.dateCreated, 'PP')}</TableCell>
+      <TableCell className="whitespace-nowrap">{format(list.lastModified, 'PP')}</TableCell>
+      <TableCell className="text-right whitespace-nowrap">
         <Button 
           variant="ghost" 
           size="sm"
