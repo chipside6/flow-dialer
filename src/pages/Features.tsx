@@ -1,10 +1,10 @@
 
-import { Navbar } from "@/components/Navbar";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { CTASection } from "@/components/CTASection";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { AudioWaveform, ContactIcon, PhoneForwarded, Server, BarChart3 } from "lucide-react";
+import PublicLayout from "@/components/layout/PublicLayout";
 
 const Features = () => {
   const coreFeatures = [
@@ -41,8 +41,7 @@ const Features = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <PublicLayout>
       <main>
         <section className="pt-32 pb-20 px-6 md:px-10">
           <div className="max-w-7xl mx-auto text-center">
@@ -90,7 +89,7 @@ const Features = () => {
         <FeaturesSection />
         <CTASection />
       </main>
-    </div>
+    </PublicLayout>
   );
 };
 
