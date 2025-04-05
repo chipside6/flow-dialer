@@ -10,12 +10,14 @@ interface PublicLayoutProps {
 
 const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const location = useLocation();
-  const isHomepage = location.pathname === '/';
+  
+  // Define which paths should use SipHeader instead of Navbar
+  const useSipHeader = ['/', '/features', '/pricing', '/support'].includes(location.pathname);
   
   return (
     <div className="flex flex-col min-h-screen">
-      {isHomepage ? <SipHeader /> : <Navbar />}
-      <main className={`flex-1 ${isHomepage ? 'pt-0' : ''}`}>
+      {useSipHeader ? <SipHeader /> : <Navbar />}
+      <main className={`flex-1 ${useSipHeader ? 'pt-0' : ''}`}>
         {children || <Outlet />}
       </main>
     </div>

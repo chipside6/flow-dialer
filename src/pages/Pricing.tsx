@@ -1,19 +1,18 @@
 
-import { Navbar } from "@/components/Navbar";
 import { PricingSection } from "@/components/PricingSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { CTASection } from "@/components/CTASection";
+import PublicLayout from "@/components/layout/PublicLayout";
 
 const Pricing = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+    <PublicLayout>
       <main>
         <PricingSection />
         <TestimonialsSection />
         <CTASection />
       </main>
-    </div>
+    </PublicLayout>
   );
 };
 
