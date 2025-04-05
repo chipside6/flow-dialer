@@ -1,4 +1,5 @@
 
+
 /* Mobile header styles */
 
 @media screen and (max-width: 768px) {
@@ -32,67 +33,36 @@
   /* Align logo to extreme left and menu/button to extreme right */
   .sip-header .max-w-7xl {
     justify-content: space-between !important;
-    width: 100% !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
   }
   
-  /* Properly position the logo on the left */
   .sip-header .max-w-7xl a:first-child {
-    flex-shrink: 0 !important;
-    padding-left: 0 !important;
+    margin-right: auto !important;
   }
   
-  /* Properly position the right-side elements */
   .sip-header .max-w-7xl .flex.items-center {
-    flex-shrink: 0 !important;
-    padding-right: 0 !important;
+    margin-left: auto !important;
   }
   
   /* Match styling from reference */
   .sip-header .bg-gray-100 {
-    padding: 4px 8px;
-    font-size: 0.75rem;
+    padding: 6px 12px;
   }
   
   .sip-header .bg-white {
-    padding: 6px 8px;
+    padding: 8px 12px;
   }
   
-  /* Make Get Started button more prominent but smaller */
+  /* Make Get Started button more prominent */
   .sip-header a[href="/signup"] {
     font-weight: 500;
-    font-size: 0.8rem;
-    padding: 4px 12px !important;
-    height: 28px !important;
   }
   
   /* Align menu and Get Started button to right */
-  .sip-header .max-w-7xl .flex.items-center.gap-4,
-  .sip-header .max-w-7xl .flex.items-center.gap-2 {
+  .sip-header .max-w-7xl .flex.items-center.gap-4 {
     display: flex;
     align-items: center;
-    gap: 4px !important;
+    gap: 8px !important;
     margin-left: auto;
   }
-  
-  /* Ensure logo and text stay on the same line */
-  .sip-header .logo, 
-  .sip-header .max-w-7xl a:first-child .logo {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-  }
-  
-  /* Ensure logo container doesn't wrap */
-  .sip-header .max-w-7xl a:first-child,
-  .sip-header .max-w-7xl a:first-child div {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-  }
-  
-  /* Fix padding for logo and button container */
-  .sip-header .w-full.bg-white .max-w-7xl {
-    padding: 0 !important;
-    width: 100% !important;
-  }
 }
+
