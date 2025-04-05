@@ -31,11 +31,13 @@ export const SipHeader = () => {
       {/* Main header */}
       <div className="w-full bg-white py-4 px-4 md:px-8 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <Link to="/" className="flex items-center">
+          {/* Logo aligned to the extreme left */}
+          <Link to="/" className="flex items-center mr-auto">
             <Logo size="lg" />
           </Link>
           
-          <div className="flex items-center gap-6">
+          {/* Button and menu aligned to the extreme right */}
+          <div className="flex items-center gap-4 ml-auto">
             <Button 
               className="bg-[#0EA5E9] hover:bg-[#0284c7] text-white rounded-full px-6 py-2 font-medium transition-colors"
               asChild

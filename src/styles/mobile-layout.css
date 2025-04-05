@@ -130,12 +130,17 @@
     padding-top: 0 !important;
   }
   
-  /* Align menu and Get Started button to right */
-  .sip-header .max-w-7xl .flex.items-center.gap-4 {
-    display: flex;
-    align-items: center;
-    gap: 8px !important;
-    margin-left: auto;
+  /* Align logo to extreme left and menu/button to extreme right */
+  .sip-header .max-w-7xl {
+    justify-content: space-between !important;
+  }
+  
+  .sip-header .max-w-7xl a:first-child {
+    margin-right: auto !important;
+  }
+  
+  .sip-header .max-w-7xl .flex.items-center {
+    margin-left: auto !important;
   }
   
   /* Match styling from reference */
@@ -150,6 +155,14 @@
   /* Make Get Started button more prominent */
   .sip-header a[href="/signup"] {
     font-weight: 500;
+  }
+  
+  /* Align menu and Get Started button to right */
+  .sip-header .max-w-7xl .flex.items-center.gap-4 {
+    display: flex;
+    align-items: center;
+    gap: 8px !important;
+    margin-left: auto;
   }
   
   /* Remove extra padding from campaign content */
