@@ -10,6 +10,7 @@ import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import CampaignDashboard from '@/components/CampaignDashboard';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -25,7 +26,7 @@ const Dashboard = () => {
   
   return (
     <DashboardLayout>
-      <div className="w-full overflow-hidden px-0 sm:px-2 py-2">
+      <div className="w-full h-full flex flex-col overflow-hidden px-0 sm:px-2 py-2">
         <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
         
         {/* Show error alert if offline or error */}
@@ -63,29 +64,65 @@ const Dashboard = () => {
           </Alert>
         )}
 
-        <div className="w-full overflow-hidden dashboard-content">
+        <div className="w-full flex-1 overflow-hidden dashboard-content">
           {activeTab === "overview" && (
-            <div className="w-full overflow-hidden">
+            <div className="w-full h-full overflow-auto">
               <DashboardContent>
-                <div className="dashboard-overview-content">
-                  {/* Dashboard overview content will be rendered inside DashboardContent */}
+                <div className="dashboard-overview-content py-4 space-y-6">
+                  <h2 className="text-xl font-semibold">Dashboard Overview</h2>
+                  <p className="text-muted-foreground">
+                    Welcome to your campaign dashboard. Here you can view analytics and manage your campaigns.
+                  </p>
+                  
+                  {/* Display some sample campaign stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div className="bg-primary/10 rounded-lg p-4">
+                      <h3 className="font-medium">Active Campaigns</h3>
+                      <p className="text-2xl font-bold mt-2">{campaigns?.length || 0}</p>
+                    </div>
+                    <div className="bg-green-100 rounded-lg p-4">
+                      <h3 className="font-medium">Completed Calls</h3>
+                      <p className="text-2xl font-bold mt-2">0</p>
+                    </div>
+                    <div className="bg-blue-100 rounded-lg p-4">
+                      <h3 className="font-medium">Success Rate</h3>
+                      <p className="text-2xl font-bold mt-2">0%</p>
+                    </div>
+                  </div>
+                  
+                  {/* Import and use CampaignDashboard component */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-4">Recent Campaigns</h3>
+                    <CampaignDashboard 
+                      initialCampaigns={campaigns?.slice(0, 3) || []} 
+                      onRefresh={refreshCampaigns}
+                    />
+                  </div>
                 </div>
               </DashboardContent>
             </div>
           )}
           
           {activeTab === "dialer" && (
-            <div className="mt-2 px-2 sm:px-4">
-              <h2 className="text-xl font-semibold mb-3">Quick Dialer</h2>
-              <p className="text-muted-foreground text-sm">
-                The quick dialer feature allows you to make calls without setting up a full campaign.
-                This feature is coming soon.
-              </p>
+            <div className="w-full h-full overflow-auto p-4">
+              <div className="max-w-4xl mx-auto">
+                <h2 className="text-xl font-semibold mb-3">Quick Dialer</h2>
+                <p className="text-muted-foreground text-sm mb-6">
+                  The quick dialer feature allows you to make calls without setting up a full campaign.
+                  This feature is coming soon.
+                </p>
+                
+                {/* Placeholder for quick dialer UI */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                  <p className="text-muted-foreground">Quick dialer functionality will be available soon</p>
+                  <Button className="mt-4" disabled>Start Quick Call</Button>
+                </div>
+              </div>
             </div>
           )}
           
           {activeTab === "campaigns" && (
-            <div className="mt-2 w-full">
+            <div className="w-full h-full overflow-auto p-4">
               <CampaignProvider initialCampaigns={campaigns || []}>
                 <div className="campaign-table-container w-full">
                   <CampaignTable />

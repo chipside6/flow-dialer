@@ -1,9 +1,22 @@
 
 /* Dashboard layout specific styles */
 
+/* Ensure content fills available space properly */
+.dashboard-container, 
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
 /* Ensure content doesn't overlap with fixed elements */
 main {
-  padding-top: 4rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
 }
 
 /* Add some spacing to improve readability */
@@ -43,8 +56,11 @@ main {
 /* Fix for content overflow */
 .dashboard-content-wrapper {
   width: 100%;
+  height: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Progress bar animation */
@@ -64,13 +80,20 @@ main {
   animation: progressPulse 1.5s infinite ease-in-out;
 }
 
-/* These fixes ensure no horizontal scrolling */
-.dashboard-container {
-  max-width: 100vw;
-  overflow-x: hidden;
+/* Tab content fixes to ensure proper height */
+[role="tabpanel"] {
+  height: 100%;
+  overflow: auto;
 }
 
-/* Make sure all tables and grids fit within viewport */
+/* Fix tab container height */
+.tab-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure all tables and grids fit within viewport */
 table, .grid {
   max-width: 100%;
   box-sizing: border-box;

@@ -27,14 +27,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [isMobile, openMobile]);
   
   return (
-    <div className="flex flex-1 w-full overflow-hidden">
+    <div className="flex flex-1 w-full h-full overflow-hidden">
       {/* Mobile menu button - only show when sidebar is not open */}
       {isMobile && !openMobile && <MobileSidebarButton onClick={toggleSidebar} />}
       
       {/* DashboardSidebar contains its own header on mobile */}
       <DashboardSidebar />
-      <div className="flex-1 w-full max-w-full overflow-hidden">
-        <div className="w-full max-w-full overflow-hidden">
+      <div className="flex-1 w-full max-w-full h-full overflow-hidden">
+        <div className="w-full max-w-full h-full overflow-hidden">
           {children}
         </div>
       </div>

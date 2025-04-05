@@ -9,4 +9,25 @@
 @import './mobile-buttons-actions.css';
 @import './desktop-layout.css';
 
+/* Global fixes for height and scroll issues */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  max-width: 100vw;
+}
+
+#root > div {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 /* This file now serves as an import collection for more focused style modules */
