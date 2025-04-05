@@ -1,4 +1,5 @@
 
+
 /* Web view specific fixes */
 
 @media screen and (min-width: 769px) {
@@ -33,7 +34,7 @@
   
   /* Public pages with SipHeader should have reduced spacing */
   .sip-header ~ main section:first-child {
-    padding-top: 2rem;
+    padding-top: 0;
   }
   
   /* Ensure buttons in tables don't overflow */
@@ -69,3 +70,4 @@
     margin: 0 auto;
   }
 }
+
