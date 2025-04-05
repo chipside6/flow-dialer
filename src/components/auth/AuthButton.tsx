@@ -18,7 +18,7 @@ export const AuthButton = ({
     <button
       type="submit"
       disabled={isLoading || disabled}
-      className="w-full h-12 py-3 px-4 bg-gray-200 hover:bg-gray-300 rounded-full text-gray-800 font-medium transition-colors"
+      className="w-full h-12 py-3 px-4 bg-sky-500 hover:bg-sky-600 rounded-full text-white font-medium transition-colors"
     >
       {isLoading ? (
         <span className="flex items-center justify-center">
