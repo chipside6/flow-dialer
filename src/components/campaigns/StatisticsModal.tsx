@@ -85,37 +85,37 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md md:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>Campaign Statistics: {campaign.title}</DialogTitle>
+      <DialogContent className="sm:max-w-md md:max-w-xl p-0 sm:p-6 overflow-hidden max-h-[90vh]">
+        <DialogHeader className="p-4 sm:p-0">
+          <DialogTitle className="text-base sm:text-lg">Campaign Statistics: {campaign.title}</DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full">
-            <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
-            <TabsTrigger value="details" className="flex-1">Phone Details</TabsTrigger>
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="overview" className="text-sm">Overview</TabsTrigger>
+            <TabsTrigger value="details" className="text-sm">Phone Details</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="overview">
-            <div className="grid grid-cols-2 gap-4 p-2">
+          <TabsContent value="overview" className="mt-2 p-2">
+            <div className="grid grid-cols-2 gap-2 sm:gap-4">
               {callStats.map((stat) => (
                 <Card key={stat.id} className="shadow-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center mb-2">
-                      <div className={`rounded-full p-1.5 mr-2 ${stat.color.replace('text-', 'bg-').replace('500', '100')}`}>
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex items-center mb-1">
+                      <div className={`rounded-full p-1 mr-2 ${stat.color.replace('text-', 'bg-').replace('500', '100')}`}>
                         <span className={stat.color}>{stat.icon}</span>
                       </div>
-                      <div className="font-medium">{stat.title}</div>
+                      <div className="font-medium text-xs sm:text-sm">{stat.title}</div>
                     </div>
-                    <div className="text-2xl font-bold mb-1">{stat.count}</div>
-                    <div className="mt-2">
+                    <div className="text-xl sm:text-2xl font-bold mb-1">{stat.count}</div>
+                    <div className="mt-1">
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="w-full mt-1 p-1 h-auto flex justify-center"
+                        className="w-full mt-1 p-1 h-6 sm:h-8 flex justify-center text-xs"
                         onClick={() => setActiveTab("details")}
                       >
-                        <Eye className="h-4 w-4 mr-1" />
+                        <Eye className="h-3 w-3 mr-1" />
                         <span>View Numbers</span>
                       </Button>
                     </div>
@@ -125,9 +125,9 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
             </div>
           </TabsContent>
           
-          <TabsContent value="details">
-            <ScrollArea className="max-h-[60vh]">
-              <div className="space-y-6 p-2">
+          <TabsContent value="details" className="mt-2">
+            <ScrollArea className="h-[50vh] sm:h-[40vh] w-full p-2">
+              <div className="space-y-4">
                 {callStats.map((stat) => (
                   <div key={stat.id}>
                     <h3 className="flex items-center gap-2 mb-2">
@@ -138,12 +138,12 @@ export const StatisticsModal: React.FC<StatisticsModalProps> = ({
                     <div className="space-y-2 ml-7">
                       {stat.phoneNumbers && stat.phoneNumbers.length > 0 ? (
                         stat.phoneNumbers.map((phone, idx) => (
-                          <Card key={idx} className="p-3">
-                            <div className="text-sm">{phone}</div>
+                          <Card key={idx} className="p-2 sm:p-3">
+                            <div className="text-xs sm:text-sm">{phone}</div>
                           </Card>
                         ))
                       ) : (
-                        <div className="text-muted-foreground">No data available</div>
+                        <div className="text-muted-foreground text-sm">No data available</div>
                       )}
                     </div>
                   </div>

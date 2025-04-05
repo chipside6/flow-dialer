@@ -4,11 +4,8 @@
 @media screen and (max-width: 768px) {
   /* Make sure campaign title doesn't overflow */
   .campaign-content h1 {
-    max-width: 240px;
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 1.5rem;
+    line-height: 1.2;
   }
 
   /* Fix campaign table text overflow */
@@ -17,11 +14,65 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: normal;
+    font-size: 0.875rem;
   }
   
-  /* Ensure that campaign content is not hidden by the mobile button */
-  .campaign-content, 
-  .dashboard-content {
-    padding-left: 64px !important;
+  /* Fix campaign table container */
+  .campaign-table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Font size adjustments for better mobile display */
+  .card-header .card-title {
+    font-size: 1rem;
+  }
+  
+  /* Prevent horizontal overflow in cards */
+  .card, .card-content {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Better spacing for mobile */
+  .campaign-content {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  /* Fix spacing in stats cards */
+  .campaign-stats-card .card-content {
+    padding: 0.75rem !important;
+  }
+  
+  /* Better sizing for stat icons */
+  .campaign-stats-card svg {
+    height: 1.25rem !important;
+    width: 1.25rem !important;
+  }
+  
+  /* Fix spacing in grid layouts */
+  .grid.grid-cols-1.md\:grid-cols-2 {
+    gap: 0.75rem !important;
+  }
+  
+  /* Better tabs display */
+  .tab-container [role="tablist"] {
+    min-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  /* Fix for tables */
+  table {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+  
+  /* Prevent buttons from wrapping */
+  .campaign-content button {
+    white-space: nowrap;
   }
 }

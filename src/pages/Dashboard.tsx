@@ -25,21 +25,21 @@ const Dashboard = () => {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-6">
+      <div className="w-full px-2 sm:px-4 py-4">
         <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
         
         {/* Show error alert if offline or error */}
         {!isOnline && (
-          <Alert variant="destructive" className="mb-6">
+          <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
+            <AlertDescription className="flex items-center justify-between flex-wrap gap-2">
               <div>You appear to be offline. Please check your network connection.</div>
               <Button 
                 variant="outline" 
                 onClick={handleRetry}
-                className="ml-4"
+                size="sm"
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-3 w-3 mr-1" />
                 Retry
               </Button>
             </AlertDescription>
@@ -47,16 +47,16 @@ const Dashboard = () => {
         )}
         
         {error && (
-          <Alert variant="destructive" className="mb-6">
+          <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
+            <AlertDescription className="flex items-center justify-between flex-wrap gap-2">
               <div>Error loading dashboard: {error.message}</div>
               <Button 
                 variant="outline" 
                 onClick={handleRetry}
-                className="ml-4"
+                size="sm"
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-3 w-3 mr-1" />
                 Retry
               </Button>
             </AlertDescription>
@@ -64,13 +64,15 @@ const Dashboard = () => {
         )}
 
         {activeTab === "overview" && (
-          <DashboardContent />
+          <div className="w-full overflow-hidden">
+            <DashboardContent />
+          </div>
         )}
         
         {activeTab === "dialer" && (
-          <div className="mt-6">
-            <h2 className="text-2xl font-semibold mb-4">Quick Dialer</h2>
-            <p className="text-muted-foreground">
+          <div className="mt-4 overflow-hidden">
+            <h2 className="text-xl font-semibold mb-3">Quick Dialer</h2>
+            <p className="text-muted-foreground text-sm">
               The quick dialer feature allows you to make calls without setting up a full campaign.
               This feature is coming soon.
             </p>
@@ -78,9 +80,11 @@ const Dashboard = () => {
         )}
         
         {activeTab === "campaigns" && (
-          <div className="mt-6">
+          <div className="mt-4 w-full overflow-hidden">
             <CampaignProvider initialCampaigns={campaigns || []}>
-              <CampaignTable />
+              <div className="campaign-table-container">
+                <CampaignTable />
+              </div>
             </CampaignProvider>
           </div>
         )}

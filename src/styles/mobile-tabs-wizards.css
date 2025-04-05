@@ -10,6 +10,7 @@
     -ms-overflow-style: none; /* IE and Edge */
     display: flex !important;
     padding: 0 4px !important;
+    margin: 0 !important;
   }
   
   [role="tablist"]::-webkit-scrollbar {
@@ -17,7 +18,7 @@
   }
   
   [role="tabpanel"] {
-    padding: 20px 16px !important;
+    padding: 0.75rem !important;
   }
   
   /* Fix for scrollable tabs on mobile */
@@ -25,6 +26,9 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
   }
   
   .tab-container::-webkit-scrollbar {
@@ -36,86 +40,90 @@
     max-width: 100%;
     width: 100%;
     overflow: hidden;
-    border-radius: 12px !important;
+    border-radius: 8px !important;
   }
   
   /* Better tab button styling */
   [role="tab"] {
     white-space: nowrap;
-    font-size: 14px !important;
-    padding: 10px 14px !important;
+    font-size: 13px !important;
+    padding: 8px 12px !important;
+    height: auto !important;
   }
   
   /* Wizard header styling */
   .card-header {
-    padding: 16px !important;
+    padding: 12px !important;
   }
   
   /* Improve spacing in tab panels */
   [role="tabpanel"] > div {
-    margin-bottom: 16px !important;
+    margin-bottom: 12px !important;
   }
   
   /* Fix wizard navigation buttons */
   .wizard-navigation {
     width: 100%;
     justify-content: space-between !important;
+    padding: 0.75rem !important;
   }
   
   .wizard-navigation button {
     flex: 1;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Campaign table container fixes */
+  .campaign-table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100vw;
+  }
+  
+  /* Fix overflow in campaign dashboard */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Better spacing for dashboard tabs */
+  .tab-container [data-orientation="horizontal"] {
+    display: flex;
+    max-width: 100%;
+    width: auto;
+  }
+  
+  /* Fix spacing in dashboard tabs */
+  .tab-container [role="tab"] {
+    flex-shrink: 0;
   }
 }
 
-/* Remove vertical scrolling for campaign wizard tabs */
-.wizard-tabs-container {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background-color: white;
-  overflow-y: hidden;
-  padding: 16px 16px 0 16px; /* Add padding to the top and sides */
-}
-
-.no-vertical-scroll {
-  overflow-y: hidden !important;
-}
-
-/* Make sure horizontal scroll works properly */
-.wizard-tabs-container .scrollbar-hide {
-  -ms-overflow-style: none;
+/* Tabs default styles regardless of screen size */
+.tab-container {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
   scrollbar-width: none;
 }
 
-.wizard-tabs-container .scrollbar-hide::-webkit-scrollbar {
+.tab-container::-webkit-scrollbar {
   display: none;
 }
 
-/* Ensure horizontal scrolling in tab container */
-.wizard-tabs-container .scroll-area {
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-/* Ensure the tabs scroll horizontally */
-.wizard-tabs-container .inline-flex {
-  white-space: nowrap;
+/* Make sure tab lists don't cause overflow */
+[role="tablist"] {
   display: inline-flex;
   min-width: min-content;
 }
 
-@media (prefers-color-scheme: dark) {
-  .wizard-tabs-container {
-    background-color: hsl(var(--background));
-  }
-}
-
-/* Add better spacing for tab triggers */
-[role="tab"] {
-  margin: 0 2px;
-}
-
 /* Ensure card title has proper spacing */
 .card-header .card-title {
-  padding: 8px 8px 0 8px;
+  padding: 0;
+}
+
+/* Fix for dialog content */
+.dialog-content {
+  max-height: 90vh;
+  overflow-y: auto;
 }

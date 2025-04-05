@@ -11,33 +11,33 @@ export interface DashboardHeaderProps {
 
 export const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
   return (
-    <div className="flex flex-col gap-4 mb-6">
-      <h1 className="text-2xl sm:text-3xl font-bold">Campaign Analytics</h1>
+    <div className="flex flex-col gap-3 mb-4">
+      <h1 className="text-xl sm:text-2xl font-bold">Campaign Analytics</h1>
       
       {/* Mobile-optimized tabs using the shadcn Tabs component */}
-      <div className="overflow-x-auto pb-1 tab-container -mx-2 px-2">
+      <div className="overflow-x-auto -mx-2 px-2 tab-container">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="inline-flex h-10 w-full max-w-md bg-muted/70 rounded-full p-1">
+          <TabsList className="w-full max-w-md bg-muted/70 rounded-full p-1">
             <TabsTrigger 
               value="overview" 
               className="flex items-center rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
-              <LayoutDashboard className="h-4 w-4 mr-2" />
-              Overview
+              <LayoutDashboard className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="text-xs sm:text-sm">Overview</span>
             </TabsTrigger>
             <TabsTrigger 
               value="dialer" 
               className="flex items-center rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
-              <Phone className="h-4 w-4 mr-2" />
-              Quick Dial
+              <Phone className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="text-xs sm:text-sm">Quick Dial</span>
             </TabsTrigger>
             <TabsTrigger 
               value="campaigns" 
               className="flex items-center rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Campaigns
+              <BarChart3 className="h-4 w-4 mr-1 sm:mr-2" />
+              <span className="text-xs sm:text-sm">Campaigns</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>

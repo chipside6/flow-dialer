@@ -104,20 +104,18 @@ const CampaignPage = () => {
                 />
               ) : (
                 <>
-                  <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
+                  <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
                     <h1 className="text-2xl md:text-3xl font-bold">Campaigns</h1>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="success"
-                        onClick={() => setShowCreateWizard(true)}
-                        className="whitespace-nowrap"
-                      >
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        Create Campaign
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="success"
+                      onClick={() => setShowCreateWizard(true)}
+                      className="whitespace-nowrap"
+                    >
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Create Campaign
+                    </Button>
                   </div>
-                  <div className="w-full">
+                  <div className="w-full overflow-hidden">
                     <CampaignDashboard initialCampaigns={campaigns} />
                   </div>
                 </>

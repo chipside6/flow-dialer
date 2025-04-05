@@ -6,8 +6,6 @@ import { CampaignTable } from "@/components/campaigns/CampaignTable";
 import { CampaignDetails } from "@/components/campaigns/CampaignDetails";
 import { CampaignStats } from "@/components/campaigns/CampaignStats";
 import { CampaignProvider, useCampaignContext } from "@/contexts/campaign/CampaignContext";
-import { RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 interface CampaignDashboardProps {
@@ -21,20 +19,20 @@ const CampaignDashboardContent = ({ onRefresh }: { onRefresh?: () => void }) => 
   const { isOnline } = useNetworkStatus();
 
   return (
-    <div className="space-y-6 w-full">
-      <Card className="w-full">
-        <CardHeader className="bg-muted/40">
-          <CardTitle>Active Campaigns</CardTitle>
+    <div className="space-y-4 w-full">
+      <Card className="w-full overflow-hidden">
+        <CardHeader className="bg-muted/40 px-4 py-3">
+          <CardTitle className="text-base md:text-lg">Active Campaigns</CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="w-full overflow-x-auto">
+        <CardContent className="p-0 overflow-hidden">
+          <div className="w-full overflow-x-auto campaign-table-container">
             <CampaignTable />
           </div>
         </CardContent>
       </Card>
 
       {selectedCampaign && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
           <CampaignDetails campaign={selectedCampaign} />
           <CampaignStats campaign={selectedCampaign} />
         </div>
