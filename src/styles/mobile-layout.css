@@ -25,6 +25,11 @@
     padding-top: 0 !important;
   }
   
+  /* All pages should have proper spacing below the header */
+  section:first-of-type {
+    padding-top: 6rem !important;
+  }
+  
   body {
     overflow-x: hidden;
     width: 100%;
