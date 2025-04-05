@@ -1,5 +1,4 @@
 
-
 /* Mobile header styles */
 
 @media screen and (max-width: 768px) {
@@ -45,24 +44,33 @@
   
   /* Match styling from reference */
   .sip-header .bg-gray-100 {
-    padding: 6px 12px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
   }
   
   .sip-header .bg-white {
-    padding: 8px 12px;
+    padding: 6px 8px;
   }
   
-  /* Make Get Started button more prominent */
+  /* Make Get Started button more prominent but smaller */
   .sip-header a[href="/signup"] {
     font-weight: 500;
+    font-size: 0.8rem;
+    padding: 4px 12px !important;
+    height: 28px !important;
   }
   
   /* Align menu and Get Started button to right */
   .sip-header .max-w-7xl .flex.items-center.gap-4 {
     display: flex;
     align-items: center;
-    gap: 8px !important;
+    gap: 4px !important;
     margin-left: auto;
   }
+  
+  /* Reduce logo size on mobile */
+  .sip-header .logo, 
+  .sip-header .max-w-7xl a:first-child .logo {
+    transform: scale(0.85);
+  }
 }
-
