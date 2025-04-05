@@ -23,7 +23,7 @@ export const PasswordInput = ({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <Input
         id="password"
         type={showPassword ? 'text' : 'password'}
@@ -32,7 +32,7 @@ export const PasswordInput = ({
         required
         placeholder={placeholder}
         minLength={minLength}
-        className={`h-12 pr-10 ${className}`}
+        className={`h-12 pr-10 w-full ${className}`}
         disabled={disabled}
       />
       <button
