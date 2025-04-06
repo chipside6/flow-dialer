@@ -7,6 +7,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     width: 100%;
     z-index: 50;
+    background-color: var(--background);
   }
   
   /* Position SipHeader properly */
@@ -25,7 +26,7 @@
   
   /* Public pages with SipHeader should remove extra spacing */
   .sip-header ~ main section:first-child {
-    padding-top: 0 !important;
+    padding-top: 16px !important;
     margin-top: 0 !important;
   }
   

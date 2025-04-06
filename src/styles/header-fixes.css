@@ -10,6 +10,7 @@
 header, .navbar, .sip-header {
   z-index: 50;
   position: relative;
+  background-color: var(--background);
 }
 
 /* Fix for mobile menu overlay */
