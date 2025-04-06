@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { 
@@ -78,7 +79,7 @@ export function SubscriptionDetails() {
           <div className="space-y-4">
             <div>
               <h3 className="text-xl font-semibold">{activePlan.name} Plan</h3>
-              <p className="text-muted-foreground">One-time payment of ${activePlan.price}</p>
+              <p className="text-muted-foreground text-center">One-time payment of ${activePlan.price}</p>
             </div>
             
             <div className="space-y-2">

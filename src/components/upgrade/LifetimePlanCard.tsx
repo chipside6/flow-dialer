@@ -24,9 +24,8 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
       </CardHeader>
       
       <CardContent className="p-0 pb-6">
-        <div className="mt-4 mb-6">
+        <div className="mt-4 mb-6 text-center">
           <span className="text-3xl font-bold">${plan.price}</span>
-          <span className="text-muted-foreground"> one-time payment</span>
         </div>
         
         <div className="space-y-3">

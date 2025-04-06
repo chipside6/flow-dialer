@@ -33,13 +33,12 @@ export const PricingSection = () => {
                 <h3 className="text-xl font-semibold">{plan.name}</h3>
                 <p className="text-muted-foreground mt-2 text-sm">{plan.description}</p>
                 
-                <div className="mt-6 mb-6">
+                <div className="mt-6 mb-6 text-center">
                   {plan.price === 0 ? (
                     <span className="text-4xl font-bold">Free</span>
                   ) : (
-                    <div className="flex items-end">
+                    <div className="flex justify-center">
                       <span className="text-4xl font-bold">${plan.price}</span>
-                      <span className="text-muted-foreground ml-1 mb-1">one-time</span>
                     </div>
                   )}
                 </div>

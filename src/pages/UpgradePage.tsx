@@ -86,9 +86,8 @@ const UpgradePage = () => {
                 <h3 className="text-xl font-semibold">{lifetimePlan.name} Plan</h3>
                 <p className="text-muted-foreground text-sm mt-1">{lifetimePlan.description}</p>
                 
-                <div className="mt-4 mb-6">
+                <div className="mt-4 mb-6 text-center">
                   <span className="text-3xl font-bold">${lifetimePlan.price}</span>
-                  <span className="text-muted-foreground"> one-time payment</span>
                 </div>
                 
                 <div className="space-y-3 mb-6">
