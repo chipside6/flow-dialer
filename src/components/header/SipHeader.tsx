@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Logo } from '@/components/ui/Logo';
@@ -8,8 +8,7 @@ import { SipMobileMenu } from './SipMobileMenu';
 
 export const SipHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
-  
+
   // Close mobile menu when route changes
   useEffect(() => {
     const handleRouteChange = () => setIsMobileMenuOpen(false);
@@ -36,7 +35,7 @@ export const SipHeader = () => {
   };
 
   return (
-    <div className="w-full flex flex-col fixed top-0 left-0 right-0 z-50 bg-white">
+    <div className="w-full flex flex-col">
       {/* Top info bar */}
       <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
