@@ -28,14 +28,16 @@ const SignUp = () => {
     setSuccessMessage(null);
 
     try {
-      // Check if the email is already registered without using any complex query methods
-      const { count, error: countError } = await supabase
+      // Check if the email already exists using a simpler query approach
+      // This avoids the TypeScript excessive instantiation error
+      const { data, error: checkError } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('email', email);
+        .select('id')
+        .eq('email', email)
+        .limit(1);
       
-      // If count is greater than 0, the email exists
-      if (count && count > 0) {
+      // If data exists and has entries, the email is already registered
+      if (data && data.length > 0) {
         throw new Error('An account with this email already exists. Please use a different email or try logging in.');
       }
 
