@@ -79,12 +79,12 @@ export const UpgradePlanSection = () => {
             <p className="text-muted-foreground text-sm mt-1">{plan.description}</p>
             
             <div className="mt-6 mb-8 text-center">
-              <span className="text-5xl md:text-6xl font-bold text-primary">${plan.price}</span>
+              <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${plan.price}</span>
             </div>
             
             <div className="space-y-3 mb-6">
               {plan.features.map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-2">
+                <div key={idx} className="flex items-start gap-3">
                   <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                     <Check className="h-3 w-3 text-primary" />
                   </div>

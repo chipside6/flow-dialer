@@ -86,13 +86,13 @@ const UpgradePage = () => {
                 <h3 className="text-xl font-semibold">{lifetimePlan.name} Plan</h3>
                 <p className="text-muted-foreground text-sm mt-1">{lifetimePlan.description}</p>
                 
-                <div className="mt-4 mb-6 text-center">
-                  <span className="text-3xl md:text-5xl lg:text-6xl font-bold">${lifetimePlan.price}</span>
+                <div className="mt-6 mb-8 text-center">
+                  <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${lifetimePlan.price}</span>
                 </div>
                 
                 <div className="space-y-3 mb-6">
                   {lifetimePlan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-2">
+                    <div key={idx} className="flex items-start gap-3">
                       <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                         <Check className="h-3 w-3 text-primary" />
                       </div>

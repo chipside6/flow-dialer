@@ -30,7 +30,7 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
         
         <div className="space-y-3">
           {plan.features.map((feature, idx) => (
-            <div key={idx} className="flex items-start gap-2">
+            <div key={idx} className="flex items-start gap-3">
               <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                 <Check className="h-3 w-3 text-primary" />
               </div>

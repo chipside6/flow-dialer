@@ -33,7 +33,7 @@ export const PricingSection = () => {
                 <h3 className="text-xl font-semibold">{plan.name}</h3>
                 <p className="text-muted-foreground mt-2 text-sm">{plan.description}</p>
                 
-                <div className="mt-8 mb-8 text-center">
+                <div className="mt-6 mb-8 text-center">
                   {plan.price === 0 ? (
                     <span className="text-5xl font-bold">Free</span>
                   ) : (
