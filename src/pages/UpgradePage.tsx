@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/auth";
 import { pricingPlans, PricingPlan } from "@/data/pricingPlans";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Circle, Loader2 } from "lucide-react";
 import { CryptoPaymentForm } from "@/components/payment/CryptoPaymentForm";
 import { usePaymentProcessing } from '@/hooks/payment/usePaymentProcessing';
 
@@ -83,26 +83,29 @@ const UpgradePage = () => {
               <div
                 className="rounded-lg border border-border/70 p-6 transition-all duration-300 bg-card shadow-md"
               >
-                <h3 className="text-xl font-semibold">{lifetimePlan.name} Plan</h3>
-                <p className="text-muted-foreground text-sm mt-1">{lifetimePlan.description}</p>
+                <h3 className="text-2xl font-bold text-center mb-3">{lifetimePlan.name} Plan</h3>
+                <p className="text-muted-foreground text-center mb-6">{lifetimePlan.description}</p>
                 
-                <div className="mt-6 mb-8 text-center">
-                  <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${lifetimePlan.price}</span>
-                </div>
-                
-                <div className="space-y-3 mb-6">
+                <div className="space-y-5 mb-8">
                   {lifetimePlan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start">
-                      <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
-                        <Check className="h-3 w-3 text-primary" />
-                      </div>
-                      <span className="text-sm">{feature}</span>
+                    <div key={idx} className="flex items-center gap-4">
+                      <Circle className="h-5 w-5 text-primary/50 flex-shrink-0" fill="#e6f7ff" strokeWidth={0} />
+                      <span className="text-base text-muted-foreground">{feature}</span>
                     </div>
                   ))}
                 </div>
                 
+                <div className="mt-10 mb-6 text-center">
+                  <div className="flex flex-col items-center">
+                    <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${lifetimePlan.price}</span>
+                    {!lifetimePlan.isLifetime && (
+                      <span className="text-xl text-primary/70 mt-2">per month{lifetimePlan.featuresObj?.maxCalls ? `, per channel` : ''}</span>
+                    )}
+                  </div>
+                </div>
+                
                 <Button 
-                  className="w-full"
+                  className="w-full rounded-full py-6 text-lg"
                   onClick={handleSelectPlan}
                   disabled={isProcessing}
                 >

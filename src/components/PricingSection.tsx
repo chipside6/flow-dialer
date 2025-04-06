@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Circle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { pricingPlans } from "@/data/pricingPlans";
 
@@ -30,37 +30,39 @@ export const PricingSection = () => {
               )}
               
               <div className="p-6">
-                <h3 className="text-xl font-semibold">{plan.name}</h3>
-                <p className="text-muted-foreground mt-2 text-sm">{plan.description}</p>
+                <h3 className="text-2xl font-bold text-center mb-3">{plan.name}</h3>
+                <p className="text-muted-foreground text-center mb-6">{plan.description}</p>
                 
-                <div className="mt-6 mb-8 text-center">
+                <div className="space-y-5 mb-8">
+                  {plan.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-4">
+                      <Circle className="h-5 w-5 text-primary/50 flex-shrink-0" fill="#e6f7ff" strokeWidth={0} />
+                      <span className="text-base text-muted-foreground">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-10 mb-6 text-center">
                   {plan.price === 0 ? (
                     <span className="text-5xl font-bold">Free</span>
                   ) : (
-                    <div className="flex justify-center">
+                    <div className="flex flex-col items-center">
                       <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${plan.price}</span>
+                      {!plan.isLifetime && (
+                        <span className="text-xl text-primary/70 mt-2">per month{plan.featuresObj?.maxCalls ? `, per channel` : ''}</span>
+                      )}
                     </div>
                   )}
                 </div>
                 
                 <Link to={plan.price === 0 ? "/signup" : "/billing"}>
                   <Button 
-                    className="w-full bg-primary hover:bg-primary/90 text-white"
+                    className="w-full rounded-full py-6 text-lg"
+                    variant={plan.isTrial ? "orange" : "default"}
                   >
                     {plan.price === 0 ? 'Start Free Trial' : 'Get Lifetime Access'}
                   </Button>
                 </Link>
-                
-                <div className="mt-8 space-y-4">
-                  {plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start">
-                      <div className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
-                        <Check className="h-3 w-3 text-primary" />
-                      </div>
-                      <span className="text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           ))}

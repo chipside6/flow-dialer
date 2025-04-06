@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Circle } from "lucide-react";
 import { PricingPlan } from "@/data/pricingPlans";
 
 interface PlansSectionProps {
@@ -30,37 +30,39 @@ export const PlansSection = ({ plans, onSelectPlan }: PlansSectionProps) => {
           )}
           
           <CardHeader>
-            <CardTitle>{plan.name}</CardTitle>
-            <CardDescription>{plan.description}</CardDescription>
+            <CardTitle className="text-3xl font-bold text-center">{plan.name}</CardTitle>
+            <CardDescription className="text-center text-lg mt-2">{plan.description}</CardDescription>
           </CardHeader>
           
-          <CardContent>
-            <div className="mt-6 mb-8 text-center">
+          <CardContent>            
+            <div className="space-y-5 mb-8">
+              {plan.features.map((feature, idx) => (
+                <div key={idx} className="flex items-center gap-4">
+                  <Circle className="h-5 w-5 text-primary/50 flex-shrink-0" fill="#e6f7ff" strokeWidth={0} />
+                  <span className="text-base text-muted-foreground">{feature}</span>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-10 mb-6 text-center">
               {plan.price === 0 ? (
                 <span className="text-5xl font-bold">Free</span>
               ) : (
-                <div className="flex justify-center">
+                <div className="flex flex-col items-center">
                   <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${plan.price}</span>
+                  {!plan.isLifetime && (
+                    <span className="text-xl text-primary/70 mt-2">per month{plan.featuresObj?.maxCalls ? `, per channel` : ''}</span>
+                  )}
                 </div>
               )}
-            </div>
-            
-            <div className="space-y-4">
-              {plan.features.map((feature, idx) => (
-                <div key={idx} className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
-                    <Check className="h-3 w-3 text-primary" />
-                  </div>
-                  <span className="text-sm">{feature}</span>
-                </div>
-              ))}
             </div>
           </CardContent>
           
           <CardFooter>
             <Button 
-              className={`w-full rounded-full ${plan.popular ? '' : 'bg-primary/90 hover:bg-primary'}`}
+              className="w-full rounded-full py-6 text-lg"
               onClick={() => onSelectPlan(plan)}
+              variant={plan.isTrial ? "orange" : "default"}
             >
               {plan.isTrial ? 'Start Free Trial' : 'Get Lifetime Access'}
             </Button>

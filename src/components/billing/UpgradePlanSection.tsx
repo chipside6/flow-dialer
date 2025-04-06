@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSubscription } from "@/hooks/useSubscription";
 import { PricingPlan, pricingPlans } from "@/data/pricingPlans";
-import { Check, Loader2 } from "lucide-react";
+import { Circle, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const UpgradePlanSection = () => {
@@ -75,26 +75,29 @@ export const UpgradePlanSection = () => {
               </div>
             )}
             
-            <h3 className="text-xl font-semibold">{plan.name}</h3>
-            <p className="text-muted-foreground text-sm mt-1">{plan.description}</p>
+            <h3 className="text-2xl font-bold text-center mb-3">{plan.name}</h3>
+            <p className="text-muted-foreground text-center mb-6">{plan.description}</p>
             
-            <div className="mt-6 mb-8 text-center">
-              <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${plan.price}</span>
-            </div>
-            
-            <div className="space-y-3 mb-6">
+            <div className="space-y-5 mb-8">
               {plan.features.map((feature, idx) => (
-                <div key={idx} className="flex items-start">
-                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-1 mr-4">
-                    <Check className="h-3 w-3 text-primary" />
-                  </div>
-                  <span className="text-sm">{feature}</span>
+                <div key={idx} className="flex items-center gap-4">
+                  <Circle className="h-5 w-5 text-primary/50 flex-shrink-0" fill="#e6f7ff" strokeWidth={0} />
+                  <span className="text-base text-muted-foreground">{feature}</span>
                 </div>
               ))}
             </div>
             
+            <div className="mt-10 mb-6 text-center">
+              <div className="flex flex-col items-center">
+                <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${plan.price}</span>
+                {!plan.isLifetime && (
+                  <span className="text-xl text-primary/70 mt-2">per month{plan.featuresObj?.maxCalls ? `, per channel` : ''}</span>
+                )}
+              </div>
+            </div>
+            
             <Button 
-              className="w-full"
+              className="w-full rounded-full py-6 text-lg"
               onClick={() => handleUpgrade(plan)}
               disabled={isLoading || processingPlan === plan.id || currentPlan === plan.id}
             >
