@@ -8,7 +8,7 @@ export const PricingSection = () => {
   return (
     <section className="py-8 md:py-16 px-6 md:px-10">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16 md:mb-20">
+        <div className="text-center mb-16 md:mb-24 pb-6">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight mb-6">
             Simple, One-Time Payment
           </h2>
