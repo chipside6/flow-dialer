@@ -25,7 +25,7 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
       
       <CardContent className="p-0 pb-6">
         <div className="mt-4 mb-6 text-center">
-          <span className="text-3xl font-bold">${plan.price}</span>
+          <span className="text-3xl md:text-5xl lg:text-5xl font-bold">${plan.price}</span>
         </div>
         
         <div className="space-y-3">

@@ -33,7 +33,7 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
       
       <CardContent>
         <div className="mb-6 text-center">
-          <span className="text-4xl font-bold">${plan.price}</span>
+          <span className="text-4xl md:text-5xl font-bold">${plan.price}</span>
           {!plan.isLifetime && <span className="text-muted-foreground">/month</span>}
         </div>
         

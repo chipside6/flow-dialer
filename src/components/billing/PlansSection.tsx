@@ -40,7 +40,7 @@ export const PlansSection = ({ plans, onSelectPlan }: PlansSectionProps) => {
                 <span className="text-4xl font-bold">Free</span>
               ) : (
                 <div className="flex justify-center">
-                  <span className="text-4xl font-bold">${plan.price}</span>
+                  <span className="text-4xl md:text-5xl lg:text-6xl font-bold">${plan.price}</span>
                 </div>
               )}
             </div>
