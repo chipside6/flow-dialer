@@ -5,3 +5,23 @@
 @import './styles/dashboard.css';
 @import './styles/header.css';
 
+/* Critical mobile header fixes */
+@media (max-width: 768px) {
+  /* Force login button to be hidden on mobile */
+  .sip-header a[href="/login"],
+  a[href="/login"],
+  [href="/login"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+  
+  /* Force menu button to be visible on mobile */
+  .sip-header button[aria-label="Menu"],
+  button[aria-label="Menu"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+

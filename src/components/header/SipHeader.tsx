@@ -35,7 +35,7 @@ export const SipHeader = () => {
   };
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full flex flex-col sip-header">
       {/* Top info bar - only visible on mobile */}
       <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm md:hidden">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
@@ -66,33 +66,29 @@ export const SipHeader = () => {
           
           {/* Buttons aligned to the right */}
           <div className="flex items-center gap-4 ml-auto">
-            {/* Login button - only shown on desktop with className to help CSS selector */}
-            <Button 
-              className="bg-white text-[#ff6c2c] hover:bg-[#fff5f0] rounded-full px-6 py-2 font-medium transition-colors hidden md:flex items-center"
-              asChild
-              variant="outline"
+            {/* Login button - DESKTOP ONLY */}
+            <Link 
+              to="/login"
+              className="hidden md:flex bg-white text-[#ff6c2c] hover:bg-[#fff5f0] rounded-full px-6 py-2 border border-[#ff6c2c] font-medium transition-colors items-center gap-2"
             >
-              <Link to="/login">
-                <LogIn size={16} className="mr-2" />
-                Login
-              </Link>
-            </Button>
+              <LogIn size={16} />
+              <span>Login</span>
+            </Link>
             
-            <Button 
+            {/* Get Started button - always visible */}
+            <Link 
+              to="/signup"
               className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-6 py-2 font-medium transition-colors"
-              asChild
-              variant="skyblue"
             >
-              <Link to="/signup">
-                Get Started
-              </Link>
-            </Button>
+              Get Started
+            </Link>
 
-            {/* Mobile menu button - explicitly shown on mobile */}
+            {/* Mobile menu button - MOBILE ONLY */}
             <button 
-              className="p-2 md:hidden flex" 
+              className="md:hidden flex items-center justify-center" 
               aria-label="Menu" 
               onClick={toggleMobileMenu}
+              style={{display: 'flex', visibility: 'visible'}}
             >
               <Menu size={28} className="text-slate-700" />
             </button>

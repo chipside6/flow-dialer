@@ -114,11 +114,32 @@ header, .navbar, .sip-header {
   }
   
   /* CRITICAL: Mobile-specific overrides for menu button and login hiding */
-  .sip-header button[aria-label="Menu"] {
+  .sip-header button[aria-label="Menu"],
+  button[aria-label="Menu"] {
     display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
+  .sip-header a[href="/login"],
+  a[href="/login"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
+
+/* Fix for desktop view */
+@media (min-width: 769px) {
   .sip-header a[href="/login"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .sip-header button[aria-label="Menu"] {
     display: none !important;
   }
 }
