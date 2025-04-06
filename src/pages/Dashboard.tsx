@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, RefreshCw, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import CampaignDashboard from '@/components/CampaignDashboard';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -108,14 +107,17 @@ const Dashboard = () => {
                     </Button>
                   </div>
                   
-                  {/* Recent Campaigns Section */}
+                  {/* Recent Campaigns Section - simplified to avoid circular dependencies */}
                   <div className="mt-6 w-full text-center">
                     <h3 className="text-lg font-semibold mb-4 text-center">Recent Campaigns</h3>
                     {(campaigns && campaigns.length > 0) ? (
-                      <CampaignDashboard 
-                        initialCampaigns={campaigns.slice(0, 3) || []} 
-                        onRefresh={refreshCampaigns}
-                      />
+                      <div className="border rounded-lg p-6">
+                        <CampaignProvider initialCampaigns={campaigns.slice(0, 3) || []}>
+                          <div className="campaign-table-container w-full">
+                            <CampaignTable />
+                          </div>
+                        </CampaignProvider>
+                      </div>
                     ) : (
                       <div className="border rounded-lg p-6 text-center bg-gray-50 mx-auto max-w-lg">
                         <p className="text-muted-foreground mb-4 text-center">You haven't created any campaigns yet</p>
