@@ -1,6 +1,5 @@
 
 import React from "react";
-import { AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { 
   Card, 
@@ -14,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PricingPlan } from "@/data/pricingPlans";
 import { Subscription } from "@/hooks/subscription/types";
+import { Clock } from "lucide-react";
 
 interface TrialPlanViewProps {
   activePlan: PricingPlan;
@@ -23,10 +23,6 @@ interface TrialPlanViewProps {
 export function TrialPlanView({ activePlan, subscription }: TrialPlanViewProps) {
   const navigate = useNavigate();
   
-  const endDate = subscription?.current_period_end 
-    ? new Date(subscription.current_period_end).toLocaleDateString() 
-    : 'Unknown';
-  
   const goToUpgradePage = () => {
     navigate('/upgrade');
   };
@@ -35,20 +31,20 @@ export function TrialPlanView({ activePlan, subscription }: TrialPlanViewProps) 
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>3-Day Trial</CardTitle>
+          <CardTitle>Free Plan</CardTitle>
           <Badge variant="outline" className="bg-primary/10 text-primary">
-            Trial
+            Free
           </Badge>
         </div>
         <CardDescription>
-          You have full access to all features during your trial period
+          You have basic access with limited daily and monthly calls
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div>
             <h3 className="text-xl font-semibold">{activePlan.name}</h3>
-            <p className="text-muted-foreground">Full access until {endDate}</p>
+            <p className="text-muted-foreground">Limited access</p>
           </div>
           
           <div className="space-y-2">
@@ -60,10 +56,10 @@ export function TrialPlanView({ activePlan, subscription }: TrialPlanViewProps) 
             </ul>
           </div>
 
-          <div className="pt-4 border-t flex items-center gap-2 text-amber-500">
-            <AlertTriangle className="h-5 w-5" />
+          <div className="pt-4 border-t flex items-center gap-2 text-blue-500">
+            <Clock className="h-5 w-5" />
             <p className="font-medium">
-              Trial ends on {endDate}
+              Call limits reset monthly
             </p>
           </div>
         </div>

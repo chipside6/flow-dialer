@@ -20,11 +20,25 @@ interface LimitReachedDialogProps {
 
 export function LimitReachedDialog({ open, onClose }: LimitReachedDialogProps) {
   const navigate = useNavigate();
-  const { callLimit } = useSubscription();
+  const { dailyCallLimit, monthlyCallLimit, dailyCallCount, monthlyCallCount } = useSubscription();
 
   const handleUpgradeClick = () => {
     onClose(); // Close the dialog
     navigate('/billing'); // Navigate to billing page
+  };
+
+  // Determine if we've hit daily or monthly limit
+  const isDailyLimitReached = dailyCallCount && dailyCallLimit && dailyCallCount >= dailyCallLimit;
+  const isMonthlyLimitReached = monthlyCallCount && monthlyCallLimit && monthlyCallCount >= monthlyCallLimit;
+  
+  // Create appropriate message based on which limit was reached
+  const getLimitMessage = () => {
+    if (isDailyLimitReached) {
+      return `You've reached your daily limit of ${dailyCallLimit} calls on the free plan.`;
+    } else if (isMonthlyLimitReached) {
+      return `You've reached your monthly limit of ${monthlyCallLimit} calls on the free plan.`;
+    }
+    return "You've reached your call limit on the free plan.";
   };
 
   return (
@@ -34,10 +48,9 @@ export function LimitReachedDialog({ open, onClose }: LimitReachedDialogProps) {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
             <AlertTriangle className="h-6 w-6 text-amber-600" />
           </div>
-          <DialogTitle className="text-center text-xl pt-4">Monthly Call Limit Reached</DialogTitle>
+          <DialogTitle className="text-center text-xl pt-4">Call Limit Reached</DialogTitle>
           <DialogDescription className="text-center">
-            You've reached your {callLimit} calls limit for this month on the free plan. 
-            Upgrade to lifetime access for unlimited calls.
+            {getLimitMessage()} Upgrade to lifetime access for unlimited calls.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">

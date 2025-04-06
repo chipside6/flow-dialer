@@ -13,7 +13,7 @@ export const PricingSection = () => {
             Simple, One-Time Payment
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Start with our free trial or get lifetime access with a one-time payment. No subscriptions or recurring fees.
+            Start with our free plan or get lifetime access with a one-time payment. No subscriptions or recurring fees.
           </p>
         </div>
         
@@ -63,9 +63,9 @@ export const PricingSection = () => {
                 <Link to={plan.price === 0 ? "/signup" : "/billing"}>
                   <Button 
                     className="w-full rounded-full py-6 text-lg mt-4"
-                    variant={plan.isTrial ? "orange" : plan.price === 0 ? "orange" : "success"}
+                    variant={plan.price === 0 ? "orange" : "success"}
                   >
-                    {plan.price === 0 ? 'Start Free Trial' : 'Get Lifetime Access'}
+                    {plan.price === 0 ? 'Start Free' : 'Get Lifetime Access'}
                   </Button>
                 </Link>
               </div>
@@ -82,4 +82,4 @@ export const PricingSection = () => {
       </div>
     </section>
   );
-};
+}

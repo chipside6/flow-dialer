@@ -22,11 +22,39 @@ export function useAuthProvider() {
   
   const profileState = useProfileState(userForProfile);
 
-  // Helper function to activate trial plan for new users
-  const activateTrialForNewUser = async (userId: string) => {
-    // This functionality is moved to a separate file
-    const { activateTrialPlan } = await import('./useTrialActivation');
-    return activateTrialPlan(userId);
+  // Helper function to set up free plan for new users
+  const setupFreeUserPlan = async (userId: string) => {
+    if (!userId) return false;
+    
+    try {
+      console.log("Setting up free plan for new user:", userId);
+      
+      // Import the createLifetimeSubscription function from the API
+      const { createLifetimeSubscription, getPlanById } = await import('@/services/subscriptionService');
+      
+      // Get the free plan from the pricing plans
+      const freePlan = getPlanById('free');
+      
+      if (!freePlan) {
+        console.error("Free plan not found");
+        return false;
+      }
+      
+      // Create a free plan subscription
+      const success = await createLifetimeSubscription(userId, freePlan);
+      
+      if (success) {
+        console.log("Free plan set up successfully");
+        localStorage.setItem('userSubscriptionPlan', 'free');
+        return true;
+      } else {
+        console.error("Failed to set up free plan");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error setting up free plan:", error);
+      return false;
+    }
   };
 
   // Effect to coordinate between session and profile states
@@ -41,10 +69,10 @@ export function useAuthProvider() {
           // Don't block the auth flow for storage issues
         }
         
-        // Activate trial plan for new user using setTimeout to prevent blocking
+        // Set up free plan for new user using setTimeout to prevent blocking
         setTimeout(() => {
           if (authSession.user) {
-            activateTrialForNewUser(authSession.user.id);
+            setupFreeUserPlan(authSession.user.id);
           }
         }, 0);
       }

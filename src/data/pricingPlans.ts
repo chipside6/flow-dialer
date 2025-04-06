@@ -24,32 +24,18 @@ export const pricingPlans: PricingPlan[] = [
     price: 0,
     description: "Basic access",
     features: [
-      "Limited to 1,000 calls",
+      "Limited to 100 calls daily",
+      "Limited to 1,000 calls monthly",
       "Maximum 1 concurrent call",
       "Basic features",
       "No automatic expiration"
     ],
     featuresObj: {
+      maxDailyCalls: 100,
+      maxMonthlyCalls: 1000,
       maxCalls: 1000
     },
     isFree: true
-  },
-  {
-    id: "trial",
-    name: "3-Day Trial",
-    price: 0,
-    description: "Try all features",
-    features: [
-      "Unlimited calls during trial period",
-      "Unlimited campaigns during trial",
-      "Unlimited contacts",
-      "Access to all premium features",
-      "Automatically downgrades after 3 days"
-    ],
-    featuresObj: {
-      maxCalls: 9999 // Unlimited for practical purposes
-    },
-    isTrial: true
   },
   {
     id: "lifetime",

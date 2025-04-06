@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Subscription } from "./types";
 import { PricingPlan, pricingPlans } from "@/data/pricingPlans";
@@ -107,7 +106,7 @@ export const fetchSubscription = async (userId: string | undefined): Promise<Sub
 };
 
 /**
- * Fetches the user's call count with enhanced retry logic and timeouts
+ * Fetches the user's total call count
  */
 export const fetchUserCallCount = async (userId: string | undefined): Promise<number> => {
   if (!userId) return 0;
@@ -161,6 +160,128 @@ export const fetchUserCallCount = async (userId: string | undefined): Promise<nu
   } catch (error) {
     clearTimeout(timeoutId);
     return 0; // Return 0 as ultimate fallback
+  }
+};
+
+/**
+ * Fetches the user's daily call count (calls made today)
+ */
+export const fetchUserDailyCallCount = async (userId: string | undefined): Promise<number> => {
+  if (!userId) return 0;
+  
+  let retryAttempt = 0;
+  const abortController = new AbortController();
+  
+  // Set timeout for the request
+  const timeoutId = setTimeout(() => {
+    abortController.abort();
+  }, REQUEST_TIMEOUT);
+  
+  const executeWithRetry = async (): Promise<number> => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('total_calls')
+        .eq('user_id', userId)
+        .gte('updated_at', today.toISOString());
+      
+      if (error) {
+        console.error("Error fetching daily call count:", error);
+        throw new Error(error.message || 'Database error');
+      }
+      
+      return data.reduce((sum, campaign) => sum + (campaign.total_calls || 0), 0);
+    } catch (error: any) {
+      // Handle error and retry logic as in other fetch functions
+      if (error.name === 'AbortError' || error.message?.includes('timeout')) {
+        console.error("Request timed out while fetching daily call count");
+        return 0;
+      }
+      
+      if (retryAttempt < MAX_RETRIES) {
+        retryAttempt++;
+        const delay = INITIAL_RETRY_DELAY * Math.pow(2, retryAttempt - 1);
+        console.log(`Retrying daily call count fetch after ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return executeWithRetry();
+      }
+      
+      console.error("Max retries exceeded in fetchUserDailyCallCount:", error);
+      return 0;
+    }
+  };
+  
+  try {
+    const result = await executeWithRetry();
+    clearTimeout(timeoutId);
+    return result;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    return 0;
+  }
+};
+
+/**
+ * Fetches the user's monthly call count (calls made this month)
+ */
+export const fetchUserMonthlyCallCount = async (userId: string | undefined): Promise<number> => {
+  if (!userId) return 0;
+  
+  let retryAttempt = 0;
+  const abortController = new AbortController();
+  
+  // Set timeout for the request
+  const timeoutId = setTimeout(() => {
+    abortController.abort();
+  }, REQUEST_TIMEOUT);
+  
+  const executeWithRetry = async (): Promise<number> => {
+    try {
+      const today = new Date();
+      const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      
+      const { data, error } = await supabase
+        .from('campaigns')
+        .select('total_calls')
+        .eq('user_id', userId)
+        .gte('updated_at', firstDayOfMonth.toISOString());
+      
+      if (error) {
+        console.error("Error fetching monthly call count:", error);
+        throw new Error(error.message || 'Database error');
+      }
+      
+      return data.reduce((sum, campaign) => sum + (campaign.total_calls || 0), 0);
+    } catch (error: any) {
+      // Handle error and retry logic as in other fetch functions
+      if (error.name === 'AbortError' || error.message?.includes('timeout')) {
+        console.error("Request timed out while fetching monthly call count");
+        return 0;
+      }
+      
+      if (retryAttempt < MAX_RETRIES) {
+        retryAttempt++;
+        const delay = INITIAL_RETRY_DELAY * Math.pow(2, retryAttempt - 1);
+        console.log(`Retrying monthly call count fetch after ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return executeWithRetry();
+      }
+      
+      console.error("Max retries exceeded in fetchUserMonthlyCallCount:", error);
+      return 0;
+    }
+  };
+  
+  try {
+    const result = await executeWithRetry();
+    clearTimeout(timeoutId);
+    return result;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    return 0;
   }
 };
 

@@ -54,7 +54,11 @@ export const useSubscription = (): UseSubscriptionReturn => {
     closeLimitDialog,
     hasReachedLimit,
     callLimit,
-    checkAndShowLimitDialog
+    checkAndShowLimitDialog,
+    dailyCallCount,
+    dailyCallLimit,
+    monthlyCallCount,
+    monthlyCallLimit
   } = useSubscriptionLimit(user?.id, currentPlan);
 
   // Use the lifetime plan activation hook and ensure it returns the correct type
@@ -102,6 +106,10 @@ export const useSubscription = (): UseSubscriptionReturn => {
     hasReachedLimit,
     callLimit,
     trialExpired,
-    checkAndShowLimitDialog
+    checkAndShowLimitDialog,
+    dailyCallCount,
+    dailyCallLimit,
+    monthlyCallCount,
+    monthlyCallLimit
   };
 };

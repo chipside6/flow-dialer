@@ -55,6 +55,7 @@ const SignUp = () => {
         // Store session immediately if available
         if (authData.session) {
           localStorage.setItem('sessionLastUpdated', Date.now().toString());
+          localStorage.setItem('userSubscriptionPlan', 'free');
           
           toast({
             title: "Account created",

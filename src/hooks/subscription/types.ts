@@ -15,6 +15,10 @@ export interface UseSubscriptionReturn {
   currentPlan: string | null;
   subscription: Subscription | null;
   callCount: number;
+  dailyCallCount?: number;
+  monthlyCallCount?: number;
+  dailyCallLimit?: number;
+  monthlyCallLimit?: number;
   showLimitDialog: boolean;
   closeLimitDialog: () => void;
   fetchCurrentSubscription: () => Promise<Subscription | null>;
