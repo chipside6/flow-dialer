@@ -28,15 +28,14 @@ const SignUp = () => {
     setSuccessMessage(null);
 
     try {
-      // First check if the email is already registered using a simpler query approach
+      // First check if the email is already registered using a simpler approach to avoid type issues
       const { data, error: checkError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', email)
-        .maybeSingle();
+        .eq('email', email);
       
       // If we found a result, the email exists
-      if (data) {
+      if (data && data.length > 0) {
         throw new Error('An account with this email already exists. Please use a different email or try logging in.');
       }
 
