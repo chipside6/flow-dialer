@@ -9,20 +9,23 @@
     z-index: 50;
   }
   
-  /* Position SipHeader properly - removing sticky positioning */
+  /* Position SipHeader properly - fixed positioning */
   .sip-header {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 50;
     width: 100%;
+    background-color: white;
   }
   
   /* SipHeader specific adjustments */
   .sip-header + main {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
+    padding-top: 105px !important; /* Adjust based on your header height */
   }
   
-  /* Public pages with SipHeader should remove extra spacing */
+  /* Public pages with SipHeader should have proper spacing */
   .sip-header ~ main section:first-child {
     padding-top: 0 !important;
     margin-top: 0 !important;
