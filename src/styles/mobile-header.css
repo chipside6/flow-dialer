@@ -64,21 +64,42 @@
     margin-left: auto;
   }
   
-  /* Ensure proper visibility of menu button on mobile */
+  /* IMPORTANT: Ensure the menu button is always visible on mobile */
   .sip-header button[aria-label="Menu"] {
     display: flex !important;
     padding: 8px;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
-  /* Explicitly hide login button on mobile */
+  /* IMPORTANT: Completely hide login button on mobile */
   .sip-header a[href="/login"] {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
   /* Fix login button display on desktop */
   @media (min-width: 769px) {
     .sip-header a[href="/login"] {
       display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: auto !important;
+      height: auto !important;
+      overflow: visible !important;
+      margin: 0 !important;
+      padding: 0.5rem 1.5rem !important;
+    }
+    
+    /* Hide menu button on desktop */
+    .sip-header button[aria-label="Menu"] {
+      display: none !important;
     }
   }
   

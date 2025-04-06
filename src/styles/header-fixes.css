@@ -112,4 +112,13 @@ header, .navbar, .sip-header {
     height: 2.5rem !important;
     width: 2.5rem !important;
   }
+  
+  /* CRITICAL: Mobile-specific overrides for menu button and login hiding */
+  .sip-header button[aria-label="Menu"] {
+    display: flex !important;
+  }
+  
+  .sip-header a[href="/login"] {
+    display: none !important;
+  }
 }

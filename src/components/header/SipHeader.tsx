@@ -66,7 +66,7 @@ export const SipHeader = () => {
           
           {/* Buttons aligned to the right */}
           <div className="flex items-center gap-4 ml-auto">
-            {/* Login button - only visible on desktop */}
+            {/* Login button - only shown on desktop with className to help CSS selector */}
             <Button 
               className="bg-white text-[#ff6c2c] hover:bg-[#fff5f0] rounded-full px-6 py-2 font-medium transition-colors hidden md:flex items-center"
               asChild
@@ -88,9 +88,9 @@ export const SipHeader = () => {
               </Link>
             </Button>
 
-            {/* Mobile menu button - only visible on mobile */}
+            {/* Mobile menu button - explicitly shown on mobile */}
             <button 
-              className="p-2 md:hidden" 
+              className="p-2 md:hidden flex" 
               aria-label="Menu" 
               onClick={toggleMobileMenu}
             >
