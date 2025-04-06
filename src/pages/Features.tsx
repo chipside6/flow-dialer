@@ -1,4 +1,3 @@
-
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { CTASection } from "@/components/CTASection";
 import { Button } from "@/components/ui/button";
@@ -43,7 +42,7 @@ const Features = () => {
   return (
     <PublicLayout>
       <main>
-        <section className="pt-12 pb-16 px-6 md:px-10">
+        <section className="pt-6 pb-12 px-6 md:px-10">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-6">
               Features that Elevate Your Experience
@@ -94,4 +93,3 @@ const Features = () => {
 };
 
 export default Features;
-
