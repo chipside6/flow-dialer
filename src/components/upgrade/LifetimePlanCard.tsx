@@ -17,13 +17,13 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
   isProcessing
 }) => {
   return (
-    <Card className="rounded-lg border border-border/70 transition-all duration-300 bg-card shadow-md max-w-full">
+    <Card className="rounded-lg border border-border/70 transition-all duration-300 bg-card shadow-md max-w-full h-full flex flex-col">
       <CardHeader className="pb-2">
         <CardTitle className="text-2xl md:text-3xl font-bold text-center">{plan.name} Plan</CardTitle>
         <CardDescription className="text-center text-base md:text-lg mt-1">{plan.description}</CardDescription>
       </CardHeader>
       
-      <CardContent className="px-4 md:px-6 py-3 md:py-4">        
+      <CardContent className="px-4 md:px-6 py-3 md:py-4 flex-grow flex flex-col">        
         <div className="space-y-3 mb-6 md:mb-8">
           {plan.features.map((feature, idx) => (
             <div key={idx} className="flex items-start gap-2 md:gap-3">
@@ -33,7 +33,7 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
           ))}
         </div>
         
-        <div className="mt-6 md:mt-8 mb-6 md:mb-10 text-center">
+        <div className="mt-auto mb-6 md:mb-10 text-center">
           <div className="flex flex-col items-center">
             <span className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary">${plan.price}</span>
             {!plan.isLifetime && (

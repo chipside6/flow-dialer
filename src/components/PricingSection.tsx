@@ -21,7 +21,7 @@ export const PricingSection = () => {
           {pricingPlans.map((plan) => (
             <div 
               key={plan.id}
-              className={`rounded-lg shadow-sm border border-border/70 bg-white overflow-hidden ${plan.popular ? 'md:scale-105' : ''}`}
+              className={`rounded-lg shadow-sm border border-border/70 bg-white overflow-hidden flex flex-col h-full ${plan.popular ? 'md:scale-105' : ''}`}
             >
               {plan.popular && (
                 <div className="bg-primary py-3 text-center text-white text-sm font-medium">
@@ -29,7 +29,7 @@ export const PricingSection = () => {
                 </div>
               )}
               
-              <div className="p-6">
+              <div className="p-6 flex flex-col flex-grow">
                 <h3 className="text-2xl font-bold text-center mb-2">{plan.name}</h3>
                 <p className="text-muted-foreground text-center mb-4">{plan.description}</p>
                 
@@ -42,7 +42,7 @@ export const PricingSection = () => {
                   ))}
                 </div>
                 
-                <div className="mt-8 mb-10 text-center">
+                <div className="mt-auto mb-10 text-center">
                   {plan.price === 0 ? (
                     <span className="text-5xl font-bold">Free</span>
                   ) : (
