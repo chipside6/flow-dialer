@@ -28,12 +28,12 @@ const SignUp = () => {
     setSuccessMessage(null);
 
     try {
-      // Check if the email already exists using a simpler query approach
-      // This avoids the TypeScript excessive instantiation error
-      const { data, error: checkError } = await supabase
+      // Use a different approach to check for existing email
+      // Instead of select + eq, use a simpler query pattern
+      const { data } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', email)
+        .filter('email', 'eq', email)
         .limit(1);
       
       // If data exists and has entries, the email is already registered
