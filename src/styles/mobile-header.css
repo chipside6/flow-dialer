@@ -25,7 +25,7 @@
   
   /* Public pages with SipHeader should remove extra spacing */
   .sip-header ~ main section:first-child {
-    padding-top: 16px !important;
+    padding-top: 0 !important;
     margin-top: 0 !important;
   }
   
