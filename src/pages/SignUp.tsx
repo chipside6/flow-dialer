@@ -12,6 +12,11 @@ import { AuthButton } from '@/components/auth/AuthButton';
 import { AuthFooter } from '@/components/auth/AuthFooter';
 import { Input } from '@/components/ui/input';
 
+// Define an explicit interface for profile data
+interface ProfileData {
+  id: string;
+}
+
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,22 +34,21 @@ const SignUp = () => {
 
     try {
       // First check if the email is already registered
-      // Fix the TypeScript error by providing explicit type for the query
-      const { data: existingUsers, error: checkError } = await supabase
+      // Use a different approach to avoid the TypeScript error
+      const { data, error: checkError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', email)
-        .maybeSingle<{ id: string }>();
+        .eq('email', email);
       
       if (checkError) {
         console.warn("Error checking existing email:", checkError);
         // Continue with signup process even if check fails
-      } else if (existingUsers) {
+      } else if (data && data.length > 0) {
         throw new Error('An account with this email already exists. Please use a different email or try logging in.');
       }
 
       // Proceed with signup if email not found
-      const { data, error } = await supabase.auth.signUp({
+      const { data: authData, error } = await supabase.auth.signUp({
         email,
         password,
       });
@@ -53,9 +57,9 @@ const SignUp = () => {
         throw error;
       }
 
-      if (data?.user) {
+      if (authData?.user) {
         // Store session immediately if available
-        if (data.session) {
+        if (authData.session) {
           localStorage.setItem('sessionLastUpdated', Date.now().toString());
           
           toast({
