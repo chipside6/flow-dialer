@@ -7,7 +7,7 @@ export const useDialerForm = () => {
     sipProviderId: "",
     contactListId: "",
     transferNumber: "",
-    maxConcurrentCalls: 1 // Default to 1 concurrent call
+    maxConcurrentCalls: 3 // Default to 3 concurrent calls
   });
   
   const [isLoadingTransferNumbers, setIsLoadingTransferNumbers] = useState(false);

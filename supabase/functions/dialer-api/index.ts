@@ -12,6 +12,7 @@ interface DialRequest {
   phoneNumber: string;
   transferNumber: string;
   greetingFileUrl?: string;
+  maxConcurrentCalls?: number; // This will always be 3 regardless of what's passed
 }
 
 serve(async (req) => {
@@ -69,7 +70,11 @@ serve(async (req) => {
     switch (req.method) {
       case "POST": {
         // Initiate a call
-        const { campaignId, phoneNumber, transferNumber, greetingFileUrl }: DialRequest = await req.json();
+        const requestData = await req.json();
+        const { campaignId, phoneNumber, transferNumber, greetingFileUrl } = requestData;
+        
+        // Always use 3 for maxConcurrentCalls regardless of what was passed
+        const maxConcurrentCalls = 3;
         
         if (!campaignId || !phoneNumber || !transferNumber) {
           return new Response(
@@ -97,6 +102,7 @@ serve(async (req) => {
         // But for now, we'll simulate a call
         console.log(`Simulating call to ${phoneNumber} for campaign ${campaignId}`);
         console.log(`Transfer number: ${transferNumber}`);
+        console.log(`Max concurrent calls: ${maxConcurrentCalls}`);
         if (greetingFileUrl) {
           console.log(`Greeting file: ${greetingFileUrl}`);
         }
@@ -119,6 +125,7 @@ serve(async (req) => {
             success: true, 
             message: "Call initiated",
             callId: crypto.randomUUID(),
+            maxConcurrentCalls,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
@@ -154,7 +161,8 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             success: true, 
-            campaign
+            campaign,
+            maxConcurrentCalls: 3 // Always return 3 as the fixed value
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
