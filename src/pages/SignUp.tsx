@@ -33,7 +33,7 @@ const SignUp = () => {
         .from('profiles')
         .select('id')
         .eq('email', email)
-        .single();
+        .maybeSingle();
       
       // If we found a result, the email exists
       if (data) {
