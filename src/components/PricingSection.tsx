@@ -73,7 +73,7 @@ export const PricingSection = () => {
           ))}
         </div>
         
-        <div className="mt-16 text-center">
+        <div className="mt-16 pt-10 md:pt-16 text-center">
           <p className="text-muted-foreground">
             Need help with setup?{' '}
             <a href="/contact" className="text-primary hover:underline">Contact our support team</a>.
