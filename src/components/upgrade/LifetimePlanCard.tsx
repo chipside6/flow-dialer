@@ -17,13 +17,13 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
   isProcessing
 }) => {
   return (
-    <Card className="rounded-lg border border-border/70 p-6 transition-all duration-300 bg-card shadow-md">
-      <CardHeader className="p-0 pb-2">
+    <Card className="rounded-lg border border-border/70 transition-all duration-300 bg-card shadow-md h-full">
+      <CardHeader className="pb-2">
         <CardTitle className="text-3xl font-bold text-center">{plan.name} Plan</CardTitle>
         <CardDescription className="text-center text-lg mt-1">{plan.description}</CardDescription>
       </CardHeader>
       
-      <CardContent className="p-0 py-4">        
+      <CardContent className="px-6 py-4">        
         <div className="space-y-4 mb-8">
           {plan.features.map((feature, idx) => (
             <div key={idx} className="flex items-start gap-3">
@@ -43,7 +43,7 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
         </div>
       </CardContent>
       
-      <CardFooter className="p-0 pt-2">
+      <CardFooter className="pb-6 pt-0">
         <Button 
           className="w-full rounded-full py-6 text-lg"
           onClick={onSelectPlan}
