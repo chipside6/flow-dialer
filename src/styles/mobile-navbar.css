@@ -68,4 +68,45 @@
       display: none;
     }
   }
+  
+  /* Make pricing more attention-grabbing */
+  .price-highlight {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+  }
+}
+
+/* Enhanced price display styles */
+.price-highlight {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font-weight: bold;
+  color: #0EA5E9;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.price-highlight::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: -12px;
+  right: -12px;
+  bottom: -8px;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.05));
+  border-radius: 12px;
+  z-index: -1;
+  transform: scale(0.9);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.price-highlight:hover {
+  transform: translateY(-2px);
+}
+
+.price-highlight:hover::before {
+  transform: scale(1);
+  opacity: 1;
 }
