@@ -55,7 +55,8 @@ header .max-w-7xl a:first-child .relative.rounded-full {
 
 /* Ensure logo image has proper dimensions and scaling */
 .sip-header .max-w-7xl a:first-child img,
-header .max-w-7xl a:first-child img {
+header .max-w-7xl a:first-child img,
+.mobile-menu .logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -101,6 +102,19 @@ header .max-w-7xl a:first-child img {
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+  }
+  
+  /* Improve mobile menu navigation and buttons */
+  .mobile-menu a {
+    display: block;
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+  
+  .mobile-menu .flex.flex-col.gap-4.mt-6 {
+    margin-top: 2rem;
   }
   
   /* Prevent scrolling when menu is open */

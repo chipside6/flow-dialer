@@ -30,14 +30,22 @@ export const SipMobileMenu = ({ isOpen, onClose }: SipMobileMenuProps) => {
       </div>
       
       <nav className="px-6 py-8 flex flex-col gap-6">
-        <div className="flex flex-col gap-4 text-lg">
-          <Link to="/" onClick={onClose} className="py-2 hover:text-[#0EA5E9]">Home</Link>
-          <Link to="/features" onClick={onClose} className="py-2 hover:text-[#0EA5E9]">Features</Link>
-          <Link to="/pricing" onClick={onClose} className="py-2 hover:text-[#0EA5E9]">Pricing</Link>
-          <Link to="/support" onClick={onClose} className="py-2 hover:text-[#0EA5E9]">Support</Link>
+        <div className="flex flex-col gap-6 text-lg">
+          <Link to="/" onClick={onClose} className="py-3 text-center hover:text-[#0EA5E9] font-medium">
+            Home
+          </Link>
+          <Link to="/features" onClick={onClose} className="py-3 text-center hover:text-[#0EA5E9] font-medium">
+            Features
+          </Link>
+          <Link to="/pricing" onClick={onClose} className="py-3 text-center hover:text-[#0EA5E9] font-medium">
+            Pricing
+          </Link>
+          <Link to="/support" onClick={onClose} className="py-3 text-center hover:text-[#0EA5E9] font-medium">
+            Support
+          </Link>
         </div>
         
-        <div className="flex flex-col gap-4 mt-4">
+        <div className="flex flex-col gap-4 mt-6">
           {isAuthenticated ? (
             <Button asChild variant="default" size="lg" className="w-full bg-[#0EA5E9] hover:bg-[#0284c7]">
               <Link to="/dashboard" onClick={onClose}>Dashboard</Link>

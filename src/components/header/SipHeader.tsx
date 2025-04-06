@@ -77,7 +77,7 @@ export const SipHeader = () => {
             </Button>
             
             <button 
-              className="p-1" 
+              className="p-2 rounded-md hover:bg-gray-100" 
               aria-label="Menu" 
               onClick={toggleMobileMenu}
             >
