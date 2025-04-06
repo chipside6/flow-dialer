@@ -21,13 +21,13 @@
   /* SipHeader specific adjustments */
   .sip-header + main {
     padding-top: 0 !important;
-    margin-top: 0 !important;
+    margin-top: 8px !important;
   }
   
   /* Public pages with SipHeader should remove extra spacing */
   .sip-header ~ main section:first-child {
-    padding-top: 16px !important;
-    margin-top: 0 !important;
+    padding-top: 28px !important;
+    margin-top: 8px !important;
   }
   
   /* Align logo to extreme left and menu/button to extreme right */

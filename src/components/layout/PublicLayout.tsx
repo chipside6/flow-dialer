@@ -17,7 +17,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
       {useSipHeader ? <SipHeader /> : <Navbar />}
-      <main className={`flex-1 ${useSipHeader ? 'pt-0 mt-2' : 'pt-16'}`}>
+      <main className={`flex-1 ${useSipHeader ? 'pt-0 mt-6' : 'pt-20'}`}>
         {children || <Outlet />}
       </main>
     </div>
