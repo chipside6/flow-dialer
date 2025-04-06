@@ -1,5 +1,5 @@
 
-import { Navbar } from "@/components/Navbar";
+import { SipHeader } from "@/components/header/SipHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,8 +16,8 @@ const Support = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="pt-16 md:pt-24">
+      <SipHeader />
+      <main className="pt-0 mt-6">
         <section className="pb-10 md:pb-16 px-6 md:px-10">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight mb-4">

@@ -1,4 +1,3 @@
-
 /* Mobile header styles */
 
 @media screen and (max-width: 768px) {
@@ -27,6 +26,12 @@
   /* Public pages with SipHeader should remove extra spacing */
   .sip-header ~ main section:first-child {
     padding-top: 36px !important;
+    margin-top: 16px !important;
+  }
+  
+  /* Support page specific adjustments */
+  body[data-page="support"] .sip-header + main {
+    padding-top: 0 !important;
     margin-top: 16px !important;
   }
   
