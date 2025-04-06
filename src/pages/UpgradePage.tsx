@@ -99,7 +99,7 @@ const UpgradePage = () => {
                   <div className="flex flex-col items-center">
                     <div className="price-highlight">
                       <span className="text-6xl md:text-7xl lg:text-8xl font-bold text-sky-500 relative">
-                        <span className="absolute top-0 -left-5 text-2xl md:text-3xl">$</span>
+                        <span className="absolute top-1 -left-3 text-2xl md:text-3xl">$</span>
                         {lifetimePlan.price}
                       </span>
                     </div>
