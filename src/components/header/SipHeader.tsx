@@ -35,9 +35,9 @@ export const SipHeader = () => {
   };
 
   return (
-    <div className="w-full flex flex-col sip-header">
+    <div className="w-full flex flex-col">
       {/* Top info bar */}
-      <div className="w-full bg-gray-100 py-1 px-3 md:px-8 text-xs md:text-sm">
+      <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
           <div className="flex items-center">
             <span className="text-gray-600">Phone: </span>
@@ -57,17 +57,17 @@ export const SipHeader = () => {
       </div>
       
       {/* Main header */}
-      <div className="w-full bg-white py-2 px-3 md:px-8 shadow-sm">
+      <div className="w-full bg-white py-2 px-4 md:px-8 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo aligned to the extreme left */}
-          <Link to="/" className="flex items-center">
-            <Logo size="md" className="flex-shrink-0" />
+          <Link to="/" className="flex items-center mr-auto">
+            <Logo size="md" />
           </Link>
           
           {/* Button and menu aligned to the extreme right */}
-          <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex items-center gap-4 ml-auto">
             <Button 
-              className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-4 md:px-6 py-1 md:py-2 text-sm font-medium transition-colors whitespace-nowrap"
+              className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-6 py-2 font-medium transition-colors"
               asChild
               variant="skyblue"
             >
@@ -77,11 +77,11 @@ export const SipHeader = () => {
             </Button>
             
             <button 
-              className="p-1 md:p-2" 
+              className="p-2" 
               aria-label="Menu" 
               onClick={toggleMobileMenu}
             >
-              <Menu size={24} className="text-slate-700" />
+              <Menu size={28} className="text-slate-700" />
             </button>
           </div>
         </div>

@@ -42,8 +42,8 @@ const Features = () => {
 
   return (
     <PublicLayout>
-      <main className="overflow-y-auto overflow-x-hidden">
-        <section className="pt-2 pb-12 px-6 md:px-10">
+      <main>
+        <section className="pt-4 pb-16 px-6 md:px-10">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-6">
               Features that Elevate Your Experience
@@ -54,7 +54,7 @@ const Features = () => {
           </div>
         </section>
         
-        <section className="py-16 px-6 md:px-10 bg-muted/30">
+        <section className="py-20 px-6 md:px-10 bg-muted/30">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Core Features</h2>

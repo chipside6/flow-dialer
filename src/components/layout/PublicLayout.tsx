@@ -15,9 +15,9 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const useSipHeader = ['/', '/features', '/pricing', '/support'].includes(location.pathname);
   
   return (
-    <div className="flex flex-col min-h-screen max-w-[100vw] overflow-x-hidden">
+    <div className="flex flex-col min-h-screen">
       {useSipHeader ? <SipHeader /> : <Navbar />}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+      <main className={`flex-1 ${useSipHeader ? 'pt-0' : ''}`}>
         {children || <Outlet />}
       </main>
     </div>
