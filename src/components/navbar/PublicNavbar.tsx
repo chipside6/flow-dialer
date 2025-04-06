@@ -43,7 +43,7 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
           </nav>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           {isAuthenticated ? (
             <>
               <Button variant="ghost" asChild className="hidden md:flex">
@@ -58,12 +58,12 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
                   <span>Log In</span>
                 </Link>
               </Button>
-              <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full" asChild>
+              <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full mr-1" asChild>
                 <Link to="/signup">Get Started</Link>
               </Button>
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted ml-2"
+                className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted"
                 aria-label="Open mobile menu"
               >
                 <Menu size={24} />

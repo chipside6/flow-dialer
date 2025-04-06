@@ -1,5 +1,4 @@
 
-
 /* Header fixes */
 
 /* Fix for logout button positioning */
@@ -31,7 +30,7 @@ header, .navbar, .sip-header {
 }
 
 /* Sky blue styling for Get Started button */
-.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"],
+.sip-header .max-w-7xl .flex.items-center a[href="/signup"],
 header a[href="/signup"] {
   background-color: #0EA5E9;
   color: white;
@@ -41,7 +40,7 @@ header a[href="/signup"] {
   transition: background-color 0.2s ease;
 }
 
-.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"]:hover,
+.sip-header .max-w-7xl .flex.items-center a[href="/signup"]:hover,
 header a[href="/signup"]:hover {
   background-color: #0284c7;
 }
@@ -94,17 +93,20 @@ header a[href="/login"] {
   
   /* Push button and menu to extreme right */
   .sip-header .max-w-7xl .flex.items-center.gap-4,
-  .sip-header .max-w-7xl .flex.items-center.gap-2 {
+  .sip-header .max-w-7xl .flex.items-center.gap-2,
+  .sip-header .max-w-7xl .flex.items-center.gap-1 {
     display: flex;
     align-items: center;
-    gap: 0.75rem !important;
+    gap: 2px !important;
     margin-left: auto;
     justify-content: flex-end;
+    padding-right: 0 !important;
   }
   
   .sip-header a[href="/signup"] {
     font-size: 0.875rem;
     padding: 0.5rem 1.25rem;
+    margin-right: 2px;
   }
   
   /* Ensure phone number and links are properly sized on mobile */

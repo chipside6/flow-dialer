@@ -64,10 +64,10 @@ export const SipHeader = () => {
             <Logo size="sm" />
           </Link>
           
-          {/* Button and menu aligned to the extreme right */}
-          <div className="flex items-center gap-2">
+          {/* Button and menu aligned to the extreme right with no spacing between them */}
+          <div className="flex items-center gap-1">
             <Button 
-              className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-4 py-1 text-sm font-medium transition-colors h-8"
+              className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-4 py-1 text-sm font-medium transition-colors h-8 mr-1"
               asChild
               variant="skyblue"
             >

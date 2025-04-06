@@ -15,9 +15,11 @@
   }
   
   /* Position menu button and Get Started button on right side */
-  .sip-header .flex.items-center.gap-4 {
+  .sip-header .flex.items-center.gap-4,
+  .sip-header .flex.items-center.gap-1 {
     margin-left: auto;
     justify-content: flex-end;
+    padding-right: 0 !important;
   }
   
   /* Make the header background more visible */

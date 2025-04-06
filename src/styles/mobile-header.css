@@ -53,7 +53,7 @@
   /* Properly position the right-side elements to the extreme right */
   .sip-header .max-w-7xl .flex.items-center {
     flex-shrink: 0 !important;
-    padding-right: 0.5rem !important;
+    padding-right: 0 !important;
     margin-left: auto !important;
   }
   
@@ -77,12 +77,14 @@
   
   /* Align menu and Get Started button to extreme right */
   .sip-header .max-w-7xl .flex.items-center.gap-4,
-  .sip-header .max-w-7xl .flex.items-center.gap-2 {
+  .sip-header .max-w-7xl .flex.items-center.gap-2,
+  .sip-header .max-w-7xl .flex.items-center.gap-1 {
     display: flex;
     align-items: center;
-    gap: 4px !important;
+    gap: 2px !important;
     margin-left: auto !important;
     justify-content: flex-end !important;
+    padding-right: 0.5rem !important;
   }
   
   /* Ensure logo and text stay on the same line */
