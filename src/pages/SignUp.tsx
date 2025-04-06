@@ -29,14 +29,14 @@ const SignUp = () => {
 
     try {
       // First check if the email is already registered
-      // Use a simpler query that doesn't trigger TypeScript's type recursion limits
-      const { data, error: checkError } = await supabase
+      // Use a count query to avoid type recursion issues
+      const { count, error: countError } = await supabase
         .from('profiles')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('email', email);
       
-      // If we got data back and it has at least one entry, the email exists
-      if (!checkError && data && data.length > 0) {
+      // If count is greater than 0, the email exists
+      if (!countError && count && count > 0) {
         throw new Error('An account with this email already exists. Please use a different email or try logging in.');
       }
 
