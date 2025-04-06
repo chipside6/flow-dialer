@@ -1,154 +1,51 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+
+import { useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
-import { fetchSubscription, getPlanById } from "@/hooks/subscription/subscriptionApi";
+import { getPlanById } from "@/hooks/subscription/subscriptionApi";
 import { useSubscriptionLimit } from "./useSubscriptionLimit";
 import { useLifetimePlan } from "./useLifetimePlan";
-import { Subscription, UseSubscriptionReturn } from "./types";
-import { useToast } from "@/components/ui/use-toast";
-import { useCachedFetch } from "@/hooks/useCachedFetch";
+import { UseSubscriptionReturn } from "./types";
+import { useSubscriptionState } from "./useSubscriptionState";
+import { useSubscriptionCache } from "./useSubscriptionCache";
+import { useSubscriptionFetch } from "./useSubscriptionFetch";
 
 export const useSubscription = (): UseSubscriptionReturn => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [trialExpired, setTrialExpired] = useState<boolean>(false);
-  const [isInitializing, setIsInitializing] = useState(true);
-  const initializedRef = useRef(false);
+  
+  // Manage subscription state
+  const {
+    currentPlan,
+    setCurrentPlan,
+    subscription,
+    setSubscription,
+    trialExpired,
+    setTrialExpired,
+    isInitializing,
+    setIsInitializing,
+    initializedRef
+  } = useSubscriptionState();
 
-  // On mount, try to initialize from localStorage for faster UI rendering
-  useEffect(() => {
-    if (!initializedRef.current) {
-      const cachedPlan = localStorage.getItem('userSubscriptionPlan');
-      const cachedSubscription = localStorage.getItem('userSubscription');
-      
-      if (cachedPlan) {
-        setCurrentPlan(cachedPlan);
-        console.log("Initialized subscription plan from cache:", cachedPlan);
-      }
-      
-      if (cachedSubscription) {
-        try {
-          const parsedSubscription = JSON.parse(cachedSubscription);
-          setSubscription(parsedSubscription);
-          console.log("Initialized subscription from cache");
-          
-          // Check cached trial expiration
-          if (parsedSubscription.plan_id === 'trial' && parsedSubscription.current_period_end) {
-            const endDate = new Date(parsedSubscription.current_period_end);
-            const now = new Date();
-            setTrialExpired(now > endDate);
-          }
-        } catch (e) {
-          console.error("Error parsing cached subscription:", e);
-        }
-      }
-      
-      initializedRef.current = true;
-      // Keep isInitializing true until the API call completes
-    }
-  }, []);
+  // Manage subscription cache
+  const { updateCache } = useSubscriptionCache({
+    initializedRef,
+    setCurrentPlan,
+    setSubscription,
+    setTrialExpired
+  });
 
-  // Use cached fetch for subscription data with improved caching
-  const { 
-    data: subscriptionData,
+  // Handle subscription data fetching
+  const {
     isLoading,
     error,
-    refetch: refetchSubscription
-  } = useCachedFetch(
-    () => fetchSubscription(user?.id),
-    {
-      cacheKey: user?.id ? `subscription-${user.id}` : undefined,
-      cacheDuration: 10 * 60 * 1000, // 10 minutes
-      enabled: !!user,
-      retry: 3, // Increased retry attempts
-      retryDelay: 1500, // Slightly longer delay between retries
-      onSuccess: (data) => {
-        if (data) {
-          setCurrentPlan(data.plan_id);
-          setSubscription(data);
-          
-          // Cache subscription data in localStorage with timestamp
-          localStorage.setItem('userSubscriptionPlan', data.plan_id);
-          localStorage.setItem('userSubscription', JSON.stringify(data));
-          localStorage.setItem('subscriptionLastUpdated', Date.now().toString());
-          
-          // Check if trial has expired
-          if (data.plan_id === 'trial' && data.current_period_end) {
-            const endDate = new Date(data.current_period_end);
-            const now = new Date();
-            
-            if (now > endDate) {
-              console.log("Trial has expired");
-              setTrialExpired(true);
-              setCurrentPlan('free'); // Downgrade to free plan
-              localStorage.setItem('userSubscriptionPlan', 'free');
-            } else {
-              setTrialExpired(false);
-            }
-          } else {
-            setTrialExpired(false);
-          }
-        } else {
-          setCurrentPlan('free');
-          setSubscription(null);
-          setTrialExpired(false);
-          
-          // Cache default free plan
-          localStorage.setItem('userSubscriptionPlan', 'free');
-          localStorage.removeItem('userSubscription');
-        }
-        setIsInitializing(false);
-      },
-      onError: (err) => {
-        console.error("Error in fetchCurrentSubscription:", err);
-        
-        // Check if we have cached data
-        const cachedPlan = localStorage.getItem('userSubscriptionPlan');
-        
-        if (cachedPlan && cachedPlan !== 'free') {
-          // Use cached data if available but show a toast
-          toast({
-            title: "Using cached subscription data",
-            description: "We couldn't connect to the server. Using your last known subscription status.",
-            variant: "default"
-          });
-        } else {
-          // Fall back to free plan
-          setCurrentPlan('free');
-          setSubscription(null);
-          setTrialExpired(false);
-          
-          // Cache default free plan on error
-          localStorage.setItem('userSubscriptionPlan', 'free');
-          localStorage.removeItem('userSubscription');
-          
-          toast({
-            title: "Subscription Error",
-            description: "Could not retrieve your subscription information. Default free plan applied.",
-            variant: "destructive"
-          });
-        }
-        setIsInitializing(false);
-      }
-    }
-  );
-
-  // Enhanced fetch subscription function that uses the cached fetch
-  const fetchCurrentSubscription = useCallback(async () => {
-    if (!user) {
-      setCurrentPlan('free');
-      setSubscription(null);
-      setTrialExpired(false);
-      localStorage.setItem('userSubscriptionPlan', 'free');
-      localStorage.removeItem('userSubscription');
-      setIsInitializing(false);
-      return null;
-    }
-    
-    await refetchSubscription(true); // Force refresh
-    return subscriptionData;
-  }, [user, refetchSubscription, subscriptionData]);
+    fetchCurrentSubscription
+  } = useSubscriptionFetch({
+    userId: user?.id,
+    setCurrentPlan,
+    setSubscription,
+    setTrialExpired,
+    setIsInitializing,
+    updateCache
+  });
 
   // Use the subscription limit hook with optimized parameters
   const { 
@@ -186,7 +83,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
       const error = err instanceof Error ? err : new Error(String(err));
       return { success: false, error };
     }
-  }, [activatePlan]);
+  }, [activatePlan, setCurrentPlan]);
 
   // Combine isLoading with isInitializing for more accurate loading state
   const combinedIsLoading = isLoading || isInitializing;
