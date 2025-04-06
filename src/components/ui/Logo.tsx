@@ -10,11 +10,11 @@ interface LogoProps {
 
 export const Logo = ({ size = "md", withText = true, className }: LogoProps) => {
   const sizes = {
-    sm: "h-5 w-5",
-    md: "h-6 w-6",
-    lg: "h-8 w-8",
-    xl: "h-10 w-10",
-    "2xl": "h-12 w-12",
+    sm: "h-6 w-6",
+    md: "h-8 w-8",
+    lg: "h-10 w-10",
+    xl: "h-12 w-12",
+    "2xl": "h-14 w-14",
   };
 
   const textSizes = {
@@ -30,11 +30,11 @@ export const Logo = ({ size = "md", withText = true, className }: LogoProps) => 
   
   return (
     <div className={cn("flex items-center gap-2 whitespace-nowrap", className)}>
-      <div className={cn(logoSize, "relative rounded-full bg-primary/10 flex-shrink-0")}>
+      <div className={cn(logoSize, "relative rounded-full bg-[#0B1A23] flex-shrink-0 p-0 overflow-hidden")}>
         <img 
-          src="/lovable-uploads/3b232783-6db7-4692-bf2e-eeadcc07ea17.png" 
+          src="/lovable-uploads/cccaa285-971a-4016-98d8-cf96663d71ea.png" 
           alt="Flow Dialer" 
-          className="w-full h-full object-contain p-0.5" 
+          className="w-full h-full object-contain" 
         />
       </div>
       {withText && (

@@ -40,13 +40,13 @@
   /* Properly position the logo on the left */
   .sip-header .max-w-7xl a:first-child {
     flex-shrink: 0 !important;
-    padding-left: 0 !important;
+    padding-left: 0.5rem !important;
   }
   
   /* Properly position the right-side elements */
   .sip-header .max-w-7xl .flex.items-center {
     flex-shrink: 0 !important;
-    padding-right: 0 !important;
+    padding-right: 0.5rem !important;
   }
   
   /* Match styling from reference */
@@ -94,5 +94,11 @@
   .sip-header .w-full.bg-white .max-w-7xl {
     padding: 0 !important;
     width: 100% !important;
+  }
+  
+  /* Better logo sizing on mobile */
+  .sip-header .max-w-7xl a:first-child .relative.rounded-full {
+    height: 2rem !important;
+    width: 2rem !important;
   }
 }

@@ -42,6 +42,16 @@ header, .navbar, .sip-header {
   background-color: #0284c7;
 }
 
+/* Logo specific styling */
+.sip-header .max-w-7xl a:first-child .relative.rounded-full,
+header .max-w-7xl a:first-child .relative.rounded-full {
+  border: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Fix mobile positioning for menu and button */
 @media (max-width: 768px) {
   .sip-header .max-w-7xl {
