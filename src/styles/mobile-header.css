@@ -64,6 +64,24 @@
     margin-left: auto;
   }
   
+  /* Ensure proper visibility of menu button on mobile */
+  .sip-header button[aria-label="Menu"] {
+    display: flex !important;
+    padding: 8px;
+  }
+  
+  /* Explicitly hide login button on mobile */
+  .sip-header a[href="/login"] {
+    display: none !important;
+  }
+  
+  /* Fix login button display on desktop */
+  @media (min-width: 769px) {
+    .sip-header a[href="/login"] {
+      display: flex !important;
+    }
+  }
+  
   /* Fix logo container to fit image properly */
   .sip-header .max-w-7xl a:first-child .flex.items-center.gap-2 {
     align-items: center;
