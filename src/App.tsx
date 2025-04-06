@@ -13,13 +13,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import "./App.css"; 
 // Import the header-fixes.css for header and logout button fixes
 import "./styles/header-fixes.css";
-// Import mobile header styles
-import "./styles/mobile-header.css";
 
 // Import Login directly instead of lazy loading it
 import Login from "./pages/Login";
-// Import Dashboard directly to fix dynamic import issues
-import Dashboard from "./pages/Dashboard";
 
 // Lazy load other components for improved performance
 const Index = lazy(() => import("./pages/Index"));
@@ -34,6 +30,7 @@ const GreetingsPage = lazy(() => import("./pages/GreetingsPage"));
 const ContactLists = lazy(() => import("./pages/ContactLists"));
 const TransferNumbers = lazy(() => import("./pages/TransferNumbers"));
 const SipProviders = lazy(() => import("./pages/SipProviders"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 const UpgradePage = lazy(() => import("./pages/UpgradePage"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const Profile = lazy(() => import("./pages/Profile"));

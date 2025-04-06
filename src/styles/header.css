@@ -33,23 +33,6 @@
   background-color: #e95d1e;
 }
 
-/* Login button styles */
-.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/login"] {
-  border-color: #ff6c2c;
-  color: #ff6c2c;
-  transition: all 0.2s ease;
-}
-
-.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/login"]:hover {
-  background-color: rgba(255, 108, 44, 0.05);
-}
-
-/* Mobile logo specific styles */
-.mobile-logo-container {
-  display: flex;
-  align-items: center;
-}
-
 @media (max-width: 768px) {
   .top-info-bar {
     font-size: 0.8rem;
@@ -63,19 +46,5 @@
   .get-started-button {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
-  }
-  
-  /* Mobile logo specific styles */
-  .mobile-logo-container .relative.overflow-hidden {
-    height: 2.5rem !important;
-    width: 2.5rem !important;
-    border-radius: 50%;
-    overflow: hidden;
-  }
-  
-  .mobile-logo-container .relative.overflow-hidden img {
-    object-fit: cover;
-    height: 100%;
-    width: 100%;
   }
 }

@@ -5,29 +5,3 @@
 @import './styles/dashboard.css';
 @import './styles/header.css';
 
-/* Critical mobile header fixes */
-@media (max-width: 768px) {
-  /* Force login button to be hidden on mobile */
-  .header-login-button,
-  .sip-header .flex.items-center.gap-4 a[href="/login"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-  }
-  
-  /* Keep the Customer Login in top bar visible */
-  .customer-login-link {
-    display: inline-flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  /* Force menu button to be hidden on mobile */
-  .mobile-menu-button,
-  .sip-header button[aria-label="Menu"],
-  button[aria-label="Menu"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-  }
-}

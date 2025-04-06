@@ -32,124 +32,67 @@
   /* Align logo to extreme left and menu/button to extreme right */
   .sip-header .max-w-7xl {
     justify-content: space-between !important;
-    padding: 0 12px !important;
+    width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
   
+  /* Properly position the logo on the left */
   .sip-header .max-w-7xl a:first-child {
-    margin-right: auto !important;
-    margin-left: 0 !important;
+    flex-shrink: 0 !important;
     padding-left: 0 !important;
   }
   
+  /* Properly position the right-side elements */
   .sip-header .max-w-7xl .flex.items-center {
-    margin-left: auto !important;
+    flex-shrink: 0 !important;
+    padding-right: 0 !important;
   }
   
   /* Match styling from reference */
   .sip-header .bg-gray-100 {
-    padding: 6px 12px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
   }
   
   .sip-header .bg-white {
-    padding: 8px 12px;
+    padding: 6px 8px;
   }
   
-  /* Make Get Started button more prominent */
+  /* Make Get Started button more prominent but smaller */
   .sip-header a[href="/signup"] {
     font-weight: 500;
+    font-size: 0.8rem;
+    padding: 4px 12px !important;
+    height: 28px !important;
   }
   
   /* Align menu and Get Started button to right */
-  .sip-header .max-w-7xl .flex.items-center.gap-4 {
+  .sip-header .max-w-7xl .flex.items-center.gap-4,
+  .sip-header .max-w-7xl .flex.items-center.gap-2 {
     display: flex;
     align-items: center;
-    gap: 8px !important;
+    gap: 4px !important;
     margin-left: auto;
   }
   
-  /* CRITICAL: Hide menu button on all screen sizes */
-  .mobile-menu-button,
-  .sip-header button[aria-label="Menu"],
-  button[aria-label="Menu"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    pointer-events: none !important;
-    clip: rect(0, 0, 0, 0) !important;
+  /* Ensure logo and text stay on the same line */
+  .sip-header .logo, 
+  .sip-header .max-w-7xl a:first-child .logo {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
   
-  /* CRITICAL: Force hide login button on mobile - using a specific class */
-  .header-login-button,
-  .sip-header .flex.items-center.gap-4 a[href="/login"],
-  .sip-header .header-login-button,
-  div[class*="items-center"] .header-login-button {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    pointer-events: none !important;
-    clip: rect(0, 0, 0, 0) !important;
-    margin: 0 !important;
+  /* Ensure logo container doesn't wrap */
+  .sip-header .max-w-7xl a:first-child,
+  .sip-header .max-w-7xl a:first-child div {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Fix padding for logo and button container */
+  .sip-header .w-full.bg-white .max-w-7xl {
     padding: 0 !important;
-  }
-  
-  /* Specifically KEEP the Customer Login visible */
-  .customer-login-link {
-    display: inline-flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    width: auto !important;
-    height: auto !important;
-  }
-  
-  /* Fix login button display on desktop */
-  @media (min-width: 769px) {
-    .header-login-button,
-    .sip-header .flex.items-center.gap-4 a[href="/login"],
-    .sip-header .header-login-button {
-      display: inline-flex !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      width: auto !important;
-      height: auto !important;
-      overflow: visible !important;
-      position: static !important;
-      pointer-events: auto !important;
-      clip: auto !important;
-      margin: 0 !important;
-      padding: 0.5rem 1.5rem !important;
-    }
-    
-    /* Keep menu button hidden on desktop */
-    .mobile-menu-button,
-    .sip-header button[aria-label="Menu"],
-    button[aria-label="Menu"] {
-      display: none !important;
-    }
-  }
-  
-  /* Fix logo container to fit image properly */
-  .sip-header .max-w-7xl a:first-child .flex.items-center.gap-2 {
-    align-items: center;
-  }
-  
-  /* Reduce logo container padding */
-  .sip-header .max-w-7xl a:first-child .relative.overflow-hidden {
-    margin: 0;
-    padding: 0;
-  }
-  
-  /* Fix logo alignment on mobile */
-  .sip-header .max-w-7xl a:first-child {
-    display: flex;
-    justify-content: flex-start;
-    width: auto;
+    width: 100% !important;
   }
 }

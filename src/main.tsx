@@ -4,10 +4,6 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import './App.css'
-import './styles/dashboard.css'
-import './styles/mobile-header.css'
-import './styles/header.css'
-import './styles/header-fixes.css'
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/providers"

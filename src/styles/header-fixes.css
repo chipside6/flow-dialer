@@ -28,20 +28,6 @@ header, .navbar, .sip-header {
   z-index: 60;
 }
 
-/* Orange styling for Login button */
-.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/login"] {
-  border-color: #ff6c2c;
-  color: #ff6c2c;
-  border-radius: 9999px;
-  padding: 0.5rem 1.5rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/login"]:hover {
-  background-color: rgba(255, 108, 44, 0.05);
-}
-
 /* Sky blue styling for Get Started button */
 .sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"] {
   background-color: #0EA5E9;
@@ -56,7 +42,7 @@ header, .navbar, .sip-header {
   background-color: #0284c7;
 }
 
-/* Fix mobile positioning for buttons */
+/* Fix mobile positioning for menu and button */
 @media (max-width: 768px) {
   .sip-header .max-w-7xl {
     padding: 0 0.5rem;
@@ -70,10 +56,11 @@ header, .navbar, .sip-header {
     margin-right: auto;
   }
   
-  /* Push button to extreme right */
+  /* Push button and menu to extreme right */
   .sip-header .max-w-7xl .flex.items-center.gap-4 {
     display: flex;
     align-items: center;
+    gap: 0.75rem !important;
     margin-left: auto;
   }
   
@@ -100,59 +87,5 @@ header, .navbar, .sip-header {
   /* Prevent scrolling when menu is open */
   body.menu-open {
     overflow: hidden;
-  }
-  
-  /* Proper logo sizing for mobile */
-  .mobile-logo-container {
-    display: flex;
-    align-items: center;
-  }
-  
-  .mobile-logo-container .relative.overflow-hidden {
-    height: 2.5rem !important;
-    width: 2.5rem !important;
-  }
-  
-  /* CRITICAL: Hide menu button completely on mobile */
-  .mobile-menu-button,
-  .sip-header button[aria-label="Menu"],
-  button[aria-label="Menu"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-  }
-  
-  /* CRITICAL: Hide only the header login button, not the Customer Login link */
-  .header-login-button,
-  .sip-header .flex.items-center.gap-4 a[href="/login"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-  }
-  
-  /* Ensure Customer Login link in the top bar stays visible */
-  .customer-login-link {
-    display: inline-flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-}
-
-/* Fix for desktop view */
-@media (min-width: 769px) {
-  .header-login-button,
-  .sip-header a[href="/login"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  .mobile-menu-button,
-  .sip-header button[aria-label="Menu"] {
-    display: none !important;
   }
 }

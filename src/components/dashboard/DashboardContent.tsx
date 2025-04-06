@@ -8,7 +8,7 @@ import { LimitReachedDialog } from "@/components/LimitReachedDialog";
 import { useSubscription } from "@/hooks/useSubscription";
 import { CallStatisticsCard } from '@/components/dashboard/CallStatisticsCard';
 
-export const DashboardContent = ({ children }: { children?: React.ReactNode }) => {
+export const DashboardContent = () => {
   const { user } = useAuth();
   const { 
     showLimitDialog, 
@@ -98,8 +98,6 @@ export const DashboardContent = ({ children }: { children?: React.ReactNode }) =
             </Button>
           </CardContent>
         </Card>
-        
-        {children}
       </div>
       
       <LimitReachedDialog 

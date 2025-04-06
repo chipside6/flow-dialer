@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { LogIn } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Logo } from '@/components/ui/Logo';
 import { SipMobileMenu } from './SipMobileMenu';
@@ -35,8 +36,8 @@ export const SipHeader = () => {
 
   return (
     <div className="w-full flex flex-col sip-header">
-      {/* Top info bar - only visible on mobile */}
-      <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm md:hidden">
+      {/* Top info bar */}
+      <div className="w-full bg-gray-100 py-1 px-3 md:px-8 text-xs">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
           <div className="flex items-center">
             <span className="text-gray-600">Phone: </span>
@@ -48,7 +49,7 @@ export const SipHeader = () => {
               Support
             </Link>
             <span className="mx-2 text-gray-400">|</span>
-            <Link to="/login" className="text-[#ff6c2c] hover:underline font-medium customer-login-link">
+            <Link to="/login" className="text-[#ff6c2c] hover:underline font-medium">
               Customer Login
             </Link>
           </div>
@@ -56,36 +57,37 @@ export const SipHeader = () => {
       </div>
       
       {/* Main header */}
-      <div className="w-full bg-white py-2 px-4 md:px-8 shadow-sm">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <div className="w-full bg-white py-2 px-3 md:px-8 shadow-sm">
+        <div className="max-w-7xl mx-auto flex justify-between items-center w-full">
           {/* Logo aligned to the extreme left */}
-          <Link to="/" className="flex items-center mr-auto">
-            <Logo size="md" className="mobile-logo-container" />
+          <Link to="/" className="flex-shrink-0">
+            <Logo size="sm" />
           </Link>
           
-          {/* Buttons aligned to the right */}
-          <div className="flex items-center gap-4 ml-auto">
-            {/* Login button - DESKTOP ONLY */}
-            <Link 
-              to="/login"
-              className="header-login-button hidden md:flex bg-white text-[#ff6c2c] hover:bg-[#fff5f0] rounded-full px-6 py-2 border border-[#ff6c2c] font-medium transition-colors items-center gap-2"
+          {/* Button and menu aligned to the extreme right */}
+          <div className="flex items-center gap-2">
+            <Button 
+              className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-4 py-1 text-sm font-medium transition-colors h-8"
+              asChild
+              variant="skyblue"
             >
-              <LogIn size={16} />
-              <span>Login</span>
-            </Link>
+              <Link to="/signup">
+                Get Started
+              </Link>
+            </Button>
             
-            {/* Get Started button - always visible */}
-            <Link 
-              to="/signup"
-              className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-6 py-2 font-medium transition-colors"
+            <button 
+              className="p-1" 
+              aria-label="Menu" 
+              onClick={toggleMobileMenu}
             >
-              Get Started
-            </Link>
+              <Menu size={24} className="text-slate-700" />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu - keeping the component but not displaying it */}
+      {/* Mobile Menu */}
       <SipMobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </div>
   );
