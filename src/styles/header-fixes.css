@@ -28,6 +28,20 @@ header, .navbar, .sip-header {
   z-index: 60;
 }
 
+/* Orange styling for Login button */
+.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/login"] {
+  border-color: #ff6c2c;
+  color: #ff6c2c;
+  border-radius: 9999px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/login"]:hover {
+  background-color: rgba(255, 108, 44, 0.05);
+}
+
 /* Sky blue styling for Get Started button */
 .sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"] {
   background-color: #0EA5E9;
@@ -87,5 +101,16 @@ header, .navbar, .sip-header {
   /* Prevent scrolling when menu is open */
   body.menu-open {
     overflow: hidden;
+  }
+  
+  /* Proper logo sizing for mobile */
+  .mobile-logo-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .mobile-logo-container .relative.overflow-hidden {
+    height: 2.5rem !important;
+    width: 2.5rem !important;
   }
 }

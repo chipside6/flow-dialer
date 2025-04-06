@@ -61,14 +61,14 @@ export const SipHeader = () => {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo aligned to the extreme left */}
           <Link to="/" className="flex items-center mr-auto">
-            <Logo size="md" />
+            <Logo size="md" className="mobile-logo-container" />
           </Link>
           
           {/* Button and menu aligned to the extreme right */}
           <div className="flex items-center gap-4 ml-auto">
             {/* Login button - only visible on desktop */}
             <Button 
-              className="bg-white text-sky-500 hover:bg-sky-50 rounded-full px-6 py-2 font-medium transition-colors hidden md:flex items-center"
+              className="bg-white text-[#ff6c2c] hover:bg-[#fff5f0] rounded-full px-6 py-2 font-medium transition-colors hidden md:flex items-center"
               asChild
               variant="outline"
             >
