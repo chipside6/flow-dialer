@@ -31,8 +31,9 @@ export const DashboardContent = () => {
   
   // Get cached plan status if not yet loaded from server
   const cachedPlanStatus = localStorage.getItem('userSubscriptionPlan');
-  const displayPlan = currentPlan || cachedPlanStatus || 'free';
+  const displayPlan = currentPlan || cachedPlanStatus || 'trial';
   const showLifetimeMessage = isLifetimePlan || displayPlan === 'lifetime';
+  const isTrialPlan = displayPlan === 'trial' || subscription?.plan_id === 'trial';
 
   return (
     <>
@@ -71,8 +72,10 @@ export const DashboardContent = () => {
                   <div className="text-sm text-blue-700">
                     {showLifetimeMessage ? (
                       <p>You have lifetime access to all features.</p>
+                    ) : isTrialPlan ? (
+                      <p>You have an active trial. <Link to="/upgrade" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link> before it expires.</p>
                     ) : (
-                      <p>You have a {displayPlan} account. <Link to="/upgrade" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link>.</p>
+                      <p>Your trial has expired. <Link to="/upgrade" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link> to continue.</p>
                     )}
                   </div>
                 </div>

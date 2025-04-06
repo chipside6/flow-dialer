@@ -38,23 +38,24 @@ export function SubscriptionDetails() {
     );
   }
 
+  // If no plan is found, show trial expired view with upgrade option
   if (!currentPlan || !activePlan) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Free Plan</CardTitle>
+          <CardTitle>Trial Expired</CardTitle>
           <CardDescription>
-            You're currently on the free plan with limited features.
+            Your trial has expired. Upgrade to continue using all features.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-2 text-muted-foreground mb-4">
             <AlertTriangle className="h-5 w-5" />
-            <span>Limited to 500 calls per month</span>
+            <span>Your 3-day trial has ended</span>
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={goToUpgradePage}>Upgrade to Lifetime</Button>
+          <Button onClick={goToUpgradePage} variant="success">Upgrade to Lifetime</Button>
         </CardFooter>
       </Card>
     );
@@ -147,57 +148,12 @@ export function SubscriptionDetails() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={goToUpgradePage}>Upgrade to Lifetime</Button>
+          <Button onClick={goToUpgradePage} variant="success">Upgrade to Lifetime</Button>
         </CardFooter>
       </Card>
     );
   }
 
-  // For free plan with more details
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Free Plan</CardTitle>
-          <Badge variant="outline" className="bg-muted/50 text-muted-foreground">
-            Limited
-          </Badge>
-        </div>
-        <CardDescription>
-          You're currently on the free plan with limited features
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-xl font-semibold">{activePlan.name} Plan</h3>
-            <p className="text-muted-foreground">Free access with limitations</p>
-          </div>
-          
-          <div className="space-y-2">
-            <h4 className="font-medium">Plan Features:</h4>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              {activePlan.features.map((feature, idx) => (
-                <li key={idx}>{feature}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="pt-4 border-t">
-            <p className="text-sm flex items-center gap-2 text-amber-500">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="font-medium">Limited to 500 calls per month</span>
-            </p>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button 
-          variant="default" 
-          onClick={goToUpgradePage}>
-          Upgrade to Lifetime
-        </Button>
-      </CardFooter>
-    </Card>
-  );
+  // Fallback (should not be reached with only trial and lifetime)
+  return null;
 }
