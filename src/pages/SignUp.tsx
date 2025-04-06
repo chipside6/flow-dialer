@@ -34,16 +34,23 @@ const SignUp = () => {
 
     try {
       // First check if the email is already registered
-      // Use a count query to avoid TypeScript inference issues
-      const { count, error: checkError } = await supabase
+      // Modify the query to avoid TypeScript inference issues
+      const { error: checkError } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('email', email);
+        .select('id')
+        .eq('email', email)
+        .limit(1)
+        .single();
       
+      // If no error, a profile was found (email exists)
+      // If error.code is 'PGRST116', no profile was found (email doesn't exist)
       if (checkError) {
-        console.warn("Error checking existing email:", checkError);
-        // Continue with signup process even if check fails
-      } else if (count && count > 0) {
+        if (checkError.code !== 'PGRST116') {
+          console.warn("Error checking existing email:", checkError);
+          // Only log non-"not found" errors and continue
+        }
+      } else {
+        // No error means a profile was found with this email
         throw new Error('An account with this email already exists. Please use a different email or try logging in.');
       }
 
