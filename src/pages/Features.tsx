@@ -76,7 +76,7 @@ const Features = () => {
               ))}
             </div>
             
-            <div className="text-center mt-16">
+            <div className="text-center mt-16 mb-8 md:mb-0">
               <Link to="/dashboard">
                 <Button size="lg" className="mx-auto">
                   Explore All Features
@@ -94,3 +94,4 @@ const Features = () => {
 };
 
 export default Features;
+

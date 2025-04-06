@@ -147,4 +147,17 @@
     justify-content: center !important;
     width: 100% !important;
   }
+  
+  /* Features page - space between explore all button and cards */
+  .text-center.mt-16 {
+    margin-top: 2.5rem !important;
+    margin-bottom: 2rem !important;
+    padding-bottom: 1rem !important;
+  }
+  
+  /* Features page section spacing */
+  .py-20 {
+    padding-bottom: 3rem !important; 
+  }
 }
+
