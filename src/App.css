@@ -22,12 +22,12 @@
     opacity: 1 !important;
   }
   
-  /* Force menu button to be visible on mobile */
+  /* Force menu button to be hidden on mobile */
   .mobile-menu-button,
   .sip-header button[aria-label="Menu"],
   button[aria-label="Menu"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
   }
 }

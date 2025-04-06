@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { LogIn, Menu } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Logo } from '@/components/ui/Logo';
 import { SipMobileMenu } from './SipMobileMenu';
@@ -82,20 +81,11 @@ export const SipHeader = () => {
             >
               Get Started
             </Link>
-
-            {/* Mobile menu button - MOBILE ONLY */}
-            <button 
-              className="mobile-menu-button md:hidden flex items-center justify-center" 
-              aria-label="Menu" 
-              onClick={toggleMobileMenu}
-            >
-              <Menu size={28} className="text-slate-700" />
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - keeping the component but not displaying it */}
       <SipMobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </div>
   );

@@ -113,13 +113,15 @@ header, .navbar, .sip-header {
     width: 2.5rem !important;
   }
   
-  /* CRITICAL: Mobile-specific overrides for menu button and login hiding */
+  /* CRITICAL: Hide menu button completely on mobile */
   .mobile-menu-button,
   .sip-header button[aria-label="Menu"],
   button[aria-label="Menu"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
   }
   
   /* CRITICAL: Hide only the header login button, not the Customer Login link */
