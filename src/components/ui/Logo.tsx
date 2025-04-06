@@ -32,7 +32,7 @@ export const Logo = ({ size = "md", withText = true, className }: LogoProps) => 
     <div className={cn("flex items-center gap-2 whitespace-nowrap", className)}>
       <div className={cn(logoSize, "relative rounded-full bg-[#0B1A23] flex-shrink-0 p-0 overflow-hidden flex items-center justify-center")}>
         <img 
-          src="/lovable-uploads/cccaa285-971a-4016-98d8-cf96663d71ea.png" 
+          src="/lovable-uploads/f85026b8-e221-4dd4-bd5c-cfaba6c14f29.png" 
           alt="Flow Dialer" 
           className="w-[90%] h-[90%] object-contain transform scale-125" 
         />
