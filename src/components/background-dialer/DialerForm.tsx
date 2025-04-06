@@ -118,23 +118,6 @@ const DialerForm: React.FC<DialerFormProps> = ({
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="maxConcurrentCalls">Max Concurrent Calls</Label>
-        <Input
-          id="maxConcurrentCalls"
-          name="maxConcurrentCalls"
-          type="number"
-          min="1"
-          max="10"
-          value={formData.maxConcurrentCalls || 1}
-          onChange={(e) => onChange("maxConcurrentCalls", parseInt(e.target.value) || 1)}
-          placeholder="1"
-        />
-        <p className="text-xs text-muted-foreground">
-          Maximum number of simultaneous calls (1-10)
-        </p>
-      </div>
-
       <Button
         onClick={onStart}
         disabled={isStartDisabled}
