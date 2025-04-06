@@ -12,11 +12,6 @@ import { AuthButton } from '@/components/auth/AuthButton';
 import { AuthFooter } from '@/components/auth/AuthFooter';
 import { Input } from '@/components/ui/input';
 
-// Define an explicit interface for profile data
-interface ProfileData {
-  id: string;
-}
-
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,23 +29,14 @@ const SignUp = () => {
 
     try {
       // First check if the email is already registered
-      // Modify the query to avoid TypeScript inference issues
-      const { error: checkError } = await supabase
+      // Use a simpler query that doesn't trigger TypeScript's type recursion limits
+      const { data, error: checkError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', email)
-        .limit(1)
-        .single();
+        .eq('email', email);
       
-      // If no error, a profile was found (email exists)
-      // If error.code is 'PGRST116', no profile was found (email doesn't exist)
-      if (checkError) {
-        if (checkError.code !== 'PGRST116') {
-          console.warn("Error checking existing email:", checkError);
-          // Only log non-"not found" errors and continue
-        }
-      } else {
-        // No error means a profile was found with this email
+      // If we got data back and it has at least one entry, the email exists
+      if (!checkError && data && data.length > 0) {
         throw new Error('An account with this email already exists. Please use a different email or try logging in.');
       }
 
