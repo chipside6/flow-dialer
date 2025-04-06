@@ -49,7 +49,7 @@ export const SipHeader = () => {
               Support
             </Link>
             <span className="mx-2 text-gray-400">|</span>
-            <Link to="/login" className="text-[#ff6c2c] hover:underline font-medium">
+            <Link to="/login" className="text-[#ff6c2c] hover:underline font-medium customer-login-link">
               Customer Login
             </Link>
           </div>
@@ -69,7 +69,7 @@ export const SipHeader = () => {
             {/* Login button - DESKTOP ONLY */}
             <Link 
               to="/login"
-              className="hidden md:flex bg-white text-[#ff6c2c] hover:bg-[#fff5f0] rounded-full px-6 py-2 border border-[#ff6c2c] font-medium transition-colors items-center gap-2"
+              className="header-login-button hidden md:flex bg-white text-[#ff6c2c] hover:bg-[#fff5f0] rounded-full px-6 py-2 border border-[#ff6c2c] font-medium transition-colors items-center gap-2"
             >
               <LogIn size={16} />
               <span>Login</span>
@@ -85,10 +85,9 @@ export const SipHeader = () => {
 
             {/* Mobile menu button - MOBILE ONLY */}
             <button 
-              className="md:hidden flex items-center justify-center" 
+              className="mobile-menu-button md:hidden flex items-center justify-center" 
               aria-label="Menu" 
               onClick={toggleMobileMenu}
-              style={{display: 'flex', visibility: 'visible'}}
             >
               <Menu size={28} className="text-slate-700" />
             </button>

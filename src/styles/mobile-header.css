@@ -65,6 +65,7 @@
   }
   
   /* CRITICAL: Force menu button to display and be visible on mobile */
+  .mobile-menu-button,
   .sip-header button[aria-label="Menu"],
   button[aria-label="Menu"] {
     display: inline-flex !important;
@@ -77,11 +78,11 @@
     position: relative !important;
   }
   
-  /* CRITICAL: Force hide login button on mobile - multiple selectors for higher specificity */
-  .sip-header a[href="/login"],
-  .flex.items-center.gap-4 a[href="/login"],
-  div[class*="items-center"] a[href="/login"],
-  a[href="/login"] {
+  /* CRITICAL: Force hide login button on mobile - using a specific class */
+  .header-login-button,
+  .sip-header .flex.items-center.gap-4 a[href="/login"],
+  .sip-header .header-login-button,
+  div[class*="items-center"] .header-login-button {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
@@ -95,12 +96,20 @@
     padding: 0 !important;
   }
   
+  /* Specifically KEEP the Customer Login visible */
+  .customer-login-link {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  
   /* Fix login button display on desktop */
   @media (min-width: 769px) {
-    .sip-header a[href="/login"],
-    .flex.items-center.gap-4 a[href="/login"],
-    div[class*="items-center"] a[href="/login"],
-    a[href="/login"] {
+    .header-login-button,
+    .sip-header .flex.items-center.gap-4 a[href="/login"],
+    .sip-header .header-login-button {
       display: inline-flex !important;
       visibility: visible !important;
       opacity: 1 !important;
@@ -115,6 +124,7 @@
     }
     
     /* Hide menu button on desktop */
+    .mobile-menu-button,
     .sip-header button[aria-label="Menu"],
     button[aria-label="Menu"] {
       display: none !important;

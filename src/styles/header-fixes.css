@@ -114,6 +114,7 @@ header, .navbar, .sip-header {
   }
   
   /* CRITICAL: Mobile-specific overrides for menu button and login hiding */
+  .mobile-menu-button,
   .sip-header button[aria-label="Menu"],
   button[aria-label="Menu"] {
     display: flex !important;
@@ -121,24 +122,34 @@ header, .navbar, .sip-header {
     opacity: 1 !important;
   }
   
-  .sip-header a[href="/login"],
-  a[href="/login"] {
+  /* CRITICAL: Hide only the header login button, not the Customer Login link */
+  .header-login-button,
+  .sip-header .flex.items-center.gap-4 a[href="/login"] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     width: 0 !important;
     height: 0 !important;
   }
+  
+  /* Ensure Customer Login link in the top bar stays visible */
+  .customer-login-link {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
 }
 
 /* Fix for desktop view */
 @media (min-width: 769px) {
+  .header-login-button,
   .sip-header a[href="/login"] {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
   
+  .mobile-menu-button,
   .sip-header button[aria-label="Menu"] {
     display: none !important;
   }
