@@ -53,7 +53,7 @@ export const PricingSection = () => {
                       </span>
                       {!plan.isLifetime && (
                         <div className="text-xl text-primary/70 mt-2">
-                          per month{plan.featuresObj?.maxCalls ? `, per channel` : ''}
+                          per month
                         </div>
                       )}
                     </div>

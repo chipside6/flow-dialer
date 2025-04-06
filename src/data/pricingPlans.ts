@@ -26,7 +26,6 @@ export const pricingPlans: PricingPlan[] = [
     features: [
       "Limited to 100 calls daily",
       "Limited to 1,000 calls monthly",
-      "Maximum 1 concurrent call",
       "Basic features",
       "No automatic expiration"
     ],

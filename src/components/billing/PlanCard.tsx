@@ -53,9 +53,7 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
                 </span>
               </div>
               {!plan.isLifetime && (
-                <span className="text-xl text-primary/70 mt-2">
-                  per month{plan.featuresObj?.maxCalls ? `, per channel` : ''}
-                </span>
+                <span className="text-xl text-primary/70 mt-2">per month</span>
               )}
             </div>
           )}

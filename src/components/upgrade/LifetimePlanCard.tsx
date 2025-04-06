@@ -39,9 +39,6 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
               <span className="text-3xl align-top mr-1">$</span>
               {plan.price}
             </span>
-            {!plan.isLifetime && (
-              <span className="text-lg md:text-xl text-primary/70 mt-2">per month{plan.featuresObj?.maxCalls ? `, per channel` : ''}</span>
-            )}
           </div>
         </div>
       </CardContent>
