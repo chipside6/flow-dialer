@@ -84,8 +84,8 @@ export const UpgradePlanSection = () => {
             
             <div className="space-y-3 mb-6">
               {plan.features.map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                <div key={idx} className="flex items-start">
+                  <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 mr-3">
                     <Check className="h-3 w-3 text-primary" />
                   </div>
                   <span className="text-sm">{feature}</span>
