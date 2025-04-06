@@ -96,16 +96,11 @@ const UpgradePage = () => {
                 </div>
                 
                 <div className="mt-10 mb-10 text-center">
-                  <div className="flex flex-col items-center">
-                    <div className="bg-green-100 text-green-800 px-8 py-4 rounded-xl shadow-sm inline-block mb-4">
-                      <div className="flex items-start">
-                        <span className="text-2xl font-medium mr-2 mt-2">$</span>
-                        <span className="text-6xl font-bold">{lifetimePlan.price}</span>
-                      </div>
-                    </div>
-                    {!lifetimePlan.isLifetime && (
-                      <span className="text-xl text-primary/70 mt-2">per month{lifetimePlan.featuresObj?.maxCalls ? `, per channel` : ''}</span>
-                    )}
+                  <div className="text-primary mb-6">
+                    <span className="text-7xl font-bold">
+                      <span className="text-5xl align-top mr-1">$</span>
+                      {lifetimePlan.price}
+                    </span>
                   </div>
                 </div>
                 
