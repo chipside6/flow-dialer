@@ -35,9 +35,9 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
         
         <div className="mt-auto text-center">
           <div className="flex flex-col items-center">
-            <div className="bg-green-100 text-green-800 px-6 py-3 rounded-xl shadow-sm">
+            <div className="bg-green-100 text-green-800 px-8 py-4 rounded-xl shadow-sm mb-4">
               <div className="flex items-start">
-                <span className="text-xl font-medium mt-1 mr-1">$</span>
+                <span className="text-xl font-medium mr-2 mt-2">$</span>
                 <span className="text-5xl font-bold">{plan.price}</span>
               </div>
             </div>
