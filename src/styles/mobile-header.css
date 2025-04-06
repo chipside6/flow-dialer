@@ -137,4 +137,14 @@
     height: auto !important;
     margin: 0 4px !important;
   }
+  
+  /* Fix logo text overflow in header */
+  .logo span, 
+  header .logo span,
+  .sip-header .logo span {
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+  }
 }

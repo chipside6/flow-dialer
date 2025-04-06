@@ -156,4 +156,12 @@ header a[href="/login"] {
     align-items: center !important;
     justify-content: space-between !important;
   }
+  
+  /* Fix for logo text overflow */
+  .logo span {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }

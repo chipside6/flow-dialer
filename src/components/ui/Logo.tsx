@@ -29,7 +29,7 @@ export const Logo = ({ size = "md", withText = true, className }: LogoProps) => 
   const textSize = textSizes[size];
   
   return (
-    <div className={cn("flex items-center gap-2 whitespace-nowrap", className)}>
+    <div className={cn("flex items-center gap-2 whitespace-nowrap overflow-hidden", className)}>
       <div className={cn(logoSize, "relative rounded-full flex-shrink-0 p-0 overflow-hidden")}>
         <img 
           src="/lovable-uploads/54734c82-a75a-47da-b504-9be3ef0c1e1e.png" 
@@ -38,7 +38,7 @@ export const Logo = ({ size = "md", withText = true, className }: LogoProps) => 
         />
       </div>
       {withText && (
-        <span className={cn(`font-display ${textSize} font-bold tracking-tight drop-shadow-sm whitespace-nowrap`, 
+        <span className={cn(`font-display ${textSize} font-bold tracking-tight drop-shadow-sm whitespace-nowrap truncate`, 
           className?.includes("text-white") ? "text-white" : "text-foreground")}>
           Flow Dialer
         </span>
