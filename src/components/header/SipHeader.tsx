@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, LogIn } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Logo } from '@/components/ui/Logo';
 import { SipMobileMenu } from './SipMobileMenu';
@@ -36,8 +36,8 @@ export const SipHeader = () => {
 
   return (
     <div className="w-full flex flex-col">
-      {/* Top info bar */}
-      <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm">
+      {/* Top info bar - only visible on mobile */}
+      <div className="w-full bg-gray-100 py-2 px-4 md:px-8 text-sm md:hidden">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
           <div className="flex items-center">
             <span className="text-gray-600">Phone: </span>
@@ -66,6 +66,18 @@ export const SipHeader = () => {
           
           {/* Button and menu aligned to the extreme right */}
           <div className="flex items-center gap-4 ml-auto">
+            {/* Login button - only visible on desktop */}
+            <Button 
+              className="bg-white text-sky-500 hover:bg-sky-50 rounded-full px-6 py-2 font-medium transition-colors hidden md:flex items-center"
+              asChild
+              variant="outline"
+            >
+              <Link to="/login">
+                <LogIn size={16} className="mr-2" />
+                Login
+              </Link>
+            </Button>
+            
             <Button 
               className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-6 py-2 font-medium transition-colors"
               asChild

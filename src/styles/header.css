@@ -33,6 +33,17 @@
   background-color: #e95d1e;
 }
 
+/* Login button styles */
+.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/login"] {
+  border-color: #0EA5E9;
+  color: #0EA5E9;
+  transition: all 0.2s ease;
+}
+
+.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/login"]:hover {
+  background-color: rgba(14, 165, 233, 0.05);
+}
+
 @media (max-width: 768px) {
   .top-info-bar {
     font-size: 0.8rem;
