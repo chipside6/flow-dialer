@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 export const HeroSection = () => {
   return (
-    <section className="pt-28 md:pt-36 pb-6 md:pb-16 px-4 md:px-10 overflow-hidden relative">
+    <section className="pt-36 md:pt-44 pb-6 md:pb-16 px-4 md:px-10 overflow-hidden relative">
       {/* Background gradient shapes */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-sky-100 to-blue-50 opacity-70"></div>
@@ -17,7 +17,7 @@ export const HeroSection = () => {
         <div className="flex flex-col items-center text-center">
           <div className="max-w-2xl mx-auto z-10">
             <div className="inline-block animate-fade-in">
-              <span className="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-600 text-xs font-medium tracking-wide mb-4">
+              <span className="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-600 text-xs font-medium tracking-wide mb-4 mt-6">
                 Modern Communication Platform
               </span>
             </div>
