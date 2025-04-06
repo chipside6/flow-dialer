@@ -36,11 +36,13 @@ const Index = () => {
   return (
     <div className="bg-background min-h-screen flex flex-col">
       <SipHeader />
-      <main className="flex-1 pt-0 overflow-y-auto"> 
-        <HeroSection />
-        <FeaturesSection />
-        <PricingSection />
-        <CTASection />
+      <main className="flex-1 pt-4 md:pt-6 overflow-hidden"> 
+        <div className="container mx-auto">
+          <HeroSection />
+          <FeaturesSection />
+          <PricingSection />
+          <CTASection />
+        </div>
       </main>
     </div>
   );

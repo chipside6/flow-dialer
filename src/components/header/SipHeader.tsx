@@ -65,7 +65,7 @@ export const SipHeader = () => {
           </Link>
           
           {/* Buttons aligned to the right */}
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-2 ml-auto">
             {/* Login button - DESKTOP ONLY */}
             <Link 
               to="/login"
@@ -78,18 +78,18 @@ export const SipHeader = () => {
             {/* Get Started button - always visible */}
             <Link 
               to="/signup"
-              className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-6 py-2 font-medium transition-colors"
+              className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-4 py-2 md:px-6 md:py-2 font-medium transition-colors"
             >
               Get Started
             </Link>
 
             {/* Mobile menu button - MOBILE ONLY */}
             <button 
-              className="mobile-menu-button md:hidden flex items-center justify-center" 
+              className="mobile-menu-button md:hidden flex items-center justify-center ml-2" 
               aria-label="Menu" 
               onClick={toggleMobileMenu}
             >
-              <Menu size={28} className="text-slate-700" />
+              <Menu size={24} className="text-slate-700" />
             </button>
           </div>
         </div>
