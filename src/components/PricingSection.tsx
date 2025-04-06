@@ -48,8 +48,8 @@ export const PricingSection = () => {
                   ) : (
                     <div className="flex flex-col items-center">
                       <div className={`price-highlight ${plan.isLifetime ? 'animate-pulse-subtle' : ''}`}>
-                        <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-sky-500 relative">
-                          <span className="absolute -top-5 -left-4 text-xl md:text-2xl">$</span>
+                        <span className="text-6xl md:text-7xl lg:text-8xl font-bold text-sky-500 relative">
+                          <span className="absolute -top-6 -left-5 text-2xl md:text-3xl">$</span>
                           {plan.price}
                         </span>
                       </div>
