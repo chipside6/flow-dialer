@@ -13,10 +13,27 @@ export interface PricingPlan {
   popular?: boolean;
   isTrial?: boolean;
   isLifetime?: boolean;
+  isFree?: boolean;
 }
 
 // Shared pricing plans data
 export const pricingPlans: PricingPlan[] = [
+  {
+    id: "free",
+    name: "Free",
+    price: 0,
+    description: "Basic access",
+    features: [
+      "Limited to 1,000 calls",
+      "Maximum 1 concurrent call",
+      "Basic features",
+      "No automatic expiration"
+    ],
+    featuresObj: {
+      maxCalls: 1000
+    },
+    isFree: true
+  },
   {
     id: "trial",
     name: "3-Day Trial",

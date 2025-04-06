@@ -19,7 +19,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     sipProviderId: "", // Initialize SIP provider ID
     schedule: {
       startDate: new Date().toISOString().split("T")[0],
-      maxConcurrentCalls: 1 // Fixed value of 1
+      maxConcurrentCalls: 1 // Fixed value of 1 (enforced)
     }
   });
 
@@ -44,7 +44,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
       ...campaign,
       schedule: {
         ...campaign.schedule,
-        maxConcurrentCalls: 1 // Ensure it's always 1
+        maxConcurrentCalls: 1 // Always enforce 1 concurrent call
       },
       status: "pending" as const,
       progress: 0,

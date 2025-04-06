@@ -10,8 +10,9 @@ export const useSubscriptionLimit = (userId: string | undefined, planId: string 
   const [hasReachedLimit, setHasReachedLimit] = useState<boolean>(false);
   const [trialExpired, setTrialExpired] = useState<boolean>(false);
   
-  // Define call limits based on plan - only trial and lifetime
-  const callLimit = planId === 'trial' ? 1000 : Infinity; // Unlimited for lifetime
+  // Define call limits based on plan - now including free users with 1000 call limit
+  const callLimit = planId === 'trial' ? 1000 : 
+                    planId === 'free' ? 1000 : Infinity; // 1000 for free users, unlimited for lifetime
   
   // Fetch call count
   useEffect(() => {

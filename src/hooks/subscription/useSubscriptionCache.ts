@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+
+import { useCallback } from "react";
 import { Subscription } from "./types";
 
 interface SubscriptionCacheProps {
@@ -14,52 +15,76 @@ export const useSubscriptionCache = ({
   setSubscription,
   setTrialExpired
 }: SubscriptionCacheProps) => {
-  // On mount, try to initialize from localStorage for faster UI rendering
-  useEffect(() => {
-    if (!initializedRef.current) {
-      const cachedPlan = localStorage.getItem('userSubscriptionPlan');
-      const cachedSubscription = localStorage.getItem('userSubscription');
+  // Load subscription data from cache
+  const loadFromCache = useCallback(() => {
+    if (initializedRef.current) return;
+    
+    try {
+      const cachedPlanId = localStorage.getItem('userSubscriptionPlan');
       
-      if (cachedPlan) {
-        setCurrentPlan(cachedPlan);
-        console.log("Initialized subscription plan from cache:", cachedPlan);
-      }
-      
-      if (cachedSubscription) {
-        try {
-          const parsedSubscription = JSON.parse(cachedSubscription);
-          setSubscription(parsedSubscription);
-          console.log("Initialized subscription from cache");
-          
-          // Check cached trial expiration
-          if (parsedSubscription.plan_id === 'trial' && parsedSubscription.current_period_end) {
-            const endDate = new Date(parsedSubscription.current_period_end);
-            const now = new Date();
-            setTrialExpired(now > endDate);
+      if (cachedPlanId) {
+        setCurrentPlan(cachedPlanId);
+        console.log("Loaded plan from cache:", cachedPlanId);
+        
+        // For trial plans, check if they might be expired based on cache
+        if (cachedPlanId === 'trial') {
+          const trialData = localStorage.getItem('userSubscription');
+          if (trialData) {
+            try {
+              const parsedData = JSON.parse(trialData) as Subscription;
+              setSubscription(parsedData);
+              
+              // Check if trial has expired
+              if (parsedData.current_period_end) {
+                const endDate = new Date(parsedData.current_period_end);
+                const now = new Date();
+                
+                if (now > endDate) {
+                  console.log("Trial has expired based on cached data");
+                  setTrialExpired(true);
+                  setCurrentPlan('free'); // Downgrade to free plan
+                  localStorage.setItem('userSubscriptionPlan', 'free');
+                }
+              }
+            } catch (err) {
+              console.error("Error parsing cached subscription:", err);
+            }
           }
-        } catch (e) {
-          console.error("Error parsing cached subscription:", e);
+        } else {
+          setTrialExpired(false);
         }
+      } else {
+        // Default to free plan if no plan is cached
+        setCurrentPlan('free');
+        localStorage.setItem('userSubscriptionPlan', 'free');
       }
-      
-      initializedRef.current = true;
-      // Keep isInitializing true until the API call completes
+    } catch (err) {
+      console.error("Error loading from cache:", err);
+      // Default to free plan on error
+      setCurrentPlan('free');
     }
   }, [initializedRef, setCurrentPlan, setSubscription, setTrialExpired]);
-
-  const updateCache = (subscription: Subscription | null, planId: string | null) => {
-    if (subscription) {
-      localStorage.setItem('userSubscriptionPlan', subscription.plan_id);
-      localStorage.setItem('userSubscription', JSON.stringify(subscription));
-      localStorage.setItem('subscriptionLastUpdated', Date.now().toString());
-    } else if (planId) {
-      localStorage.setItem('userSubscriptionPlan', planId);
-      localStorage.removeItem('userSubscription');
-    } else {
-      localStorage.removeItem('userSubscriptionPlan');
-      localStorage.removeItem('userSubscription');
+  
+  // Update cache with latest subscription data
+  const updateCache = useCallback((subscription: Subscription | null, planId: string | null): void => {
+    try {
+      if (subscription) {
+        localStorage.setItem('userSubscription', JSON.stringify(subscription));
+        localStorage.setItem('userSubscriptionPlan', subscription.plan_id);
+        localStorage.setItem('subscriptionCacheTime', Date.now().toString());
+      } else if (planId) {
+        // If only planId is provided (not a full subscription object)
+        localStorage.setItem('userSubscriptionPlan', planId);
+        localStorage.setItem('subscriptionCacheTime', Date.now().toString());
+      } else {
+        // If no subscription or plan, default to free
+        localStorage.setItem('userSubscriptionPlan', 'free');
+        localStorage.removeItem('userSubscription');
+      }
+    } catch (err) {
+      console.error("Error updating subscription cache:", err);
     }
-  };
-
-  return { updateCache };
+  }, []);
+  
+  return { loadFromCache, updateCache };
 };
