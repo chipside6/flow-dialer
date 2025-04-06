@@ -50,6 +50,15 @@ header .max-w-7xl a:first-child .relative.rounded-full {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+}
+
+/* Ensure logo image has proper dimensions and scaling */
+.sip-header .max-w-7xl a:first-child img,
+header .max-w-7xl a:first-child img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* Fix mobile positioning for menu and button */
