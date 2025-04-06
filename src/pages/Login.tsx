@@ -51,7 +51,17 @@ const Login = () => {
       const { error } = await signIn(email, password);
 
       if (error) {
-        setErrorMessage(error.message || "Failed to login");
+        // Format error messages to be more user-friendly
+        let message = error.message || "Failed to login";
+        
+        if (message.includes("credentials") || message.includes("Invalid") || 
+            message.includes("password") || message.includes("user")) {
+          message = "Invalid email or password. Please check your credentials and try again.";
+        } else if (message.includes("network") || message.includes("connect")) {
+          message = "Unable to connect to the server. Please check your internet connection.";
+        }
+        
+        setErrorMessage(message);
         setIsLoading(false);
         return;
       }
@@ -60,7 +70,7 @@ const Login = () => {
       
     } catch (error: any) {
       console.error("Login error:", error);
-      setErrorMessage(error.message || "Failed to login");
+      setErrorMessage("An unexpected error occurred. Please try again later.");
       setIsLoading(false);
     }
   };

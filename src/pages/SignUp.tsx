@@ -28,6 +28,21 @@ const SignUp = () => {
     setSuccessMessage(null);
 
     try {
+      // First check if the email is already registered
+      const { data: existingUsers, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+      
+      if (checkError) {
+        console.warn("Error checking existing email:", checkError);
+        // Continue with signup process even if check fails
+      } else if (existingUsers) {
+        throw new Error('An account with this email already exists. Please use a different email or try logging in.');
+      }
+
+      // Proceed with signup if email not found
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -63,10 +78,21 @@ const SignUp = () => {
       }
     } catch (error: any) {
       console.error("Signup error:", error);
-      setErrorMessage(error.message || "An unexpected error occurred");
+      
+      // Display user-friendly error messages
+      let message = error.message || "An unexpected error occurred";
+      
+      // Format Supabase error messages to be more user-friendly
+      if (message.includes("duplicate")) {
+        message = "This email is already registered. Please use a different email or try logging in.";
+      } else if (message.includes("password")) {
+        message = "Password doesn't meet requirements. Please use at least 6 characters.";
+      }
+      
+      setErrorMessage(message);
       toast({
         title: "Signup failed",
-        description: error.message || "An unexpected error occurred",
+        description: message,
         variant: "destructive",
       });
     } finally {
