@@ -47,8 +47,8 @@ export const HeroSection = () => {
           
           <div className="md:w-1/2 flex justify-center">
             <img 
-              src="/public/lovable-uploads/ebae8c85-b3d8-4542-8f0d-eadb9ab31801.png" 
-              alt="Call center agent working at desk" 
+              src="/public/lovable-uploads/ab5a9df8-3741-4057-8a9b-ae93420a7b03.png" 
+              alt="Two people looking at a laptop together" 
               className="w-full max-w-md object-contain rounded-lg shadow-sm"
               width={600}
               height={600}
