@@ -1,5 +1,4 @@
 
-
 /* Mobile header styles */
 
 @media screen and (max-width: 768px) {
@@ -64,5 +63,15 @@
     gap: 8px !important;
     margin-left: auto;
   }
+  
+  /* Fix logo container to fit image properly */
+  .sip-header .max-w-7xl a:first-child .flex.items-center.gap-2 {
+    align-items: center;
+  }
+  
+  /* Reduce logo container padding */
+  .sip-header .max-w-7xl a:first-child .relative.overflow-hidden {
+    margin: 0;
+    padding: 0;
+  }
 }
-

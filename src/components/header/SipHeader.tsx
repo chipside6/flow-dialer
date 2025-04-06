@@ -57,11 +57,11 @@ export const SipHeader = () => {
       </div>
       
       {/* Main header */}
-      <div className="w-full bg-white py-4 px-4 md:px-8 shadow-sm">
+      <div className="w-full bg-white py-2 px-4 md:px-8 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo aligned to the extreme left */}
           <Link to="/" className="flex items-center mr-auto">
-            <Logo size="lg" />
+            <Logo size="md" />
           </Link>
           
           {/* Button and menu aligned to the extreme right */}
