@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Logo } from '@/components/ui/Logo';
@@ -8,7 +8,8 @@ import { SipMobileMenu } from './SipMobileMenu';
 
 export const SipHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const location = useLocation();
+  
   // Close mobile menu when route changes
   useEffect(() => {
     const handleRouteChange = () => setIsMobileMenuOpen(false);
