@@ -21,9 +21,8 @@ export const pricingPlans: PricingPlan[] = [
     id: "trial",
     name: "3-Day Trial",
     price: 0,
-    description: "Full access for 3 days",
+    description: "Try all features",
     features: [
-      "Full feature access for 3 days",
       "Unlimited calls during trial period",
       "Unlimited campaigns during trial",
       "Unlimited contacts",
