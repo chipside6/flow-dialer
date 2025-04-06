@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, LogIn } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Logo } from '@/components/ui/Logo';
 import { SipMobileMenu } from './SipMobileMenu';
@@ -28,11 +28,6 @@ export const SipHeader = () => {
       document.body.classList.remove('menu-open');
     };
   }, [isMobileMenuOpen]);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-    console.log('Mobile menu toggled:', !isMobileMenuOpen);
-  };
 
   return (
     <div className="w-full flex flex-col">
@@ -64,7 +59,7 @@ export const SipHeader = () => {
             <Logo size="md" className="mobile-logo-container" />
           </Link>
           
-          {/* Button and menu aligned to the extreme right */}
+          {/* Buttons aligned to the right, removed menu button */}
           <div className="flex items-center gap-4 ml-auto">
             {/* Login button - only visible on desktop */}
             <Button 
@@ -87,19 +82,11 @@ export const SipHeader = () => {
                 Get Started
               </Link>
             </Button>
-            
-            <button 
-              className="p-2" 
-              aria-label="Menu" 
-              onClick={toggleMobileMenu}
-            >
-              <Menu size={28} className="text-slate-700" />
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - only used when mobile menu is triggered */}
       <SipMobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </div>
   );
