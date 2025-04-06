@@ -35,11 +35,11 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
         
         <div className="mt-auto text-center">
           <div className="flex flex-col items-center">
-            <div className="price-highlight">
-              <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-sky-500 relative">
-                <span className="absolute top-1 -left-2 text-lg md:text-xl">$</span>
-                {plan.price}
-              </span>
+            <div className="bg-gradient-to-r from-sky-500 to-sky-400 text-white px-6 py-3 rounded-xl shadow-md">
+              <div className="flex items-start">
+                <span className="text-xl font-medium mt-1 mr-1">$</span>
+                <span className="text-5xl font-bold">{plan.price}</span>
+              </div>
             </div>
             {!plan.isLifetime && (
               <span className="text-lg md:text-xl text-primary/70 mt-2">per month{plan.featuresObj?.maxCalls ? `, per channel` : ''}</span>

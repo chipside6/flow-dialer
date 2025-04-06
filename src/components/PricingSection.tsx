@@ -47,11 +47,11 @@ export const PricingSection = () => {
                     <span className="text-5xl font-bold">Free</span>
                   ) : (
                     <div className="flex flex-col items-center">
-                      <div className="price-highlight">
-                        <span className="text-6xl md:text-7xl lg:text-8xl font-bold text-sky-500 relative">
-                          <span className="absolute top-1 -left-3 text-2xl md:text-3xl">$</span>
-                          {plan.price}
-                        </span>
+                      <div className="bg-gradient-to-r from-sky-500 to-sky-400 text-white px-8 py-3 rounded-xl shadow-md">
+                        <div className="flex items-start">
+                          <span className="text-2xl font-medium mt-1 mr-1">$</span>
+                          <span className="text-6xl font-bold">{plan.price}</span>
+                        </div>
                       </div>
                       {!plan.isLifetime && (
                         <span className="text-xl text-primary/70 mt-2">per month{plan.featuresObj?.maxCalls ? `, per channel` : ''}</span>
