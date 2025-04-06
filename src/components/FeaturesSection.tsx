@@ -6,7 +6,7 @@ const features = [];
 
 export const FeaturesSection = () => {
   return (
-    <section className="py-16 px-6 md:px-10 bg-sky-50/70 relative overflow-hidden">
+    <section className="py-16 px-6 md:px-10 mt-6 md:mt-10 bg-sky-50/70 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-sky-50 to-blue-50"></div>

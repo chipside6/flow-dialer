@@ -78,8 +78,8 @@ export const UpgradePlanSection = () => {
             <h3 className="text-xl font-semibold">{plan.name}</h3>
             <p className="text-muted-foreground text-sm mt-1">{plan.description}</p>
             
-            <div className="mt-4 mb-6 text-center">
-              <span className="text-3xl md:text-5xl font-bold">${plan.price}</span>
+            <div className="mt-6 mb-8 text-center">
+              <span className="text-5xl md:text-6xl font-bold text-primary">${plan.price}</span>
             </div>
             
             <div className="space-y-3 mb-6">

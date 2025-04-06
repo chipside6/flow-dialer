@@ -6,9 +6,9 @@ import { pricingPlans } from "@/data/pricingPlans";
 
 export const PricingSection = () => {
   return (
-    <section className="py-4 md:py-6 px-6 md:px-10">
+    <section className="py-8 md:py-16 px-6 md:px-10">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
+        <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight mb-6">
             Simple, One-Time Payment
           </h2>
@@ -33,12 +33,12 @@ export const PricingSection = () => {
                 <h3 className="text-xl font-semibold">{plan.name}</h3>
                 <p className="text-muted-foreground mt-2 text-sm">{plan.description}</p>
                 
-                <div className="mt-6 mb-6 text-center">
+                <div className="mt-8 mb-8 text-center">
                   {plan.price === 0 ? (
-                    <span className="text-4xl font-bold">Free</span>
+                    <span className="text-5xl font-bold">Free</span>
                   ) : (
                     <div className="flex justify-center">
-                      <span className="text-4xl md:text-5xl lg:text-6xl font-bold">${plan.price}</span>
+                      <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${plan.price}</span>
                     </div>
                   )}
                 </div>

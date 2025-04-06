@@ -35,12 +35,12 @@ export const PlansSection = ({ plans, onSelectPlan }: PlansSectionProps) => {
           </CardHeader>
           
           <CardContent>
-            <div className="mb-6 text-center">
+            <div className="mb-8 mt-4 text-center">
               {plan.price === 0 ? (
-                <span className="text-4xl font-bold">Free</span>
+                <span className="text-5xl font-bold">Free</span>
               ) : (
                 <div className="flex justify-center">
-                  <span className="text-4xl md:text-5xl lg:text-6xl font-bold">${plan.price}</span>
+                  <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${plan.price}</span>
                 </div>
               )}
             </div>

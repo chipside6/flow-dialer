@@ -23,7 +23,7 @@ const Index = () => {
   return (
     <div className="bg-background min-h-screen flex flex-col">
       <SipHeader />
-      <main className="flex-1 pt-0"> 
+      <main className="flex-1 pt-6 md:pt-10"> 
         <HeroSection />
         <FeaturesSection />
         <PricingSection />
