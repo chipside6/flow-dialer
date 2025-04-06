@@ -50,15 +50,6 @@ header .max-w-7xl a:first-child .relative.rounded-full {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-}
-
-.sip-header .max-w-7xl a:first-child .relative.rounded-full img,
-header .max-w-7xl a:first-child .relative.rounded-full img {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  transform: scale(1.25);
-  position: relative;
 }
 
 /* Fix mobile positioning for menu and button */
