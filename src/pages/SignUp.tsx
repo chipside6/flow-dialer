@@ -29,11 +29,12 @@ const SignUp = () => {
 
     try {
       // First check if the email is already registered
+      // Fix the TypeScript error by providing explicit type for the query
       const { data: existingUsers, error: checkError } = await supabase
         .from('profiles')
         .select('id')
         .eq('email', email)
-        .maybeSingle();
+        .maybeSingle<{ id: string }>();
       
       if (checkError) {
         console.warn("Error checking existing email:", checkError);
