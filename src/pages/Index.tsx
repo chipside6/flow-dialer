@@ -36,7 +36,7 @@ const Index = () => {
   return (
     <div className="bg-background min-h-screen flex flex-col">
       <SipHeader />
-      <main className="flex-1 pt-6 md:pt-8 overflow-y-auto"> 
+      <main className="flex-1 pt-0 overflow-y-auto"> 
         <HeroSection />
         <FeaturesSection />
         <PricingSection />

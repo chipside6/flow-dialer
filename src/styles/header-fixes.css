@@ -29,7 +29,7 @@ header, .navbar, .sip-header {
 }
 
 /* Orange styling for Login button */
-.sip-header .max-w-7xl .flex.items-center a[href="/login"]:not(.customer-login-link) {
+.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/login"] {
   border-color: #ff6c2c;
   color: #ff6c2c;
   border-radius: 9999px;
@@ -38,12 +38,12 @@ header, .navbar, .sip-header {
   transition: all 0.2s ease;
 }
 
-.sip-header .max-w-7xl .flex.items-center a[href="/login"]:not(.customer-login-link):hover {
+.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/login"]:hover {
   background-color: rgba(255, 108, 44, 0.05);
 }
 
 /* Sky blue styling for Get Started button */
-.sip-header .max-w-7xl .flex.items-center a[href="/signup"] {
+.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"] {
   background-color: #0EA5E9;
   color: white;
   border-radius: 9999px;
@@ -52,7 +52,7 @@ header, .navbar, .sip-header {
   transition: background-color 0.2s ease;
 }
 
-.sip-header .max-w-7xl .flex.items-center a[href="/signup"]:hover {
+.sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"]:hover {
   background-color: #0284c7;
 }
 
@@ -71,14 +71,13 @@ header, .navbar, .sip-header {
   }
   
   /* Push button to extreme right */
-  .sip-header .max-w-7xl .flex.items-center {
+  .sip-header .max-w-7xl .flex.items-center.gap-4 {
     display: flex;
     align-items: center;
     margin-left: auto;
-    gap: 8px !important;
   }
   
-  .sip-header .max-w-7xl .flex.items-center a[href="/signup"] {
+  .sip-header .max-w-7xl .flex.items-center.gap-4 a[href="/signup"] {
     font-size: 0.875rem;
     padding: 0.5rem 1.25rem;
   }
@@ -121,12 +120,11 @@ header, .navbar, .sip-header {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    margin-left: 8px !important;
   }
   
   /* CRITICAL: Hide only the header login button, not the Customer Login link */
   .header-login-button,
-  .sip-header .flex.items-center a[href="/login"]:not(.customer-login-link) {
+  .sip-header .flex.items-center.gap-4 a[href="/login"] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
@@ -145,7 +143,7 @@ header, .navbar, .sip-header {
 /* Fix for desktop view */
 @media (min-width: 769px) {
   .header-login-button,
-  .sip-header a[href="/login"]:not(.customer-login-link) {
+  .sip-header a[href="/login"] {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;

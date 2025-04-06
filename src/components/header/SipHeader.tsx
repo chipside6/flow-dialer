@@ -65,7 +65,7 @@ export const SipHeader = () => {
           </Link>
           
           {/* Buttons aligned to the right */}
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-4 ml-auto">
             {/* Login button - DESKTOP ONLY */}
             <Link 
               to="/login"
@@ -85,11 +85,11 @@ export const SipHeader = () => {
 
             {/* Mobile menu button - MOBILE ONLY */}
             <button 
-              className="mobile-menu-button md:hidden flex items-center justify-center ml-2" 
+              className="mobile-menu-button md:hidden flex items-center justify-center" 
               aria-label="Menu" 
               onClick={toggleMobileMenu}
             >
-              <Menu size={24} className="text-slate-700" />
+              <Menu size={28} className="text-slate-700" />
             </button>
           </div>
         </div>

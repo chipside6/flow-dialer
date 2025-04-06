@@ -19,13 +19,13 @@
   
   /* SipHeader specific adjustments */
   .sip-header + main {
-    padding-top: 1.5rem !important; /* Added padding to prevent content from touching header */
+    padding-top: 0 !important;
     margin-top: 0 !important;
   }
   
   /* Public pages with SipHeader should remove extra spacing */
   .sip-header ~ main section:first-child {
-    padding-top: 1.5rem !important; /* Added padding to prevent content from touching header */
+    padding-top: 0 !important;
     margin-top: 0 !important;
   }
   
@@ -57,14 +57,14 @@
   }
   
   /* Align menu and Get Started button to right */
-  .sip-header .max-w-7xl .flex.items-center.gap-2 {
-    display: flex !important;
-    align-items: center !important;
+  .sip-header .max-w-7xl .flex.items-center.gap-4 {
+    display: flex;
+    align-items: center;
     gap: 8px !important;
-    margin-left: auto !important;
+    margin-left: auto;
   }
   
-  /* CRITICAL: Force menu button to display and be visible on mobile, positioned properly next to Get Started */
+  /* CRITICAL: Force menu button to display and be visible on mobile */
   .mobile-menu-button,
   .sip-header button[aria-label="Menu"],
   button[aria-label="Menu"] {
@@ -80,7 +80,7 @@
   
   /* CRITICAL: Force hide login button on mobile - using a specific class */
   .header-login-button,
-  .sip-header .flex.items-center a[href="/login"]:not(.customer-login-link),
+  .sip-header .flex.items-center.gap-4 a[href="/login"],
   .sip-header .header-login-button,
   div[class*="items-center"] .header-login-button {
     display: none !important;
@@ -108,7 +108,7 @@
   /* Fix login button display on desktop */
   @media (min-width: 769px) {
     .header-login-button,
-    .sip-header .flex.items-center a[href="/login"]:not(.customer-login-link),
+    .sip-header .flex.items-center.gap-4 a[href="/login"],
     .sip-header .header-login-button {
       display: inline-flex !important;
       visibility: visible !important;
