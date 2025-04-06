@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { DashboardContent } from '@/components/layout/DashboardContent';
+import { DashboardContent } from '@/components/dashboard/DashboardContent';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { CampaignProvider } from '@/contexts/campaign/CampaignContext';
 import { CampaignTable } from '@/components/campaigns/CampaignTable';
@@ -10,8 +10,8 @@ import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, RefreshCw, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import CampaignDashboard from '@/components/CampaignDashboard';
 import { useNavigate } from 'react-router-dom';
+import CampaignDashboard from '@/components/CampaignDashboard';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("overview");
