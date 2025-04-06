@@ -19,26 +19,23 @@
   
   /* SipHeader specific adjustments */
   .sip-header + main {
-    padding-top: 1.5rem !important; /* Add padding to prevent content from touching header */
+    padding-top: 0 !important;
     margin-top: 0 !important;
   }
   
   /* Public pages with SipHeader should remove extra spacing */
   .sip-header ~ main section:first-child {
-    padding-top: 1.5rem !important; /* Add padding to first section */
+    padding-top: 0 !important;
     margin-top: 0 !important;
   }
   
   /* Align logo to extreme left and menu/button to extreme right */
   .sip-header .max-w-7xl {
     justify-content: space-between !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
   }
   
   .sip-header .max-w-7xl a:first-child {
     margin-right: auto !important;
-    padding-left: 0 !important; /* Ensure no left padding on logo container */
   }
   
   .sip-header .max-w-7xl .flex.items-center {
@@ -108,7 +105,7 @@
     width: auto !important;
     height: auto !important;
   }
-
+  
   /* Fix login button display on desktop */
   @media (min-width: 769px) {
     .header-login-button,
@@ -135,11 +132,9 @@
     }
   }
   
-  /* Fix logo container to fit image properly and ensure it's aligned to the left */
+  /* Fix logo container to fit image properly */
   .sip-header .max-w-7xl a:first-child .flex.items-center.gap-2 {
     align-items: center;
-    padding-left: 0 !important;
-    margin-left: 0 !important;
   }
   
   /* Reduce logo container padding */

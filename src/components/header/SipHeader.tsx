@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
@@ -60,7 +59,7 @@ export const SipHeader = () => {
       <div className="w-full bg-white py-2 px-4 md:px-8 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo aligned to the extreme left */}
-          <Link to="/" className="flex items-center mr-auto pl-0">
+          <Link to="/" className="flex items-center mr-auto">
             <Logo size="md" className="mobile-logo-container" />
           </Link>
           
