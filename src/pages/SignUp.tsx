@@ -34,16 +34,16 @@ const SignUp = () => {
 
     try {
       // First check if the email is already registered
-      // Use a different approach to avoid the TypeScript error
-      const { data, error: checkError } = await supabase
+      // Use a count query to avoid TypeScript inference issues
+      const { count, error: checkError } = await supabase
         .from('profiles')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('email', email);
       
       if (checkError) {
         console.warn("Error checking existing email:", checkError);
         // Continue with signup process even if check fails
-      } else if (data && data.length > 0) {
+      } else if (count && count > 0) {
         throw new Error('An account with this email already exists. Please use a different email or try logging in.');
       }
 
