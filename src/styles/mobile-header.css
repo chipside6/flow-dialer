@@ -25,17 +25,20 @@
   
   /* Public pages with SipHeader should remove extra spacing */
   .sip-header ~ main section:first-child {
-    padding-top: 0 !important;
+    padding-top: 16px !important;
     margin-top: 0 !important;
   }
   
   /* Align logo to extreme left and menu/button to extreme right */
   .sip-header .max-w-7xl {
     justify-content: space-between !important;
+    padding: 0 12px !important;
   }
   
   .sip-header .max-w-7xl a:first-child {
     margin-right: auto !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
   }
   
   .sip-header .max-w-7xl .flex.items-center {
@@ -141,5 +144,12 @@
   .sip-header .max-w-7xl a:first-child .relative.overflow-hidden {
     margin: 0;
     padding: 0;
+  }
+  
+  /* Fix logo alignment on mobile */
+  .sip-header .max-w-7xl a:first-child {
+    display: flex;
+    justify-content: flex-start;
+    width: auto;
   }
 }

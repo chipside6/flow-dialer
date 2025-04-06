@@ -1,8 +1,45 @@
 
 import { Check } from "lucide-react";
 
-// Empty features array since all features were removed
-const features = [];
+// Define features array with actual content
+const features = [
+  {
+    title: "Voice Broadcasting",
+    description: "Reach thousands of contacts with personalized voice messages in minutes.",
+    icon: "📞",
+    imageUrl: "/public/lovable-uploads/ab50b0cb-d3bc-4516-9140-d7a7a3f147d9.png"
+  },
+  {
+    title: "Advanced Call Routing",
+    description: "Route calls to the right team members with intelligent IVR systems.",
+    icon: "🔄",
+    imageUrl: "/public/lovable-uploads/ab50b0cb-d3bc-4516-9140-d7a7a3f147d9.png"
+  },
+  {
+    title: "Real-time Analytics",
+    description: "Monitor campaign performance with detailed analytics and reporting.",
+    icon: "📊",
+    imageUrl: "/public/lovable-uploads/ab50b0cb-d3bc-4516-9140-d7a7a3f147d9.png"
+  },
+  {
+    title: "Contact Management",
+    description: "Organize and manage your contact lists with easy import and export features.",
+    icon: "👥",
+    imageUrl: "/public/lovable-uploads/ab50b0cb-d3bc-4516-9140-d7a7a3f147d9.png"
+  },
+  {
+    title: "Custom Greetings",
+    description: "Record or upload professional greeting messages for your campaigns.",
+    icon: "🎤",
+    imageUrl: "/public/lovable-uploads/ab50b0cb-d3bc-4516-9140-d7a7a3f147d9.png"
+  },
+  {
+    title: "Call Scheduling",
+    description: "Schedule campaigns to run at optimal times for your audience.",
+    icon: "🕒",
+    imageUrl: "/public/lovable-uploads/ab50b0cb-d3bc-4516-9140-d7a7a3f147d9.png"
+  }
+];
 
 export const FeaturesSection = () => {
   return (
@@ -22,6 +59,20 @@ export const FeaturesSection = () => {
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Our platform offers everything you need to make your calling campaigns successful.
           </p>
+        </div>
+        
+        {/* Feature cards grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {features.map((feature, index) => (
+            <FeatureCard 
+              key={index}
+              title={feature.title}
+              description={feature.description}
+              icon={feature.icon}
+              imageUrl={feature.imageUrl}
+              delay={index * 100}
+            />
+          ))}
         </div>
       </div>
     </section>
