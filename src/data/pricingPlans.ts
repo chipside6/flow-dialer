@@ -26,8 +26,7 @@ export const pricingPlans: PricingPlan[] = [
     features: [
       "Limited to 100 calls daily",
       "Limited to 1,000 calls monthly",
-      "Basic features",
-      "No automatic expiration"
+      "Basic features"
     ],
     featuresObj: {
       maxDailyCalls: 100,
