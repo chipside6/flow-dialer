@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription } from "@/hooks/subscription";
 import { PricingPlan } from "@/data/pricingPlans";
 import { Loader2 } from "lucide-react";
 
@@ -17,7 +17,7 @@ export const CurrentSubscription = () => {
     };
     
     loadSubscription();
-  }, []);
+  }, [fetchCurrentSubscription]);
 
   useEffect(() => {
     if (currentPlan) {
@@ -26,7 +26,7 @@ export const CurrentSubscription = () => {
     } else {
       setActivePlan(null);
     }
-  }, [currentPlan]);
+  }, [currentPlan, getPlanById]);
 
   if (isLoading) {
     return (

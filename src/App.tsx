@@ -140,7 +140,7 @@ const App = () => (
                 path="/billing" 
                 element={
                   <ProtectedRoute>
-                    <SubscriptionCheck redirectTo="/dashboard" />
+                    <UpgradePage />
                   </ProtectedRoute>
                 } 
               />
@@ -148,7 +148,7 @@ const App = () => (
                 path="/upgrade" 
                 element={
                   <ProtectedRoute>
-                    <SubscriptionCheck redirectTo="/dashboard" />
+                    <UpgradePage />
                   </ProtectedRoute>
                 } 
               />
