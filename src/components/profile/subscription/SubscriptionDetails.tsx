@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription } from "@/hooks/subscription";
 import { SubscriptionLoading } from "./SubscriptionLoading";
 import { ExpiredTrialView } from "./ExpiredTrialView";
 import { LifetimePlanView } from "./LifetimePlanView";

@@ -1,4 +1,4 @@
 
-import { SubscriptionDetails } from "./subscription";
+import { SubscriptionDetails } from "./subscription/SubscriptionDetails";
 
 export { SubscriptionDetails };
