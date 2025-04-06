@@ -26,22 +26,22 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
         </div>
       )}
       
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle className="text-3xl font-bold text-center">{plan.name}</CardTitle>
-        <CardDescription className="text-center text-lg mt-2">{plan.description}</CardDescription>
+        <CardDescription className="text-center text-lg mt-1">{plan.description}</CardDescription>
       </CardHeader>
       
-      <CardContent>
-        <div className="space-y-5 mb-8">
+      <CardContent className="px-6 py-4">            
+        <div className="space-y-4 mb-8">
           {plan.features.map((feature, idx) => (
-            <div key={idx} className="flex items-center gap-4">
-              <Circle className="h-5 w-5 text-primary/50 flex-shrink-0" fill="#e6f7ff" strokeWidth={0} />
+            <div key={idx} className="flex items-start gap-3">
+              <Circle className="h-5 w-5 text-primary/50 flex-shrink-0 mt-0.5" fill="#e6f7ff" strokeWidth={0} />
               <span className="text-base text-muted-foreground">{feature}</span>
             </div>
           ))}
         </div>
         
-        <div className="mt-10 mb-6 text-center">
+        <div className="mt-8 mb-10 text-center">
           <div className="flex flex-col items-center">
             <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-primary">${plan.price}</span>
             {!plan.isLifetime && (
@@ -53,13 +53,13 @@ export const PlanCard = ({ plan, onSelect }: PlanCardProps) => {
         </div>
       </CardContent>
       
-      <CardFooter>
+      <CardFooter className="pb-6 pt-0">
         <Button 
           className="w-full rounded-full py-6 text-lg"
           onClick={() => onSelect(plan)}
           variant={plan.isTrial ? "orange" : "default"}
         >
-          {plan.isTrial ? 'Start Free Trial' : 'Subscribe Now'}
+          {plan.isTrial ? 'Start Free Trial' : 'Get Lifetime Access'}
         </Button>
       </CardFooter>
     </Card>

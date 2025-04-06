@@ -30,19 +30,19 @@ export const PricingSection = () => {
               )}
               
               <div className="p-6">
-                <h3 className="text-2xl font-bold text-center mb-3">{plan.name}</h3>
-                <p className="text-muted-foreground text-center mb-6">{plan.description}</p>
+                <h3 className="text-2xl font-bold text-center mb-2">{plan.name}</h3>
+                <p className="text-muted-foreground text-center mb-4">{plan.description}</p>
                 
-                <div className="space-y-5 mb-8">
+                <div className="space-y-4 mb-8">
                   {plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-4">
-                      <Circle className="h-5 w-5 text-primary/50 flex-shrink-0" fill="#e6f7ff" strokeWidth={0} />
+                    <div key={idx} className="flex items-start gap-3">
+                      <Circle className="h-5 w-5 text-primary/50 flex-shrink-0 mt-0.5" fill="#e6f7ff" strokeWidth={0} />
                       <span className="text-base text-muted-foreground">{feature}</span>
                     </div>
                   ))}
                 </div>
                 
-                <div className="mt-10 mb-6 text-center">
+                <div className="mt-8 mb-10 text-center">
                   {plan.price === 0 ? (
                     <span className="text-5xl font-bold">Free</span>
                   ) : (
