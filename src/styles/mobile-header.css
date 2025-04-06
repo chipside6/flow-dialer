@@ -102,4 +102,39 @@
     height: 2rem !important;
     width: 2rem !important;
   }
+  
+  /* Fix support page header spacing */
+  body[data-page="support"] header {
+    margin-bottom: 0 !important;
+  }
+  
+  /* Adjust main content when on support page */
+  body[data-page="support"] main {
+    padding-top: 70px !important;
+  }
+  
+  /* Fix navbar height to match reference image */
+  header.fixed {
+    height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 16px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Fix login/get started button positioning */
+  header .flex.items-center.gap-2 {
+    margin-right: auto !important;
+    padding-left: 0 !important;
+  }
+  
+  /* Fix right side buttons */
+  header .button, 
+  header a[href="/login"],
+  header a[href="/signup"] {
+    font-size: 14px !important;
+    padding: 6px 12px !important;
+    height: auto !important;
+    margin: 0 4px !important;
+  }
 }

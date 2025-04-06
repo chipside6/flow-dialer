@@ -3,28 +3,37 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useEffect } from "react";
 
 const Support = () => {
+  // Add a data attribute to body for page-specific styling
+  useEffect(() => {
+    document.body.setAttribute('data-page', 'support');
+    return () => {
+      document.body.removeAttribute('data-page');
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-20 md:pt-32">
-        <section className="pb-16 md:pb-20 px-6 md:px-10">
+      <main className="pt-16 md:pt-24">
+        <section className="pb-10 md:pb-16 px-6 md:px-10">
           <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-6">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight mb-4">
               We're Here to Help
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-md md:text-lg text-muted-foreground max-w-3xl mx-auto">
               Get the support you need with our dedicated team ready to assist you.
             </p>
           </div>
         </section>
         
-        <section className="pb-24 px-6 md:px-10">
+        <section className="pb-20 px-6 md:px-10">
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-              <div className="bg-card rounded-2xl p-8 border border-border/50 shadow-sm">
-                <h2 className="text-2xl font-display font-bold mb-6">Contact Support</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
+              <div className="bg-card rounded-2xl p-6 md:p-8 border border-border/50 shadow-sm">
+                <h2 className="text-xl md:text-2xl font-display font-bold mb-6">Contact Support</h2>
                 <form className="space-y-6">
                   <div className="space-y-2">
                     <label htmlFor="name" className="text-sm font-medium">Name</label>
@@ -54,8 +63,8 @@ const Support = () => {
               
               <div className="space-y-10">
                 <div>
-                  <h2 className="text-2xl font-display font-bold mb-6">Frequently Asked Questions</h2>
-                  <div className="space-y-6">
+                  <h2 className="text-xl md:text-2xl font-display font-bold mb-6">Frequently Asked Questions</h2>
+                  <div className="space-y-4 md:space-y-6">
                     {[
                       {
                         question: "How do I reset my password?",
@@ -74,7 +83,7 @@ const Support = () => {
                         answer: "Absolutely. We use end-to-end encryption for all communications and follow strict data protection protocols."
                       }
                     ].map((faq, index) => (
-                      <div key={index} className="bg-secondary/50 rounded-xl p-6">
+                      <div key={index} className="bg-secondary/50 rounded-xl p-4 md:p-6">
                         <h3 className="font-medium mb-2">{faq.question}</h3>
                         <p className="text-muted-foreground text-sm">{faq.answer}</p>
                       </div>
@@ -83,7 +92,7 @@ const Support = () => {
                 </div>
                 
                 <div>
-                  <h2 className="text-2xl font-display font-bold mb-6">Additional Resources</h2>
+                  <h2 className="text-xl md:text-2xl font-display font-bold mb-6">Additional Resources</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
                       {

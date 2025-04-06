@@ -8,6 +8,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { useAuth } from '@/contexts/auth';
 import LogoutButton from '@/components/LogoutButton';
 import { Logo } from '@/components/ui/Logo';
+import { useLocation } from 'react-router-dom';
 
 interface PublicNavbarProps {
   isScrolled: boolean;
@@ -17,18 +18,17 @@ interface PublicNavbarProps {
 
 export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen }: PublicNavbarProps) => {
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
+  
+  // Add a data attribute to body for page-specific styling
+  if (typeof document !== 'undefined') {
+    document.body.setAttribute('data-page', location.pathname.replace('/', '') || 'home');
+  }
   
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 py-4 ${isScrolled ? 'bg-background/80 backdrop-blur-sm shadow-sm border-b' : 'border-transparent'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-4 py-2 ${isScrolled ? 'bg-background/80 backdrop-blur-sm shadow-sm border-b' : 'border-transparent bg-background'}`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted"
-            aria-label="Open mobile menu"
-          >
-            <Menu size={24} />
-          </button>
           <Link 
             to={isAuthenticated ? "/dashboard" : "/"} 
             className="flex items-center gap-2"
@@ -43,7 +43,7 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
           </nav>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {isAuthenticated ? (
             <>
               <Button variant="ghost" asChild className="hidden md:flex">
@@ -53,15 +53,21 @@ export const PublicNavbar = ({ isScrolled, isMobileMenuOpen, setIsMobileMenuOpen
             </>
           ) : (
             <>
-              <Button variant="ghost" asChild className="hidden md:flex">
+              <Button variant="ghost" asChild>
                 <Link to="/login">
-                  <LogIn className="h-4 w-4 mr-2" />
                   <span>Log In</span>
                 </Link>
               </Button>
               <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full" asChild>
                 <Link to="/signup">Get Started</Link>
               </Button>
+              <button
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="md:hidden p-2 flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted ml-2"
+                aria-label="Open mobile menu"
+              >
+                <Menu size={24} />
+              </button>
             </>
           )}
         </div>
