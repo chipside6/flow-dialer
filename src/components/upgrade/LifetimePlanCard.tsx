@@ -51,6 +51,7 @@ export const LifetimePlanCard: React.FC<LifetimePlanCardProps> = ({
           className="w-full rounded-full py-4 md:py-6 text-base md:text-lg"
           onClick={onSelectPlan}
           disabled={isProcessing}
+          variant="success"
         >
           Get Lifetime Access
         </Button>

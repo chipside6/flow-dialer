@@ -63,7 +63,7 @@ export const PricingSection = () => {
                 <Link to={plan.price === 0 ? "/signup" : "/billing"}>
                   <Button 
                     className="w-full rounded-full py-6 text-lg mt-4"
-                    variant={plan.isTrial ? "orange" : "default"}
+                    variant={plan.isTrial ? "orange" : plan.price === 0 ? "orange" : "success"}
                   >
                     {plan.price === 0 ? 'Start Free Trial' : 'Get Lifetime Access'}
                   </Button>

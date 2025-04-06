@@ -108,6 +108,7 @@ const UpgradePage = () => {
                   className="w-full rounded-full py-6 text-lg mt-4"
                   onClick={handleSelectPlan}
                   disabled={isProcessing}
+                  variant="success"
                 >
                   Get Lifetime Access
                 </Button>
