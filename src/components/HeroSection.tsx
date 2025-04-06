@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 export const HeroSection = () => {
   return (
-    <section className="pt-36 md:pt-44 pb-6 md:pb-16 px-4 md:px-10 overflow-hidden relative">
+    <section className="pt-24 md:pt-32 pb-6 md:pb-16 px-4 md:px-10 overflow-hidden relative">
       {/* Background gradient shapes */}
       <div className="absolute inset-0 overflow-hidden -z-10">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-sky-100 to-blue-50 opacity-70"></div>
@@ -14,8 +14,8 @@ export const HeroSection = () => {
       </div>
       
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col items-center text-center">
-          <div className="max-w-2xl mx-auto z-10">
+        <div className="flex flex-col md:flex-row items-center">
+          <div className="md:w-1/2 z-10 mb-10 md:mb-0">
             <div className="inline-block animate-fade-in">
               <span className="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-600 text-xs font-medium tracking-wide mb-4 mt-6">
                 Modern Communication Platform
@@ -30,7 +30,7 @@ export const HeroSection = () => {
               A cutting-edge communication tool with a simple interface to transform the way you connect with others.
             </p>
             
-            <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 justify-center">
+            <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 sm:justify-start">
               <Button size="sm" className="rounded-full px-6 bg-sky-500 hover:bg-sky-600 group" asChild>
                 <Link to="/signup">
                   Try for Free
@@ -43,6 +43,16 @@ export const HeroSection = () => {
                 </Link>
               </Button>
             </div>
+          </div>
+          
+          <div className="md:w-1/2 flex justify-center">
+            <img 
+              src="/public/lovable-uploads/ebae8c85-b3d8-4542-8f0d-eadb9ab31801.png" 
+              alt="Call center agent working at desk" 
+              className="w-full max-w-md object-contain rounded-lg shadow-sm"
+              width={600}
+              height={600}
+            />
           </div>
         </div>
       </div>
