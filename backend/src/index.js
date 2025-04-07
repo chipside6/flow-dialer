@@ -1,64 +1,42 @@
-
 const express = require('express');
 const cors = require('cors');
-const { pool } = require('./config/database');
-const authMiddleware = require('./middleware/auth');
-const errorHandler = require('./middleware/error');
+const authRoutes = require('./routes/auth');
+const campaignRoutes = require('./routes/campaigns');
+const sipProvidersRoutes = require('./routes/sipProviders');
+const contactListsRoutes = require('./routes/contactLists');
+const transferNumbersRoutes = require('./routes/transferNumbers');
+const greetingFilesRoutes = require('./routes/greetingFiles');
+const profilesRoutes = require('./routes/profiles');
+const subscriptionsRoutes = require('./routes/subscriptions');
+const configsRoutes = require('./routes/configs');
+const databaseRoutes = require('./routes/database');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
-// Enable CORS
+// Middleware
 app.use(cors());
-
-// Parse JSON request bodies
 app.use(express.json());
 
-// Simple health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'API is healthy' });
-});
-
-// Middleware to check database connection
-app.use(async (req, res, next) => {
-  try {
-    await pool.query('SELECT 1');
-    next();
-  } catch (error) {
-    console.error('Database connection error:', error);
-    res.status(500).json({ error: true, message: 'Database connection failed' });
-  }
-});
-
-// Import routes
-const authRoutes = require('./routes/auth');
-const profilesRoutes = require('./routes/profiles');
-const campaignsRoutes = require('./routes/campaigns/index');
-const contactListsRoutes = require('./routes/contactLists');
-const greetingFilesRoutes = require('./routes/greetingFiles');
-const transferNumbersRoutes = require('./routes/transferNumbers');
-const sipProvidersRoutes = require('./routes/sipProviders');
-const subscriptionsRoutes = require('./routes/subscriptions');
-const configsRoutes = require('./routes/configs/index');
-
-// Use authentication middleware (example, apply to specific routes)
-// app.use('/api/profiles', authMiddleware);
-
-// Use routes
-app.use('/api/auth', authRoutes);
-app.use('/api/profiles', profilesRoutes);
-app.use('/api/campaigns', campaignsRoutes);
-app.use('/api/contact-lists', contactListsRoutes);
-app.use('/api/greeting-files', greetingFilesRoutes);
-app.use('/api/transfer-numbers', transferNumbersRoutes);
-app.use('/api/sip-providers', sipProvidersRoutes);
-app.use('/api/subscriptions', subscriptionsRoutes);
-app.use('/api/configs', configsRoutes);
-
-// Error handling middleware
-app.use(errorHandler);
+// Register routes
+app.use('/auth', authRoutes);
+app.use('/campaigns', campaignRoutes);
+app.use('/sip-providers', sipProvidersRoutes);
+app.use('/contact-lists', contactListsRoutes);
+app.use('/transfer-numbers', transferNumbersRoutes);
+app.use('/greeting-files', greetingFilesRoutes);
+app.use('/profiles', profilesRoutes);
+app.use('/subscriptions', subscriptionsRoutes);
+app.use('/configs', configsRoutes);
+app.use('/database', databaseRoutes); // Add this line to include database utilities
 
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
