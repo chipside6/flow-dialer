@@ -35,10 +35,23 @@ export const useBackgroundDialer = (campaignId: string) => {
       setIsLoadingCampaign(true);
       
       try {
-        // Select necessary fields including port_number
+        // First check if port_number column exists by examining the table structure
+        const { error: structureError } = await supabase
+          .from('campaigns')
+          .select('port_number')
+          .limit(1);
+        
+        // If port_number doesn't exist, we need to handle this case
+        const includePortNumber = !structureError;
+        
+        // Select necessary fields - dynamically adjust the query based on column existence
+        const selectFields = includePortNumber 
+          ? 'contact_list_id, transfer_number, port_number' 
+          : 'contact_list_id, transfer_number';
+          
         const { data, error } = await supabase
           .from('campaigns')
-          .select('contact_list_id, transfer_number, port_number')
+          .select(selectFields)
           .eq('id', campaignId)
           .single();
         
@@ -63,8 +76,9 @@ export const useBackgroundDialer = (campaignId: string) => {
             handleFormChange("transferNumber", data.transfer_number);
           }
           
-          // Set port number from campaign or default to 1 - using safe access
-          const portNumber = data.port_number ?? 1;
+          // Set port number from campaign or default to 1
+          // Safe access with nullish coalescing to handle undefined or non-existent column
+          const portNumber = (data as any).port_number ?? 1;
           handleFormChange("portNumber", portNumber);
         }
       } catch (err) {
