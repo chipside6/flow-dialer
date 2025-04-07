@@ -53,33 +53,22 @@ export const useBackgroundDialer = (campaignId: string) => {
           return;
         }
         
-        // Create a function to check if a column exists in a table
-        const checkColumnExists = async (table: string, column: string): Promise<boolean> => {
-          try {
-            // Query for just this column - if it exists, no error will be thrown
-            const { data, error } = await supabase
-              .rpc('column_exists', { table_name: table, column_name: column });
-              
-            // If we get an RPC error, the function might not exist - fall back to a direct query
-            if (error) {
-              // Try a direct query instead
-              const { error: directQueryError } = await supabase
-                .from(table)
-                .select(column)
-                .limit(1);
-                
-              return !directQueryError;
-            }
+        // Check if port_number column exists in campaigns table using the new function
+        let portNumberExists = false;
+        try {
+          const { data, error } = await supabase
+            .rpc('column_exists', { 
+              table_name: 'campaigns', 
+              column_name: 'port_number' 
+            });
             
-            return data === true;
-          } catch (err) {
-            console.log(`Error checking if column ${column} exists in ${table}:`, err);
-            return false;
+          if (!error && data !== null) {
+            portNumberExists = data;
           }
-        };
-        
-        // Check if port_number column exists in campaigns table
-        const portNumberExists = await checkColumnExists('campaigns', 'port_number');
+        } catch (err) {
+          console.log("Error checking if port_number column exists:", err);
+          portNumberExists = false;
+        }
         
         // Now fetch the basic campaign data we know exists
         const { data: basicData, error: basicError } = await supabase

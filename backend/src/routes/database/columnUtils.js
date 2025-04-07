@@ -20,6 +20,7 @@ const checkColumnExists = async (req, res) => {
       [table, column]
     );
     
+    // In MySQL, the result would be { column_exists: 0 } or { column_exists: 1 }
     const exists = result.length > 0 && result[0].column_exists === 1;
     
     res.status(200).json({ exists });
@@ -29,6 +30,31 @@ const checkColumnExists = async (req, res) => {
   }
 };
 
+/**
+ * Get all columns of a table
+ */
+const getTableColumns = async (req, res) => {
+  const { table } = req.params;
+  
+  try {
+    // Use information_schema to get all columns
+    const [columns] = await pool.query(
+      `SELECT column_name, data_type 
+       FROM information_schema.columns 
+       WHERE table_schema = 'public' 
+       AND table_name = ?
+       ORDER BY ordinal_position`,
+      [table]
+    );
+    
+    res.status(200).json({ columns });
+  } catch (error) {
+    console.error('Error getting table columns:', error);
+    res.status(500).json({ error: true, message: 'Error getting table columns' });
+  }
+};
+
 module.exports = {
-  checkColumnExists
+  checkColumnExists,
+  getTableColumns
 };
