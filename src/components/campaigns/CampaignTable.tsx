@@ -1,88 +1,106 @@
 
 import React from "react";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { CampaignItem } from "./CampaignItem";
-import { useCampaignContext } from "@/contexts/campaign/CampaignContext";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, AlertTriangle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useSubscription } from "@/hooks/subscription";
+import { MoreHorizontal, PlayCircle, PauseCircle, Trash2 } from "lucide-react";
+import { badgeVariantFromStatus } from "@/utils/campaignUtils";
+import { Badge } from "@/components/ui/badge";
+import { useCampaignContext } from "@/contexts/campaign/CampaignContext";
+import { formatDistanceToNow } from "date-fns";
+import { EmptyCampaignState } from "@/components/dashboard/EmptyCampaignState";
 
-export const CampaignTable: React.FC = () => {
-  const { campaigns } = useCampaignContext();
-  const navigate = useNavigate();
-  const { currentPlan, trialExpired, isLoading: subscriptionLoading } = useSubscription();
-  
-  // Check if user can create campaigns - only show upgrade notice when we're sure about subscription status
-  const canCreateCampaigns = currentPlan === 'lifetime' || 
-                          (currentPlan === 'trial' && !trialExpired);
-  const subscriptionChecked = !subscriptionLoading;
+export const CampaignTable = () => {
+  const { 
+    campaigns, 
+    selectedCampaignId, 
+    setSelectedCampaignId,
+    startCampaign,
+    pauseCampaign,
+    deleteCampaign
+  } = useCampaignContext();
 
-  const handleCreateCampaign = () => {
-    // This should navigate to the campaign creation view
-    navigate('/campaign', { state: { showCreateWizard: true } });
-  };
+  if (!campaigns.length) {
+    return <EmptyCampaignState />;
+  }
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="overflow-auto campaign-table-container">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[30%] whitespace-nowrap">Name</TableHead>
-            <TableHead className="w-[15%] text-center whitespace-nowrap">Execution</TableHead>
-            <TableHead className="w-[30%] text-center whitespace-nowrap">Progress</TableHead>
-            <TableHead className="text-right w-[25%] whitespace-nowrap">Actions</TableHead>
+            <TableHead className="w-[40%] md:w-[30%]">Campaign</TableHead>
+            <TableHead className="hidden md:table-cell">Created</TableHead>
+            <TableHead className="w-[25%] text-center">Status</TableHead>
+            <TableHead className="w-[15%] md:w-[10%] text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {campaigns.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center py-8">
-                <div className="flex flex-col items-center justify-center space-y-4 mx-auto px-4">
-                  <p className="text-muted-foreground">No campaigns found</p>
-                  
-                  {subscriptionChecked && !canCreateCampaigns ? (
-                    <div className="text-center space-y-2 max-w-md mx-auto">
-                      <div className="flex items-center justify-center gap-2 text-amber-500">
-                        <AlertTriangle className="h-4 w-4" />
-                        <p className="text-sm font-medium">Your trial has expired</p>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Upgrade to lifetime access to create and run campaigns
-                      </p>
-                      <Button 
-                        className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium mx-auto"
-                        onClick={() => navigate('/upgrade')}
-                        size="lg"
-                      >
-                        Upgrade Now
-                      </Button>
-                    </div>
-                  ) : (
-                    subscriptionChecked && (
-                      <div className="text-center mx-auto">
-                        <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto">
-                          Create your first campaign to start making calls
-                        </p>
-                        <Button 
-                          variant="success" 
-                          className="gap-2 px-6 py-3 h-auto text-base rounded-md font-medium mx-auto w-full sm:w-auto"
-                          onClick={handleCreateCampaign}
-                          size="lg"
-                        >
-                          <PlusCircle className="h-5 w-5" /> Create Campaign
-                        </Button>
-                      </div>
-                    )
-                  )}
-                </div>
+          {campaigns.map((campaign) => (
+            <TableRow 
+              key={campaign.id}
+              className={selectedCampaignId === campaign.id ? "bg-muted/50" : undefined}
+              onClick={() => setSelectedCampaignId(campaign.id)}
+            >
+              <TableCell className="font-medium truncate max-w-[200px]">
+                <div className="table-cell-content">{campaign.title}</div>
+              </TableCell>
+              <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
+                {campaign.created_at ? 
+                  formatDistanceToNow(new Date(campaign.created_at), { addSuffix: true }) : 
+                  'Unknown'
+                }
+              </TableCell>
+              <TableCell className="text-center">
+                <Badge variant={badgeVariantFromStatus(campaign.status)} className="capitalize">
+                  {campaign.status}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-card border-border">
+                    {campaign.status !== 'running' && (
+                      <DropdownMenuItem onClick={() => startCampaign(campaign.id)}>
+                        <PlayCircle className="mr-2 h-4 w-4" />
+                        <span>Start Campaign</span>
+                      </DropdownMenuItem>
+                    )}
+                    {campaign.status === 'running' && (
+                      <DropdownMenuItem onClick={() => pauseCampaign(campaign.id)}>
+                        <PauseCircle className="mr-2 h-4 w-4" />
+                        <span>Pause Campaign</span>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem 
+                      onClick={() => deleteCampaign(campaign.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>Delete</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
-          ) : (
-            campaigns.map((campaign) => (
-              <CampaignItem key={campaign.id} campaign={campaign} />
-            ))
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>

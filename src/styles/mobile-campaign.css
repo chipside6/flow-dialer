@@ -47,26 +47,25 @@
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
     margin: 0 auto !important;
-    text-align: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
   }
   
   /* Fix spacing in stats cards */
   .campaign-stats-card .card-content {
     padding: 0.75rem !important;
-    text-align: center !important;
   }
   
   /* Better sizing for stat icons */
   .campaign-stats-card svg {
     height: 1.25rem !important;
     width: 1.25rem !important;
-    margin: 0 auto !important; 
   }
   
   /* Fix spacing in grid layouts */
   .grid.grid-cols-1.md\:grid-cols-2 {
     gap: 0.75rem !important;
-    margin: 0 auto !important;
   }
   
   /* Better tabs display */
@@ -76,87 +75,71 @@
     white-space: nowrap;
     padding-bottom: 0.5rem !important;
     margin-bottom: 0.5rem !important;
+  }
+  
+  /* Fix for campaign stats display */
+  .campaign-stats-card {
+    width: 100% !important;
+    overflow: visible !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Ensure stats icons are visible */
+  .campaign-stats-card .text-primary,
+  .campaign-stats-card .text-green-500,
+  .campaign-stats-card .text-blue-500,
+  .campaign-stats-card .text-destructive {
+    display: inline-flex !important;
+    align-items: center !important;
     justify-content: center !important;
   }
   
-  /* Fix for tables */
-  table {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-    margin: 0 auto !important;
-  }
-  
-  /* Center table headers */
-  th {
-    text-align: center !important;
-  }
-  
-  /* Prevent buttons from wrapping */
-  .campaign-content button {
-    white-space: nowrap;
-    margin: 0 auto;
-  }
-
-  /* Fix for dashboard content overflow */
-  .dashboard-content-wrapper {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-    margin: 0 auto;
-    text-align: center;
-  }
-  
-  /* Fix campaign dashboard view */
-  .campaign-dashboard {
-    max-width: 100%;
-    overflow-x: hidden;
-    margin: 0 auto;
-  }
-
-  /* Fix card spacing */
-  .card {
-    margin-bottom: 1rem;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-  
-  /* Ensure "Create Campaign" button is centered and fully visible */
-  .gap-2 {
-    display: flex;
-    justify-content: center;
-    margin: 0 auto;
-  }
-  
-  /* Center empty state content */
-  .text-center p, .text-center button {
-    margin: 0 auto;
-  }
-  
-  /* Fix for Create Campaign button in empty state */
-  td button[variant="success"],
-  button[variant="success"] {
-    max-width: 100% !important;
+  /* Ensure view numbers buttons are visible */
+  .campaign-stats-card button {
+    padding: 0.5rem !important;
+    font-size: 0.75rem !important;
+    height: auto !important;
     width: auto !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    margin-top: 0.5rem !important;
-    margin-bottom: 0.5rem !important;
-    display: inline-flex !important;
-  }
-  
-  /* Ensure Create Campaign button text is visible */
-  button[variant="success"] span,
-  td button[variant="success"] span {
-    display: inline-block !important;
     white-space: nowrap !important;
   }
-}
+  
+  /* Fix stats cards grid layout */
+  .campaign-stats-card .grid-cols-2 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
 
-/* Dashboard content fixes for all screen sizes */
-.dashboard-content {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  margin: 0 auto;
+  /* Center campaign details text */
+  .campaign-details-card p {
+    margin: 0.25rem 0;
+  }
+
+  /* Fix campaign statistics title */
+  .card-title.text-base {
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    font-weight: 600 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Fix "View Number" buttons text */
+  button span {
+    display: inline !important;
+    visibility: visible !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Fix display of eye icon in view number buttons */
+  button svg.h-3 {
+    margin-right: 0.25rem !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Fix spacing between cards */
+  .space-y-4 > .card {
+    margin-bottom: 1rem !important;
+  }
 }
