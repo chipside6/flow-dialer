@@ -1,3 +1,4 @@
+
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { CTASection } from "@/components/CTASection";
 import { Button } from "@/components/ui/button";
@@ -75,7 +76,7 @@ const Features = () => {
               ))}
             </div>
             
-            <div className="text-center mt-16 mb-8 md:mb-0">
+            <div className="text-center mt-24 mb-8 md:mb-0">
               <Link to="/dashboard">
                 <Button size="lg" className="mx-auto">
                   Explore All Features
