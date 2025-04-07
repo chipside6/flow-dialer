@@ -21,7 +21,7 @@ export const AuthHeader = ({ title, emoji }: AuthHeaderProps) => {
         </button>
       </div>
       
-      <div className="mb-6 text-center">
+      <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-gray-800 flex items-center justify-center gap-2">
           {emoji && <span className="text-2xl">{emoji}</span>} {title}
         </h1>

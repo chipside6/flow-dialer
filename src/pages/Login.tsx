@@ -79,38 +79,40 @@ const Login = () => {
     <AuthContainer>
       <AuthHeader title="Welcome back" emoji="👋" />
       
-      {errorMessage && (
-        <AuthAlert 
-          type="error" 
-          message={errorMessage}
-        />
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6 px-1">
-        <div className="space-y-4">
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="h-12"
-            placeholder="Enter your email"
-            disabled={isLoading}
+      <div className="mt-8">
+        {errorMessage && (
+          <AuthAlert 
+            type="error" 
+            message={errorMessage}
           />
-          
-          <PasswordInput
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-          />
-        </div>
+        )}
 
-        <AuthButton 
-          isLoading={isLoading} 
-          buttonText="Log In"
-        />
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-6 px-1">
+          <div className="space-y-4">
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="h-12"
+              placeholder="Enter your email"
+              disabled={isLoading}
+            />
+            
+            <PasswordInput
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+
+          <AuthButton 
+            isLoading={isLoading} 
+            buttonText="Log In"
+          />
+        </form>
+      </div>
 
       <AuthFooter type="login" />
     </AuthContainer>
