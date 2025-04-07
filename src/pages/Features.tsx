@@ -1,4 +1,3 @@
-
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { CTASection } from "@/components/CTASection";
 import { Button } from "@/components/ui/button";
@@ -63,7 +62,7 @@ const Features = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
               {coreFeatures.map((feature, index) => (
                 <div key={index} className="bg-card border rounded-xl shadow-sm p-8 text-center hover:shadow-md transition-shadow">
                   <div className="flex justify-center">{feature.icon}</div>
@@ -76,7 +75,7 @@ const Features = () => {
               ))}
             </div>
             
-            <div className="text-center mt-36 mb-8 md:mb-0">
+            <div className="text-center mt-8 mb-8 md:mb-0">
               <Link to="/dashboard">
                 <Button size="lg" className="mx-auto">
                   Explore All Features
