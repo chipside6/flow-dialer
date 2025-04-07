@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Campaign } from "@/hooks/useCampaigns";
 import { CampaignTable } from "@/components/campaigns/CampaignTable";
@@ -15,14 +15,27 @@ interface CampaignDashboardProps {
 
 // Inner component that uses the context
 const CampaignDashboardContent = ({ onRefresh }: { onRefresh?: () => void }) => {
-  const { selectedCampaign } = useCampaignContext();
+  const { selectedCampaign, campaigns } = useCampaignContext();
   const { isOnline } = useNetworkStatus();
+  
+  // Log campaigns inside the dashboard for debugging
+  useEffect(() => {
+    console.log("CampaignDashboardContent campaigns:", campaigns);
+  }, [campaigns]);
 
   return (
     <div className="space-y-4 w-full max-w-full overflow-hidden campaign-dashboard">
       <Card className="w-full overflow-hidden">
-        <CardHeader className="bg-muted/40 px-4 py-3">
+        <CardHeader className="bg-muted/40 px-4 py-3 flex flex-row justify-between items-center">
           <CardTitle className="text-base md:text-lg">Active Campaigns</CardTitle>
+          {onRefresh && (
+            <button 
+              onClick={onRefresh}
+              className="text-xs text-muted-foreground hover:text-primary"
+            >
+              Refresh
+            </button>
+          )}
         </CardHeader>
         <CardContent className="p-0 overflow-hidden">
           <div className="w-full overflow-x-auto campaign-table-container">
@@ -43,6 +56,11 @@ const CampaignDashboardContent = ({ onRefresh }: { onRefresh?: () => void }) => 
 
 // Wrapper component that provides the context
 const CampaignDashboard = ({ initialCampaigns = [], onRefresh }: CampaignDashboardProps) => {
+  // Log the initialCampaigns for debugging
+  useEffect(() => {
+    console.log("CampaignDashboard initialCampaigns:", initialCampaigns);
+  }, [initialCampaigns]);
+  
   return (
     <CampaignProvider initialCampaigns={initialCampaigns}>
       <CampaignDashboardContent onRefresh={onRefresh} />

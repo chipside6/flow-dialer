@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { DashboardContent } from '@/components/layout/DashboardContent';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
@@ -12,6 +11,7 @@ import { AlertCircle, RefreshCw, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CampaignDashboard from '@/components/CampaignDashboard';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -19,6 +19,12 @@ const Dashboard = () => {
   const { isOnline } = useNetworkStatus();
   const [retryCount, setRetryCount] = useState(0);
   const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Log campaigns to debug
+  useEffect(() => {
+    console.log("Dashboard campaigns:", campaigns);
+  }, [campaigns]);
   
   // Handle retry
   const handleRetry = () => {
@@ -28,6 +34,21 @@ const Dashboard = () => {
   
   const handleCreateCampaign = () => {
     navigate('/campaign', { state: { showCreateWizard: true } });
+  };
+  
+  // Add a refresh function explicitly for the dashboard
+  const handleRefreshCampaigns = async () => {
+    try {
+      const success = await refreshCampaigns();
+      if (success) {
+        toast({
+          title: "Campaigns refreshed",
+          description: "Your campaign list has been updated."
+        });
+      }
+    } catch (error) {
+      console.error("Error refreshing campaigns:", error);
+    }
   };
   
   return (
@@ -84,15 +105,23 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mx-auto">
                     <div className="bg-primary/10 rounded-lg p-4">
                       <h3 className="font-medium">Active Campaigns</h3>
-                      <p className="text-2xl font-bold mt-2">{campaigns?.length || 0}</p>
+                      <p className="text-2xl font-bold mt-2">{campaigns?.filter(c => c.status === 'running').length || 0}</p>
                     </div>
                     <div className="bg-green-100 rounded-lg p-4">
                       <h3 className="font-medium">Completed Calls</h3>
-                      <p className="text-2xl font-bold mt-2">0</p>
+                      <p className="text-2xl font-bold mt-2">
+                        {campaigns?.reduce((sum, c) => sum + (c.answeredCalls || 0), 0) || 0}
+                      </p>
                     </div>
                     <div className="bg-blue-100 rounded-lg p-4">
                       <h3 className="font-medium">Success Rate</h3>
-                      <p className="text-2xl font-bold mt-2">0%</p>
+                      <p className="text-2xl font-bold mt-2">
+                        {(() => {
+                          const totalCalls = campaigns?.reduce((sum, c) => sum + (c.totalCalls || 0), 0) || 0;
+                          const answered = campaigns?.reduce((sum, c) => sum + (c.answeredCalls || 0), 0) || 0;
+                          return totalCalls > 0 ? `${Math.round((answered / totalCalls) * 100)}%` : '0%';
+                        })()}
+                      </p>
                     </div>
                   </div>
                   
@@ -108,13 +137,28 @@ const Dashboard = () => {
                     </Button>
                   </div>
                   
-                  {/* Recent Campaigns Section */}
+                  {/* Recent Campaigns Section with refresh button */}
                   <div className="mt-6 w-full text-center">
-                    <h3 className="text-lg font-semibold mb-4 text-center">Recent Campaigns</h3>
-                    {(campaigns && campaigns.length > 0) ? (
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-semibold text-center">Recent Campaigns</h3>
+                      <Button 
+                        variant="outline" 
+                        onClick={handleRefreshCampaigns}
+                        size="sm"
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Refresh
+                      </Button>
+                    </div>
+                    
+                    {isLoading ? (
+                      <div className="border rounded-lg p-6 text-center bg-gray-50 mx-auto max-w-lg">
+                        <p className="text-muted-foreground mb-4 text-center">Loading campaigns...</p>
+                      </div>
+                    ) : (campaigns && campaigns.length > 0) ? (
                       <CampaignDashboard 
                         initialCampaigns={campaigns.slice(0, 3) || []} 
-                        onRefresh={refreshCampaigns}
+                        onRefresh={handleRefreshCampaigns}
                       />
                     ) : (
                       <div className="border rounded-lg p-6 text-center bg-gray-50 mx-auto max-w-lg">

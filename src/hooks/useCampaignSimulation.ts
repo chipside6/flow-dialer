@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { Campaign } from "@/types/campaign";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,10 +26,13 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
 
   // Load campaigns from props
   useEffect(() => {
-    setCampaigns(initialCampaigns);
+    if (initialCampaigns.length > 0) {
+      console.log("Setting campaigns from initialCampaigns:", initialCampaigns);
+      setCampaigns(initialCampaigns);
+    }
   }, [initialCampaigns]);
 
-  const startCampaign = async (campaignId: string) => {
+  const startCampaign = useCallback(async (campaignId: string) => {
     // Update campaign status in Supabase
     if (user) {
       try {
@@ -72,9 +76,9 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
       title: "Campaign Started",
       description: "The autodialer is now processing your call list.",
     });
-  };
+  }, [user, toast]);
 
-  const pauseCampaign = async (campaignId: string) => {
+  const pauseCampaign = useCallback(async (campaignId: string) => {
     // Update campaign status in Supabase
     if (user) {
       try {
@@ -113,10 +117,10 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
       title: "Campaign Paused",
       description: "The autodialer has been paused.",
     });
-  };
+  }, [user, toast]);
 
   // Add deleteCampaign function
-  const deleteCampaign = async (campaignId: string) => {
+  const deleteCampaign = useCallback(async (campaignId: string) => {
     // Update campaign status in Supabase
     if (user) {
       try {
@@ -150,7 +154,7 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
       title: "Campaign Deleted",
       description: "The campaign has been successfully deleted.",
     });
-  };
+  }, [user, toast, selectedCampaignId]);
 
   // Simulate campaign progress for demo purposes
   const simulateCampaignProgress = (campaignId: string) => {
