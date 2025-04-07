@@ -116,7 +116,6 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           {profile?.is_admin === true && adminNavItems.length > 0 && (
             <>
               <div className="my-2 px-3">
-                <div className="border-t border-slate-200 dark:border-slate-700"></div>
                 <p className="text-xs uppercase font-semibold text-slate-500 dark:text-slate-400 mt-4 mb-2 px-2">
                   Admin
                 </p>
@@ -133,7 +132,6 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           
           {/* Logout button */}
           <div className="mt-auto pt-4 w-full">
-            <div className="border-t border-slate-200 dark:border-slate-700 mb-4"></div>
             <LogoutButton 
               variant="ghost" 
               className="w-full justify-start py-2 px-3 text-left rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" 
