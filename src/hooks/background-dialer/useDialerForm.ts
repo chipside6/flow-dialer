@@ -4,6 +4,7 @@ import { DialerFormData } from "@/components/background-dialer/types";
 
 export const useDialerForm = () => {
   const [formData, setFormData] = useState<DialerFormData>({
+    sipProviderId: "",
     contactListId: "",
     transferNumber: "",
     maxConcurrentCalls: 3 // Default to 3 concurrent calls

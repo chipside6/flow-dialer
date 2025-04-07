@@ -7,6 +7,7 @@ import { PhoneNumberBulkInput } from "./PhoneNumberBulkInput";
 import { PhoneListActions } from "./PhoneListActions";
 import { PhoneNumberDisplay } from "./PhoneNumberDisplay";
 import { IvrConfigSection } from "./ivr-config/IvrConfigSection";
+import { SipTrunkSection } from "./sip-config/SipTrunkSection";
 import { useAuth } from "@/contexts/auth";
 import { usePhoneListState } from "./hooks/usePhoneListState";
 
@@ -42,6 +43,22 @@ const PhoneNumberList: React.FC<PhoneNumberListProps> = ({ campaignId }) => {
           fileInputRef={state.fileInputRef}
           handleFileChange={actions.handleFileChange}
           audioFile={state.audioFile}
+          isActionInProgress={state.isActionInProgress}
+        />
+        
+        <SipTrunkSection
+          showSipConfig={state.showSipConfig}
+          setShowSipConfig={actions.setShowSipConfig}
+          sipTrunkProvider={state.sipTrunkProvider}
+          setSipTrunkProvider={actions.setSipTrunkProvider}
+          sipUsername={state.sipUsername}
+          setSipUsername={actions.setSipUsername}
+          sipPassword={state.sipPassword}
+          setSipPassword={actions.setSipPassword}
+          sipHost={state.sipHost}
+          setSipHost={actions.setSipHost}
+          sipPort={state.sipPort}
+          setSipPort={actions.setSipPort}
           isActionInProgress={state.isActionInProgress}
         />
         
