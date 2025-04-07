@@ -9,7 +9,6 @@ import {
 interface CallFlowConfig {
   transferNumber: string;
   greetingFile?: string;
-  sipProviderId: string;
 }
 
 interface StartDialingParams extends CallFlowConfig {

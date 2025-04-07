@@ -5,28 +5,22 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Phone } from "lucide-react";
-import { ContactList, DialerFormData, SipProvider } from "./types";
+import { ContactList, DialerFormData } from "./types";
 
 interface DialerFormProps {
-  sipProviders: SipProvider[];
   contactLists: ContactList[];
   formData: DialerFormData;
-  isLoadingProviders?: boolean;
   isLoadingLists?: boolean;
   onChange: (field: string, value: any) => void;
   onStart: () => void;
-  disableSipProviderSelect?: boolean;
 }
 
 const DialerForm: React.FC<DialerFormProps> = ({
-  sipProviders,
   contactLists,
   formData,
-  isLoadingProviders = false,
   isLoadingLists = false,
   onChange,
-  onStart,
-  disableSipProviderSelect = false
+  onStart
 }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,45 +28,12 @@ const DialerForm: React.FC<DialerFormProps> = ({
   };
 
   const isStartDisabled = 
-    !formData.sipProviderId || 
     !formData.contactListId || 
     !formData.transferNumber ||
-    isLoadingProviders || 
     isLoadingLists;
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="sipProviderId">SIP Provider</Label>
-        <Select
-          value={formData.sipProviderId || ""}
-          onValueChange={(value) => onChange("sipProviderId", value)}
-          disabled={isLoadingProviders || disableSipProviderSelect}
-        >
-          <SelectTrigger id="sipProviderId">
-            <SelectValue placeholder="Select a SIP provider" />
-          </SelectTrigger>
-          <SelectContent>
-            {isLoadingProviders ? (
-              <div className="flex items-center justify-center py-2">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                <span>Loading...</span>
-              </div>
-            ) : sipProviders.length === 0 ? (
-              <div className="py-2 px-2 text-sm text-muted-foreground">
-                No SIP providers available
-              </div>
-            ) : (
-              sipProviders.map((provider) => (
-                <SelectItem key={provider.id} value={provider.id}>
-                  {provider.name}
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="space-y-2">
         <Label htmlFor="contactListId">Contact List</Label>
         <Select

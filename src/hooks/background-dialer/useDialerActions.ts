@@ -83,7 +83,6 @@ export const useDialerActions = (
         contactListId: formData.contactListId,
         campaignId,
         transferNumber: formData.transferNumber,
-        // We no longer need sipProviderId as we're using GoIP directly
         greetingFile: formData.greetingFile,
         maxConcurrentCalls // Enforced to 3
       });
