@@ -13,6 +13,7 @@
     border-right: none !important;
     max-width: 280px !important;
     width: 100% !important;
+    overflow-x: hidden !important; /* Prevent horizontal scrolling */
   }
   
   /* Fix sheet overlay */
@@ -26,10 +27,11 @@
     animation-duration: 0.25s !important;
   }
   
-  /* Ensure header has no lines */
+  /* Ensure header has no lines and no overflow */
   [data-sidebar="header"] {
     border-bottom: none !important;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden !important;
   }
   
   /* Remove borders between nav items */
