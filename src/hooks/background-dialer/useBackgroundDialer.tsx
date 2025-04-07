@@ -35,50 +35,74 @@ export const useBackgroundDialer = (campaignId: string) => {
       setIsLoadingCampaign(true);
       
       try {
-        // First check if port_number column exists by examining the table structure
-        const { error: structureError } = await supabase
+        // Use a more basic query first to check if the campaign exists
+        const { data: campaignExists, error: campaignError } = await supabase
           .from('campaigns')
-          .select('port_number')
-          .limit(1);
-        
-        // If port_number doesn't exist, we need to handle this case
-        const includePortNumber = !structureError;
-        
-        // Select necessary fields - dynamically adjust the query based on column existence
-        const selectFields = includePortNumber 
-          ? 'contact_list_id, transfer_number, port_number' 
-          : 'contact_list_id, transfer_number';
-          
-        const { data, error } = await supabase
-          .from('campaigns')
-          .select(selectFields)
+          .select('id')
           .eq('id', campaignId)
           .single();
         
-        if (error) {
-          console.error("Error fetching campaign data:", error);
+        if (campaignError) {
+          console.error("Error fetching campaign:", campaignError);
+          toast({
+            title: "Error loading campaign",
+            description: "Could not find the specified campaign.",
+            variant: "destructive"
+          });
+          setIsLoadingCampaign(false);
+          return;
+        }
+        
+        // Fetch contact_list_id and transfer_number separately to avoid type issues
+        const { data: basicData, error: basicError } = await supabase
+          .from('campaigns')
+          .select('contact_list_id, transfer_number')
+          .eq('id', campaignId)
+          .single();
+          
+        if (basicError) {
+          console.error("Error fetching campaign data:", basicError);
           toast({
             title: "Error loading campaign",
             description: "Could not load campaign settings. Please try again.",
             variant: "destructive"
           });
+          setIsLoadingCampaign(false);
           return;
         }
         
-        if (data) {
-          // Set contact list ID if available - using safe access
-          if (data.contact_list_id) {
-            handleFormChange("contactListId", data.contact_list_id);
+        // Now try to get the port_number in a separate query to handle cases where the column might not exist
+        let portNumber = 1; // Default to port 1
+        
+        try {
+          const { data: portData } = await supabase
+            .from('campaigns')
+            .select('port_number')
+            .eq('id', campaignId)
+            .single();
+            
+          // If we got data and port_number exists, use it
+          if (portData && 'port_number' in portData) {
+            portNumber = portData.port_number || 1;
+          }
+        } catch (portErr) {
+          // If there's an error fetching port_number, just use the default (1)
+          console.log("Port number not available, using default:", portErr);
+        }
+        
+        // Now safely set the form data
+        if (basicData) {
+          // Set contact list ID if available
+          if (basicData.contact_list_id) {
+            handleFormChange("contactListId", basicData.contact_list_id);
           }
           
-          // Set transfer number if available - using safe access
-          if (data.transfer_number) {
-            handleFormChange("transferNumber", data.transfer_number);
+          // Set transfer number if available
+          if (basicData.transfer_number) {
+            handleFormChange("transferNumber", basicData.transfer_number);
           }
           
-          // Set port number from campaign or default to 1
-          // Safe access with nullish coalescing to handle undefined or non-existent column
-          const portNumber = (data as any).port_number ?? 1;
+          // Set the port number we determined
           handleFormChange("portNumber", portNumber);
         }
       } catch (err) {
