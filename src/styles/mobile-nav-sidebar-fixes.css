@@ -21,6 +21,8 @@
     width: 100% !important;
     padding: 12px 16px !important; 
     align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
   }
 
   /* Remove any borders that might still appear */
@@ -28,5 +30,11 @@
   [data-sidebar="content"] nav button,
   [data-sidebar="content"] nav div {
     border: none !important;
+  }
+  
+  /* Fix text alignment in nav items */
+  [data-sidebar="content"] nav a span,
+  .mobile-menu nav a span {
+    text-align: left !important;
   }
 }

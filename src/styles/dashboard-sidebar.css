@@ -36,6 +36,7 @@
   color: hsl(var(--primary));
   border-radius: 0.5rem;
   width: 100%;
+  text-align: center;
 }
 
 .dark .active-nav-item {
@@ -88,6 +89,11 @@
 [data-sidebar="content"] nav div {
   border: none !important;
   width: 100% !important;
+}
+
+/* Fix alignment of nav items */
+[data-sidebar="content"] nav > a {
+  text-align: center;
 }
 
 /* Fixed admin section without divider */
