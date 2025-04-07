@@ -57,16 +57,7 @@ export const CTASection = () => {
           </div>
           
           <div className="md:w-2/5 mt-12 md:mt-0">
-            <div className="relative">
-              <div className="absolute inset-0 bg-white/10 rounded-2xl blur-xl"></div>
-              <div className="relative rounded-2xl overflow-hidden border border-white/20">
-                <img 
-                  src="https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=600&h=800&q=80" 
-                  alt="Person using communication platform"
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
+            {/* Removed the older image that was here */}
           </div>
         </div>
       </div>
