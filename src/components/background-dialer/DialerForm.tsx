@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Phone } from "lucide-react";
-import { ContactList, DialerFormData } from "./types";
+import { ContactList } from "@/components/campaign-wizard/types";
+import { DialerFormData } from "./types";
+import { Phone } from "lucide-react";
 
 interface DialerFormProps {
   contactLists: ContactList[];
   formData: DialerFormData;
-  isLoadingLists?: boolean;
+  isLoadingLists: boolean;
   onChange: (field: string, value: any) => void;
   onStart: () => void;
 }
@@ -18,71 +19,73 @@ interface DialerFormProps {
 const DialerForm: React.FC<DialerFormProps> = ({
   contactLists,
   formData,
-  isLoadingLists = false,
+  isLoadingLists,
   onChange,
   onStart
 }) => {
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    onChange(name, value);
-  };
-
-  const isStartDisabled = 
-    !formData.contactListId || 
-    !formData.transferNumber ||
-    isLoadingLists;
-
+  // Available ports for GoIP (typically 1-4 for a 4-port GoIP)
+  const availablePorts = [1, 2, 3, 4];
+  
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="contactListId">Contact List</Label>
-        <Select
-          value={formData.contactListId || ""}
-          onValueChange={(value) => onChange("contactListId", value)}
-          disabled={isLoadingLists}
-        >
-          <SelectTrigger id="contactListId">
-            <SelectValue placeholder="Select a contact list" />
-          </SelectTrigger>
-          <SelectContent>
-            {isLoadingLists ? (
-              <div className="flex items-center justify-center py-2">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                <span>Loading...</span>
-              </div>
-            ) : contactLists.length === 0 ? (
-              <div className="py-2 px-2 text-sm text-muted-foreground">
-                No contact lists available
-              </div>
-            ) : (
-              contactLists.map((list) => (
+      <div className="space-y-3">
+        <div className="space-y-2">
+          <Label htmlFor="contactList">Contact List</Label>
+          <Select
+            value={formData.contactListId}
+            onValueChange={(value) => onChange("contactListId", value)}
+            disabled={isLoadingLists}
+          >
+            <SelectTrigger id="contactList">
+              <SelectValue placeholder="Select a contact list" />
+            </SelectTrigger>
+            <SelectContent>
+              {contactLists.map(list => (
                 <SelectItem key={list.id} value={list.id}>
-                  {list.name} ({list.contactCount} contacts)
+                  {list.name}
                 </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="transferNumber">Transfer Number</Label>
+          <Input
+            id="transferNumber"
+            placeholder="e.g. +1 (555) 123-4567"
+            value={formData.transferNumber}
+            onChange={(e) => onChange("transferNumber", e.target.value)}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="portNumber">GoIP Port</Label>
+          <Select 
+            value={(formData.portNumber || 1).toString()}
+            onValueChange={(value) => onChange("portNumber", parseInt(value))}
+          >
+            <SelectTrigger id="portNumber">
+              <SelectValue placeholder="Select port" />
+            </SelectTrigger>
+            <SelectContent>
+              {availablePorts.map(port => (
+                <SelectItem key={port} value={port.toString()}>
+                  Port {port}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground mt-1">
+            Select which GoIP port to use for dialing out.
+          </p>
+        </div>
       </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="transferNumber">Transfer Number</Label>
-        <Input
-          id="transferNumber"
-          name="transferNumber"
-          value={formData.transferNumber || ""}
-          onChange={handleInputChange}
-          placeholder="e.g., +1234567890"
-        />
-        <p className="text-xs text-muted-foreground">
-          Number that calls will be transferred to when users press 1
-        </p>
-      </div>
-
-      <Button
+      
+      <Button 
+        className="w-full bg-green-600 hover:bg-green-700 text-white font-medium"
         onClick={onStart}
-        disabled={isStartDisabled}
-        className="w-full"
+        disabled={!formData.contactListId || !formData.transferNumber}
       >
         <Phone className="h-4 w-4 mr-2" />
         Start Dialing

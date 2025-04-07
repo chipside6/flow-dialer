@@ -35,9 +35,10 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({ campaign, contactLists, 
       ]
     },
     {
-      title: "Transfer Number",
+      title: "Transfer Settings",
       items: [
-        { label: "Transfer To", value: campaign.transferNumber || "No transfer number specified" }
+        { label: "Transfer To", value: campaign.transferNumber || "No transfer number specified" },
+        { label: "GoIP Port", value: campaign.portNumber ? `Port ${campaign.portNumber}` : "Port 1 (default)" }
       ]
     },
     {

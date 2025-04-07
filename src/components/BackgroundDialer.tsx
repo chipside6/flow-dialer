@@ -87,6 +87,7 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
               <DialerStatusDisplay
                 jobId={currentJobId}
                 dialStatus={dialStatus}
+                portNumber={formData.portNumber}
                 onStop={stopDialing}
               />
             )}

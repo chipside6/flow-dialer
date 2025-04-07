@@ -1,112 +1,79 @@
 
 import React from "react";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { CampaignData } from "./types";
-import { useAuth } from "@/contexts/auth";
-import { Loader2, AlertTriangle } from "lucide-react";
-import { useTransferNumbers } from "@/hooks/useTransferNumbers";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface TransfersStepProps {
   campaign: CampaignData;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSelectChange?: (name: string, value: string | number) => void;
 }
 
-export const TransfersStep = ({ campaign, onChange }: TransfersStepProps) => {
-  const { isAuthenticated } = useAuth();
-  const { 
-    transferNumbers, 
-    isLoading,
-    error
-  } = useTransferNumbers();
-
-  const handleSelectTransferNumber = (value: string) => {
-    // Create a synthetic event object to pass to onChange
-    const syntheticEvent = {
-      target: {
-        name: "transferNumber",
-        value: value
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    
-    onChange(syntheticEvent);
+export const TransfersStep: React.FC<TransfersStepProps> = ({ 
+  campaign, 
+  onChange,
+  onSelectChange 
+}) => {
+  // Available ports for GoIP (typically 1-4 for a 4-port GoIP)
+  const availablePorts = [1, 2, 3, 4];
+  
+  const handlePortChange = (value: string) => {
+    if (onSelectChange) {
+      onSelectChange('portNumber', parseInt(value));
+    }
   };
-
-  // If user is not authenticated, show a simple message
-  if (!isAuthenticated) {
-    return (
-      <Alert variant="warning" className="mb-6">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          You need to be logged in to view and select transfer numbers.
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
+  
   return (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="transferNumber">Transfer Number</Label>
-        {isLoading ? (
-          <div className="flex items-center mt-2">
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            <span className="text-sm text-muted-foreground">Loading transfer numbers...</span>
-          </div>
-        ) : error ? (
+    <Card>
+      <CardContent className="pt-6 pb-8 space-y-5">
+        <div>
+          <h3 className="text-lg font-medium">Transfer Settings</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Configure where calls should be transferred when a prospect responds.
+          </p>
+        </div>
+        
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Alert variant="destructive" className="mt-2">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <span>{error}</span>
-              </AlertDescription>
-            </Alert>
+            <Label htmlFor="transferNumber">Transfer Number</Label>
             <Input
               id="transferNumber"
               name="transferNumber"
+              placeholder="e.g. +1 (555) 123-4567"
               value={campaign.transferNumber}
               onChange={onChange}
-              placeholder="Enter a phone number for transfers (e.g., +1 555-123-4567)"
-              className="w-full mt-2"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              This is the phone number where live calls will be transferred.
+            </p>
           </div>
-        ) : transferNumbers && transferNumbers.length > 0 ? (
-          <Select
-            value={campaign.transferNumber}
-            onValueChange={handleSelectTransferNumber}
-          >
-            <SelectTrigger id="transferNumber" className="w-full bg-white dark:bg-gray-800">
-              <SelectValue placeholder="Select a transfer number" />
-            </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-              {transferNumbers.map((tn) => (
-                <SelectItem key={tn.id} value={tn.number} className="py-2">
-                  {tn.name} ({tn.number})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <div className="space-y-2 mt-2">
-            <div className="text-sm text-muted-foreground">
-              No transfer numbers available. You can enter a number manually or add transfer numbers in the Transfer Numbers section.
-            </div>
-            <Input
-              id="transferNumber"
-              name="transferNumber"
-              value={campaign.transferNumber}
-              onChange={onChange}
-              placeholder="Enter a phone number for transfers (e.g., +1 555-123-4567)"
-              className="w-full"
-            />
+          
+          <div className="space-y-2">
+            <Label htmlFor="portNumber">GoIP Port</Label>
+            <Select 
+              value={campaign.portNumber?.toString() || "1"} 
+              onValueChange={handlePortChange}
+            >
+              <SelectTrigger id="portNumber">
+                <SelectValue placeholder="Select port" />
+              </SelectTrigger>
+              <SelectContent>
+                {availablePorts.map(port => (
+                  <SelectItem key={port} value={port.toString()}>
+                    Port {port}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Select which GoIP port to use for dialing out.
+            </p>
           </div>
-        )}
-        <p className="text-sm text-muted-foreground mt-1">
-          This is the number that will receive calls when recipients request to speak with someone.
-        </p>
-      </div>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

@@ -84,6 +84,7 @@ export const useDialerActions = (
         campaignId,
         transferNumber: formData.transferNumber,
         greetingFile: formData.greetingFile,
+        portNumber: formData.portNumber || 1, // Use the selected port or default to 1
         maxConcurrentCalls // Enforced to 3
       });
       
@@ -99,7 +100,7 @@ export const useDialerActions = (
       
       toast({
         title: "Dialing Started",
-        description: "The system is now dialing your contact list in the background.",
+        description: `The system is now dialing your contact list using port ${formData.portNumber || 1}.`,
       });
     } catch (error) {
       console.error("Error starting dialing:", error);

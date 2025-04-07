@@ -37,7 +37,7 @@ export const useBackgroundDialer = (campaignId: string) => {
       try {
         const { data, error } = await supabase
           .from('campaigns')
-          .select('contact_list_id, transfer_number')
+          .select('contact_list_id, transfer_number, port_number')
           .eq('id', campaignId)
           .single();
         
@@ -60,6 +60,11 @@ export const useBackgroundDialer = (campaignId: string) => {
           // Set transfer number if available
           if (data.transfer_number) {
             handleFormChange("transferNumber", data.transfer_number);
+          }
+          
+          // Set port number if available
+          if (data.port_number) {
+            handleFormChange("portNumber", data.port_number);
           }
         }
       } catch (err) {

@@ -9,6 +9,7 @@ import {
 interface CallFlowConfig {
   transferNumber: string;
   greetingFile?: string;
+  portNumber?: number;
 }
 
 interface StartDialingParams extends CallFlowConfig {
@@ -94,6 +95,9 @@ export const dialingService = {
       if (!apiUrl || !username || !password) {
         throw new Error('Asterisk API configuration missing');
       }
+      
+      // Log which port is being used for dialing
+      console.log(`Using GoIP port ${params.portNumber || 1} for dialing`);
       
       // In a real implementation, you would make an API call to start the dialing
       // For now, just return a simulated job ID

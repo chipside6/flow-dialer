@@ -6,7 +6,8 @@ export const useDialerForm = () => {
   const [formData, setFormData] = useState<DialerFormData>({
     contactListId: "",
     transferNumber: "",
-    maxConcurrentCalls: 3 // Default to 3 concurrent calls
+    maxConcurrentCalls: 3, // Default to 3 concurrent calls
+    portNumber: 1 // Default to port 1
   });
   
   const [isLoadingTransferNumbers, setIsLoadingTransferNumbers] = useState(false);

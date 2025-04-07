@@ -1,24 +1,14 @@
 
-export interface SipProvider {
-  id: string;
-  name: string;
-}
-
-export interface ContactList {
-  id: string;
-  name: string;
-  contactCount: number;
-}
-
 export interface DialerFormData {
   contactListId: string;
   transferNumber: string;
   greetingFile?: string;
-  maxConcurrentCalls?: number;
+  maxConcurrentCalls: number;
+  portNumber?: number; // Added port number
 }
 
 export interface DialStatus {
-  status: 'idle' | 'running' | 'stopped' | 'completed' | 'failed';
+  status: 'idle' | 'running' | 'completed' | 'failed' | 'stopped';
   totalCalls: number;
   completedCalls: number;
   answeredCalls: number;

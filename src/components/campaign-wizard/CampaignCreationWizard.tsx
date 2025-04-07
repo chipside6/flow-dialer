@@ -77,7 +77,11 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
       </TabsContent>
       
       <TabsContent value="transfers">
-        <TransfersStep campaign={campaign} onChange={handleInputChange} />
+        <TransfersStep 
+          campaign={campaign} 
+          onChange={handleInputChange} 
+          onSelectChange={handleSelectChange}
+        />
       </TabsContent>
       
       <TabsContent value="review">
