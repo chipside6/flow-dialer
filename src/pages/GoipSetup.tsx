@@ -85,29 +85,30 @@ const GoipSetup = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Port</TableHead>
-                            <TableHead>SIP Username</TableHead>
-                            <TableHead>SIP Password</TableHead>
-                            <TableHead>Actions</TableHead>
+                            <TableHead className="w-[100px] py-4">Port</TableHead>
+                            <TableHead className="py-4">SIP Username</TableHead>
+                            <TableHead className="py-4">SIP Password</TableHead>
+                            <TableHead className="py-4">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {credentials.map((cred) => (
                             <TableRow key={cred.port_number}>
-                              <TableCell>Port {cred.port_number}</TableCell>
-                              <TableCell>
-                                <code className="bg-muted px-2 py-1 rounded">{cred.sip_user}</code>
+                              <TableCell className="py-4 font-medium">Port {cred.port_number}</TableCell>
+                              <TableCell className="py-4">
+                                <code className="bg-muted px-3 py-1.5 rounded text-sm">{cred.sip_user}</code>
                               </TableCell>
-                              <TableCell>
-                                <code className="bg-muted px-2 py-1 rounded">{cred.sip_pass}</code>
+                              <TableCell className="py-4">
+                                <code className="bg-muted px-3 py-1.5 rounded text-sm">{cred.sip_pass}</code>
                               </TableCell>
-                              <TableCell>
-                                <div className="flex space-x-2">
+                              <TableCell className="py-4">
+                                <div className="flex flex-wrap gap-2">
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => copyToClipboard(cred.sip_user)}
                                     title="Copy username"
+                                    className="h-9"
                                   >
                                     <Copy className="h-4 w-4 mr-1" /> Username
                                   </Button>
@@ -116,6 +117,7 @@ const GoipSetup = () => {
                                     variant="outline"
                                     onClick={() => copyToClipboard(cred.sip_pass)}
                                     title="Copy password"
+                                    className="h-9"
                                   >
                                     <Copy className="h-4 w-4 mr-1" /> Password
                                   </Button>
