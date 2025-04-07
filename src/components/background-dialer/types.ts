@@ -11,7 +11,6 @@ export interface ContactList {
 }
 
 export interface DialerFormData {
-  sipProviderId: string;
   contactListId: string;
   transferNumber: string;
   greetingFile?: string;

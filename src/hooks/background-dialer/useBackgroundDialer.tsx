@@ -12,13 +12,8 @@ export const useBackgroundDialer = (campaignId: string) => {
   const { formData, handleFormChange, isLoadingTransferNumbers } = useDialerForm();
   const [isLoadingCampaign, setIsLoadingCampaign] = useState(false);
   
-  // Get resources (SIP Providers and Contact Lists)
-  const { 
-    sipProviders, 
-    contactLists, 
-    isLoadingProviders, 
-    isLoadingLists 
-  } = useFetchDialerResources();
+  // Get resources (Contact Lists)
+  const { contactLists, isLoadingLists } = useFetchDialerResources();
   
   // Get dialer action handlers
   const {
@@ -29,7 +24,7 @@ export const useBackgroundDialer = (campaignId: string) => {
     dialStatus
   } = useDialerActions(formData, campaignId);
   
-  // Load campaign data to get the preferred SIP provider
+  // Load campaign data
   useEffect(() => {
     const fetchCampaignData = async () => {
       if (!campaignId) return;
@@ -39,7 +34,7 @@ export const useBackgroundDialer = (campaignId: string) => {
       try {
         const { data, error } = await supabase
           .from('campaigns')
-          .select('contact_list_id, transfer_number, sip_provider_id')
+          .select('contact_list_id, transfer_number')
           .eq('id', campaignId)
           .single();
         
@@ -54,11 +49,6 @@ export const useBackgroundDialer = (campaignId: string) => {
         }
         
         if (data) {
-          // If campaign has a SIP provider set, use it
-          if (data.sip_provider_id) {
-            handleFormChange("sipProviderId", data.sip_provider_id);
-          }
-          
           // Set contact list ID if available
           if (data.contact_list_id) {
             handleFormChange("contactListId", data.contact_list_id);
@@ -91,9 +81,7 @@ export const useBackgroundDialer = (campaignId: string) => {
   
   return {
     // Resources
-    sipProviders,
     contactLists,
-    isLoadingProviders,
     isLoadingLists,
     isLoadingCampaign,
     
