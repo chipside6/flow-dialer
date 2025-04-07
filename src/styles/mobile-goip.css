@@ -1,0 +1,58 @@
+
+/* GoIP setup specific mobile styles */
+@media screen and (max-width: 768px) {
+  /* Better card layout on mobile */
+  .goip-device-card {
+    margin-bottom: 1rem;
+  }
+  
+  /* Improve status badges on mobile */
+  .goip-device-card .badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+  }
+  
+  /* Better tabs on mobile */
+  [role="tablist"] {
+    width: 100%;
+  }
+  
+  /* Fix form field spacing on mobile */
+  .goip-form-field {
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Asterisk server connection badge */
+  .asterisk-status-badge {
+    font-size: 0.7rem;
+    white-space: nowrap;
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* Device status indicators */
+  .device-status {
+    font-size: 0.7rem;
+  }
+  
+  /* Fix GoIP setup page padding */
+  .goip-setup-container {
+    padding: 0.5rem !important;
+  }
+  
+  /* Fix title area on small screens */
+  .goip-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  /* Improve form spacing on mobile */
+  .goip-form-row {
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Better spacing for switches and labels */
+  .goip-switch-container {
+    margin-bottom: 0.5rem;
+  }
+}

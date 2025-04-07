@@ -1,4 +1,3 @@
-
 /* Mobile specific styles */
 
 /* Import the refactored CSS files */
@@ -16,6 +15,7 @@
 @import './mobile-campaign.css'; /* Add the new campaign mobile styles */
 @import './wizard-mobile-fixes.css'; /* Add the new wizard mobile fixes */
 @import './mobile-header.css'; /* Add the mobile header styles */
+@import './mobile-goip.css'; /* Add the GoIP-specific mobile styles */
 
 /* Fix profile page layout specifically */
 @media (max-width: 768px) {
