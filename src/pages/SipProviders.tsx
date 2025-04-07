@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { SipProviderForm } from "@/components/sip/SipProviderForm";
 import { SipProviderTable } from "@/components/sip/SipProviderTable";
 import { useSipProviders } from "@/hooks/useSipProviders";
@@ -8,7 +8,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Loader2, AlertCircle, WifiOff } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 
 const SipProviders = () => {
@@ -36,9 +35,9 @@ const SipProviders = () => {
   
   return (
     <DashboardLayout>
-      <div className="container-fluid">
+      <div className="container-fluid max-w-full px-4 sm:px-6">
         <div className="mb-6">
-          <h1 className={`text-3xl font-bold ${isMobile ? 'pl-2' : ''}`}>SIP Providers</h1>
+          <h1 className={`text-2xl sm:text-3xl font-bold ${isMobile ? 'text-center' : ''} mt-2 sm:mt-0`}>SIP Providers</h1>
         </div>
         
         <SipProviderForm 
@@ -84,7 +83,7 @@ const SipProviders = () => {
           />
         ) : (
           !error && (
-            <>
+            <div className="w-full overflow-hidden max-w-full">
               <SipProviderTable 
                 providers={providers}
                 onEdit={handleEditProvider}
@@ -103,7 +102,7 @@ const SipProviders = () => {
                   <span className="text-muted-foreground">Refreshing data...</span>
                 </div>
               )}
-            </>
+            </div>
           )
         )}
       </div>

@@ -6,6 +6,7 @@
   margin: 0;
   padding: 0;
   text-align: left;
+  overflow-x: hidden;
 }
 
 /* Add container styles for consistent padding */
@@ -27,6 +28,7 @@ body, html {
   min-height: 100%;
   margin: 0;
   padding: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Fix for campaign page specific issues */
@@ -52,6 +54,13 @@ button:focus, a:focus {
   outline-offset: 2px;
 }
 
+/* Image handling */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Global responsive fixes */
 @media (max-width: 768px) {
   .container-fluid {
     padding-right: 0.75rem;
@@ -68,5 +77,27 @@ button:focus, a:focus {
   main {
     min-height: calc(100vh - 120px);
     overflow-y: auto;
+  }
+  
+  /* Fix table display on mobile */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+  
+  /* Fix content scaling */
+  [data-sidebar-inset] > div {
+    max-width: 100%;
+    overflow-x: hidden;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  /* Prevent text cutoff */
+  h1, h2, h3, p {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
   }
 }

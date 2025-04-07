@@ -14,12 +14,15 @@
     overflow-x: auto !important;
     max-width: 100% !important;
     width: 100% !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 0.5rem !important;
   }
 
   /* Ensure tables take full width */
   table {
     min-width: max-content !important;
     width: 100% !important;
+    margin: 0 !important;
   }
   
   /* Prevent text wrapping in buttons within tables */
@@ -35,6 +38,7 @@
     flex-direction: row !important;
     gap: 0.5rem !important;
     align-items: center !important;
+    justify-content: flex-start !important;
   }
   
   /* Give more breathing room between cells */
@@ -61,6 +65,33 @@
   td span.flex.items-center {
     gap: 0.375rem !important;
   }
+  
+  /* Prevent content from being cut off */
+  .overflow-hidden {
+    overflow-x: auto !important;
+  }
+  
+  /* Ensure table card headers don't overflow */
+  .card-header h3, 
+  .card-header h2,
+  .CardHeader-root {
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    hyphens: auto !important;
+    max-width: 100% !important;
+  }
+
+  /* Fix action cell spacing */
+  td:last-child {
+    min-width: 120px !important;
+    padding-right: 1.25rem !important;
+  }
+
+  /* Fix table container padding */
+  .CardContent-root {
+    padding: 0 !important;
+  }
 }
 
 /* Full content button fixes */
@@ -72,3 +103,4 @@ td button.mx-auto {
   padding-left: 1rem !important;
   padding-right: 1rem !important;
 }
+

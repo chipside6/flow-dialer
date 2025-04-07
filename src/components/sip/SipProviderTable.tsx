@@ -28,53 +28,53 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
           Your SIP Providers
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0 overflow-x-auto">
+      <CardContent className="p-0">
         {providers.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
             No SIP providers configured yet. Add your first provider.
           </div>
         ) : (
-          <div className="w-full overflow-x-auto">
+          <div className="w-full table-container overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap pl-6 pr-3 py-4">Name</TableHead>
-                  <TableHead className="whitespace-nowrap px-3 py-4">Host</TableHead>
-                  <TableHead className="whitespace-nowrap px-3 py-4">Username</TableHead>
-                  <TableHead className="whitespace-nowrap px-3 py-4">Added</TableHead>
-                  <TableHead className="whitespace-nowrap px-3 py-4">Status</TableHead>
-                  <TableHead className="whitespace-nowrap px-3 py-4">Actions</TableHead>
+                  <TableHead className="whitespace-nowrap pl-6 py-4">Name</TableHead>
+                  <TableHead className="whitespace-nowrap px-4 py-4">Host</TableHead>
+                  <TableHead className="whitespace-nowrap px-4 py-4">Username</TableHead>
+                  <TableHead className="whitespace-nowrap px-4 py-4">Added</TableHead>
+                  <TableHead className="whitespace-nowrap px-4 py-4">Status</TableHead>
+                  <TableHead className="whitespace-nowrap px-4 py-4 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {providers.map((provider) => (
                   <TableRow key={provider.id}>
-                    <TableCell className="font-medium whitespace-nowrap pl-6 pr-3 py-4">{provider.name}</TableCell>
-                    <TableCell className="whitespace-nowrap px-3 py-4">
+                    <TableCell className="font-medium whitespace-nowrap pl-6 py-4">{provider.name}</TableCell>
+                    <TableCell className="whitespace-nowrap px-4 py-4">
                       {provider.host}:{provider.port}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap px-3 py-4">{provider.username}</TableCell>
-                    <TableCell className="whitespace-nowrap px-3 py-4">
-                      <div className="flex items-center space-x-1.5">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <TableCell className="whitespace-nowrap px-4 py-4">{provider.username}</TableCell>
+                    <TableCell className="whitespace-nowrap px-4 py-4">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <span>{formatDistanceToNow(provider.dateAdded, { addSuffix: true })}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="whitespace-nowrap px-3 py-4">
+                    <TableCell className="whitespace-nowrap px-4 py-4">
                       <div className="flex items-center">
                         {provider.isActive ? (
-                          <span className="flex items-center text-green-600">
-                            <Check className="mr-1.5 h-4 w-4" /> Active
+                          <span className="flex items-center text-green-600 gap-1.5">
+                            <Check className="h-4 w-4 flex-shrink-0" /> Active
                           </span>
                         ) : (
-                          <span className="flex items-center text-red-600">
-                            <X className="mr-1.5 h-4 w-4" /> Inactive
+                          <span className="flex items-center text-red-600 gap-1.5">
+                            <X className="h-4 w-4 flex-shrink-0" /> Inactive
                           </span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="whitespace-nowrap px-3 py-4">
-                      <div className="flex items-center space-x-3">
+                    <TableCell className="whitespace-nowrap px-4 py-4 text-right">
+                      <div className="flex items-center justify-end gap-3">
                         <Button 
                           variant="ghost" 
                           size="sm" 
