@@ -28,7 +28,7 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
           Your SIP Providers
         </CardTitle>
       </CardHeader>
-      <CardContent className="overflow-x-auto">
+      <CardContent className="p-0 overflow-x-auto">
         {providers.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
             No SIP providers configured yet. Add your first provider.
@@ -38,47 +38,49 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap">Name</TableHead>
-                  <TableHead className="whitespace-nowrap">Host</TableHead>
-                  <TableHead className="whitespace-nowrap">Username</TableHead>
-                  <TableHead className="whitespace-nowrap">Added</TableHead>
-                  <TableHead className="whitespace-nowrap">Status</TableHead>
-                  <TableHead className="whitespace-nowrap">Actions</TableHead>
+                  <TableHead className="whitespace-nowrap pl-6 pr-3 py-4">Name</TableHead>
+                  <TableHead className="whitespace-nowrap px-3 py-4">Host</TableHead>
+                  <TableHead className="whitespace-nowrap px-3 py-4">Username</TableHead>
+                  <TableHead className="whitespace-nowrap px-3 py-4">Added</TableHead>
+                  <TableHead className="whitespace-nowrap px-3 py-4">Status</TableHead>
+                  <TableHead className="whitespace-nowrap px-3 py-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {providers.map((provider) => (
                   <TableRow key={provider.id}>
-                    <TableCell className="font-medium whitespace-nowrap">{provider.name}</TableCell>
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className="font-medium whitespace-nowrap pl-6 pr-3 py-4">{provider.name}</TableCell>
+                    <TableCell className="whitespace-nowrap px-3 py-4">
                       {provider.host}:{provider.port}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">{provider.username}</TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      <div className="flex items-center">
-                        <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {formatDistanceToNow(provider.dateAdded, { addSuffix: true })}
+                    <TableCell className="whitespace-nowrap px-3 py-4">{provider.username}</TableCell>
+                    <TableCell className="whitespace-nowrap px-3 py-4">
+                      <div className="flex items-center space-x-1.5">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>{formatDistanceToNow(provider.dateAdded, { addSuffix: true })}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap px-3 py-4">
                       <div className="flex items-center">
                         {provider.isActive ? (
                           <span className="flex items-center text-green-600">
-                            <Check className="mr-1 h-4 w-4" /> Active
+                            <Check className="mr-1.5 h-4 w-4" /> Active
                           </span>
                         ) : (
                           <span className="flex items-center text-red-600">
-                            <X className="mr-1 h-4 w-4" /> Inactive
+                            <X className="mr-1.5 h-4 w-4" /> Inactive
                           </span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
+                    <TableCell className="whitespace-nowrap px-3 py-4">
+                      <div className="flex items-center space-x-3">
                         <Button 
                           variant="ghost" 
                           size="sm" 
                           onClick={() => onToggleStatus(provider.id)}
+                          className="h-8 w-8 p-0"
+                          title={provider.isActive ? "Deactivate" : "Activate"}
                         >
                           {provider.isActive ? (
                             <X className="h-4 w-4 text-red-600" />
@@ -88,15 +90,19 @@ export const SipProviderTable: React.FC<SipProviderTableProps> = ({
                         </Button>
                         <Button 
                           variant="ghost" 
-                          size="sm" 
+                          size="sm"
                           onClick={() => onEdit(provider)}
+                          className="h-8 w-8 p-0"
+                          title="Edit"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
-                          size="sm" 
+                          size="sm"
                           onClick={() => onDelete(provider.id)}
+                          className="h-8 w-8 p-0"
+                          title="Delete"
                         >
                           <Trash className="h-4 w-4 text-destructive" />
                         </Button>
