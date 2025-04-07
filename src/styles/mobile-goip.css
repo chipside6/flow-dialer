@@ -55,49 +55,4 @@
   .goip-switch-container {
     margin-bottom: 0.5rem;
   }
-
-  /* Enhanced credential display on mobile */
-  .credentials-list > div {
-    padding: 1rem 0.75rem;
-  }
-  
-  /* Ensure credential cards stack properly */
-  .credentials-list .grid {
-    gap: 0.5rem;
-  }
-  
-  /* Prevent text overflow in credential fields */
-  .credentials-list .bg-muted {
-    word-break: break-all;
-  }
-  
-  /* Improve copy button positioning */
-  .credentials-list .bg-muted button {
-    margin-left: 0.25rem;
-  }
-}
-
-/* Responsive credential table wrapper */
-.credential-table-wrapper {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: visible;
-}
-
-/* Card styles for credential items */
-.credentials-list > div {
-  transition: all 0.2s ease-in-out;
-}
-
-.credentials-list > div:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-/* Credential field styles */
-.credentials-list .bg-muted {
-  transition: background-color 0.2s ease;
-}
-
-.credentials-list .bg-muted:hover {
-  background-color: rgba(0, 0, 0, 0.07);
 }
