@@ -45,11 +45,11 @@ export const SipHeader = () => {
               (800) 250-6510
             </a>
             <span className="mx-2 text-gray-400">|</span>
-            <Link to="/support" className="text-[#ff6c2c] hover:underline font-medium">
+            <Link to="/support" className="text-[#ff6c2c] hover:underline font-medium flex items-center">
               Support
             </Link>
             <span className="mx-2 text-gray-400">|</span>
-            <Link to="/login" className="text-[#ff6c2c] hover:underline font-medium">
+            <Link to="/login" className="text-[#ff6c2c] hover:underline font-medium flex items-center">
               Customer Login
             </Link>
           </div>
