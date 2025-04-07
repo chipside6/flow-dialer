@@ -15,6 +15,7 @@
 @import './mobile-tables.css'; /* Add the new mobile tables CSS file */
 @import './mobile-campaign.css'; /* Add the new campaign mobile styles */
 @import './wizard-mobile-fixes.css'; /* Add the new wizard mobile fixes */
+@import './mobile-header.css'; /* Add the mobile header styles */
 
 /* Fix profile page layout specifically */
 @media (max-width: 768px) {
@@ -36,5 +37,49 @@
   /* Adjust spacing between icon and text */
   .inline-flex.items-center.gap-2 {
     gap: 8px !important;
+  }
+  
+  /* Modern popup styles for mobile */
+  [role="dialog"],
+  .DialogOverlay,
+  .DialogContent {
+    z-index: 100 !important;
+  }
+  
+  /* Better toast positioning on mobile */
+  [role="status"],
+  .ToastViewport {
+    position: fixed !important;
+    bottom: 1rem !important;
+    top: auto !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    right: 0.75rem !important;
+    z-index: 200 !important;
+  }
+  
+  /* Improve alert/dialog rendering on mobile */
+  .Alert, 
+  .alert,
+  div[role="alert"] {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+  
+  /* Popup animation on mobile */
+  .DialogContent,
+  [role="dialog"] > div {
+    animation: dialogSlideUp 0.2s ease-out !important;
+  }
+  
+  @keyframes dialogSlideUp {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -48%) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
   }
 }
