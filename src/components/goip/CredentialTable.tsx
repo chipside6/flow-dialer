@@ -61,6 +61,14 @@ export const CredentialTable = ({ credentials, isLoading }: CredentialTableProps
     return null;
   }
 
+  // Group credentials by port number to prevent duplicates
+  const uniqueCredentialsByPort = credentials.reduce<Record<number, SipCredential>>((acc, credential) => {
+    acc[credential.port_number] = credential;
+    return acc;
+  }, {});
+
+  const uniqueCredentials = Object.values(uniqueCredentialsByPort);
+
   return (
     <div className="mt-8">
       <h3 className="text-lg font-medium mb-4">Your SIP Credentials</h3>
@@ -76,7 +84,7 @@ export const CredentialTable = ({ credentials, isLoading }: CredentialTableProps
             </TableRow>
           </TableHeader>
           <TableBody>
-            {credentials.map((credential) => (
+            {uniqueCredentials.map((credential) => (
               <TableRow key={credential.id}>
                 <TableCell>Port {credential.port_number}</TableCell>
                 <TableCell>{credential.sip_user}</TableCell>
