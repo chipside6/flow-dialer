@@ -99,7 +99,7 @@ const CampaignPage = () => {
       toast({
         title: "Campaign created",
         description: "Your campaign has been created successfully.",
-        variant: "default" // Changed from "success" to "default" to match allowed variants
+        variant: "default"
       });
       
       // Refresh campaigns list to show the new campaign
