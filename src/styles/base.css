@@ -58,6 +58,13 @@ button:focus, a:focus {
 img {
   max-width: 100%;
   height: auto;
+  display: block; /* Prevents inline spacing issues */
+}
+
+/* Fix image paths for public directory */
+[src^="/public/"] {
+  content: attr(src);
+  content: attr(src) url(attr(src));
 }
 
 /* Global responsive fixes */
@@ -99,5 +106,12 @@ img {
     overflow-wrap: break-word;
     word-wrap: break-word;
     hyphens: auto;
+  }
+  
+  /* Fix image display on small devices */
+  img {
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
   }
 }

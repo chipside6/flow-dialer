@@ -51,7 +51,7 @@ export const CTASection = () => {
           <div className="w-full md:w-2/5 mt-8 md:mt-0 flex justify-center">
             <div className="w-full max-w-sm overflow-hidden rounded-lg shadow-lg border-2 border-white/20">
               <img 
-                src="/public/lovable-uploads/8a65ed15-58e2-4a75-acc6-dfef1e6a3cc9.png" 
+                src="/lovable-uploads/8a65ed15-58e2-4a75-acc6-dfef1e6a3cc9.png" 
                 alt="Call center agent working at desk" 
                 className="w-full h-auto object-cover"
                 loading="lazy"

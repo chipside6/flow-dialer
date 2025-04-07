@@ -47,7 +47,7 @@ export const HeroSection = () => {
           
           <div className="md:w-1/2 flex justify-center px-4 sm:px-0">
             <img 
-              src="/public/lovable-uploads/ebae8c85-b3d8-4542-8f0d-eadb9ab31801.png" 
+              src="/lovable-uploads/ebae8c85-b3d8-4542-8f0d-eadb9ab31801.png" 
               alt="Call center agent working at desk" 
               className="w-full max-w-md object-contain rounded-lg shadow-sm"
               width={600}
