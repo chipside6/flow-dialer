@@ -59,15 +59,15 @@
     border-bottom: none !important;
   }
   
-  /* Only style GoIP setup highlight when it's active */
-  [data-sidebar="content"] a[href="/goip-setup"].active {
+  /* Only style GoIP setup highlight when it's active - now using the active-goip-setup-link class */
+  [data-sidebar="content"] a.active-goip-setup-link {
     background-color: #f0f4ff !important;
     color: #4338ca !important;
     margin: 2px 0 !important;
     width: 100% !important;
   }
   
-  .dark [data-sidebar="content"] a[href="/goip-setup"].active {
+  .dark [data-sidebar="content"] a.active-goip-setup-link {
     background-color: rgba(79, 70, 229, 0.2) !important;
     color: #c7d2fe !important;
   }

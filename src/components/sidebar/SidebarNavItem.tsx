@@ -19,6 +19,9 @@ export const SidebarNavItem = ({ item, onClick }: NavItemProps) => {
   const isActive = location.pathname === item.path || 
                   (item.path !== "/" && location.pathname.startsWith(item.path));
   
+  // We need to specifically track if this is the GoIP setup page for mobile CSS
+  const isGoipSetup = item.path === "/goip-setup";
+  
   return (
     <Link
       to={item.path}
@@ -27,7 +30,7 @@ export const SidebarNavItem = ({ item, onClick }: NavItemProps) => {
         isActive 
           ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300" 
           : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"
-      }`}
+      } ${isGoipSetup && isActive ? "active-goip-setup-link" : ""}`}
     >
       <div className="flex items-center w-full">
         <span className={`w-5 h-5 flex items-center justify-center mr-3 ${isActive ? "text-indigo-600 dark:text-indigo-400" : "text-slate-500 dark:text-slate-400"}`}>

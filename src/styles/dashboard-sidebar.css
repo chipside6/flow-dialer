@@ -96,9 +96,9 @@
   padding-top: 0.5rem;
 }
 
-/* Special highlight for GoIP setup on mobile */
+/* Special highlight for GoIP setup on mobile - ONLY when active */
 @media (max-width: 768px) {
-  a[href="/goip-setup"] {
+  a[href="/goip-setup"].active-goip-setup-link {
     background-color: #f0f4ff !important;
     color: #4338ca !important;
     border-radius: 0.5rem;
@@ -106,7 +106,7 @@
     width: 100% !important;
   }
   
-  .dark a[href="/goip-setup"] {
+  .dark a[href="/goip-setup"].active-goip-setup-link {
     background-color: rgba(79, 70, 229, 0.2) !important;
     color: #c7d2fe !important;
   }
