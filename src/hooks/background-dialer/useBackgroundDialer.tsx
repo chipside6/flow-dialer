@@ -35,7 +35,7 @@ export const useBackgroundDialer = (campaignId: string) => {
       setIsLoadingCampaign(true);
       
       try {
-        // Select necessary fields including port_number
+        // Select necessary fields including port_number (which now exists in the table)
         const { data, error } = await supabase
           .from('campaigns')
           .select('contact_list_id, transfer_number, port_number')

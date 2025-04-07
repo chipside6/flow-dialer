@@ -50,7 +50,8 @@ export const createCampaign = async (campaign: any, userId: string) => {
         transferred_calls: campaign.transferredCalls || 0,
         failed_calls: campaign.failedCalls || 0,
         contact_list_id: campaign.contactListId || null,
-        sip_provider_id: campaign.sipProviderId || null
+        sip_provider_id: campaign.sipProviderId || null,
+        port_number: campaign.portNumber || 1 // Include the port number
       })
       .select()
       .single();

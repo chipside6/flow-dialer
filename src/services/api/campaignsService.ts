@@ -20,6 +20,7 @@ export const fetchCampaigns = async (userId: string) => {
       greetingFileName: item.greeting_file_name || item.greetingFileName || "",
       transferNumber: item.transfer_number || item.transferNumber || "",
       sipProviderId: item.sip_provider_id || item.sipProviderId || "",
+      portNumber: item.port_number || item.portNumber || 1, // Map port number
       progress: item.progress || 0,
       totalCalls: item.total_calls || item.totalCalls || 0,
       answeredCalls: item.answered_calls || item.answeredCalls || 0,
@@ -46,7 +47,8 @@ export const createCampaign = async (campaign: any, userId: string) => {
       method: 'POST',
       body: JSON.stringify({
         ...campaign,
-        user_id: userId
+        user_id: userId,
+        port_number: campaign.portNumber || 1 // Include port number
       })
     });
     

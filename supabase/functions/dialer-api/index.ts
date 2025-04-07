@@ -13,6 +13,7 @@ interface DialRequest {
   transferNumber: string;
   greetingFileUrl?: string;
   maxConcurrentCalls?: number; // This will always be 3 regardless of what's passed
+  portNumber?: number; // Added port number
 }
 
 serve(async (req) => {
@@ -71,7 +72,7 @@ serve(async (req) => {
       case "POST": {
         // Initiate a call
         const requestData = await req.json();
-        const { campaignId, phoneNumber, transferNumber, greetingFileUrl } = requestData;
+        const { campaignId, phoneNumber, transferNumber, greetingFileUrl, portNumber = 1 } = requestData;
         
         // Always use 3 for maxConcurrentCalls regardless of what was passed
         const maxConcurrentCalls = 3;
@@ -103,6 +104,7 @@ serve(async (req) => {
         console.log(`Simulating call to ${phoneNumber} for campaign ${campaignId}`);
         console.log(`Transfer number: ${transferNumber}`);
         console.log(`Max concurrent calls: ${maxConcurrentCalls}`);
+        console.log(`Using GoIP port: ${portNumber}`);
         if (greetingFileUrl) {
           console.log(`Greeting file: ${greetingFileUrl}`);
         }
@@ -126,6 +128,7 @@ serve(async (req) => {
             message: "Call initiated",
             callId: crypto.randomUUID(),
             maxConcurrentCalls,
+            portNumber,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );

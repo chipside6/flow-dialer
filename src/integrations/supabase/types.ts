@@ -19,6 +19,7 @@ export type Database = {
           greeting_file_name: string | null
           greeting_file_url: string | null
           id: string
+          port_number: number | null
           progress: number | null
           sip_provider_id: string | null
           status: string | null
@@ -38,6 +39,7 @@ export type Database = {
           greeting_file_name?: string | null
           greeting_file_url?: string | null
           id?: string
+          port_number?: number | null
           progress?: number | null
           sip_provider_id?: string | null
           status?: string | null
@@ -57,6 +59,7 @@ export type Database = {
           greeting_file_name?: string | null
           greeting_file_url?: string | null
           id?: string
+          port_number?: number | null
           progress?: number | null
           sip_provider_id?: string | null
           status?: string | null

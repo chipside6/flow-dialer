@@ -26,7 +26,8 @@ const createCampaign = async (req, res) => {
       contact_list_id, 
       transfer_number, 
       greeting_file_url, 
-      sip_provider_id 
+      sip_provider_id,
+      port_number
     } = req.body;
     
     if (!name || !status) {
@@ -41,8 +42,9 @@ const createCampaign = async (req, res) => {
         contact_list_id, 
         transfer_number, 
         greeting_file_url, 
-        sip_provider_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)`, 
+        sip_provider_id,
+        port_number
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
       [
         name, 
         description || "", 
@@ -50,7 +52,8 @@ const createCampaign = async (req, res) => {
         contact_list_id || null, 
         transfer_number || null, 
         greeting_file_url || null, 
-        sip_provider_id || null
+        sip_provider_id || null,
+        port_number || 1
       ]
     );
 
