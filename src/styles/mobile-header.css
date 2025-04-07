@@ -157,4 +157,19 @@
     text-overflow: ellipsis;
     display: inline-block;
   }
+  
+  /* Fix phone number alignment in top info bar */
+  .sip-header .w-full.bg-gray-100 .flex.items-center {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+  
+  /* Ensure phone label and number are aligned */
+  .sip-header .text-gray-600,
+  .sip-header a.text-[#ff6c2c] {
+    display: inline-flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+  }
 }

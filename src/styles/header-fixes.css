@@ -169,4 +169,20 @@ header a[href="/login"] {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  
+  /* Fix phone number alignment issues */
+  .sip-header .w-full.bg-gray-100 .flex.items-center {
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+  
+  .sip-header .text-gray-600,
+  .sip-header a.text-[#ff6c2c] {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    line-height: 1.5 !important;
+  }
 }

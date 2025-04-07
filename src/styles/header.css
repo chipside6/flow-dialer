@@ -33,6 +33,20 @@
   background-color: #e95d1e;
 }
 
+/* Phone number and label alignment */
+.sip-header .w-full.bg-gray-100 .flex.items-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sip-header .text-gray-600,
+.sip-header a.text-[#ff6c2c] {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.5;
+}
+
 @media (max-width: 768px) {
   .top-info-bar {
     font-size: 0.8rem;
@@ -46,6 +60,22 @@
   .get-started-button {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
+  }
+  
+  /* Improved phone label alignment on mobile */
+  .sip-header .w-full.bg-gray-100 .flex.items-center {
+    gap: 2px;
+  }
+  
+  .sip-header .text-gray-600,
+  .sip-header a.text-[#ff6c2c] {
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .sip-header a.text-[#ff6c2c] {
+    margin-left: 2px;
   }
 }
 
