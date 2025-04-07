@@ -46,13 +46,15 @@ export const CTASection = () => {
               </Button>
             </div>
             
-            {/* Call center illustration - visible on both mobile and desktop */}
+            {/* Call center illustration - properly responsive */}
             <div className="w-full mt-12 flex justify-center md:justify-start">
-              <img 
-                src="/public/lovable-uploads/8a65ed15-58e2-4a75-acc6-dfef1e6a3cc9.png" 
-                alt="Call center agent working at desk" 
-                className="max-w-xs md:max-w-sm rounded-lg shadow-lg border-2 border-white/20"
-              />
+              <div className="w-full max-w-sm md:max-w-md overflow-hidden rounded-lg shadow-lg border-2 border-white/20">
+                <img 
+                  src="/public/lovable-uploads/8a65ed15-58e2-4a75-acc6-dfef1e6a3cc9.png" 
+                  alt="Call center agent working at desk" 
+                  className="w-full h-auto object-cover"
+                />
+              </div>
             </div>
           </div>
           
