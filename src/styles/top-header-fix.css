@@ -4,7 +4,7 @@
 @media (max-width: 768px) {
   /* Fix for top info bar on mobile */
   .sip-header .w-full.bg-gray-100 {
-    padding: 1px 2px;
+    padding: 1px 1px;
     overflow-x: auto;
     white-space: nowrap;
     -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
@@ -26,28 +26,30 @@
   
   /* Better spacing between the divider elements */
   .sip-header .w-full.bg-gray-100 .text-gray-400 {
-    margin: 0 0.05rem !important;
-    font-size: 0.6rem !important;
+    margin: 0 0.03rem !important;
+    font-size: 0.5rem !important;
   }
   
   /* Reduce spacing between elements */
   .sip-header .w-full.bg-gray-100 .mx-2,
-  .sip-header .w-full.bg-gray-100 .mx-1 {
-    margin-left: 0.05rem !important;
-    margin-right: 0.05rem !important;
+  .sip-header .w-full.bg-gray-100 .mx-1,
+  .sip-header .w-full.bg-gray-100 .mx-0.5 {
+    margin-left: 0.02rem !important;
+    margin-right: 0.02rem !important;
   }
   
   /* Smaller font size for text elements */
   .sip-header .text-gray-600,
   .sip-header a.text-[#ff6c2c] {
-    font-size: 0.6rem !important;
+    font-size: 0.55rem !important;
     white-space: nowrap !important;
-    letter-spacing: -0.02em !important;
+    letter-spacing: -0.025em !important;
   }
   
   /* Specifically adjust the Phone: label */
   .sip-header .text-gray-600 {
     margin-right: 0 !important;
+    padding-right: 0 !important;
   }
   
   /* Minimize space between Phone: and the phone number */

@@ -40,16 +40,16 @@ export const SipHeader = () => {
       <div className="w-full bg-gray-100 py-0.5 px-1 md:px-8 text-xs">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
           <div className="flex items-center">
-            <span className="text-gray-600 flex items-center">Phone:</span>
-            <a href="tel:+18002506510" className="text-[#ff6c2c] hover:underline font-medium flex items-center">
+            <span className="text-gray-600">Phone:</span>
+            <a href="tel:+18002506510" className="text-[#ff6c2c] hover:underline font-medium">
               (800) 250-6510
             </a>
-            <span className="mx-0.5 text-gray-400">|</span>
-            <Link to="/support" className="text-[#ff6c2c] hover:underline font-medium flex items-center">
+            <span className="text-gray-400">|</span>
+            <Link to="/support" className="text-[#ff6c2c] hover:underline font-medium">
               Support
             </Link>
-            <span className="mx-0.5 text-gray-400">|</span>
-            <Link to="/login" className="text-[#ff6c2c] hover:underline font-medium flex items-center">
+            <span className="text-gray-400">|</span>
+            <Link to="/login" className="text-[#ff6c2c] hover:underline font-medium">
               Customer Login
             </Link>
           </div>
