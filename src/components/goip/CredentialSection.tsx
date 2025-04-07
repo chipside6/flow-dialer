@@ -9,6 +9,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { z } from 'zod';
 import { generateRandomPassword } from '@/utils/passwordGenerator';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Schema for the trunk name form
 const trunkNameSchema = z.object({
@@ -33,6 +43,8 @@ export const CredentialSection = ({ userId }: CredentialSectionProps) => {
   const [credentials, setCredentials] = useState<SipCredential[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [credentialToDelete, setCredentialToDelete] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Fetch existing credentials when user loads the page
@@ -134,31 +146,129 @@ export const CredentialSection = ({ userId }: CredentialSectionProps) => {
     }
   };
 
+  // Regenerate a single credential by port number
+  const handleRegenerateCredential = async (portNumber: number) => {
+    if (!userId) return;
+    
+    try {
+      // Find the credential for this port
+      const credential = credentials.find(c => c.port_number === portNumber);
+      if (!credential) return;
+      
+      // Generate new password
+      const newPassword = generateRandomPassword(10);
+      
+      // Update the credential
+      const { error } = await supabase
+        .from('user_trunks')
+        .update({ sip_pass: newPassword })
+        .eq('id', credential.id);
+      
+      if (error) throw error;
+      
+      // Refresh the credentials list
+      await fetchCredentials();
+      
+      toast({
+        title: "Credential regenerated",
+        description: `New password for Port ${portNumber} has been generated.`,
+      });
+    } catch (error: any) {
+      console.error('Error regenerating credential:', error);
+      toast({
+        title: "Error regenerating credential",
+        description: error.message || "Could not regenerate credential. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Delete credential
+  const handleDeleteCredential = (id: string) => {
+    setCredentialToDelete(id);
+    setShowDeleteDialog(true);
+  };
+
+  // Confirm delete credential
+  const confirmDeleteCredential = async () => {
+    if (!credentialToDelete) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_trunks')
+        .delete()
+        .eq('id', credentialToDelete);
+      
+      if (error) throw error;
+      
+      // Refresh the credentials list
+      await fetchCredentials();
+      
+      toast({
+        title: "Credential deleted",
+        description: "The SIP credential has been deleted.",
+      });
+    } catch (error: any) {
+      console.error('Error deleting credential:', error);
+      toast({
+        title: "Error deleting credential",
+        description: error.message || "Could not delete credential. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setShowDeleteDialog(false);
+      setCredentialToDelete(null);
+    }
+  };
+
   return (
-    <Card className="goip-setup-container">
-      <CardHeader>
-        <CardTitle>Generate SIP Credentials</CardTitle>
-        <CardDescription>
-          Generate SIP credentials to connect your GoIP device to our Asterisk server
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <CredentialGenerator 
-          isGenerating={isGenerating} 
-          onGenerate={generateCredentials} 
-        />
-        
-        {isLoading ? (
-          <CredentialTable credentials={[]} isLoading={true} />
-        ) : credentials.length > 0 ? (
-          <>
-            <CredentialTable credentials={credentials} isLoading={false} />
-            <SetupInstructions />
-          </>
-        ) : (
-          <EmptyCredentialsState />
-        )}
-      </CardContent>
-    </Card>
+    <>
+      <Card className="goip-setup-container">
+        <CardHeader>
+          <CardTitle>Generate SIP Credentials</CardTitle>
+          <CardDescription>
+            Generate SIP credentials to connect your GoIP device to our Asterisk server
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CredentialGenerator 
+            isGenerating={isGenerating} 
+            onGenerate={generateCredentials} 
+          />
+          
+          {isLoading ? (
+            <CredentialTable credentials={[]} isLoading={true} />
+          ) : credentials.length > 0 ? (
+            <>
+              <CredentialTable 
+                credentials={credentials} 
+                isLoading={false} 
+                onRegenerateCredential={handleRegenerateCredential}
+                onDeleteCredential={handleDeleteCredential}
+              />
+              <SetupInstructions />
+            </>
+          ) : (
+            <EmptyCredentialsState />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete SIP Credential</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this SIP credential? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCredential}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };

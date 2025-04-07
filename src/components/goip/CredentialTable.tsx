@@ -2,9 +2,17 @@
 import React, { useState } from 'react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, RefreshCcw } from 'lucide-react';
+import { Copy, Check, RefreshCcw, MoreHorizontal, Trash2, ClipboardCopy } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { ASTERISK_CONFIG } from '@/config/productionConfig';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface SipCredential {
   id: string;
@@ -18,9 +26,16 @@ interface SipCredential {
 interface CredentialTableProps {
   credentials: SipCredential[];
   isLoading: boolean;
+  onRegenerateCredential?: (portNumber: number) => void;
+  onDeleteCredential?: (id: string) => void;
 }
 
-export const CredentialTable = ({ credentials, isLoading }: CredentialTableProps) => {
+export const CredentialTable = ({ 
+  credentials, 
+  isLoading, 
+  onRegenerateCredential, 
+  onDeleteCredential 
+}: CredentialTableProps) => {
   const [copyStatus, setCopyStatus] = useState<{[key: number]: boolean}>({});
   const { toast } = useToast();
   const asteriskIp = ASTERISK_CONFIG.apiUrl.split(':')[0]; // Extract just the IP part
@@ -93,21 +108,37 @@ export const CredentialTable = ({ credentials, isLoading }: CredentialTableProps
                 <TableCell>{credential.sip_pass}</TableCell>
                 <TableCell>{asteriskIp}</TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => copyToClipboard(
-                      credential.port_number,
-                      `Server: ${asteriskIp}\nUsername: ${credential.sip_user}\nPassword: ${credential.sip_pass}`
-                    )}
-                  >
-                    {copyStatus[credential.port_number] ? (
-                      <Check className="h-4 w-4 mr-1" />
-                    ) : (
-                      <Copy className="h-4 w-4 mr-1" />
-                    )}
-                    Copy
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <MoreHorizontal className="h-4 w-4" />
+                        Actions
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Credential Options</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => copyToClipboard(
+                        credential.port_number,
+                        `Server: ${asteriskIp}\nUsername: ${credential.sip_user}\nPassword: ${credential.sip_pass}`
+                      )}>
+                        <ClipboardCopy className="h-4 w-4 mr-2" />
+                        Copy Credentials
+                      </DropdownMenuItem>
+                      {onRegenerateCredential && (
+                        <DropdownMenuItem onClick={() => onRegenerateCredential(credential.port_number)}>
+                          <RefreshCcw className="h-4 w-4 mr-2" />
+                          Regenerate
+                        </DropdownMenuItem>
+                      )}
+                      {onDeleteCredential && (
+                        <DropdownMenuItem onClick={() => onDeleteCredential(credential.id)}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
