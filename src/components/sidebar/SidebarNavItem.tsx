@@ -13,7 +13,13 @@ interface NavItemProps {
 
 export const SidebarNavItem = ({ item, onClick }: NavItemProps) => {
   const location = useLocation();
-  const isActive = location.pathname === item.path;
+  
+  // Check for exact match or if the path is a parent route
+  // Example: /greetings should be active when the route is /greetings or /greetings/*
+  const isActive = location.pathname === item.path || 
+                  (item.path !== "/" && location.pathname.startsWith(item.path));
+  
+  // Special case for GoIP Setup
   const isGoipSetup = item.path === "/goip-setup";
   
   return (
