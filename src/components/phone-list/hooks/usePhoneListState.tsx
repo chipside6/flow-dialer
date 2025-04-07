@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { toast } from "@/components/ui/use-toast";
 
@@ -10,12 +9,6 @@ export interface PhoneListState {
   transferNumber: string;
   recordingFile: string;
   audioFile: File | null;
-  sipTrunkProvider: string;
-  sipUsername: string;
-  sipPassword: string;
-  sipHost: string;
-  sipPort: string;
-  showSipConfig: boolean;
   isActionInProgress: boolean;
   fileInputRef: React.RefObject<HTMLInputElement>;
 }
@@ -28,12 +21,6 @@ export interface PhoneListActions {
   setTransferNumber: (number: string) => void;
   setRecordingFile: (file: string) => void;
   setAudioFile: (file: File | null) => void;
-  setSipTrunkProvider: (provider: string) => void;
-  setSipUsername: (username: string) => void;
-  setSipPassword: (password: string) => void;
-  setSipHost: (host: string) => void;
-  setSipPort: (port: string) => void;
-  setShowSipConfig: (show: boolean) => void;
   setIsActionInProgress: (inProgress: boolean) => void;
   handleAddNumber: () => void;
   handleRemoveNumber: (index: number) => void;
@@ -51,12 +38,6 @@ export function usePhoneListState(): [PhoneListState, PhoneListActions] {
   const [transferNumber, setTransferNumber] = useState("");
   const [recordingFile, setRecordingFile] = useState("greeting.wav");
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [sipTrunkProvider, setSipTrunkProvider] = useState("");
-  const [sipUsername, setSipUsername] = useState("");
-  const [sipPassword, setSipPassword] = useState("");
-  const [sipHost, setSipHost] = useState("");
-  const [sipPort, setSipPort] = useState("5060");
-  const [showSipConfig, setShowSipConfig] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -197,15 +178,6 @@ export function usePhoneListState(): [PhoneListState, PhoneListActions] {
       return;
     }
     
-    if (!sipTrunkProvider || !sipUsername || !sipHost) {
-      toast({
-        title: "Missing SIP configuration",
-        description: "Please provide SIP trunk configuration",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     setIsActionInProgress(true);
     
     setTimeout(() => {
@@ -213,29 +185,11 @@ export function usePhoneListState(): [PhoneListState, PhoneListActions] {
       const formattedNumbers = phoneNumbers.map(num => {
         // Remove non-numeric characters for Asterisk
         const cleanNumber = num.replace(/[^0-9+]/g, '');
-        return `exten => s,n,Dial(SIP/${cleanNumber}@${sipTrunkProvider},30,g)`;
+        return `exten => s,n,Dial(SIP/${cleanNumber},30,g)`;
       }).join('\n');
-      
-      // Create SIP trunk configuration
-      const sipConfig = `
-[${sipTrunkProvider}]
-type=peer
-host=${sipHost}
-port=${sipPort}
-username=${sipUsername}
-secret=${sipPassword}
-fromuser=${sipUsername}
-context=from-trunk
-disallow=all
-allow=ulaw
-allow=alaw
-      `.trim();
       
       // Create a dialplan with IVR functionality
       const dialplan = `
-; SIP Provider Configuration
-${sipConfig}
-
 [campaign-${Math.random().toString(36).substring(2, 8)}]
 exten => s,1,Answer()
 exten => s,n,Wait(1)
@@ -323,12 +277,6 @@ exten => 1,n,Hangup()
       transferNumber,
       recordingFile,
       audioFile,
-      sipTrunkProvider,
-      sipUsername,
-      sipPassword,
-      sipHost,
-      sipPort,
-      showSipConfig,
       isActionInProgress,
       fileInputRef
     },
@@ -340,12 +288,6 @@ exten => 1,n,Hangup()
       setTransferNumber,
       setRecordingFile,
       setAudioFile,
-      setSipTrunkProvider,
-      setSipUsername,
-      setSipPassword,
-      setSipHost,
-      setSipPort,
-      setShowSipConfig,
       setIsActionInProgress,
       handleAddNumber,
       handleRemoveNumber,
