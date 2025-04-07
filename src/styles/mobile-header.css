@@ -173,3 +173,27 @@
     white-space: nowrap !important;
   }
 }
+
+/* GoIP setup specific mobile styles */
+@media screen and (max-width: 768px) {
+  /* Better card layout on mobile */
+  .goip-device-card {
+    margin-bottom: 1rem;
+  }
+  
+  /* Improve status badges on mobile */
+  .goip-device-card .badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+  }
+  
+  /* Better tabs on mobile */
+  [role="tablist"] {
+    width: 100%;
+  }
+  
+  /* Fix form field spacing on mobile */
+  .goip-form-field {
+    margin-bottom: 0.75rem;
+  }
+}
