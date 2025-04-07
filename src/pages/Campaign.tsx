@@ -16,6 +16,8 @@ import { useSubscription } from "@/hooks/subscription";
 import { TrialExpiredNotice } from "@/components/campaign/TrialExpiredNotice";
 import { LoadingState } from "@/components/upgrade/LoadingState";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const CampaignPage = () => {
   const location = useLocation();
@@ -26,6 +28,7 @@ const CampaignPage = () => {
   const { isOnline } = useNetworkStatus();
   const [hasAttemptedInitialLoad, setHasAttemptedInitialLoad] = useState(false);
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
+  const { toast } = useToast();
   
   // Check if user can create campaigns based on subscription status
   const canAccessCampaigns = currentPlan === 'lifetime' || 
@@ -55,22 +58,64 @@ const CampaignPage = () => {
   }, [isLoading]);
   
   const handleCreateCampaign = async (newCampaign: CampaignData) => {
-    // Ensure the campaign has a user_id property and matches the Campaign type
-    const campaignWithRequiredFields: Campaign = {
-      id: newCampaign.id || uuidv4(),
-      name: newCampaign.title || 'Untitled Campaign', // Add name for Campaign type
-      title: newCampaign.title,
-      status: (newCampaign.status as Campaign["status"]) || "draft",
-      progress: newCampaign.progress || 0,
-      totalCalls: newCampaign.totalCalls || 0,
-      answeredCalls: newCampaign.answeredCalls || 0,
-      transferredCalls: newCampaign.transferredCalls || 0,
-      failedCalls: newCampaign.failedCalls || 0,
-      user_id: user?.id || '',
-      created_at: new Date().toISOString() // Add created_at for Campaign type
-    };
-    
-    setShowCreateWizard(false);
+    try {
+      // Ensure the campaign has a user_id property and matches the Campaign type
+      const campaignWithRequiredFields = {
+        id: newCampaign.id || uuidv4(),
+        name: newCampaign.title || 'Untitled Campaign', // Add name for Campaign type
+        title: newCampaign.title,
+        status: (newCampaign.status as Campaign["status"]) || "draft",
+        progress: newCampaign.progress || 0,
+        totalCalls: newCampaign.totalCalls || 0,
+        answeredCalls: newCampaign.answeredCalls || 0,
+        transferredCalls: newCampaign.transferredCalls || 0,
+        failedCalls: newCampaign.failedCalls || 0,
+        user_id: user?.id || '',
+        created_at: new Date().toISOString(),
+        description: newCampaign.description || '',
+        contact_list_id: newCampaign.contactListId || null,
+        greeting_file_url: null,
+        port_number: newCampaign.portNumber || 1,
+        transfer_number: newCampaign.transferNumber || null,
+        sip_provider_id: newCampaign.sipProviderId || null
+      };
+      
+      // Save to Supabase
+      const { data, error } = await supabase
+        .from('campaigns')
+        .insert(campaignWithRequiredFields)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error creating campaign:", error);
+        toast({
+          title: "Error creating campaign",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      toast({
+        title: "Campaign created",
+        description: "Your campaign has been created successfully.",
+        variant: "success"
+      });
+      
+      // Refresh campaigns list to show the new campaign
+      await refreshCampaigns();
+      
+      // Hide the wizard
+      setShowCreateWizard(false);
+    } catch (error: any) {
+      console.error("Error in handleCreateCampaign:", error);
+      toast({
+        title: "Error creating campaign",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
+    }
   };
   
   // Only show loading state for initial load, not for subsequent refreshes
