@@ -22,6 +22,7 @@
   }
   
   /* Add spacing for icons */
+  [data-sidebar="content"] nav > a > div > span:first-child,
   [data-sidebar="content"] nav > a > span:first-child,
   [data-sidebar="menu-button"] > span:first-child,
   [data-sidebar="menu-button"] > svg {
