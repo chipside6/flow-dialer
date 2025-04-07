@@ -14,7 +14,8 @@ import {
   CreditCard,
   Settings,
   ShieldCheck,
-  Activity
+  Activity,
+  Network
 } from "lucide-react";
 
 interface DashboardNavProps {
@@ -55,6 +56,11 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
       href: "/sip-providers",
       label: "SIP Providers",
       icon: Server,
+    },
+    {
+      href: "/goip-setup",
+      label: "GoIP Setup",
+      icon: Network,
     },
     {
       href: "/upgrade",

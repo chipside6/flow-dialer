@@ -387,6 +387,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_trunks: {
+        Row: {
+          created_at: string
+          id: string
+          port_number: number
+          sip_pass: string
+          sip_user: string
+          status: string | null
+          trunk_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          port_number: number
+          sip_pass: string
+          sip_user: string
+          status?: string | null
+          trunk_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          port_number?: number
+          sip_pass?: string
+          sip_user?: string
+          status?: string | null
+          trunk_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +29,7 @@ const GreetingsPage = lazy(() => import("./pages/GreetingsPage"));
 const ContactLists = lazy(() => import("./pages/ContactLists"));
 const TransferNumbers = lazy(() => import("./pages/TransferNumbers"));
 const SipProviders = lazy(() => import("./pages/SipProviders"));
+const GoipSetup = lazy(() => import("./pages/GoipSetup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const UpgradePage = lazy(() => import("./pages/UpgradePage"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
@@ -184,6 +184,16 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAdmin>
                     <AsteriskConfigPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Add GoIP Setup route */}
+              <Route 
+                path="/goip-setup" 
+                element={
+                  <ProtectedRoute>
+                    <GoipSetup />
                   </ProtectedRoute>
                 } 
               />
