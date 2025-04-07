@@ -102,7 +102,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           )}
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-3 py-3 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
+      <SidebarContent className="px-3 py-3 overflow-y-auto overflow-x-hidden bg-white dark:bg-slate-800">
         <nav className="w-full flex flex-col space-y-1">
           {navItems.map((item) => (
             <SidebarNavItem 
