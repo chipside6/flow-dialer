@@ -4,7 +4,7 @@
 @media (max-width: 768px) {
   /* Fix for top info bar on mobile */
   .sip-header .w-full.bg-gray-100 {
-    padding: 1px 4px;
+    padding: 1px 2px;
     overflow-x: auto;
     white-space: nowrap;
     -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
@@ -26,22 +26,23 @@
   
   /* Better spacing between the divider elements */
   .sip-header .w-full.bg-gray-100 .text-gray-400 {
-    margin: 0 0.1rem !important;
-    font-size: 0.65rem !important;
+    margin: 0 0.05rem !important;
+    font-size: 0.6rem !important;
   }
   
   /* Reduce spacing between elements */
-  .sip-header .w-full.bg-gray-100 .mx-2 {
-    margin-left: 0.1rem !important;
-    margin-right: 0.1rem !important;
+  .sip-header .w-full.bg-gray-100 .mx-2,
+  .sip-header .w-full.bg-gray-100 .mx-1 {
+    margin-left: 0.05rem !important;
+    margin-right: 0.05rem !important;
   }
   
   /* Smaller font size for text elements */
   .sip-header .text-gray-600,
   .sip-header a.text-[#ff6c2c] {
-    font-size: 0.65rem !important;
+    font-size: 0.6rem !important;
     white-space: nowrap !important;
-    letter-spacing: -0.01em !important;
+    letter-spacing: -0.02em !important;
   }
   
   /* Specifically adjust the Phone: label */
@@ -49,15 +50,16 @@
     margin-right: 0 !important;
   }
   
+  /* Minimize space between Phone: and the phone number */
+  .sip-header a.text-[#ff6c2c] {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  
   /* Adjust vertical alignment */
   .sip-header .w-full.bg-gray-100 .flex.items-center > * {
     display: inline-flex !important;
     align-items: center !important;
-  }
-  
-  /* Ensure phone number and other links are properly spaced */
-  .sip-header a.text-[#ff6c2c] {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
   }
 }
