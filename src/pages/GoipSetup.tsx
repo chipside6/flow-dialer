@@ -161,7 +161,7 @@ const GoipSetup = () => {
                         <p>For each port (1-4), enter the corresponding SIP username and password from the table above.</p>
                         <p className="mt-2">Make sure to set the following parameters:</p>
                         <ul className="list-disc pl-5 mt-1 space-y-1">
-                          <li>SIP Server: <code className="bg-muted px-2 py-1 rounded">grhvoclalziyjbjlhpml.supabase.co</code></li>
+                          <li>SIP Server: <code className="bg-muted px-2 py-1 rounded">YOUR_ASTERISK_SERVER_IP</code></li>
                           <li>SIP Port: <code className="bg-muted px-2 py-1 rounded">5060</code></li>
                           <li>Registration Interval: <code className="bg-muted px-2 py-1 rounded">60</code> (seconds)</li>
                         </ul>
