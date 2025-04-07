@@ -4,6 +4,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { Button } from '@/components/ui/button';
 import { Copy, Check, RefreshCcw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { ASTERISK_CONFIG } from '@/config/productionConfig';
 
 interface SipCredential {
   id: string;
@@ -22,6 +23,7 @@ interface CredentialTableProps {
 export const CredentialTable = ({ credentials, isLoading }: CredentialTableProps) => {
   const [copyStatus, setCopyStatus] = useState<{[key: number]: boolean}>({});
   const { toast } = useToast();
+  const asteriskIp = ASTERISK_CONFIG.apiUrl.split(':')[0]; // Extract just the IP part
 
   // Copy credentials to clipboard
   const copyToClipboard = (portNumber: number, text: string) => {
@@ -89,14 +91,14 @@ export const CredentialTable = ({ credentials, isLoading }: CredentialTableProps
                 <TableCell>Port {credential.port_number}</TableCell>
                 <TableCell>{credential.sip_user}</TableCell>
                 <TableCell>{credential.sip_pass}</TableCell>
-                <TableCell>your-asterisk-ip</TableCell>
+                <TableCell>{asteriskIp}</TableCell>
                 <TableCell className="text-right">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => copyToClipboard(
                       credential.port_number,
-                      `Server: your-asterisk-ip\nUsername: ${credential.sip_user}\nPassword: ${credential.sip_pass}`
+                      `Server: ${asteriskIp}\nUsername: ${credential.sip_user}\nPassword: ${credential.sip_pass}`
                     )}
                   >
                     {copyStatus[credential.port_number] ? (

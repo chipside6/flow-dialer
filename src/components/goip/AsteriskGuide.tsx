@@ -3,8 +3,11 @@ import React from 'react';
 import { Server, ChevronRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { ASTERISK_CONFIG } from '@/config/productionConfig';
 
 export const AsteriskGuide = () => {
+  const asteriskIp = ASTERISK_CONFIG.apiUrl.split(':')[0]; // Extract just the IP part
+  
   return (
     <Card>
       <CardHeader>
@@ -21,7 +24,7 @@ export const AsteriskGuide = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium">Server Address:</p>
-                <p className="text-sm text-muted-foreground">your-asterisk-ip</p>
+                <p className="text-sm text-muted-foreground">{asteriskIp}</p>
               </div>
               <div>
                 <p className="text-sm font-medium">Port:</p>
