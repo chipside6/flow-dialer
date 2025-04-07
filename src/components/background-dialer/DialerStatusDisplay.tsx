@@ -49,7 +49,7 @@ const DialerStatusDisplay: React.FC<DialerStatusDisplayProps> = ({
           </span>
         </div>
         <div className="text-sm text-muted-foreground">
-          Port: {portNumber}
+          GoIP Port: {portNumber}
         </div>
       </div>
       

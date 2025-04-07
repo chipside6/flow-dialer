@@ -16,7 +16,6 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     contactListId: "",
     greetingFileId: "",
     transferNumber: "",
-    portNumber: 1, // Default to Port 1
     schedule: {
       startDate: new Date().toISOString().split("T")[0],
       maxConcurrentCalls: 3 // Fixed value of 3 (enforced)
@@ -75,8 +74,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
             user_id: authUser.id,
             contact_list_id: newCampaign.contactListId || null,
             transfer_number: newCampaign.transferNumber || null,
-            greeting_file_url: newCampaign.greetingFileId || null,
-            port_number: newCampaign.portNumber || 1 // Save port number to database
+            greeting_file_url: newCampaign.greetingFileId || null
           })
           .select();
           

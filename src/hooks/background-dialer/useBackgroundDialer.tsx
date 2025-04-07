@@ -35,9 +35,10 @@ export const useBackgroundDialer = (campaignId: string) => {
       setIsLoadingCampaign(true);
       
       try {
+        // Select only the necessary fields, excluding port_number until it's added to the database
         const { data, error } = await supabase
           .from('campaigns')
-          .select('contact_list_id, transfer_number, port_number')
+          .select('contact_list_id, transfer_number')
           .eq('id', campaignId)
           .single();
         
@@ -62,10 +63,8 @@ export const useBackgroundDialer = (campaignId: string) => {
             handleFormChange("transferNumber", data.transfer_number);
           }
           
-          // Set port number if available
-          if (data.port_number) {
-            handleFormChange("portNumber", data.port_number);
-          }
+          // Default to port 1 for now (this will be updated when the column is added)
+          handleFormChange("portNumber", 1);
         }
       } catch (err) {
         console.error("Error loading campaign preferences:", err);

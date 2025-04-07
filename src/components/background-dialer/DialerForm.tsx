@@ -57,6 +57,9 @@ const DialerForm: React.FC<DialerFormProps> = ({
             value={formData.transferNumber}
             onChange={(e) => onChange("transferNumber", e.target.value)}
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            The number where answered calls will be transferred.
+          </p>
         </div>
         
         <div className="space-y-2">
@@ -77,7 +80,7 @@ const DialerForm: React.FC<DialerFormProps> = ({
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground mt-1">
-            Select which GoIP port to use for dialing out.
+            Select which GoIP port to use for outgoing calls.
           </p>
         </div>
       </div>

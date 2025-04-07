@@ -6,7 +6,6 @@ export interface CampaignData {
   contactListId: string;
   greetingFileId: string;
   transferNumber: string;
-  portNumber?: number; // Add port selection
   schedule: {
     startDate: string;
     maxConcurrentCalls: number;
