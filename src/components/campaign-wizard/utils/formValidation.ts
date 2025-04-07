@@ -11,8 +11,6 @@ export const validateStep = (step: WizardStep, campaign: CampaignData): boolean 
       return !!campaign.greetingFileId;
     case "transfers":
       return !!campaign.transferNumber && campaign.transferNumber.length >= 7;
-    case "sipProvider":
-      return !!campaign.sipProviderId;
     case "review":
       return true;
     default:
@@ -26,8 +24,7 @@ export const getStepAvailability = (campaign: CampaignData) => {
     contacts: true,
     audio: !!campaign.title,
     transfers: !!campaign.greetingFileId,
-    sipProvider: !!campaign.transferNumber,
-    review: !!campaign.sipProviderId
+    review: !!campaign.transferNumber
   };
 };
 
@@ -40,8 +37,6 @@ export const getNextStep = (currentStep: WizardStep): WizardStep => {
     case "audio":
       return "transfers";
     case "transfers":
-      return "sipProvider";
-    case "sipProvider":
       return "review";
     default:
       return "review";
@@ -56,10 +51,8 @@ export const getPreviousStep = (currentStep: WizardStep): WizardStep => {
       return "contacts";
     case "transfers":
       return "audio";
-    case "sipProvider":
-      return "transfers";
     case "review":
-      return "sipProvider";
+      return "transfers";
     default:
       return "basics";
   }

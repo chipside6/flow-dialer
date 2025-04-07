@@ -16,7 +16,6 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     contactListId: "",
     greetingFileId: "",
     transferNumber: "",
-    sipProviderId: "", // Initialize SIP provider ID
     schedule: {
       startDate: new Date().toISOString().split("T")[0],
       maxConcurrentCalls: 3 // Fixed value of 3 (enforced)
@@ -75,8 +74,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
             user_id: authUser.id,
             contact_list_id: newCampaign.contactListId || null,
             transfer_number: newCampaign.transferNumber || null,
-            greeting_file_url: newCampaign.greetingFileId || null,
-            sip_provider_id: newCampaign.sipProviderId || null // Save SIP provider ID
+            greeting_file_url: newCampaign.greetingFileId || null
           })
           .select();
           

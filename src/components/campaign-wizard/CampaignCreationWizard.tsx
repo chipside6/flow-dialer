@@ -5,7 +5,6 @@ import { BasicsStep } from "./BasicsStep";
 import { ContactsStep } from "./ContactsStep";
 import { AudioStep } from "./AudioStep";
 import { TransfersStep } from "./TransfersStep";
-import { SipProviderStep } from "./SipProviderStep";
 import { ReviewStep } from "./ReviewStep";
 import { WizardContainer } from "./WizardContainer";
 import { CampaignData } from "./types";
@@ -79,13 +78,6 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
       
       <TabsContent value="transfers">
         <TransfersStep campaign={campaign} onChange={handleInputChange} />
-      </TabsContent>
-      
-      <TabsContent value="sipProvider">
-        <SipProviderStep
-          campaign={campaign}
-          onSelectChange={handleSelectChange}
-        />
       </TabsContent>
       
       <TabsContent value="review">
