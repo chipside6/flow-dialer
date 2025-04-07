@@ -74,7 +74,7 @@ const CampaignPage = () => {
         created_at: new Date().toISOString(),
         description: newCampaign.description || '',
         contact_list_id: newCampaign.contactListId || null,
-        greeting_file_url: null,
+        greeting_file_url: newCampaign.greetingFileId || null,
         port_number: newCampaign.portNumber || 1,
         transfer_number: newCampaign.transferNumber || null
       };

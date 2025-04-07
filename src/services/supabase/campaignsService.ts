@@ -34,6 +34,7 @@ export const createCampaign = async (campaign: any, userId: string) => {
   console.log(`[CampaignsService] Creating campaign for user: ${userId}`);
   
   try {
+    // Make sure all field names match the database column names (snake_case)
     const { data, error } = await supabase
       .from('campaigns')
       .insert({
@@ -50,7 +51,7 @@ export const createCampaign = async (campaign: any, userId: string) => {
         transferred_calls: campaign.transferredCalls || 0,
         failed_calls: campaign.failedCalls || 0,
         contact_list_id: campaign.contactListId || null,
-        port_number: campaign.portNumber || 1 // Include the port number
+        port_number: campaign.portNumber || 1 // Default to port 1 if not specified
       })
       .select()
       .single();

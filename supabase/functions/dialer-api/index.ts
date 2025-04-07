@@ -12,7 +12,7 @@ interface DialRequest {
   phoneNumber: string;
   transferNumber: string;
   greetingFileUrl?: string;
-  maxConcurrentCalls?: number; // This will always be 3 regardless of what's passed
+  maxConcurrentCalls?: number; // This will always be 1 regardless of what's passed
   portNumber?: number; // Added port number
 }
 
@@ -74,8 +74,8 @@ serve(async (req) => {
         const requestData = await req.json();
         const { campaignId, phoneNumber, transferNumber, greetingFileUrl, portNumber = 1 } = requestData;
         
-        // Always use 3 for maxConcurrentCalls regardless of what was passed
-        const maxConcurrentCalls = 3;
+        // Always use 1 for maxConcurrentCalls regardless of what was passed
+        const maxConcurrentCalls = 1;
         
         if (!campaignId || !phoneNumber || !transferNumber) {
           return new Response(
@@ -165,7 +165,7 @@ serve(async (req) => {
           JSON.stringify({ 
             success: true, 
             campaign,
-            maxConcurrentCalls: 3 // Always return 3 as the fixed value
+            maxConcurrentCalls: 1 // Always return 1 as the fixed value
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );

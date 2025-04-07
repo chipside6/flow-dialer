@@ -19,7 +19,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     portNumber: 1, // Default port number to 1
     schedule: {
       startDate: new Date().toISOString().split("T")[0],
-      maxConcurrentCalls: 1 // Fixed value of 1 (enforced)
+      maxConcurrentCalls: 1 // Fixed value of 1
     }
   });
 

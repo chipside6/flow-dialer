@@ -20,39 +20,36 @@ const getAllCampaigns = async (req, res) => {
 const createCampaign = async (req, res) => {
   try {
     const { 
-      name, 
+      title, 
       description, 
       status, 
       contact_list_id, 
       transfer_number, 
       greeting_file_url, 
-      sip_provider_id,
       port_number
     } = req.body;
     
-    if (!name || !status) {
-      return res.status(400).json({ error: true, message: 'Campaign name and status are required' });
+    if (!title || !status) {
+      return res.status(400).json({ error: true, message: 'Campaign title and status are required' });
     }
 
     const [result] = await pool.query(
       `INSERT INTO campaigns (
-        name, 
+        title, 
         description, 
         status, 
         contact_list_id, 
         transfer_number, 
         greeting_file_url, 
-        sip_provider_id,
         port_number
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)`, 
       [
-        name, 
+        title, 
         description || "", 
         status, 
         contact_list_id || null, 
         transfer_number || null, 
         greeting_file_url || null, 
-        sip_provider_id || null,
         port_number || 1
       ]
     );
