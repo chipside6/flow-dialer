@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
@@ -62,8 +61,8 @@ const CampaignPage = () => {
       // Ensure the campaign has a user_id property and matches the Campaign type
       const campaignWithRequiredFields = {
         id: newCampaign.id || uuidv4(),
-        name: newCampaign.title || 'Untitled Campaign', // Add name for Campaign type
         title: newCampaign.title,
+        description: newCampaign.description || '',
         status: (newCampaign.status as Campaign["status"]) || "draft",
         progress: newCampaign.progress || 0,
         total_calls: newCampaign.totalCalls || 0,
@@ -72,7 +71,6 @@ const CampaignPage = () => {
         failed_calls: newCampaign.failedCalls || 0,
         user_id: user?.id || '',
         created_at: new Date().toISOString(),
-        description: newCampaign.description || '',
         contact_list_id: newCampaign.contactListId || null,
         greeting_file_url: newCampaign.greetingFileId || null,
         port_number: newCampaign.portNumber || 1,
