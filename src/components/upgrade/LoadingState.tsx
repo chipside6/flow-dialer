@@ -21,7 +21,6 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
 }) => {
   const [isTimedOut, setIsTimedOut] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
-  const [showRetrying, setShowRetrying] = useState(false);
   
   // Reset timeout when message or retry function changes
   useEffect(() => {
@@ -43,13 +42,6 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
   const handleRetry = () => {
     if (onRetry) {
       setRetryCount(prev => prev + 1);
-      setShowRetrying(true);
-      
-      // Hide "retrying" message after 1.5 seconds
-      setTimeout(() => {
-        setShowRetrying(false);
-      }, 1500);
-      
       onRetry();
     }
   };
@@ -66,19 +58,9 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
                 variant="outline" 
                 onClick={handleRetry}
                 className="flex items-center w-fit"
-                disabled={showRetrying}
               >
-                {showRetrying ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Retrying...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Retry Connection
-                  </>
-                )}
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Retry Connection
               </Button>
             )}
           </AlertDescription>

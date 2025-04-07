@@ -26,7 +26,6 @@ const CampaignPage = () => {
   const { isOnline } = useNetworkStatus();
   const [hasAttemptedInitialLoad, setHasAttemptedInitialLoad] = useState(false);
   const [subscriptionChecked, setSubscriptionChecked] = useState(false);
-  const [loadingTimeout, setLoadingTimeout] = useState(false);
   
   // Check if user can create campaigns based on subscription status
   const canAccessCampaigns = currentPlan === 'lifetime' || 
@@ -48,17 +47,10 @@ const CampaignPage = () => {
     }
   }, [subscriptionLoading]);
   
-  // Mark when first load attempt has occurred and set timeout
+  // Mark when first load attempt has occurred
   useEffect(() => {
     if (isLoading) {
       setHasAttemptedInitialLoad(true);
-      
-      // Set a timeout to avoid infinite loading state
-      const timer = setTimeout(() => {
-        setLoadingTimeout(true);
-      }, 10000); // 10 seconds timeout
-      
-      return () => clearTimeout(timer);
     }
   }, [isLoading]);
   
@@ -79,11 +71,9 @@ const CampaignPage = () => {
     };
     
     setShowCreateWizard(false);
-    // After closing the wizard, refresh campaigns
-    await refreshCampaigns();
   };
   
-  // Show different states based on loading conditions
+  // Only show loading state for initial load, not for subsequent refreshes
   if ((isLoading && campaigns.length === 0 && !hasAttemptedInitialLoad) || !subscriptionChecked) {
     return (
       <DashboardLayout>
@@ -93,23 +83,6 @@ const CampaignPage = () => {
             onRetry={refreshCampaigns}
             timeout={10000} // Longer timeout to prevent flickering
             showTimeoutError={false} // Don't show timeout errors on initial load
-          />
-        </div>
-      </DashboardLayout>
-    );
-  }
-  
-  // If loading takes too long, show a message with retry option
-  if (loadingTimeout && isLoading && campaigns.length === 0) {
-    return (
-      <DashboardLayout>
-        <div className="max-w-6xl mx-auto w-full px-4 pt-8">
-          <LoadingState 
-            message="Taking longer than expected..." 
-            onRetry={refreshCampaigns}
-            timeout={3000}
-            showTimeoutError={true}
-            errorVariant="warning"
           />
         </div>
       </DashboardLayout>
