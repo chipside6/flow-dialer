@@ -2,57 +2,70 @@
 /* Mobile sidebar dialog fixes */
 
 @media (max-width: 768px) {
-  /* Fix SheetContent appearance on mobile */
-  [role="dialog"] {
-    background-color: white !important;
-    max-width: 100% !important;
+  /* Fix sheet dialog z-index and positioning */
+  [data-sidebar="sidebar"] + .fixed.inset-0 {
+    z-index: 50 !important;
   }
   
-  /* Fix drawer components */
-  [data-state="open"][data-side="left"] {
-    width: 85% !important;
+  /* Clean up sheet design */
+  [data-sidebar="sidebar"].SheetContent {
+    box-shadow: none !important;
+    border-right: none !important;
+    max-width: 280px !important;
   }
   
-  /* Prevent body scrolling when sidebar is open */
-  .mobile-menu-open {
-    overflow: hidden !important;
+  /* Fix sheet overlay */
+  .SheetOverlay {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(2px) !important;
   }
   
-  /* Hide the default Radix close button in mobile sidebars */
-  .SheetPrimitive-Close,
-  [data-sidebar][data-mobile="true"] .SheetContent-root > button {
+  /* Fix animation */
+  [data-sidebar="sidebar"].SheetContent {
+    animation-duration: 0.25s !important;
+  }
+  
+  /* Ensure header has no lines */
+  [data-sidebar="header"] {
+    border-bottom: none !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* Remove borders between nav items */
+  [data-sidebar="content"] a,
+  [data-sidebar="content"] button {
+    border: none !important;
+    margin-bottom: 2px !important;
+  }
+  
+  /* Remove all dividers */
+  [data-sidebar="content"] .border-t,
+  [data-sidebar="content"] .border-b,
+  [data-sidebar="content"] hr {
     display: none !important;
+    border: none !important;
   }
   
-  /* Keep only our custom close button */
-  [data-sidebar-close-button],
-  [data-mobile-menu-close] {
-    display: flex !important;
+  /* Remove borders from any nested components */
+  [data-sidebar="sidebar"] * {
+    border-color: transparent !important;
   }
   
-  /* Improve header spacing */
-  [data-sidebar="header"] > div {
-    padding: 20px !important;
+  /* Clean border between nav items */
+  [data-sidebar="content"] nav > a:not(:last-child),
+  [data-sidebar="content"] nav > button:not(:last-child) {
+    border-bottom: none !important;
   }
   
-  /* Make sure the close button has proper spacing */
-  [data-sidebar-close-button],
-  [data-mobile-menu-close] {
-    margin-left: 20px !important;
-    width: 54px !important;
-    height: 54px !important;
+  /* Improve style for mobile GoIP setup highlight */
+  [data-sidebar="content"] a[href="/goip-setup"] {
+    background-color: #f0f4ff !important;
+    color: #4338ca !important;
+    margin: 2px 0 !important;
   }
   
-  /* Ensure logo text is properly visible */
-  .font-display.text-3xl, 
-  .font-display.text-2xl {
-    font-size: 1.5rem !important;
-    line-height: 2rem !important;
-  }
-  
-  /* Make sure the logo and close button have enough space between them */
-  [data-sidebar="header"] > div,
-  .mobile-menu > div:first-child {
-    gap: 16px !important;
+  .dark [data-sidebar="content"] a[href="/goip-setup"] {
+    background-color: rgba(79, 70, 229, 0.2) !important;
+    color: #c7d2fe !important;
   }
 }
