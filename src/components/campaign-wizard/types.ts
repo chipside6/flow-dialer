@@ -1,4 +1,3 @@
-
 export interface CampaignData {
   id: string; // Changed from optional to required
   title: string;
@@ -7,6 +6,7 @@ export interface CampaignData {
   greetingFileId: string;
   transferNumber: string;
   portNumber?: number; // Added port number for GoIP
+  sipProviderId?: string; // Add this property for the SIP provider
   schedule: {
     startDate: string;
     maxConcurrentCalls: number;
