@@ -3,7 +3,6 @@
 
 @media (max-width: 768px) {
   /* Style the navigation items to match the design */
-  [data-sidebar="content"] nav > a > div,
   [data-sidebar="content"] nav > a,
   [data-sidebar="content"] nav button,
   [data-sidebar="menu-button"] {
@@ -23,7 +22,7 @@
   }
   
   /* Add spacing for icons */
-  [data-sidebar="content"] nav > a > div > span:first-child,
+  [data-sidebar="content"] nav > a > span:first-child,
   [data-sidebar="menu-button"] > span:first-child,
   [data-sidebar="menu-button"] > svg {
     margin-right: 12px !important;
@@ -36,7 +35,7 @@
   }
   
   /* Style for active navigation item */
-  [data-sidebar="content"] nav > a > div.bg-gray-50,
+  [data-sidebar="content"] nav > a.bg-gray-50,
   [data-sidebar="menu-button"][data-active="true"] {
     background-color: rgba(0, 0, 0, 0.03) !important;
   }
