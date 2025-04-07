@@ -1,7 +1,8 @@
 
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { CampaignData, ContactList, GreetingFile } from "./types";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface ReviewStepProps {
   campaign: CampaignData;
@@ -10,72 +11,93 @@ interface ReviewStepProps {
 }
 
 export const ReviewStep: React.FC<ReviewStepProps> = ({ campaign, contactLists, greetingFiles }) => {
-  // Find the selected contact list and greeting file
-  const selectedList = contactLists.find(list => list.id === campaign.contactListId);
-  const selectedGreeting = greetingFiles.find(file => file.id === campaign.greetingFileId);
+  // Find the selected contact list name
+  const selectedContactList = contactLists.find(list => list.id === campaign.contactListId);
   
-  const sections = [
-    {
-      title: "Campaign Basics",
-      items: [
-        { label: "Campaign Name", value: campaign.title || "Not specified" },
-        { label: "Description", value: campaign.description || "No description" }
-      ]
-    },
-    {
-      title: "Contact List",
-      items: [
-        { label: "Selected List", value: selectedList?.name || "No list selected" }
-      ]
-    },
-    {
-      title: "Audio Greeting",
-      items: [
-        { label: "Selected Greeting", value: selectedGreeting?.filename || "No greeting selected" }
-      ]
-    },
-    {
-      title: "Transfer Settings",
-      items: [
-        { label: "Transfer To", value: campaign.transferNumber || "No transfer number specified" },
-        { label: "GoIP Port", value: campaign.portNumber ? `Port ${campaign.portNumber}` : "Default Port (1)" }
-      ]
-    },
-    {
-      title: "Schedule",
-      items: [
-        { label: "Start Date", value: campaign.schedule.startDate || "Not specified" },
-        { label: "Concurrent Calls", value: campaign.schedule.maxConcurrentCalls.toString() || "1" }
-      ]
-    }
-  ];
+  // Find the selected greeting file name
+  const selectedGreetingFile = greetingFiles.find(file => file.id === campaign.greetingFileId);
   
   return (
-    <Card>
-      <CardContent className="pt-6 pb-8 space-y-6">
-        <div>
-          <h3 className="text-lg font-medium">Review Campaign Details</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Please review your campaign details before creating it.
-          </p>
-        </div>
-        
-        <div className="space-y-6">
-          {sections.map((section, idx) => (
-            <div key={idx} className="space-y-3">
-              <h4 className="font-medium text-sm border-b pb-1">{section.title}</h4>
-              <div className="grid gap-y-2">
-                {section.items.map((item, itemIdx) => (
-                  <div key={itemIdx} className="grid grid-cols-3 gap-2">
-                    <span className="text-sm text-muted-foreground col-span-1">{item.label}:</span>
-                    <span className="text-sm font-medium col-span-2">{item.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <div className="text-center mb-4">
+        <h3 className="text-lg font-semibold">Review Campaign Details</h3>
+        <p className="text-sm text-muted-foreground">
+          Please review your campaign details before creating
+        </p>
+      </div>
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Campaign Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 pt-0">
+          <div className="grid grid-cols-3 gap-1">
+            <span className="text-sm font-medium">Title:</span>
+            <span className="text-sm col-span-2">{campaign.title || "Untitled Campaign"}</span>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-1">
+            <span className="text-sm font-medium">Description:</span>
+            <span className="text-sm col-span-2">{campaign.description || "No description"}</span>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Contact List</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <span className="text-sm">
+            {selectedContactList?.name || "No contact list selected"}
+          </span>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Greeting Audio</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <span className="text-sm">
+            {selectedGreetingFile?.filename || "No greeting file selected"}
+          </span>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Transfer Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 pt-0">
+          <div className="grid grid-cols-3 gap-1">
+            <span className="text-sm font-medium">Transfer To:</span>
+            <span className="text-sm col-span-2">{campaign.transferNumber || "Not set"}</span>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-1">
+            <span className="text-sm font-medium">GoIP Port:</span>
+            <span className="text-sm col-span-2">Port {campaign.portNumber || 1}</span>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Schedule</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 pt-0">
+          <div className="grid grid-cols-3 gap-1">
+            <span className="text-sm font-medium">Start Date:</span>
+            <span className="text-sm col-span-2">{campaign.schedule.startDate || "Not set"}</span>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-1">
+            <span className="text-sm font-medium">Concurrent Calls:</span>
+            <span className="text-sm col-span-2">1</span>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

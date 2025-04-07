@@ -19,7 +19,6 @@ export const fetchCampaigns = async (userId: string) => {
       greetingFileUrl: item.greeting_file_url || item.greetingFileUrl || "",
       greetingFileName: item.greeting_file_name || item.greetingFileName || "",
       transferNumber: item.transfer_number || item.transferNumber || "",
-      sipProviderId: item.sip_provider_id || item.sipProviderId || "",
       portNumber: item.port_number || item.portNumber || 1, // Map port number
       progress: item.progress || 0,
       totalCalls: item.total_calls || item.totalCalls || 0,
@@ -43,13 +42,27 @@ export const createCampaign = async (campaign: any, userId: string) => {
   console.log(`[CampaignsService] Creating campaign for user: ${userId}`);
   
   try {
+    // Make sure we're using snake_case for all field names
+    const payload = {
+      title: campaign.title,
+      description: campaign.description,
+      status: campaign.status || "pending",
+      user_id: userId,
+      port_number: campaign.portNumber || 1,
+      transfer_number: campaign.transferNumber || null,
+      contact_list_id: campaign.contactListId || null,
+      greeting_file_url: campaign.greetingFileUrl || null,
+      greeting_file_name: campaign.greetingFileName || null,
+      total_calls: campaign.totalCalls || 0,
+      answered_calls: campaign.answeredCalls || 0,
+      transferred_calls: campaign.transferredCalls || 0,
+      failed_calls: campaign.failedCalls || 0,
+      progress: campaign.progress || 0
+    };
+    
     const data = await apiFetch('campaigns', {
       method: 'POST',
-      body: JSON.stringify({
-        ...campaign,
-        user_id: userId,
-        port_number: campaign.portNumber || 1 // Include port number
-      })
+      body: JSON.stringify(payload)
     });
     
     console.log(`[CampaignsService] Successfully created campaign:`, data);

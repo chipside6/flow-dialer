@@ -19,7 +19,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     portNumber: 1, // Default port number to 1
     schedule: {
       startDate: new Date().toISOString().split("T")[0],
-      maxConcurrentCalls: 3 // Fixed value of 3 (enforced)
+      maxConcurrentCalls: 1 // Fixed value of 1 (enforced)
     }
   });
 
@@ -44,7 +44,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
       ...campaign,
       schedule: {
         ...campaign.schedule,
-        maxConcurrentCalls: 3 // Always enforce 3 concurrent calls
+        maxConcurrentCalls: 1 // Always enforce 1 concurrent call
       },
       status: "pending" as const,
       progress: 0,
@@ -59,7 +59,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
     try {
       console.log("Attempting to save campaign:", newCampaign);
       
-      // Save to Supabase
+      // Save to Supabase using snake_case column names to match the database schema
       if (authUser) {
         const { data, error } = await supabase
           .from('campaigns')
