@@ -15,7 +15,8 @@ import {
   Settings,
   ShieldCheck,
   Activity,
-  Network
+  Network,
+  Smartphone
 } from "lucide-react";
 
 interface DashboardNavProps {
@@ -53,14 +54,9 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
       icon: PhoneForwarded,
     },
     {
-      href: "/sip-providers",
-      label: "SIP Providers",
-      icon: Server,
-    },
-    {
       href: "/goip-setup",
       label: "GoIP Setup",
-      icon: Network,
+      icon: Smartphone,
     },
     {
       href: "/upgrade",

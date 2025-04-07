@@ -66,10 +66,10 @@ export const useDialerActions = (
   );
   
   const startDialing = async (campaignId: string) => {
-    if (!formData.sipProviderId || !formData.contactListId) {
+    if (!formData.contactListId) {
       toast({
         title: "Incomplete Configuration",
-        description: "Please select a SIP provider and contact list before starting.",
+        description: "Please select a contact list before starting.",
         variant: "destructive",
       });
       return;
@@ -83,7 +83,7 @@ export const useDialerActions = (
         contactListId: formData.contactListId,
         campaignId,
         transferNumber: formData.transferNumber,
-        sipProviderId: formData.sipProviderId,
+        // We no longer need sipProviderId as we're using GoIP directly
         greetingFile: formData.greetingFile,
         maxConcurrentCalls // Enforced to 3
       });
