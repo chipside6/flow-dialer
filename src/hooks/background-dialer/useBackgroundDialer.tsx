@@ -53,17 +53,20 @@ export const useBackgroundDialer = (campaignId: string) => {
           return;
         }
         
-        // Check if port_number column exists in campaigns table using the new function
+        // Check if port_number column exists in campaigns table
         let portNumberExists = false;
         try {
-          const { data, error } = await supabase
-            .rpc('column_exists', { 
-              table_name: 'campaigns', 
-              column_name: 'port_number' 
-            });
+          // Use direct query to information_schema instead of RPC function
+          const { data: columnData, error: columnError } = await supabase
+            .from('information_schema.columns')
+            .select('column_name')
+            .eq('table_schema', 'public')
+            .eq('table_name', 'campaigns')
+            .eq('column_name', 'port_number')
+            .maybeSingle();
             
-          if (!error && data !== null) {
-            portNumberExists = data;
+          if (!columnError) {
+            portNumberExists = columnData !== null;
           }
         } catch (err) {
           console.log("Error checking if port_number column exists:", err);

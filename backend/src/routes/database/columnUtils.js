@@ -10,18 +10,16 @@ const checkColumnExists = async (req, res) => {
   try {
     // Use information_schema to check if column exists
     const [result] = await pool.query(
-      `SELECT EXISTS (
-        SELECT 1 
-        FROM information_schema.columns 
-        WHERE table_schema = 'public' 
-        AND table_name = ? 
-        AND column_name = ?
-      ) AS column_exists`,
+      `SELECT COUNT(*) as column_exists
+       FROM information_schema.columns 
+       WHERE table_schema = 'public' 
+       AND table_name = ? 
+       AND column_name = ?`,
       [table, column]
     );
     
     // In MySQL, the result would be { column_exists: 0 } or { column_exists: 1 }
-    const exists = result.length > 0 && result[0].column_exists === 1;
+    const exists = result.length > 0 && parseInt(result[0].column_exists) > 0;
     
     res.status(200).json({ exists });
   } catch (error) {
