@@ -104,46 +104,48 @@ const SignUp = () => {
     <AuthContainer>
       <AuthHeader title="Create your account" />
       
-      {errorMessage && (
-        <AuthAlert 
-          type="error" 
-          message={errorMessage}
-        />
-      )}
-      
-      {successMessage && (
-        <AuthAlert 
-          type="success" 
-          message={successMessage}
-        />
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6 px-1">
-        <div className="space-y-4">
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="h-12"
-            placeholder="Enter your email"
+      <div className="mt-8">
+        {errorMessage && (
+          <AuthAlert 
+            type="error" 
+            message={errorMessage}
           />
-          
-          <PasswordInput
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Create a password"
-            minLength={6}
+        )}
+        
+        {successMessage && (
+          <AuthAlert 
+            type="success" 
+            message={successMessage}
           />
-        </div>
+        )}
 
-        <AuthButton 
-          isLoading={isLoading} 
-          buttonText="Create Account" 
-          loadingText="Creating account..."
-        />
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-6 px-1">
+          <div className="space-y-4">
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="h-12"
+              placeholder="Enter your email"
+            />
+            
+            <PasswordInput
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Create a password"
+              minLength={6}
+            />
+          </div>
+
+          <AuthButton 
+            isLoading={isLoading} 
+            buttonText="Create Account" 
+            loadingText="Creating account..."
+          />
+        </form>
+      </div>
 
       <AuthFooter type="signup" />
     </AuthContainer>
