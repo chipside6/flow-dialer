@@ -2,13 +2,13 @@
 /* GoIP Setup specific mobile styling */
 
 @media (max-width: 768px) {
-  /* Special highlight for current GoIP setup page on mobile */
-  .goip-setup-link {
+  /* Only highlight GoIP setup when it's the active page */
+  .active-goip-setup-link {
     background-color: #f0f4ff !important;
     color: #4338ca !important;
   }
 
-  .dark .goip-setup-link {
+  .dark .active-goip-setup-link {
     background-color: rgba(79, 70, 229, 0.2) !important;
     color: #c7d2fe !important;
   }
