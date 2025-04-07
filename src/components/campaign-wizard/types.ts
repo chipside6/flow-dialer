@@ -6,6 +6,7 @@ export interface CampaignData {
   contactListId: string;
   greetingFileId: string;
   transferNumber: string;
+  portNumber?: number; // Added port number for GoIP
   schedule: {
     startDate: string;
     maxConcurrentCalls: number;
