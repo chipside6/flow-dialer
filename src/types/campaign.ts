@@ -12,7 +12,6 @@ export interface Campaign {
   description?: string;
   greeting_file_id?: string;
   contact_list_id?: string;
-  sip_provider_id?: string;
   transfer_number_id?: string;
   schedule_date?: string;
   schedule_time?: string;
@@ -51,7 +50,6 @@ export interface CampaignFormData {
   description?: string;
   greeting_file_id?: string;
   contact_list_id?: string;
-  sip_provider_id?: string;
   transfer_number_id?: string;
   schedule_date?: string;
   schedule_time?: string;

@@ -76,8 +76,7 @@ const CampaignPage = () => {
         contact_list_id: newCampaign.contactListId || null,
         greeting_file_url: null,
         port_number: newCampaign.portNumber || 1,
-        transfer_number: newCampaign.transferNumber || null,
-        sip_provider_id: newCampaign.sipProviderId || null
+        transfer_number: newCampaign.transferNumber || null
       };
       
       // Save to Supabase
