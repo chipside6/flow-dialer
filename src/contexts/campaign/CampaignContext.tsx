@@ -6,9 +6,12 @@ import { useCampaignSimulation } from '@/hooks/useCampaignSimulation';
 type CampaignContextType = {
   campaigns: Campaign[];
   selectedCampaign: Campaign | null;
+  selectedCampaignId: string | null;
   setSelectedCampaign: (campaign: Campaign) => void;
+  setSelectedCampaignId: (id: string) => void;
   startCampaign: (campaignId: string) => void;
   pauseCampaign: (campaignId: string) => void;
+  deleteCampaign: (campaignId: string) => void;
 };
 
 const CampaignContext = createContext<CampaignContextType | undefined>(undefined);

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Campaign } from "@/types/campaign";
 import { useToast } from "@/components/ui/use-toast";
@@ -10,7 +9,20 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
   const { user } = useAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   
+  // Set selected campaign when selectedCampaignId changes
+  useEffect(() => {
+    if (selectedCampaignId) {
+      const campaign = campaigns.find(c => c.id === selectedCampaignId);
+      if (campaign) {
+        setSelectedCampaign(campaign);
+      }
+    } else {
+      setSelectedCampaign(null);
+    }
+  }, [selectedCampaignId, campaigns]);
+
   // Load campaigns from props
   useEffect(() => {
     setCampaigns(initialCampaigns);
@@ -103,6 +115,43 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
     });
   };
 
+  // Add deleteCampaign function
+  const deleteCampaign = async (campaignId: string) => {
+    // Update campaign status in Supabase
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('campaigns')
+          .delete()
+          .eq('id', campaignId)
+          .eq('user_id', user.id);
+          
+        if (error) throw error;
+      } catch (err) {
+        console.error("Failed to delete campaign:", err);
+        toast({
+          title: "Error deleting campaign",
+          description: "Failed to delete the campaign",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
+    // Remove campaign from state
+    setCampaigns(prev => prev.filter(campaign => campaign.id !== campaignId));
+    
+    // Reset selected campaign if the deleted one was selected
+    if (selectedCampaignId === campaignId) {
+      setSelectedCampaignId(null);
+    }
+    
+    toast({
+      title: "Campaign Deleted",
+      description: "The campaign has been successfully deleted.",
+    });
+  };
+
   // Simulate campaign progress for demo purposes
   const simulateCampaignProgress = (campaignId: string) => {
     // Find the campaign
@@ -181,8 +230,11 @@ export const useCampaignSimulation = (initialCampaigns: Campaign[] = []) => {
   return {
     campaigns,
     selectedCampaign,
+    selectedCampaignId,
     setSelectedCampaign,
+    setSelectedCampaignId,
     startCampaign,
-    pauseCampaign
+    pauseCampaign,
+    deleteCampaign
   };
 };
