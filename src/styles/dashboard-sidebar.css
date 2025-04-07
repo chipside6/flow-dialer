@@ -4,12 +4,14 @@
 /* Sidebar animation fixes */
 [data-sidebar="sidebar"] {
   transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease !important;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
 /* Custom sidebar styling in dark mode */
 .dark [data-sidebar="sidebar"] {
   background-color: hsl(var(--card));
   border-color: hsl(var(--border));
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
 
 /* Improve mobile drawer appearance */
@@ -32,6 +34,7 @@
 .active-nav-item {
   background-color: hsl(var(--primary) / 0.1);
   color: hsl(var(--primary));
+  border-radius: 0.5rem;
 }
 
 .dark .active-nav-item {
@@ -42,5 +45,49 @@
 /* Improve hover state for navigation items */
 [data-sidebar="content"] a:hover > div {
   background-color: hsl(var(--muted) / 0.5);
+  border-radius: 0.5rem;
 }
 
+/* Modern scrollbar styling */
+[data-sidebar="content"] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+[data-sidebar="content"]::-webkit-scrollbar {
+  width: 4px;
+}
+
+[data-sidebar="content"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-sidebar="content"]::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+}
+
+.dark [data-sidebar="content"]::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Enhanced sidebar header with gradient */
+[data-sidebar="header"] {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dark [data-sidebar="header"] {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Footer styling */
+[data-sidebar="footer"] {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 0.5rem;
+}
+
+.dark [data-sidebar="footer"] {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}

@@ -54,7 +54,6 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     { name: "Greeting Files", path: "/greetings", icon: <AudioWaveform className="h-5 w-5" /> },
     { name: "Contact Lists", path: "/contacts", icon: <ContactIcon className="h-5 w-5" /> },
     { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
-    // Add GoIP Setup with appropriate icon
     { name: "GoIP Setup", path: "/goip-setup", icon: <Smartphone className="h-5 w-5" /> },
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
   ];
@@ -75,7 +74,6 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
       path: "/admin",
       icon: <ShieldCheck className="h-5 w-5" />
     },
-    // Renamed to make it clearer this is just configuration, not checking
     {
       name: "Asterisk Configuration",
       path: "/asterisk-config",
@@ -85,8 +83,8 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="bg-primary text-white dark:bg-primary/90">
-        <div className="flex items-center p-5 justify-between">
+      <SidebarHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white dark:from-indigo-800 dark:to-purple-800">
+        <div className="flex items-center p-4 justify-between">
           <Logo size="lg" withText={true} className="text-white" />
           
           {/* Only show close button for mobile */}
@@ -94,18 +92,18 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-white hover:bg-white/20 h-14 w-14 ml-4" 
+              className="text-white hover:bg-white/20 h-10 w-10" 
               onClick={handleClose}
               data-sidebar-close-button
             >
-              <X size={28} />
+              <X size={24} />
               <span className="sr-only">Close Sidebar</span>
             </Button>
           )}
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-0 py-0 overflow-y-auto overflow-x-hidden">
-        <nav className="w-full flex flex-col">
+      <SidebarContent className="px-3 py-3 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
+        <nav className="w-full flex flex-col space-y-1">
           {navItems.map((item) => (
             <SidebarNavItem 
               key={item.path}
@@ -115,8 +113,14 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           ))}
           
           {/* Admin Links */}
-          {profile?.is_admin === true && (
+          {profile?.is_admin === true && adminNavItems.length > 0 && (
             <>
+              <div className="my-2 px-3">
+                <div className="border-t border-slate-200 dark:border-slate-700"></div>
+                <p className="text-xs uppercase font-semibold text-slate-500 dark:text-slate-400 mt-4 mb-2 px-2">
+                  Admin
+                </p>
+              </div>
               {adminNavItems.map((item) => (
                 <SidebarNavItem 
                   key={item.path}
@@ -128,10 +132,11 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           )}
           
           {/* Logout button */}
-          <div className="border-t border-border mt-2 pt-2 w-full">
+          <div className="mt-auto pt-4 w-full">
+            <div className="border-t border-slate-200 dark:border-slate-700 mb-4"></div>
             <LogoutButton 
               variant="ghost" 
-              className="w-full justify-start py-3 px-4 text-left" 
+              className="w-full justify-start py-2 px-3 text-left rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" 
               onClick={handleItemClick}
               position="left"
             />

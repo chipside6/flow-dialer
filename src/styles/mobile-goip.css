@@ -3,40 +3,47 @@
 @media screen and (max-width: 768px) {
   /* Better card layout on mobile */
   .goip-device-card {
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    border-radius: 0.75rem;
   }
   
   /* Improve status badges on mobile */
   .goip-device-card .badge {
     font-size: 0.65rem;
-    padding: 0.15rem 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
   }
   
   /* Better tabs on mobile */
   [role="tablist"] {
     width: 100%;
+    border-radius: 0.5rem;
+    overflow: hidden;
   }
   
   /* Fix form field spacing on mobile */
   .goip-form-field {
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
   }
   
   /* Asterisk server connection badge */
   .asterisk-status-badge {
     font-size: 0.7rem;
     white-space: nowrap;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 1rem;
+    border-radius: 9999px;
   }
 
   /* Device status indicators */
   .device-status {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
   }
   
   /* Fix GoIP setup page padding */
   .goip-setup-container {
-    padding: 0.5rem !important;
+    padding: 0.75rem !important;
   }
   
   /* Fix title area on small screens */
@@ -44,31 +51,38 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.75rem;
+    padding: 1.25rem !important;
+    border-radius: 0.75rem !important;
   }
   
   /* Improve form spacing on mobile */
   .goip-form-row {
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
   }
   
   /* Better spacing for switches and labels */
   .goip-switch-container {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
   }
 
   /* Enhanced credential display on mobile */
   .credentials-list > div {
-    padding: 1rem 0.75rem;
+    padding: 1.25rem !important;
+    border-radius: 0.75rem !important;
+    margin-bottom: 1rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
   }
   
   /* Ensure credential cards stack properly */
   .credentials-list .grid {
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
   
   /* Prevent text overflow in credential fields */
   .credentials-list .bg-muted {
     word-break: break-all;
+    border-radius: 0.375rem;
   }
   
   /* Improve copy button positioning */
@@ -87,17 +101,38 @@
 /* Card styles for credential items */
 .credentials-list > div {
   transition: all 0.2s ease-in-out;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .credentials-list > div:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(79, 70, 229, 0.2);
+}
+
+/* Dark mode support */
+.dark .credentials-list > div {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dark .credentials-list > div:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: rgba(129, 140, 248, 0.3);
 }
 
 /* Credential field styles */
 .credentials-list .bg-muted {
   transition: background-color 0.2s ease;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .credentials-list .bg-muted:hover {
   background-color: rgba(0, 0, 0, 0.07);
+}
+
+.dark .credentials-list .bg-muted:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
