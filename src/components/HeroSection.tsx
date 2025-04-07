@@ -16,21 +16,21 @@ export const HeroSection = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 z-10 mb-10 md:mb-0">
-            <div className="inline-block animate-fade-in">
+            <div className="inline-block animate-fade-in text-center md:text-left w-full">
               <span className="inline-block px-3 py-1 rounded-full bg-sky-100 text-sky-600 text-xs font-medium tracking-wide mb-4 mt-6">
                 Modern Communication Platform
               </span>
             </div>
             
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight leading-tight md:leading-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight leading-tight md:leading-tight text-center md:text-left">
               Simplify Your Calling Experience
             </h1>
             
-            <p className="mt-4 text-base md:text-lg text-muted-foreground">
+            <p className="mt-4 text-base md:text-lg text-muted-foreground text-center md:text-left">
               A cutting-edge communication tool with a simple interface to transform the way you connect with others.
             </p>
             
-            <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 sm:justify-start">
+            <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 sm:justify-start justify-center">
               <Button size="sm" className="rounded-full px-6 bg-sky-500 hover:bg-sky-600 group" asChild>
                 <Link to="/signup">
                   Try for Free
