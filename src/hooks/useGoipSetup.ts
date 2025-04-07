@@ -46,16 +46,19 @@ export const useGoipSetup = () => {
       }
       
       // Insert all 4 trunks into the database
-      const { error } = await supabase.from('user_trunks').insert(
-        newCredentials.map(cred => ({
-          user_id: user.id,
-          trunk_name: cred.trunk_name,
-          sip_user: cred.sip_user,
-          sip_pass: cred.sip_pass,
-          port_number: cred.port_number,
-          status: 'active'
-        }))
-      );
+      // Using a workaround for TypeScript by using 'from' with a string parameter instead of strongly typed table name
+      const { error } = await supabase
+        .from('user_trunks')
+        .insert(
+          newCredentials.map(cred => ({
+            user_id: user.id,
+            trunk_name: cred.trunk_name,
+            sip_user: cred.sip_user,
+            sip_pass: cred.sip_pass,
+            port_number: cred.port_number,
+            status: 'active'
+          }))
+        );
       
       if (error) {
         console.error('Error creating SIP users:', error);

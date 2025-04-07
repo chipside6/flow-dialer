@@ -164,7 +164,7 @@ const GoipSetup = () => {
                         <p>Save your settings and restart the GoIP device to apply the new configuration.</p>
                       </div>
                       
-                      <Button onClick={() => setCredentials([])} variant="outline">
+                      <Button onClick={() => createSipUsers('')} variant="outline">
                         Create New GoIP Configuration
                       </Button>
                     </div>
