@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,11 +14,11 @@ import "./App.css";
 // Import the header-fixes.css for header and logout button fixes
 import "./styles/header-fixes.css";
 
-// Import Login directly instead of lazy loading it
+// Import critical components directly instead of lazy loading them
 import Login from "./pages/Login";
+import Index from "./pages/Index"; // Import Index directly to avoid lazy loading issues
 
 // Lazy load other components for improved performance
-const Index = lazy(() => import("./pages/Index"));
 const Features = lazy(() => import("./pages/Features"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const Support = lazy(() => import("./pages/Support"));

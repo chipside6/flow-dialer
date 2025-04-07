@@ -10,7 +10,7 @@ const preloadedComponents: string[] = [];
  * Preload components in the background during idle times
  */
 export const preloadComponents = (componentPaths: string[]) => {
-  if (typeof window === 'undefined' || !('requestIdleCallback' in window)) {
+  if (typeof window === 'undefined') {
     return;
   }
   
@@ -19,19 +19,23 @@ export const preloadComponents = (componentPaths: string[]) => {
   
   if (toPreload.length === 0) return;
   
-  // Use requestIdleCallback to load during browser idle time
-  window.requestIdleCallback(() => {
+  // Use setTimeout instead of requestIdleCallback for better compatibility
+  setTimeout(() => {
     toPreload.forEach(path => {
-      import(`../pages/${path}.tsx`)
-        .then(() => {
-          preloadedComponents.push(path);
-          console.log(`Preloaded: ${path}`);
-        })
-        .catch(err => {
-          console.error(`Failed to preload ${path}:`, err);
-        });
+      try {
+        import(`../pages/${path}.tsx`)
+          .then(() => {
+            preloadedComponents.push(path);
+            console.log(`Preloaded: ${path}`);
+          })
+          .catch(err => {
+            console.error(`Failed to preload ${path}:`, err);
+          });
+      } catch (error) {
+        console.error(`Error initiating preload for ${path}:`, error);
+      }
     });
-  }, { timeout: 2000 });
+  }, 1000);
 };
 
 /**
