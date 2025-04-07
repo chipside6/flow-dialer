@@ -25,6 +25,7 @@ export const useCampaigns = (): UseCampaignsResult => {
   const errorToastShownRef = useRef(false);
   const fetchAttemptedRef = useRef(false);
   const silentErrorsRef = useRef(false);
+  const initialLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Define refreshCampaigns as a callback function
   const refreshCampaigns = useCallback(async () => {
@@ -40,10 +41,31 @@ export const useCampaigns = (): UseCampaignsResult => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
+      // Set a maximum timeout for loading state
+      if (initialLoadTimeoutRef.current) {
+        clearTimeout(initialLoadTimeoutRef.current);
+      }
+      
+      initialLoadTimeoutRef.current = setTimeout(() => {
+        setState(prev => {
+          // Only update if still loading
+          if (prev.isLoading) {
+            return { ...prev, isLoading: false };
+          }
+          return prev;
+        });
+      }, 15000); // Force exit loading state after 15 seconds max
+      
       const result = await fetchCampaigns({ 
         user, 
         isAuthenticated 
       });
+      
+      // Clear the loading timeout
+      if (initialLoadTimeoutRef.current) {
+        clearTimeout(initialLoadTimeoutRef.current);
+        initialLoadTimeoutRef.current = null;
+      }
       
       // Even if there's an error, save any data we received
       setState(prev => ({
@@ -75,6 +97,12 @@ export const useCampaigns = (): UseCampaignsResult => {
       return true;
     } catch (error: any) {
       console.error('Error refreshing campaigns:', error.message);
+      
+      // Clear the loading timeout
+      if (initialLoadTimeoutRef.current) {
+        clearTimeout(initialLoadTimeoutRef.current);
+        initialLoadTimeoutRef.current = null;
+      }
       
       // Keep any existing data
       setState(prev => ({ 
@@ -118,11 +146,11 @@ export const useCampaigns = (): UseCampaignsResult => {
           
           // Set a timeout to ensure we're not showing the loading state for too long
           loadingTimeoutRef.current = setTimeout(() => {
-            if (state.isLoading && isMounted) {
+            if (isMounted) {
               console.log("Campaigns loading timeout reached, ending loading state");
               setState(prev => ({ ...prev, isLoading: false }));
             }
-          }, 6000); // 6 seconds timeout
+          }, 15000); // 15 seconds hard timeout for initial load
 
           const result = await fetchCampaigns({ 
             user, 
@@ -175,8 +203,11 @@ export const useCampaigns = (): UseCampaignsResult => {
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
       }
+      if (initialLoadTimeoutRef.current) {
+        clearTimeout(initialLoadTimeoutRef.current);
+      }
     };
-  }, [user?.id, isAuthenticated, fetchCampaigns, isOnline]);
+  }, [user?.id, isAuthenticated, fetchCampaigns, isOnline, toast]);
 
   return {
     campaigns: state.campaigns,
