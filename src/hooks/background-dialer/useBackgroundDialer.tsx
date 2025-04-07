@@ -56,17 +56,25 @@ export const useBackgroundDialer = (campaignId: string) => {
         // Check if port_number column exists in campaigns table
         let portNumberExists = false;
         try {
-          // Use direct query to information_schema instead of RPC function
-          const { data: columnData, error: columnError } = await supabase
-            .from('information_schema.columns')
-            .select('column_name')
-            .eq('table_schema', 'public')
-            .eq('table_name', 'campaigns')
-            .eq('column_name', 'port_number')
-            .maybeSingle();
-            
-          if (!columnError) {
-            portNumberExists = columnData !== null;
+          // Use the Supabase Edge Function to check if the column exists
+          const response = await fetch(
+            'https://grhvoclalziyjbjlhpml.supabase.co/functions/v1/check-column-exists',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabase.auth.getSession()}`
+              },
+              body: JSON.stringify({
+                table_name: 'campaigns',
+                column_name: 'port_number'
+              })
+            }
+          );
+          
+          if (response.ok) {
+            const result = await response.json();
+            portNumberExists = result.exists;
           }
         } catch (err) {
           console.log("Error checking if port_number column exists:", err);
