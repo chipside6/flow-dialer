@@ -2,8 +2,6 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CampaignData, ContactList, GreetingFile } from "./types";
-import { SipProvider } from "@/types/sipProviders";
-import { useSipProviders } from "@/hooks/useSipProviders";
 
 interface ReviewStepProps {
   campaign: CampaignData;
@@ -12,12 +10,9 @@ interface ReviewStepProps {
 }
 
 export const ReviewStep: React.FC<ReviewStepProps> = ({ campaign, contactLists, greetingFiles }) => {
-  const { providers } = useSipProviders();
-  
-  // Find the selected contact list, greeting file, and SIP provider
+  // Find the selected contact list and greeting file
   const selectedList = contactLists.find(list => list.id === campaign.contactListId);
   const selectedGreeting = greetingFiles.find(file => file.id === campaign.greetingFileId);
-  const selectedProvider = providers.find(provider => provider.id === campaign.sipProviderId);
   
   const sections = [
     {
@@ -46,18 +41,10 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({ campaign, contactLists, 
       ]
     },
     {
-      title: "SIP Provider",
-      items: [
-        { label: "Provider", value: selectedProvider?.name || "No provider selected" },
-        { label: "Host", value: selectedProvider?.host || "Not specified" },
-        { label: "Port", value: selectedProvider?.port || "Not specified" }
-      ]
-    },
-    {
       title: "Schedule",
       items: [
         { label: "Start Date", value: campaign.schedule.startDate || "Not specified" },
-        { label: "Concurrent Calls", value: "1" }
+        { label: "Concurrent Calls", value: campaign.schedule.maxConcurrentCalls.toString() || "1" }
       ]
     }
   ];

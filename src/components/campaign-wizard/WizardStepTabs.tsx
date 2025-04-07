@@ -2,8 +2,9 @@
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WizardStep } from "./types";
-import { FileText, Users, Radio, PhoneForwarded, ClipboardCheck, Server } from "lucide-react";
+import { FileText, Users, Radio, PhoneForwarded, ClipboardCheck } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WizardStepTabsProps {
   currentStep: WizardStep;
@@ -16,19 +17,20 @@ export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
   setStep,
   isStepAvailable
 }) => {
+  const isMobile = useIsMobile();
+  
   const steps = [
     { id: "basics", label: "Basics", icon: <FileText className="h-4 w-4" /> },
     { id: "contacts", label: "Contacts", icon: <Users className="h-4 w-4" /> },
     { id: "audio", label: "Audio", icon: <Radio className="h-4 w-4" /> },
     { id: "transfers", label: "Transfers", icon: <PhoneForwarded className="h-4 w-4" /> },
-    { id: "sipProvider", label: "SIP Provider", icon: <Server className="h-4 w-4" /> },
     { id: "review", label: "Review", icon: <ClipboardCheck className="h-4 w-4" /> }
   ];
 
   return (
-    <div className="wizard-tabs-container">
-      <ScrollArea className="w-full">
-        <TabsList className="inline-flex mb-4 max-w-4xl mx-auto no-vertical-scroll">
+    <div className="wizard-tabs-container w-full overflow-x-auto">
+      <ScrollArea className="w-full" orientation="horizontal">
+        <TabsList className="mb-4 mx-auto flex min-w-full justify-start sm:justify-center no-vertical-scroll">
           {steps.map((step) => (
             <TabsTrigger
               key={step.id}
@@ -39,7 +41,7 @@ export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
                 }
               }}
               disabled={!isStepAvailable[step.id as WizardStep]}
-              className={`flex flex-col items-center justify-center py-2 px-1 sm:px-3 ${
+              className={`flex-shrink-0 flex flex-col items-center justify-center py-2 px-2 sm:px-3 ${
                 currentStep === step.id
                   ? "bg-primary text-primary-foreground font-medium"
                   : "text-muted-foreground"
@@ -48,7 +50,9 @@ export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
               <span className="flex items-center justify-center mb-1">
                 {step.icon}
               </span>
-              <span className="text-xs truncate max-w-full">{step.label}</span>
+              <span className="text-xs truncate max-w-[70px] sm:max-w-full">
+                {isMobile && step.id === "transfers" ? "Transfer" : step.label}
+              </span>
             </TabsTrigger>
           ))}
         </TabsList>

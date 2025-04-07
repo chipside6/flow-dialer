@@ -13,6 +13,7 @@
 @import './mobile-tabs-wizards.css';
 @import './mobile-navigation.css'; /* This now imports all the refactored navigation modules */
 @import './mobile-tables.css'; /* Add the new mobile tables CSS file */
+@import './wizard-mobile-fixes.css'; /* Add the new wizard mobile fixes */
 
 /* Fix profile page layout specifically */
 @media (max-width: 768px) {

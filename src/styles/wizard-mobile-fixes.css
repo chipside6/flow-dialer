@@ -1,0 +1,87 @@
+
+/* Wizard mobile fixes */
+
+@media screen and (max-width: 768px) {
+  /* Fix tab display in campaign wizard */
+  .wizard-tabs-container [role="tablist"] {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    justify-content: flex-start !important;
+    padding: 0.75rem 0.5rem !important;
+    gap: 0.25rem !important;
+    margin-bottom: 0.5rem !important;
+    width: 100% !important;
+  }
+  
+  /* Improve tab buttons for mobile */
+  .wizard-tabs-container [role="tab"] {
+    flex-shrink: 0 !important;
+    min-width: auto !important;
+    padding: 0.5rem 0.75rem !important;
+    height: auto !important;
+    border-radius: 6px !important;
+  }
+  
+  /* Fix tab content padding */
+  [role="tabpanel"] > div {
+    padding: 0.5rem !important;
+  }
+  
+  /* Remove scrollbars */
+  .wizard-tabs-container [role="tablist"]::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  .wizard-tabs-container [role="tablist"] {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  /* Fix card padding */
+  .campaign-wizard .card-content {
+    padding: 0.75rem !important;
+  }
+  
+  /* Better spacing for mobile */
+  .wizard-container .card-content {
+    padding: 0 !important;
+  }
+  
+  /* Fix wizard steps height */
+  .wizard-tabs-container {
+    overflow-x: auto !important;
+    width: 100% !important;
+    display: flex !important;
+  }
+  
+  /* Fix buttons in wizard navigation */
+  .wizard-navigation {
+    padding: 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+  
+  .wizard-navigation button {
+    white-space: nowrap !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+}
+
+/* Default styles regardless of screen size */
+.wizard-tabs-container {
+  width: 100%;
+  position: relative;
+}
+
+/* Ensure scrollable tabs on all devices */
+.wizard-tabs-container [role="tablist"] {
+  display: flex;
+  min-width: min-content;
+}
+
+/* Fix tab icon alignment */
+.wizard-tabs-container [role="tab"] span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

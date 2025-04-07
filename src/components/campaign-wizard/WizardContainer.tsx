@@ -35,23 +35,23 @@ export const WizardContainer: React.FC<WizardContainerProps> = ({
   const isMobile = useIsMobile();
 
   return (
-    <Card className="w-full max-w-4xl mx-auto shadow-md">
-      <CardHeader className="border-b bg-muted/30">
+    <Card className="w-full max-w-4xl mx-auto shadow-md campaign-wizard">
+      <CardHeader className="border-b bg-muted/30 px-4 py-3 sm:px-6 sm:py-4">
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0 overflow-hidden">
-        <Tabs value={step} className="w-full">
+        <Tabs value={step} className="w-full wizard-container">
           <WizardStepTabs 
             currentStep={step} 
             setStep={setStep} 
             isStepAvailable={isStepAvailable} 
           />
-          <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
+          <div className={`${isMobile ? 'p-3' : 'p-6'}`}>
             {children}
           </div>
         </Tabs>
       </CardContent>
-      <CardFooter className="border-t bg-muted/30 py-4">
+      <CardFooter className="border-t bg-muted/30 py-3 px-4 sm:py-4 sm:px-6">
         <WizardNavigation 
           step={step}
           onPrevious={onPrevious}
