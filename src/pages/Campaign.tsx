@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CampaignDashboard from "@/components/CampaignDashboard";
@@ -58,9 +59,12 @@ const CampaignPage = () => {
   
   const handleCreateCampaign = async (newCampaign: CampaignData) => {
     try {
+      // Ensure we're using a proper UUID for campaign ID
+      const campaignId = uuidv4();
+      
       // Ensure the campaign has a user_id property and matches the Campaign type
       const campaignWithRequiredFields = {
-        id: newCampaign.id || uuidv4(),
+        id: campaignId, // Always use a properly generated UUID here
         title: newCampaign.title,
         description: newCampaign.description || '',
         status: (newCampaign.status as Campaign["status"]) || "draft",

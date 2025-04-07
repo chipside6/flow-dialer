@@ -4,13 +4,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { CampaignData, WizardStep } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
+import { v4 as uuidv4 } from 'uuid';
 
 export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, user?: { id?: string }) => {
   const { toast } = useToast();
   const { user: authUser } = useAuth();
   const [step, setStep] = useState<WizardStep>("basics");
   const [campaign, setCampaign] = useState<CampaignData>({
-    id: `camp-${Date.now().toString(36)}`, // Generate a unique ID
+    id: uuidv4(), // Generate a proper UUID instead of string prefix
     title: "",
     description: "",
     contactListId: "",
@@ -64,6 +65,7 @@ export const useCampaignForm = (onComplete: (campaign: CampaignData) => void, us
         const { data, error } = await supabase
           .from('campaigns')
           .insert({
+            id: uuidv4(), // Always generate a proper UUID here
             title: newCampaign.title,
             description: newCampaign.description,
             status: newCampaign.status,
