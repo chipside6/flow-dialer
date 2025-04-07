@@ -3,7 +3,7 @@ import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WizardStep } from "./types";
 import { FileText, Users, Radio, PhoneForwarded, ClipboardCheck } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WizardStepTabsProps {
@@ -29,7 +29,7 @@ export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
 
   return (
     <div className="wizard-tabs-container w-full overflow-x-auto">
-      <ScrollArea className="w-full" orientation="horizontal">
+      <ScrollArea className="w-full">
         <TabsList className="mb-4 mx-auto flex min-w-full justify-start sm:justify-center no-vertical-scroll">
           {steps.map((step) => (
             <TabsTrigger
@@ -56,6 +56,7 @@ export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
             </TabsTrigger>
           ))}
         </TabsList>
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
     </div>
   );
