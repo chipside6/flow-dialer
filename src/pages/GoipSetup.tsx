@@ -82,33 +82,39 @@ const GoipSetup = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="overflow-x-auto">
-                      <Table>
+                      <Table className="min-w-full divide-y divide-gray-200">
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-[100px] py-4">Port</TableHead>
-                            <TableHead className="py-4">SIP Username</TableHead>
-                            <TableHead className="py-4">SIP Password</TableHead>
-                            <TableHead className="py-4">Actions</TableHead>
+                            <TableHead className="w-[100px] py-4 pl-6">Port</TableHead>
+                            <TableHead className="py-4 px-4">SIP Username</TableHead>
+                            <TableHead className="py-4 px-4">SIP Password</TableHead>
+                            <TableHead className="py-4 px-4 text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {credentials.map((cred) => (
                             <TableRow key={cred.port_number}>
-                              <TableCell className="py-4 font-medium">Port {cred.port_number}</TableCell>
-                              <TableCell className="py-4">
-                                <code className="bg-muted px-3 py-1.5 rounded text-sm">{cred.sip_user}</code>
+                              <TableCell className="py-4 pl-6 font-medium whitespace-nowrap">
+                                Port {cred.port_number}
                               </TableCell>
-                              <TableCell className="py-4">
-                                <code className="bg-muted px-3 py-1.5 rounded text-sm">{cred.sip_pass}</code>
+                              <TableCell className="py-4 px-4 whitespace-nowrap">
+                                <code className="bg-muted px-3 py-1.5 rounded text-sm break-all md:break-normal">
+                                  {cred.sip_user}
+                                </code>
                               </TableCell>
-                              <TableCell className="py-4">
-                                <div className="flex flex-wrap gap-2">
+                              <TableCell className="py-4 px-4 whitespace-nowrap">
+                                <code className="bg-muted px-3 py-1.5 rounded text-sm break-all md:break-normal">
+                                  {cred.sip_pass}
+                                </code>
+                              </TableCell>
+                              <TableCell className="py-4 px-4 text-right">
+                                <div className="flex flex-wrap gap-2 justify-end">
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => copyToClipboard(cred.sip_user)}
                                     title="Copy username"
-                                    className="h-9"
+                                    className="h-9 whitespace-nowrap"
                                   >
                                     <Copy className="h-4 w-4 mr-1" /> Username
                                   </Button>
@@ -117,7 +123,7 @@ const GoipSetup = () => {
                                     variant="outline"
                                     onClick={() => copyToClipboard(cred.sip_pass)}
                                     title="Copy password"
-                                    className="h-9"
+                                    className="h-9 whitespace-nowrap"
                                   >
                                     <Copy className="h-4 w-4 mr-1" /> Password
                                   </Button>
@@ -155,9 +161,9 @@ const GoipSetup = () => {
                         <p>For each port (1-4), enter the corresponding SIP username and password from the table above.</p>
                         <p className="mt-2">Make sure to set the following parameters:</p>
                         <ul className="list-disc pl-5 mt-1 space-y-1">
-                          <li>SIP Server: <code>grhvoclalziyjbjlhpml.supabase.co</code></li>
-                          <li>SIP Port: <code>5060</code></li>
-                          <li>Registration Interval: <code>60</code> (seconds)</li>
+                          <li>SIP Server: <code className="bg-muted px-2 py-1 rounded">grhvoclalziyjbjlhpml.supabase.co</code></li>
+                          <li>SIP Port: <code className="bg-muted px-2 py-1 rounded">5060</code></li>
+                          <li>Registration Interval: <code className="bg-muted px-2 py-1 rounded">60</code> (seconds)</li>
                         </ul>
                       </div>
                       
