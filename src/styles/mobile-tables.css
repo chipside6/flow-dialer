@@ -16,6 +16,7 @@
     width: 100% !important;
     -webkit-overflow-scrolling: touch !important;
     padding-bottom: 0.5rem !important;
+    margin: 0 !important;
   }
 
   /* Ensure tables take full width */
@@ -39,6 +40,7 @@
     gap: 0.5rem !important;
     align-items: center !important;
     justify-content: flex-start !important;
+    min-width: 120px !important; /* Ensure buttons have enough space */
   }
   
   /* Give more breathing room between cells */
