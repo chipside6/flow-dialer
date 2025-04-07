@@ -83,10 +83,10 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white dark:from-indigo-800 dark:to-purple-800 overflow-hidden">
-        <div className="flex items-center p-4 justify-between w-full overflow-hidden">
-          <div className="min-w-0 flex-1 overflow-hidden">
-            <Logo size="lg" withText={true} className="text-white max-w-full" />
+      <SidebarHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white dark:from-indigo-800 dark:to-purple-800">
+        <div className="flex items-center p-4 justify-between w-full">
+          <div className="flex-shrink-0 min-w-0">
+            <Logo size="md" withText={true} className="text-white" />
           </div>
           
           {/* Only show close button for mobile */}

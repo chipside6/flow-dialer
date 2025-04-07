@@ -99,6 +99,23 @@
   padding-top: 0.5rem;
 }
 
+/* Fix logo display in sidebar header */
+[data-sidebar="header"] .logo, 
+[data-sidebar="header"] img {
+  max-height: 100% !important;
+  object-fit: contain !important;
+}
+
+/* Ensure logo text doesn't overflow */
+[data-sidebar="header"] .truncate {
+  max-width: 160px !important;
+}
+
+/* Logo specific sidebar header adjustments */
+[data-sidebar="header"] > div {
+  padding: 0.75rem 1rem !important;
+}
+
 /* Special highlight for GoIP setup on mobile - ONLY when active */
 @media (max-width: 768px) {
   a[href="/goip-setup"].active-goip-setup-link {
@@ -112,5 +129,24 @@
   .dark a[href="/goip-setup"].active-goip-setup-link {
     background-color: rgba(79, 70, 229, 0.2) !important;
     color: #c7d2fe !important;
+  }
+  
+  /* Fix logo in sidebar header on mobile */
+  [data-sidebar="header"] .logo {
+    display: flex !important;
+    align-items: center !important;
+    width: auto !important;
+    max-width: 170px !important;
+  }
+  
+  [data-sidebar="header"] .logo img {
+    flex-shrink: 0 !important;
+  }
+  
+  [data-sidebar="header"] .logo span {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 110px !important;
   }
 }
