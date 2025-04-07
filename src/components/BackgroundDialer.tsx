@@ -8,14 +8,11 @@ import { useBackgroundDialer } from "@/hooks/background-dialer/useBackgroundDial
 
 interface BackgroundDialerProps {
   campaignId: string;
-  sipProviderId?: string;
 }
 
-const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProviderId }) => {
+const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId }) => {
   const {
-    sipProviders,
     contactLists,
-    isLoadingProviders,
     isLoadingLists,
     isLoadingCampaign,
     formData,
@@ -29,18 +26,11 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProv
   
   const [isStuck, setIsStuck] = useState(false);
   
-  // Set SIP provider if provided explicitly via props
-  useEffect(() => {
-    if (sipProviderId && formData.sipProviderId !== sipProviderId) {
-      handleFormChange("sipProviderId", sipProviderId);
-    }
-  }, [sipProviderId, formData.sipProviderId]);
-  
   // Check if loading is taking too long
   useEffect(() => {
     let stuckTimer: NodeJS.Timeout;
     
-    if (isLoadingProviders || isLoadingLists || isLoadingCampaign) {
+    if (isLoadingLists || isLoadingCampaign) {
       stuckTimer = setTimeout(() => {
         setIsStuck(true);
       }, 10000); // 10 seconds before considering it stuck
@@ -51,14 +41,12 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProv
     return () => {
       if (stuckTimer) clearTimeout(stuckTimer);
     };
-  }, [isLoadingProviders, isLoadingLists, isLoadingCampaign]);
+  }, [isLoadingLists, isLoadingCampaign]);
   
-  const isLoading = isLoadingProviders || isLoadingLists || isLoadingCampaign;
+  const isLoading = isLoadingLists || isLoadingCampaign;
   const loadingMessage = isLoadingCampaign 
     ? "Loading campaign settings..." 
-    : isLoadingProviders 
-      ? "Loading SIP providers..." 
-      : "Loading contact lists...";
+    : "Loading contact lists...";
   
   return (
     <Card className="border-border/40 shadow-md">
@@ -89,14 +77,11 @@ const BackgroundDialer: React.FC<BackgroundDialerProps> = ({ campaignId, sipProv
           <>
             {!isDialing ? (
               <DialerForm
-                sipProviders={sipProviders}
                 contactLists={contactLists}
                 formData={formData}
-                isLoadingProviders={isLoadingProviders}
                 isLoadingLists={isLoadingLists}
                 onChange={handleFormChange}
                 onStart={startDialing}
-                disableSipProviderSelect={!!formData.sipProviderId}
               />
             ) : (
               <DialerStatusDisplay

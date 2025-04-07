@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { SipProvider, ContactList } from "@/components/background-dialer/types";
+import { ContactList } from "@/components/background-dialer/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
 import { 
@@ -11,42 +11,11 @@ import {
 
 export const useFetchDialerResources = () => {
   const { user } = useAuth();
-  const [sipProviders, setSipProviders] = useState<SipProvider[]>([]);
   const [contactLists, setContactLists] = useState<ContactList[]>([]);
-  const [isLoadingProviders, setIsLoadingProviders] = useState(true);
   const [isLoadingLists, setIsLoadingLists] = useState(true);
   
-  // Fetch SIP providers and contact lists
+  // Fetch contact lists
   useEffect(() => {
-    const fetchProviders = async () => {
-      if (!user) {
-        setSipProviders([]);
-        setIsLoadingProviders(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('sip_providers')
-          .select('id, name')
-          .eq('user_id', user.id)
-          .eq('active', true);
-
-        if (error) throw error;
-        
-        setSipProviders(data || []);
-      } catch (err) {
-        console.error("Error fetching SIP providers:", err);
-        handleDialerError(createDialerError(
-          DialerErrorType.PROVIDER,
-          "Could not load your SIP providers",
-          err
-        ));
-      } finally {
-        setIsLoadingProviders(false);
-      }
-    };
-
     const fetchContactLists = async () => {
       if (!user) {
         setContactLists([]);
@@ -85,14 +54,11 @@ export const useFetchDialerResources = () => {
       }
     };
 
-    fetchProviders();
     fetchContactLists();
   }, [user]);
   
   return {
-    sipProviders,
     contactLists,
-    isLoadingProviders,
     isLoadingLists
   };
 };

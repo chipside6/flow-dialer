@@ -5,7 +5,7 @@
 export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || '';
 export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || '';
 export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || '';
-export const ASTERISK_SERVER_IP = import.meta.env.VITE_ASTERISK_SERVER_IP || ''; // Add this line
+export const ASTERISK_SERVER_IP = import.meta.env.VITE_ASTERISK_SERVER_IP || ''; 
 
 /**
  * Helper function to create basic auth header
@@ -45,7 +45,7 @@ export const getConfigFromStorage = () => {
       apiUrl: ASTERISK_API_URL,
       username: ASTERISK_API_USERNAME,
       password: ASTERISK_API_PASSWORD,
-      serverIp: ASTERISK_SERVER_IP // Add this line
+      serverIp: ASTERISK_SERVER_IP
     };
   }
   
@@ -53,13 +53,13 @@ export const getConfigFromStorage = () => {
     const savedApiUrl = localStorage.getItem('asterisk_api_url') || ASTERISK_API_URL;
     const savedUsername = localStorage.getItem('asterisk_username') || ASTERISK_API_USERNAME;
     const savedPassword = localStorage.getItem('asterisk_password') || ASTERISK_API_PASSWORD;
-    const savedServerIp = localStorage.getItem('asterisk_server_ip') || ASTERISK_SERVER_IP; // Add this line
+    const savedServerIp = localStorage.getItem('asterisk_server_ip') || ASTERISK_SERVER_IP;
     
     return {
       apiUrl: savedApiUrl,
       username: savedUsername,
       password: savedPassword,
-      serverIp: savedServerIp // Add this line
+      serverIp: savedServerIp
     };
   } catch (error) {
     console.error('Error accessing localStorage:', error);
@@ -67,7 +67,7 @@ export const getConfigFromStorage = () => {
       apiUrl: ASTERISK_API_URL,
       username: ASTERISK_API_USERNAME,
       password: ASTERISK_API_PASSWORD,
-      serverIp: ASTERISK_SERVER_IP // Add this line
+      serverIp: ASTERISK_SERVER_IP
     };
   }
 };
