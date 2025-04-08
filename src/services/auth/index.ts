@@ -3,5 +3,5 @@
 
 export * from './session';
 export * from './types';
-export * from './authApi';
+// Remove reference to non-existent authApi
 export * from './profileApi';

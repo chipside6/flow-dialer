@@ -1,43 +1,23 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
 import { Shield, AlertCircle, LogIn, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { withExponentialBackoff } from '@/utils/apiHelpers';
 import { toast } from '@/components/ui/use-toast';
 import { refreshAdminStatus } from '@/contexts/auth/authUtils';
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isAdmin, initialized, user, profile, updateProfile } = useAuth();
+  const { isAuthenticated, isAdmin, user } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   
   // Check if user came from admin panel
   const isFromAdmin = location.state?.from?.pathname?.includes('/admin');
   
-  // Auto-refresh admin status when coming from admin panel
-  useEffect(() => {
-    if (user?.id && isFromAdmin && !isAdmin && retryCount < 1) {
-      handleRefreshAdminStatus();
-    }
-  }, [user?.id, isAdmin, isFromAdmin, retryCount]);
-
-  // Advanced error detection for auth state
-  useEffect(() => {
-    // Check for inconsistent auth state
-    if (isAuthenticated && !user) {
-      console.warn("Inconsistent auth state detected: authenticated but no user");
-      toast({
-        title: "Session Issue Detected",
-        description: "Your session appears to be in an inconsistent state. Try refreshing the page.",
-        variant: "destructive"
-      });
-    }
-  }, [isAuthenticated, user]);
-
   // Improved and more reliable admin status refresh
   const handleRefreshAdminStatus = async () => {
     if (!user?.id || isRefreshing) return;
@@ -52,12 +32,6 @@ const UnauthorizedPage = () => {
       const isUserAdmin = await refreshAdminStatus(user.id);
       
       if (isUserAdmin) {
-        // Update the profile in context to reflect admin status
-        updateProfile({
-          ...profile!,
-          is_admin: true
-        });
-        
         toast({
           title: "Admin Access Verified",
           description: "Your administrator access has been confirmed.",
@@ -84,31 +58,6 @@ const UnauthorizedPage = () => {
     }
   };
   
-  // Fallback case - if the user has been stuck on this page for too long
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (document.visibilityState === 'visible' && isAuthenticated && !location.state) {
-        // If user has been on this page for a while without context, offer dashboard
-        toast({
-          title: "Need help?",
-          description: "You've been on this page for a while. Would you like to go to the dashboard?",
-          action: (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => navigate('/dashboard')}
-              className="mt-2"
-            >
-              Go to Dashboard
-            </Button>
-          ),
-        });
-      }
-    }, 15000); // 15 seconds
-    
-    return () => clearTimeout(timer);
-  }, [isAuthenticated, navigate, location.state]);
-  
   return (
     <div className="flex flex-col items-center justify-center min-h-[100vh] p-6">
       <div className="w-full max-w-md mx-auto space-y-6">
@@ -128,9 +77,8 @@ const UnauthorizedPage = () => {
             <AlertTitle>Authentication Status</AlertTitle>
             <AlertDescription className="space-y-2 mt-2">
               <p><strong>User ID:</strong> {user?.id || 'Unknown'}</p>
-              <p><strong>Email:</strong> {user?.email || profile?.email || 'Unknown'}</p>
+              <p><strong>Email:</strong> {user?.email || 'Unknown'}</p>
               <p><strong>Admin:</strong> {isAdmin ? 'Yes' : 'No'}</p>
-              <p><strong>Initialized:</strong> {initialized ? 'Yes' : 'No'}</p>
             </AlertDescription>
           </Alert>
         )}

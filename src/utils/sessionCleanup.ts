@@ -11,3 +11,9 @@ export const clearAllAuthData = () => {
 };
 
 export const debouncedClearAllAuthData = clearAllAuthData;
+
+// Add the missing forceAppReload function
+export const forceAppReload = () => {
+  // Force a page reload to reset application state
+  window.location.reload();
+};
