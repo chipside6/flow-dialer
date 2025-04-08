@@ -8,7 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 export const useAuthSession = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setIsLoading] = useState(false); // Changed to false by default
+  const [loading, setIsLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
   const [sessionExpiryTime, setSessionExpiryTime] = useState<number | null>(null);
   const [refreshError, setRefreshError] = useState<Error | null>(null);
@@ -94,28 +94,6 @@ export const useAuthSession = () => {
       setInitialized(true);
     }
   }, [initialized, refreshInProgress]);
-
-  // Check session expiry and refresh if needed
-  useEffect(() => {
-    // Setup session refresh before expiry
-    if (sessionExpiryTime) {
-      const now = Date.now();
-      const timeUntilExpiry = sessionExpiryTime - now;
-      
-      // If session is expired or will expire in less than 5 minutes
-      if (timeUntilExpiry < 5 * 60 * 1000) {
-        refreshSession(true);
-      } else {
-        // Schedule refresh for 5 minutes before expiry
-        const refreshTime = timeUntilExpiry - 5 * 60 * 1000;
-        const refreshTimer = setTimeout(() => {
-          refreshSession(true);
-        }, refreshTime);
-        
-        return () => clearTimeout(refreshTimer);
-      }
-    }
-  }, [sessionExpiryTime, refreshSession]);
 
   // Initial session fetch
   useEffect(() => {

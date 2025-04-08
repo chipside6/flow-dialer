@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from './types';
+import { clearAllAuthData } from '@/utils/sessionCleanup';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -55,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setIsAdmin(false);
+          clearAllAuthData();
         }
         
         setIsLoading(false);
@@ -71,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear user state
       setUser(null);
       setIsAdmin(false);
+      clearAllAuthData();
       
       // Sign out from Supabase
       await supabase.auth.signOut();

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/components/ui/use-toast";
@@ -122,7 +123,7 @@ export const useCampaigns = (): UseCampaignsResult => {
               console.log("Campaigns loading timeout reached, ending loading state");
               setState(prev => ({ ...prev, isLoading: false }));
             }
-          }, 6000); // 6 seconds timeout
+          }, 4000); // 4 seconds timeout (reduced from 6)
 
           const result = await fetchCampaigns({ 
             user, 
@@ -167,6 +168,9 @@ export const useCampaigns = (): UseCampaignsResult => {
       };
 
       loadCampaigns();
+    } else if (!isAuthenticated || !user?.id) {
+      // If not authenticated, end loading state immediately
+      setState(prev => ({ ...prev, isLoading: false }));
     }
 
     // Cleanup function
@@ -176,7 +180,7 @@ export const useCampaigns = (): UseCampaignsResult => {
         clearTimeout(loadingTimeoutRef.current);
       }
     };
-  }, [user?.id, isAuthenticated, fetchCampaigns, isOnline]);
+  }, [user?.id, isAuthenticated, fetchCampaigns, isOnline, state.isLoading]);
 
   return {
     campaigns: state.campaigns,
