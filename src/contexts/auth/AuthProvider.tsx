@@ -22,7 +22,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data } = await supabase.auth.getSession();
         
         if (data.session?.user) {
-          setUser(data.session.user);
+          // Convert Supabase User to our User type
+          const userData: User = {
+            id: data.session.user.id,
+            email: data.session.user.email || undefined,
+            created_at: data.session.user.created_at,
+            last_sign_in_at: data.session.user.last_sign_in_at
+          };
+          setUser(userData);
           
           // Simple admin check
           const { data: profileData } = await supabase
@@ -54,7 +61,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("Auth state changed:", event);
         
         if (event === 'SIGNED_IN' && session?.user) {
-          setUser(session.user);
+          // Convert Supabase User to our User type
+          const userData: User = {
+            id: session.user.id,
+            email: session.user.email || undefined,
+            created_at: session.user.created_at,
+            last_sign_in_at: session.user.last_sign_in_at
+          };
+          setUser(userData);
           
           // Fetch user profile
           const { data: profileData } = await supabase
