@@ -2,14 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import type { User } from './types';
+import type { User, UserProfile } from './types';
 import { clearAllAuthData } from '@/utils/sessionCleanup';
+import { toast } from '@/components/ui/use-toast';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [initialized, setInitialized] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
     // Check for existing session on mount
@@ -23,17 +27,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Simple admin check
           const { data: profileData } = await supabase
             .from('profiles')
-            .select('is_admin')
+            .select('*')
             .eq('id', data.session.user.id)
             .single();
             
-          setIsAdmin(!!profileData?.is_admin);
+          if (profileData) {
+            setProfile(profileData);
+            setIsAdmin(!!profileData.is_admin);
+          }
         }
       } catch (error) {
         console.error("Auth session check error:", error);
         setError(error instanceof Error ? error : new Error('Unknown error'));
       } finally {
         setIsLoading(false);
+        setInitialized(true);
+        setSessionChecked(true);
       }
     };
     
@@ -42,24 +51,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("Auth state changed:", event);
+        
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user);
           
-          // Simple admin check
+          // Fetch user profile
           const { data: profileData } = await supabase
             .from('profiles')
-            .select('is_admin')
+            .select('*')
             .eq('id', session.user.id)
             .single();
             
-          setIsAdmin(!!profileData?.is_admin);
+          if (profileData) {
+            setProfile(profileData);
+            setIsAdmin(!!profileData.is_admin);
+          }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+          setProfile(null);
           setIsAdmin(false);
           clearAllAuthData();
         }
         
         setIsLoading(false);
+        setInitialized(true);
+        setSessionChecked(true);
       }
     );
     
@@ -68,10 +85,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  const updateProfile = async (data: Partial<UserProfile>) => {
+    if (!user) {
+      return { error: new Error('No authenticated user') };
+    }
+
+    try {
+      const { data: updatedProfile, error } = await supabase
+        .from('profiles')
+        .update(data)
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      // Update local state
+      setProfile(prev => prev ? { ...prev, ...data } : null);
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully"
+      });
+
+      return { error: null };
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      return { error: error instanceof Error ? error : new Error(String(error)) };
+    }
+  };
+
   const signOut = async () => {
     try {
       // Clear user state
       setUser(null);
+      setProfile(null);
       setIsAdmin(false);
       clearAllAuthData();
       
@@ -90,10 +137,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = {
     user,
+    profile,
     isLoading,
     isAuthenticated: !!user,
     isAdmin,
     error,
+    initialized,
+    sessionChecked,
+    setProfile,
+    updateProfile,
     signOut
   };
 
