@@ -33,10 +33,6 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   const { setOpenMobile } = useSidebar();
   const isMobile = useIsMobile();
   
-  // Debug: log authentication status
-  const { user, isAuthenticated } = useAuth();
-  console.log("Sidebar auth status:", { isAuthenticated, userId: user?.id });
-  
   // Specifically check for lifetime plan
   const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
   
