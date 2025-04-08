@@ -43,8 +43,6 @@ const UnauthorizedPage = () => {
         }, 1000);
       } else {
         toast({
-          variant: "destructive",
-          title: "Access Denied",
           description: "You don't have administrator privileges. If this is unexpected, contact support.",
         });
       }

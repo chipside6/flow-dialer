@@ -1,6 +1,6 @@
 
 import { Session } from './types';
-import { debouncedClearAllAuthData, forceAppReload } from '@/utils/sessionCleanup';
+import { debouncedClearAllAuthData } from '@/utils/sessionCleanup';
 
 // Storage key for local session data
 const SESSION_STORAGE_KEY = 'user_session';
@@ -16,8 +16,7 @@ const isValidSession = (session: any): session is Session => {
     typeof session === 'object' && 
     session.user && 
     typeof session.user === 'object' &&
-    typeof session.user.id === 'string' &&
-    (session.token || session.access_token)  // Check for either token format
+    typeof session.user.id === 'string'
   );
 };
 
@@ -47,13 +46,6 @@ export const getStoredSession = (): Session | null => {
       // Don't remove the session on parse error - it might be a temporary issue
       sessionCache = null;
       return null;
-    }
-    
-    // Normalize token field (some APIs use token, others use access_token)
-    if (session.access_token && !session.token) {
-      session.token = session.access_token;
-    } else if (session.token && !session.access_token) {
-      session.access_token = session.token;
     }
     
     // Validate session structure
@@ -108,13 +100,6 @@ export const storeSession = (session: Session): void => {
   if (!isValidSession(session)) {
     console.error('Attempted to store invalid session', session);
     return;
-  }
-  
-  // Normalize token field (some APIs use token, others use access_token)
-  if (session.access_token && !session.token) {
-    session.token = session.access_token;
-  } else if (session.token && !session.access_token) {
-    session.access_token = session.token;
   }
   
   try {
@@ -194,12 +179,4 @@ export const hasValidSession = (): boolean => {
   } catch (e) {
     return false;
   }
-};
-
-/**
- * Force logout and session cleanup with page reload
- */
-export const forceLogout = (): void => {
-  clearSession();
-  forceAppReload();
 };

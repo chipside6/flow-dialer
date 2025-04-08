@@ -3,10 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from './types';
-import { clearAllAuthData, forceAppReload } from '@/utils/sessionCleanup';
+import { clearAllAuthData } from '@/utils/sessionCleanup';
 import { toast } from '@/components/ui/use-toast';
-import { getStoredSession, storeSession, clearSession } from '@/services/auth/session';
-import { refreshAdminStatus, getCachedAdminStatus } from './authUtils';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -21,101 +19,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check for existing session on mount
     const getSession = async () => {
       try {
-        // First check local storage for cached session
-        const storedSession = getStoredSession();
+        const { data } = await supabase.auth.getSession();
         
-        if (storedSession?.user) {
-          console.log("Found stored session, using it for initial state");
-          setUser(storedSession.user);
+        if (data.session?.user) {
+          // Convert Supabase User to our User type
+          const userData: User = {
+            id: data.session.user.id,
+            email: data.session.user.email || undefined,
+            created_at: data.session.user.created_at,
+            last_sign_in_at: data.session.user.last_sign_in_at
+          };
+          setUser(userData);
           
-          // Check for cached admin status
-          const cachedAdminStatus = getCachedAdminStatus(storedSession.user.id);
-          if (cachedAdminStatus !== null) {
-            setIsAdmin(cachedAdminStatus);
-          }
-          
-          // Verify session with Supabase as well (in background)
-          supabase.auth.getSession().then(async ({ data }) => {
-            if (data.session?.user) {
-              console.log("Supabase session verified");
-              
-              // Check admin status if not available from cache
-              if (cachedAdminStatus === null) {
-                try {
-                  const isUserAdmin = await refreshAdminStatus(data.session.user.id);
-                  setIsAdmin(isUserAdmin);
-                } catch (adminError) {
-                  console.error("Error checking admin status:", adminError);
-                }
-              }
-              
-              // Fetch profile data
-              try {
-                const { data: profileData } = await supabase
-                  .from('profiles')
-                  .select('*')
-                  .eq('id', data.session.user.id)
-                  .maybeSingle();
-                  
-                if (profileData) {
-                  setProfile(profileData);
-                }
-              } catch (profileError) {
-                console.error("Error fetching profile:", profileError);
-              }
-            } else {
-              console.warn("Stored session invalid, clearing it");
-              clearSession();
-              setUser(null);
-              setIsAdmin(false);
-            }
-          }).catch(err => {
-            console.error("Error verifying session with Supabase:", err);
-          });
-        } else {
-          // No stored session, check with Supabase
-          const { data } = await supabase.auth.getSession();
-          
-          if (data.session?.user) {
-            // Convert Supabase User to our User type
-            const userData: User = {
-              id: data.session.user.id,
-              email: data.session.user.email || '',
-              created_at: data.session.user.created_at,
-              last_sign_in_at: data.session.user.last_sign_in_at
-            };
-            setUser(userData);
+          // Simple admin check
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.session.user.id)
+            .maybeSingle();
             
-            // Store session for later use
-            storeSession({
-              user: userData,
-              token: data.session.access_token,
-              refresh_token: data.session.refresh_token,
-              expires_at: data.session.expires_at
-            });
-            
-            // Check admin status
-            try {
-              const isUserAdmin = await refreshAdminStatus(userData.id);
-              setIsAdmin(isUserAdmin);
-            } catch (adminError) {
-              console.error("Error checking admin status:", adminError);
-            }
-            
-            // Fetch profile data
-            try {
-              const { data: profileData } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userData.id)
-                .maybeSingle();
-                
-              if (profileData) {
-                setProfile(profileData);
-              }
-            } catch (profileError) {
-              console.error("Error fetching profile:", profileError);
-            }
+          if (profileData) {
+            setProfile(profileData);
+            setIsAdmin(!!profileData.is_admin);
           }
         }
       } catch (error) {
@@ -139,60 +64,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Convert Supabase User to our User type
           const userData: User = {
             id: session.user.id,
-            email: session.user.email || '',
+            email: session.user.email || undefined,
             created_at: session.user.created_at,
             last_sign_in_at: session.user.last_sign_in_at
           };
           setUser(userData);
           
-          // Store session for future use
-          storeSession({
-            user: userData,
-            token: session.access_token,
-            refresh_token: session.refresh_token,
-            expires_at: session.expires_at
-          });
-          
-          // Check admin status
-          try {
-            const isUserAdmin = await refreshAdminStatus(userData.id);
-            setIsAdmin(isUserAdmin);
-          } catch (adminError) {
-            console.error("Error checking admin status on sign in:", adminError);
-          }
-          
           // Fetch user profile
-          try {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .maybeSingle();
-              
-            if (profileData) {
-              setProfile(profileData);
-            }
-          } catch (profileError) {
-            console.error("Error fetching profile on sign in:", profileError);
-          }
-        } else if (event === 'TOKEN_REFRESHED' && session) {
-          console.log("Token refreshed, updating stored session");
-          
-          // Only update the token-related information to avoid overwriting user data
-          const storedSession = getStoredSession();
-          if (storedSession) {
-            storeSession({
-              ...storedSession,
-              token: session.access_token,
-              refresh_token: session.refresh_token,
-              expires_at: session.expires_at
-            });
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+            
+          if (profileData) {
+            setProfile(profileData);
+            setIsAdmin(!!profileData.is_admin);
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
-          clearSession();
+          clearAllAuthData();
         }
         
         setIsLoading(false);
@@ -236,31 +129,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Enhanced sign out function with token clearing
+  // Simple sign out function
   const signOut = async () => {
     try {
-      console.log("Signing out user");
-      
-      // Clear user state first for immediate UI response
+      // Clear user state
       setUser(null);
       setProfile(null);
       setIsAdmin(false);
-      
-      // Clear all auth data from storage
-      clearSession();
+      clearAllAuthData();
       
       // Sign out from Supabase
       await supabase.auth.signOut();
       
-      console.log("Sign out completed");
-      
       return { success: true, error: null };
     } catch (error) {
       console.error("Error during sign out:", error);
-      
-      // Even if there's an error, still clear local state
-      clearAllAuthData();
-      
       return { 
         success: false, 
         error: error instanceof Error ? error : new Error(String(error)) 

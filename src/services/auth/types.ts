@@ -4,7 +4,7 @@
 // Base user interface
 export interface User {
   id: string;
-  email?: string; // Changed from required to optional to match other definition
+  email: string;
   created_at?: string;
   last_sign_in_at?: string;
 }
@@ -13,8 +13,6 @@ export interface User {
 export interface Session {
   user: User;
   token?: string;
-  access_token?: string; // Support both token formats
-  refresh_token?: string;
   expires_at?: number;
 }
 

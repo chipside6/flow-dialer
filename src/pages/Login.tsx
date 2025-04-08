@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { storeSession } from '@/services/auth/session';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
 import { AuthHeader } from '@/components/auth/AuthHeader';
@@ -49,7 +48,7 @@ const Login = () => {
     setErrorMessage(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
@@ -70,32 +69,10 @@ const Login = () => {
         return;
       }
       
-      // Store the session information for persistence
-      if (data.session) {
-        const userData = data.session.user;
-        
-        storeSession({
-          user: {
-            id: userData.id,
-            email: userData.email || '',
-            created_at: userData.created_at,
-            last_sign_in_at: userData.last_sign_in_at
-          },
-          token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-          expires_at: data.session.expires_at
-        });
-        
-        localStorage.setItem('sessionLastUpdated', Date.now().toString());
-      }
-      
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
-      
-      // Navigate to the returnTo path
-      navigate(returnTo, { replace: true });
       
     } catch (error: any) {
       console.error("Login error:", error);

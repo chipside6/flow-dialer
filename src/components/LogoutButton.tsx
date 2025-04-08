@@ -1,10 +1,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import { clearSession } from "@/services/auth/session";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -34,16 +33,11 @@ const LogoutButton = ({
       // Call optional callback if provided
       if (onClick) onClick();
       
-      // Immediately clear session for faster feedback
-      clearSession();
-      
       // Navigate to login page directly
       navigate("/login", { replace: true });
       
-      // Then attempt to sign out in the background
-      signOut().catch(error => {
-        console.error("Background signout error:", error);
-      });
+      // Then attempt to sign out
+      await signOut();
     } catch (error: any) {
       console.error("Logout error:", error);
       
@@ -64,17 +58,8 @@ const LogoutButton = ({
       className={buttonClasses}
       disabled={isLoggingOut}
     >
-      {isLoggingOut ? (
-        <>
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          <span>Logging out...</span>
-        </>
-      ) : (
-        <>
-          <LogOut className="h-4 w-4 mr-2" /> 
-          <span>Logout</span>
-        </>
-      )}
+      <LogOut className="h-4 w-4 mr-2" /> 
+      <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
     </Button>
   );
 };
