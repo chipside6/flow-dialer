@@ -6,6 +6,7 @@ import type { User } from './types';
 import { clearAllAuthData, forceAppReload } from '@/utils/sessionCleanup';
 import { toast } from '@/components/ui/use-toast';
 import { getStoredSession, storeSession, clearSession } from '@/services/auth/session';
+import { refreshAdminStatus, getCachedAdminStatus } from './authUtils';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -27,12 +28,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log("Found stored session, using it for initial state");
           setUser(storedSession.user);
           
+          // Check for cached admin status
+          const cachedAdminStatus = getCachedAdminStatus(storedSession.user.id);
+          if (cachedAdminStatus !== null) {
+            setIsAdmin(cachedAdminStatus);
+          }
+          
           // Verify session with Supabase as well (in background)
           supabase.auth.getSession().then(async ({ data }) => {
             if (data.session?.user) {
               console.log("Supabase session verified");
               
-              // Simple admin check
+              // Check admin status if not available from cache
+              if (cachedAdminStatus === null) {
+                try {
+                  const isUserAdmin = await refreshAdminStatus(data.session.user.id);
+                  setIsAdmin(isUserAdmin);
+                } catch (adminError) {
+                  console.error("Error checking admin status:", adminError);
+                }
+              }
+              
+              // Fetch profile data
               try {
                 const { data: profileData } = await supabase
                   .from('profiles')
@@ -42,7 +59,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   
                 if (profileData) {
                   setProfile(profileData);
-                  setIsAdmin(!!profileData.is_admin);
                 }
               } catch (profileError) {
                 console.error("Error fetching profile:", profileError);
@@ -51,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.warn("Stored session invalid, clearing it");
               clearSession();
               setUser(null);
+              setIsAdmin(false);
             }
           }).catch(err => {
             console.error("Error verifying session with Supabase:", err);
@@ -77,16 +94,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               expires_at: data.session.expires_at
             });
             
-            // Simple admin check
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', data.session.user.id)
-              .maybeSingle();
-              
-            if (profileData) {
-              setProfile(profileData);
-              setIsAdmin(!!profileData.is_admin);
+            // Check admin status
+            try {
+              const isUserAdmin = await refreshAdminStatus(userData.id);
+              setIsAdmin(isUserAdmin);
+            } catch (adminError) {
+              console.error("Error checking admin status:", adminError);
+            }
+            
+            // Fetch profile data
+            try {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userData.id)
+                .maybeSingle();
+                
+              if (profileData) {
+                setProfile(profileData);
+              }
+            } catch (profileError) {
+              console.error("Error fetching profile:", profileError);
             }
           }
         }
@@ -125,6 +153,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             expires_at: session.expires_at
           });
           
+          // Check admin status
+          try {
+            const isUserAdmin = await refreshAdminStatus(userData.id);
+            setIsAdmin(isUserAdmin);
+          } catch (adminError) {
+            console.error("Error checking admin status on sign in:", adminError);
+          }
+          
           // Fetch user profile
           try {
             const { data: profileData } = await supabase
@@ -135,7 +171,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               
             if (profileData) {
               setProfile(profileData);
-              setIsAdmin(!!profileData.is_admin);
             }
           } catch (profileError) {
             console.error("Error fetching profile on sign in:", profileError);

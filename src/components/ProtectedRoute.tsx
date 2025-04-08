@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
-import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
+import { checkSubscriptionStatus, refreshAdminStatus } from '@/contexts/auth/authUtils';
 import { isSessionValid } from '@/services/auth/session';
 
 interface ProtectedRouteProps {
@@ -20,11 +20,29 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { isAuthenticated, isAdmin, isLoading, user, sessionChecked } = useAuth();
   const [hasSubscription, setHasSubscription] = useState(true);
   const [checkingSubscription, setCheckingSubscription] = useState(false);
+  const [isVerifyingAdmin, setIsVerifyingAdmin] = useState(false);
+  const [actualIsAdmin, setActualIsAdmin] = useState(isAdmin);
   const location = useLocation();
   
   // Double-check session validity as a safety measure
   const sessionIsValid = isSessionValid();
   const isActuallyAuthenticated = isAuthenticated && sessionIsValid;
+  
+  // Double-check admin status if required
+  useEffect(() => {
+    if (requireAdmin && isActuallyAuthenticated && user?.id) {
+      setIsVerifyingAdmin(true);
+      
+      // Always verify admin status when it's required
+      refreshAdminStatus(user.id)
+        .then(isUserAdmin => {
+          setActualIsAdmin(isUserAdmin);
+        })
+        .finally(() => {
+          setIsVerifyingAdmin(false);
+        });
+    }
+  }, [requireAdmin, isActuallyAuthenticated, user]);
   
   // Check subscription if required
   useEffect(() => {
@@ -41,7 +59,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }, [requireSubscription, isActuallyAuthenticated, user]);
   
   // Show loading state while auth is being determined
-  if ((isLoading || !sessionChecked) || (requireSubscription && checkingSubscription)) {
+  if ((isLoading || !sessionChecked || isVerifyingAdmin) || (requireSubscription && checkingSubscription)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="w-full max-w-md space-y-4 p-4">
@@ -62,7 +80,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
   
   // If admin required but user is not admin, redirect to unauthorized
-  if (requireAdmin && !isAdmin) {
+  if (requireAdmin && !actualIsAdmin) {
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
   
