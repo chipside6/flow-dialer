@@ -9,7 +9,7 @@
 const configureCallFlow = async (
   campaignId: string, 
   options: any
-): Promise<{ success: boolean; message?: string }> => {
+): Promise<{ success: boolean; message?: string; error?: string }> => {
   try {
     return { 
       success: true, 
@@ -19,7 +19,8 @@ const configureCallFlow = async (
     console.error('Error configuring call flow:', error);
     return { 
       success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 };
@@ -29,17 +30,32 @@ const configureCallFlow = async (
  */
 const getDialingStatus = async (
   campaignId: string
-): Promise<{ success: boolean; status?: string; message?: string }> => {
+): Promise<{ 
+  success: boolean; 
+  status?: string; 
+  message?: string; 
+  error?: string;
+  totalCalls?: number;
+  completedCalls?: number;
+  answeredCalls?: number;
+  failedCalls?: number;
+}> => {
   try {
+    // Mock response for development
     return { 
       success: true, 
-      status: 'idle'
+      status: 'idle',
+      totalCalls: 0,
+      completedCalls: 0,
+      answeredCalls: 0,
+      failedCalls: 0
     };
   } catch (error) {
     console.error('Error getting dialing status:', error);
     return { 
       success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 };
@@ -50,17 +66,19 @@ const getDialingStatus = async (
 const startDialing = async (
   campaignId: string, 
   phoneNumbers: string[]
-): Promise<{ success: boolean; message?: string }> => {
+): Promise<{ success: boolean; message?: string; error?: string; jobId?: string }> => {
   try {
     return { 
       success: true, 
-      message: 'Dialing started successfully'
+      message: 'Dialing started successfully',
+      jobId: `job-${Date.now()}` // Generate a mock job ID
     };
   } catch (error) {
     console.error('Error starting dialing:', error);
     return { 
       success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 };
@@ -70,7 +88,7 @@ const startDialing = async (
  */
 const stopDialing = async (
   campaignId: string
-): Promise<{ success: boolean; message?: string }> => {
+): Promise<{ success: boolean; message?: string; error?: string }> => {
   try {
     return { 
       success: true, 
@@ -80,7 +98,8 @@ const stopDialing = async (
     console.error('Error stopping dialing:', error);
     return { 
       success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 };

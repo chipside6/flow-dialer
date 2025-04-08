@@ -172,7 +172,7 @@ export const useReadinessChecker = (user: UserWithId | null) => {
         // Add more robust error handling and retry logic
         const result = await asteriskService.testConnection().catch(err => {
           console.error("Connection test error:", err);
-          return { success: false, error: err.message };
+          return { success: false, message: err.message, error: err.message };
         });
         
         console.log("Connection test result:", result);
@@ -204,9 +204,7 @@ export const useReadinessChecker = (user: UserWithId | null) => {
             check.name === "Asterisk Connection" ? {
               ...check,
               status: "error",
-              message: result.error 
-                ? `Connection error: ${result.error}` 
-                : "Could not connect to Asterisk server"
+              message: result.message || "Could not connect to Asterisk server"
             } : check
           ));
           

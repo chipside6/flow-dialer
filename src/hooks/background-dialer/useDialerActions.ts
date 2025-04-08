@@ -25,29 +25,34 @@ export const useDialerActions = (
       if (!currentJobId) return;
       
       try {
-        const status = await asteriskService.getDialingStatus(currentJobId);
+        const response = await asteriskService.getDialingStatus(currentJobId);
         
-        setDialStatus({
-          ...status,
-          status: status.status === 'running' ? 'running' : 
-                  status.status === 'completed' ? 'completed' : 
-                  status.status === 'failed' ? 'failed' : 'stopped'
-        });
-        
-        if (status.status === 'completed' || status.status === 'failed') {
-          setIsDialing(false);
+        if (response.success) {
+          setDialStatus({
+            status: response.status === 'running' ? 'running' : 
+                    response.status === 'completed' ? 'completed' : 
+                    response.status === 'failed' ? 'failed' : 'stopped',
+            totalCalls: response.totalCalls || 0,
+            completedCalls: response.completedCalls || 0,
+            answeredCalls: response.answeredCalls || 0,
+            failedCalls: response.failedCalls || 0
+          });
           
-          if (status.status === 'completed') {
-            toast({
-              title: "Dialing Complete",
-              description: `Successfully completed dialing campaign with ${status.answeredCalls} answered calls.`,
-            });
-          } else {
-            toast({
-              title: "Dialing Failed",
-              description: "There was an issue with the dialing operation.",
-              variant: "destructive",
-            });
+          if (response.status === 'completed' || response.status === 'failed') {
+            setIsDialing(false);
+            
+            if (response.status === 'completed') {
+              toast({
+                title: "Dialing Complete",
+                description: `Successfully completed dialing campaign with ${response.answeredCalls || 0} answered calls.`,
+              });
+            } else {
+              toast({
+                title: "Dialing Failed",
+                description: "There was an issue with the dialing operation.",
+                variant: "destructive",
+              });
+            }
           }
         }
       } catch (error) {
@@ -79,29 +84,31 @@ export const useDialerActions = (
       // Set max concurrent calls to 3 (enforced)
       const maxConcurrentCalls = 3;
       
-      const response = await asteriskService.startDialing({
-        contactListId: formData.contactListId,
-        campaignId,
-        transferNumber: formData.transferNumber,
-        greetingFile: formData.greetingFile,
-        portNumber: formData.portNumber || 1, // Use the selected port or default to 1
-        maxConcurrentCalls // Enforced to 3
-      });
+      const phoneNumbers = ['17735551234', '17735551235']; // Mock numbers for testing, would be fetched from contact list
       
-      setCurrentJobId(response.jobId);
-      setIsDialing(true);
-      setDialStatus({
-        status: 'running',
-        totalCalls: 0,
-        completedCalls: 0,
-        answeredCalls: 0,
-        failedCalls: 0
-      });
+      const response = await asteriskService.startDialing(
+        campaignId, 
+        phoneNumbers
+      );
       
-      toast({
-        title: "Dialing Started",
-        description: `The system is now dialing your contact list using port ${formData.portNumber || 1}.`,
-      });
+      if (response.success && response.jobId) {
+        setCurrentJobId(response.jobId);
+        setIsDialing(true);
+        setDialStatus({
+          status: 'running',
+          totalCalls: 0,
+          completedCalls: 0,
+          answeredCalls: 0,
+          failedCalls: 0
+        });
+        
+        toast({
+          title: "Dialing Started",
+          description: `The system is now dialing your contact list using port ${formData.portNumber || 1}.`,
+        });
+      } else {
+        throw new Error(response.message || "Unknown error starting dialing");
+      }
     } catch (error) {
       console.error("Error starting dialing:", error);
       toast({

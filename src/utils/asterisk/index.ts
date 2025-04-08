@@ -3,47 +3,46 @@ import {
   ASTERISK_API_URL, 
   ASTERISK_API_USERNAME, 
   ASTERISK_API_PASSWORD,
-  isHostedEnvironment,
-  hasConfiguredEnvironment,
   getConfigFromStorage,
-  saveConfigToStorage
+  saveConfigToStorage,
+  createBasicAuthHeader,
+  hasConfiguredEnvironment,
+  isHostedEnvironment
 } from './config';
-import { asteriskConfig, generateCompleteConfig } from './generators';
+
 import { connectionService } from './connectionService';
 import { dialingService } from './dialingService';
 import { securityUtils } from './utils/securityUtils';
 
-// Export everything through a single service object to maintain the original API
+// Combined service for easier importing
 export const asteriskService = {
-  // Re-export connection methods
+  // Connection
   testConnection: connectionService.testConnection,
   reloadPjsip: connectionService.reloadPjsip,
   reloadExtensions: connectionService.reloadExtensions,
   
-  // Re-export dialing methods
+  // Dialing
   configureCallFlow: dialingService.configureCallFlow,
   getDialingStatus: dialingService.getDialingStatus,
   startDialing: dialingService.startDialing,
-  stopDialing: dialingService.stopDialing,
-  
-  // Re-export config generators for backward compatibility
-  generateSipTrunkConfig: asteriskConfig.generateSipTrunkConfig,
-  generateCompleteConfig,
-  
-  // Security utilities
-  generateSecureToken: securityUtils.generateSecureToken,
-  createBasicAuthHeader: securityUtils.createBasicAuthHeader
+  stopDialing: dialingService.stopDialing
 };
 
-// Re-export constants and the configuration object
-export { 
-  ASTERISK_API_URL, 
-  ASTERISK_API_USERNAME, 
-  ASTERISK_API_PASSWORD,
-  isHostedEnvironment,
-  hasConfiguredEnvironment,
+// Configuration exports
+export const asteriskConfig = {
   getConfigFromStorage,
   saveConfigToStorage,
-  asteriskConfig,
-  securityUtils
+  createBasicAuthHeader,
+  hasConfiguredEnvironment,
+  isHostedEnvironment
+};
+
+// Export security utils
+export { securityUtils };
+
+// Export configuration constants
+export {
+  ASTERISK_API_URL,
+  ASTERISK_API_USERNAME,
+  ASTERISK_API_PASSWORD
 };

@@ -24,29 +24,34 @@ export const useDialerStatus = (currentJobId: string | null, isDialing: boolean)
       if (!currentJobId) return;
       
       try {
-        const status = await asteriskService.getDialingStatus(currentJobId);
+        const response = await asteriskService.getDialingStatus(currentJobId);
         
-        setDialStatus({
-          ...status,
-          status: status.status === 'running' ? 'running' : 
-                  status.status === 'completed' ? 'completed' : 
-                  status.status === 'failed' ? 'failed' : 'stopped'
-        });
-        
-        if (status.status === 'completed' || status.status === 'failed') {
-          // Let the parent hook know to stop dialing if needed
-          if (status.status === 'completed') {
-            handleDialerError(createDialerError(
-              DialerErrorType.UNKNOWN,
-              `Successfully completed dialing campaign with ${status.answeredCalls} answered calls.`,
-              null
-            ));
-          } else {
-            handleDialerError(createDialerError(
-              DialerErrorType.SERVER,
-              "There was an issue with the dialing operation.",
-              null
-            ));
+        if (response.success) {
+          setDialStatus({
+            status: response.status === 'running' ? 'running' : 
+                    response.status === 'completed' ? 'completed' : 
+                    response.status === 'failed' ? 'failed' : 'stopped',
+            totalCalls: response.totalCalls || 0,
+            completedCalls: response.completedCalls || 0,
+            answeredCalls: response.answeredCalls || 0,
+            failedCalls: response.failedCalls || 0
+          });
+          
+          if (response.status === 'completed' || response.status === 'failed') {
+            // Let the parent hook know to stop dialing if needed
+            if (response.status === 'completed') {
+              handleDialerError(createDialerError(
+                DialerErrorType.UNKNOWN,
+                `Successfully completed dialing campaign with ${response.answeredCalls || 0} answered calls.`,
+                null
+              ));
+            } else {
+              handleDialerError(createDialerError(
+                DialerErrorType.SERVER,
+                "There was an issue with the dialing operation.",
+                null
+              ));
+            }
           }
         }
       } catch (error) {

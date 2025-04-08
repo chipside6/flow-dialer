@@ -12,7 +12,7 @@ const testConnection = async (config?: {
   apiUrl?: string;
   username?: string;
   password?: string;
-}): Promise<{ success: boolean; message?: string }> => {
+}): Promise<{ success: boolean; message?: string; error?: string }> => {
   try {
     // Get configuration (either from params or storage)
     const { apiUrl, username, password } = config || getConfigFromStorage();
@@ -20,7 +20,8 @@ const testConnection = async (config?: {
     if (!apiUrl || !username || !password) {
       return { 
         success: false, 
-        message: 'Missing configuration parameters. Please provide API URL, username, and password.'
+        message: 'Missing configuration parameters. Please provide API URL, username, and password.',
+        error: 'Missing parameters'
       };
     }
     
@@ -34,7 +35,8 @@ const testConnection = async (config?: {
     console.error('Error testing Asterisk connection:', error);
     return { 
       success: false, 
-      message: `Connection error: ${error instanceof Error ? error.message : String(error)}`
+      message: `Connection error: ${error instanceof Error ? error.message : String(error)}`,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 };
@@ -42,7 +44,7 @@ const testConnection = async (config?: {
 /**
  * Reload PJSIP configuration on Asterisk server
  */
-const reloadPjsip = async (): Promise<{ success: boolean; message?: string }> => {
+const reloadPjsip = async (): Promise<{ success: boolean; message?: string; error?: string }> => {
   try {
     return { 
       success: true, 
@@ -52,7 +54,8 @@ const reloadPjsip = async (): Promise<{ success: boolean; message?: string }> =>
     console.error('Error reloading PJSIP:', error);
     return { 
       success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 };
@@ -60,7 +63,7 @@ const reloadPjsip = async (): Promise<{ success: boolean; message?: string }> =>
 /**
  * Reload dialplan/extensions on Asterisk server
  */
-const reloadExtensions = async (): Promise<{ success: boolean; message?: string }> => {
+const reloadExtensions = async (): Promise<{ success: boolean; message?: string; error?: string }> => {
   try {
     return { 
       success: true, 
@@ -70,7 +73,8 @@ const reloadExtensions = async (): Promise<{ success: boolean; message?: string 
     console.error('Error reloading extensions:', error);
     return { 
       success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      error: error instanceof Error ? error.message : String(error)
     };
   }
 };
