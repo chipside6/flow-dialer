@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { DashboardContent } from '@/components/layout/DashboardContent';
@@ -7,11 +8,12 @@ import { CampaignTable } from '@/components/campaigns/CampaignTable';
 import { useCampaigns } from '@/hooks/useCampaigns';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, RefreshCw, PlusCircle } from 'lucide-react';
+import { AlertCircle, RefreshCw, PlusCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CampaignDashboard from '@/components/CampaignDashboard';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/auth';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -20,15 +22,31 @@ const Dashboard = () => {
   const [retryCount, setRetryCount] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
   
-  // Log campaigns to debug
+  // Enhanced debug logging
   useEffect(() => {
-    console.log("Dashboard campaigns:", campaigns);
-  }, [campaigns]);
+    console.log("Dashboard - Auth status:", { isAuthenticated, userId: user?.id });
+    console.log("Dashboard - Campaigns:", campaigns);
+    console.log("Dashboard - Loading state:", isLoading);
+    console.log("Dashboard - Error:", error);
+  }, [campaigns, isLoading, error, isAuthenticated, user]);
   
-  // Handle retry
-  const handleRetry = () => {
+  // Handle retry with exponential backoff
+  const handleRetry = async () => {
     setRetryCount(prev => prev + 1);
+    const newCount = retryCount + 1;
+    
+    // Add a delay with exponential backoff (0, 1s, 2s, 4s...)
+    if (newCount > 1) {
+      const delay = Math.min(Math.pow(2, newCount - 2) * 1000, 5000);
+      toast({
+        title: "Retrying...",
+        description: `Retrying in ${delay/1000} seconds`,
+      });
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    
     refreshCampaigns();
   };
   
@@ -39,7 +57,13 @@ const Dashboard = () => {
   // Add a refresh function explicitly for the dashboard
   const handleRefreshCampaigns = async () => {
     try {
+      toast({
+        title: "Refreshing campaigns",
+        description: "Please wait while we update your campaign data..."
+      });
+      
       const success = await refreshCampaigns();
+      
       if (success) {
         toast({
           title: "Campaigns refreshed",
@@ -48,8 +72,32 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error("Error refreshing campaigns:", error);
+      toast({
+        title: "Refresh failed",
+        description: "There was a problem refreshing campaign data. Please try again.",
+        variant: "destructive"
+      });
     }
   };
+  
+  // Check authentication status
+  if (!isAuthenticated && !isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="w-full h-full flex flex-col items-center justify-center p-8">
+          <Alert variant="destructive" className="mb-4 mx-auto max-w-lg">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              You need to be logged in to view your campaigns.
+            </AlertDescription>
+          </Alert>
+          <Button onClick={() => navigate('/login')}>
+            Go to Login
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
   
   return (
     <DashboardLayout>
@@ -78,7 +126,7 @@ const Dashboard = () => {
           <Alert variant="destructive" className="mb-4 mx-auto max-w-lg">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="flex items-center justify-between flex-wrap gap-2">
-              <div>Error loading dashboard: {error.message}</div>
+              <div>Error loading campaigns: {error.message}</div>
               <Button 
                 variant="outline" 
                 onClick={handleRetry}
@@ -145,20 +193,30 @@ const Dashboard = () => {
                         variant="outline" 
                         onClick={handleRefreshCampaigns}
                         size="sm"
+                        disabled={isLoading}
                       >
-                        <RefreshCw className="h-3 w-3 mr-1" />
+                        {isLoading ? (
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                        )}
                         Refresh
                       </Button>
                     </div>
                     
-                    {isLoading ? (
+                    {isLoading && campaigns.length === 0 ? (
                       <div className="border rounded-lg p-6 text-center bg-gray-50 mx-auto max-w-lg">
-                        <p className="text-muted-foreground mb-4 text-center">Loading campaigns...</p>
+                        <div className="flex flex-col items-center justify-center">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                          <p className="text-muted-foreground mb-2">Loading campaigns...</p>
+                          <p className="text-xs text-muted-foreground">This may take a moment</p>
+                        </div>
                       </div>
                     ) : (campaigns && campaigns.length > 0) ? (
                       <CampaignDashboard 
                         initialCampaigns={campaigns.slice(0, 3) || []} 
                         onRefresh={handleRefreshCampaigns}
+                        isLoading={isLoading}
                       />
                     ) : (
                       <div className="border rounded-lg p-6 text-center bg-gray-50 mx-auto max-w-lg">
@@ -214,11 +272,20 @@ const Dashboard = () => {
                   </Button>
                 </div>
                 
-                <CampaignProvider initialCampaigns={campaigns || []}>
-                  <div className="campaign-table-container w-full p-4 mx-auto">
-                    <CampaignTable />
+                {isLoading ? (
+                  <div className="border rounded-lg p-8 text-center bg-gray-50 mx-auto max-w-lg">
+                    <div className="flex flex-col items-center justify-center">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                      <p className="text-muted-foreground mb-2">Loading campaigns...</p>
+                    </div>
                   </div>
-                </CampaignProvider>
+                ) : (
+                  <CampaignProvider initialCampaigns={campaigns || []}>
+                    <div className="campaign-table-container w-full p-4 mx-auto">
+                      <CampaignTable />
+                    </div>
+                  </CampaignProvider>
+                )}
               </DashboardContent>
             </div>
           )}

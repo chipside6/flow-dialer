@@ -9,7 +9,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, PauseCircle, Trash2 } from "lucide-react";
+import { PlayCircle, PauseCircle, Trash2, Loader2 } from "lucide-react";
 import { badgeVariantFromStatus } from "@/utils/campaignUtils";
 import { Badge } from "@/components/ui/badge";
 import { useCampaignContext } from "@/contexts/campaign/CampaignContext";
@@ -26,7 +26,12 @@ export const CampaignTable = () => {
     deleteCampaign
   } = useCampaignContext();
 
-  if (!campaigns.length) {
+  // Debug logging to find the issue
+  console.log("CampaignTable - campaigns data:", campaigns);
+
+  // Handle loading state or no campaigns
+  if (!campaigns || campaigns.length === 0) {
+    console.log("CampaignTable - No campaigns found");
     return <EmptyCampaignState />;
   }
 
