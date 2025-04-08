@@ -28,20 +28,7 @@ const SignUp = () => {
     setSuccessMessage(null);
 
     try {
-      // Use a different approach to check for existing email
-      // Instead of select + eq, use a simpler query pattern
-      const { data } = await supabase
-        .from('profiles')
-        .select('id')
-        .filter('email', 'eq', email)
-        .limit(1);
-      
-      // If data exists and has entries, the email is already registered
-      if (data && data.length > 0) {
-        throw new Error('An account with this email already exists. Please use a different email or try logging in.');
-      }
-
-      // Proceed with signup if email not found
+      // Proceed with signup
       const { data: authData, error } = await supabase.auth.signUp({
         email,
         password,
@@ -55,7 +42,6 @@ const SignUp = () => {
         // Store session immediately if available
         if (authData.session) {
           localStorage.setItem('sessionLastUpdated', Date.now().toString());
-          localStorage.setItem('userSubscriptionPlan', 'free');
           
           toast({
             title: "Account created",

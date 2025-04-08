@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
-import { useAuthOperations } from '@/contexts/auth/hooks/useAuthOperations';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
 import { AuthHeader } from '@/components/auth/AuthHeader';
@@ -20,7 +21,6 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
-  const { signIn } = useAuthOperations();
   
   // Extract returnTo from location state if available
   const returnTo = location.state?.returnTo || '/dashboard';
@@ -48,7 +48,10 @@ const Login = () => {
     setErrorMessage(null);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
       if (error) {
         // Format error messages to be more user-friendly
@@ -66,11 +69,15 @@ const Login = () => {
         return;
       }
       
-      // Success will be handled by the auth state effect
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
       
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage("An unexpected error occurred. Please try again later.");
+    } finally {
       setIsLoading(false);
     }
   };

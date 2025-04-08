@@ -3,8 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/auth/useAuth";
-import { clearAllAuthData } from "@/utils/sessionCleanup";
+import { useAuth } from "@/contexts/auth";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -34,21 +33,18 @@ const LogoutButton = ({
       // Call optional callback if provided
       if (onClick) onClick();
       
-      // First clear all auth data immediately
-      clearAllAuthData();
-      
       // Navigate to login page directly
       navigate("/login", { replace: true });
       
-      // Then attempt to sign out through auth context as background operation
-      signOut().catch(error => {
-        console.warn("Logout error in background:", error);
-      });
+      // Then attempt to sign out
+      await signOut();
     } catch (error: any) {
       console.error("Logout error:", error);
       
       // Force navigation even on error
       navigate("/login", { replace: true });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   
