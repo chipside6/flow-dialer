@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -9,14 +8,17 @@ import { LifetimePlanCard } from './LifetimePlanCard';
 import { LoadingState } from './LoadingState';
 import { PaymentSection } from './PaymentSection';
 import { pricingPlans } from '@/data/pricingPlans';
+import { usePaymentProcessing } from '@/hooks/payment/usePaymentProcessing';
 
 export const UpgradeContainer: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  
+  // Use the payment processing hook
+  const { isProcessing, handlePaymentSuccess } = usePaymentProcessing();
   
   // Get only the lifetime plan
   const lifetimePlan = pricingPlans.find(plan => plan.isLifetime);
@@ -61,17 +63,9 @@ export const UpgradeContainer: React.FC = () => {
   
   const handlePaymentComplete = async (paymentDetails: any) => {
     console.log("Payment completed, details:", paymentDetails);
-    setIsProcessing(true);
     
-    // Simulate processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      toast({
-        title: "Success!",
-        description: "Your payment has been processed successfully.",
-      });
-      navigate("/dashboard");
-    }, 2000);
+    // Use the payment processing hook to handle payment success
+    await handlePaymentSuccess(paymentDetails, lifetimePlan);
   };
   
   const handleBack = () => {

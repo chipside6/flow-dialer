@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/subscription';
@@ -19,7 +20,7 @@ export function SubscriptionCheck({
   const [retryCount, setRetryCount] = useState(0);
   const [hasValidSubscription, setHasValidSubscription] = useState<boolean | null>(null);
   
-  // Check if user has a valid subscription
+  // Check if user has a valid subscription - explicitly check for lifetime plan first
   const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
   const isTrialActive = subscription?.plan_id === 'trial' && subscription?.status === 'active';
   const isPaidPlanActive = subscription?.status === 'active' && !isTrialActive && !isLifetimePlan;
@@ -30,6 +31,14 @@ export function SubscriptionCheck({
   // Effect to handle subscription checks with retry logic
   useEffect(() => {
     if (isLoading) return;
+    
+    // Log subscription status for debugging
+    console.log('Subscription check:', { 
+      currentPlan, 
+      isLifetimePlan, 
+      subscriptionValid, 
+      subscription 
+    });
     
     // Validate subscription in Supabase directly as a double-check
     const validateSubscriptionInDb = async () => {
@@ -95,7 +104,9 @@ export function SubscriptionCheck({
     redirectTo, 
     retryCount, 
     fetchCurrentSubscription, 
-    hasValidSubscription
+    hasValidSubscription,
+    currentPlan,
+    subscription
   ]);
 
   // Don't show any loading state - just render children if appropriate
