@@ -4,6 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
+import { isSessionValid } from '@/services/auth/session';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,14 +17,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAdmin = false,
   requireSubscription = false
 }) => {
-  const { isAuthenticated, isAdmin, isLoading, user } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading, user, sessionChecked } = useAuth();
   const [hasSubscription, setHasSubscription] = useState(true);
   const [checkingSubscription, setCheckingSubscription] = useState(false);
   const location = useLocation();
   
+  // Double-check session validity as a safety measure
+  const sessionIsValid = isSessionValid();
+  const isActuallyAuthenticated = isAuthenticated && sessionIsValid;
+  
   // Check subscription if required
   useEffect(() => {
-    if (requireSubscription && isAuthenticated && user?.id) {
+    if (requireSubscription && isActuallyAuthenticated && user?.id) {
       setCheckingSubscription(true);
       checkSubscriptionStatus(user.id)
         .then(hasActive => {
@@ -33,10 +38,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           setCheckingSubscription(false);
         });
     }
-  }, [requireSubscription, isAuthenticated, user]);
+  }, [requireSubscription, isActuallyAuthenticated, user]);
   
   // Show loading state while auth is being determined
-  if (isLoading || (requireSubscription && checkingSubscription)) {
+  if ((isLoading || !sessionChecked) || (requireSubscription && checkingSubscription)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="w-full max-w-md space-y-4 p-4">
@@ -52,7 +57,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
   
   // If not authenticated, redirect to login
-  if (!isAuthenticated) {
+  if (!isActuallyAuthenticated) {
     return <Navigate to="/login" state={{ returnTo: location.pathname }} replace />;
   }
   

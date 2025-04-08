@@ -13,6 +13,8 @@ export interface User {
 export interface Session {
   user: User;
   token?: string;
+  access_token?: string; // Support both token formats
+  refresh_token?: string;
   expires_at?: number;
 }
 
