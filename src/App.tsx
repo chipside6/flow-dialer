@@ -1,6 +1,6 @@
 
 import { Suspense, lazy } from "react";
-import { Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth";
@@ -61,7 +61,7 @@ const App = () => (
     <AuthProvider>
       <BrowserRouter>
         <SidebarProvider defaultOpen>
-          <Sonner />
+          <Toaster />
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Public routes */}

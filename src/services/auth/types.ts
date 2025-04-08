@@ -4,7 +4,7 @@
 // Base user interface
 export interface User {
   id: string;
-  email: string;
+  email?: string; // Changed from required to optional to match contexts/auth/types
   created_at?: string;
   last_sign_in_at?: string;
 }
