@@ -1,12 +1,11 @@
 
 import { Suspense, lazy } from "react";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { SubscriptionCheck } from "@/components/SubscriptionCheck";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Import the App.css for styling
@@ -17,6 +16,7 @@ import "./styles/header-fixes.css";
 // Import critical components directly instead of lazy loading them
 import Login from "./pages/Login";
 import Index from "./pages/Index"; // Import Index directly to avoid lazy loading issues
+import UpgradePage from "./pages/UpgradePage"; // Import UpgradePage directly
 
 // Lazy load other components for improved performance
 const Features = lazy(() => import("./pages/Features"));
@@ -32,7 +32,6 @@ const TransferNumbers = lazy(() => import("./pages/TransferNumbers"));
 const SipProviders = lazy(() => import("./pages/SipProviders"));
 const GoipSetup = lazy(() => import("./pages/GoipSetup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const UpgradePage = lazy(() => import("./pages/UpgradePage"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const Profile = lazy(() => import("./pages/Profile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
