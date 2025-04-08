@@ -7,6 +7,7 @@ import { Shield, AlertCircle, LogIn, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
 import { refreshAdminStatus } from '@/contexts/auth/authUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
