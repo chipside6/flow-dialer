@@ -36,6 +36,7 @@ export function UserManagement({ users = [], isLoading, error, onRetry }: UserMa
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Handle error state with retry button
   if (error && onRetry) {
     return (
       <div className="space-y-4">

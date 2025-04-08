@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Loader2, AlertCircle } from "lucide-react";
-import { AdminPanelUser, UserProfile } from "./UserManagement";
+import { CheckCircle, XCircle, Loader2, AlertCircle, UserCircle } from "lucide-react";
+import { AdminPanelUser } from "./UserManagement";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface UserTableProps {
@@ -52,6 +52,7 @@ export function UserTable({ users, isLoading }: UserTableProps) {
             <TableRow>
               <TableHead>User ID</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Name</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
@@ -63,17 +64,20 @@ export function UserTable({ users, isLoading }: UserTableProps) {
                   {user.id ? user.id.substring(0, 8) + '...' : 'N/A'}
                 </TableCell>
                 <TableCell>{user.email || 'No Email'}</TableCell>
+                <TableCell>{user.profile?.full_name || 'Not Set'}</TableCell>
                 <TableCell>
                   {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                 </TableCell>
                 <TableCell>
-                  {user.profile?.is_admin && (
-                    <Badge variant="secondary" className="mr-1">Admin</Badge>
-                  )}
-                  <Badge variant="outline" className="text-muted-foreground">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Standard
-                  </Badge>
+                  <div className="flex space-x-1">
+                    {user.profile?.is_admin && (
+                      <Badge variant="secondary" className="mr-1">Admin</Badge>
+                    )}
+                    <Badge variant="outline" className="text-muted-foreground">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Active
+                    </Badge>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

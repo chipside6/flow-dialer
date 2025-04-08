@@ -2,11 +2,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
-import { UserProfile } from "@/contexts/auth/types";
+import { UserProfile } from "@/components/admin/UserManagement";
 
 export interface AdminPanelUser {
   id: string;
-  email: string;
+  email: string | null;
   created_at: string;
   profile?: UserProfile;
 }
@@ -51,8 +51,11 @@ export const useAdminUsers = (options = {}) => {
         profilesResult.data.forEach(profile => {
           profilesMap.set(profile.id, {
             id: profile.id,
-            full_name: profile.full_name || '',
-            is_admin: !!profile.is_admin
+            full_name: profile.full_name || null,
+            created_at: profile.created_at,
+            updated_at: profile.updated_at,
+            is_admin: profile.is_admin || false,
+            user_id: profile.id // Use id as user_id for compatibility
           });
         });
       }

@@ -7,12 +7,14 @@ import { UserManagement } from "@/components/admin/UserManagement";
 import { useAdminUsers } from "@/hooks/useAdminUsers";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function UsersDataFetcher() {
   console.log("UsersDataFetcher - Component rendering");
 
+  const { toast } = useToast();
+  
   const { 
     data: users = [], 
     isLoading, 
