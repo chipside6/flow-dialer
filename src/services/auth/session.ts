@@ -4,10 +4,12 @@ import { debouncedClearAllAuthData, forceAppReload } from '@/utils/sessionCleanu
 
 // Storage key for local session data
 const SESSION_STORAGE_KEY = 'user_session';
+const ADMIN_STATUS_KEY = 'user_is_admin'; // Add a specific key for admin status
 
 // Cache the session in memory for faster access
 let sessionCache: Session | null = null;
 let sessionCacheExpiry: number = 0;
+let adminStatusCache: boolean | null = null;
 
 // Add validation utility functions
 const isValidSession = (session: any): session is Session => {
@@ -141,6 +143,40 @@ export const storeSession = (session: Session): void => {
 };
 
 /**
+ * Store the admin status separately for persistence
+ */
+export const storeAdminStatus = (isAdmin: boolean): void => {
+  try {
+    localStorage.setItem(ADMIN_STATUS_KEY, isAdmin ? 'true' : 'false');
+    adminStatusCache = isAdmin;
+    
+    // Store timestamp to know when this was last checked
+    localStorage.setItem('admin_check_timestamp', Date.now().toString());
+  } catch (error) {
+    console.error('Failed to store admin status in localStorage:', error);
+  }
+};
+
+/**
+ * Retrieve the stored admin status
+ */
+export const getStoredAdminStatus = (): boolean | null => {
+  // Return from cache if available
+  if (adminStatusCache !== null) return adminStatusCache;
+  
+  try {
+    const status = localStorage.getItem(ADMIN_STATUS_KEY);
+    if (status === null) return null;
+    
+    adminStatusCache = status === 'true';
+    return adminStatusCache;
+  } catch (error) {
+    console.error('Failed to retrieve admin status from localStorage:', error);
+    return null;
+  }
+};
+
+/**
  * Clear session with optimized cleanup approach
  */
 export const clearSession = (): void => {
@@ -148,9 +184,12 @@ export const clearSession = (): void => {
     // Clear in-memory cache first for immediate effect
     sessionCache = null;
     sessionCacheExpiry = 0;
+    adminStatusCache = null;
     
     // Remove specific session key
     localStorage.removeItem(SESSION_STORAGE_KEY);
+    localStorage.removeItem(ADMIN_STATUS_KEY);
+    localStorage.removeItem('admin_check_timestamp');
     
     // Use our debounced cleanup utility for more efficient thorough session clearing
     debouncedClearAllAuthData();

@@ -5,13 +5,19 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User } from './types';
 import { clearAllAuthData, forceAppReload } from '@/utils/sessionCleanup';
 import { toast } from '@/components/ui/use-toast';
-import { getStoredSession, storeSession, clearSession } from '@/services/auth/session';
+import { 
+  getStoredSession, 
+  storeSession, 
+  clearSession, 
+  storeAdminStatus,
+  getStoredAdminStatus 
+} from '@/services/auth/session';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -20,7 +26,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check for existing session on mount
     const getSession = async () => {
       try {
-        // First check local storage for cached session
+        // First check for stored admin status to set initial state
+        const storedAdminStatus = getStoredAdminStatus();
+        if (storedAdminStatus !== null) {
+          console.log("Found stored admin status:", storedAdminStatus);
+          setIsAdmin(storedAdminStatus);
+        }
+        
+        // Check local storage for cached session
         const storedSession = getStoredSession();
         
         if (storedSession?.user) {
@@ -43,6 +56,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 if (profileData) {
                   setProfile(profileData);
                   setIsAdmin(!!profileData.is_admin);
+                  // Store admin status for persistence
+                  storeAdminStatus(!!profileData.is_admin);
                 }
               } catch (profileError) {
                 console.error("Error fetching profile:", profileError);
@@ -87,6 +102,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (profileData) {
               setProfile(profileData);
               setIsAdmin(!!profileData.is_admin);
+              // Store admin status for persistence
+              storeAdminStatus(!!profileData.is_admin);
             }
           }
         }
@@ -136,6 +153,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (profileData) {
               setProfile(profileData);
               setIsAdmin(!!profileData.is_admin);
+              // Store admin status for persistence
+              storeAdminStatus(!!profileData.is_admin);
             }
           } catch (profileError) {
             console.error("Error fetching profile on sign in:", profileError);
@@ -188,6 +207,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Update local state
       setProfile(prev => prev ? { ...prev, ...data } : null);
+      
+      // If admin status is being updated, also update the stored value
+      if (data.hasOwnProperty('is_admin')) {
+        setIsAdmin(!!data.is_admin);
+        storeAdminStatus(!!data.is_admin);
+      }
       
       toast({
         title: "Profile updated",

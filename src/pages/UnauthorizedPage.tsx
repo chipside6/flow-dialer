@@ -11,7 +11,7 @@ import { refreshAdminStatus } from '@/contexts/auth/authUtils';
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isAdmin, user } = useAuth();
+  const { isAuthenticated, isAdmin, user, setProfile } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   
@@ -36,6 +36,18 @@ const UnauthorizedPage = () => {
           title: "Admin Access Verified",
           description: "Your administrator access has been confirmed.",
         });
+        
+        // Retrieve updated profile to also update the UI context
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+          
+        if (profileData) {
+          // Update the profile in context
+          setProfile(profileData);
+        }
         
         // Redirect back to admin page
         setTimeout(() => {

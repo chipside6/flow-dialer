@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { storeSession } from '@/services/auth/session';
+import { storeSession, storeAdminStatus } from '@/services/auth/session';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
 import { AuthHeader } from '@/components/auth/AuthHeader';
@@ -85,6 +84,17 @@ const Login = () => {
           refresh_token: data.session.refresh_token,
           expires_at: data.session.expires_at
         });
+        
+        // Fetch admin status and store it
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', userData.id)
+          .maybeSingle();
+          
+        if (profileData) {
+          storeAdminStatus(!!profileData.is_admin);
+        }
         
         localStorage.setItem('sessionLastUpdated', Date.now().toString());
       }

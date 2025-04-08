@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { storeAdminStatus } from '@/services/auth/session';
 
 export const refreshAdminStatus = async (userId: string): Promise<boolean> => {
   try {
@@ -14,7 +15,11 @@ export const refreshAdminStatus = async (userId: string): Promise<boolean> => {
       
     if (error) throw error;
     
-    return !!data?.is_admin;
+    // Store the admin status for persistence
+    const isUserAdmin = !!data?.is_admin;
+    storeAdminStatus(isUserAdmin);
+    
+    return isUserAdmin;
   } catch (error) {
     console.error('Error refreshing admin status:', error);
     return false;
