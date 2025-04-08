@@ -7,8 +7,10 @@ import { CampaignDetails } from "@/components/campaigns/CampaignDetails";
 import { CampaignStats } from "@/components/campaigns/CampaignStats";
 import { CampaignProvider, useCampaignContext } from "@/contexts/campaign/CampaignContext";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { EmptyCampaignState } from "@/components/dashboard/EmptyCampaignState";
 
 interface CampaignDashboardProps {
   initialCampaigns?: Campaign[];
@@ -31,7 +33,21 @@ const CampaignDashboardContent = ({
   useEffect(() => {
     console.log("CampaignDashboardContent - campaigns:", campaigns);
     console.log("CampaignDashboardContent - selectedCampaign:", selectedCampaign);
-  }, [campaigns, selectedCampaign]);
+    console.log("CampaignDashboardContent - isLoading:", isLoading);
+    console.log("CampaignDashboardContent - isOnline:", isOnline);
+  }, [campaigns, selectedCampaign, isLoading, isOnline]);
+
+  // Show network offline alert if applicable
+  if (!isOnline) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          You appear to be offline. Please check your network connection and try again.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-4 w-full max-w-full overflow-hidden campaign-dashboard">
@@ -89,6 +105,7 @@ const CampaignDashboard = ({
   useEffect(() => {
     console.log("CampaignDashboard initialCampaigns:", initialCampaigns);
     console.log("CampaignDashboard isLoading:", isLoading);
+    console.log("CampaignDashboard campaigns length:", initialCampaigns?.length || 0);
   }, [initialCampaigns, isLoading]);
   
   return (

@@ -8,6 +8,7 @@ export const EmptyCampaignState = () => {
   const navigate = useNavigate();
   
   const handleCreateCampaign = () => {
+    console.log("Navigating to campaign creation wizard");
     navigate('/campaign', { state: { showCreateWizard: true } });
   };
   

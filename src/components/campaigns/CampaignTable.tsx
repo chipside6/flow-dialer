@@ -28,10 +28,11 @@ export const CampaignTable = () => {
 
   // Debug logging to find the issue
   console.log("CampaignTable - campaigns data:", campaigns);
+  console.log("CampaignTable - selectedCampaignId:", selectedCampaignId);
 
   // Handle loading state or no campaigns
   if (!campaigns || campaigns.length === 0) {
-    console.log("CampaignTable - No campaigns found");
+    console.log("CampaignTable - No campaigns found, showing empty state");
     return <EmptyCampaignState />;
   }
 
