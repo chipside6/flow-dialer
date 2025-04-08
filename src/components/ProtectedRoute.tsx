@@ -1,20 +1,42 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
+import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  requireSubscription?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
-  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  requireAdmin = false,
+  requireSubscription = false
+}) => {
+  const { isAuthenticated, isAdmin, isLoading, user } = useAuth();
+  const [hasSubscription, setHasSubscription] = useState(true);
+  const [checkingSubscription, setCheckingSubscription] = useState(false);
   const location = useLocation();
   
+  // Check subscription if required
+  useEffect(() => {
+    if (requireSubscription && isAuthenticated && user?.id) {
+      setCheckingSubscription(true);
+      checkSubscriptionStatus(user.id)
+        .then(hasActive => {
+          setHasSubscription(hasActive);
+        })
+        .finally(() => {
+          setCheckingSubscription(false);
+        });
+    }
+  }, [requireSubscription, isAuthenticated, user]);
+  
   // Show loading state while auth is being determined
-  if (isLoading) {
+  if (isLoading || (requireSubscription && checkingSubscription)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="w-full max-w-md space-y-4 p-4">
@@ -39,7 +61,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
   
-  // User is authenticated (and admin if required), render children
+  // If subscription required but user has no active subscription
+  if (requireSubscription && !hasSubscription) {
+    return <Navigate to="/upgrade" state={{ from: location }} replace />;
+  }
+  
+  // User is authenticated (and admin if required and has subscription if required), render children
   return <>{children}</>;
 };
 

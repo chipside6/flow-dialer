@@ -2,13 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import type { User, UserProfile } from './types';
+import type { User } from './types';
 import { clearAllAuthData } from '@/utils/sessionCleanup';
 import { toast } from '@/components/ui/use-toast';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .from('profiles')
             .select('*')
             .eq('id', data.session.user.id)
-            .single();
+            .maybeSingle();
             
           if (profileData) {
             setProfile(profileData);
@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .from('profiles')
             .select('*')
             .eq('id', session.user.id)
-            .single();
+            .maybeSingle();
             
           if (profileData) {
             setProfile(profileData);
@@ -85,7 +85,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const updateProfile = async (data: Partial<UserProfile>) => {
+  // Simplified profile update
+  const updateProfile = async (data: any) => {
     if (!user) {
       return { error: new Error('No authenticated user') };
     }
@@ -114,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Simple sign out function
   const signOut = async () => {
     try {
       // Clear user state

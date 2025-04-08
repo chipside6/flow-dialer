@@ -1,9 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { UserProfile } from './types';
 import { toast } from '@/components/ui/use-toast';
 
-export const updateUserProfileAction = async (userId: string, data: Partial<UserProfile>) => {
+export const updateUserProfileAction = async (userId: string, data: any) => {
   try {
     const { data: updatedProfile, error } = await supabase
       .from('profiles')
@@ -30,7 +29,7 @@ export const fetchUserProfile = async (userId: string) => {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
       
     if (error) throw error;
     
