@@ -14,16 +14,13 @@ export function SubscriptionCheck({
   requireSubscription = true,
   children 
 }: SubscriptionCheckProps) {
-  const { currentPlan, subscription, isLoading, fetchCurrentSubscription } = useSubscription();
+  const { hasLifetimePlan, isLoading, fetchCurrentSubscription } = useSubscription();
   const navigate = useNavigate();
   const [retryCount, setRetryCount] = useState(0);
   const [hasValidSubscription, setHasValidSubscription] = useState<boolean | null>(null);
   
-  // Check if user has a valid subscription - explicitly check for lifetime plan
-  const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
-  
   // Determine if the user's subscription status meets requirements
-  const subscriptionValid = !requireSubscription || isLifetimePlan;
+  const subscriptionValid = !requireSubscription || hasLifetimePlan;
   
   // Effect to handle subscription checks with retry logic
   useEffect(() => {
@@ -31,10 +28,8 @@ export function SubscriptionCheck({
     
     // Log subscription status for debugging
     console.log('Subscription check:', { 
-      currentPlan, 
-      isLifetimePlan, 
-      subscriptionValid, 
-      subscription 
+      hasLifetimePlan, 
+      subscriptionValid
     });
     
     // Validate subscription in Supabase directly as a double-check
@@ -103,8 +98,7 @@ export function SubscriptionCheck({
     retryCount, 
     fetchCurrentSubscription, 
     hasValidSubscription,
-    currentPlan,
-    subscription
+    hasLifetimePlan
   ]);
 
   // Don't show any loading state - just render children if appropriate

@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 
 const CampaignsPage = () => {
-  const { currentPlan } = useSubscription();
-  const isLifetimePlan = currentPlan === 'lifetime';
+  const { hasLifetimePlan } = useSubscription();
   const navigate = useNavigate();
   
   const handleCreateCampaign = () => {
@@ -20,7 +19,7 @@ const CampaignsPage = () => {
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        {isLifetimePlan ? (
+        {hasLifetimePlan ? (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-bold">Your Campaigns</h1>

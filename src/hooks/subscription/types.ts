@@ -45,4 +45,5 @@ export interface UseSubscriptionReturn {
   dailyCallLimit: number;
   monthlyCallCount: number;
   monthlyCallLimit: number;
+  hasLifetimePlan: boolean; // New property
 }

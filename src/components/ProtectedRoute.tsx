@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
 import { touchSession, isSessionValid } from '@/services/auth/session';
+import { useSubscription } from '@/hooks/subscription';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,14 +19,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireSubscription = false
 }) => {
   const { isAuthenticated, isAdmin, isLoading, user, sessionChecked } = useAuth();
-  const [hasSubscription, setHasSubscription] = useState(true);
-  const [checkingSubscription, setCheckingSubscription] = useState(false);
+  const { hasLifetimePlan, isLoading: subscriptionLoading, fetchCurrentSubscription } = useSubscription();
   const location = useLocation();
   
   // Double-check session validity as a safety measure
   const sessionIsValid = isSessionValid();
   const isActuallyAuthenticated = isAuthenticated && sessionIsValid;
   
+  useEffect(() => {
+    // If we need to check subscription status, fetch it
+    if (requireSubscription && isActuallyAuthenticated && user?.id) {
+      fetchCurrentSubscription();
+    }
+  }, [requireSubscription, isActuallyAuthenticated, user, fetchCurrentSubscription]);
+
   // Touch session every 30 seconds to ensure it stays alive
   useEffect(() => {
     if (isActuallyAuthenticated) {
@@ -41,22 +48,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }, [isActuallyAuthenticated]);
   
-  // Check subscription if required
-  useEffect(() => {
-    if (requireSubscription && isActuallyAuthenticated && user?.id) {
-      setCheckingSubscription(true);
-      checkSubscriptionStatus(user.id)
-        .then(hasActive => {
-          setHasSubscription(hasActive);
-        })
-        .finally(() => {
-          setCheckingSubscription(false);
-        });
-    }
-  }, [requireSubscription, isActuallyAuthenticated, user]);
-  
   // Show loading state while auth is being determined
-  if ((isLoading || !sessionChecked) || (requireSubscription && checkingSubscription)) {
+  if ((isLoading || !sessionChecked) || (requireSubscription && subscriptionLoading)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="w-full max-w-md space-y-4 p-4">
@@ -83,7 +76,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
   
   // If subscription required but user has no active subscription
-  if (requireSubscription && !hasSubscription) {
+  if (requireSubscription && !hasLifetimePlan) {
     return <Navigate to="/upgrade" state={{ from: location }} replace />;
   }
   
