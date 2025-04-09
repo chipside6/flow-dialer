@@ -1,119 +1,199 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Play, Pause, AlertTriangle, Loader2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Play, Pause, Loader2, Square } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useMutation } from '@tanstack/react-query';
+import { pauseCampaign, resumeCampaign, stopCampaign } from '@/services/campaignService';
 
 interface DialerJobControlProps {
-  isRunning: boolean;
-  isLoading: boolean;
-  onStart: () => void;
-  onStop: () => void;
-  remainingCalls?: number;
-  completedCalls?: number;
-  campaignStatus?: string;
+  campaignId: string | undefined;
+  campaignStatus: string | null | undefined;
+  refetchCampaign: () => void;
 }
 
-export const DialerJobControl: React.FC<DialerJobControlProps> = ({
-  isRunning,
-  isLoading,
-  onStart,
-  onStop,
-  remainingCalls = 0,
-  completedCalls = 0,
-  campaignStatus = 'ready'
-}) => {
-  const getStatusBadge = () => {
-    switch (campaignStatus) {
-      case 'running':
-        return <Badge className="bg-green-500">Active</Badge>;
-      case 'paused':
-        return <Badge className="bg-yellow-500">Paused</Badge>;
-      case 'completed':
-        return <Badge className="bg-blue-500">Completed</Badge>;
-      case 'stopped':
-        return <Badge className="bg-red-500">Stopped</Badge>;
-      case 'error':
-        return <Badge variant="destructive">Error</Badge>;
-      default:
-        return <Badge variant="outline">Ready</Badge>;
+export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }: DialerJobControlProps) => {
+  const { toast } = useToast();
+  const [isPausing, setIsPausing] = useState(false);
+  const [isResuming, setIsResuming] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
+  const [canStart, setCanStart] = useState(false);
+  const [canPause, setCanPause] = useState(false);
+  const [canStop, setCanStop] = useState(false);
+
+  // Mutations for campaign control
+  const pauseMutation = useMutation({
+    mutationFn: pauseCampaign,
+    onSuccess: () => {
+      toast({
+        title: "Campaign Paused",
+        description: "The campaign has been paused successfully.",
+        variant: "default"
+      });
+      refetchCampaign();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Pausing Campaign",
+        description: error.message || "Failed to pause the campaign. Please try again.",
+        variant: "destructive"
+      });
+    },
+    onSettled: () => {
+      setIsPausing(false);
     }
+  });
+
+  const resumeMutation = useMutation({
+    mutationFn: resumeCampaign,
+    onSuccess: () => {
+      toast({
+        title: "Campaign Resumed",
+        description: "The campaign has been resumed successfully.",
+      });
+      refetchCampaign();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Resuming Campaign",
+        description: error.message || "Failed to resume the campaign. Please try again.",
+        variant: "destructive"
+      });
+    },
+    onSettled: () => {
+      setIsResuming(false);
+    }
+  });
+
+  const stopMutation = useMutation({
+    mutationFn: stopCampaign,
+    onSuccess: () => {
+      toast({
+        title: "Campaign Stopped",
+        description: "The campaign has been stopped successfully.",
+      });
+      refetchCampaign();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Stopping Campaign",
+        description: error.message || "Failed to stop the campaign. Please try again.",
+        variant: "destructive"
+      });
+    },
+    onSettled: () => {
+      setIsStopping(false);
+    }
+  });
+
+  useEffect(() => {
+    // Determine button states based on campaign status
+    setCanStart(campaignStatus === 'created' || campaignStatus === 'paused');
+    setCanPause(campaignStatus === 'running');
+    setCanStop(campaignStatus === 'running' || campaignStatus === 'paused');
+  }, [campaignStatus]);
+
+  const handlePause = async () => {
+    if (!campaignId) {
+      toast({
+        title: "Campaign ID Missing",
+        description: "Campaign ID is required to pause the campaign.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsPausing(true);
+    pauseMutation.mutate(campaignId);
+  };
+
+  const handleResume = async () => {
+    if (!campaignId) {
+       toast({
+        title: "Campaign ID Missing",
+        description: "Campaign ID is required to resume the campaign.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsResuming(true);
+    resumeMutation.mutate(campaignId);
+  };
+
+  const handleStop = async () => {
+    if (!campaignId) {
+      toast({
+        title: "Campaign ID Missing",
+        description: "Campaign ID is required to stop the campaign.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsStopping(true);
+    stopMutation.mutate(campaignId);
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center justify-between">
-          <span>Dialer Controls</span>
-          {getStatusBadge()}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-muted/50 p-3 rounded">
-            <div className="text-sm text-muted-foreground">Remaining</div>
-            <div className="text-2xl font-bold">{remainingCalls}</div>
-          </div>
-          <div className="bg-muted/50 p-3 rounded">
-            <div className="text-sm text-muted-foreground">Completed</div>
-            <div className="text-2xl font-bold">{completedCalls}</div>
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          {isRunning ? (
-            <Button
-              variant="destructive"
-              className="flex-1"
-              onClick={onStop}
-              disabled={isLoading || campaignStatus === 'completed'}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Stopping...
-                </>
-              ) : (
-                <>
-                  <Pause className="mr-2 h-4 w-4" />
-                  Stop Dialer
-                </>
-              )}
-            </Button>
+    <div className="flex space-x-2">
+      {canStart && (
+        <Button
+          onClick={handleResume}
+          disabled={isResuming}
+        >
+          {isResuming ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Resuming
+            </>
           ) : (
-            <Button
-              className="flex-1 bg-green-600 hover:bg-green-700"
-              onClick={onStart}
-              disabled={
-                isLoading || 
-                remainingCalls === 0 || 
-                campaignStatus === 'completed' || 
-                campaignStatus === 'error'
-              }
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Starting...
-                </>
-              ) : (
-                <>
-                  <Play className="mr-2 h-4 w-4" />
-                  Start Dialer
-                </>
-              )}
-            </Button>
+            <>
+              <Play className="mr-2 h-4 w-4" />
+              Resume
+            </>
           )}
-        </div>
+        </Button>
+      )}
 
-        {campaignStatus === 'error' && (
-          <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm flex items-center text-red-800">
-            <AlertTriangle className="h-4 w-4 mr-2 text-red-500" />
-            There was an error with the dialer. Please check logs.
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {canPause && (
+        <Button
+          onClick={handlePause}
+          disabled={isPausing}
+        >
+          {isPausing ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Pausing
+            </>
+          ) : (
+            <>
+              <Pause className="mr-2 h-4 w-4" />
+              Pause
+            </>
+          )}
+        </Button>
+      )}
+
+      {canStop && (
+        <Button
+          variant="destructive"
+          onClick={handleStop}
+          disabled={isStopping}
+        >
+          {isStopping ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Stopping
+            </>
+          ) : (
+            <>
+              <Square className="mr-2 h-4 w-4" />
+              Stop
+            </>
+          )}
+        </Button>
+      )}
+    </div>
   );
 };

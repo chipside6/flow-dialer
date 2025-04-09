@@ -212,7 +212,7 @@ const Campaign = () => {
         {/* Create Campaign Wizard Dialog */}
         {showCreateWizard && (
           <CampaignCreationWizard 
-            isOpen={showCreateWizard} 
+            open={showCreateWizard} 
             onOpenChange={(open) => setShowCreateWizard(open)}
             onSuccess={handleCampaignCreated}
           />

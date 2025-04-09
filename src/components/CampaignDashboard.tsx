@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 import { CampaignDetails } from '@/components/campaigns/CampaignDetails';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { Campaign } from '@/types/campaign';
 import { useCampaigns } from '@/hooks/useCampaigns';
 

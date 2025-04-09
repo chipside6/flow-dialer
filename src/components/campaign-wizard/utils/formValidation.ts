@@ -1,30 +1,69 @@
 
 import { CampaignData, WizardStep } from "../types";
 
-export const getStepAvailability = (campaign: CampaignData): Record<WizardStep, boolean> => {
-  // Basic data is always available
-  const isBasicsValid = !!campaign.title; // At minimum, require a title
-  
-  // Contacts step is available if basics are valid
-  const isContactsAvailable = isBasicsValid;
-  const isContactsValid = isContactsAvailable && !!campaign.contactListId;
-  
-  // Audio step is available if contacts are valid
-  const isAudioAvailable = isContactsValid;
-  const isAudioValid = isAudioAvailable && !!campaign.greetingFileId;
-  
-  // Transfers step is available if audio is valid
-  const isTransfersAvailable = isAudioValid;
-  const isTransfersValid = isTransfersAvailable && !!campaign.transferNumber;
-  
-  // Review step is available if transfers are valid
-  const isReviewAvailable = isTransfersValid;
-  
+export const validateStep = (step: WizardStep, campaign: CampaignData): boolean => {
+  switch (step) {
+    case "basics":
+      return !!campaign.title && campaign.title.length >= 3;
+    case "contacts":
+      return !!campaign.contactListId;
+    case "audio":
+      return !!campaign.greetingFileId;
+    case "transfers":
+      return !!campaign.transferNumber && campaign.transferNumber.length >= 7;
+    case "review":
+      return true;
+    default:
+      return false;
+  }
+};
+
+export const getStepAvailability = (campaign: CampaignData) => {
   return {
-    basics: true, // Always available
-    contacts: isContactsAvailable,
-    audio: isAudioAvailable,
-    transfers: isTransfersAvailable,
-    review: isReviewAvailable
+    basics: true,
+    contacts: true,
+    audio: !!campaign.title,
+    transfers: !!campaign.greetingFileId,
+    review: !!campaign.transferNumber
+  };
+};
+
+export const getNextStep = (currentStep: WizardStep): WizardStep => {
+  switch (currentStep) {
+    case "basics":
+      return "contacts";
+    case "contacts":
+      return "audio";
+    case "audio":
+      return "transfers";
+    case "transfers":
+      return "review";
+    default:
+      return "review";
+  }
+};
+
+export const getPreviousStep = (currentStep: WizardStep): WizardStep => {
+  switch (currentStep) {
+    case "contacts":
+      return "basics";
+    case "audio":
+      return "contacts";
+    case "transfers":
+      return "audio";
+    case "review":
+      return "transfers";
+    default:
+      return "basics";
+  }
+};
+
+// Create a hook that wraps all validation functions
+export const useFormValidation = () => {
+  return {
+    validateStep,
+    getStepAvailability,
+    getNextStep,
+    getPreviousStep
   };
 };

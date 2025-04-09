@@ -3,10 +3,11 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/auth/AuthProvider';
+
 // Page imports
-import Home from '@/pages/Home';
+import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
-import SignupPage from '@/pages/SignupPage'; // Fixed case sensitivity
+import SignUpPage from '@/pages/SignUpPage';
 import DashboardPage from '@/pages/DashboardPage';
 import ContactsPage from '@/pages/ContactsPage';
 import CampaignsPage from '@/pages/CampaignsPage';
@@ -17,17 +18,21 @@ import SettingsPage from '@/pages/SettingsPage';
 import ContactListPage from '@/pages/ContactListPage';
 import AsteriskConfigPage from '@/pages/AsteriskConfigPage';
 import GoipSetup from '@/pages/GoipSetup';
+
 import { RequireAuth } from '@/components/auth/RequireAuth';
+import PublicLayout from '@/components/layout/PublicLayout';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          {/* Public routes with PublicLayout wrapper that includes the header */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+          </Route>
           
           {/* Protected routes */}
           <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
@@ -41,7 +46,7 @@ function App() {
           <Route path="/asterisk-config" element={<RequireAuth><AsteriskConfigPage /></RequireAuth>} />
           <Route path="/goip-setup" element={<RequireAuth><GoipSetup /></RequireAuth>} />
           
-          {/* Catch-all route */}
+          {/* Redirect for unknown routes */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster />

@@ -1,176 +1,282 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Check } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Copy, Download, Server, Code, FileText, Settings } from 'lucide-react';
+import { generateAsteriskConfigs } from '@/utils/asterisk/configGenerator';
+import { toast } from '@/components/ui/use-toast';
 
 interface AsteriskConfigDisplayProps {
   username: string;
   password: string;
-  host: string;
-  port: number;
+  host?: string;
+  port?: number;
 }
 
 export const AsteriskConfigDisplay: React.FC<AsteriskConfigDisplayProps> = ({
   username,
   password,
-  host,
-  port
+  host = '0.0.0.0',
+  port = 5060
 }) => {
-  const { toast } = useToast();
-  const [copied, setCopied] = useState<string | null>(null);
+  const [configs, setConfigs] = useState(() => 
+    generateAsteriskConfigs(username, password, host, port)
+  );
   
-  const sipConfig = `[${username}]
-type=friend
-host=dynamic
-secret=${password}
-context=autodialer
-disallow=all
-allow=ulaw
-allow=alaw
-nat=force_rport,comedia
-qualify=yes
-`;
+  const [activeTab, setActiveTab] = useState('sip');
+  const [hostInput, setHostInput] = useState(host);
+  const [portInput, setPortInput] = useState(port.toString());
 
-  const extensionsConfig = `[autodialer]
-exten => s,1,Answer()
-exten => s,n,Wait(1)
-exten => s,n,Playback(\${GREETING_FILE})
-exten => s,n,WaitExten(5)
-exten => s,n,Hangup()
+  // Regenerate configs when inputs change
+  useEffect(() => {
+    setConfigs(generateAsteriskConfigs(
+      username,
+      password,
+      host,
+      port
+    ));
+  }, [username, password, host, port]);
 
-; Handle keypress 1 for transfer
-exten => 1,1,NoOp(Transferring call to \${TRANSFER_NUMBER})
-exten => 1,n,Dial(SIP/\${TRANSFER_NUMBER})
-exten => 1,n,Hangup()
-`;
-
-  const agiScript = `#!/usr/bin/env python
-import sys
-from asterisk.agi import AGI
-
-agi = AGI()
-agi.answer()
-
-# Get variables passed from the dialplan
-greeting_file = agi.get_variable('GREETING_FILE')
-transfer_number = agi.get_variable('TRANSFER_NUMBER')
-user_id = agi.get_variable('USER_ID')
-campaign_id = agi.get_variable('CAMPAIGN_ID')
-
-# Play greeting
-agi.exec('Playback', greeting_file)
-
-# Wait for DTMF input (keypress)
-result = agi.wait_for_digit(5000)  # Wait 5 seconds for input
-
-if result == 49:  # ASCII for '1'
-    agi.verbose("Customer pressed 1, transferring to %s" % transfer_number)
-    agi.exec('Dial', 'SIP/%s' % transfer_number)
-else:
-    agi.verbose("No transfer requested or timeout")
-
-# Log call result to database
-# (This would be handled by your custom logging module)
-
-agi.hangup()
-`;
-
-  const handleCopy = (text: string, type: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(type);
+  // Apply config changes
+  const handleApplyChanges = () => {
+    const newPort = parseInt(portInput);
+    
+    if (isNaN(newPort) || newPort < 1 || newPort > 65535) {
       toast({
-        title: 'Copied!',
-        description: `${type} configuration copied to clipboard.`,
+        title: 'Invalid port number',
+        description: 'Please enter a valid port number between 1 and 65535',
+        variant: 'destructive'
       });
-      
-      setTimeout(() => setCopied(null), 2000);
+      return;
+    }
+    
+    // Regenerate configs with new settings
+    setConfigs(generateAsteriskConfigs(
+      username,
+      password,
+      hostInput,
+      newPort
+    ));
+    
+    toast({
+      title: 'Configuration updated',
+      description: 'The Asterisk configuration has been updated'
     });
   };
-  
+
+  // Copy config to clipboard
+  const copyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    
+    toast({
+      title: 'Copied to clipboard',
+      description: `${type} configuration has been copied to clipboard`
+    });
+  };
+
+  // Download config as file
+  const downloadConfig = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <Card>
+    <Card className="shadow-md">
       <CardHeader>
-        <CardTitle>Asterisk Configuration</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Server className="h-5 w-5" />
+          Asterisk Configuration
+        </CardTitle>
         <CardDescription>
-          Use these configurations to set up your Asterisk server for this campaign.
+          Configuration files for setting up the Asterisk autodialer
         </CardDescription>
       </CardHeader>
+      
       <CardContent>
-        <Tabs defaultValue="sip">
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="sip">SIP Configuration</TabsTrigger>
+        <Tabs defaultValue="sip" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-4 mb-4">
+            <TabsTrigger value="sip">SIP</TabsTrigger>
             <TabsTrigger value="dialplan">Dialplan</TabsTrigger>
             <TabsTrigger value="agi">AGI Script</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="sip" className="relative">
-            <pre className="p-4 rounded-md bg-slate-100 dark:bg-slate-800 overflow-x-auto">
-              <code>{sipConfig}</code>
-            </pre>
-            <Button
-              variant="outline"
-              size="sm"
-              className="absolute top-2 right-2"
-              onClick={() => handleCopy(sipConfig, 'SIP')}
-            >
-              {copied === 'SIP' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
+          <TabsContent value="sip">
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <h3 className="text-sm font-medium">SIP Configuration</h3>
+                <div className="space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => copyToClipboard(configs.sipConfig, 'SIP')}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => downloadConfig(configs.sipConfig, 'sip_autodialer.conf')}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+              
+              <ScrollArea className="h-[300px] w-full rounded-md border bg-muted">
+                <pre className="p-4 text-xs">
+                  {configs.sipConfig}
+                </pre>
+              </ScrollArea>
+              
+              <p className="text-xs text-muted-foreground">
+                Save this configuration to /etc/asterisk/sip_autodialer.conf
+              </p>
+            </div>
           </TabsContent>
           
-          <TabsContent value="dialplan" className="relative">
-            <pre className="p-4 rounded-md bg-slate-100 dark:bg-slate-800 overflow-x-auto">
-              <code>{extensionsConfig}</code>
-            </pre>
-            <Button
-              variant="outline"
-              size="sm"
-              className="absolute top-2 right-2"
-              onClick={() => handleCopy(extensionsConfig, 'Dialplan')}
-            >
-              {copied === 'Dialplan' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
+          <TabsContent value="dialplan">
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <h3 className="text-sm font-medium">Dialplan Configuration</h3>
+                <div className="space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => copyToClipboard(configs.dialplanConfig, 'Dialplan')}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => downloadConfig(configs.dialplanConfig, 'extensions_autodialer.conf')}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+              
+              <ScrollArea className="h-[300px] w-full rounded-md border bg-muted">
+                <pre className="p-4 text-xs">
+                  {configs.dialplanConfig}
+                </pre>
+              </ScrollArea>
+              
+              <p className="text-xs text-muted-foreground">
+                Save this configuration to /etc/asterisk/extensions_autodialer.conf
+              </p>
+            </div>
           </TabsContent>
           
-          <TabsContent value="agi" className="relative">
-            <pre className="p-4 rounded-md bg-slate-100 dark:bg-slate-800 overflow-x-auto">
-              <code>{agiScript}</code>
-            </pre>
-            <Button
-              variant="outline"
-              size="sm"
-              className="absolute top-2 right-2"
-              onClick={() => handleCopy(agiScript, 'AGI')}
-            >
-              {copied === 'AGI' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
+          <TabsContent value="agi">
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <h3 className="text-sm font-medium">AGI Script</h3>
+                <div className="space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => copyToClipboard(configs.agiScript, 'AGI Script')}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => downloadConfig(configs.agiScript, 'autodialer.agi')}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+              
+              <ScrollArea className="h-[300px] w-full rounded-md border bg-muted">
+                <pre className="p-4 text-xs">
+                  {configs.agiScript}
+                </pre>
+              </ScrollArea>
+              
+              <p className="text-xs text-muted-foreground">
+                Save this script to /var/lib/asterisk/agi-bin/autodialer.agi and make it executable
+              </p>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="settings">
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Configuration Settings</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sipHost">SIP Host</Label>
+                  <Input 
+                    id="sipHost" 
+                    value={hostInput} 
+                    onChange={(e) => setHostInput(e.target.value)}
+                    placeholder="0.0.0.0"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    The IP address to bind for SIP communications
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="sipPort">SIP Port</Label>
+                  <Input 
+                    id="sipPort" 
+                    value={portInput} 
+                    onChange={(e) => setPortInput(e.target.value)}
+                    type="number"
+                    min="1"
+                    max="65535"
+                    placeholder="5060"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    The port number for SIP communications
+                  </p>
+                </div>
+              </div>
+              
+              <Button onClick={handleApplyChanges}>
+                <Settings className="h-4 w-4 mr-2" />
+                Apply Settings
+              </Button>
+            </div>
           </TabsContent>
         </Tabs>
-        
-        <div className="mt-4 p-4 border border-border rounded-md bg-muted/50">
-          <h3 className="font-medium mb-2">Connection Details</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <p className="text-sm font-medium">Host:</p>
-              <p className="text-sm">{host}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Port:</p>
-              <p className="text-sm">{port}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Username:</p>
-              <p className="text-sm">{username}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Password:</p>
-              <p className="text-sm">{password}</p>
-            </div>
-          </div>
-        </div>
       </CardContent>
+      
+      <CardFooter className="flex-col items-start space-y-2">
+        <h3 className="text-sm font-medium flex items-center gap-2">
+          <FileText className="h-4 w-4" />
+          Installation Instructions
+        </h3>
+        <Button 
+          variant="outline" 
+          onClick={() => downloadConfig(configs.installInstructions, 'asterisk_autodialer_setup.md')}
+          className="w-full"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Download Setup Instructions
+        </Button>
+      </CardFooter>
     </Card>
   );
 };
