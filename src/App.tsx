@@ -7,7 +7,7 @@ import { AuthProvider } from '@/contexts/auth/AuthProvider';
 // Page imports
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
-import SignupPage from '@/pages/SignupPage';
+import SignUpPage from '@/pages/SignUpPage';
 import DashboardPage from '@/pages/DashboardPage';
 import ContactsPage from '@/pages/ContactsPage';
 import CampaignsPage from '@/pages/CampaignsPage';
@@ -29,7 +29,7 @@ function App() {
           {/* Public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
           
           {/* Protected routes */}
           <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />

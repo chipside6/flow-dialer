@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Stop, Loader2, CheckCircle, AlertTriangle } from "lucide-react";
+import { Play, Pause, Loader2, Square } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation } from '@tanstack/react-query';
 import { pauseCampaign, resumeCampaign, stopCampaign } from '@/services/campaignService';
@@ -21,7 +22,8 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
   const [canStop, setCanStop] = useState(false);
 
   // Mutations for campaign control
-  const pauseMutation = useMutation(pauseCampaign, {
+  const pauseMutation = useMutation({
+    mutationFn: pauseCampaign,
     onSuccess: () => {
       toast({
         title: "Campaign Paused",
@@ -42,7 +44,8 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
     }
   });
 
-  const resumeMutation = useMutation(resumeCampaign, {
+  const resumeMutation = useMutation({
+    mutationFn: resumeCampaign,
     onSuccess: () => {
       toast({
         title: "Campaign Resumed",
@@ -62,7 +65,8 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
     }
   });
 
-  const stopMutation = useMutation(stopCampaign, {
+  const stopMutation = useMutation({
+    mutationFn: stopCampaign,
     onSuccess: () => {
       toast({
         title: "Campaign Stopped",
@@ -184,7 +188,7 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
             </>
           ) : (
             <>
-              <Stop className="mr-2 h-4 w-4" />
+              <Square className="mr-2 h-4 w-4" />
               Stop
             </>
           )}

@@ -179,8 +179,9 @@ const CampaignDialer = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
                   <DialerJobControl 
-                    campaignId={campaignId || ''}
-                    disabled={!campaign.transfer_number || !campaign.caller_id}
+                    campaignId={campaignId}
+                    campaignStatus={campaign.status}
+                    refetchCampaign={loadCampaign}
                   />
                 </div>
                 

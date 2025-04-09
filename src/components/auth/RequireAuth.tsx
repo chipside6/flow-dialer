@@ -8,10 +8,19 @@ interface RequireAuthProps {
 }
 
 export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const location = useLocation();
+  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
 
-  if (loading) {
+  // Check if we're still loading the auth state
+  React.useEffect(() => {
+    // If we have a user or explicitly know auth status, we're no longer loading
+    if (user !== undefined || isAuthenticated !== undefined) {
+      setIsCheckingAuth(false);
+    }
+  }, [user, isAuthenticated]);
+
+  if (isCheckingAuth) {
     // Show loading state while checking authentication
     return (
       <div className="flex items-center justify-center min-h-screen">

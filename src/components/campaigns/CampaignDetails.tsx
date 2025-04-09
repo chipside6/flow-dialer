@@ -1,60 +1,105 @@
 
-import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Play, Pause } from "lucide-react";
-import { Campaign } from "@/types/campaign";
-import { useCampaignContext } from "@/contexts/campaign/CampaignContext";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Play, Phone, Calendar, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface CampaignDetailsProps {
-  campaign: Campaign;
+export interface CampaignDetailsProps {
+  campaignId?: string;
 }
 
-export const CampaignDetails: React.FC<CampaignDetailsProps> = ({
-  campaign
-}) => {
-  const { startCampaign, pauseCampaign } = useCampaignContext();
-
+export const CampaignDetails: React.FC<CampaignDetailsProps> = ({ campaignId }) => {
+  const navigate = useNavigate();
+  
+  // In a real implementation, you'd fetch campaign details from an API or database
+  // For now, we'll render a simple placeholder UI
+  
   return (
-    <Card className="campaign-details-card">
-      <CardHeader className="bg-muted/40 px-4 py-3">
-        <CardTitle className="text-base md:text-lg">Campaign Details</CardTitle>
-      </CardHeader>
-      <CardContent className="p-4">
-        <div className="space-y-4">
-          <div className="text-center sm:text-left">
-            <p className="text-sm text-muted-foreground">Name</p>
-            <p className="font-medium">{campaign.title}</p>
-          </div>
-          <div className="text-center sm:text-left">
-            <p className="text-sm text-muted-foreground">Status</p>
-            <p className="font-medium capitalize">{campaign.status || 'N/A'}</p>
-          </div>
-          <div className="text-center sm:text-left">
-            <p className="text-sm text-muted-foreground">Progress</p>
-            <div className="flex items-center gap-2 mt-1">
-              <Progress value={campaign.progress || 0} className="h-2 flex-1" />
-              <span className="text-sm">{campaign.progress || 0}%</span>
-            </div>
-          </div>
-          <div className="text-center sm:text-left">
-            <p className="text-sm text-muted-foreground">Campaign ID</p>
-            <p className="font-mono text-xs sm:text-sm break-all">{campaign.id}</p>
-          </div>
-          <div className="pt-2 flex justify-center sm:justify-start">
-            {campaign.status === "running" ? (
-              <Button variant="outline" onClick={() => pauseCampaign(campaign.id)}>
-                <Pause className="h-4 w-4 mr-2" /> Pause Campaign
-              </Button>
-            ) : (campaign.status === "paused" || campaign.status === "pending" || campaign.status === "draft") ? (
-              <Button variant="default" onClick={() => startCampaign(campaign.id)}>
-                <Play className="h-4 w-4 mr-2" /> Start Campaign
-              </Button>
-            ) : null}
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Campaign Details</h1>
+          <p className="text-muted-foreground">ID: {campaignId}</p>
         </div>
-      </CardContent>
-    </Card>
+        
+        <Button 
+          onClick={() => navigate(`/campaigns/${campaignId}/dialer`)}
+          className="gap-2"
+        >
+          <Phone className="h-4 w-4" />
+          Start Dialer
+        </Button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Campaign Info</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium">Status</p>
+                <Badge variant="outline">Active</Badge>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Created</p>
+                <p className="text-sm">April 15, 2023</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Contact List</p>
+                <p className="text-sm">Main Contacts</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Statistics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium">Total Calls</p>
+                <p className="text-2xl font-bold">0</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Answered Calls</p>
+                <p className="text-2xl font-bold">0</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Transfer Rate</p>
+                <p className="text-2xl font-bold">0%</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Button className="w-full" variant="outline">
+                <Play className="mr-2 h-4 w-4" />
+                Preview Audio
+              </Button>
+              <Button className="w-full" variant="outline">
+                <Calendar className="mr-2 h-4 w-4" />
+                Schedule Calls
+              </Button>
+              <Button className="w-full" variant="outline">
+                <Info className="mr-2 h-4 w-4" />
+                View Logs
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };

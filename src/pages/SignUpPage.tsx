@@ -1,6 +1,6 @@
 
 import React from 'react';
-import SignUp from '../pages/SignUp';
+import SignUp from './SignUp';
 
 const SignUpPage = () => {
   return <SignUp />;
