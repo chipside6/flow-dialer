@@ -25,6 +25,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const sessionIsValid = isSessionValid();
   const isActuallyAuthenticated = isAuthenticated && sessionIsValid;
   
+  console.log(`Protected route check: Path=${location.pathname}, Auth=${isAuthenticated}, SessionValid=${sessionIsValid}`);
+  
   // Touch the session periodically to keep it active
   useEffect(() => {
     // Initial touch
@@ -33,7 +35,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     // Set up interval to touch session periodically
     const intervalId = setInterval(() => {
       touchSession();
-    }, 60000); // Touch every minute
+    }, 30000); // Touch every 30 seconds - more frequently than before
     
     return () => clearInterval(intervalId);
   }, []);
@@ -70,6 +72,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   
   // If not authenticated, redirect to login
   if (!isActuallyAuthenticated) {
+    console.log(`Redirecting to login from ${location.pathname} - not authenticated`);
     return <Navigate to="/login" state={{ returnTo: location.pathname }} replace />;
   }
   

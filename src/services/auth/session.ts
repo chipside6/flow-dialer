@@ -237,6 +237,9 @@ export const refreshSession = (newExpiresAt: number): void => {
   }
 };
 
+// Update the lastAccessTime when the module is loaded
+let lastAccessTime = Date.now();
+
 /**
  * Touch session to update last access time without changing anything else
  * This helps prevent premature session expiration during navigation
@@ -245,6 +248,7 @@ export const touchSession = (): void => {
   const now = Date.now();
   localStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
   lastAccessTime = now;
+  console.log("Session touched at:", new Date(now).toISOString());
 };
 
 /**
@@ -258,7 +262,15 @@ export const isSessionValid = (): boolean => {
   if (sessionCache && sessionCacheExpiry > Date.now()) {
     return true;
   }
-  return !!getStoredSession();
+  
+  const session = getStoredSession();
+  const isValid = !!session;
+  
+  if (!isValid) {
+    console.warn("Session is not valid");
+  }
+  
+  return isValid;
 };
 
 /**
