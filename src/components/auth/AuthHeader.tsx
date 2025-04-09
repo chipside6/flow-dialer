@@ -15,9 +15,11 @@ export const AuthHeader = ({ title, emoji }: AuthHeaderProps) => {
       <div className="absolute top-4 left-4">
         <button 
           onClick={() => navigate('/')} 
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-1 text-gray-700"
+          aria-label="Back to Home"
         >
-          <ChevronLeft className="h-6 w-6 text-gray-700" />
+          <ChevronLeft className="h-6 w-6" />
+          <span className="text-sm font-medium">Back</span>
         </button>
       </div>
       
