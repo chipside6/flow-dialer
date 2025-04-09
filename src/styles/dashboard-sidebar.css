@@ -132,8 +132,50 @@
   padding: 0.5rem 0.75rem;
 }
 
-/* Special highlight for GoIP setup on mobile - ONLY when active */
+/* Mobile-specific sidebar optimizations */
 @media (max-width: 768px) {
+  /* Reduce overall spacing for mobile */
+  [data-sidebar="content"] {
+    padding: 0.25rem !important;
+  }
+
+  /* Make navigation items more compact */
+  [data-sidebar="content"] nav > a,
+  [data-sidebar="content"] nav button,
+  .sidebar-nav-button,
+  [data-sidebar="menu-button"] {
+    padding: 0.4rem 0.75rem !important;
+    margin: 1px 0 !important;
+    min-height: 2.25rem !important;
+  }
+
+  /* Make icons smaller */
+  [data-sidebar="content"] svg {
+    width: 0.9rem !important;
+    height: 0.9rem !important;
+  }
+
+  /* Reduce font size for sidebar items */
+  [data-sidebar="content"] nav {
+    font-size: 0.875rem !important;
+  }
+  
+  /* Compact header for mobile */
+  [data-sidebar="header"] {
+    height: 3rem !important;
+    min-height: auto !important;
+  }
+  
+  /* Reduce spacing between sections */
+  [data-sidebar="content"] nav > div.mt-4 {
+    margin-top: 0.5rem !important;
+  }
+  
+  [data-sidebar="content"] nav > div.pt-4 {
+    padding-top: 0.5rem !important;
+  }
+  
+  /* Special highlight for GoIP setup on mobile - ONLY when active */
   a[href="/goip-setup"].active-goip-setup-link {
     background-color: #f0f4ff !important;
     color: #4338ca !important;

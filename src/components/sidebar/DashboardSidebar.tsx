@@ -87,7 +87,7 @@ export const DashboardSidebar = () => {
       } md:flex w-64`}
     >
       {/* Header - Fixed at top */}
-      <div className="flex h-14 items-center px-4 border-b" data-sidebar="header">
+      <div className="flex h-12 md:h-14 items-center px-3 md:px-4 border-b" data-sidebar="header">
         <Link to="/dashboard" className="flex items-center gap-2">
           <Logo size="sm" withText={true} />
         </Link>
@@ -105,14 +105,15 @@ export const DashboardSidebar = () => {
       </div>
       
       {/* Main content - with proper scrolling */}
-      <ScrollArea className="flex-1 py-2" data-sidebar="content">
-        <nav className="flex flex-col gap-1 px-2">
+      <div className="flex-1 overflow-hidden" data-sidebar="content">
+        <nav className="flex flex-col gap-0.5 px-1.5 py-1.5">
           <SidebarNavItem
             icon={<LayoutDashboard className="h-4 w-4" />}
             href="/dashboard"
             label="Dashboard"
             isActive={activeItem === 'dashboard'}
             onClick={handleCloseSidebar}
+            className="py-1.5"
           />
           <SidebarNavItem
             icon={<Phone className="h-4 w-4" />}
@@ -120,6 +121,7 @@ export const DashboardSidebar = () => {
             label="Campaigns"
             isActive={activeItem === 'campaigns'}
             onClick={handleCloseSidebar}
+            className="py-1.5"
           />
           <SidebarNavItem
             icon={<Users className="h-4 w-4" />}
@@ -127,6 +129,7 @@ export const DashboardSidebar = () => {
             label="Leads"
             isActive={activeItem === 'leads'}
             onClick={handleCloseSidebar}
+            className="py-1.5"
           />
           <SidebarNavItem
             icon={<Phone className="h-4 w-4" />}
@@ -134,6 +137,7 @@ export const DashboardSidebar = () => {
             label="Transfer Numbers"
             isActive={activeItem === 'transfers'}
             onClick={handleCloseSidebar}
+            className="py-1.5"
           />
           <SidebarNavItem
             icon={<FileAudio className="h-4 w-4" />}
@@ -141,6 +145,7 @@ export const DashboardSidebar = () => {
             label="Audio Files"
             isActive={activeItem === 'audio'}
             onClick={handleCloseSidebar}
+            className="py-1.5"
           />
           <SidebarNavItem
             icon={<Server className="h-4 w-4" />}
@@ -148,6 +153,7 @@ export const DashboardSidebar = () => {
             label="Device Setup"
             isActive={activeItem === 'device'}
             onClick={handleCloseSidebar}
+            className="py-1.5"
           />
           {isAdmin && (
             <SidebarNavItem
@@ -156,17 +162,19 @@ export const DashboardSidebar = () => {
               label="Asterisk Config"
               isActive={activeItem === 'asterisk'}
               onClick={handleCloseSidebar}
+              className="py-1.5"
             />
           )}
 
-          {/* User section - ensure it's visible */}
-          <div className="mt-4 border-t pt-4">
+          {/* User section */}
+          <div className="mt-2 border-t pt-2">
             <SidebarNavItem
               icon={<UserCircle className="h-4 w-4" />}
               href="/profile"
               label="Profile"
               isActive={activeItem === 'profile'}
               onClick={handleCloseSidebar}
+              className="py-1.5"
             />
             <SidebarNavItem
               icon={<Settings className="h-4 w-4" />}
@@ -174,18 +182,19 @@ export const DashboardSidebar = () => {
               label="Settings"
               isActive={activeItem === 'settings'}
               onClick={handleCloseSidebar}
+              className="py-1.5"
             />
           </div>
         </nav>
-      </ScrollArea>
+      </div>
       
       {/* Logout button - Fixed at bottom */}
-      <div className="px-2 py-3 border-t mt-auto sticky bottom-0 bg-background">
+      <div className="px-2 py-2 border-t sticky bottom-0 bg-background">
         <Button 
           variant="outline" 
-          size="default" 
+          size="sm"
           onClick={handleLogout} 
-          className="w-full justify-start"
+          className="w-full justify-start h-8"
           disabled={isLoggingOut}
         >
           <LogOut className="h-4 w-4 mr-2" /> 
