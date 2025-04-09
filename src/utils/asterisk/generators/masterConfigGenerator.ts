@@ -1,4 +1,3 @@
-
 /**
  * Generates the master Asterisk configuration for the autodialer system
  */
@@ -88,9 +87,9 @@ exten => _X.,n,Set(CAMPAIGN_ID=\${CUT(EXTEN,_,2)})
 exten => _X.,n,Set(CACHE_FILE=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.conf)
 exten => _X.,n,Set(CACHE_TIME=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.time)
 exten => _X.,n,TrySystem(test -f \${CACHE_FILE})
-exten => _X.,n,GotoIf($[$\{SYSTEMSTATUS\} = SUCCESS]?cache_check:fetch_new)
+exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?cache_check:fetch_new)
 exten => _X.,n(cache_check),TrySystem(find \${CACHE_FILE} -mmin -60 | grep -q \${CACHE_FILE})
-exten => _X.,n,GotoIf($[$\{SYSTEMSTATUS\} = SUCCESS]?use_cache:fetch_new)
+exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?use_cache:fetch_new)
 exten => _X.,n(use_cache),NoOp(Using cached configuration)
 exten => _X.,n,Goto(campaign-\${CAMPAIGN_ID},s,1)
 exten => _X.,n(fetch_new),NoOp(Fetching fresh configuration)
@@ -229,9 +228,9 @@ exten => _X.,n,Set(CAMPAIGN_ID=\${CUT(EXTEN,_,2)})
 exten => _X.,n,Set(CACHE_FILE=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.conf)
 exten => _X.,n,Set(CACHE_TIME=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.time)
 exten => _X.,n,TrySystem(test -f \${CACHE_FILE})
-exten => _X.,n,GotoIf($[$\{SYSTEMSTATUS\} = SUCCESS]?cache_check:fetch_new)
+exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?cache_check:fetch_new)
 exten => _X.,n(cache_check),TrySystem(find \${CACHE_FILE} -mmin -60 | grep -q \${CACHE_FILE})
-exten => _X.,n,GotoIf($[$\{SYSTEMSTATUS\} = SUCCESS]?use_cache:fetch_new)
+exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?use_cache:fetch_new)
 exten => _X.,n(use_cache),NoOp(Using cached configuration)
 exten => _X.,n,Goto(campaign-\${CAMPAIGN_ID},s,1)
 exten => _X.,n(fetch_new),NoOp(Fetching fresh configuration)
