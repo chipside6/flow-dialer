@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { z } from 'zod';
 import { generateRandomPassword } from '@/utils/passwordGenerator';
+import { ConfigSyncButton } from './ConfigSyncButton';
+import { GoipStatusBadge } from './GoipStatusBadge';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -134,6 +136,31 @@ export const CredentialSection = ({ userId }: CredentialSectionProps) => {
         title: "SIP credentials generated",
         description: "Your SIP credentials have been generated successfully.",
       });
+      
+      // Sync the new credentials with Asterisk
+      const { data: session } = await supabase.auth.getSession();
+      const accessToken = session.session?.access_token;
+      
+      if (accessToken) {
+        try {
+          await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-goip-config`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              userId,
+              operation: 'sync_user'
+            })
+          });
+          
+          // No need to handle the response as this is a background task
+        } catch (syncError) {
+          console.error('Error syncing with Asterisk:', syncError);
+          // Don't fail the main operation if this secondary task fails
+        }
+      }
     } catch (error: any) {
       console.error('Error generating credentials:', error);
       toast({
@@ -173,6 +200,28 @@ export const CredentialSection = ({ userId }: CredentialSectionProps) => {
         title: "Credential regenerated",
         description: `New password for Port ${portNumber} has been generated.`,
       });
+      
+      // Sync the updated credential with Asterisk
+      const { data: session } = await supabase.auth.getSession();
+      const accessToken = session.session?.access_token;
+      
+      if (accessToken) {
+        try {
+          await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-goip-config`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              userId,
+              operation: 'sync_user'
+            })
+          });
+        } catch (syncError) {
+          console.error('Error syncing with Asterisk:', syncError);
+        }
+      }
     } catch (error: any) {
       console.error('Error regenerating credential:', error);
       toast({
@@ -208,6 +257,28 @@ export const CredentialSection = ({ userId }: CredentialSectionProps) => {
         title: "Credential deleted",
         description: "The SIP credential has been deleted.",
       });
+      
+      // Sync the changes with Asterisk
+      const { data: session } = await supabase.auth.getSession();
+      const accessToken = session.session?.access_token;
+      
+      if (accessToken && userId) {
+        try {
+          await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-goip-config`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              userId,
+              operation: 'sync_user'
+            })
+          });
+        } catch (syncError) {
+          console.error('Error syncing with Asterisk:', syncError);
+        }
+      }
     } catch (error: any) {
       console.error('Error deleting credential:', error);
       toast({
@@ -225,10 +296,21 @@ export const CredentialSection = ({ userId }: CredentialSectionProps) => {
     <>
       <Card className="goip-setup-container">
         <CardHeader>
-          <CardTitle>Generate SIP Credentials</CardTitle>
-          <CardDescription>
-            Generate SIP credentials to connect your GoIP device to our Asterisk server
-          </CardDescription>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+            <div>
+              <CardTitle>Generate SIP Credentials</CardTitle>
+              <CardDescription>
+                Generate SIP credentials to connect your GoIP device to our Asterisk server
+              </CardDescription>
+            </div>
+            
+            {credentials.length > 0 && userId && (
+              <div className="flex flex-col md:flex-row gap-2 md:items-center">
+                <GoipStatusBadge userId={userId} portNumber={1} />
+                <ConfigSyncButton userId={userId} />
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <CredentialGenerator 

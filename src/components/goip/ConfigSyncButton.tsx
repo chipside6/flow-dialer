@@ -1,0 +1,98 @@
+
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { RefreshCw, Server } from 'lucide-react';
+import { toast } from "@/components/ui/use-toast";
+import { supabase } from '@/integrations/supabase/client';
+
+interface ConfigSyncButtonProps {
+  userId: string;
+  operation?: 'reload' | 'sync_user' | 'sync_all';
+  variant?: 'default' | 'outline' | 'secondary';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+}
+
+export const ConfigSyncButton = ({ 
+  userId, 
+  operation = 'sync_user',
+  variant = 'default',
+  size = 'default'
+}: ConfigSyncButtonProps) => {
+  const [isSyncing, setIsSyncing] = useState(false);
+  
+  const handleSync = async () => {
+    if (!userId) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to sync configurations.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSyncing(true);
+    
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const accessToken = session.session?.access_token;
+      
+      if (!accessToken) {
+        throw new Error('You must be logged in to sync configurations');
+      }
+      
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-goip-config`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          userId,
+          operation
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error syncing configuration: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      toast({
+        title: "Configuration Synced",
+        description: result.message || "Your GoIP configuration has been synced with the Asterisk server.",
+      });
+    } catch (error) {
+      console.error('Error syncing configuration:', error);
+      toast({
+        title: "Error Syncing Configuration",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+  
+  return (
+    <Button 
+      variant={variant} 
+      size={size}
+      onClick={handleSync}
+      disabled={isSyncing}
+    >
+      {isSyncing ? (
+        <>
+          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+          Syncing...
+        </>
+      ) : (
+        <>
+          <Server className="h-4 w-4 mr-2" />
+          Sync Config
+        </>
+      )}
+    </Button>
+  );
+};

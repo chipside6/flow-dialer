@@ -16,6 +16,8 @@ import { AsteriskConfigDisplay } from '@/components/dialer/AsteriskConfigDisplay
 import { TransferNumberSelector } from '@/components/dialer/TransferNumberSelector';
 import { CallerIdSelector } from '@/components/dialer/CallerIdSelector';
 import { useCallLogs } from '@/hooks/useCallLogs';
+import { TestCampaignButton } from '@/components/dialer/TestCampaignButton';
+import { GoipStatusBadge } from '@/components/goip/GoipStatusBadge';
 
 const CampaignDialer = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
@@ -106,12 +108,14 @@ const CampaignDialer = () => {
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'active':
+      case 'running':
         return 'default';
       case 'completed':
         return 'success';
       case 'failed':
         return 'destructive';
       case 'cancelled':
+      case 'paused':
         return 'outline';
       default:
         return 'secondary';
@@ -139,7 +143,15 @@ const CampaignDialer = () => {
           ) : campaign ? (
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold">{campaign.title}</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-3xl font-bold">{campaign.title}</h1>
+                  {user?.id && (
+                    <GoipStatusBadge 
+                      userId={user.id}
+                      portNumber={campaign.port_number || 1}
+                    />
+                  )}
+                </div>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant={getStatusBadgeVariant(campaign.status)}>
                     {campaign.status}
@@ -150,10 +162,17 @@ const CampaignDialer = () => {
                 </div>
               </div>
               
-              <Button>
-                <Play className="h-4 w-4 mr-2" />
-                Preview Audio
-              </Button>
+              <div className="flex gap-2">
+                <TestCampaignButton 
+                  campaignId={campaignId || ''}
+                  disabled={!campaign.greeting_file_url || !campaign.transfer_number}
+                />
+                
+                <Button onClick={() => window.open(campaign.greeting_file_url, '_blank')}>
+                  <Play className="h-4 w-4 mr-2" />
+                  Preview Audio
+                </Button>
+              </div>
             </div>
           ) : null}
         </div>
@@ -179,7 +198,7 @@ const CampaignDialer = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
                   <DialerJobControl 
-                    campaignId={campaignId}
+                    campaignId={campaignId || ''}
                     campaignStatus={campaign.status}
                     refetchCampaign={loadCampaign}
                   />
@@ -218,9 +237,9 @@ const CampaignDialer = () => {
             
             <TabsContent value="config">
               <AsteriskConfigDisplay
-                username={`campaign_${campaignId}`}
-                password="password123" // Note: In a real app, generate this randomly and store it
-                host="0.0.0.0"
+                username={user?.id ? `goip_${user.id}_port${campaign.port_number || 1}` : ''}
+                password="********" // Masked for security
+                host="dynamic"
                 port={5060}
               />
             </TabsContent>
