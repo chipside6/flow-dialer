@@ -20,23 +20,6 @@ export interface PricingPlan {
 // Shared pricing plans data
 export const pricingPlans: PricingPlan[] = [
   {
-    id: "free",
-    name: "Free",
-    price: 0,
-    description: "Basic access",
-    features: [
-      "Limited to 100 calls daily",
-      "Limited to 1,000 calls monthly",
-      "Basic features"
-    ],
-    featuresObj: {
-      maxDailyCalls: 100,
-      maxMonthlyCalls: 1000,
-      maxCalls: 1000
-    },
-    isFree: true
-  },
-  {
     id: "lifetime",
     name: "Lifetime",
     price: 199,

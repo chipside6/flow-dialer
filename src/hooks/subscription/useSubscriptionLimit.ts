@@ -12,9 +12,9 @@ export const useSubscriptionLimit = (userId: string | undefined, planId: string 
   const [hasReachedLimit, setHasReachedLimit] = useState<boolean>(false);
   
   // Define call limits based on plan
-  const callLimit = planId === 'free' ? 1000 : Infinity; // 1000 for free users, unlimited for lifetime
-  const dailyCallLimit = planId === 'free' ? 100 : Infinity; // 100 for free users, unlimited for lifetime
-  const monthlyCallLimit = planId === 'free' ? 1000 : Infinity; // 1000 for free users, unlimited for lifetime
+  const callLimit = planId === 'lifetime' ? Infinity : 0; // No calls for non-lifetime users
+  const dailyCallLimit = planId === 'lifetime' ? Infinity : 0; // No calls for non-lifetime users
+  const monthlyCallLimit = planId === 'lifetime' ? Infinity : 0; // No calls for non-lifetime users
   
   // Fetch call counts
   useEffect(() => {
@@ -32,10 +32,7 @@ export const useSubscriptionLimit = (userId: string | undefined, planId: string 
         setMonthlyCallCount(monthlyCount);
         
         // Check if user has reached any limit
-        if (
-          (dailyCount >= dailyCallLimit || monthlyCount >= monthlyCallLimit) && 
-          planId === 'free'
-        ) {
+        if (planId !== 'lifetime') {
           setHasReachedLimit(true);
         } else {
           setHasReachedLimit(false);
