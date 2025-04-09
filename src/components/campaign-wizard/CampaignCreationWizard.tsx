@@ -94,3 +94,6 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
     </WizardContainer>
   );
 };
+
+export { CampaignCreationWizard };
+export type { CampaignCreationWizardProps };

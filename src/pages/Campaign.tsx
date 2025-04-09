@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -210,9 +211,8 @@ const Campaign = () => {
         {/* Create Campaign Wizard Dialog */}
         {showCreateWizard && (
           <CampaignCreationWizard 
-            isOpen={showCreateWizard}
-            onOpenChange={(open) => setShowCreateWizard(open)}
-            onSuccess={handleCampaignCreated}
+            onComplete={handleCampaignCreated}
+            onCancel={() => setShowCreateWizard(false)}
           />
         )}
       </div>
