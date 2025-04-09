@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
+import { useSubscription } from "@/hooks/subscription";
 import {
   BarChart3,
   Phone,
@@ -26,6 +27,10 @@ interface DashboardNavProps {
 export function DashboardNav({ isCollapsed }: DashboardNavProps) {
   const { pathname } = useLocation();
   const { isAdmin } = useAuth();
+  const { currentPlan, subscription } = useSubscription();
+  
+  // Check if user has lifetime plan
+  const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
 
   const routes = [
     {
@@ -34,7 +39,7 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
       icon: BarChart3,
     },
     {
-      href: "/campaign",
+      href: "/campaigns",
       label: "Campaigns",
       icon: Phone,
     },
@@ -59,16 +64,6 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
       icon: Smartphone,
     },
     {
-      href: "/asterisk-config",
-      label: "Asterisk Config",
-      icon: Server,
-    },
-    {
-      href: "/upgrade",
-      label: "Upgrade",
-      icon: CreditCard,
-    },
-    {
       href: "/profile",
       label: "Settings",
       icon: Settings,
@@ -79,6 +74,15 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
       icon: Activity,
     }
   ];
+
+  // Only add upgrade link if not on lifetime plan
+  if (!isLifetimePlan) {
+    routes.push({
+      href: "/upgrade",
+      label: "Upgrade",
+      icon: CreditCard,
+    });
+  }
 
   // Add admin-only route if user is admin
   if (isAdmin) {

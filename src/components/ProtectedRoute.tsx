@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
-import { isSessionValid, touchSession } from '@/services/auth/session';
+import { isSessionValid } from '@/services/auth/session';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -25,21 +25,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Double-check session validity as a safety measure
   const sessionIsValid = isSessionValid();
   const isActuallyAuthenticated = isAuthenticated && sessionIsValid;
-  
-  console.log(`Protected route check: Path=${location.pathname}, Auth=${isAuthenticated}, SessionValid=${sessionIsValid}`);
-  
-  // Touch the session periodically to keep it active
-  useEffect(() => {
-    // Initial touch
-    touchSession();
-    
-    // Set up interval to touch session more frequently
-    const intervalId = setInterval(() => {
-      touchSession();
-    }, 10000); // Touch every 10 seconds - more frequently than before
-    
-    return () => clearInterval(intervalId);
-  }, []);
   
   // Check subscription if required
   useEffect(() => {
@@ -73,7 +58,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   
   // If not authenticated, redirect to login
   if (!isActuallyAuthenticated) {
-    console.log(`Redirecting to login from ${location.pathname} - not authenticated`);
     return <Navigate to="/login" state={{ returnTo: location.pathname }} replace />;
   }
   

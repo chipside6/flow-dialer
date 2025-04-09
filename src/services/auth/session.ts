@@ -1,3 +1,4 @@
+
 import { Session } from './types';
 import { debouncedClearAllAuthData, forceAppReload } from '@/utils/sessionCleanup';
 
@@ -10,7 +11,7 @@ const SESSION_ACCESS_TIMESTAMP = 'session_access_timestamp';
 let sessionCache: Session | null = null;
 let sessionCacheExpiry: number = 0;
 let adminStatusCache: boolean | null = null;
-let lastAccessTime: number = 0;
+let lastAccessTime: number = Date.now(); // Initialize with current time
 
 // Add validation utility functions
 const isValidSession = (session: any): session is Session => {
@@ -81,18 +82,6 @@ export const getStoredSession = (): Session | null => {
         console.log("Session has expired, clearing stored session");
         clearSession();
         return null;
-      }
-      
-      // Add a grace period for expiring sessions that are actively being used
-      const lastAccess = parseInt(localStorage.getItem(SESSION_ACCESS_TIMESTAMP) || '0', 10);
-      const timeGap = now - lastAccess;
-      
-      // If the session is expiring but was accessed in the last 5 minutes, don't expire it immediately
-      // This prevents logouts during active use
-      if (expiryTime.getTime() - now < 5 * 60 * 1000 && timeGap < 5 * 60 * 1000) {
-        console.log("Session near expiry but recently accessed, extending temporarily");
-        // We don't actually extend the session here, but we don't invalidate it either
-        // This gives time for token refresh to happen
       }
       
       // Set the expiry time for the memory cache (1 minute or session expiry, whichever is sooner)
@@ -247,11 +236,6 @@ export const touchSession = (): void => {
   lastAccessTime = now;
   console.log("Session touched at:", new Date(now).toISOString());
 };
-
-// Initialize lastAccessTime if it hasn't been already
-if (lastAccessTime === 0) {
-  lastAccessTime = Date.now();
-}
 
 /**
  * Check if the session is valid and not expired - optimized for performance

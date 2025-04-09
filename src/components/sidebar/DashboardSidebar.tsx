@@ -50,7 +50,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },
-    { name: "Campaigns", path: "/campaign", icon: <BarChart3 className="h-5 w-5" /> },
+    { name: "Campaigns", path: "/campaigns", icon: <BarChart3 className="h-5 w-5" /> },
     { name: "Audio Files", path: "/greetings", icon: <AudioWaveform className="h-5 w-5" /> },
     { name: "Leads", path: "/contacts", icon: <ContactIcon className="h-5 w-5" /> },
     { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
