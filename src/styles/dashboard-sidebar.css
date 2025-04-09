@@ -19,6 +19,8 @@
 /* Improve mobile drawer appearance */
 [data-sidebar][data-mobile="true"] {
   padding: 0 !important;
+  width: 280px !important;
+  max-width: 80vw !important;
 }
 
 /* Fix spacing for navigation items */
@@ -91,20 +93,6 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Remove all border styling that might show as lines */
-[data-sidebar="content"] nav > a,
-[data-sidebar="content"] nav button,
-[data-sidebar="content"] nav div {
-  border: none !important;
-  width: 100% !important;
-}
-
-/* Fixed admin section without divider */
-[data-sidebar="content"] nav > div.my-2 {
-  border-top: none !important;
-  padding-top: 0.5rem;
-}
-
 /* Fix logo display in sidebar header */
 [data-sidebar="header"] .logo, 
 [data-sidebar="header"] img {
@@ -123,20 +111,20 @@
 }
 
 /* Fix logout button to be always visible */
-[data-sidebar="sidebar"] .border-t.mt-auto {
+[data-sidebar="sidebar"] > div:last-child {
   position: sticky;
   bottom: 0;
   background-color: var(--background);
   z-index: 5;
   margin-top: auto !important;
-  padding: 0.5rem 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* Mobile-specific sidebar optimizations */
 @media (max-width: 768px) {
   /* Reduce overall spacing for mobile */
   [data-sidebar="content"] {
-    padding: 0.25rem !important;
+    padding: 0 !important;
   }
 
   /* Make navigation items more compact */
@@ -144,15 +132,16 @@
   [data-sidebar="content"] nav button,
   .sidebar-nav-button,
   [data-sidebar="menu-button"] {
-    padding: 0.4rem 0.75rem !important;
-    margin: 1px 0 !important;
-    min-height: 2.25rem !important;
+    padding: 8px 12px !important;
+    margin: 0 !important;
+    min-height: 36px !important;
+    font-size: 0.875rem !important;
   }
 
   /* Make icons smaller */
   [data-sidebar="content"] svg {
-    width: 0.9rem !important;
-    height: 0.9rem !important;
+    width: 18px !important;
+    height: 18px !important;
   }
 
   /* Reduce font size for sidebar items */
@@ -162,49 +151,31 @@
   
   /* Compact header for mobile */
   [data-sidebar="header"] {
-    height: 3rem !important;
-    min-height: auto !important;
+    height: 48px !important;
+    min-height: 48px !important;
   }
   
   /* Reduce spacing between sections */
   [data-sidebar="content"] nav > div.mt-4 {
-    margin-top: 0.5rem !important;
+    margin-top: 0 !important;
   }
   
   [data-sidebar="content"] nav > div.pt-4 {
-    padding-top: 0.5rem !important;
+    padding-top: 0 !important;
   }
   
-  /* Special highlight for GoIP setup on mobile - ONLY when active */
-  a[href="/goip-setup"].active-goip-setup-link {
-    background-color: #f0f4ff !important;
-    color: #4338ca !important;
-    border-radius: 0.5rem;
-    margin: 0.25rem 0;
-    width: 100% !important;
+  /* Fix logout button on mobile */
+  [data-sidebar="sidebar"] > div:last-child {
+    padding: 0 !important;
   }
   
-  .dark a[href="/goip-setup"].active-goip-setup-link {
-    background-color: rgba(79, 70, 229, 0.2) !important;
-    color: #c7d2fe !important;
+  [data-sidebar="sidebar"] > div:last-child button {
+    padding: 8px 12px !important;
+    height: 36px !important;
   }
   
-  /* Fix logo in sidebar header on mobile */
-  [data-sidebar="header"] .logo {
-    display: flex !important;
-    align-items: center !important;
-    width: auto !important;
-    max-width: 170px !important;
-  }
-  
-  [data-sidebar="header"] .logo img {
-    flex-shrink: 0 !important;
-  }
-  
-  [data-sidebar="header"] .logo span {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 110px !important;
+  /* Fix the sidebar content scrolling */
+  [data-sidebar="content"] {
+    max-height: calc(100vh - 84px) !important;
   }
 }

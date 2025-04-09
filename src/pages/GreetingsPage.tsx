@@ -13,25 +13,30 @@ import { GreetingFilesList } from '@/components/greeting-files/GreetingFilesList
 import { useNavigate } from 'react-router-dom';
 
 const GreetingsFallback = () => (
-  <div className="w-full h-96 flex items-center justify-center">
-    <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-    <span className="text-lg">Loading audio files...</span>
+  <div className="w-full h-48 flex items-center justify-center">
+    <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+    <span>Loading audio files...</span>
   </div>
 );
 
-// Update the component to take an Error directly, not an object with error property
-const ErrorFallback = (error: Error) => (
-  <div className="w-full h-96 flex flex-col items-center justify-center">
-    <div className="bg-destructive/10 text-destructive px-4 py-6 rounded-md mb-4 w-full max-w-md text-center">
-      <h3 className="text-lg font-medium mb-2">Something went wrong</h3>
-      <p className="mb-4">{error.message || "Could not load files. Please try again later."}</p>
-      <Button 
-        onClick={() => window.location.reload()}
-        variant="outline"
-      >
-        Try Again
-      </Button>
-    </div>
+// Error component for greeting files
+const GreetingFilesError = ({ error, onRetry }: { error: Error | null, onRetry: () => void }) => (
+  <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-6">
+    <h3 className="font-medium flex items-center gap-2">
+      <FileAudio className="h-5 w-5" />
+      Could not load files
+    </h3>
+    <p className="mt-1">
+      {error?.message || "There was a problem loading your audio files. Please try again."}
+    </p>
+    <Button 
+      variant="outline" 
+      size="sm" 
+      className="mt-2"
+      onClick={onRetry}
+    >
+      Retry
+    </Button>
   </div>
 );
 
@@ -50,19 +55,11 @@ const GreetingsContent = () => {
   // Touch the session on component mount to prevent premature session expiration
   useEffect(() => {
     touchSession();
-    
-    // Set a timeout to clear any stuck loading state
-    const loadingTimeout = setTimeout(() => {
-      console.log("Safety timeout reached, resetting loading state");
-    }, 5000);
-    
-    return () => clearTimeout(loadingTimeout);
   }, []);
 
   const handleDelete = async (fileId: string) => {
     try {
       setIsDeleting(true);
-      // Call the mutate function from the mutation result
       await deleteGreetingFileMutation.mutateAsync(fileId);
       toast({
         title: "File deleted",
@@ -81,57 +78,13 @@ const GreetingsContent = () => {
     }
   };
   
-  // If there's an error, show the error fallback
-  if (error) {
-    return (
-      <div className="container mx-auto py-6 max-w-7xl">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Audio Files</h1>
-            <p className="text-muted-foreground">
-              Upload and manage audio greetings for your autodialer campaigns
-            </p>
-          </div>
-          
-          <Button 
-            className="bg-primary text-primary-foreground"
-            onClick={() => navigate('/greetings/upload')}
-          >
-            + Upload Audio
-          </Button>
-        </div>
-        
-        <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-6">
-          <h3 className="font-medium flex items-center gap-2">
-            <FileAudio className="h-5 w-5" />
-            Could not load files
-          </h3>
-          <p className="mt-1">There was a problem loading your audio files. Please try again later.</p>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="mt-2"
-            onClick={() => refreshGreetingFiles()}
-          >
-            Retry
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  // If loading or not authenticated yet, show the loading fallback
-  if (isLoading || !isAuthenticated) {
-    return <GreetingsFallback />;
-  }
-  
   return (
-    <div className="container mx-auto py-6 max-w-7xl">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto py-4 max-w-7xl">
+      <div className="flex justify-between items-center mb-4">
         <div>
-          <h1 className="text-3xl font-bold">Audio Files</h1>
+          <h1 className="text-2xl font-bold">Audio Files</h1>
           <p className="text-muted-foreground">
-            Upload and manage audio greetings for your autodialer campaigns
+            Upload and manage audio greetings for your campaigns
           </p>
         </div>
         
@@ -143,12 +96,22 @@ const GreetingsContent = () => {
         </Button>
       </div>
       
-      {/* Render content */}
-      <GreetingFilesList 
-        files={greetingFiles || []} 
-        onDelete={handleDelete}
-        isDeleting={isDeleting}
-      />
+      {/* Show error if present */}
+      {error && (
+        <GreetingFilesError error={error as Error} onRetry={refreshGreetingFiles} />
+      )}
+      
+      {/* Show loading state */}
+      {isLoading && <GreetingsFallback />}
+      
+      {/* Show content when loaded and no error */}
+      {!isLoading && !error && (
+        <GreetingFilesList 
+          files={greetingFiles || []}
+          onDelete={handleDelete}
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 };
@@ -157,7 +120,20 @@ const GreetingsPage = () => {
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        <ErrorBoundary fallback={ErrorFallback}>
+        <ErrorBoundary fallback={(error) => (
+          <div className="container mx-auto py-4">
+            <div className="bg-destructive/10 text-destructive p-4 rounded-md">
+              <h3 className="text-lg font-medium mb-2">Something went wrong</h3>
+              <p className="mb-4">{error?.message || "Could not load files. Please try again later."}</p>
+              <Button 
+                onClick={() => window.location.reload()}
+                variant="outline"
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        )}>
           <GreetingsContent />
         </ErrorBoundary>
       </DashboardLayout>
