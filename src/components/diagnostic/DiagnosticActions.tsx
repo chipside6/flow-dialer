@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
-import { clearAllAuthData } from "@/utils/sessionCleanup";
+import { clearAllAuthData, forceLogoutWithReload } from "@/utils/sessionCleanup";
 
 export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
   const { signOut } = useAuth();
@@ -20,18 +20,18 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
       // IMMEDIATELY clear all auth data
       clearAllAuthData();
       
-      // First navigate to login page immediately for better UX
-      navigate("/login", { replace: true });
-      
-      // Then attempt to sign out as a background operation
-      signOut().catch(error => {
+      // First try to signout properly
+      await signOut().catch(error => {
         console.warn("DiagnosticActions - Error during sign out:", error);
       });
+      
+      // Force a complete application reload to reset all state
+      forceLogoutWithReload();
     } catch (error: any) {
       console.error("DiagnosticActions - Error signing out:", error);
       
-      // Force navigation even on error
-      navigate("/login", { replace: true });
+      // Even on error, force app reload
+      forceLogoutWithReload();
     }
   };
   

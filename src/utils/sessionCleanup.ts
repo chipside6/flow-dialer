@@ -18,9 +18,17 @@ export const clearAllAuthData = () => {
   localStorage.removeItem('sessionLastUpdated');
   localStorage.removeItem('session_access_timestamp');
 
-  // Clear Supabase auth state
+  // Clear ALL Supabase auth-related items
+  // This comprehensive approach will clear any item that might be storing auth data
+  Object.keys(localStorage).forEach(key => {
+    if (key.includes('supabase.auth.') || key.includes('sb-') || key.includes('supa') || key.includes('auth')) {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  // Force clear localStorage completely as a fallback if needed
   try {
-    // The line below specifically targets the authentication storage in Supabase
+    // We only clear Supabase related items to not affect other app functionality
     localStorage.removeItem('supabase.auth.token');
   } catch (e) {
     console.error("Error clearing Supabase auth state:", e);

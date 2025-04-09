@@ -5,7 +5,7 @@ import { LogOut, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { clearSession } from "@/services/auth/session";
-import { clearAllAuthData } from "@/utils/sessionCleanup";
+import { clearAllAuthData, forceLogoutWithReload } from "@/utils/sessionCleanup";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -39,20 +39,16 @@ const LogoutButton = ({
       clearAllAuthData();
       
       // Call the signOut function from auth context
-      const result = await signOut();
+      await signOut();
       
-      // Force navigation regardless of signOut result
-      navigate("/login", { replace: true });
-      
-      if (!result.success) {
-        console.error("Error during logout:", result.error);
-      }
+      // Force app reload after signOut to ensure complete state reset
+      forceLogoutWithReload();
     } catch (error: any) {
       console.error("Logout error:", error);
       
-      // If all else fails, clear session directly and force navigation
+      // If all else fails, clear session directly and force reload
       clearSession();
-      navigate("/login", { replace: true });
+      forceLogoutWithReload();
     } finally {
       setIsLoggingOut(false);
     }
