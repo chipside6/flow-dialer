@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useTransferNumbers } from "@/hooks/useTransferNumbers";
@@ -6,6 +5,7 @@ import { useAuth } from "@/contexts/auth";
 import { TransferNumbersHeader } from "@/components/transfer-numbers/TransferNumbersHeader";
 import { AuthRequiredAlert } from "@/components/transfer-numbers/AuthRequiredAlert";
 import { TransferNumbersContent } from "@/components/transfer-numbers/TransferNumbersContent";
+import { touchSession } from '@/services/auth/session';
 
 const TransferNumbers = () => {
   const { 
@@ -20,6 +20,11 @@ const TransferNumbers = () => {
   } = useTransferNumbers();
   
   const { isAuthenticated, user } = useAuth();
+  
+  // Touch the session to keep it active
+  useEffect(() => {
+    touchSession();
+  }, []);
   
   // Load data once when component mounts and user is authenticated
   // Use a more stable dependency array to avoid refresh loops
