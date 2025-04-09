@@ -3,7 +3,6 @@ import React from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { GoipHeader } from '@/components/goip/GoipHeader';
 import { CredentialSection } from '@/components/goip/CredentialSection';
-import { AsteriskGuide } from '@/components/goip/AsteriskGuide';
 import { useAuth } from '@/contexts/auth/useAuth';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon } from 'lucide-react';
@@ -29,9 +28,6 @@ const GoipSetupContent = () => {
         <div className="grid grid-cols-1 gap-6">
           {/* SIP Credentials Generator */}
           <CredentialSection userId={user?.id} />
-
-          {/* Asterisk Integration Guide */}
-          <AsteriskGuide />
         </div>
       </div>
     </DashboardLayout>

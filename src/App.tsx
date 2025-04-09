@@ -18,9 +18,11 @@ import SettingsPage from '@/pages/SettingsPage';
 import ContactListPage from '@/pages/ContactListPage';
 import AsteriskConfigPage from '@/pages/AsteriskConfigPage';
 import GoipSetup from '@/pages/GoipSetup';
+import TransfersPage from '@/pages/TransfersPage';
+import GreetingsPage from '@/pages/GreetingsPage';
 
-import { RequireAuth } from '@/components/auth/RequireAuth';
 import PublicLayout from '@/components/layout/PublicLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 function App() {
   return (
@@ -35,16 +37,20 @@ function App() {
           </Route>
           
           {/* Protected routes */}
-          <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
-          <Route path="/contacts" element={<RequireAuth><ContactsPage /></RequireAuth>} />
-          <Route path="/contacts/:listId" element={<RequireAuth><ContactListPage /></RequireAuth>} />
-          <Route path="/campaigns" element={<RequireAuth><CampaignsPage /></RequireAuth>} />
-          <Route path="/campaigns/:campaignId" element={<RequireAuth><CampaignDetailPage /></RequireAuth>} />
-          <Route path="/campaigns/:campaignId/dialer" element={<RequireAuth><CampaignDialer /></RequireAuth>} />
-          <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
-          <Route path="/settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
-          <Route path="/asterisk-config" element={<RequireAuth><AsteriskConfigPage /></RequireAuth>} />
-          <Route path="/goip-setup" element={<RequireAuth><GoipSetup /></RequireAuth>} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
+          <Route path="/contacts/:listId" element={<ProtectedRoute><ContactListPage /></ProtectedRoute>} />
+          <Route path="/campaigns" element={<ProtectedRoute><CampaignsPage /></ProtectedRoute>} />
+          <Route path="/campaigns/:campaignId" element={<ProtectedRoute><CampaignDetailPage /></ProtectedRoute>} />
+          <Route path="/campaigns/:campaignId/dialer" element={<ProtectedRoute><CampaignDialer /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+          <Route path="/goip-setup" element={<ProtectedRoute><GoipSetup /></ProtectedRoute>} />
+          <Route path="/transfers" element={<ProtectedRoute><TransfersPage /></ProtectedRoute>} />
+          <Route path="/greetings" element={<ProtectedRoute><GreetingsPage /></ProtectedRoute>} />
+          
+          {/* Admin-only routes */}
+          <Route path="/asterisk-config" element={<ProtectedRoute requireAdmin={true}><AsteriskConfigPage /></ProtectedRoute>} />
           
           {/* Redirect for unknown routes */}
           <Route path="*" element={<Navigate to="/" replace />} />

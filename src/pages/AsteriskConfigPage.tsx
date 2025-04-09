@@ -7,79 +7,104 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Server, ExternalLink, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { AsteriskGuide } from '@/components/goip/AsteriskGuide';
+import { useAuth } from "@/contexts/auth/useAuth";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
-const AsteriskConfigPage = () => {
+const AsteriskConfigPageContent = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
   
-  // Redirect to GoIP setup page after a short delay
+  // Redirect regular users to GoIP setup page after a short delay
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate('/goip-setup');
-    }, 5000); // 5 second delay before auto-redirect
-    
-    return () => clearTimeout(timer);
-  }, [navigate]);
-  
+    if (!isAdmin) {
+      const timer = setTimeout(() => {
+        navigate('/goip-setup');
+        toast({
+          title: "Redirected",
+          description: "This page is only accessible to administrators."
+        });
+      }, 3000); // 3 second delay before auto-redirect
+      
+      return () => clearTimeout(timer);
+    }
+  }, [navigate, isAdmin, toast]);
+
   const handleRedirectNow = () => {
     navigate('/goip-setup');
   };
+
+  // If not admin, show a message and redirect
+  if (!isAdmin) {
+    return (
+      <DashboardLayout>
+        <div className="container py-6">
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Admin Access Required</AlertTitle>
+            <AlertDescription>
+              This page is only accessible to administrators. You are being redirected to the GoIP setup page.
+            </AlertDescription>
+          </Alert>
+          
+          <Button onClick={handleRedirectNow}>Go to GoIP Setup Now</Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
       <div className="container py-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">GoIP Device Setup</h1>
+            <h1 className="text-3xl font-bold mb-2">Asterisk Configuration</h1>
             <p className="text-muted-foreground">
-              Configure your GoIP device to connect to our system
+              Configure and manage the Asterisk server for GoIP devices
             </p>
           </div>
         </div>
         
-        <Alert className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Redirecting to GoIP Setup</AlertTitle>
-          <AlertDescription>
-            You're being redirected to the GoIP setup page where you can configure your device.
-            Each user brings their own GoIP device - no system-wide Asterisk configuration is needed.
-          </AlertDescription>
-        </Alert>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Server className="h-5 w-5" />
-              GoIP Device Configuration
-            </CardTitle>
-            <CardDescription>
-              Generate credentials and setup instructions for your GoIP device
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p>
-              Our system is designed for users to bring their own GoIP devices. You only need to:
-            </p>
-            
-            <ol className="list-decimal pl-5 space-y-2">
-              <li>Generate SIP credentials specifically for your account</li>
-              <li>Configure your GoIP device with these credentials</li>
-              <li>Start using your device with our campaigns</li>
-            </ol>
-            
-            <div className="flex flex-col items-center justify-center gap-4 pt-4">
-              <Button size="lg" onClick={handleRedirectNow} className="w-full md:w-auto">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Go to GoIP Setup Now
-              </Button>
-              <p className="text-sm text-muted-foreground">
-                (You'll be redirected automatically in a few seconds)
+        <div className="grid grid-cols-1 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Server className="h-5 w-5" />
+                System-Wide Asterisk Configuration
+              </CardTitle>
+              <CardDescription>
+                Admin-only settings for configuring the Asterisk server
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p>
+                As an administrator, you can configure the system-wide Asterisk settings here.
+                Regular users only need to set up their individual GoIP devices.
               </p>
-            </div>
-          </CardContent>
-        </Card>
+              
+              <div className="flex flex-col md:flex-row gap-4 mt-4">
+                <Button onClick={() => navigate('/goip-setup')}>
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  View User GoIP Setup Page
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Asterisk Technical Guide - Admin Only */}
+          <AsteriskGuide />
+        </div>
       </div>
     </DashboardLayout>
+  );
+};
+
+const AsteriskConfigPage = () => {
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <AsteriskConfigPageContent />
+    </ProtectedRoute>
   );
 };
 
