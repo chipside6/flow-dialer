@@ -37,7 +37,13 @@ const ErrorFallback = (error: Error) => (
 
 const GreetingsContent = () => {
   const { isAuthenticated, user } = useAuth();
-  const { greetingFiles, isLoading, error, refreshGreetingFiles, deleteGreetingFile } = useGreetingFiles();
+  const { 
+    greetingFiles, 
+    isLoading, 
+    error, 
+    refreshGreetingFiles, 
+    deleteGreetingFile: deleteGreetingFileMutation 
+  } = useGreetingFiles();
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
   
@@ -56,7 +62,8 @@ const GreetingsContent = () => {
   const handleDelete = async (fileId: string) => {
     try {
       setIsDeleting(true);
-      await deleteGreetingFile(fileId);
+      // Call the mutate function from the mutation result
+      await deleteGreetingFileMutation.mutateAsync(fileId);
       toast({
         title: "File deleted",
         description: "Audio file has been removed successfully",

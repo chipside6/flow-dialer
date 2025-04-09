@@ -26,7 +26,7 @@ export function useGreetingFiles() {
   // Handle errors
   useErrorHandling(error as Error | null);
   
-  // Handle the delete operation
+  // Handle the delete operation - export the mutation result directly
   const deleteGreetingFile = useDeleteGreetingFile(user?.id);
   
   // Handle refreshing the files
@@ -61,6 +61,6 @@ export function useGreetingFiles() {
     error, 
     isError: !!error,
     refreshGreetingFiles,
-    deleteGreetingFile
+    deleteGreetingFile // Return the mutation result directly
   };
 }
