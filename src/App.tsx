@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -5,7 +6,7 @@ import { AuthProvider } from '@/contexts/auth/AuthProvider';
 // Page imports
 import Home from '@/pages/Home';
 import LoginPage from '@/pages/LoginPage';
-import SignUpPage from '@/pages/SignUpPage'; // Fixed case sensitivity
+import SignupPage from '@/pages/SignupPage'; // Fixed case sensitivity
 import DashboardPage from '@/pages/DashboardPage';
 import ContactsPage from '@/pages/ContactsPage';
 import CampaignsPage from '@/pages/CampaignsPage';
@@ -26,7 +27,7 @@ function App() {
           {/* Public routes */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           
           {/* Protected routes */}
           <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />

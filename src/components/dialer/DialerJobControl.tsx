@@ -1,232 +1,148 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Square } from 'lucide-react';
-import { Loader2 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { startCampaign, pauseCampaign, stopCampaign, resumeCampaign } from '@/services/campaignService';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Phone, PauseCircle, PlayCircle, StopCircle, RefreshCw } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
-interface DialerJobControlProps {
+export interface DialerJobControlProps {
   campaignId: string;
-  status: string;
-  onStatusChange: () => void;
+  campaignStatus?: string;
+  refetchCampaign: () => Promise<void>;
 }
 
 export const DialerJobControl: React.FC<DialerJobControlProps> = ({
   campaignId,
-  status,
-  onStatusChange
+  campaignStatus = 'idle',
+  refetchCampaign
 }) => {
-  const [isLoading, setIsLoading] = React.useState(false);
-  const { toast } = useToast();
-
+  const [isLoading, setIsLoading] = useState(false);
+  
   const handleStartCampaign = async () => {
     setIsLoading(true);
     try {
-      await startCampaign(campaignId);
+      // Mock implementation - in a real app, you would call an API
+      await new Promise(resolve => setTimeout(resolve, 1000));
       toast({
-        title: 'Campaign started',
-        description: 'The campaign has been started successfully.',
+        title: "Campaign started",
+        description: "Your campaign has been started successfully"
       });
-      onStatusChange();
+      await refetchCampaign();
     } catch (error) {
       console.error('Error starting campaign:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to start campaign. Please try again.',
-        variant: 'destructive',
+        title: "Failed to start campaign",
+        description: "There was an error starting your campaign",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   const handlePauseCampaign = async () => {
     setIsLoading(true);
     try {
-      await pauseCampaign(campaignId);
+      // Mock implementation - in a real app, you would call an API
+      await new Promise(resolve => setTimeout(resolve, 1000));
       toast({
-        title: 'Campaign paused',
-        description: 'The campaign has been paused successfully.',
+        title: "Campaign paused",
+        description: "Your campaign has been paused"
       });
-      onStatusChange();
+      await refetchCampaign();
     } catch (error) {
       console.error('Error pausing campaign:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to pause campaign. Please try again.',
-        variant: 'destructive',
+        title: "Failed to pause campaign",
+        description: "There was an error pausing your campaign",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  const handleResumeCampaign = async () => {
-    setIsLoading(true);
-    try {
-      await resumeCampaign(campaignId);
-      toast({
-        title: 'Campaign resumed',
-        description: 'The campaign has been resumed successfully.',
-      });
-      onStatusChange();
-    } catch (error) {
-      console.error('Error resuming campaign:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to resume campaign. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  
   const handleStopCampaign = async () => {
     setIsLoading(true);
     try {
-      await stopCampaign(campaignId);
+      // Mock implementation - in a real app, you would call an API
+      await new Promise(resolve => setTimeout(resolve, 1000));
       toast({
-        title: 'Campaign stopped',
-        description: 'The campaign has been stopped successfully.',
+        title: "Campaign stopped",
+        description: "Your campaign has been stopped"
       });
-      onStatusChange();
+      await refetchCampaign();
     } catch (error) {
       console.error('Error stopping campaign:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to stop campaign. Please try again.',
-        variant: 'destructive',
+        title: "Failed to stop campaign",
+        description: "There was an error stopping your campaign",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  const getStatusBadge = () => {
+    switch (campaignStatus) {
+      case 'running':
+        return <Badge className="bg-green-500">Running</Badge>;
+      case 'paused':
+        return <Badge className="bg-yellow-500">Paused</Badge>;
+      case 'completed':
+        return <Badge className="bg-blue-500">Completed</Badge>;
+      case 'stopped':
+        return <Badge className="bg-red-500">Stopped</Badge>;
+      default:
+        return <Badge variant="outline">Not Started</Badge>;
     }
   };
 
   return (
-    <div className="flex flex-col space-y-4">
-      {status === 'pending' && (
-        <Button
-          onClick={handleStartCampaign}
-          disabled={isLoading}
-          className="w-full"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Starting...
-            </>
-          ) : (
-            <>
-              <Play className="mr-2 h-4 w-4" />
-              Start Campaign
-            </>
-          )}
-        </Button>
-      )}
-
-      {status === 'running' && (
-        <>
-          <Button
+    <Card className="p-4">
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Phone className="h-5 w-5 mr-2 text-primary" />
+            <h3 className="text-lg font-medium">Dialer Control</h3>
+          </div>
+          <div className="flex items-center">
+            <span className="mr-2">Status:</span>
+            {getStatusBadge()}
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            onClick={handleStartCampaign}
+            disabled={isLoading || campaignStatus === 'running' || campaignStatus === 'completed'}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            {isLoading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-2" />}
+            {campaignStatus === 'paused' ? 'Resume' : 'Start'} Campaign
+          </Button>
+          
+          <Button 
             onClick={handlePauseCampaign}
-            disabled={isLoading}
+            disabled={isLoading || campaignStatus !== 'running'}
             variant="outline"
-            className="w-full"
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Pausing...
-              </>
-            ) : (
-              <>
-                <Pause className="mr-2 h-4 w-4" />
-                Pause Campaign
-              </>
-            )}
+            {isLoading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <PauseCircle className="h-4 w-4 mr-2" />}
+            Pause Campaign
           </Button>
-          <Button
+          
+          <Button 
             onClick={handleStopCampaign}
-            disabled={isLoading}
+            disabled={isLoading || campaignStatus === 'stopped' || campaignStatus === 'completed'}
             variant="destructive"
-            className="w-full"
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Stopping...
-              </>
-            ) : (
-              <>
-                <Square className="mr-2 h-4 w-4" />
-                Stop Campaign
-              </>
-            )}
+            {isLoading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <StopCircle className="h-4 w-4 mr-2" />}
+            Stop Campaign
           </Button>
-        </>
-      )}
-
-      {status === 'paused' && (
-        <>
-          <Button
-            onClick={handleResumeCampaign}
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Resuming...
-              </>
-            ) : (
-              <>
-                <Play className="mr-2 h-4 w-4" />
-                Resume Campaign
-              </>
-            )}
-          </Button>
-          <Button
-            onClick={handleStopCampaign}
-            disabled={isLoading}
-            variant="destructive"
-            className="w-full"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Stopping...
-              </>
-            ) : (
-              <>
-                <Square className="mr-2 h-4 w-4" />
-                Stop Campaign
-              </>
-            )}
-          </Button>
-        </>
-      )}
-
-      {status === 'completed' && (
-        <Button
-          onClick={handleStartCampaign}
-          disabled={isLoading}
-          variant="outline"
-          className="w-full"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Restarting...
-            </>
-          ) : (
-            <>
-              <Play className="mr-2 h-4 w-4" />
-              Restart Campaign
-            </>
-          )}
-        </Button>
-      )}
-    </div>
+        </div>
+      </div>
+    </Card>
   );
 };

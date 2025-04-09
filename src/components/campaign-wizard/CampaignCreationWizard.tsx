@@ -32,7 +32,7 @@ export const CampaignCreationWizard: React.FC<CampaignCreationWizardProps> = ({
     handleComplete
   } = useCampaignForm(onSuccess);
 
-  const { contactLists, isLoading: isLoadingLists } = useContactLists();
+  const { lists: contactLists, isLoading: isLoadingLists } = useContactLists();
   const { greetingFiles, isLoading: isLoadingGreetings } = useGreetingFiles();
 
   const handleFinish = async () => {

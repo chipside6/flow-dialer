@@ -9,8 +9,9 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { formatDistance } from 'date-fns';
+import { Button } from '@/components/ui/button';
 
 interface CallLog {
   id: string;
@@ -23,14 +24,16 @@ interface CallLog {
   notes?: string;
 }
 
-interface CallLogsTableProps {
+export interface CallLogsTableProps {
   logs: CallLog[];
-  isLoading: boolean;
+  isLoading?: boolean;
+  onRefresh?: () => Promise<void>;
 }
 
 export const CallLogsTable: React.FC<CallLogsTableProps> = ({ 
   logs, 
-  isLoading 
+  isLoading = false,
+  onRefresh
 }) => {
   if (isLoading) {
     return (
@@ -68,6 +71,14 @@ export const CallLogsTable: React.FC<CallLogsTableProps> = ({
 
   return (
     <div className="border rounded-md">
+      {onRefresh && (
+        <div className="flex justify-end p-2">
+          <Button variant="outline" size="sm" onClick={onRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Logs
+          </Button>
+        </div>
+      )}
       <Table>
         <TableHeader>
           <TableRow>
