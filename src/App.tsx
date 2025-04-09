@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -6,7 +7,7 @@ import { AuthProvider } from '@/contexts/auth/AuthProvider';
 // Page imports
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
-import SignUpPage from '@/pages/SignUp';  // Fixed import to use SignUp instead of SignUpPage
+import SignUpPage from '@/pages/SignUp';  // Using the direct import to SignUp.tsx
 import DashboardPage from '@/pages/DashboardPage';
 import ContactsPage from '@/pages/ContactsPage';
 import CampaignsPage from '@/pages/CampaignsPage';
