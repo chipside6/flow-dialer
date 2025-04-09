@@ -1,47 +1,34 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Phone, BarChart3 } from "lucide-react";
+import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export interface DashboardHeaderProps {
+interface DashboardHeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
 
 export const DashboardHeader = ({ activeTab, setActiveTab }: DashboardHeaderProps) => {
   return (
-    <div className="flex flex-col gap-3 mb-4 w-full max-w-full overflow-hidden">
-      <h1 className="text-xl sm:text-2xl font-bold">Campaign Analytics</h1>
-      
-      {/* Mobile-optimized tabs using the shadcn Tabs component */}
-      <div className="overflow-x-auto -mx-0 px-0 tab-container w-full">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full max-w-md bg-muted/70 rounded-full p-1">
-            <TabsTrigger 
-              value="overview" 
-              className="flex items-center rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              <LayoutDashboard className="h-4 w-4 mr-1 sm:mr-2" />
-              <span className="text-xs sm:text-sm">Overview</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="dialer" 
-              className="flex items-center rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              <Phone className="h-4 w-4 mr-1 sm:mr-2" />
-              <span className="text-xs sm:text-sm">Quick Dial</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="campaigns" 
-              className="flex items-center rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              <BarChart3 className="h-4 w-4 mr-1 sm:mr-2" />
-              <span className="text-xs sm:text-sm">Campaigns</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between py-2 px-4 border-b">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Manage your campaigns and view analytics.
+        </p>
       </div>
+
+      <Tabs 
+        defaultValue={activeTab} 
+        value={activeTab}
+        className="w-full max-w-md" 
+        onValueChange={setActiveTab}
+      >
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          <TabsTrigger value="dialer">Quick Dialer</TabsTrigger>
+        </TabsList>
+      </Tabs>
     </div>
   );
 };

@@ -1,120 +1,146 @@
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { CampaignDetails } from '@/components/campaigns/CampaignDetails';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge'; // Add missing import
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { Play, Pause, RefreshCw, PlusCircle } from 'lucide-react';
 import { Campaign } from '@/types/campaign';
-import { useCampaigns } from '@/hooks/useCampaigns';
 
 interface CampaignDashboardProps {
-  campaignId?: string;
-  initialCampaigns?: Campaign[];
+  initialCampaigns: Campaign[];
   onRefresh?: () => void;
 }
 
-export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({ 
-  campaignId: propCampaignId,
-  initialCampaigns,
-  onRefresh
+const CampaignDashboard: React.FC<CampaignDashboardProps> = ({ 
+  initialCampaigns, 
+  onRefresh 
 }) => {
-  const { campaignId: paramCampaignId } = useParams<{ campaignId: string }>();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const { campaigns, isLoading, error, refreshCampaigns } = useCampaigns();
-
-  // Use either the prop campaignId or the URL param
-  const campaignId = propCampaignId || paramCampaignId;
-
-  useEffect(() => {
-    const fetchCampaignDetails = async () => {
-      if (campaignId && campaigns) {
-        // Find the campaign in the list of campaigns
-        const foundCampaign = campaigns.find(c => c.id === campaignId);
-        if (foundCampaign) {
-          setCampaign(foundCampaign);
-        }
-      } else if (initialCampaigns && initialCampaigns.length > 0) {
-        // If initialCampaigns is provided, use the first one
-        setCampaign(initialCampaigns[0]);
-      }
-    };
-
-    fetchCampaignDetails();
-  }, [campaignId, campaigns, initialCampaigns]);
-
-  const handleRefresh = () => {
-    if (onRefresh) {
-      onRefresh();
-    } else {
-      refreshCampaigns();
+  const navigate = useNavigate();
+  const [campaigns] = useState<Campaign[]>(initialCampaigns);
+  
+  const handleViewCampaign = (id: string) => {
+    navigate(`/campaigns/${id}`);
+  };
+  
+  const handleStartCampaign = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Start campaign:', id);
+    // Implement campaign start logic if needed
+  };
+  
+  const handlePauseCampaign = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('Pause campaign:', id);
+    // Implement campaign pause logic if needed
+  };
+  
+  const handleCreateCampaign = () => {
+    navigate('/campaign');
+  };
+  
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'running':
+        return 'bg-green-100 text-green-800';
+      case 'paused':
+        return 'bg-amber-100 text-amber-800';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card className="p-6 bg-red-50 border-red-200">
-        <h2 className="text-lg font-semibold text-red-700">Error</h2>
-        <p className="text-red-600">Failed to load campaign details. Please try again later.</p>
-      </Card>
-    );
-  }
-
-  // If we have initialCampaigns but no campaign is selected, show a list of campaigns
-  if (initialCampaigns && initialCampaigns.length > 0 && !campaign) {
-    return (
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Recent Campaigns</h2>
-        {initialCampaigns.map((campaign) => (
-          <Card key={campaign.id} className="p-4">
-            <h3 className="font-medium">{campaign.title}</h3>
-            <p className="text-sm text-gray-500">{campaign.description}</p>
-            <div className="mt-2">
-              <Badge variant="outline">{campaign.status}</Badge>
-            </div>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
+  
   return (
-    <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="overview">Campaign Overview</TabsTrigger>
-          <TabsTrigger value="calls">Call Records</TabsTrigger>
-          <TabsTrigger value="settings">Campaign Settings</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="overview" className="py-4">
-          <CampaignDetails campaignId={campaignId} />
-        </TabsContent>
-        
-        <TabsContent value="calls" className="py-4">
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Call Records</h2>
-            <p className="text-gray-500">No call records available for this campaign yet.</p>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="settings" className="py-4">
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Campaign Settings</h2>
-            <p className="text-gray-500">Settings functionality coming soon.</p>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Recent Campaigns</CardTitle>
+        <div className="flex gap-2">
+          {onRefresh && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onRefresh}
+              className="flex items-center gap-1"
+            >
+              <RefreshCw className="h-3 w-3" />
+              <span>Refresh</span>
+            </Button>
+          )}
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={handleCreateCampaign}
+            className="flex items-center gap-1"
+          >
+            <PlusCircle className="h-3 w-3" />
+            <span>Create</span>
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {campaigns.length === 0 ? (
+          <div className="text-center py-4">
+            <p className="text-muted-foreground">No campaigns found</p>
+            <Button 
+              variant="outline" 
+              className="mt-2"
+              onClick={handleCreateCampaign}
+            >
+              Create your first campaign
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {campaigns.map((campaign) => (
+              <div 
+                key={campaign.id} 
+                className="border rounded-lg p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+                onClick={() => handleViewCampaign(campaign.id)}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium">{campaign.title}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-1">
+                      {campaign.description || 'No description'}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(campaign.status)}`}>
+                        {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+                      </span>
+                      {campaign.totalCalls > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          {campaign.answeredCalls || 0}/{campaign.totalCalls} calls
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {campaign.status === 'running' ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={(e) => handlePauseCampaign(campaign.id, e)}
+                      >
+                        <Pause className="h-4 w-4" />
+                      </Button>
+                    ) : campaign.status !== 'completed' ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={(e) => handleStartCampaign(campaign.id, e)}
+                      >
+                        <Play className="h-4 w-4" />
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

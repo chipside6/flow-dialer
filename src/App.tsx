@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -21,6 +20,7 @@ import GoipSetup from '@/pages/GoipSetup';
 import TransfersPage from '@/pages/TransfersPage';
 import GreetingsPage from '@/pages/GreetingsPage';
 import UpgradePage from '@/pages/UpgradePage';
+import Campaign from '@/pages/Campaign';
 
 import PublicLayout from '@/components/layout/PublicLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -43,6 +43,7 @@ function App() {
           <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
           <Route path="/contacts/:listId" element={<ProtectedRoute><ContactListPage /></ProtectedRoute>} />
           <Route path="/campaigns" element={<ProtectedRoute><CampaignsPage /></ProtectedRoute>} />
+          <Route path="/campaign" element={<ProtectedRoute><Campaign /></ProtectedRoute>} />
           <Route path="/campaigns/:campaignId" element={<ProtectedRoute><CampaignDetailPage /></ProtectedRoute>} />
           <Route path="/campaigns/:campaignId/dialer" element={<ProtectedRoute><CampaignDialer /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
