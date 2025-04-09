@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Loader2 } from "lucide-react";
@@ -15,6 +14,7 @@ const GreetingsFallback = () => (
   </div>
 );
 
+// Update the component to take an Error directly, not an object with error property
 const ErrorFallback = (error: Error) => (
   <div className="w-full h-96 flex flex-col items-center justify-center">
     <div className="bg-destructive text-destructive-foreground px-4 py-2 rounded-md mb-4">
@@ -48,7 +48,8 @@ const GreetingsContent = () => {
   
   // If there's an error, show the error fallback
   if (error) {
-    return <ErrorFallback error={error as Error} />;
+    // Pass the error directly, not as an object with an error property
+    return ErrorFallback(error as Error);
   }
   
   // If loading or not authenticated yet, show the loading fallback
