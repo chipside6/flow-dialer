@@ -19,7 +19,7 @@ export const asteriskConfig = {
   generateAutoConfig: campaignGenerator.generateAutoConfig,
   
   // Re-export user generators
-  generateUserCampaignConfig: userGenerator.generateUserCampaignConfig,
+  generateUserCampaignConfig: userGenerator.generateSipConfig, // Map to existing method
   
   // Re-export API generators
   generateConfigFromApi: apiGenerator.generateConfigFromApi,

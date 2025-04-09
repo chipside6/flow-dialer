@@ -27,13 +27,16 @@ export const useDialerActions = (
       try {
         const response = await asteriskService.getDialingStatus(currentJobId);
         
-        // Update to handle the response structure correctly
+        // Convert string status to our DialStatus type
+        const typedStatus = (response.status as "running" | "completed" | "failed" | "stopped" | "idle") || 'idle';
+        
+        // Update to handle the response structure correctly with proper defaults
         setDialStatus({
-          status: response.status,
+          status: typedStatus,
           totalCalls: response.totalCalls || 0,
           completedCalls: response.completedCalls || 0,
-          answeredCalls: response.answeredCalls || 0,
-          failedCalls: response.failedCalls || 0
+          answeredCalls: response.answeredCalls || 0, // Added with default
+          failedCalls: response.failedCalls || 0 // Added with default
         });
         
         if (response.status === 'completed' || response.status === 'failed') {

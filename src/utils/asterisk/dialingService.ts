@@ -28,12 +28,20 @@ export const dialingService = {
   /**
    * Get dialing status for a campaign
    */
-  getDialingStatus: async (campaignId: string): Promise<{ status: string; totalCalls: number; completedCalls: number }> => {
+  getDialingStatus: async (campaignId: string): Promise<{ 
+    status: "running" | "completed" | "failed" | "stopped" | "idle"; 
+    totalCalls: number; 
+    completedCalls: number;
+    answeredCalls: number;
+    failedCalls: number;
+  }> => {
     // This would typically fetch the status from a database or API
     return { 
       status: 'running', 
       totalCalls: 100, 
-      completedCalls: 25 
+      completedCalls: 25,
+      answeredCalls: 20,
+      failedCalls: 5
     };
   },
   
