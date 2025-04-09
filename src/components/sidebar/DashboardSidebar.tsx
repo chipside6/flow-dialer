@@ -14,7 +14,8 @@ import {
   Activity,
   PhoneForwarded,
   Shield,
-  CreditCard
+  CreditCard,
+  Database
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarNavItem } from './SidebarNavItem';
@@ -61,6 +62,8 @@ export const DashboardSidebar = () => {
       setActiveItem('admin');
     } else if (path.includes('/upgrade')) {
       setActiveItem('upgrade');
+    } else if (path.includes('/asterisk-config')) {
+      setActiveItem('asterisk-config');
     }
   }, [location]);
 
@@ -208,16 +211,26 @@ export const DashboardSidebar = () => {
             />
           )}
           
-          {/* Admin-only item */}
+          {/* Admin-only items */}
           {isAdmin && (
-            <SidebarNavItem
-              icon={<Shield className="h-4 w-4" />}
-              href="/admin"
-              label="Admin Panel"
-              isActive={activeItem === 'admin'}
-              onClick={handleCloseSidebar}
-              className="py-1"
-            />
+            <>
+              <SidebarNavItem
+                icon={<Shield className="h-4 w-4" />}
+                href="/admin"
+                label="Admin Panel"
+                isActive={activeItem === 'admin'}
+                onClick={handleCloseSidebar}
+                className="py-1"
+              />
+              <SidebarNavItem
+                icon={<Database className="h-4 w-4" />}
+                href="/asterisk-config"
+                label="Asterisk Config"
+                isActive={activeItem === 'asterisk-config'}
+                onClick={handleCloseSidebar}
+                className="py-1"
+              />
+            </>
           )}
         </nav>
       </div>
