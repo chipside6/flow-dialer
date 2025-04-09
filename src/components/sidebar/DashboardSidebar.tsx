@@ -10,7 +10,11 @@ import {
   X,
   UserCircle,
   Server,
-  LogOut
+  LogOut,
+  Activity,
+  PhoneForwarded,
+  Shield,
+  CreditCard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarNavItem } from './SidebarNavItem';
@@ -18,6 +22,7 @@ import { useAuth } from '@/contexts/auth';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Logo } from '@/components/ui/Logo';
 import { clearAllAuthData, forceLogoutWithReload } from '@/utils/sessionCleanup';
+import { useSubscription } from '@/hooks/subscription';
 
 export const DashboardSidebar = () => {
   const location = useLocation();
@@ -25,6 +30,12 @@ export const DashboardSidebar = () => {
   const [activeItem, setActiveItem] = useState('');
   const { openMobile, setOpenMobile, isMobile } = useSidebar();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { currentPlan, subscription } = useSubscription();
+  
+  // Check for lifetime plan OR any active subscription plan that's not a trial
+  const isSubscribed = currentPlan === 'lifetime' || 
+                      (subscription?.plan_id === 'lifetime' || 
+                      (subscription?.status === 'active' && subscription?.plan_id !== 'trial'));
 
   useEffect(() => {
     const path = location.pathname;
@@ -44,6 +55,12 @@ export const DashboardSidebar = () => {
       setActiveItem('profile');
     } else if (path.includes('/settings')) {
       setActiveItem('settings');
+    } else if (path.includes('/diagnostics')) {
+      setActiveItem('diagnostics');
+    } else if (path.includes('/admin')) {
+      setActiveItem('admin');
+    } else if (path.includes('/upgrade')) {
+      setActiveItem('upgrade');
     }
   }, [location]);
 
@@ -131,7 +148,7 @@ export const DashboardSidebar = () => {
             className="py-1"
           />
           <SidebarNavItem
-            icon={<Phone className="h-4 w-4" />}
+            icon={<PhoneForwarded className="h-4 w-4" />}
             href="/transfers"
             label="Transfer Numbers"
             isActive={activeItem === 'transfers'}
@@ -154,21 +171,55 @@ export const DashboardSidebar = () => {
             onClick={handleCloseSidebar}
             className="py-1"
           />
-        </nav>
-        
-        {/* Hidden on mobile most of the time */}
-        {(isAdmin && !isMobile) && (
-          <div className="px-1">
+          <SidebarNavItem
+            icon={<UserCircle className="h-4 w-4" />}
+            href="/profile"
+            label="Profile"
+            isActive={activeItem === 'profile'}
+            onClick={handleCloseSidebar}
+            className="py-1"
+          />
+          <SidebarNavItem
+            icon={<Settings className="h-4 w-4" />}
+            href="/settings"
+            label="Settings"
+            isActive={activeItem === 'settings'}
+            onClick={handleCloseSidebar}
+            className="py-1"
+          />
+          <SidebarNavItem
+            icon={<Activity className="h-4 w-4" />}
+            href="/diagnostics"
+            label="Diagnostics"
+            isActive={activeItem === 'diagnostics'}
+            onClick={handleCloseSidebar}
+            className="py-1"
+          />
+          
+          {/* Only show upgrade link if not subscribed */}
+          {!isSubscribed && (
             <SidebarNavItem
-              icon={<Settings className="h-4 w-4" />}
-              href="/asterisk-config"
-              label="Asterisk Config"
-              isActive={activeItem === 'asterisk'}
+              icon={<CreditCard className="h-4 w-4" />}
+              href="/upgrade"
+              label="Upgrade"
+              isActive={activeItem === 'upgrade'}
               onClick={handleCloseSidebar}
               className="py-1"
             />
-          </div>
-        )}
+          )}
+          
+          {/* Admin-only item */}
+          {isAdmin && (
+            <SidebarNavItem
+              icon={<Shield className="h-4 w-4" />}
+              href="/admin"
+              label="Admin Panel"
+              isActive={activeItem === 'admin'}
+              onClick={handleCloseSidebar}
+              className="py-1"
+            />
+          )}
+        </nav>
       </div>
       
       {/* Logout button - Fixed at bottom */}

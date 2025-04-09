@@ -9,10 +9,10 @@
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
-    padding: 6px 10px !important;
+    padding: 4px 8px !important;
     border: none !important;
-    min-height: 32px !important;
-    font-size: 14px !important;
+    min-height: 28px !important;
+    font-size: 13px !important;
   }
   
   /* Force navigation container to be vertical */
@@ -33,8 +33,8 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 16px !important;
-    height: 16px !important;
+    width: 14px !important;
+    height: 14px !important;
     flex-shrink: 0 !important;
   }
   
@@ -47,15 +47,15 @@
   /* Style for the logout button */
   [data-sidebar="content"] nav > div > button,
   [data-sidebar="sidebar"] > div:last-child button {
-    padding: 6px 10px !important;
+    padding: 4px 8px !important;
     border-radius: 0 !important;
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
     text-align: left !important;
     border: none !important;
-    min-height: 32px !important;
-    font-size: 14px !important;
+    min-height: 28px !important;
+    font-size: 13px !important;
   }
   
   /* Fix any horizontal overflow issues */
@@ -70,12 +70,12 @@
   
   /* Reduce font size in mobile sidebar */
   [data-sidebar="content"] {
-    font-size: 0.875rem !important;
+    font-size: 0.813rem !important;
   }
   
   /* Make sidebar scrollable without being too large */
   [data-sidebar="content"] {
-    max-height: calc(100vh - 80px) !important;
+    max-height: calc(100vh - 70px) !important;
     overflow-y: auto !important;
   }
   
@@ -94,14 +94,14 @@
     flex-direction: column !important;
     width: 100% !important;
     overflow-x: hidden !important;
-    padding: 2px !important;
+    padding: 1px !important;
   }
   
   /* Compact header */
   [data-sidebar="header"] {
-    height: 48px !important;
-    min-height: 48px !important;
-    padding: 0 8px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 6px !important;
   }
   
   /* Reduce all margins and paddings */
@@ -112,18 +112,28 @@
   
   /* Fix nested children spacing */
   [data-sidebar="content"] nav > * {
-    padding-top: 2px !important;
-    padding-bottom: 2px !important;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
   }
   
   /* Make logout button slim */
   [data-sidebar="sidebar"] > div:last-child {
-    padding: 4px !important;
+    padding: 2px !important;
     min-height: auto !important;
   }
   
   [data-sidebar="sidebar"] > div:last-child button {
-    height: 32px !important;
-    min-height: 32px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+  }
+  
+  /* Fix SidebarNavItem component for mobile */
+  [data-sidebar="content"] .sidebar-nav-item {
+    padding: 1px 0 !important;
+  }
+  
+  [data-sidebar="content"] nav {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
   }
 }
