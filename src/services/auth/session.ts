@@ -1,4 +1,3 @@
-
 import { Session } from './types';
 import { debouncedClearAllAuthData, forceAppReload } from '@/utils/sessionCleanup';
 
@@ -238,12 +237,6 @@ export const refreshSession = (newExpiresAt: number): void => {
   }
 };
 
-// Update the lastAccessTime when the module is loaded - Remove the redeclaration
-// Initialize lastAccessTime if it hasn't been already
-if (lastAccessTime === 0) {
-  lastAccessTime = Date.now();
-}
-
 /**
  * Touch session to update last access time without changing anything else
  * This helps prevent premature session expiration during navigation
@@ -254,6 +247,11 @@ export const touchSession = (): void => {
   lastAccessTime = now;
   console.log("Session touched at:", new Date(now).toISOString());
 };
+
+// Initialize lastAccessTime if it hasn't been already
+if (lastAccessTime === 0) {
+  lastAccessTime = Date.now();
+}
 
 /**
  * Check if the session is valid and not expired - optimized for performance

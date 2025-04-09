@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,9 +22,18 @@ const Campaign = () => {
   const location = useLocation();
   const { toast } = useToast();
 
-  // Touch session when the component mounts
+  // Touch session when the component mounts and periodically
   useEffect(() => {
+    // Initial touch
     touchSession();
+    
+    // Set up interval to touch session every 10 seconds
+    const intervalId = setInterval(() => {
+      touchSession();
+      console.log('Session touched in Campaign component');
+    }, 10000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   // Filter campaigns for active, paused, and completed tabs

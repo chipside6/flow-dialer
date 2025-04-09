@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/auth/AuthProvider';
+import { touchSession } from '@/services/auth/session';
 
 // Page imports
 import HomePage from '@/pages/HomePage';
@@ -25,6 +26,19 @@ import PublicLayout from '@/components/layout/PublicLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 function App() {
+  // Touch session periodically at the app level
+  useEffect(() => {
+    // Initial touch
+    touchSession();
+    
+    // Set up interval for periodic touches
+    const intervalId = setInterval(() => {
+      touchSession();
+    }, 60000); // Every minute
+    
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <Router>
       <AuthProvider>

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
@@ -32,10 +33,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     // Initial touch
     touchSession();
     
-    // Set up interval to touch session periodically
+    // Set up interval to touch session more frequently
     const intervalId = setInterval(() => {
       touchSession();
-    }, 30000); // Touch every 30 seconds - more frequently than before
+    }, 10000); // Touch every 10 seconds - more frequently than before
     
     return () => clearInterval(intervalId);
   }, []);

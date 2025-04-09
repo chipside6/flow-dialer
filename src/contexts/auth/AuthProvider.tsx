@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +9,8 @@ import {
   storeSession, 
   clearSession, 
   storeAdminStatus,
-  getStoredAdminStatus 
+  getStoredAdminStatus,
+  touchSession 
 } from '@/services/auth/session';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -22,6 +22,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [initialized, setInitialized] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [sessionCheckInProgress, setSessionCheckInProgress] = useState(false);
+
+  useEffect(() => {
+    // Touch session to keep it active
+    touchSession();
+    
+    // Set up interval to touch session periodically
+    const intervalId = setInterval(() => {
+      touchSession();
+    }, 30000); // Every 30 seconds
+    
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     // Check for existing session on mount
