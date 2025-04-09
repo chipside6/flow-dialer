@@ -29,6 +29,15 @@ export const SipMobileMenu = ({ isOpen, onClose }: SipMobileMenuProps) => {
         </button>
       </div>
       
+      {/* Adding a more prominent close button at the top right */}
+      <button
+        onClick={onClose}
+        className="fixed top-4 right-4 z-60 bg-white shadow-md p-2 rounded-full hover:bg-gray-100"
+        aria-label="Exit menu"
+      >
+        <X size={24} />
+      </button>
+      
       <nav className="px-6 py-8 flex flex-col gap-6">
         <div className="flex flex-col gap-6 text-lg">
           <Link to="/" onClick={onClose} className="py-3 text-center hover:text-[#0EA5E9] font-medium">
