@@ -9,9 +9,94 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      asterisk_configs: {
+        Row: {
+          active: boolean | null
+          config_content: string
+          config_name: string
+          config_type: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          config_content: string
+          config_name: string
+          config_type: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          config_content?: string
+          config_name?: string
+          config_type?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      call_logs: {
+        Row: {
+          campaign_id: string | null
+          created_at: string | null
+          duration: number | null
+          id: string
+          notes: string | null
+          phone_number: string
+          status: string
+          transfer_requested: boolean | null
+          transfer_successful: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string | null
+          duration?: number | null
+          id?: string
+          notes?: string | null
+          phone_number: string
+          status: string
+          transfer_requested?: boolean | null
+          transfer_successful?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string | null
+          duration?: number | null
+          id?: string
+          notes?: string | null
+          phone_number?: string
+          status?: string
+          transfer_requested?: boolean | null
+          transfer_successful?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           answered_calls: number | null
+          audio_file_path: string | null
+          caller_id: string | null
           contact_list_id: string | null
           created_at: string
           description: string | null
@@ -19,6 +104,7 @@ export type Database = {
           greeting_file_name: string | null
           greeting_file_url: string | null
           id: string
+          max_concurrent_calls: number | null
           port_number: number | null
           progress: number | null
           sip_provider_id: string | null
@@ -32,6 +118,8 @@ export type Database = {
         }
         Insert: {
           answered_calls?: number | null
+          audio_file_path?: string | null
+          caller_id?: string | null
           contact_list_id?: string | null
           created_at?: string
           description?: string | null
@@ -39,6 +127,7 @@ export type Database = {
           greeting_file_name?: string | null
           greeting_file_url?: string | null
           id?: string
+          max_concurrent_calls?: number | null
           port_number?: number | null
           progress?: number | null
           sip_provider_id?: string | null
@@ -52,6 +141,8 @@ export type Database = {
         }
         Update: {
           answered_calls?: number | null
+          audio_file_path?: string | null
+          caller_id?: string | null
           contact_list_id?: string | null
           created_at?: string
           description?: string | null
@@ -59,6 +150,7 @@ export type Database = {
           greeting_file_name?: string | null
           greeting_file_url?: string | null
           id?: string
+          max_concurrent_calls?: number | null
           port_number?: number | null
           progress?: number | null
           sip_provider_id?: string | null
@@ -185,6 +277,113 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      dialer_jobs: {
+        Row: {
+          campaign_id: string | null
+          completed_calls: number | null
+          created_at: string | null
+          end_time: string | null
+          failed_calls: number | null
+          id: string
+          start_time: string | null
+          status: string
+          successful_calls: number | null
+          total_calls: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          completed_calls?: number | null
+          created_at?: string | null
+          end_time?: string | null
+          failed_calls?: number | null
+          id?: string
+          start_time?: string | null
+          status?: string
+          successful_calls?: number | null
+          total_calls?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string | null
+          completed_calls?: number | null
+          created_at?: string | null
+          end_time?: string | null
+          failed_calls?: number | null
+          id?: string
+          start_time?: string | null
+          status?: string
+          successful_calls?: number | null
+          total_calls?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dialer_jobs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dialer_queue: {
+        Row: {
+          attempts: number | null
+          campaign_id: string | null
+          created_at: string | null
+          id: string
+          job_id: string
+          last_attempt: string | null
+          phone_number: string
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attempts?: number | null
+          campaign_id?: string | null
+          created_at?: string | null
+          id?: string
+          job_id: string
+          last_attempt?: string | null
+          phone_number: string
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attempts?: number | null
+          campaign_id?: string | null
+          created_at?: string | null
+          id?: string
+          job_id?: string
+          last_attempt?: string | null
+          phone_number?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dialer_queue_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dialer_queue_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "dialer_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       greeting_files: {
         Row: {
