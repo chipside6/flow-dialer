@@ -40,12 +40,12 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
     },
     {
       href: "/greetings",
-      label: "Greetings",
+      label: "Audio Files",
       icon: FileAudio,
     },
     {
       href: "/contacts",
-      label: "Contacts",
+      label: "Leads",
       icon: Users,
     },
     {

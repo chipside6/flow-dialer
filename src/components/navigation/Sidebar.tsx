@@ -11,7 +11,8 @@ import {
   User, 
   LogOut, 
   PhoneCall,
-  Server
+  Server,
+  FileAudio
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
 
@@ -29,7 +30,8 @@ export default function Sidebar({ collapsed = false }: SidebarProps) {
   const links = [
     { to: '/dashboard', label: 'Dashboard', icon: <Home className="h-5 w-5" /> },
     { to: '/campaigns', label: 'Campaigns', icon: <PhoneCall className="h-5 w-5" /> },
-    { to: '/contacts', label: 'Contacts', icon: <Users className="h-5 w-5" /> },
+    { to: '/greetings', label: 'Audio Files', icon: <FileAudio className="h-5 w-5" /> },
+    { to: '/contacts', label: 'Leads', icon: <Users className="h-5 w-5" /> },
     { to: '/goip-setup', label: 'Device Setup', icon: <Server className="h-5 w-5" /> },
     { to: '/profile', label: 'Profile', icon: <User className="h-5 w-5" /> },
     { to: '/settings', label: 'Settings', icon: <Settings className="h-5 w-5" /> },

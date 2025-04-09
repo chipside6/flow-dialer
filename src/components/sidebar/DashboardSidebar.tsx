@@ -51,8 +51,8 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <Home className="h-5 w-5" /> },
     { name: "Campaigns", path: "/campaign", icon: <BarChart3 className="h-5 w-5" /> },
-    { name: "Greeting Files", path: "/greetings", icon: <AudioWaveform className="h-5 w-5" /> },
-    { name: "Contact Lists", path: "/contacts", icon: <ContactIcon className="h-5 w-5" /> },
+    { name: "Audio Files", path: "/greetings", icon: <AudioWaveform className="h-5 w-5" /> },
+    { name: "Leads", path: "/contacts", icon: <ContactIcon className="h-5 w-5" /> },
     { name: "Transfer Numbers", path: "/transfers", icon: <PhoneForwarded className="h-5 w-5" /> },
     { name: "GoIP Setup", path: "/goip-setup", icon: <Smartphone className="h-5 w-5" /> },
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },

@@ -48,7 +48,7 @@ const ContactLists = () => {
     <DashboardLayout>
       <div className={`container-fluid overflow-x-hidden w-full ${isMobile ? 'px-2' : ''}`}>
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Contact Lists</h1>
+          <h1 className="text-3xl font-bold">Leads</h1>
         </div>
         
         <CreateContactListForm 
@@ -66,7 +66,7 @@ const ContactLists = () => {
             <Alert variant="warning" className={`${isMobile ? 'w-full' : 'max-w-lg'}`}>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                It's taking longer than expected to load your contact lists.
+                It's taking longer than expected to load your leads.
               </AlertDescription>
             </Alert>
             <Button 
@@ -82,7 +82,7 @@ const ContactLists = () => {
             <Alert variant="destructive" className={`${isMobile ? 'w-full' : 'max-w-lg'}`}>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Error loading contact lists: {error.message || "Unknown error"}
+                Error loading leads: {error.message || "Unknown error"}
               </AlertDescription>
             </Alert>
             <Button 

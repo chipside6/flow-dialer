@@ -9,7 +9,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 const GreetingsFallback = () => (
   <div className="w-full h-96 flex items-center justify-center">
     <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-    <span className="text-lg">Loading greeting files...</span>
+    <span className="text-lg">Loading audio files...</span>
   </div>
 );
 

@@ -21,19 +21,19 @@ const GreetingFiles = () => {
   const isUserLoggedIn = !!user || window.location.pathname.includes('/greetings');
 
   if (isLoading) {
-    return <LoadingState message="Loading greeting files..." />;
+    return <LoadingState message="Loading audio files..." />;
   }
 
   // Display for non-authenticated users - this should now be skipped if we're in a protected route
   if (!isUserLoggedIn) {
     return (
       <div className="container mx-auto py-10">
-        <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
+        <h1 className="text-3xl font-semibold mb-6">Audio Files</h1>
         <Alert className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Authentication required</AlertTitle>
           <AlertDescription>
-            Please log in to manage your greeting files.
+            Please log in to manage your audio files.
           </AlertDescription>
         </Alert>
       </div>
@@ -44,12 +44,12 @@ const GreetingFiles = () => {
   if (isError && error instanceof Error) {
     return (
       <div className="w-full">
-        <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
+        <h1 className="text-3xl font-semibold mb-6">Audio Files</h1>
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            {error.message || "Failed to load greeting files"}
+            {error.message || "Failed to load audio files"}
           </AlertDescription>
           <Button 
             variant="outline" 
@@ -79,7 +79,7 @@ const GreetingFiles = () => {
 
   return (
     <div className="w-full">
-      <h1 className="text-3xl font-semibold mb-6">Greeting Files</h1>
+      <h1 className="text-3xl font-semibold mb-6">Audio Files</h1>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="mb-4">
