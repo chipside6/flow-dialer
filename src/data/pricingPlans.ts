@@ -14,7 +14,7 @@ export interface PricingPlan {
   isTrial?: boolean;
   isLifetime?: boolean;
   isFree?: boolean;
-  trialDays?: number; // Added this property
+  trialDays?: number;
 }
 
 // Shared pricing plans data
@@ -53,6 +53,7 @@ export const pricingPlans: PricingPlan[] = [
       maxCalls: 9999 // Unlimited for practical purposes
     },
     popular: true,
-    isLifetime: true
+    isLifetime: true,
+    trialDays: 0 // No trial for lifetime plan
   }
 ];

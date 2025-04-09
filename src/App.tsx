@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -21,6 +22,8 @@ import TransfersPage from '@/pages/TransfersPage';
 import GreetingsPage from '@/pages/GreetingsPage';
 import UpgradePage from '@/pages/UpgradePage';
 import Campaign from '@/pages/Campaign';
+import PricingPage from '@/pages/PricingPage';
+import FeaturesPage from '@/pages/FeaturesPage';
 
 import PublicLayout from '@/components/layout/PublicLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -36,6 +39,8 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
             <Route path="/upgrade" element={<UpgradePage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/features" element={<FeaturesPage />} />
           </Route>
           
           {/* Protected routes */}

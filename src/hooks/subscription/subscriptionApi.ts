@@ -61,8 +61,8 @@ export const fetchUserDailyCallCount = async (userId: string | undefined): Promi
     today.setHours(0, 0, 0, 0);
     
     const { data, error } = await supabase
-      .from('calls')
-      .select('count')
+      .from('call_logs')  // Use call_logs instead of calls
+      .select('id')
       .eq('user_id', userId)
       .gte('created_at', today.toISOString());
       
@@ -89,8 +89,8 @@ export const fetchUserMonthlyCallCount = async (userId: string | undefined): Pro
     const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
     
     const { data, error } = await supabase
-      .from('calls')
-      .select('count')
+      .from('call_logs')  // Use call_logs instead of calls
+      .select('id')
       .eq('user_id', userId)
       .gte('created_at', firstDay.toISOString());
       
@@ -110,4 +110,32 @@ export const fetchUserMonthlyCallCount = async (userId: string | undefined): Pro
 // Get plan by ID
 export const getPlanById = (planId: string): PricingPlan | undefined => {
   return pricingPlans.find(plan => plan.id === planId);
+};
+
+// Create a lifetime subscription for a user
+export const createLifetimeSubscription = async (userId: string, plan: PricingPlan): Promise<boolean> => {
+  if (!userId) return false;
+  
+  try {
+    // Create subscription record in the database
+    const { error } = await supabase
+      .from('subscriptions')
+      .insert({
+        user_id: userId,
+        plan_id: plan.id,
+        plan_name: plan.name,
+        status: 'active',
+        current_period_end: null // Lifetime has no end date
+      });
+      
+    if (error) {
+      console.error("Error creating lifetime subscription:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error in createLifetimeSubscription:", error);
+    return false;
+  }
 };
