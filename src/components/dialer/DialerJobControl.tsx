@@ -1,18 +1,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Loader2, Square } from "lucide-react";
+import { Play, Pause, Stop, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation } from '@tanstack/react-query';
 import { pauseCampaign, resumeCampaign, stopCampaign } from '@/services/campaignService';
 
 interface DialerJobControlProps {
-  campaignId: string | undefined;
-  campaignStatus: string | null | undefined;
+  campaignId?: string;
+  campaignStatus?: string;
   refetchCampaign: () => void;
 }
 
-export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }: DialerJobControlProps) => {
+export const DialerJobControl: React.FC<DialerJobControlProps> = ({ 
+  campaignId, 
+  campaignStatus, 
+  refetchCampaign 
+}) => {
   const { toast } = useToast();
   const [isPausing, setIsPausing] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
@@ -49,7 +53,7 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
     onSuccess: () => {
       toast({
         title: "Campaign Resumed",
-        description: "The campaign has been resumed successfully.",
+        description: "The campaign has been resumed successfully."
       });
       refetchCampaign();
     },
@@ -70,7 +74,7 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
     onSuccess: () => {
       toast({
         title: "Campaign Stopped",
-        description: "The campaign has been stopped successfully.",
+        description: "The campaign has been stopped successfully."
       });
       refetchCampaign();
     },
@@ -102,21 +106,19 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
       });
       return;
     }
-
     setIsPausing(true);
     pauseMutation.mutate(campaignId);
   };
 
   const handleResume = async () => {
     if (!campaignId) {
-       toast({
+      toast({
         title: "Campaign ID Missing",
         description: "Campaign ID is required to resume the campaign.",
         variant: "destructive"
       });
       return;
     }
-
     setIsResuming(true);
     resumeMutation.mutate(campaignId);
   };
@@ -130,7 +132,6 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
       });
       return;
     }
-
     setIsStopping(true);
     stopMutation.mutate(campaignId);
   };
@@ -155,7 +156,7 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
           )}
         </Button>
       )}
-
+      
       {canPause && (
         <Button
           onClick={handlePause}
@@ -174,7 +175,7 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
           )}
         </Button>
       )}
-
+      
       {canStop && (
         <Button
           variant="destructive"
@@ -188,7 +189,7 @@ export const DialerJobControl = ({ campaignId, campaignStatus, refetchCampaign }
             </>
           ) : (
             <>
-              <Square className="mr-2 h-4 w-4" />
+              <Stop className="mr-2 h-4 w-4" />
               Stop
             </>
           )}

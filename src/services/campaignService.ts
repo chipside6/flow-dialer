@@ -70,3 +70,62 @@ export const stopCampaign = async (campaignId: string) => {
     throw error;
   }
 };
+
+/**
+ * Start a new campaign
+ * @param campaignId The ID of the campaign to start
+ * @returns A Promise resolving to the updated campaign data
+ */
+export const startCampaign = async (campaignId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('campaigns')
+      .update({ 
+        status: 'running',
+        progress: 0,
+        total_calls: 0,
+        answered_calls: 0,
+        transferred_calls: 0,
+        failed_calls: 0
+      })
+      .eq('id', campaignId)
+      .select()
+      .single();
+      
+    if (error) throw error;
+    
+    return data;
+  } catch (error) {
+    console.error('Error starting campaign:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get campaign details
+ * @param campaignId The ID of the campaign
+ * @returns A Promise resolving to the campaign data
+ */
+export const getCampaignDetails = async (campaignId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select(`
+        *,
+        contact_lists!inner(
+          id,
+          name,
+          description
+        )
+      `)
+      .eq('id', campaignId)
+      .single();
+      
+    if (error) throw error;
+    
+    return data;
+  } catch (error) {
+    console.error('Error getting campaign details:', error);
+    throw error;
+  }
+};

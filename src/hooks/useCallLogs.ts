@@ -1,126 +1,83 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
+import { useInterval } from '@/hooks/useInterval';
 
-export interface CallLog {
+interface CallLog {
   id: string;
-  campaign_id: string;
-  user_id: string;
   phone_number: string;
   status: string;
-  duration: number;
-  transfer_requested: boolean;
-  transfer_successful: boolean;
-  notes: string;
+  duration?: number;
+  transfer_requested?: boolean;
+  transfer_successful?: boolean;
   created_at: string;
+  notes?: string;
 }
 
 interface UseCallLogsProps {
   campaignId?: string;
-  limit?: number;
-  refreshInterval?: number | null;
+  refreshInterval: number | null;
 }
 
-export const useCallLogs = ({ 
-  campaignId, 
-  limit = 100,
-  refreshInterval = null 
-}: UseCallLogsProps = {}) => {
+export const useCallLogs = ({ campaignId, refreshInterval = 10000 }: UseCallLogsProps) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [logs, setLogs] = useState<CallLog[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState({
-    total: 0,
-    human: 0,
-    voicemail: 0,
-    failed: 0,
-    transfers: 0
-  });
-
-  // Load logs and set up refresh interval if enabled
-  useEffect(() => {
-    if (user?.id) {
-      fetchLogs();
-      
-      // Set up refresh interval if specified
-      if (refreshInterval) {
-        const intervalId = setInterval(fetchLogs, refreshInterval);
-        return () => clearInterval(intervalId);
-      }
-    }
-  }, [user?.id, campaignId, limit, refreshInterval]);
-
-  // Fetch call logs from the database
-  const fetchLogs = async () => {
-    if (!user?.id) return;
+  const [error, setError] = useState<Error | null>(null);
+  
+  const fetchLogs = useCallback(async () => {
+    if (!user?.id || !campaignId) return;
     
     setIsLoading(true);
     setError(null);
     
     try {
-      // Use the typed query to call_logs table
-      let query = supabase
+      const { data, error } = await supabase
         .from('call_logs')
         .select('*')
+        .eq('campaign_id', campaignId)
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-        
-      // Add campaign filter if provided
-      if (campaignId) {
-        query = query.eq('campaign_id', campaignId);
-      }
-      
-      const { data, error } = await query;
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       
-      if (data) {
-        setLogs(data as CallLog[]);
-        calculateStats(data as CallLog[]);
-      }
-    } catch (err) {
+      setLogs(data || []);
+    } catch (err: any) {
       console.error('Error fetching call logs:', err);
-      setError('Failed to load call logs');
+      setError(err);
+      
+      toast({
+        title: 'Error fetching call logs',
+        description: err.message || 'Failed to load call logs',
+        variant: 'destructive'
+      });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Calculate statistics from call logs
-  const calculateStats = (logs: CallLog[]) => {
-    const newStats = {
-      total: logs.length,
-      human: 0,
-      voicemail: 0,
-      failed: 0,
-      transfers: 0
-    };
-    
-    logs.forEach(log => {
-      if (log.status === 'human') {
-        newStats.human += 1;
-      } else if (log.status === 'voicemail') {
-        newStats.voicemail += 1;
-      } else if (['failed', 'error', 'busy', 'noanswer'].includes(log.status)) {
-        newStats.failed += 1;
-      }
-      
-      if (log.transfer_requested) {
-        newStats.transfers += 1;
-      }
-    });
-    
-    setStats(newStats);
-  };
-
+  }, [campaignId, user?.id, toast]);
+  
+  // Initial fetch
+  useEffect(() => {
+    if (campaignId && user?.id) {
+      fetchLogs();
+    }
+  }, [campaignId, user?.id, fetchLogs]);
+  
+  // Set up polling if refreshInterval is specified
+  useInterval(fetchLogs, refreshInterval);
+  
+  // Manual refresh function
+  const refresh = useCallback(() => {
+    return fetchLogs();
+  }, [fetchLogs]);
+  
   return {
     logs,
     isLoading,
     error,
-    stats,
-    refresh: fetchLogs
+    refresh
   };
 };
