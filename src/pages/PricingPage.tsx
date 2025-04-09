@@ -1,9 +1,17 @@
 
 import React from 'react';
-import Pricing from '../pages/Pricing';
+import { PricingSection } from "@/components/PricingSection";
+import { CTASection } from "@/components/CTASection";
 
 const PricingPage = () => {
-  return <Pricing />;
+  return (
+    <>
+      <main>
+        <PricingSection />
+        <CTASection />
+      </main>
+    </>
+  );
 };
 
 export default PricingPage;

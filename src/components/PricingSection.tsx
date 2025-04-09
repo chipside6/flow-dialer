@@ -13,11 +13,11 @@ export const PricingSection = () => {
             Simple, One-Time Payment
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Start with our free plan or get lifetime access with a one-time payment. No subscriptions or recurring fees.
+            Get lifetime access with a one-time payment. No subscriptions or recurring fees.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-8 max-w-2xl mx-auto">
           {pricingPlans.map((plan) => (
             <div 
               key={plan.id}
@@ -43,29 +43,25 @@ export const PricingSection = () => {
                 </div>
                 
                 <div className="mt-auto mb-10 text-center">
-                  {plan.price === 0 ? (
-                    <span className="text-5xl font-bold">Free</span>
-                  ) : (
-                    <div className="mb-4 text-primary">
-                      <span className="text-6xl font-bold">
-                        <span className="text-4xl align-top mr-1">$</span>
-                        {plan.price}
-                      </span>
-                      {!plan.isLifetime && (
-                        <div className="text-xl text-primary/70 mt-2">
-                          per month
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div className="mb-4 text-primary">
+                    <span className="text-6xl font-bold">
+                      <span className="text-4xl align-top mr-1">$</span>
+                      {plan.price}
+                    </span>
+                    {!plan.isLifetime && (
+                      <div className="text-xl text-primary/70 mt-2">
+                        per month
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
-                <Link to={plan.price === 0 ? "/signup" : "/billing"}>
+                <Link to="/signup">
                   <Button 
                     className="w-full rounded-full py-6 text-lg mt-4"
-                    variant={plan.price === 0 ? "orange" : "success"}
+                    variant="success"
                   >
-                    {plan.price === 0 ? 'Start Free' : 'Get Lifetime Access'}
+                    Get Started
                   </Button>
                 </Link>
               </div>
