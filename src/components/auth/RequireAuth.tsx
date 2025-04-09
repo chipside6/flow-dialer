@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth/useAuth';
+import { touchSession } from '@/services/auth/session';
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -12,6 +13,11 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
   const location = useLocation();
   const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
   const [authChecked, setAuthChecked] = React.useState(false);
+
+  // Touch the session on component mount to prevent premature session expiration
+  React.useEffect(() => {
+    touchSession();
+  }, []);
 
   // Check if we're still loading the auth state
   React.useEffect(() => {
