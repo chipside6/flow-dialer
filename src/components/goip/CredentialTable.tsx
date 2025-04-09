@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, RefreshCcw, MoreHorizontal, Trash2, ClipboardCopy } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';

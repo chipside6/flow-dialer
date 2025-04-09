@@ -1,26 +1,55 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Server, Smartphone } from 'lucide-react';
+import { Server, Router, PhoneCall } from 'lucide-react';
 
 export const GoipHeader = () => {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 goip-header bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Smartphone className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-          <h1 className="text-2xl font-bold">GoIP Setup</h1>
-        </div>
-        <p className="text-slate-600 dark:text-slate-400">Connect your GoIP devices to our Asterisk server</p>
+    <div className="mb-8">
+      <div className="flex items-center space-x-2 mb-2">
+        <Server className="h-6 w-6 text-primary" />
+        <h1 className="text-3xl font-bold">GoIP Device Setup</h1>
       </div>
-      <div className="flex flex-col sm:flex-row gap-2">
-        <Badge 
-          variant="outline" 
-          className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800 flex items-center px-3 py-1.5 rounded-full asterisk-status-badge"
-        >
-          <Server className="h-3.5 w-3.5 mr-1.5" />
-          Asterisk Server: Connected
-        </Badge>
+      <p className="text-muted-foreground">
+        Connect your GoIP device to our Asterisk server to make automated calls with your campaigns.
+        Follow the steps below to generate SIP credentials and configure your device.
+      </p>
+      
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-muted/50 p-4 rounded-lg flex items-start space-x-3">
+          <div className="bg-primary/10 p-2 rounded-full">
+            <Server className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-medium">Step 1: Generate Credentials</h3>
+            <p className="text-sm text-muted-foreground">
+              Create SIP credentials to authenticate your GoIP device with our server.
+            </p>
+          </div>
+        </div>
+        
+        <div className="bg-muted/50 p-4 rounded-lg flex items-start space-x-3">
+          <div className="bg-primary/10 p-2 rounded-full">
+            <Router className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-medium">Step 2: Configure Device</h3>
+            <p className="text-sm text-muted-foreground">
+              Enter the SIP details in your GoIP device's configuration panel.
+            </p>
+          </div>
+        </div>
+        
+        <div className="bg-muted/50 p-4 rounded-lg flex items-start space-x-3">
+          <div className="bg-primary/10 p-2 rounded-full">
+            <PhoneCall className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-medium">Step 3: Start Making Calls</h3>
+            <p className="text-sm text-muted-foreground">
+              Once connected, you can use your GoIP device with any campaign.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,46 +1,31 @@
 
-# A string used to distinguish different Supabase projects on the same host. Defaults to the project ID.
 project_id = "grhvoclalziyjbjlhpml"
 
 [api]
-# Port to use for the API URL.
+enabled = true
 port = 54321
+schemas = ["public", "storage", "extensions"]
 
 [db]
-# Port to use for the local database URL.
 port = 54322
 
+[realtime]
+enabled = true
+
 [studio]
-# Port to use for the local Studio URL.
-port = 54324
+enabled = true
+port = 54323
 
 [inbucket]
-# Port to use for the local Inbucket URL.
-port = 54325
-
-[auth]
-# The base URL of your website. Used as an allow-list for redirects and for constructing URLs used in emails.
-site_url = "http://localhost:3000"
-# A comma separated list of URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://localhost:3000"]
-# How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
-jwt_expiry = 3600
-# If disabled, the refresh token will never expire.
-enable_refresh_token_rotation = true
-# Allows refresh tokens to be reused after expiry, up to the specified interval in seconds.
-refresh_token_reuse_interval = 10
-# Allow/disallow new user signups to your project.
-enable_signup = true
-
-[auth.email]
-# Allow/disallow new user signups via email to your project.
-enable_signup = true
-# If enabled, a user will be required to confirm any email change on both the old, and new email addresses.
-# If disabled, only the new email is required to confirm.
-double_confirm_changes = true
-# If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+enabled = true
+port = 54324
 
 [storage]
-# The maximum file size allowed (e.g. "5MB", "500KB").
-file_size_limit = "50MiB"
+enabled = true
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+
+[functions.goip-asterisk-integration]
+verify_jwt = true
