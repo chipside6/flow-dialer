@@ -32,7 +32,7 @@ export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
   
   return (
     <div 
-      className={`fixed top-4 left-4 z-50 transition-all duration-300 ${
+      className={`fixed top-4 left-4 z-40 transition-all duration-300 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-16'
       }`}
     >
@@ -42,6 +42,7 @@ export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
         className="bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-slate-200 w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:bg-slate-800/80 dark:border-slate-700 dark:hover:bg-slate-700" 
         onClick={handleClick}
         aria-label="Open sidebar"
+        data-mobile-menu-trigger
       >
         <Menu size={20} />
       </Button>

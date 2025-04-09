@@ -41,9 +41,13 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
       {/* Mobile menu button - only show when sidebar is not open */}
       {isMobile && !openMobile && <MobileSidebarButton onClick={toggleSidebar} />}
       
-      {/* DashboardSidebar contains its own header on mobile */}
+      {/* DashboardSidebar */}
       <DashboardSidebar />
-      <div className="flex-1 w-full max-w-full h-full overflow-auto pb-16 md:pb-0 pt-4 px-4">
+
+      {/* Main content area */}
+      <div className={`flex-1 w-full max-w-full h-full overflow-auto pb-16 md:pb-0 pt-4 px-4 transition-all duration-300 ${
+        !isMobile ? 'md:ml-64' : ''
+      }`}>
         <div className="max-w-7xl mx-auto">
           {children}
         </div>

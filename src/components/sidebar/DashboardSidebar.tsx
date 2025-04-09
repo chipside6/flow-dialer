@@ -17,11 +17,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import LogoutButton from '../LogoutButton';
 import { SidebarNavItem } from './SidebarNavItem';
 import { useAuth } from '@/contexts/auth';
+import { useSidebar } from '@/components/ui/sidebar';
 
-export const DashboardSidebar = ({ isMobile = false, onCloseMobile }: { isMobile?: boolean; onCloseMobile?: () => void }) => {
+export const DashboardSidebar = () => {
   const location = useLocation();
   const { isAdmin } = useAuth();
   const [activeItem, setActiveItem] = useState('');
+  const { openMobile, setOpenMobile } = useSidebar();
 
   useEffect(() => {
     const path = location.pathname;
@@ -44,60 +46,76 @@ export const DashboardSidebar = ({ isMobile = false, onCloseMobile }: { isMobile
     }
   }, [location]);
 
+  const handleCloseSidebar = () => {
+    if (setOpenMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   return (
-    <div className={`fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r bg-background transition-transform duration-300 ease-in-out ${isMobile ? 'w-64' : 'hidden md:flex w-64'}`}>
-      <div className="flex h-14 items-center px-4 border-b">
+    <div 
+      data-sidebar="sidebar"
+      className={`fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r bg-background transition-transform duration-300 ease-in-out ${
+        openMobile ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      } md:flex w-64`}
+    >
+      <div className="flex h-14 items-center px-4 border-b" data-sidebar="header">
         <Link to="/dashboard" className="flex items-center gap-2">
           <span className="font-bold text-lg">VoIP Dialer</span>
         </Link>
-        {isMobile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="ml-auto"
-            onClick={onCloseMobile}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="ml-auto md:hidden"
+          onClick={handleCloseSidebar}
+          aria-label="Close sidebar"
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
-      <ScrollArea className="flex-1 px-2 py-4">
+      <ScrollArea className="flex-1 px-2 py-4" data-sidebar="content">
         <nav className="flex flex-col gap-1">
           <SidebarNavItem
             icon={<LayoutDashboard className="h-4 w-4" />}
             href="/dashboard"
             label="Dashboard"
             isActive={activeItem === 'dashboard'}
+            onClick={handleCloseSidebar}
           />
           <SidebarNavItem
             icon={<Phone className="h-4 w-4" />}
             href="/campaigns"
             label="Campaigns"
             isActive={activeItem === 'campaigns'}
+            onClick={handleCloseSidebar}
           />
           <SidebarNavItem
             icon={<Users className="h-4 w-4" />}
             href="/contacts"
             label="Contact Lists"
             isActive={activeItem === 'contacts'}
+            onClick={handleCloseSidebar}
           />
           <SidebarNavItem
             icon={<Phone className="h-4 w-4" />}
             href="/transfers"
             label="Transfer Numbers"
             isActive={activeItem === 'transfers'}
+            onClick={handleCloseSidebar}
           />
           <SidebarNavItem
             icon={<FileAudio className="h-4 w-4" />}
             href="/greetings"
             label="Greeting Files"
             isActive={activeItem === 'greetings'}
+            onClick={handleCloseSidebar}
           />
           <SidebarNavItem
             icon={<ExternalLink className="h-4 w-4" />}
             href="/goip-setup"
             label="GoIP Setup"
             isActive={activeItem === 'goip'}
+            onClick={handleCloseSidebar}
           />
           {isAdmin && (
             <SidebarNavItem
@@ -105,6 +123,7 @@ export const DashboardSidebar = ({ isMobile = false, onCloseMobile }: { isMobile
               href="/asterisk-config"
               label="Asterisk Config"
               isActive={activeItem === 'asterisk'}
+              onClick={handleCloseSidebar}
             />
           )}
         </nav>
@@ -114,12 +133,14 @@ export const DashboardSidebar = ({ isMobile = false, onCloseMobile }: { isMobile
             href="/profile"
             label="Profile"
             isActive={activeItem === 'profile'}
+            onClick={handleCloseSidebar}
           />
           <SidebarNavItem
             icon={<Settings className="h-4 w-4" />}
             href="/settings"
             label="Settings"
             isActive={activeItem === 'settings'}
+            onClick={handleCloseSidebar}
           />
           <div className="mt-4">
             <LogoutButton position="left" className="w-full justify-start" />

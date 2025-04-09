@@ -1,0 +1,72 @@
+
+/* Dashboard sidebar fixes */
+
+/* Fix the z-index and positioning */
+[data-sidebar="sidebar"] {
+  z-index: 50 !important;
+  background-color: white !important;
+  width: 16rem !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out !important;
+}
+
+/* Ensure proper header styling */
+[data-sidebar="header"] {
+  height: 3.5rem !important;
+  padding: 0 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Fix content scrolling */
+[data-sidebar="content"] {
+  overflow-y: auto !important;
+  padding: 1rem !important;
+}
+
+/* Fix mobile view */
+@media (max-width: 768px) {
+  [data-sidebar="sidebar"] {
+    transform: translateX(-100%) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100% !important;
+    width: 85% !important;
+    max-width: 320px !important;
+  }
+  
+  [data-sidebar="sidebar"].translate-x-0 {
+    transform: translateX(0) !important;
+  }
+  
+  /* Ensure the main content shifts properly */
+  .md\:ml-64 {
+    margin-left: 0 !important;
+  }
+  
+  /* Improve mobile menu button visibility */
+  [data-mobile-menu-trigger] {
+    display: flex !important;
+    visibility: visible !important;
+    z-index: 40 !important;
+  }
+}
+
+/* Fix desktop view */
+@media (min-width: 769px) {
+  [data-sidebar="sidebar"] {
+    transform: translateX(0) !important;
+  }
+  
+  .md\:ml-64 {
+    margin-left: 16rem !important;
+  }
+}
+
+/* Fix dark mode */
+.dark [data-sidebar="sidebar"] {
+  background-color: #1e293b !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
