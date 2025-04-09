@@ -29,12 +29,6 @@ export const DashboardContent = () => {
   // Check if the user has a lifetime subscription
   const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
   
-  // Get cached plan status if not yet loaded from server
-  const cachedPlanStatus = localStorage.getItem('userSubscriptionPlan');
-  const displayPlan = currentPlan || cachedPlanStatus || 'trial';
-  const showLifetimeMessage = isLifetimePlan || displayPlan === 'lifetime';
-  const isTrialPlan = displayPlan === 'trial' || subscription?.plan_id === 'trial';
-
   return (
     <>
       <div className="grid gap-6">
@@ -70,12 +64,10 @@ export const DashboardContent = () => {
                 </div>
                 <div className="ml-3">
                   <div className="text-sm text-blue-700">
-                    {showLifetimeMessage ? (
+                    {isLifetimePlan ? (
                       <p>You have lifetime access to all features.</p>
-                    ) : isTrialPlan ? (
-                      <p>You have an active trial. <Link to="/upgrade" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link> before it expires.</p>
                     ) : (
-                      <p>Your trial has expired. <Link to="/upgrade" className="font-medium text-blue-700 underline">Upgrade to Lifetime</Link> to continue.</p>
+                      <p>You can set up your account but need to <Link to="/upgrade" className="font-medium text-blue-700 underline">upgrade to Lifetime</Link> to run campaigns.</p>
                     )}
                   </div>
                 </div>

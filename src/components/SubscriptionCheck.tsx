@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/subscription';
@@ -20,13 +19,11 @@ export function SubscriptionCheck({
   const [retryCount, setRetryCount] = useState(0);
   const [hasValidSubscription, setHasValidSubscription] = useState<boolean | null>(null);
   
-  // Check if user has a valid subscription - explicitly check for lifetime plan first
+  // Check if user has a valid subscription - explicitly check for lifetime plan
   const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
-  const isTrialActive = subscription?.plan_id === 'trial' && subscription?.status === 'active';
-  const isPaidPlanActive = subscription?.status === 'active' && !isTrialActive && !isLifetimePlan;
   
   // Determine if the user's subscription status meets requirements
-  const subscriptionValid = !requireSubscription || isLifetimePlan || isTrialActive || isPaidPlanActive;
+  const subscriptionValid = !requireSubscription || isLifetimePlan;
   
   // Effect to handle subscription checks with retry logic
   useEffect(() => {
@@ -56,6 +53,7 @@ export function SubscriptionCheck({
             .select('*')
             .eq('user_id', authData.session.user.id)
             .eq('status', 'active')
+            .eq('plan_id', 'lifetime')
             .maybeSingle();
           
           if (error) {
@@ -87,12 +85,12 @@ export function SubscriptionCheck({
       if (requireSubscription && !subscriptionValid) {
         // The user needs a subscription but doesn't have one
         if (retryCount >= 3 || hasValidSubscription === false) {
-          console.log('User has no valid subscription, redirecting to upgrade page');
+          console.log('User has no lifetime subscription, redirecting to upgrade page');
           navigate('/upgrade', { replace: true });
         }
       } else if (!requireSubscription && subscriptionValid) {
         // The user already has a subscription and is on a page that doesn't require one (like upgrade)
-        console.log('User already has a subscription, redirecting to dashboard');
+        console.log('User already has a lifetime subscription, redirecting to dashboard');
         navigate(redirectTo, { replace: true });
       }
     }
