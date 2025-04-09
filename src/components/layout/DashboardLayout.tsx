@@ -10,18 +10,17 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const isMobile = useIsMobile();
-  
   return (
-    <SidebarProvider>
-      <DashboardLayoutContent children={children} />
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex w-full min-h-svh bg-slate-50 dark:bg-slate-900 overflow-hidden">
+        <DashboardLayoutContent children={children} />
+      </div>
     </SidebarProvider>
   );
 }
 
 function DashboardLayoutContent({ children }: DashboardLayoutProps) {
-  const { toggleSidebar, openMobile } = useSidebar();
-  const isMobile = useIsMobile();
+  const { toggleSidebar, openMobile, isMobile } = useSidebar();
   
   // Add class to body when sidebar is open
   React.useEffect(() => {
@@ -37,7 +36,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
   }, [isMobile, openMobile]);
   
   return (
-    <div className="flex flex-1 w-full h-full overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <>
       {/* Mobile menu button - only show when sidebar is not open */}
       {isMobile && !openMobile && <MobileSidebarButton onClick={toggleSidebar} />}
       
@@ -52,6 +51,6 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
           {children}
         </div>
       </div>
-    </div>
+    </>
   );
 }

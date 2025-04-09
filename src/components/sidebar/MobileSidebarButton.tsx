@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
+import { useSidebar } from '@/components/ui/sidebar';
 
 interface MobileSidebarButtonProps {
   onClick: () => void;
@@ -10,6 +11,7 @@ interface MobileSidebarButtonProps {
 export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
   const [visible, setVisible] = useState(true);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
+  const { openMobile } = useSidebar();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,6 +31,9 @@ export const MobileSidebarButton = ({ onClick }: MobileSidebarButtonProps) => {
     e.stopPropagation();
     onClick();
   };
+  
+  // Don't show the button if the sidebar is already open
+  if (openMobile) return null;
   
   return (
     <div 

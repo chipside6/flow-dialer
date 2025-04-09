@@ -19,5 +19,5 @@
 @import './styles/mobile-goip.css';
 @import './styles/top-header-fix.css';
 @import './styles/dashboard-sidebar-fix.css';
-
-
+@import './styles/mobile-sidebar-imports.css';
+@import './styles/mobile-navigation.css';
