@@ -1,177 +1,225 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+import { CampaignCreationWizard } from '@/components/campaign-wizard/CampaignCreationWizard';
+import { useCampaigns } from '@/hooks/useCampaigns';
+import { PlusCircle, RefreshCw, Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import CampaignDashboard from '@/components/CampaignDashboard';
+import { CampaignTable } from '@/components/campaigns/CampaignTable';
+import { CampaignProvider } from '@/contexts/campaign/CampaignContext';
 
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import CampaignDashboard from "@/components/CampaignDashboard";
-import { CampaignCreationWizard } from "@/components/campaign-wizard/CampaignCreationWizard";
-import { PlusCircle } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { CampaignData } from "@/components/campaign-wizard/types";
-import { useAuth } from "@/contexts/auth/useAuth";
-import { Campaign } from "@/types/campaign";
-import { v4 as uuidv4 } from 'uuid';
-import { useLocation } from "react-router-dom";
-import { useCampaigns } from "@/hooks/useCampaigns";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { useSubscription } from "@/hooks/subscription";
-import { TrialExpiredNotice } from "@/components/campaign/TrialExpiredNotice";
-import { LoadingState } from "@/components/upgrade/LoadingState";
-import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+// Need to add missing Badge import
+import { Badge } from '@/components/ui/badge';
 
-const CampaignPage = () => {
-  const location = useLocation();
+const Campaign = () => {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
-  const { user } = useAuth();
   const { campaigns, isLoading, error, refreshCampaigns } = useCampaigns();
-  const { trialExpired, currentPlan, isLoading: subscriptionLoading } = useSubscription();
-  const { isOnline } = useNetworkStatus();
-  const [hasAttemptedInitialLoad, setHasAttemptedInitialLoad] = useState(false);
-  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Filter campaigns for active, paused, and completed tabs
+  const activeFilteredCampaigns = campaigns ? campaigns.filter(c => c.status === 'running') : [];
+  const pausedFilteredCampaigns = campaigns ? campaigns.filter(c => c.status === 'paused') : [];
+  const completedFilteredCampaigns = campaigns ? campaigns.filter(c => c.status === 'completed') : [];
   
-  // Check if user can create campaigns based on subscription status
-  const canAccessCampaigns = currentPlan === 'lifetime' || 
-                             (currentPlan === 'trial' && !trialExpired);
-  
-  // Check for state passed from navigation to determine if we should show the wizard
   useEffect(() => {
+    // Check if the URL has a state indicating to show the create wizard
     if (location.state && location.state.showCreateWizard) {
       setShowCreateWizard(true);
-      // Clean up the state after using it
-      window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+
+  const handleCampaignCreated = (newCampaign: any) => {
+    toast({
+      title: "Campaign Created",
+      description: `${newCampaign.title} has been successfully created.`,
+    });
+    setShowCreateWizard(false); // Close the wizard
+    refreshCampaigns(); // Refresh the campaign list
+  };
   
-  // Mark when subscription check is complete to prevent UI flashing
-  useEffect(() => {
-    if (!subscriptionLoading) {
-      setSubscriptionChecked(true);
-    }
-  }, [subscriptionLoading]);
-  
-  // Mark when first load attempt has occurred
-  useEffect(() => {
-    if (isLoading) {
-      setHasAttemptedInitialLoad(true);
-    }
-  }, [isLoading]);
-  
-  const handleCreateCampaign = async (newCampaign: CampaignData) => {
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
     try {
-      // Ensure we're using a proper UUID for campaign ID
-      const campaignId = uuidv4();
-      
-      // Ensure the campaign has a user_id property and matches the Campaign type
-      const campaignWithRequiredFields = {
-        id: campaignId, // Always use a properly generated UUID here
-        title: newCampaign.title,
-        description: newCampaign.description || '',
-        status: (newCampaign.status as Campaign["status"]) || "draft",
-        progress: newCampaign.progress || 0,
-        total_calls: newCampaign.totalCalls || 0,
-        answered_calls: newCampaign.answeredCalls || 0,
-        transferred_calls: newCampaign.transferredCalls || 0,
-        failed_calls: newCampaign.failedCalls || 0,
-        user_id: user?.id || '',
-        created_at: new Date().toISOString(),
-        contact_list_id: newCampaign.contactListId || null,
-        greeting_file_url: newCampaign.greetingFileId || null,
-        port_number: newCampaign.portNumber || 1,
-        transfer_number: newCampaign.transferNumber || null
-      };
-      
-      // Save to Supabase
-      const { data, error } = await supabase
-        .from('campaigns')
-        .insert(campaignWithRequiredFields)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error("Error creating campaign:", error);
-        toast({
-          title: "Error creating campaign",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      toast({
-        title: "Campaign created",
-        description: "Your campaign has been created successfully.",
-        variant: "default"
-      });
-      
-      // Refresh campaigns list to show the new campaign
       await refreshCampaigns();
-      
-      // Hide the wizard
-      setShowCreateWizard(false);
-    } catch (error: any) {
-      console.error("Error in handleCreateCampaign:", error);
       toast({
-        title: "Error creating campaign",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive"
+        title: "Campaigns Refreshed",
+        description: "The campaign list has been updated.",
       });
+    } catch (err: any) {
+      toast({
+        title: "Error Refreshing Campaigns",
+        description: err.message || "Failed to refresh campaigns.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
     }
   };
   
-  // Only show loading state for initial load, not for subsequent refreshes
-  if ((isLoading && campaigns.length === 0 && !hasAttemptedInitialLoad) || !subscriptionChecked) {
-    return (
-      <DashboardLayout>
-        <div className="max-w-6xl mx-auto w-full px-4 pt-8">
-          <LoadingState 
-            message="Loading your campaigns..." 
-            onRetry={refreshCampaigns}
-            timeout={10000} // Longer timeout to prevent flickering
-            showTimeoutError={false} // Don't show timeout errors on initial load
-          />
-        </div>
-      </DashboardLayout>
-    );
-  }
-  
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <SidebarProvider>
-        <div className="flex flex-1 w-full">
-          <DashboardLayout>
-            <div className="max-w-6xl mx-auto w-full px-2 md:px-4 pt-4 campaign-content">
-              {!canAccessCampaigns && subscriptionChecked ? (
-                <TrialExpiredNotice />
-              ) : showCreateWizard ? (
-                <CampaignCreationWizard 
-                  onComplete={handleCreateCampaign}
-                  onCancel={() => setShowCreateWizard(false)}
-                />
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Campaigns</h1>
+            <p className="text-muted-foreground">Manage your auto-dialer campaigns</p>
+          </div>
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              size="sm"
+            >
+              {isRefreshing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Refreshing...
+                </>
               ) : (
                 <>
-                  <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
-                    <h1 className="text-2xl md:text-3xl font-bold">Campaigns</h1>
-                    <Button 
-                      variant="success"
-                      onClick={() => setShowCreateWizard(true)}
-                      className="whitespace-nowrap"
-                    >
-                      <PlusCircle className="h-4 w-4 mr-2" />
-                      Create Campaign
-                    </Button>
-                  </div>
-                  <div className="w-full overflow-hidden">
-                    <CampaignDashboard initialCampaigns={campaigns} />
-                  </div>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh
                 </>
               )}
-            </div>
-          </DashboardLayout>
+            </Button>
+            <Button 
+              onClick={() => setShowCreateWizard(true)}
+              size="sm"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create Campaign
+            </Button>
+          </div>
         </div>
-      </SidebarProvider>
-    </div>
+
+        {/* Error and loading states */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error.message || "Failed to load campaigns"}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isLoading && !campaigns.length ? (
+          <Card>
+            <CardContent className="py-10">
+              <div className="flex justify-center items-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-2 text-lg">Loading campaigns...</span>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {/* Campaign tabs */}
+            <Tabs defaultValue="all" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="all">All Campaigns</TabsTrigger>
+                <TabsTrigger value="active">Active</TabsTrigger>
+                <TabsTrigger value="paused">Paused</TabsTrigger>
+                <TabsTrigger value="completed">Completed</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="all" className="space-y-4">
+                {campaigns.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-10 text-center">
+                      <h3 className="text-lg font-medium mb-2">No campaigns yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Get started by creating your first campaign.
+                      </p>
+                      <Button 
+                        onClick={() => setShowCreateWizard(true)}
+                        className="mx-auto"
+                      >
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Create Campaign
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <CampaignProvider initialCampaigns={campaigns}>
+                    <CampaignTable />
+                  </CampaignProvider>
+                )}
+              </TabsContent>
+
+              <TabsContent value="active" className="space-y-4">
+                {activeFilteredCampaigns.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-10 text-center">
+                      <h3 className="text-lg font-medium">No active campaigns</h3>
+                      <p className="text-muted-foreground">
+                        You don't have any running campaigns at the moment.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <CampaignProvider initialCampaigns={activeFilteredCampaigns}>
+                    <CampaignTable />
+                  </CampaignProvider>
+                )}
+              </TabsContent>
+
+              <TabsContent value="paused" className="space-y-4">
+                {pausedFilteredCampaigns.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-10 text-center">
+                      <h3 className="text-lg font-medium">No paused campaigns</h3>
+                      <p className="text-muted-foreground">
+                        You don't have any paused campaigns at the moment.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <CampaignProvider initialCampaigns={pausedFilteredCampaigns}>
+                    <CampaignTable />
+                  </CampaignProvider>
+                )}
+              </TabsContent>
+
+              <TabsContent value="completed" className="space-y-4">
+                {completedFilteredCampaigns.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-10 text-center">
+                      <h3 className="text-lg font-medium">No completed campaigns</h3>
+                      <p className="text-muted-foreground">
+                        You don't have any completed campaigns yet.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <CampaignProvider initialCampaigns={completedFilteredCampaigns}>
+                    <CampaignTable />
+                  </CampaignProvider>
+                )}
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
+
+        {/* Create Campaign Wizard Dialog */}
+        {showCreateWizard && (
+          <CampaignCreationWizard 
+            open={showCreateWizard} 
+            onOpenChange={(open) => setShowCreateWizard(open)}
+            onSuccess={handleCampaignCreated}
+          />
+        )}
+      </div>
+    </DashboardLayout>
   );
 };
 
-export default CampaignPage;
+export default Campaign;

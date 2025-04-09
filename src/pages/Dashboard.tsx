@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { DashboardContent } from '@/components/layout/DashboardContent';
@@ -157,7 +158,7 @@ const Dashboard = () => {
                       </div>
                     ) : (campaigns && campaigns.length > 0) ? (
                       <CampaignDashboard 
-                        initialCampaigns={campaigns.slice(0, 3) || []} 
+                        initialCampaigns={campaigns.slice(0, 3)} 
                         onRefresh={handleRefreshCampaigns}
                       />
                     ) : (

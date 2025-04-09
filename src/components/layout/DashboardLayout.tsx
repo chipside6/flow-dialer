@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebar, SidebarProvider } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DashboardSidebar } from "@/components/sidebar/DashboardSidebar";
 import { MobileSidebarButton } from "@/components/sidebar/MobileSidebarButton";
@@ -10,6 +10,16 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const isMobile = useIsMobile();
+  
+  return (
+    <SidebarProvider>
+      <DashboardLayoutContent children={children} />
+    </SidebarProvider>
+  );
+}
+
+function DashboardLayoutContent({ children }: DashboardLayoutProps) {
   const { toggleSidebar, openMobile } = useSidebar();
   const isMobile = useIsMobile();
   

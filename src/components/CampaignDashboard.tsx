@@ -7,26 +7,49 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Campaign } from '@/types/campaign';
 import { useCampaigns } from '@/hooks/useCampaigns';
 
-export const CampaignDashboard = () => {
-  const { campaignId } = useParams<{ campaignId: string }>();
+interface CampaignDashboardProps {
+  campaignId?: string;
+  initialCampaigns?: Campaign[];
+  onRefresh?: () => void;
+}
+
+export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({ 
+  campaignId: propCampaignId,
+  initialCampaigns,
+  onRefresh
+}) => {
+  const { campaignId: paramCampaignId } = useParams<{ campaignId: string }>();
   const [activeTab, setActiveTab] = useState('overview');
   const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const { getCampaign, isLoading, error } = useCampaigns();
+  const { campaigns, isLoading, error, refreshCampaigns } = useCampaigns();
+
+  // Use either the prop campaignId or the URL param
+  const campaignId = propCampaignId || paramCampaignId;
 
   useEffect(() => {
     const fetchCampaignDetails = async () => {
-      if (campaignId) {
-        try {
-          const campaignData = await getCampaign(campaignId);
-          setCampaign(campaignData);
-        } catch (err) {
-          console.error("Error fetching campaign details:", err);
+      if (campaignId && campaigns) {
+        // Find the campaign in the list of campaigns
+        const foundCampaign = campaigns.find(c => c.id === campaignId);
+        if (foundCampaign) {
+          setCampaign(foundCampaign);
         }
+      } else if (initialCampaigns && initialCampaigns.length > 0) {
+        // If initialCampaigns is provided, use the first one
+        setCampaign(initialCampaigns[0]);
       }
     };
 
     fetchCampaignDetails();
-  }, [campaignId, getCampaign]);
+  }, [campaignId, campaigns, initialCampaigns]);
+
+  const handleRefresh = () => {
+    if (onRefresh) {
+      onRefresh();
+    } else {
+      refreshCampaigns();
+    }
+  };
 
   if (isLoading) {
     return (
@@ -42,6 +65,24 @@ export const CampaignDashboard = () => {
         <h2 className="text-lg font-semibold text-red-700">Error</h2>
         <p className="text-red-600">Failed to load campaign details. Please try again later.</p>
       </Card>
+    );
+  }
+
+  // If we have initialCampaigns but no campaign is selected, show a list of campaigns
+  if (initialCampaigns && initialCampaigns.length > 0 && !campaign) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Recent Campaigns</h2>
+        {initialCampaigns.map((campaign) => (
+          <Card key={campaign.id} className="p-4">
+            <h3 className="font-medium">{campaign.title}</h3>
+            <p className="text-sm text-gray-500">{campaign.description}</p>
+            <div className="mt-2">
+              <Badge variant="outline">{campaign.status}</Badge>
+            </div>
+          </Card>
+        ))}
+      </div>
     );
   }
 
