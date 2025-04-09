@@ -9,7 +9,8 @@ import {
   Settings, 
   ExternalLink,
   X,
-  UserCircle
+  UserCircle,
+  Server
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -31,13 +32,13 @@ export const DashboardSidebar = () => {
     } else if (path.includes('/campaigns') || path.includes('/campaign')) {
       setActiveItem('campaigns');
     } else if (path.includes('/contacts')) {
-      setActiveItem('contacts');
+      setActiveItem('leads');
     } else if (path.includes('/transfers')) {
       setActiveItem('transfers');
     } else if (path.includes('/greetings')) {
-      setActiveItem('greetings');
+      setActiveItem('audio');
     } else if (path.includes('/goip-setup')) {
-      setActiveItem('goip');
+      setActiveItem('device');
     } else if (path.includes('/profile')) {
       setActiveItem('profile');
     } else if (path.includes('/settings')) {
@@ -60,7 +61,7 @@ export const DashboardSidebar = () => {
     >
       <div className="flex h-14 items-center px-4 border-b" data-sidebar="header">
         <Link to="/dashboard" className="flex items-center gap-2">
-          <span className="font-bold text-lg">VoIP Dialer</span>
+          <span className="font-bold text-lg">Autodialer</span>
         </Link>
         {isMobile && (
           <Button
@@ -93,8 +94,8 @@ export const DashboardSidebar = () => {
           <SidebarNavItem
             icon={<Users className="h-4 w-4" />}
             href="/contacts"
-            label="Contact Lists"
-            isActive={activeItem === 'contacts'}
+            label="Leads"
+            isActive={activeItem === 'leads'}
             onClick={handleCloseSidebar}
           />
           <SidebarNavItem
@@ -107,15 +108,15 @@ export const DashboardSidebar = () => {
           <SidebarNavItem
             icon={<FileAudio className="h-4 w-4" />}
             href="/greetings"
-            label="Greeting Files"
-            isActive={activeItem === 'greetings'}
+            label="Audio Files"
+            isActive={activeItem === 'audio'}
             onClick={handleCloseSidebar}
           />
           <SidebarNavItem
-            icon={<ExternalLink className="h-4 w-4" />}
+            icon={<Server className="h-4 w-4" />}
             href="/goip-setup"
-            label="GoIP Setup"
-            isActive={activeItem === 'goip'}
+            label="Device Setup"
+            isActive={activeItem === 'device'}
             onClick={handleCloseSidebar}
           />
           {isAdmin && (
