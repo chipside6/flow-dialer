@@ -1,150 +1,118 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useToast } from "@/components/ui/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyGreetingsState } from './EmptyGreetingsState';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Trash } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { AudioFileCard } from './AudioFileCard';
-import { LoadingState } from '@/components/upgrade/LoadingState';
-import { GreetingFile } from '@/hooks/useGreetingFiles';
+import { Play, Pause, Trash, Music } from 'lucide-react';
+import { formatDistance } from 'date-fns';
+import { GreetingFile } from '@/hooks/greeting-files/types';
 
 interface GreetingFilesListProps {
-  greetingFiles: GreetingFile[];
-  isLoading: boolean;
-  error: Error | null;
-  isError: boolean;
-  refreshGreetingFiles: () => Promise<void>;
-  deleteGreetingFile: any;
-  onUploadClick?: () => void;
+  files: GreetingFile[];
+  onDelete: (fileId: string) => void;
+  isDeleting: boolean;
 }
 
 export const GreetingFilesList = ({ 
-  greetingFiles, 
-  isLoading, 
-  error, 
-  isError,
-  refreshGreetingFiles,
-  deleteGreetingFile,
-  onUploadClick
+  files,
+  onDelete,
+  isDeleting
 }: GreetingFilesListProps) => {
   const { toast } = useToast();
-  const [currentAudio, setCurrentAudio] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentPlaying, setCurrentPlaying] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const isMobile = useIsMobile();
 
-  // Initialize audio element
-  useEffect(() => {
-    audioRef.current = new Audio();
-    
-    // Add event listeners to the audio element
-    const audio = audioRef.current;
-    
-    const handleEnded = () => {
-      setIsPlaying(false);
-    };
-    
-    const handleError = (e: ErrorEvent) => {
-      console.error("Audio playback error:", e);
-      toast({
-        variant: "destructive",
-        title: "Playback Error",
-        description: "There was an error playing this audio file."
-      });
-      setIsPlaying(false);
-    };
-    
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError as EventListener);
-    
-    return () => {
-      audio.pause();
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError as EventListener);
-    };
-  }, [toast]);
-
-  if (isLoading) {
-    return <LoadingState message="Loading greeting files..." />;
-  }
-
-  if (isError) {
-    return (
-      <Alert variant="destructive" className="mb-4">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          {error?.message || "Failed to load greeting files"}
-        </AlertDescription>
-        <Button 
-          variant="outline" 
-          className="mt-2" 
-          onClick={() => refreshGreetingFiles()}
-          size="sm"
-        >
-          <RefreshCw className="h-4 w-4 mr-2" /> Try Again
-        </Button>
-      </Alert>
-    );
-  }
-
-  if (greetingFiles.length === 0) {
-    return <EmptyGreetingsState onUploadClick={onUploadClick} onRefresh={refreshGreetingFiles} />;
-  }
-
-  const handleDelete = async (fileId: string) => {
-    try {
-      await deleteGreetingFile.mutateAsync(fileId);
-    } catch (error: any) {
-      console.error("Error in delete handler:", error);
+  const handlePlay = (file: GreetingFile) => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
     }
-  };
 
-  const handlePlayToggle = (url: string) => {
-    if (!audioRef.current) return;
-    
-    if (currentAudio === url && isPlaying) {
-      // Pause the current audio
+    if (currentPlaying === file.id) {
+      // Pause current audio
       audioRef.current.pause();
-      setIsPlaying(false);
+      setCurrentPlaying(null);
     } else {
-      // Stop any currently playing audio first
-      if (audioRef.current.src) {
-        audioRef.current.pause();
-      }
-      
-      // Set the new audio source and play
-      audioRef.current.src = url;
-      audioRef.current.play().catch(error => {
-        console.error("Error playing audio:", error);
+      // Play new audio
+      audioRef.current.src = file.url;
+      audioRef.current.play().catch(err => {
+        console.error("Error playing audio:", err);
         toast({
           variant: "destructive",
           title: "Playback Error",
           description: "There was an error playing this audio file."
         });
       });
-      
-      setCurrentAudio(url);
-      setIsPlaying(true);
+      setCurrentPlaying(file.id);
     }
   };
 
+  if (files.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <Music className="h-12 w-12 text-muted-foreground mb-4" />
+        <div className="text-lg font-medium mb-2">No audio files yet</div>
+        <p className="text-muted-foreground mb-4">
+          Upload your first audio greeting to get started
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {greetingFiles.map((file) => (
-        <AudioFileCard 
-          key={file.id}
-          file={file}
-          isPlaying={isPlaying && currentAudio === file.url}
-          isActiveAudio={currentAudio === file.url}
-          onPlayToggle={() => handlePlayToggle(file.url)}
-          onDelete={() => handleDelete(file.id)}
-        />
+      {files.map((file) => (
+        <Card key={file.id} className="overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-medium text-base line-clamp-1" title={file.filename}>
+                {file.filename}
+              </h3>
+              <span className="text-xs text-muted-foreground">
+                {formatDistance(new Date(file.created_at), new Date(), { addSuffix: true })}
+              </span>
+            </div>
+            
+            <div className="mt-2 text-sm text-muted-foreground">
+              <p>Duration: {file.duration_seconds ? `${file.duration_seconds.toFixed(1)}s` : 'Unknown'}</p>
+            </div>
+            
+            <div className="mt-4 h-12 bg-secondary/30 rounded-md flex items-center justify-center">
+              <span className="text-xs text-muted-foreground">Audio waveform</span>
+            </div>
+          </CardContent>
+          
+          <CardFooter className="p-4 pt-2 flex justify-between gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="flex-1"
+              onClick={() => handlePlay(file)}
+            >
+              {currentPlaying === file.id ? (
+                <>
+                  <Pause className="h-4 w-4 mr-2" />
+                  Pause
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-2" />
+                  Play
+                </>
+              )}
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => onDelete(file.id)}
+              className="text-destructive hover:text-destructive"
+              disabled={isDeleting}
+            >
+              <Trash className="h-4 w-4" />
+              <span className="sr-only">Delete</span>
+            </Button>
+          </CardFooter>
+        </Card>
       ))}
     </div>
   );
