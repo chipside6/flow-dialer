@@ -6,6 +6,8 @@
   transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease !important;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   overflow-x: hidden; /* Prevent horizontal scrolling */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Custom sidebar styling in dark mode */
@@ -56,6 +58,7 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
   overflow-x: hidden; /* Prevent horizontal scrolling */
+  flex: 1;
 }
 
 [data-sidebar="content"]::-webkit-scrollbar {
@@ -114,6 +117,12 @@
 /* Logo specific sidebar header adjustments */
 [data-sidebar="header"] > div {
   padding: 0.75rem 1rem !important;
+}
+
+/* Fix logout button */
+[data-sidebar="sidebar"] .border-t.mt-auto {
+  margin-top: auto !important;
+  background-color: var(--background);
 }
 
 /* Special highlight for GoIP setup on mobile - ONLY when active */

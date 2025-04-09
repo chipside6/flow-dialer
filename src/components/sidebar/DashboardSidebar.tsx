@@ -9,21 +9,23 @@ import {
   Settings, 
   X,
   UserCircle,
-  Server
+  Server,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import LogoutButton from '../LogoutButton';
 import { SidebarNavItem } from './SidebarNavItem';
 import { useAuth } from '@/contexts/auth';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Logo } from '@/components/ui/Logo';
+import { clearAllAuthData, forceLogoutWithReload } from '@/utils/sessionCleanup';
 
 export const DashboardSidebar = () => {
   const location = useLocation();
-  const { isAdmin } = useAuth();
+  const { isAdmin, signOut } = useAuth();
   const [activeItem, setActiveItem] = useState('');
   const { openMobile, setOpenMobile, isMobile } = useSidebar();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     const path = location.pathname;
@@ -52,6 +54,31 @@ export const DashboardSidebar = () => {
     }
   };
 
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    
+    setIsLoggingOut(true);
+    
+    try {
+      // IMMEDIATELY clear all auth data to prevent auto re-login
+      clearAllAuthData();
+      
+      // Call the signOut function from auth context
+      if (signOut) await signOut();
+      
+      // Force app reload after signOut to ensure complete state reset
+      forceLogoutWithReload();
+    } catch (error) {
+      console.error("Logout error:", error);
+      
+      // If all else fails, clear session directly and force reload
+      clearAllAuthData();
+      forceLogoutWithReload();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <div 
       data-sidebar="sidebar"
@@ -75,80 +102,95 @@ export const DashboardSidebar = () => {
           </Button>
         )}
       </div>
-      <ScrollArea className="flex-1 px-2 py-4" data-sidebar="content">
-        <nav className="flex flex-col gap-1">
-          <SidebarNavItem
-            icon={<LayoutDashboard className="h-4 w-4" />}
-            href="/dashboard"
-            label="Dashboard"
-            isActive={activeItem === 'dashboard'}
-            onClick={handleCloseSidebar}
-          />
-          <SidebarNavItem
-            icon={<Phone className="h-4 w-4" />}
-            href="/campaigns"
-            label="Campaigns"
-            isActive={activeItem === 'campaigns'}
-            onClick={handleCloseSidebar}
-          />
-          <SidebarNavItem
-            icon={<Users className="h-4 w-4" />}
-            href="/contacts"
-            label="Leads"
-            isActive={activeItem === 'leads'}
-            onClick={handleCloseSidebar}
-          />
-          <SidebarNavItem
-            icon={<Phone className="h-4 w-4" />}
-            href="/transfers"
-            label="Transfer Numbers"
-            isActive={activeItem === 'transfers'}
-            onClick={handleCloseSidebar}
-          />
-          <SidebarNavItem
-            icon={<FileAudio className="h-4 w-4" />}
-            href="/greetings"
-            label="Audio Files"
-            isActive={activeItem === 'audio'}
-            onClick={handleCloseSidebar}
-          />
-          <SidebarNavItem
-            icon={<Server className="h-4 w-4" />}
-            href="/goip-setup"
-            label="Device Setup"
-            isActive={activeItem === 'device'}
-            onClick={handleCloseSidebar}
-          />
-          {isAdmin && (
+      
+      {/* Main sidebar content with fixed height and scrolling */}
+      <div className="flex flex-col h-[calc(100vh-3.5rem)] overflow-hidden">
+        <ScrollArea className="flex-1 px-2 py-4" data-sidebar="content">
+          <nav className="flex flex-col gap-1">
             <SidebarNavItem
-              icon={<Settings className="h-4 w-4" />}
-              href="/asterisk-config"
-              label="Asterisk Config"
-              isActive={activeItem === 'asterisk'}
+              icon={<LayoutDashboard className="h-4 w-4" />}
+              href="/dashboard"
+              label="Dashboard"
+              isActive={activeItem === 'dashboard'}
               onClick={handleCloseSidebar}
             />
-          )}
-        </nav>
-        <div className="mt-4 border-t pt-4">
-          <SidebarNavItem
-            icon={<UserCircle className="h-4 w-4" />}
-            href="/profile"
-            label="Profile"
-            isActive={activeItem === 'profile'}
-            onClick={handleCloseSidebar}
-          />
-          <SidebarNavItem
-            icon={<Settings className="h-4 w-4" />}
-            href="/settings"
-            label="Settings"
-            isActive={activeItem === 'settings'}
-            onClick={handleCloseSidebar}
-          />
-          <div className="mt-4">
-            <LogoutButton position="left" className="w-full justify-start" />
+            <SidebarNavItem
+              icon={<Phone className="h-4 w-4" />}
+              href="/campaigns"
+              label="Campaigns"
+              isActive={activeItem === 'campaigns'}
+              onClick={handleCloseSidebar}
+            />
+            <SidebarNavItem
+              icon={<Users className="h-4 w-4" />}
+              href="/contacts"
+              label="Leads"
+              isActive={activeItem === 'leads'}
+              onClick={handleCloseSidebar}
+            />
+            <SidebarNavItem
+              icon={<Phone className="h-4 w-4" />}
+              href="/transfers"
+              label="Transfer Numbers"
+              isActive={activeItem === 'transfers'}
+              onClick={handleCloseSidebar}
+            />
+            <SidebarNavItem
+              icon={<FileAudio className="h-4 w-4" />}
+              href="/greetings"
+              label="Audio Files"
+              isActive={activeItem === 'audio'}
+              onClick={handleCloseSidebar}
+            />
+            <SidebarNavItem
+              icon={<Server className="h-4 w-4" />}
+              href="/goip-setup"
+              label="Device Setup"
+              isActive={activeItem === 'device'}
+              onClick={handleCloseSidebar}
+            />
+            {isAdmin && (
+              <SidebarNavItem
+                icon={<Settings className="h-4 w-4" />}
+                href="/asterisk-config"
+                label="Asterisk Config"
+                isActive={activeItem === 'asterisk'}
+                onClick={handleCloseSidebar}
+              />
+            )}
+          </nav>
+          <div className="mt-4 border-t pt-4">
+            <SidebarNavItem
+              icon={<UserCircle className="h-4 w-4" />}
+              href="/profile"
+              label="Profile"
+              isActive={activeItem === 'profile'}
+              onClick={handleCloseSidebar}
+            />
+            <SidebarNavItem
+              icon={<Settings className="h-4 w-4" />}
+              href="/settings"
+              label="Settings"
+              isActive={activeItem === 'settings'}
+              onClick={handleCloseSidebar}
+            />
           </div>
+        </ScrollArea>
+        
+        {/* Fixed logout button at bottom */}
+        <div className="px-2 py-3 border-t mt-auto">
+          <Button 
+            variant="outline" 
+            size="default" 
+            onClick={handleLogout} 
+            className="w-full justify-start"
+            disabled={isLoggingOut}
+          >
+            <LogOut className="h-4 w-4 mr-2" /> 
+            <span>Logout</span>
+          </Button>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
