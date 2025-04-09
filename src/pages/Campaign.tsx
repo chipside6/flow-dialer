@@ -12,8 +12,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import CampaignDashboard from '@/components/CampaignDashboard';
 import { CampaignTable } from '@/components/campaigns/CampaignTable';
 import { CampaignProvider } from '@/contexts/campaign/CampaignContext';
-
-// Need to add missing Badge import
 import { Badge } from '@/components/ui/badge';
 
 const Campaign = () => {
@@ -212,7 +210,7 @@ const Campaign = () => {
         {/* Create Campaign Wizard Dialog */}
         {showCreateWizard && (
           <CampaignCreationWizard 
-            open={showCreateWizard} 
+            isOpen={showCreateWizard}
             onOpenChange={(open) => setShowCreateWizard(open)}
             onSuccess={handleCampaignCreated}
           />

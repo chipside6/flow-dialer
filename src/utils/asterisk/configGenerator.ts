@@ -45,12 +45,12 @@ export const generateDialplan = (
 exten => s,1,NoOp(Autodialer call started)
 exten => s,n,Answer()
 exten => s,n,AMD()
-exten => s,n,GotoIf($["${AMDSTATUS}" = "HUMAN"]?playmsg,1:hangup,1)
+exten => s,n,GotoIf($["$\{AMDSTATUS\}" = "HUMAN"]?playmsg,1:hangup,1)
 
 exten => playmsg,1,NoOp(Human detected, playing greeting)
 exten => playmsg,n,Playback(\${GREETING_FILE})
 exten => playmsg,n,Read(digit,1,5)
-exten => playmsg,n,GotoIf($["${digit}" = "1"]?transfer,1:hangup,1)
+exten => playmsg,n,GotoIf($["$\{digit\}" = "1"]?transfer,1:hangup,1)
 
 exten => transfer,1,NoOp(Transferring call to \${TRANSFER_NUMBER})
 exten => transfer,n,Set(TRANSFER_REQUESTED=1)
