@@ -1,227 +1,43 @@
 
-import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
+
+export type CampaignStatusType = 'pending' | 'running' | 'completed' | 'failed' | 'stopped';
+
+export interface Campaign {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  status: CampaignStatusType;
+  greeting_file_url?: string;
+  transfer_number?: string;
+  port_number?: number;
+  created_at: string;
+  contact_list_id?: string;
+  [key: string]: any;
+}
 
 /**
- * Pause a running campaign
- * @param campaignId The ID of the campaign to pause
- * @returns A Promise resolving to the updated campaign data
+ * Check if GoIP device is online for a specific port
  */
-export const pauseCampaign = async (campaignId: string) => {
+export const checkGoipStatus = async (
+  userId: string, 
+  portNumber: number = 1
+): Promise<{ online: boolean; message: string; lastSeen?: string | null }> => {
   try {
-    const { data, error } = await supabase
-      .from('campaigns')
-      .update({ status: 'paused' })
-      .eq('id', campaignId)
-      .select()
-      .single();
-      
-    if (error) throw error;
-    
-    toast({
-      title: "Campaign Paused",
-      description: "The campaign has been paused successfully."
-    });
-    
-    return data;
-  } catch (error) {
-    console.error('Error pausing campaign:', error);
-    toast({
-      title: "Error Pausing Campaign",
-      description: error instanceof Error ? error.message : "An unexpected error occurred",
-      variant: "destructive"
-    });
-    throw error;
-  }
-};
-
-/**
- * Resume a paused campaign
- * @param campaignId The ID of the campaign to resume
- * @returns A Promise resolving to the updated campaign data
- */
-export const resumeCampaign = async (campaignId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('campaigns')
-      .update({ status: 'running' })
-      .eq('id', campaignId)
-      .select()
-      .single();
-      
-    if (error) throw error;
-    
-    toast({
-      title: "Campaign Resumed",
-      description: "The campaign has been resumed successfully."
-    });
-    
-    return data;
-  } catch (error) {
-    console.error('Error resuming campaign:', error);
-    toast({
-      title: "Error Resuming Campaign",
-      description: error instanceof Error ? error.message : "An unexpected error occurred",
-      variant: "destructive"
-    });
-    throw error;
-  }
-};
-
-/**
- * Stop a campaign
- * @param campaignId The ID of the campaign to stop
- * @returns A Promise resolving to the updated campaign data
- */
-export const stopCampaign = async (campaignId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('campaigns')
-      .update({ status: 'completed' })
-      .eq('id', campaignId)
-      .select()
-      .single();
-      
-    if (error) throw error;
-    
-    toast({
-      title: "Campaign Stopped",
-      description: "The campaign has been stopped successfully."
-    });
-    
-    return data;
-  } catch (error) {
-    console.error('Error stopping campaign:', error);
-    toast({
-      title: "Error Stopping Campaign",
-      description: error instanceof Error ? error.message : "An unexpected error occurred",
-      variant: "destructive"
-    });
-    throw error;
-  }
-};
-
-/**
- * Start a test call for a campaign
- * @param campaignId The ID of the campaign to test
- * @param phoneNumber The phone number to call
- * @returns A Promise resolving to the result of the test call
- */
-export const startTestCall = async (campaignId: string, phoneNumber: string) => {
-  try {
-    // Get the campaign details
-    const { data: campaign, error: campaignError } = await supabase
-      .from('campaigns')
-      .select(`
-        *,
-        user_id
-      `)
-      .eq('id', campaignId)
-      .single();
-      
-    if (campaignError) throw campaignError;
-    
-    if (!campaign) {
-      throw new Error('Campaign not found');
-    }
-    
-    // Get the user's GoIP trunk
-    const { data: trunks, error: trunksError } = await supabase
-      .from('user_trunks')
-      .select('*')
-      .eq('user_id', campaign.user_id)
-      .eq('port_number', campaign.port_number || 1)
-      .limit(1);
-      
-    if (trunksError) throw trunksError;
-    
-    if (!trunks || trunks.length === 0) {
-      throw new Error('No GoIP trunk found for this user. Please configure your GoIP device first.');
-    }
-    
-    // Call the dialer-api endpoint
+    // Get authentication session
     const { data: session } = await supabase.auth.getSession();
-    const accessToken = session.session?.access_token;
     
-    if (!accessToken) {
-      throw new Error('You must be logged in to make a test call');
+    if (!session?.session?.access_token) {
+      throw new Error('Authentication required');
     }
     
-    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dialer-api`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      },
-      body: JSON.stringify({
-        campaignId: campaign.id,
-        phoneNumber: phoneNumber,
-        transferNumber: campaign.transfer_number,
-        greetingFileUrl: campaign.greeting_file_url,
-        portNumber: campaign.port_number || 1,
-        isTest: true // Indicate this is a test call
-      })
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Error making test call: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    
-    toast({
-      title: "Test Call Initiated",
-      description: `A test call to ${phoneNumber} has been initiated. Please answer your phone.`
-    });
-    
-    return result;
-  } catch (error) {
-    console.error('Error making test call:', error);
-    toast({
-      title: "Error Making Test Call",
-      description: error instanceof Error ? error.message : "An unexpected error occurred",
-      variant: "destructive"
-    });
-    throw error;
-  }
-};
-
-/**
- * Check the status of a GoIP trunk
- * @param userId The ID of the user
- * @param portNumber The port number to check
- * @returns A Promise resolving to the status of the GoIP trunk
- */
-export const checkGoipStatus = async (userId: string, portNumber: number = 1) => {
-  try {
-    // Get the user's GoIP trunk
-    const { data: trunks, error: trunksError } = await supabase
-      .from('user_trunks')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('port_number', portNumber)
-      .limit(1);
-      
-    if (trunksError) throw trunksError;
-    
-    if (!trunks || trunks.length === 0) {
-      return { online: false, message: 'No GoIP trunk configured' };
-    }
-    
-    // Call the goip-asterisk-integration endpoint to check status
-    const { data: session } = await supabase.auth.getSession();
-    const accessToken = session.session?.access_token;
-    
-    if (!accessToken) {
-      throw new Error('You must be logged in to check GoIP status');
-    }
-    
+    // Call the edge function to check status
     const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/goip-asterisk-integration`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        'Authorization': `Bearer ${session.session.access_token}`
       },
       body: JSON.stringify({
         userId,
@@ -230,25 +46,165 @@ export const checkGoipStatus = async (userId: string, portNumber: number = 1) =>
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Error checking GoIP status: ${response.status}`);
+      throw new Error(`Error checking GoIP status: ${response.statusText}`);
     }
     
     const result = await response.json();
     
+    if (!result.success) {
+      throw new Error(result.error || 'Unknown error checking GoIP status');
+    }
+    
     // Find the status for the specific port
     const portStatus = result.statuses?.find((s: any) => s.port === portNumber);
     
-    return { 
-      online: portStatus?.status === 'registered',
-      message: portStatus?.status === 'registered' ? 'Online' : 'Offline',
-      lastSeen: portStatus?.lastSeen || null
+    if (!portStatus) {
+      return {
+        online: false,
+        message: `No information available for port ${portNumber}`
+      };
+    }
+    
+    return {
+      online: portStatus.status === 'registered',
+      message: portStatus.status === 'registered' 
+        ? `Port ${portNumber} is online and registered` 
+        : `Port ${portNumber} is offline or not registered`,
+      lastSeen: portStatus.lastSeen
     };
   } catch (error) {
     console.error('Error checking GoIP status:', error);
-    return { 
-      online: false, 
-      message: error instanceof Error ? error.message : "An error occurred checking GoIP status"
+    return {
+      online: false,
+      message: error instanceof Error ? error.message : 'Unknown error checking GoIP status'
+    };
+  }
+};
+
+/**
+ * Start a campaign
+ */
+export const startCampaign = async (campaignId: string): Promise<{ success: boolean; message: string }> => {
+  try {
+    // Get campaign details
+    const { data: campaign, error: campaignError } = await supabase
+      .from('campaigns')
+      .select('*')
+      .eq('id', campaignId)
+      .single();
+    
+    if (campaignError || !campaign) {
+      throw new Error(campaignError?.message || 'Campaign not found');
+    }
+    
+    // Update campaign status
+    const { error: updateError } = await supabase
+      .from('campaigns')
+      .update({ 
+        status: 'running',
+        started_at: new Date().toISOString()
+      })
+      .eq('id', campaignId);
+    
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+    
+    return {
+      success: true,
+      message: 'Campaign started successfully'
+    };
+  } catch (error) {
+    console.error('Error starting campaign:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error starting campaign'
+    };
+  }
+};
+
+/**
+ * Stop a campaign
+ */
+export const stopCampaign = async (campaignId: string): Promise<{ success: boolean; message: string }> => {
+  try {
+    // Update campaign status
+    const { error: updateError } = await supabase
+      .from('campaigns')
+      .update({ 
+        status: 'stopped',
+        stopped_at: new Date().toISOString()
+      })
+      .eq('id', campaignId);
+    
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+    
+    return {
+      success: true,
+      message: 'Campaign stopped successfully'
+    };
+  } catch (error) {
+    console.error('Error stopping campaign:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error stopping campaign'
+    };
+  }
+};
+
+/**
+ * Make a test call
+ */
+export const makeTestCall = async (
+  userId: string,
+  phoneNumber: string,
+  transferNumber: string,
+  portNumber: number = 1,
+  greetingFileUrl?: string
+): Promise<{ success: boolean; message: string; callId?: string }> => {
+  try {
+    // Get authentication session
+    const { data: session } = await supabase.auth.getSession();
+    
+    if (!session?.session?.access_token) {
+      throw new Error('Authentication required');
+    }
+    
+    // Call the edge function to make a test call
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dialer-api`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.session.access_token}`
+      },
+      body: JSON.stringify({
+        campaignId: 'test',
+        phoneNumber,
+        transferNumber,
+        greetingFileUrl,
+        portNumber,
+        isTest: true
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error making test call: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    
+    return {
+      success: result.success || false,
+      message: result.message || 'Test call initiated',
+      callId: result.callId
+    };
+  } catch (error) {
+    console.error('Error making test call:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error making test call'
     };
   }
 };

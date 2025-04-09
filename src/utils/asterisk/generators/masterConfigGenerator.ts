@@ -1,142 +1,299 @@
 
 /**
- * Generates master configuration for Asterisk server
- * This is a complete server configuration that can handle all users
+ * Generates the master Asterisk configuration for the autodialer system
  */
 export const masterConfigGenerator = {
-  /**
-   * Generate a complete master server configuration
-   * This provides a single Asterisk config that handles all users automatically
-   */
-  generateMasterConfig(supabaseUrl = "https://grhvoclalziyjbjlhpml.supabase.co", supabaseAnonKey = "") {
-    // Always use the provided key, never fall back to a placeholder
-    const anonKey = supabaseAnonKey;
-    
-    if (!anonKey || anonKey === "your-key-here") {
-      console.warn("WARNING: No Supabase key provided. Configuration will not work properly.");
-    }
-    
+  generateMasterConfig: () => {
     return `
-; =================================================================
-; GLOBAL AUTOMATED CAMPAIGN SYSTEM - MASTER SERVER CONFIGURATION
-; =================================================================
-; This creates a complete server setup that works for all users
-; Configure this ONCE and all users' campaigns will work automatically
+# ======================================================================
+# Asterisk AutoDialer Master Configuration
+# ======================================================================
+# This file contains the complete configuration for setting up your
+# Asterisk server to work with the autodialer system.
+# 
+# Installation Instructions:
+# 1. Copy this file to your Asterisk server
+# 2. From the directory containing this file, run:
+#    sudo bash ./install-autodialer.sh
+#
+# ======================================================================
 
-; ------------------------
-; GLOBAL API SETTINGS
-; ------------------------
-[globals]
-; Your Supabase project URL (where Asterisk can fetch campaign configurations)
-SUPABASE_URL=${supabaseUrl}
-; Your Supabase anon key for API authentication
-; Keep this key secure as it provides access to your database
-SUPABASE_KEY=${anonKey}
-RETRY_COUNT=3
-CALL_TIMEOUT=30
+# ---- SIP Configuration (/etc/asterisk/sip.conf) ----
 
-; ------------------------
-; DATABASE CONNECTOR SETUP
-; ------------------------
-[database-connector]
-; This context handles all database operations with Supabase
-exten => s,1,NoOp(Database connector activated)
-exten => s,n,Set(DB_REQUEST=\${ARG1})
-exten => s,n,Set(USER_ID=\${ARG2})
-exten => s,n,Set(CAMPAIGN_ID=\${ARG3})
-exten => s,n,System(curl -s "\${SUPABASE_URL}/rest/v1/campaigns?user_id=eq.\${USER_ID}&id=eq.\${CAMPAIGN_ID}&select=id,greeting_file_url,transfer_number" -H "apikey: \${SUPABASE_KEY}" -H "Authorization: Bearer \${SUPABASE_KEY}" -o /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json)
-exten => s,n,NoOp(Database request complete)
-exten => s,n,Return
+[general]
+context=default
+allowguest=no
+allowoverlap=no
+bindport=5060
+bindaddr=0.0.0.0
+srvlookup=no
+disallow=all
+allow=ulaw
+allow=alaw
+alwaysauthreject=yes
+useragent=Asterisk AutoDialer
+directmedia=no
+nat=force_rport,comedia
+session-timers=refuse
+videosupport=no
 
-; ------------------------
-; USER CAMPAIGN ROUTER
-; ------------------------
-[user-campaign-router]
-; Route incoming requests to the appropriate campaign
-exten => _X.,1,NoOp(Routing request for: \${EXTEN})
-exten => _X.,n,Set(REQUEST_DATA=\${EXTEN})
-exten => _X.,n,Set(USER_ID=\${CUT(REQUEST_DATA,_,1)})
-exten => _X.,n,Set(CAMPAIGN_ID=\${CUT(REQUEST_DATA,_,2)})
-exten => _X.,n,Gosub(database-connector,s,1(campaign,\${USER_ID},\${CAMPAIGN_ID}))
-exten => _X.,n,Gosub(campaign-runner,s,1(\${USER_ID},\${CAMPAIGN_ID}))
-exten => _X.,n,Hangup()
+# GoIP Device Configuration
+# Replace with your GoIP device settings
+[goip_trunk]
+type=peer
+host=dynamic
+context=from-goip
+disallow=all
+allow=ulaw
+allow=alaw
+dtmfmode=rfc2833
+insecure=port,invite
+nat=force_rport,comedia
+qualify=yes
+directmedia=no
 
-; -------------------------
-; DYNAMIC CAMPAIGN RUNNER
-; -------------------------
-[campaign-runner]
-; This macro runs any user's campaign with dynamic configuration from Supabase
-exten => s,1,NoOp(Running campaign for user \${ARG1}, campaign \${ARG2})
-exten => s,n,Set(USER_ID=\${ARG1})
-exten => s,n,Set(CAMPAIGN_ID=\${ARG2})
+# ---- Extensions Configuration (/etc/asterisk/extensions.conf) ----
+
+[from-goip]
+exten => _X.,1,NoOp(Incoming call from GoIP device)
+exten => _X.,n,Set(CALLERID(name)=\${CALLERID(num)})
+exten => _X.,n,Goto(autodialer,s,1)
+
+[autodialer]
+exten => s,1,NoOp(Autodialer call started)
 exten => s,n,Answer()
 exten => s,n,Wait(1)
-
-; Extract greeting file URL from Supabase JSON response (array format)
-exten => s,n,Set(GREETING_FILE=\${SHELL(cat /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json | jq -r '.[0].greeting_file_url')})
-exten => s,n,NoOp(Playing greeting: \${GREETING_FILE})
-exten => s,n,Playback(\${GREETING_FILE})
-
-; Wait for keypress
-exten => s,n,WaitExten(5)
+exten => s,n,Set(TIMEOUT(digit)=5)
+exten => s,n,Set(TIMEOUT(response)=10)
+exten => s,n,AGI(autodialer.agi)
 exten => s,n,Hangup()
 
-; Handle transfer request
-exten => 1,1,NoOp(Transfer requested)
-exten => 1,n,Set(TRANSFER_NUMBER=\${SHELL(cat /tmp/asterisk-data-\${USER_ID}-\${CAMPAIGN_ID}.json | jq -r '.[0].transfer_number')})
-exten => 1,n,NoOp(Transferring to: \${TRANSFER_NUMBER})
-exten => 1,n,Dial(SIP/\${TRANSFER_NUMBER},30,g)
+; Handle key press 1 for transfer
+exten => 1,1,NoOp(Transferring call)
+exten => 1,n,Set(TRANSFER_REQUESTED=1)
+exten => 1,n,Dial(\${TRANSFER_NUMBER},30,g)
 exten => 1,n,Hangup()
 
-; -------------------------
-; SIP TRUNK DYNAMIC LOADER
-; -------------------------
-#include "dynamic_sip_trunks/*.conf"
+; Handle hangup
+exten => h,1,NoOp(Call ended)
+exten => h,n,System(curl -s "\${API_URL}/call_ended?call_id=\${CALL_ID}&status=\${DIALSTATUS}&duration=\${ANSWEREDTIME}")
 
-; -------------------------
-; SYSTEM MAINTENANCE
-; -------------------------
-[system-maintenance]
-; Scheduled tasks for system upkeep
-exten => s,1,NoOp(Running system maintenance)
-exten => s,n,System(find /tmp -name "asterisk-data-*" -mtime +1 -delete)
+# ---- AGI Script (/var/lib/asterisk/agi-bin/autodialer.agi) ----
+
+#!/usr/bin/env python3
+import sys
+import os
+import requests
+from asterisk.agi import AGI
+
+# Initialize AGI
+agi = AGI()
+agi.verbose("Autodialer AGI script started")
+
+# Get campaign ID from arguments or channel variables
+campaign_id = agi.get_variable("CAMPAIGN_ID") or "unknown"
+user_id = agi.get_variable("USER_ID") or "unknown"
+transfer_number = agi.get_variable("TRANSFER_NUMBER") or "0"
+greeting_file = agi.get_variable("GREETING_FILE") or "greeting"
+
+# Log call start
+agi.verbose(f"Processing call for campaign {campaign_id} and user {user_id}")
+
+# Play greeting
+agi.verbose(f"Playing greeting: {greeting_file}")
+agi.appexec("Playback", greeting_file)
+
+# Wait for digit
+agi.verbose("Waiting for digit press")
+result = agi.get_data("beep", 10000, 1)
+
+# Check if user pressed 1
+if result == "1":
+    agi.verbose("User pressed 1, transferring")
+    agi.set_variable("TRANSFER_REQUESTED", "1")
+    agi.set_variable("TRANSFER_NUMBER", transfer_number)
+    agi.appexec("Goto", "autodialer,1,1")
+else:
+    agi.verbose("No digit received or not 1, hanging up")
+
+agi.verbose("AGI script completed")
+sys.exit(0)
+
+# ---- Installation Script (install-autodialer.sh) ----
+
+#!/bin/bash
+echo "Installing Asterisk AutoDialer Configuration"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root"
+  exit 1
+fi
+
+# Install dependencies
+echo "Installing dependencies..."
+apt update
+apt install -y asterisk asterisk-modules asterisk-core-sounds-en python3 python3-pip
+pip3 install asterisk-agi requests
+
+# Create configuration files
+echo "Creating configuration files..."
+
+# Extract SIP configuration
+cat > /etc/asterisk/sip_autodialer.conf << 'EOF'
+[general]
+context=default
+allowguest=no
+allowoverlap=no
+bindport=5060
+bindaddr=0.0.0.0
+srvlookup=no
+disallow=all
+allow=ulaw
+allow=alaw
+alwaysauthreject=yes
+useragent=Asterisk AutoDialer
+directmedia=no
+nat=force_rport,comedia
+session-timers=refuse
+videosupport=no
+
+# GoIP Device Configuration
+[goip_trunk]
+type=peer
+host=dynamic
+context=from-goip
+disallow=all
+allow=ulaw
+allow=alaw
+dtmfmode=rfc2833
+insecure=port,invite
+nat=force_rport,comedia
+qualify=yes
+directmedia=no
+EOF
+
+# Extract Extensions configuration
+cat > /etc/asterisk/extensions_autodialer.conf << 'EOF'
+[from-goip]
+exten => _X.,1,NoOp(Incoming call from GoIP device)
+exten => _X.,n,Set(CALLERID(name)=\${CALLERID(num)})
+exten => _X.,n,Goto(autodialer,s,1)
+
+[autodialer]
+exten => s,1,NoOp(Autodialer call started)
+exten => s,n,Answer()
+exten => s,n,Wait(1)
+exten => s,n,Set(TIMEOUT(digit)=5)
+exten => s,n,Set(TIMEOUT(response)=10)
+exten => s,n,AGI(autodialer.agi)
 exten => s,n,Hangup()
 
-; -------------------------
-; DETAILED INSTALLATION INSTRUCTIONS
-; -------------------------
-; 1. Save this file as /etc/asterisk/campaign-master.conf
-; 
-; 2. Add this line to your /etc/asterisk/extensions.conf:
-;    #include "campaign-master.conf"
-; 
-; 3. Create directory for dynamic SIP trunks:
-;    mkdir -p /etc/asterisk/dynamic_sip_trunks
-;
-; 4. Install jq for JSON parsing:
-;    apt-get install jq
-;
-; 5. Make sure curl is installed:
-;    apt-get install curl
-;
-; 6. Set up a cron job for maintenance (add to /etc/crontab):
-;    0 2 * * * asterisk /usr/sbin/asterisk -rx "dialplan reload" && /usr/sbin/asterisk -rx "originate Local/s@system-maintenance extension s@system-maintenance"
-;
-; 7. Reload Asterisk configuration:
-;    asterisk -rx "dialplan reload"
-;
-; 8. IMPORTANT: Verify installation with:
-;    asterisk -rx "dialplan show user-campaign-router"
-;    (You should see the dialplan for user-campaign-router context)
-;
-; 9. If the context is not showing, check:
-;    - Did you include campaign-master.conf in extensions.conf?
-;    - Did you reload the dialplan with "dialplan reload"?
-;    - Is the file in the correct location?
-;    - Try restarting Asterisk completely: systemctl restart asterisk
-; 
-; IMPORTANT: This configuration directly accesses your Supabase database using the REST API
-; Make sure your RLS (Row Level Security) policies are configured correctly for the campaigns table
-`.trim();
+; Handle key press 1 for transfer
+exten => 1,1,NoOp(Transferring call)
+exten => 1,n,Set(TRANSFER_REQUESTED=1)
+exten => 1,n,Dial(\${TRANSFER_NUMBER},30,g)
+exten => 1,n,Hangup()
+
+; Handle hangup
+exten => h,1,NoOp(Call ended)
+exten => h,n,System(curl -s "\${API_URL}/call_ended?call_id=\${CALL_ID}&status=\${DIALSTATUS}&duration=\${ANSWEREDTIME}")
+EOF
+
+# Create AGI directory if it doesn't exist
+mkdir -p /var/lib/asterisk/agi-bin
+
+# Extract AGI script
+cat > /var/lib/asterisk/agi-bin/autodialer.agi << 'EOF'
+#!/usr/bin/env python3
+import sys
+import os
+import requests
+from asterisk.agi import AGI
+
+# Initialize AGI
+agi = AGI()
+agi.verbose("Autodialer AGI script started")
+
+# Get campaign ID from arguments or channel variables
+campaign_id = agi.get_variable("CAMPAIGN_ID") or "unknown"
+user_id = agi.get_variable("USER_ID") or "unknown"
+transfer_number = agi.get_variable("TRANSFER_NUMBER") or "0"
+greeting_file = agi.get_variable("GREETING_FILE") or "greeting"
+
+# Log call start
+agi.verbose(f"Processing call for campaign {campaign_id} and user {user_id}")
+
+# Play greeting
+agi.verbose(f"Playing greeting: {greeting_file}")
+agi.appexec("Playback", greeting_file)
+
+# Wait for digit
+agi.verbose("Waiting for digit press")
+result = agi.get_data("beep", 10000, 1)
+
+# Check if user pressed 1
+if result == "1":
+    agi.verbose("User pressed 1, transferring")
+    agi.set_variable("TRANSFER_REQUESTED", "1")
+    agi.set_variable("TRANSFER_NUMBER", transfer_number)
+    agi.appexec("Goto", "autodialer,1,1")
+else:
+    agi.verbose("No digit received or not 1, hanging up")
+
+agi.verbose("AGI script completed")
+sys.exit(0)
+EOF
+
+# Make AGI script executable
+chmod +x /var/lib/asterisk/agi-bin/autodialer.agi
+
+# Update main configuration files to include our configuration
+if ! grep -q "#include \"sip_autodialer.conf\"" /etc/asterisk/sip.conf; then
+  echo "#include \"sip_autodialer.conf\"" >> /etc/asterisk/sip.conf
+fi
+
+if ! grep -q "#include \"extensions_autodialer.conf\"" /etc/asterisk/extensions.conf; then
+  echo "#include \"extensions_autodialer.conf\"" >> /etc/asterisk/extensions.conf
+fi
+
+# Restart Asterisk
+echo "Restarting Asterisk..."
+systemctl restart asterisk
+
+# Reload Asterisk configuration
+echo "Reloading Asterisk configuration..."
+asterisk -rx "module reload"
+asterisk -rx "sip reload"
+asterisk -rx "dialplan reload"
+
+echo "Installation complete!"
+echo "Your Asterisk server is now configured for the autodialer system."
+echo "Check the status with: systemctl status asterisk"
+echo "View SIP peers with: asterisk -rx \"sip show peers\""
+`;
+  },
+  
+  generateSipConfig: (userId: string, portNumber: number, password: string) => {
+    return `
+[goip_${userId}_port${portNumber}]
+type=peer
+host=dynamic
+port=5060
+username=goip_${userId}_port${portNumber}
+secret=${password}
+fromuser=goip_${userId}_port${portNumber}
+context=from-goip
+disallow=all
+allow=ulaw
+allow=alaw
+dtmfmode=rfc2833
+insecure=port,invite
+nat=force_rport,comedia
+qualify=yes
+directmedia=no
+rtp_timeout=30
+transport=udp
+`;
   }
 };

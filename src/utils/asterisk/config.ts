@@ -94,3 +94,26 @@ export const testAsteriskConnection = async (): Promise<{ success: boolean; mess
     };
   }
 };
+
+/**
+ * Create Basic Auth header value
+ */
+export const createBasicAuthHeader = (username: string, password: string): string => {
+  return `Basic ${btoa(`${username}:${password}`)}`;
+};
+
+/**
+ * Check if the environment has been configured
+ */
+export const hasConfiguredEnvironment = (): boolean => {
+  const config = getConfigFromStorage();
+  return !!(config.apiUrl && config.username && config.password);
+};
+
+/**
+ * Check if running in a hosted environment
+ */
+export const isHostedEnvironment = (): boolean => {
+  return window.location.hostname !== 'localhost' && 
+         window.location.hostname !== '127.0.0.1';
+};

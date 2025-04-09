@@ -1,86 +1,106 @@
 
-/**
- * Connection service for Asterisk integration
- */
-
 import { getConfigFromStorage } from './config';
 
-/**
- * Test connection to Asterisk server
- */
-const testConnection = async (config?: {
-  apiUrl?: string;
-  username?: string;
-  password?: string;
-}): Promise<{ success: boolean; message?: string; error?: string }> => {
-  try {
-    // Get configuration (either from params or storage)
-    const { apiUrl, username, password } = config || getConfigFromStorage();
+export const connectionService = {
+  /**
+   * Test connection to Asterisk server
+   */
+  testConnection: async (): Promise<{ success: boolean; message: string }> => {
+    const config = getConfigFromStorage();
     
-    if (!apiUrl || !username || !password) {
+    try {
+      const response = await fetch(`${config.apiUrl}/applications`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
+        }
+      });
+      
+      if (response.ok) {
+        return { 
+          success: true, 
+          message: 'Successfully connected to Asterisk ARI' 
+        };
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        return { 
+          success: false, 
+          message: `Error connecting to Asterisk: ${errorData.message || response.statusText}` 
+        };
+      }
+    } catch (error) {
       return { 
         success: false, 
-        message: 'Missing configuration parameters. Please provide API URL, username, and password.',
-        error: 'Missing parameters'
+        message: `Error connecting to Asterisk: ${error instanceof Error ? error.message : String(error)}` 
       };
     }
+  },
+  
+  /**
+   * Reload PJSIP configuration
+   */
+  reloadPjsip: async (): Promise<{ success: boolean; message: string }> => {
+    const config = getConfigFromStorage();
     
-    // For hosted environments, we don't actually test the connection
-    // just validate that values are present
-    return { 
-      success: true, 
-      message: 'Configuration validated. Server connection will be tested when deployed.'
-    };
-  } catch (error) {
-    console.error('Error testing Asterisk connection:', error);
-    return { 
-      success: false, 
-      message: `Connection error: ${error instanceof Error ? error.message : String(error)}`,
-      error: error instanceof Error ? error.message : String(error)
-    };
+    try {
+      const response = await fetch(`${config.apiUrl}/asterisk/modules/pjsip/reload`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
+        }
+      });
+      
+      if (response.ok) {
+        return { 
+          success: true, 
+          message: 'Successfully reloaded PJSIP configuration' 
+        };
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        return { 
+          success: false, 
+          message: `Error reloading PJSIP: ${errorData.message || response.statusText}` 
+        };
+      }
+    } catch (error) {
+      return { 
+        success: false, 
+        message: `Error reloading PJSIP: ${error instanceof Error ? error.message : String(error)}` 
+      };
+    }
+  },
+  
+  /**
+   * Reload extensions (dialplan)
+   */
+  reloadExtensions: async (): Promise<{ success: boolean; message: string }> => {
+    const config = getConfigFromStorage();
+    
+    try {
+      const response = await fetch(`${config.apiUrl}/asterisk/reload`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
+        }
+      });
+      
+      if (response.ok) {
+        return { 
+          success: true, 
+          message: 'Successfully reloaded Asterisk configuration' 
+        };
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        return { 
+          success: false, 
+          message: `Error reloading Asterisk: ${errorData.message || response.statusText}` 
+        };
+      }
+    } catch (error) {
+      return { 
+        success: false, 
+        message: `Error reloading Asterisk: ${error instanceof Error ? error.message : String(error)}` 
+      };
+    }
   }
-};
-
-/**
- * Reload PJSIP configuration on Asterisk server
- */
-const reloadPjsip = async (): Promise<{ success: boolean; message?: string; error?: string }> => {
-  try {
-    return { 
-      success: true, 
-      message: 'PJSIP configuration reloaded successfully'
-    };
-  } catch (error) {
-    console.error('Error reloading PJSIP:', error);
-    return { 
-      success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
-      error: error instanceof Error ? error.message : String(error)
-    };
-  }
-};
-
-/**
- * Reload dialplan/extensions on Asterisk server
- */
-const reloadExtensions = async (): Promise<{ success: boolean; message?: string; error?: string }> => {
-  try {
-    return { 
-      success: true, 
-      message: 'Extensions reloaded successfully'
-    };
-  } catch (error) {
-    console.error('Error reloading extensions:', error);
-    return { 
-      success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
-      error: error instanceof Error ? error.message : String(error)
-    };
-  }
-};
-
-export const connectionService = {
-  testConnection,
-  reloadPjsip,
-  reloadExtensions
 };

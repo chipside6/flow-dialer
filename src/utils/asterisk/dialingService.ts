@@ -1,112 +1,69 @@
 
-/**
- * Dialing service for Asterisk integration
- */
-
-/**
- * Configure call flow
- */
-const configureCallFlow = async (
-  campaignId: string, 
-  options: any
-): Promise<{ success: boolean; message?: string; error?: string }> => {
-  try {
-    return { 
-      success: true, 
-      message: 'Call flow configured successfully'
-    };
-  } catch (error) {
-    console.error('Error configuring call flow:', error);
-    return { 
-      success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
-      error: error instanceof Error ? error.message : String(error)
-    };
-  }
-};
-
-/**
- * Get dialing status
- */
-const getDialingStatus = async (
-  campaignId: string
-): Promise<{ 
-  success: boolean; 
-  status?: string; 
-  message?: string; 
-  error?: string;
-  totalCalls?: number;
-  completedCalls?: number;
-  answeredCalls?: number;
-  failedCalls?: number;
-}> => {
-  try {
-    // Mock response for development
-    return { 
-      success: true, 
-      status: 'idle',
-      totalCalls: 0,
-      completedCalls: 0,
-      answeredCalls: 0,
-      failedCalls: 0
-    };
-  } catch (error) {
-    console.error('Error getting dialing status:', error);
-    return { 
-      success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
-      error: error instanceof Error ? error.message : String(error)
-    };
-  }
-};
-
-/**
- * Start dialing
- */
-const startDialing = async (
-  campaignId: string, 
-  phoneNumbers: string[]
-): Promise<{ success: boolean; message?: string; error?: string; jobId?: string }> => {
-  try {
-    return { 
-      success: true, 
-      message: 'Dialing started successfully',
-      jobId: `job-${Date.now()}` // Generate a mock job ID
-    };
-  } catch (error) {
-    console.error('Error starting dialing:', error);
-    return { 
-      success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
-      error: error instanceof Error ? error.message : String(error)
-    };
-  }
-};
-
-/**
- * Stop dialing
- */
-const stopDialing = async (
-  campaignId: string
-): Promise<{ success: boolean; message?: string; error?: string }> => {
-  try {
-    return { 
-      success: true, 
-      message: 'Dialing stopped successfully'
-    };
-  } catch (error) {
-    console.error('Error stopping dialing:', error);
-    return { 
-      success: false, 
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
-      error: error instanceof Error ? error.message : String(error)
-    };
-  }
-};
+import { getConfigFromStorage } from './config';
 
 export const dialingService = {
-  configureCallFlow,
-  getDialingStatus,
-  startDialing,
-  stopDialing
+  /**
+   * Configure call flow for a campaign
+   */
+  configureCallFlow: async (campaignId: string, userId: string): Promise<{ success: boolean; message: string }> => {
+    const config = getConfigFromStorage();
+    
+    try {
+      // This would typically call an Edge Function or direct API to configure the call flow
+      console.log(`Configuring call flow for campaign ${campaignId} and user ${userId}`);
+      
+      // Simulated success
+      return { 
+        success: true, 
+        message: 'Call flow configured successfully' 
+      };
+    } catch (error) {
+      return { 
+        success: false, 
+        message: `Error configuring call flow: ${error instanceof Error ? error.message : String(error)}` 
+      };
+    }
+  },
+  
+  /**
+   * Get dialing status for a campaign
+   */
+  getDialingStatus: async (campaignId: string): Promise<{ status: string; totalCalls: number; completedCalls: number }> => {
+    // This would typically fetch the status from a database or API
+    return { 
+      status: 'running', 
+      totalCalls: 100, 
+      completedCalls: 25 
+    };
+  },
+  
+  /**
+   * Start dialing for a campaign
+   */
+  startDialing: async (campaignId: string, contactListId: string, transferNumber: string, portNumber = 1): Promise<{ success: boolean; message: string; jobId?: string }> => {
+    // This would typically call an Edge Function or direct API to start dialing
+    console.log(`Starting dialing for campaign ${campaignId}, contact list ${contactListId}, transfer to ${transferNumber}, using port ${portNumber}`);
+    
+    // Simulated job ID
+    const jobId = `job_${Math.random().toString(36).substring(2, 9)}`;
+    
+    return { 
+      success: true, 
+      message: 'Dialing started successfully', 
+      jobId 
+    };
+  },
+  
+  /**
+   * Stop dialing for a campaign
+   */
+  stopDialing: async (campaignId: string): Promise<{ success: boolean; message: string }> => {
+    // This would typically call an Edge Function or direct API to stop dialing
+    console.log(`Stopping dialing for campaign ${campaignId}`);
+    
+    return { 
+      success: true, 
+      message: 'Dialing stopped successfully' 
+    };
+  }
 };

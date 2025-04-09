@@ -19,7 +19,7 @@ export const SetupInstructions = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <Alert variant="info" className="mb-4">
+        <Alert className="mb-4">
           <Info className="h-4 w-4" />
           <AlertTitle>Requirements</AlertTitle>
           <AlertDescription>

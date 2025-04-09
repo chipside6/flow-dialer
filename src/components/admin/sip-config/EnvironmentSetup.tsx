@@ -128,7 +128,7 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
         </div>
         
         {testResult && (
-          <Alert variant={testResult.success ? "success" : "destructive"} className="mt-4">
+          <Alert variant={testResult.success ? "default" : "destructive"} className="mt-4">
             {testResult.success ? (
               <CheckCircle className="h-4 w-4" />
             ) : (

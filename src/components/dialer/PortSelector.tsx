@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
+import { GoipStatusBadge } from '@/components/goip/GoipStatusBadge';
 
 interface PortSelectorProps {
   selectedPort: number;
@@ -22,92 +23,101 @@ export const PortSelector = ({
   const [availablePorts, setAvailablePorts] = useState<{port: number, label: string}[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load available ports from user's GoIP configuration
+  // Load available ports from user's trunks
   useEffect(() => {
-    if (user?.id) {
-      loadAvailablePorts();
-    }
-  }, [user?.id]);
-
-  const loadAvailablePorts = async () => {
-    if (!user?.id) return;
-    
-    setIsLoading(true);
-    
-    try {
-      // Get the user's GoIP trunks
-      const { data, error } = await supabase
-        .from('user_trunks')
-        .select('port_number, trunk_name')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .order('port_number');
-        
-      if (error) throw error;
+    const loadPorts = async () => {
+      if (!user?.id) return;
       
-      if (data && data.length > 0) {
-        const ports = data.map(trunk => ({
-          port: trunk.port_number,
-          label: `Port ${trunk.port_number} (${trunk.trunk_name})`
+      setIsLoading(true);
+      
+      try {
+        // Get user's trunks
+        const { data: trunks, error } = await supabase
+          .from('user_trunks')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        if (error) {
+          throw error;
+        }
+        
+        // If user has trunks, use them to populate available ports
+        if (trunks && trunks.length > 0) {
+          const ports = trunks.map(trunk => ({
+            port: trunk.port_number || 1,
+            label: `Port ${trunk.port_number || 1} (${trunk.sip_user})`
+          }));
+          
+          setAvailablePorts(ports);
+          
+          // If no port is selected, select the first one
+          if (!selectedPort && ports.length > 0) {
+            onPortChange(ports[0].port);
+          }
+        } else {
+          // Default to 4 ports if no trunks are configured
+          const defaultPorts = [1, 2, 3, 4].map(port => ({
+            port,
+            label: `Port ${port}`
+          }));
+          
+          setAvailablePorts(defaultPorts);
+          
+          // If no port is selected, select the first one
+          if (!selectedPort) {
+            onPortChange(1);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading ports:', error);
+        
+        // Fallback to default ports
+        const defaultPorts = [1, 2, 3, 4].map(port => ({
+          port,
+          label: `Port ${port}`
         }));
         
-        setAvailablePorts(ports);
-        
-        // If no port is selected yet and we have ports, select the first one
-        if (selectedPort === 0 && ports.length > 0) {
-          onPortChange(ports[0].port);
-        }
-      } else {
-        setAvailablePorts([]);
+        setAvailablePorts(defaultPorts);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error('Error loading available ports:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePortChange = (value: string) => {
-    onPortChange(parseInt(value, 10));
-  };
-
-  // If no ports available and not loading, show message and return null
-  if (!isLoading && availablePorts.length === 0) {
-    return (
-      <div className="space-y-2">
-        <Label>GoIP Port</Label>
-        <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
-          <p className="font-medium">No GoIP ports configured</p>
-          <p className="mt-1">Please configure your GoIP device in the Device Setup page before running campaigns.</p>
-        </div>
-      </div>
-    );
-  }
-
+    };
+    
+    loadPorts();
+  }, [user?.id, campaignId]);
+  
   return (
     <div className="space-y-2">
-      <Label htmlFor="port">GoIP Port</Label>
-      <Select
-        value={selectedPort.toString()}
-        onValueChange={handlePortChange}
-        disabled={disabled || isLoading || availablePorts.length === 0}
+      <div className="flex items-center justify-between">
+        <Label htmlFor="port">GoIP Port</Label>
+        {user?.id && selectedPort && (
+          <GoipStatusBadge 
+            userId={user.id} 
+            portNumber={selectedPort} 
+            refreshInterval={30000}
+          />
+        )}
+      </div>
+      
+      <Select 
+        value={selectedPort?.toString()} 
+        onValueChange={(value) => onPortChange(parseInt(value))}
+        disabled={disabled || isLoading}
       >
-        <SelectTrigger id="port">
-          <SelectValue placeholder="Select a port" />
+        <SelectTrigger id="port" className="w-full">
+          <SelectValue placeholder="Select GoIP port" />
         </SelectTrigger>
         <SelectContent>
-          {availablePorts.map((port) => (
-            <SelectItem key={port.port} value={port.port.toString()}>
-              {port.label}
+          {availablePorts.map(({ port, label }) => (
+            <SelectItem key={port} value={port.toString()}>
+              {label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      {availablePorts.length > 0 && (
-        <p className="text-xs text-muted-foreground">
-          Select which GoIP port to use for this campaign
-        </p>
-      )}
+      <p className="text-xs text-muted-foreground">
+        Select which GoIP port to use for this campaign
+      </p>
     </div>
   );
 };

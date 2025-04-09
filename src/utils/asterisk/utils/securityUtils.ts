@@ -1,27 +1,34 @@
 
+import { getConfigFromStorage } from '../config';
+
 /**
  * Security utilities for Asterisk integration
  */
-
-import { createBasicAuthHeader } from '../config';
-
-/**
- * Generate secure token for API authentication
- */
-export const generateSecureToken = (length = 32): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  const randomValues = new Uint8Array(length);
-  window.crypto.getRandomValues(randomValues);
-  
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(randomValues[i] % chars.length);
-  }
-  
-  return result;
-};
-
 export const securityUtils = {
-  generateSecureToken,
-  createBasicAuthHeader
+  /**
+   * Create a basic auth header for Asterisk API
+   */
+  getAuthHeader: (): string => {
+    const config = getConfigFromStorage();
+    return `Basic ${btoa(`${config.username}:${config.password}`)}`;
+  },
+  
+  /**
+   * Sanitize a string for use in a command
+   */
+  sanitizeCommandInput: (input: string): string => {
+    return input.replace(/[;&|"`'$*?#()[]{}~<>\\]/g, '');
+  },
+  
+  /**
+   * Check if an API URL is valid
+   */
+  isValidApiUrl: (url: string): boolean => {
+    try {
+      const parsedUrl = new URL(url);
+      return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+    } catch (error) {
+      return false;
+    }
+  }
 };

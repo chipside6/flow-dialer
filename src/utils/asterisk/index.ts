@@ -5,7 +5,6 @@ import {
   ASTERISK_API_PASSWORD,
   getConfigFromStorage,
   saveConfigToStorage,
-  createBasicAuthHeader,
   hasConfiguredEnvironment,
   isHostedEnvironment
 } from './config';
@@ -32,7 +31,6 @@ export const asteriskService = {
 export const asteriskConfig = {
   getConfigFromStorage,
   saveConfigToStorage,
-  createBasicAuthHeader,
   hasConfiguredEnvironment,
   isHostedEnvironment
 };

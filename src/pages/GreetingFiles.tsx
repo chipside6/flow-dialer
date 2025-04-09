@@ -1,290 +1,180 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { UploadCloud, Trash2, PlayCircle, PauseCircle, RefreshCcw } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
-import { useGreetingFiles, GreetingFile } from "@/hooks/useGreetingFiles";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useGreetingFilesQuery, ensureStorageBucket } from "@/hooks/greeting-files/useGreetingFilesQuery";
 import { useAuth } from "@/contexts/auth";
-import { supabase } from '@/integrations/supabase/client';
+import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { GreetingFile } from "@/hooks/greeting-files/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { GreetingFileList } from "@/components/greeting-files/GreetingFileList";
+import { GreetingFileUploader } from "@/components/greeting-files/GreetingFileUploader";
+import { Button } from "@/components/ui/button";
+import { Loader2, Plus } from "lucide-react";
 
 const GreetingFiles = () => {
-  const [uploading, setUploading] = useState(false);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-  const [playingId, setPlayingId] = useState<string | null>(null);
-  const { toast } = useToast();
   const { user } = useAuth();
-  const isMobile = useIsMobile();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { greetingFiles, isLoading, refreshGreetingFiles, deleteGreetingFile } = useGreetingFiles();
+  const { data: greetingFiles, isLoading } = useGreetingFilesQuery(user?.id);
+  const [isUploading, setIsUploading] = useState(false);
+  const [showUploader, setShowUploader] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Handle file upload
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-
-    // Validate file type
-    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/x-wav', 'audio/ogg'];
-    if (!validTypes.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an MP3, WAV, or OGG audio file.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Audio files must be less than 10MB.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setUploading(true);
-    try {
-      // Upload to Supabase Storage
-      const fileName = `${user.id}-${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+  // Mutation for uploading new greeting files
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      setIsUploading(true);
+      // Ensure the storage bucket exists first
+      await ensureStorageBucket();
+      
+      // Generate a unique filename with timestamp
+      const timestamp = new Date().getTime();
+      const filename = `${timestamp}_${file.name.replace(/\s+/g, '_')}`;
+      
+      // Upload file to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('greetings')
-        .upload(fileName, file);
-
+        .upload(`${user?.id}/${filename}`, file);
+      
       if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: urlData } = await supabase.storage
+      
+      // Get the public URL
+      const { data: publicData } = supabase.storage
         .from('greetings')
-        .getPublicUrl(fileName);
-
-      if (!urlData?.publicUrl) {
-        throw new Error("Failed to get public URL");
-      }
-
-      // Create database record
-      const { error: dbError } = await supabase
+        .getPublicUrl(`${user?.id}/${filename}`);
+      
+      // Create record in the database
+      const { data: recordData, error: recordError } = await supabase
         .from('greeting_files')
         .insert({
-          user_id: user.id,
-          filename: file.name,
-          file_path: fileName,
+          user_id: user?.id,
+          file_name: file.name,
+          file_path: uploadData.path,
+          public_url: publicData.publicUrl,
           file_type: file.type,
-          file_size: file.size,
-          url: urlData.publicUrl
-        });
-
-      if (dbError) throw dbError;
-
+          file_size: file.size
+        })
+        .select()
+        .single();
+      
+      if (recordError) throw recordError;
+      
+      return recordData.public_url;
+    },
+    onSuccess: (data) => {
       toast({
-        title: "Upload successful",
-        description: "Your audio file has been uploaded."
+        title: "File uploaded successfully",
+        description: "Your greeting file is now available for campaigns"
       });
-
-      // Refresh the files list
-      refreshGreetingFiles();
-
-    } catch (error) {
-      console.error("Upload error:", error);
+      queryClient.invalidateQueries({ queryKey: ['greetingFiles', user?.id] });
+      setShowUploader(false);
+    },
+    onError: (error) => {
+      console.error("Error uploading file:", error);
       toast({
         title: "Upload failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        description: error instanceof Error ? error.message : "An error occurred during upload",
         variant: "destructive"
       });
-    } finally {
-      setUploading(false);
-      // Reset the file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+    },
+    onSettled: () => {
+      setIsUploading(false);
     }
-  };
+  });
 
-  // Handle file deletion
-  const handleDelete = async (fileId: string) => {
-    if (!user) return;
-
-    // If this file is currently playing, stop it
-    if (playingId === fileId && currentAudio) {
-      currentAudio.pause();
-      setCurrentAudio(null);
-      setPlayingId(null);
-    }
-
-    try {
-      await deleteGreetingFile(fileId);
+  // Mutation for deleting greeting files
+  const deleteMutation = useMutation({
+    mutationFn: async (fileId: number) => {
+      // Get the file path first
+      const { data: fileData, error: fileError } = await supabase
+        .from('greeting_files')
+        .select('file_path')
+        .eq('id', fileId)
+        .single();
       
+      if (fileError) throw fileError;
+      
+      // Delete from storage if path exists
+      if (fileData?.file_path) {
+        const { error: storageError } = await supabase.storage
+          .from('greetings')
+          .remove([fileData.file_path]);
+        
+        if (storageError) throw storageError;
+      }
+      
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('greeting_files')
+        .delete()
+        .eq('id', fileId);
+      
+      if (dbError) throw dbError;
+      
+      return fileId;
+    },
+    onSuccess: (data) => {
       toast({
         title: "File deleted",
-        description: "The audio file has been removed."
+        description: "The greeting file has been removed"
       });
-    } catch (error) {
-      console.error("Deletion error:", error);
+      queryClient.invalidateQueries({ queryKey: ['greetingFiles', user?.id] });
+    },
+    onError: (error) => {
+      console.error("Error deleting file:", error);
       toast({
         title: "Deletion failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        description: error instanceof Error ? error.message : "An error occurred during deletion",
         variant: "destructive"
       });
     }
+  });
+
+  const handleUpload = (file: File) => {
+    uploadMutation.mutate(file);
   };
 
-  // Handle audio playback
-  const handlePlayPause = (file: GreetingFile) => {
-    // If there's already something playing, pause it
-    if (currentAudio) {
-      currentAudio.pause();
-      
-      // If we're clicking the same file that's already playing, just stop it
-      if (playingId === file.id) {
-        setCurrentAudio(null);
-        setPlayingId(null);
-        return;
-      }
+  const handleDelete = (file: GreetingFile) => {
+    if (confirm(`Are you sure you want to delete "${file.file_name}"?`)) {
+      deleteMutation.mutate(file.id);
     }
-
-    // Create new audio element
-    const audio = new Audio(file.url);
-    audio.onended = () => {
-      setCurrentAudio(null);
-      setPlayingId(null);
-    };
-    
-    audio.play();
-    setCurrentAudio(audio);
-    setPlayingId(file.id);
   };
-
-  // Clean up audio on unmount
-  useEffect(() => {
-    return () => {
-      if (currentAudio) {
-        currentAudio.pause();
-      }
-    };
-  }, [currentAudio]);
 
   return (
     <DashboardLayout>
-      <div className="container py-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <div className="container mx-auto p-6">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Audio Files</h1>
+            <h1 className="text-3xl font-bold">Audio Files</h1>
             <p className="text-muted-foreground">
-              Upload and manage greeting messages for your campaigns
+              Upload and manage audio greetings for your autodialer campaigns
             </p>
           </div>
           
-          <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-2">
-            <Button 
-              onClick={() => refreshGreetingFiles()}
-              variant="outline"
-              disabled={isLoading}
-            >
-              <RefreshCcw className="mr-2 h-4 w-4" />
-              Refresh
-            </Button>
-            
-            <div className="relative">
-              <Input
-                type="file"
-                ref={fileInputRef}
-                className="absolute inset-0 opacity-0 w-full cursor-pointer"
-                accept="audio/*"
-                onChange={handleFileChange}
-                disabled={uploading}
-              />
-              <Button disabled={uploading}>
-                <UploadCloud className="mr-2 h-4 w-4" />
-                {uploading ? "Uploading..." : "Upload Audio"}
-              </Button>
-            </div>
-          </div>
+          <Button onClick={() => setShowUploader(true)} disabled={showUploader}>
+            <Plus className="mr-2 h-4 w-4" /> Upload Audio
+          </Button>
         </div>
         
-        <Separator className="my-6" />
+        {showUploader && (
+          <div className="mb-6">
+            <GreetingFileUploader 
+              onUpload={handleUpload} 
+              isUploading={isUploading}
+              onCancel={() => setShowUploader(false)}
+            />
+          </div>
+        )}
         
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader className="bg-muted h-12"></CardHeader>
-                <CardContent className="h-24 flex items-center justify-center">
-                  <div className="w-full h-8 bg-muted rounded"></div>
-                </CardContent>
-                <CardFooter className="bg-muted h-12"></CardFooter>
-              </Card>
-            ))}
-          </div>
-        ) : greetingFiles.length === 0 ? (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium mb-2">No audio files found</h3>
-            <p className="text-muted-foreground mb-6">
-              Upload greeting messages for your campaigns.
-            </p>
-            <div className="relative inline-block">
-              <Input
-                type="file"
-                className="absolute inset-0 opacity-0 w-full cursor-pointer"
-                accept="audio/*"
-                onChange={handleFileChange}
-                disabled={uploading}
-              />
-              <Button disabled={uploading}>
-                <UploadCloud className="mr-2 h-4 w-4" />
-                {uploading ? "Uploading..." : "Upload Your First Audio"}
-              </Button>
-            </div>
+          <div className="flex justify-center items-center h-40">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {greetingFiles.map((file) => (
-              <Card key={file.id} className="overflow-hidden">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base truncate" title={file.filename}>
-                    {file.filename}
-                  </CardTitle>
-                  <CardDescription>
-                    {file.file_size ? `${(file.file_size / 1024 / 1024).toFixed(2)} MB` : "Unknown size"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="flex justify-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handlePlayPause(file)}
-                      className="h-12 w-12"
-                    >
-                      {playingId === file.id ? (
-                        <PauseCircle className="h-10 w-10" />
-                      ) : (
-                        <PlayCircle className="h-10 w-10" />
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-                <CardFooter className="border-t pt-4 flex justify-between">
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(file.created_at).toLocaleDateString()}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(file.id)}
-                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+          <GreetingFileList 
+            files={greetingFiles || []} 
+            onDelete={handleDelete}
+            isDeleting={deleteMutation.isPending}
+          />
         )}
       </div>
     </DashboardLayout>
