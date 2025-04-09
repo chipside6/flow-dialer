@@ -1,11 +1,8 @@
 
-import { NavLinks } from './NavLinks';
-import { X, LogIn } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth';
-import LogoutButton from '@/components/LogoutButton';
-import { Logo } from '@/components/ui/Logo';
+import { X } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -13,50 +10,67 @@ interface MobileMenuProps {
 }
 
 export const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
-  const { isAuthenticated } = useAuth();
-  
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-background z-50 overflow-y-auto overflow-x-hidden mobile-menu">
-      <div className="px-6 py-6 border-b flex items-center justify-between bg-primary text-white">
-        <Logo size="xl" withText={true} className="text-white" />
+    <div className="fixed inset-0 z-50 bg-white">
+      <div className="flex justify-end p-4">
         <button
           onClick={onClose}
-          className="p-2 flex items-center justify-center w-14 h-14 rounded-full hover:bg-white/20 ml-4"
-          aria-label="Close mobile menu"
-          data-mobile-menu-close
+          className="p-2 rounded-full hover:bg-gray-100"
+          aria-label="Close menu"
         >
-          <X size={28} />
+          <X size={24} />
         </button>
       </div>
       
-      <nav className="px-6 py-8 flex flex-col gap-8 w-full">
-        <div className="flex flex-col gap-6 text-xl w-full">
-          <NavLinks mobile onClick={onClose} />
-        </div>
+      <nav className="flex flex-col p-4 space-y-4">
+        <Link 
+          to="/" 
+          className="px-4 py-3 text-lg hover:bg-gray-100 rounded-md"
+          onClick={onClose}
+        >
+          Home
+        </Link>
+        <Link 
+          to="/features" 
+          className="px-4 py-3 text-lg hover:bg-gray-100 rounded-md"
+          onClick={onClose}
+        >
+          Features
+        </Link>
+        <Link 
+          to="/pricing" 
+          className="px-4 py-3 text-lg hover:bg-gray-100 rounded-md"
+          onClick={onClose}
+        >
+          Pricing
+        </Link>
+        <Link 
+          to="/support" 
+          className="px-4 py-3 text-lg hover:bg-gray-100 rounded-md"
+          onClick={onClose}
+        >
+          Support
+        </Link>
         
-        <div className="flex flex-col gap-4 mt-6 w-full">
-          {isAuthenticated ? (
-            <>
-              <Button asChild variant="default" size="lg" className="w-full">
-                <Link to="/dashboard" onClick={onClose}>Dashboard</Link>
-              </Button>
-              <LogoutButton variant="outline" size="lg" className="w-full" onClick={onClose} position="left" />
-            </>
-          ) : (
-            <>
-              <Button asChild variant="default" size="lg" className="w-full">
-                <Link to="/signup" onClick={onClose}>Get Started</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="w-full">
-                <Link to="/login" onClick={onClose} className="flex items-center">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  <span>Log In</span>
-                </Link>
-              </Button>
-            </>
-          )}
+        <div className="pt-4 mt-4 border-t">
+          <Button
+            className="w-full bg-sky-500 hover:bg-sky-600 text-white rounded-full py-6"
+            onClick={onClose}
+            asChild
+          >
+            <Link to="/signup">Get Started</Link>
+          </Button>
+          
+          <Button
+            variant="outline"
+            className="w-full mt-3 rounded-full py-6"
+            onClick={onClose}
+            asChild
+          >
+            <Link to="/login">Log In</Link>
+          </Button>
         </div>
       </nav>
     </div>
