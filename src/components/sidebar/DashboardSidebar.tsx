@@ -86,6 +86,7 @@ export const DashboardSidebar = () => {
         openMobile || !isMobile ? 'translate-x-0' : '-translate-x-full'
       } md:flex w-64`}
     >
+      {/* Header - Fixed at top */}
       <div className="flex h-14 items-center px-4 border-b" data-sidebar="header">
         <Link to="/dashboard" className="flex items-center gap-2">
           <Logo size="sm" withText={true} />
@@ -103,62 +104,62 @@ export const DashboardSidebar = () => {
         )}
       </div>
       
-      {/* Main sidebar content with fixed height and scrolling */}
-      <div className="flex flex-col h-[calc(100vh-3.5rem)] overflow-hidden">
-        <ScrollArea className="flex-1 px-2 py-4" data-sidebar="content">
-          <nav className="flex flex-col gap-1">
+      {/* Main content - with proper scrolling */}
+      <ScrollArea className="flex-1 py-2" data-sidebar="content">
+        <nav className="flex flex-col gap-1 px-2">
+          <SidebarNavItem
+            icon={<LayoutDashboard className="h-4 w-4" />}
+            href="/dashboard"
+            label="Dashboard"
+            isActive={activeItem === 'dashboard'}
+            onClick={handleCloseSidebar}
+          />
+          <SidebarNavItem
+            icon={<Phone className="h-4 w-4" />}
+            href="/campaigns"
+            label="Campaigns"
+            isActive={activeItem === 'campaigns'}
+            onClick={handleCloseSidebar}
+          />
+          <SidebarNavItem
+            icon={<Users className="h-4 w-4" />}
+            href="/contacts"
+            label="Leads"
+            isActive={activeItem === 'leads'}
+            onClick={handleCloseSidebar}
+          />
+          <SidebarNavItem
+            icon={<Phone className="h-4 w-4" />}
+            href="/transfers"
+            label="Transfer Numbers"
+            isActive={activeItem === 'transfers'}
+            onClick={handleCloseSidebar}
+          />
+          <SidebarNavItem
+            icon={<FileAudio className="h-4 w-4" />}
+            href="/greetings"
+            label="Audio Files"
+            isActive={activeItem === 'audio'}
+            onClick={handleCloseSidebar}
+          />
+          <SidebarNavItem
+            icon={<Server className="h-4 w-4" />}
+            href="/goip-setup"
+            label="Device Setup"
+            isActive={activeItem === 'device'}
+            onClick={handleCloseSidebar}
+          />
+          {isAdmin && (
             <SidebarNavItem
-              icon={<LayoutDashboard className="h-4 w-4" />}
-              href="/dashboard"
-              label="Dashboard"
-              isActive={activeItem === 'dashboard'}
+              icon={<Settings className="h-4 w-4" />}
+              href="/asterisk-config"
+              label="Asterisk Config"
+              isActive={activeItem === 'asterisk'}
               onClick={handleCloseSidebar}
             />
-            <SidebarNavItem
-              icon={<Phone className="h-4 w-4" />}
-              href="/campaigns"
-              label="Campaigns"
-              isActive={activeItem === 'campaigns'}
-              onClick={handleCloseSidebar}
-            />
-            <SidebarNavItem
-              icon={<Users className="h-4 w-4" />}
-              href="/contacts"
-              label="Leads"
-              isActive={activeItem === 'leads'}
-              onClick={handleCloseSidebar}
-            />
-            <SidebarNavItem
-              icon={<Phone className="h-4 w-4" />}
-              href="/transfers"
-              label="Transfer Numbers"
-              isActive={activeItem === 'transfers'}
-              onClick={handleCloseSidebar}
-            />
-            <SidebarNavItem
-              icon={<FileAudio className="h-4 w-4" />}
-              href="/greetings"
-              label="Audio Files"
-              isActive={activeItem === 'audio'}
-              onClick={handleCloseSidebar}
-            />
-            <SidebarNavItem
-              icon={<Server className="h-4 w-4" />}
-              href="/goip-setup"
-              label="Device Setup"
-              isActive={activeItem === 'device'}
-              onClick={handleCloseSidebar}
-            />
-            {isAdmin && (
-              <SidebarNavItem
-                icon={<Settings className="h-4 w-4" />}
-                href="/asterisk-config"
-                label="Asterisk Config"
-                isActive={activeItem === 'asterisk'}
-                onClick={handleCloseSidebar}
-              />
-            )}
-          </nav>
+          )}
+
+          {/* User section - ensure it's visible */}
           <div className="mt-4 border-t pt-4">
             <SidebarNavItem
               icon={<UserCircle className="h-4 w-4" />}
@@ -175,21 +176,21 @@ export const DashboardSidebar = () => {
               onClick={handleCloseSidebar}
             />
           </div>
-        </ScrollArea>
-        
-        {/* Fixed logout button at bottom */}
-        <div className="px-2 py-3 border-t mt-auto">
-          <Button 
-            variant="outline" 
-            size="default" 
-            onClick={handleLogout} 
-            className="w-full justify-start"
-            disabled={isLoggingOut}
-          >
-            <LogOut className="h-4 w-4 mr-2" /> 
-            <span>Logout</span>
-          </Button>
-        </div>
+        </nav>
+      </ScrollArea>
+      
+      {/* Logout button - Fixed at bottom */}
+      <div className="px-2 py-3 border-t mt-auto sticky bottom-0 bg-background">
+        <Button 
+          variant="outline" 
+          size="default" 
+          onClick={handleLogout} 
+          className="w-full justify-start"
+          disabled={isLoggingOut}
+        >
+          <LogOut className="h-4 w-4 mr-2" /> 
+          <span>Logout</span>
+        </Button>
       </div>
     </div>
   );

@@ -5,7 +5,7 @@
 [data-sidebar="sidebar"] {
   transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease !important;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-  overflow-x: hidden; /* Prevent horizontal scrolling */
+  overflow: hidden; /* Prevent horizontal scrolling but allow vertical */
   display: flex;
   flex-direction: column;
 }
@@ -55,10 +55,10 @@
 
 /* Modern scrollbar styling */
 [data-sidebar="content"] {
+  overflow-y: auto !important; /* Ensure vertical scrolling works */
+  flex: 1;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-  overflow-x: hidden; /* Prevent horizontal scrolling */
-  flex: 1;
 }
 
 [data-sidebar="content"]::-webkit-scrollbar {
@@ -81,7 +81,10 @@
 /* Enhanced sidebar header with gradient */
 [data-sidebar="header"] {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  overflow: hidden; /* Prevent header overflow */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--background);
 }
 
 .dark [data-sidebar="header"] {
@@ -119,10 +122,14 @@
   padding: 0.75rem 1rem !important;
 }
 
-/* Fix logout button */
+/* Fix logout button to be always visible */
 [data-sidebar="sidebar"] .border-t.mt-auto {
-  margin-top: auto !important;
+  position: sticky;
+  bottom: 0;
   background-color: var(--background);
+  z-index: 5;
+  margin-top: auto !important;
+  padding: 0.5rem 0.75rem;
 }
 
 /* Special highlight for GoIP setup on mobile - ONLY when active */
