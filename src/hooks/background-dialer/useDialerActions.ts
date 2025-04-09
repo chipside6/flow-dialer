@@ -27,32 +27,29 @@ export const useDialerActions = (
       try {
         const response = await asteriskService.getDialingStatus(currentJobId);
         
-        if (response.success) {
-          setDialStatus({
-            status: response.status === 'running' ? 'running' : 
-                    response.status === 'completed' ? 'completed' : 
-                    response.status === 'failed' ? 'failed' : 'stopped',
-            totalCalls: response.totalCalls || 0,
-            completedCalls: response.completedCalls || 0,
-            answeredCalls: response.answeredCalls || 0,
-            failedCalls: response.failedCalls || 0
-          });
+        // Update to handle the response structure correctly
+        setDialStatus({
+          status: response.status,
+          totalCalls: response.totalCalls || 0,
+          completedCalls: response.completedCalls || 0,
+          answeredCalls: response.answeredCalls || 0,
+          failedCalls: response.failedCalls || 0
+        });
+        
+        if (response.status === 'completed' || response.status === 'failed') {
+          setIsDialing(false);
           
-          if (response.status === 'completed' || response.status === 'failed') {
-            setIsDialing(false);
-            
-            if (response.status === 'completed') {
-              toast({
-                title: "Dialing Complete",
-                description: `Successfully completed dialing campaign with ${response.answeredCalls || 0} answered calls.`,
-              });
-            } else {
-              toast({
-                title: "Dialing Failed",
-                description: "There was an issue with the dialing operation.",
-                variant: "destructive",
-              });
-            }
+          if (response.status === 'completed') {
+            toast({
+              title: "Dialing Complete",
+              description: `Successfully completed dialing campaign with ${response.answeredCalls || 0} answered calls.`,
+            });
+          } else {
+            toast({
+              title: "Dialing Failed",
+              description: "There was an issue with the dialing operation.",
+              variant: "destructive",
+            });
           }
         }
       } catch (error) {
@@ -88,7 +85,9 @@ export const useDialerActions = (
       
       const response = await asteriskService.startDialing(
         campaignId, 
-        phoneNumbers
+        formData.contactListId, 
+        formData.transferNumber || '', 
+        formData.portNumber || 1
       );
       
       if (response.success && response.jobId) {

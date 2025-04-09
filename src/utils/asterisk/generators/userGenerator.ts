@@ -1,100 +1,94 @@
 
-import { campaignGenerator } from './campaignGenerator';
-import { masterConfigGenerator } from './masterConfigGenerator';
 import { securityUtils } from '../utils/securityUtils';
 
 /**
- * User-specific configuration generators for Asterisk
+ * Generates user configurations for Asterisk
  */
 export const userGenerator = {
   /**
-   * Generate configuration for a specific user's campaign by user ID and campaign ID
-   * This allows targeted generation of configuration for specific users
+   * Generate a secure SIP password
    */
-  generateUserCampaignConfig(
-    userId: string,
-    campaignId: string,
-    fetchUserResources: (userId: string) => Promise<any>,
-    fetchCampaignDetails: (campaignId: string) => Promise<any>
-  ) {
-    return async () => {
-      try {
-        // Add timeout to prevent infinite loading
-        const resourcesPromise = fetchUserResources(userId);
-        const campaignPromise = fetchCampaignDetails(campaignId);
-        
-        // Set a timeout for fetch operations
-        const timeout = new Promise<null>((_, reject) => 
-          setTimeout(() => reject(new Error('Request timed out after 10 seconds')), 10000)
-        );
-        
-        // Race between fetch and timeout
-        const [resources, campaign] = await Promise.all([
-          Promise.race([resourcesPromise, timeout]) as Promise<any>,
-          Promise.race([campaignPromise, timeout]) as Promise<any>
-        ]);
-        
-        if (!resources || !campaign) {
-          throw new Error(`Could not fetch data for user ${userId} or campaign ${campaignId}`);
-        }
-        
-        // Extract resources
-        const { providers, greetingFiles, transferNumbers } = resources;
-        
-        // Ensure we have required resources
-        if (!providers?.length || !greetingFiles?.length || !transferNumbers?.length) {
-          throw new Error("Missing required resources for campaign configuration");
-        }
-        
-        // Find the provider specified for this campaign or use default
-        const provider = campaign.sipProviderId 
-          ? providers.find((p: any) => p.id === campaign.sipProviderId) 
-          : providers.find((p: any) => p.isActive) || providers[0];
-        
-        // Get greeting file and transfer number from campaign or defaults
-        const greetingUrl = campaign.greetingFileUrl || 
-          (greetingFiles[0]?.file_path || greetingFiles[0]?.url);
-        
-        const transferNumber = campaign.transferNumber || 
-          (transferNumbers[0]?.number || transferNumbers[0]?.phone_number);
-        
-        // Generate the full configuration
-        return campaignGenerator.generateFullConfig(
-          campaign.id,
-          provider.name,
-          provider.host,
-          provider.port,
-          provider.username,
-          provider.password,
-          greetingUrl,
-          transferNumber
-        );
-      } catch (error) {
-        console.error(`Error generating configuration for user ${userId}, campaign ${campaignId}:`, error);
-        return `
-; Error generating configuration
-; -----------------------------
-; Could not generate configuration for user ${userId}, campaign ${campaignId}
-; Error: ${error instanceof Error ? error.message : 'Unknown error'}
-; Please ensure the user and campaign exist and have proper resources configured.
-        `.trim();
-      }
-    };
-  },
-
-  /**
-   * Generate a complete server configuration that supports all users in the system
-   * This creates one master config file that can be installed on Asterisk once
-   */
-  generateMasterServerConfig(supabaseUrl = "https://grhvoclalziyjbjlhpml.supabase.co", supabaseAnonKey = "") {
-    return masterConfigGenerator.generateMasterConfig(supabaseUrl, supabaseAnonKey);
+  generateSipPassword: (): string => {
+    return securityUtils.generateSecureToken();
   },
   
   /**
-   * Generate a cryptographically secure token for API security
-   * @private
+   * Generate a SIP configuration for a user
    */
-  generateSecureToken() {
-    return securityUtils.generateSecureToken();
+  generateSipConfig: (userId: string, portNumber: number = 1, password?: string): string => {
+    const sipUser = `goip_${userId}_port${portNumber}`;
+    const sipPassword = password || securityUtils.generateSecureToken();
+    
+    return `
+[${sipUser}](goip_template)
+type=auth
+auth_type=userpass
+username=${sipUser}
+password=${sipPassword}
+
+[${sipUser}](goip_endpoint)
+auth=${sipUser}
+aors=${sipUser}
+callerid="GoIP ${portNumber}" <${sipUser}>
+direct_media=no
+disallow=all
+allow=ulaw
+context=goip-inbound
+
+[${sipUser}]
+type=aor
+max_contacts=5
+qualify_frequency=60
+support_path=yes
+remove_existing=yes
+authenticate_qualify=no
+    `;
+  },
+  
+  /**
+   * Generate an extension configuration for a user
+   */
+  generateExtensionConfig: (userId: string, portNumber: number = 1): string => {
+    const sipUser = `goip_${userId}_port${portNumber}`;
+    
+    return `
+[goip-inbound]
+exten => ${sipUser},1,Answer()
+exten => ${sipUser},n,Wait(1)
+exten => ${sipUser},n,Playback(welcome)
+exten => ${sipUser},n,Hangup()
+
+[from-${sipUser}]
+exten => _X.,1,NoOp(Outbound call from ${sipUser})
+exten => _X.,n,Set(CALLERID(all)=\${EXTEN})
+exten => _X.,n,Dial(PJSIP/\${EXTEN}@asterisk-provider,60)
+exten => _X.,n,Hangup()
+    `;
+  },
+  
+  /**
+   * Generate GoIP provider SIP configuration
+   */
+  generateProviderConfig: (providerName: string): string => {
+    return `
+[${providerName}]
+type=endpoint
+context=from-provider
+disallow=all
+allow=ulaw
+transport=transport-udp
+direct_media=no
+
+[${providerName}]
+type=auth
+auth_type=userpass
+username=${providerName}
+password=${securityUtils.generateSecureToken()}
+
+[${providerName}]
+type=aor
+contact=sip:${providerName}@example.com
+qualify_frequency=60
+    `;
   }
 };

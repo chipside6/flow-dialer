@@ -38,10 +38,20 @@ export const TestCampaignButton = ({ campaignId, disabled = false }: TestCampaig
       await startTestCall(campaignId, phoneNumber);
       setOpen(false);
       
+      toast({
+        title: "Test Call Initiated",
+        description: `A test call to ${phoneNumber} has been started.`,
+      });
+      
       // Reset form
       setPhoneNumber('');
     } catch (error) {
       console.error('Error initiating test call:', error);
+      toast({
+        title: "Call Failed",
+        description: error instanceof Error ? error.message : "An error occurred while making the test call",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

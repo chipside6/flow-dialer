@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export type CampaignStatusType = 'pending' | 'running' | 'completed' | 'failed' | 'stopped';
@@ -151,6 +150,84 @@ export const stopCampaign = async (campaignId: string): Promise<{ success: boole
       success: false,
       message: error instanceof Error ? error.message : 'Unknown error stopping campaign'
     };
+  }
+};
+
+/**
+ * Pause a campaign
+ */
+export const pauseCampaign = async (campaignId: string): Promise<void> => {
+  try {
+    // Update campaign status
+    const { error: updateError } = await supabase
+      .from('campaigns')
+      .update({ 
+        status: 'paused',
+        paused_at: new Date().toISOString()
+      })
+      .eq('id', campaignId);
+    
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+  } catch (error) {
+    console.error('Error pausing campaign:', error);
+    throw error;
+  }
+};
+
+/**
+ * Resume a campaign
+ */
+export const resumeCampaign = async (campaignId: string): Promise<void> => {
+  try {
+    // Update campaign status
+    const { error: updateError } = await supabase
+      .from('campaigns')
+      .update({ 
+        status: 'running',
+        resumed_at: new Date().toISOString()
+      })
+      .eq('id', campaignId);
+    
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+  } catch (error) {
+    console.error('Error resuming campaign:', error);
+    throw error;
+  }
+};
+
+/**
+ * Start a test call
+ */
+export const startTestCall = async (campaignId: string, phoneNumber: string): Promise<void> => {
+  try {
+    // Get campaign details
+    const { data: campaign, error: campaignError } = await supabase
+      .from('campaigns')
+      .select('*')
+      .eq('id', campaignId)
+      .single();
+    
+    if (campaignError || !campaign) {
+      throw new Error(campaignError?.message || 'Campaign not found');
+    }
+    
+    console.log(`Starting test call for campaign ${campaignId} to ${phoneNumber}`);
+    
+    // Call makeTestCall with the appropriate parameters
+    await makeTestCall(
+      campaign.user_id, 
+      phoneNumber, 
+      campaign.transfer_number || '',
+      campaign.port_number || 1,
+      campaign.greeting_file_url
+    );
+  } catch (error) {
+    console.error('Error starting test call:', error);
+    throw error;
   }
 };
 

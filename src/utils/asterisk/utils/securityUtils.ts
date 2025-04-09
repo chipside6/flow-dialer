@@ -30,5 +30,20 @@ export const securityUtils = {
     } catch (error) {
       return false;
     }
+  },
+  
+  /**
+   * Generate a secure token for authentication
+   */
+  generateSecureToken: (): string => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const length = 32;
+    
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    
+    return result;
   }
 };

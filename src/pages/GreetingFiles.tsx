@@ -47,9 +47,9 @@ const GreetingFiles = () => {
         .from('greeting_files')
         .insert({
           user_id: user?.id,
-          file_name: file.name,
+          filename: file.name,
           file_path: uploadData.path,
-          public_url: publicData.publicUrl,
+          url: publicData.publicUrl,
           file_type: file.type,
           file_size: file.size
         })
@@ -58,7 +58,7 @@ const GreetingFiles = () => {
       
       if (recordError) throw recordError;
       
-      return recordData.public_url;
+      return recordData.url;
     },
     onSuccess: (data) => {
       toast({
@@ -83,7 +83,7 @@ const GreetingFiles = () => {
 
   // Mutation for deleting greeting files
   const deleteMutation = useMutation({
-    mutationFn: async (fileId: number) => {
+    mutationFn: async (fileId: string) => {
       // Get the file path first
       const { data: fileData, error: fileError } = await supabase
         .from('greeting_files')
@@ -134,7 +134,7 @@ const GreetingFiles = () => {
   };
 
   const handleDelete = (file: GreetingFile) => {
-    if (confirm(`Are you sure you want to delete "${file.file_name}"?`)) {
+    if (confirm(`Are you sure you want to delete "${file.filename}"?`)) {
       deleteMutation.mutate(file.id);
     }
   };
