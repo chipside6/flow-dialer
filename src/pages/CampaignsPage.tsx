@@ -15,7 +15,7 @@ const CampaignsPage = () => {
   const { campaigns, isLoading, refreshCampaigns } = useCampaigns();
   const [hasChecked, setHasChecked] = useState(false);
   
-  // Initial data load on component mount
+  // Initial data load on component mount - only run once
   useEffect(() => {
     if (!hasChecked) {
       refreshCampaigns().then(() => {
