@@ -21,10 +21,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [sessionCheckInProgress, setSessionCheckInProgress] = useState(false);
 
   useEffect(() => {
     // Check for existing session on mount
     const getSession = async () => {
+      // Prevent multiple simultaneous session checks
+      if (sessionCheckInProgress) return;
+      
+      setSessionCheckInProgress(true);
       try {
         // First check for stored admin status to set initial state
         const storedAdminStatus = getStoredAdminStatus();
@@ -110,10 +115,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error("Auth session check error:", error);
         setError(error instanceof Error ? error : new Error('Unknown error'));
+        // Don't clear session on errors to prevent unwanted logouts
       } finally {
         setIsLoading(false);
         setInitialized(true);
         setSessionChecked(true);
+        setSessionCheckInProgress(false);
       }
     };
     

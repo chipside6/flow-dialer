@@ -5,11 +5,13 @@ import { debouncedClearAllAuthData, forceAppReload } from '@/utils/sessionCleanu
 // Storage key for local session data
 const SESSION_STORAGE_KEY = 'user_session';
 const ADMIN_STATUS_KEY = 'user_is_admin'; // Add a specific key for admin status
+const SESSION_ACCESS_TIMESTAMP = 'session_access_timestamp';
 
 // Cache the session in memory for faster access
 let sessionCache: Session | null = null;
 let sessionCacheExpiry: number = 0;
 let adminStatusCache: boolean | null = null;
+let lastAccessTime: number = 0;
 
 // Add validation utility functions
 const isValidSession = (session: any): session is Session => {
@@ -29,6 +31,10 @@ const isValidSession = (session: any): session is Session => {
  */
 export const getStoredSession = (): Session | null => {
   const now = Date.now();
+  
+  // Update last access time to prevent premature session expiry
+  localStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
+  lastAccessTime = now;
   
   // Check memory cache first for better performance
   if (sessionCache && sessionCacheExpiry > now) {
@@ -78,6 +84,18 @@ export const getStoredSession = (): Session | null => {
         return null;
       }
       
+      // Add a grace period for expiring sessions that are actively being used
+      const lastAccess = parseInt(localStorage.getItem(SESSION_ACCESS_TIMESTAMP) || '0', 10);
+      const timeGap = now - lastAccess;
+      
+      // If the session is expiring but was accessed in the last 5 minutes, don't expire it immediately
+      // This prevents logouts during active use
+      if (expiryTime.getTime() - now < 5 * 60 * 1000 && timeGap < 5 * 60 * 1000) {
+        console.log("Session near expiry but recently accessed, extending temporarily");
+        // We don't actually extend the session here, but we don't invalidate it either
+        // This gives time for token refresh to happen
+      }
+      
       // Set the expiry time for the memory cache (1 minute or session expiry, whichever is sooner)
       const cacheExpiry = Math.min(
         now + 1 * 60 * 1000, // 1 minute
@@ -122,6 +140,11 @@ export const storeSession = (session: Session): void => {
   try {
     // Store session in localStorage
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+    
+    // Update last access time
+    const now = Date.now();
+    localStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
+    lastAccessTime = now;
     
     // Update memory cache
     sessionCache = session;
@@ -190,6 +213,7 @@ export const clearSession = (): void => {
     localStorage.removeItem(SESSION_STORAGE_KEY);
     localStorage.removeItem(ADMIN_STATUS_KEY);
     localStorage.removeItem('admin_check_timestamp');
+    localStorage.removeItem(SESSION_ACCESS_TIMESTAMP);
     
     // Use our debounced cleanup utility for more efficient thorough session clearing
     debouncedClearAllAuthData();
@@ -207,13 +231,31 @@ export const refreshSession = (newExpiresAt: number): void => {
     session.expires_at = newExpiresAt;
     storeSession(session);
     console.log("Session expiry refreshed to:", new Date(newExpiresAt * 1000));
+    
+    // Update last access time
+    const now = Date.now();
+    localStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
+    lastAccessTime = now;
   }
+};
+
+/**
+ * Touch session to update last access time without changing anything else
+ * This helps prevent premature session expiration during navigation
+ */
+export const touchSession = (): void => {
+  const now = Date.now();
+  localStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
+  lastAccessTime = now;
 };
 
 /**
  * Check if the session is valid and not expired - optimized for performance
  */
 export const isSessionValid = (): boolean => {
+  // Touch the session to record the access
+  touchSession();
+  
   // Use memory cache if available before hitting localStorage
   if (sessionCache && sessionCacheExpiry > Date.now()) {
     return true;

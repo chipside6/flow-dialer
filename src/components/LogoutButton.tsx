@@ -34,20 +34,23 @@ const LogoutButton = ({
       // Call optional callback if provided
       if (onClick) onClick();
       
-      // Immediately clear session for faster feedback
-      clearSession();
+      // Call the signOut function from auth context
+      // This is better than directly clearing session as it follows proper auth flow
+      const result = await signOut();
       
-      // Navigate to login page directly
-      navigate("/login", { replace: true });
-      
-      // Then attempt to sign out in the background
-      signOut().catch(error => {
-        console.error("Background signout error:", error);
-      });
+      if (result.success) {
+        // Navigate to login page on successful logout
+        navigate("/login", { replace: true });
+      } else {
+        console.error("Error during logout:", result.error);
+        // Force navigation even on error
+        navigate("/login", { replace: true });
+      }
     } catch (error: any) {
       console.error("Logout error:", error);
       
-      // Force navigation even on error
+      // If all else fails, clear session directly and force navigation
+      clearSession();
       navigate("/login", { replace: true });
     } finally {
       setIsLoggingOut(false);

@@ -8,19 +8,36 @@ interface RequireAuthProps {
 }
 
 export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading, sessionChecked } = useAuth();
   const location = useLocation();
   const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
+  const [authChecked, setAuthChecked] = React.useState(false);
 
   // Check if we're still loading the auth state
   React.useEffect(() => {
     // If we have a user or explicitly know auth status, we're no longer loading
-    if (user !== undefined || isAuthenticated !== undefined) {
+    if (sessionChecked) {
       setIsCheckingAuth(false);
+      setAuthChecked(true);
     }
-  }, [user, isAuthenticated]);
+  }, [user, isAuthenticated, sessionChecked]);
 
-  if (isCheckingAuth) {
+  // Add debouncing to prevent flashing redirect during page transitions
+  React.useEffect(() => {
+    if (!isLoading && !isAuthenticated && authChecked) {
+      // Small timeout to prevent premature redirect during navigation
+      const timeoutId = setTimeout(() => {
+        // Only redirect if still not authenticated after timeout
+        if (!isAuthenticated) {
+          setAuthChecked(true);
+        }
+      }, 300);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isLoading, isAuthenticated, authChecked]);
+
+  if (isCheckingAuth || isLoading) {
     // Show loading state while checking authentication
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -30,7 +47,7 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
   }
 
   // If not authenticated, redirect to login page
-  if (!isAuthenticated) {
+  if (!isAuthenticated && authChecked) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

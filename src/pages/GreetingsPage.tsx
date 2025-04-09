@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navbar } from "@/components/Navbar";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Loader2 } from "lucide-react";
 import GreetingFiles from './GreetingFiles';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useAuth } from '@/contexts/auth/useAuth';
+import { touchSession } from '@/services/auth/session';
 
 const GreetingsFallback = () => (
   <div className="w-full h-96 flex items-center justify-center">
@@ -30,11 +32,22 @@ const ErrorFallback = (error: Error) => (
 );
 
 const GreetingsPage = () => {
+  const { isAuthenticated } = useAuth();
+  
+  // Touch the session on component mount to prevent premature session expiration
+  useEffect(() => {
+    touchSession();
+  }, []);
+  
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6 max-w-7xl">
         <ErrorBoundary fallback={ErrorFallback}>
-          <GreetingFiles />
+          {isAuthenticated ? (
+            <GreetingFiles />
+          ) : (
+            <GreetingsFallback />
+          )}
         </ErrorBoundary>
       </div>
     </DashboardLayout>
