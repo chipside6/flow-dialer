@@ -1,4 +1,3 @@
-
 import { Session } from './types';
 import { debouncedClearAllAuthData, forceAppReload } from '@/utils/sessionCleanup';
 
@@ -142,23 +141,22 @@ export const storeSession = (session: Session): void => {
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
     
     // Update last access time
-    const now = Date.now();
-    localStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
-    lastAccessTime = now;
+    const currentTime = Date.now();
+    localStorage.setItem(SESSION_ACCESS_TIMESTAMP, currentTime.toString());
+    lastAccessTime = currentTime;
     
     // Update memory cache
     sessionCache = session;
     
     // Set cache expiry (1 minute or session expiry, whichever is sooner)
-    const now = Date.now();
     if (session.expires_at) {
       const expiryTime = new Date(session.expires_at * 1000);
       sessionCacheExpiry = Math.min(
-        now + 1 * 60 * 1000, // 1 minute
+        currentTime + 1 * 60 * 1000, // 1 minute
         expiryTime.getTime()
       );
     } else {
-      sessionCacheExpiry = now + 1 * 60 * 1000;
+      sessionCacheExpiry = currentTime + 1 * 60 * 1000;
     }
   } catch (error) {
     console.error('Failed to store session in localStorage:', error);
