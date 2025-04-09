@@ -217,25 +217,41 @@ sudo chmod 644 /etc/asterisk/campaign-master.conf</pre>
         
         <div className="space-y-4">
           <div>
-            <h4 className="font-medium text-amber-800">1. Verify File Contents</h4>
-            <p className="text-amber-700">Make sure the configuration file contains the 'user-campaign-router' context:</p>
+            <h4 className="font-medium text-amber-800">1. Check the Context Name</h4>
+            <p className="text-amber-700">Make sure the context is correctly named in the configuration:</p>
             <div className="bg-amber-100 p-3 rounded text-sm relative">
-              <pre className="overflow-x-auto text-amber-800">sudo grep -A 5 "\[user-campaign-router\]" /etc/asterisk/campaign-master.conf</pre>
+              <pre className="overflow-x-auto text-amber-800">sudo cat /etc/asterisk/campaign-master.conf | grep -A 1 "\[user-"</pre>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 className="absolute top-1 right-1 h-6 w-6 p-0" 
-                onClick={() => copyToClipboard('sudo grep -A 5 "\\[user-campaign-router\\]" /etc/asterisk/campaign-master.conf')}
+                onClick={() => copyToClipboard('sudo cat /etc/asterisk/campaign-master.conf | grep -A 1 "\\[user-"')}
               >
                 <Copy className="h-3.5 w-3.5 text-amber-700" />
               </Button>
             </div>
-            <p className="text-sm text-amber-700 mt-1">You should see the context definition. If not, regenerate the configuration.</p>
+            <p className="text-sm text-amber-700 mt-1">Look for either <code>[user-campaign-router]</code> or <code>[user-campaign-manager]</code> in the output.</p>
           </div>
           
           <div>
-            <h4 className="font-medium text-amber-800">2. Check File Inclusion</h4>
-            <p className="text-amber-700">Verify your extensions.conf includes the campaign-master.conf file:</p>
+            <h4 className="font-medium text-amber-800">2. Fix Context Name if Necessary</h4>
+            <p className="text-amber-700">If you see [user-campaign-manager] in the file but you're looking for [user-campaign-router], update your check command:</p>
+            <div className="bg-amber-100 p-3 rounded text-sm relative">
+              <pre className="overflow-x-auto text-amber-800">sudo asterisk -rx "dialplan show user-campaign-manager"</pre>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="absolute top-1 right-1 h-6 w-6 p-0" 
+                onClick={() => copyToClipboard('sudo asterisk -rx "dialplan show user-campaign-manager"')}
+              >
+                <Copy className="h-3.5 w-3.5 text-amber-700" />
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-medium text-amber-800">3. Verify File Inclusion</h4>
+            <p className="text-amber-700">Check if your extensions.conf includes the campaign-master.conf file:</p>
             <div className="bg-amber-100 p-3 rounded text-sm relative">
               <pre className="overflow-x-auto text-amber-800">sudo grep "campaign-master.conf" /etc/asterisk/extensions.conf</pre>
               <Button 
@@ -256,24 +272,8 @@ sudo chmod 644 /etc/asterisk/campaign-master.conf</pre>
           </div>
           
           <div>
-            <h4 className="font-medium text-amber-800">3. Try Direct File Loading</h4>
-            <p className="text-amber-700">Try forcing Asterisk to load your config directly:</p>
-            <div className="bg-amber-100 p-3 rounded text-sm relative">
-              <pre className="overflow-x-auto text-amber-800">sudo asterisk -rx "dialplan reload campaign-master.conf"</pre>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="absolute top-1 right-1 h-6 w-6 p-0" 
-                onClick={() => copyToClipboard('sudo asterisk -rx "dialplan reload campaign-master.conf"')}
-              >
-                <Copy className="h-3.5 w-3.5 text-amber-700" />
-              </Button>
-            </div>
-          </div>
-          
-          <div>
             <h4 className="font-medium text-amber-800">4. Check For Syntax Errors</h4>
-            <p className="text-amber-700">Look for syntax errors in your configuration:</p>
+            <p className="text-amber-700">Verify that there are no syntax errors in your configuration:</p>
             <div className="bg-amber-100 p-3 rounded text-sm relative">
               <pre className="overflow-x-auto text-amber-800">sudo asterisk -C -x "dialplan reload"</pre>
               <Button 
@@ -325,23 +325,6 @@ sudo chmod 644 /etc/asterisk/campaign-master.conf</pre>
                 size="sm" 
                 className="absolute top-1 right-1 h-6 w-6 p-0" 
                 onClick={() => copyToClipboard('sudo asterisk -rx "dialplan show user-campaign-router"')}
-              >
-                <Copy className="h-3.5 w-3.5 text-amber-700" />
-              </Button>
-            </div>
-          </div>
-          
-          <div>
-            <h4 className="font-medium text-amber-800">6. Check File Path Case</h4>
-            <p className="text-amber-700">Asterisk can be case-sensitive in some environments. Verify the filename case:</p>
-            <div className="bg-amber-100 p-3 rounded text-sm relative">
-              <pre className="overflow-x-auto text-amber-800">ls -la /etc/asterisk/campaign-master.conf
-ls -la /etc/asterisk/Campaign-Master.conf</pre>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="absolute top-1 right-1 h-6 w-6 p-0" 
-                onClick={() => copyToClipboard('ls -la /etc/asterisk/campaign-master.conf\nls -la /etc/asterisk/Campaign-Master.conf')}
               >
                 <Copy className="h-3.5 w-3.5 text-amber-700" />
               </Button>

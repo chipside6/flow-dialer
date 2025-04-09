@@ -1,4 +1,3 @@
-
 /**
  * Generates the master Asterisk configuration for the autodialer system
  */
@@ -77,6 +76,28 @@ exten => 1,n,Hangup()
 ; Handle hangup
 exten => h,1,NoOp(Call ended)
 exten => h,n,System(curl -s "\${API_URL}/call_ended?call_id=\${CALL_ID}&status=\${DIALSTATUS}&duration=\${ANSWEREDTIME}")
+
+# ---- USER CAMPAIGN ROUTER CONTEXT ----
+# This context is needed for dynamic campaign routing
+[user-campaign-router]
+; This context handles fetching configuration for any user/campaign with efficient caching
+exten => _X.,1,NoOp(Fetching configuration for: \${EXTEN})
+exten => _X.,n,Set(USER_ID=\${CUT(EXTEN,_,1)})
+exten => _X.,n,Set(CAMPAIGN_ID=\${CUT(EXTEN,_,2)})
+exten => _X.,n,Set(CACHE_FILE=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.conf)
+exten => _X.,n,Set(CACHE_TIME=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.time)
+exten => _X.,n,TrySystem(test -f \${CACHE_FILE})
+exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?cache_check:fetch_new)
+exten => _X.,n(cache_check),TrySystem(find \${CACHE_FILE} -mmin -60 | grep -q \${CACHE_FILE})
+exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?use_cache:fetch_new)
+exten => _X.,n(use_cache),NoOp(Using cached configuration)
+exten => _X.,n,Goto(campaign-\${CAMPAIGN_ID},s,1)
+exten => _X.,n(fetch_new),NoOp(Fetching fresh configuration)
+exten => _X.,n,System(curl -s "\${API_URL}/configs/asterisk-campaign/\${USER_ID}/\${CAMPAIGN_ID}?token=\${API_TOKEN}" > \${CACHE_FILE})
+exten => _X.,n,System(date +%s > \${CACHE_TIME})
+exten => _X.,n,System(asterisk -rx "dialplan reload")
+exten => _X.,n,NoOp(Configuration loaded for user \${USER_ID}, campaign \${CAMPAIGN_ID})
+exten => _X.,n,Goto(campaign-\${CAMPAIGN_ID},s,1)
 
 # ---- AGI Script (/var/lib/asterisk/agi-bin/autodialer.agi) ----
 
@@ -198,6 +219,26 @@ exten => 1,n,Hangup()
 ; Handle hangup
 exten => h,1,NoOp(Call ended)
 exten => h,n,System(curl -s "\${API_URL}/call_ended?call_id=\${CALL_ID}&status=\${DIALSTATUS}&duration=\${ANSWEREDTIME}")
+
+[user-campaign-router]
+; This context handles fetching configuration for any user/campaign with efficient caching
+exten => _X.,1,NoOp(Fetching configuration for: \${EXTEN})
+exten => _X.,n,Set(USER_ID=\${CUT(EXTEN,_,1)})
+exten => _X.,n,Set(CAMPAIGN_ID=\${CUT(EXTEN,_,2)})
+exten => _X.,n,Set(CACHE_FILE=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.conf)
+exten => _X.,n,Set(CACHE_TIME=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.time)
+exten => _X.,n,TrySystem(test -f \${CACHE_FILE})
+exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?cache_check:fetch_new)
+exten => _X.,n(cache_check),TrySystem(find \${CACHE_FILE} -mmin -60 | grep -q \${CACHE_FILE})
+exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?use_cache:fetch_new)
+exten => _X.,n(use_cache),NoOp(Using cached configuration)
+exten => _X.,n,Goto(campaign-\${CAMPAIGN_ID},s,1)
+exten => _X.,n(fetch_new),NoOp(Fetching fresh configuration)
+exten => _X.,n,System(curl -s "\${API_URL}/configs/asterisk-campaign/\${USER_ID}/\${CAMPAIGN_ID}?token=\${API_TOKEN}" > \${CACHE_FILE})
+exten => _X.,n,System(date +%s > \${CACHE_TIME})
+exten => _X.,n,System(asterisk -rx "dialplan reload")
+exten => _X.,n,NoOp(Configuration loaded for user \${USER_ID}, campaign \${CAMPAIGN_ID})
+exten => _X.,n,Goto(campaign-\${CAMPAIGN_ID},s,1)
 EOF
 
 # Create AGI directory if it doesn't exist
