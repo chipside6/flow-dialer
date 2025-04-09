@@ -60,6 +60,7 @@ export const useCallLogs = ({
     setError(null);
     
     try {
+      // Use the typed query to call_logs table
       let query = supabase
         .from('call_logs')
         .select('*')

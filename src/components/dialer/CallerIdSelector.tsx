@@ -40,7 +40,7 @@ export const CallerIdSelector: React.FC<CallerIdSelectorProps> = ({
         
       if (error) throw error;
       
-      if (data) {
+      if (data && data.caller_id) {
         setCallerId(data.caller_id || '');
       }
     } catch (err) {

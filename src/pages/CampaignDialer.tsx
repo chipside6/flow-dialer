@@ -112,7 +112,7 @@ const CampaignDialer = () => {
       case 'failed':
         return 'destructive';
       case 'cancelled':
-        return 'warning';
+        return 'outline';
       default:
         return 'secondary';
     }

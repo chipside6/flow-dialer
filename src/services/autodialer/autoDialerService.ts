@@ -26,7 +26,7 @@ export const autoDialerService = {
    */
   async startDialerJob({ campaignId, userId }: CreateJobParams): Promise<{ success: boolean; jobId?: string; error?: string }> {
     try {
-      const response = await fetch(`${process.env.VITE_SUPABASE_URL}/functions/v1/autodialer`, {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/autodialer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ export const autoDialerService = {
   async getJobStatus(jobId: string, userId: string): Promise<{ success: boolean; job?: DialerJob; error?: string }> {
     try {
       const response = await fetch(
-        `${process.env.VITE_SUPABASE_URL}/functions/v1/dialer-status?jobId=${jobId}&userId=${userId}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dialer-status?jobId=${jobId}&userId=${userId}`,
         {
           method: 'GET',
           headers: {
@@ -99,6 +99,7 @@ export const autoDialerService = {
    */
   async cancelDialerJob(jobId: string, userId: string): Promise<{ success: boolean; error?: string }> {
     try {
+      // Direct update to the dialer_jobs table
       const { error } = await supabase
         .from('dialer_jobs')
         .update({ 
@@ -130,6 +131,7 @@ export const autoDialerService = {
    */
   async getCallLogs(campaignId: string, userId: string): Promise<{ success: boolean; logs?: any[]; error?: string }> {
     try {
+      // Query the call_logs table
       const { data, error } = await supabase
         .from('call_logs')
         .select('*')

@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Phone, PhoneOff, RefreshCw, PlayCircle, StopCircle } from 'lucide-react';
-import { useDialerJobs } from '@/hooks/useDialerJobs';
-import { useCallLogs } from '@/hooks/useCallLogs';
 import { useToast } from '@/components/ui/use-toast';
+import { Play, Square, Clock, BarChart, Phone, CheckCircle, XCircle } from 'lucide-react';
+import { useDialerJobs } from '@/hooks/useDialerJobs';
+import { usePollingInterval } from '@/hooks/usePollingInterval';
 
 interface DialerJobControlProps {
   campaignId: string;
@@ -19,275 +19,214 @@ export const DialerJobControl: React.FC<DialerJobControlProps> = ({
   disabled = false
 }) => {
   const { toast } = useToast();
-  const { 
-    startJob, 
-    cancelJob, 
-    currentJob, 
-    isLoading: isJobLoading 
-  } = useDialerJobs(campaignId);
+  const { startJob, cancelJob, getJobStatus, currentJob, isLoading } = useDialerJobs(campaignId);
   
-  const { 
-    logs, 
-    stats, 
-    refresh: refreshLogs, 
-    isLoading: isLogsLoading 
-  } = useCallLogs({ 
-    campaignId, 
-    refreshInterval: 
-    (currentJob?.status === 'in_progress') ? 5000 : null 
+  const [status, setStatus] = useState('idle');
+  const [progress, setProgress] = useState(0);
+  const [stats, setStats] = useState({
+    total: 0,
+    completed: 0,
+    successful: 0,
+    failed: 0,
   });
   
-  const [isStarting, setIsStarting] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  // Update progress when job status changes
+  // Poll for updates when a job is running
+  usePollingInterval(
+    async () => {
+      if (!currentJob || status === 'completed' || status === 'failed' || status === 'cancelled') return;
+      
+      try {
+        const jobStatus = await getJobStatus(currentJob.id);
+        
+        if (jobStatus) {
+          updateStatus(jobStatus);
+        }
+      } catch (error) {
+        console.error('Error polling job status:', error);
+      }
+    },
+    { 
+      enabled: Boolean(currentJob && ['running', 'in_progress'].includes(status)), 
+      interval: 3000 
+    }
+  );
+  
+  // Initialize from current job when it loads
   useEffect(() => {
     if (currentJob) {
-      const completed = currentJob.completed_calls || 0;
-      const total = currentJob.total_calls || 1; // Avoid division by zero
-      const calculatedProgress = Math.round((completed / total) * 100);
-      setProgress(calculatedProgress);
+      updateStatus(currentJob);
+    } else {
+      setStatus('idle');
+      setProgress(0);
+      setStats({
+        total: 0,
+        completed: 0,
+        successful: 0,
+        failed: 0,
+      });
+    }
+  }, [currentJob]);
+  
+  // Update the status and stats from job data
+  const updateStatus = (job: any) => {
+    setStatus(job.status);
+    
+    const total = job.total_calls || 0;
+    const completed = job.completed_calls || 0;
+    const successful = job.successful_calls || 0;
+    const failed = job.failed_calls || 0;
+    
+    setStats({
+      total,
+      completed,
+      successful,
+      failed,
+    });
+    
+    // Calculate progress percentage
+    if (total > 0) {
+      setProgress(Math.round((completed / total) * 100));
     } else {
       setProgress(0);
     }
-  }, [currentJob]);
-
-  // Handle starting a new dialer job
+  };
+  
+  // Start the dialer job
   const handleStartJob = async () => {
-    if (disabled || isStarting) return;
-    
-    setIsStarting(true);
+    if (disabled || isLoading) return;
     
     try {
       const jobId = await startJob(campaignId);
       
-      if (!jobId) {
+      if (jobId) {
         toast({
-          title: 'Failed to start dialer job',
-          description: 'Please check the campaign configuration and try again',
-          variant: 'destructive'
+          title: 'Dialer started',
+          description: 'The autodialer job has been started successfully'
         });
-      } else {
-        toast({
-          title: 'Dialer job started',
-          description: 'The system has started making calls for this campaign'
-        });
-        
-        // Refresh logs after a short delay
-        setTimeout(refreshLogs, 2000);
       }
     } catch (error) {
       console.error('Error starting dialer job:', error);
       toast({
-        title: 'Error starting dialer job',
+        title: 'Failed to start dialer',
         description: error instanceof Error ? error.message : 'An unknown error occurred',
         variant: 'destructive'
       });
-    } finally {
-      setIsStarting(false);
     }
   };
-
-  // Handle cancelling a dialer job
+  
+  // Cancel the dialer job
   const handleCancelJob = async () => {
-    if (!currentJob || isCancelling) return;
-    
-    setIsCancelling(true);
+    if (!currentJob || isLoading) return;
     
     try {
       const success = await cancelJob(currentJob.id);
       
       if (success) {
         toast({
-          title: 'Dialer job cancelled',
-          description: 'The dialer job has been cancelled successfully'
-        });
-        
-        // Refresh logs after a short delay
-        setTimeout(refreshLogs, 2000);
-      } else {
-        toast({
-          title: 'Failed to cancel dialer job',
-          description: 'The system could not cancel the dialer job',
-          variant: 'destructive'
+          title: 'Dialer cancelled',
+          description: 'The autodialer job has been cancelled'
         });
       }
     } catch (error) {
       console.error('Error cancelling dialer job:', error);
       toast({
-        title: 'Error cancelling dialer job',
+        title: 'Failed to cancel dialer',
         description: error instanceof Error ? error.message : 'An unknown error occurred',
         variant: 'destructive'
       });
-    } finally {
-      setIsCancelling(false);
     }
   };
-
-  // Get status badge color based on job status
-  const getStatusBadgeVariant = (status: string) => {
+  
+  // Get status badge color
+  const getStatusBadge = () => {
     switch (status) {
-      case 'in_progress':
-        return 'default';
-      case 'completed':
-        return 'success';
-      case 'failed':
-        return 'destructive';
-      case 'cancelled':
-        return 'warning';
-      default:
-        return 'secondary';
-    }
-  };
-
-  // Format job status for display
-  const formatStatus = (status: string) => {
-    switch (status) {
-      case 'in_progress':
-        return 'In Progress';
+      case 'idle':
+        return <Badge variant="secondary">Ready</Badge>;
       case 'pending':
-        return 'Pending';
+      case 'in_progress':
+      case 'running':
+        return <Badge variant="default">Running</Badge>;
+      case 'completed':
+        return <Badge variant="success">Completed</Badge>;
+      case 'failed':
+        return <Badge variant="destructive">Failed</Badge>;
+      case 'cancelled':
+        return <Badge variant="outline">Cancelled</Badge>;
       default:
-        return status.charAt(0).toUpperCase() + status.slice(1);
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
-
-  const isRunning = currentJob?.status === 'in_progress';
-  const isCompleted = ['completed', 'failed', 'cancelled'].includes(currentJob?.status || '');
-  const isLoading = isJobLoading || isLogsLoading || isStarting || isCancelling;
-
+  
   return (
-    <Card className="shadow-md">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <Phone className="h-5 w-5" />
-          Autodialer Status
-        </CardTitle>
-        <CardDescription>
-          Monitor and control the autodialer for this campaign
-        </CardDescription>
+    <Card>
+      <CardHeader>
+        <CardTitle>Campaign Dialer</CardTitle>
+        <CardDescription>Start or manage the autodialer for this campaign</CardDescription>
       </CardHeader>
       
-      <CardContent className="pb-2">
-        {currentJob ? (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Job Status:</p>
-                <Badge variant={getStatusBadgeVariant(currentJob.status)}>
-                  {formatStatus(currentJob.status)}
-                </Badge>
-              </div>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={refreshLogs}
-                disabled={isLoading}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
+      <CardContent className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium">Status</p>
+              {getStatusBadge()}
             </div>
-            
-            {isRunning && (
-              <div className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span>Progress:</span>
-                  <span>{progress}%</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-                <p className="text-xs text-muted-foreground">
-                  {currentJob.completed_calls || 0} of {currentJob.total_calls || 0} calls completed
-                </p>
-              </div>
-            )}
-            
-            {isCompleted && (
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Total Calls:</p>
-                  <p className="text-2xl font-bold">{currentJob.total_calls || 0}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Successful:</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {currentJob.successful_calls || 0}
-                  </p>
-                </div>
-              </div>
-            )}
-            
-            {logs.length > 0 && (
-              <div className="space-y-2 pt-2">
-                <p className="text-sm font-medium">Call Summary:</p>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="p-2 bg-muted rounded-md">
-                    <p className="text-sm font-medium">Human</p>
-                    <p className="text-xl">{stats.human}</p>
-                  </div>
-                  <div className="p-2 bg-muted rounded-md">
-                    <p className="text-sm font-medium">Voicemail</p>
-                    <p className="text-xl">{stats.voicemail}</p>
-                  </div>
-                  <div className="p-2 bg-muted rounded-md">
-                    <p className="text-sm font-medium">Transfers</p>
-                    <p className="text-xl">{stats.transfers}</p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-        ) : (
-          <div className="text-center py-6">
-            <PhoneOff className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-            <p className="text-muted-foreground">No dialer job running for this campaign</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Click the button below to start making calls
-            </p>
+          
+          <div className="flex items-center gap-2">
+            <BarChart className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium">Progress</p>
+              <p className="text-sm text-muted-foreground">
+                {stats.completed} / {stats.total} calls
+              </p>
+            </div>
           </div>
-        )}
+        </div>
+        
+        <Progress value={progress} className="h-2" />
+        
+        <div className="grid grid-cols-3 gap-4 pt-4">
+          <div className="flex flex-col items-center justify-center p-3 bg-muted rounded-lg">
+            <Phone className="h-5 w-5 mb-1 text-muted-foreground" />
+            <p className="text-xl font-semibold">{stats.total}</p>
+            <p className="text-xs text-muted-foreground">Total Calls</p>
+          </div>
+          
+          <div className="flex flex-col items-center justify-center p-3 bg-muted rounded-lg">
+            <CheckCircle className="h-5 w-5 mb-1 text-green-500" />
+            <p className="text-xl font-semibold">{stats.successful}</p>
+            <p className="text-xs text-muted-foreground">Successful</p>
+          </div>
+          
+          <div className="flex flex-col items-center justify-center p-3 bg-muted rounded-lg">
+            <XCircle className="h-5 w-5 mb-1 text-red-500" />
+            <p className="text-xl font-semibold">{stats.failed}</p>
+            <p className="text-xs text-muted-foreground">Failed</p>
+          </div>
+        </div>
       </CardContent>
       
-      <CardFooter className="pt-2">
-        {isRunning ? (
+      <CardFooter>
+        {['idle', 'cancelled', 'completed', 'failed'].includes(status) ? (
           <Button 
-            variant="destructive" 
-            className="w-full"
-            onClick={handleCancelJob}
+            className="w-full" 
+            onClick={handleStartJob}
             disabled={disabled || isLoading}
           >
-            {isCancelling ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Cancelling...
-              </>
-            ) : (
-              <>
-                <StopCircle className="h-4 w-4 mr-2" />
-                Stop Autodialer
-              </>
-            )}
+            <Play className="h-4 w-4 mr-2" />
+            Start Dialing
           </Button>
         ) : (
           <Button 
-            variant="default" 
-            className="w-full"
-            onClick={handleStartJob}
-            disabled={disabled || isLoading || isCompleted}
+            className="w-full" 
+            variant="outline" 
+            onClick={handleCancelJob}
+            disabled={isLoading}
           >
-            {isStarting ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Starting...
-              </>
-            ) : (
-              <>
-                <PlayCircle className="h-4 w-4 mr-2" />
-                Start Autodialer
-              </>
-            )}
+            <Square className="h-4 w-4 mr-2" />
+            Cancel Dialing
           </Button>
         )}
       </CardFooter>

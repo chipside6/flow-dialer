@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { autoDialerService } from '@/services/autodialer/autoDialerService';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DialerJob {
   id: string;
@@ -46,6 +47,7 @@ export const useDialerJobs = (campaignId?: string): UseDialerJobsResult => {
     setError(null);
     
     try {
+      // Fetch using the new dialer_jobs table
       const { data, error } = await supabase
         .from('dialer_jobs')
         .select('*')
@@ -171,6 +173,7 @@ export const useDialerJobs = (campaignId?: string): UseDialerJobsResult => {
     if (!user?.id) return null;
     
     try {
+      // Use supabase client to query the dialer_jobs table
       const { data, error } = await supabase
         .from('dialer_jobs')
         .select('*')
