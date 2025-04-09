@@ -21,17 +21,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { isAuthenticated, isAdmin, isLoading, user, sessionChecked } = useAuth();
   const { hasLifetimePlan, isLoading: subscriptionLoading, fetchCurrentSubscription } = useSubscription();
   const location = useLocation();
+  const [hasFetchedSubscription, setHasFetchedSubscription] = useState(false);
   
   // Double-check session validity as a safety measure
   const sessionIsValid = isSessionValid();
   const isActuallyAuthenticated = isAuthenticated && sessionIsValid;
   
+  // Fetch subscription data only once when needed
   useEffect(() => {
-    // If we need to check subscription status, fetch it
-    if (requireSubscription && isActuallyAuthenticated && user?.id) {
-      fetchCurrentSubscription();
+    if (requireSubscription && isActuallyAuthenticated && user?.id && !hasFetchedSubscription) {
+      fetchCurrentSubscription()
+        .then(() => setHasFetchedSubscription(true))
+        .catch(err => {
+          console.error("Failed to fetch subscription:", err);
+          setHasFetchedSubscription(true); // Mark as fetched even on error to prevent retries
+        });
     }
-  }, [requireSubscription, isActuallyAuthenticated, user, fetchCurrentSubscription]);
+  }, [requireSubscription, isActuallyAuthenticated, user, fetchCurrentSubscription, hasFetchedSubscription]);
 
   // Touch session every 30 seconds to ensure it stays alive
   useEffect(() => {
@@ -49,7 +55,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }, [isActuallyAuthenticated]);
   
   // Show loading state while auth is being determined
-  if ((isLoading || !sessionChecked) || (requireSubscription && subscriptionLoading)) {
+  if ((isLoading || !sessionChecked) || (requireSubscription && subscriptionLoading && !hasFetchedSubscription)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="w-full max-w-md space-y-4 p-4">
