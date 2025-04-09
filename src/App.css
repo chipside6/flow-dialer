@@ -4,5 +4,7 @@
 @import './styles/mobile.css';
 @import './styles/dashboard.css';
 @import './styles/header.css';
+@import './styles/header-fixes.css';
+@import './styles/mobile-header.css';
+@import './styles/mobile-navbar.css';
 @import './styles/animations.css';
-

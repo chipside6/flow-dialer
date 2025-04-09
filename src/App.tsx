@@ -20,16 +20,19 @@ import AsteriskConfigPage from '@/pages/AsteriskConfigPage';
 import GoipSetup from '@/pages/GoipSetup';
 
 import { RequireAuth } from '@/components/auth/RequireAuth';
+import PublicLayout from '@/components/layout/PublicLayout';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+          {/* Public routes with PublicLayout wrapper that includes the header */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+          </Route>
           
           {/* Protected routes */}
           <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
