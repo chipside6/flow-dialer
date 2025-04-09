@@ -59,7 +59,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
     closeLimitDialog,
     hasReachedLimit,
     callLimit,
-    checkAndShowLimitDialog,
+    checkAndShowLimitDialog, // Now returns Promise<boolean>
     dailyCallCount,
     dailyCallLimit,
     monthlyCallCount,
@@ -108,7 +108,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
       isLifetime: plan.isLifetime || false,
       isTrial: plan.isTrial || false,
       callLimit: plan.featuresObj?.maxCalls || 1000,
-      trialDays: plan.trialDays
+      trialDays: plan.trialDays // Now properly typed
     };
   };
 
@@ -129,7 +129,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
     hasReachedLimit,
     callLimit,
     trialExpired,
-    checkAndShowLimitDialog,
+    checkAndShowLimitDialog, // Now returns Promise<boolean>
     dailyCallCount,
     dailyCallLimit,
     monthlyCallCount,

@@ -14,6 +14,7 @@ export interface PricingPlan {
   isTrial?: boolean;
   isLifetime?: boolean;
   isFree?: boolean;
+  trialDays?: number; // Added this property
 }
 
 // Shared pricing plans data

@@ -57,12 +57,16 @@ export const useSubscriptionLimit = (userId: string | undefined, planId: string 
     setShowLimitDialog(false);
   }, []);
   
-  const checkAndShowLimitDialog = useCallback(() => {
-    if (hasReachedLimit) {
-      setShowLimitDialog(true);
-      return true; // Limit reached
-    }
-    return false; // Limit not reached
+  // Updated to return a Promise<boolean> instead of a boolean
+  const checkAndShowLimitDialog = useCallback(async (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (hasReachedLimit) {
+        setShowLimitDialog(true);
+        resolve(true); // Limit reached
+      } else {
+        resolve(false); // Limit not reached
+      }
+    });
   }, [hasReachedLimit]);
   
   return {
