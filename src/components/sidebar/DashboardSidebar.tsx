@@ -7,7 +7,6 @@ import {
   FileAudio, 
   Users, 
   Settings, 
-  ExternalLink,
   X,
   UserCircle,
   Server
