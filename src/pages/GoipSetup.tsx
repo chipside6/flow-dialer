@@ -7,8 +7,9 @@ import { AsteriskGuide } from '@/components/goip/AsteriskGuide';
 import { useAuth } from '@/contexts/auth/useAuth';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
-const GoipSetup = () => {
+const GoipSetupContent = () => {
   const { user } = useAuth();
   
   return (
@@ -34,6 +35,14 @@ const GoipSetup = () => {
         </div>
       </div>
     </DashboardLayout>
+  );
+};
+
+const GoipSetup = () => {
+  return (
+    <ProtectedRoute>
+      <GoipSetupContent />
+    </ProtectedRoute>
   );
 };
 

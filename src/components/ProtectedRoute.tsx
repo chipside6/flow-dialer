@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
-import { isSessionValid } from '@/services/auth/session';
+import { isSessionValid, touchSession } from '@/services/auth/session';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -25,6 +24,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Double-check session validity as a safety measure
   const sessionIsValid = isSessionValid();
   const isActuallyAuthenticated = isAuthenticated && sessionIsValid;
+  
+  // Touch the session periodically to keep it active
+  useEffect(() => {
+    // Initial touch
+    touchSession();
+    
+    // Set up interval to touch session periodically
+    const intervalId = setInterval(() => {
+      touchSession();
+    }, 60000); // Touch every minute
+    
+    return () => clearInterval(intervalId);
+  }, []);
   
   // Check subscription if required
   useEffect(() => {

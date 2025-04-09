@@ -9,18 +9,25 @@ interface RequireAuthProps {
 }
 
 export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
-  const { isAuthenticated, user, isLoading, sessionChecked } = useAuth();
+  const { isAuthenticated, isLoading, sessionChecked } = useAuth();
   const location = useLocation();
   const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
 
-  // Touch the session on component mount to prevent premature session expiration
+  // Touch the session more frequently to prevent session expiration
   React.useEffect(() => {
+    // Initial touch
     touchSession();
+    
+    // Set up a regular interval to touch the session
+    const intervalId = setInterval(() => {
+      touchSession();
+    }, 60000); // Touch every minute
+    
+    return () => clearInterval(intervalId);
   }, []);
 
-  // Check if we're still loading the auth state
+  // Update checking state when session check is complete
   React.useEffect(() => {
-    // If we have determined the session status, we're no longer checking
     if (sessionChecked) {
       setIsCheckingAuth(false);
     }
