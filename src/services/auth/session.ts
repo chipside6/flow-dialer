@@ -1,3 +1,4 @@
+
 import { Session } from './types';
 import { debouncedClearAllAuthData, forceAppReload } from '@/utils/sessionCleanup';
 
@@ -237,8 +238,11 @@ export const refreshSession = (newExpiresAt: number): void => {
   }
 };
 
-// Update the lastAccessTime when the module is loaded
-let lastAccessTime = Date.now();
+// Update the lastAccessTime when the module is loaded - Remove the redeclaration
+// Initialize lastAccessTime if it hasn't been already
+if (lastAccessTime === 0) {
+  lastAccessTime = Date.now();
+}
 
 /**
  * Touch session to update last access time without changing anything else
