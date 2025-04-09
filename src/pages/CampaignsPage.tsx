@@ -4,17 +4,38 @@ import { useSubscription } from '@/hooks/subscription';
 import { TrialExpiredNotice } from '@/components/campaign/TrialExpiredNotice';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Campaign from './Campaign';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 
 const CampaignsPage = () => {
   const { currentPlan } = useSubscription();
   const isLifetimePlan = currentPlan === 'lifetime';
+  const navigate = useNavigate();
+  
+  const handleCreateCampaign = () => {
+    navigate('/campaign');
+  };
   
   return (
     <ProtectedRoute>
       <DashboardLayout>
         {isLifetimePlan ? (
-          <Campaign />
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold">Your Campaigns</h1>
+              <Button onClick={handleCreateCampaign}>
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Create Campaign
+              </Button>
+            </div>
+            {/* Campaign list will go here */}
+            <div className="bg-muted rounded-lg p-8 text-center">
+              <p className="text-muted-foreground">
+                You don't have any active campaigns yet. Click the button above to create your first campaign.
+              </p>
+            </div>
+          </div>
         ) : (
           <TrialExpiredNotice />
         )}
