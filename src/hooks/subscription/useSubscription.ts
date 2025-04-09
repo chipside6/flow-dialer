@@ -1,5 +1,5 @@
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useAuth } from "@/contexts/auth";
 import { getPlanById } from "@/hooks/subscription/subscriptionApi";
 import { useSubscriptionLimit } from "./useSubscriptionLimit";
@@ -47,10 +47,10 @@ export const useSubscription = (): UseSubscriptionReturn => {
     updateCache
   });
 
-  // Wrapper to ensure void return type
-  const fetchCurrentSubscription = async (): Promise<void> => {
+  // Wrapper to ensure void return type - use memoization to prevent recreating on each render
+  const fetchCurrentSubscription = useCallback(async (): Promise<void> => {
     await fetchSubscription();
-  };
+  }, [fetchSubscription]);
 
   // Use the subscription limit hook with optimized parameters
   const { 
@@ -59,7 +59,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
     closeLimitDialog,
     hasReachedLimit,
     callLimit,
-    checkAndShowLimitDialog, // Now returns Promise<boolean>
+    checkAndShowLimitDialog,
     dailyCallCount,
     dailyCallLimit,
     monthlyCallCount,
@@ -69,13 +69,12 @@ export const useSubscription = (): UseSubscriptionReturn => {
   // Use the lifetime plan activation hook and ensure it returns the correct type
   const { activateLifetimePlan: activatePlan } = useLifetimePlan(user?.id, fetchCurrentSubscription);
   
-  // Wrapper to ensure correct type is returned
+  // Memoize to prevent recreation on each render
   const activateLifetimePlan = useCallback(async (planId?: string): Promise<{ success: boolean; error?: Error }> => {
     try {
       const result = await activatePlan(planId);
       
       if (!result.success && result.error) {
-        // Convert the plain error object to a proper Error instance
         const error = new Error(result.error.message);
         return { success: false, error };
       }
@@ -88,14 +87,13 @@ export const useSubscription = (): UseSubscriptionReturn => {
       
       return { success: result.success };
     } catch (err) {
-      // Ensure any caught error is returned as a proper Error instance
       const error = err instanceof Error ? err : new Error(String(err));
       return { success: false, error };
     }
   }, [activatePlan, setCurrentPlan]);
 
-  // Wrapper for getPlanById to ensure it returns PlanDetails
-  const getPlanDetailsById = (planId: string): PlanDetails | null => {
+  // Memoize this function to prevent recreation on each render
+  const getPlanDetailsById = useCallback((planId: string): PlanDetails | null => {
     const plan = getPlanById(planId);
     if (!plan) return null;
     
@@ -108,14 +106,15 @@ export const useSubscription = (): UseSubscriptionReturn => {
       isLifetime: plan.isLifetime || false,
       isTrial: plan.isTrial || false,
       callLimit: plan.featuresObj?.maxCalls || 1000,
-      trialDays: plan.trialDays // Now properly typed
+      trialDays: plan.trialDays
     };
-  };
+  }, []);
 
   // Combine isLoading with isInitializing for more accurate loading state
   const combinedIsLoading = isLoading || isInitializing;
 
-  return {
+  // Use useMemo to prevent recreation of the return object on each render
+  return useMemo(() => ({
     isLoading: combinedIsLoading,
     currentPlan,
     subscription,
@@ -129,10 +128,29 @@ export const useSubscription = (): UseSubscriptionReturn => {
     hasReachedLimit,
     callLimit,
     trialExpired,
-    checkAndShowLimitDialog, // Now returns Promise<boolean>
+    checkAndShowLimitDialog,
     dailyCallCount,
     dailyCallLimit,
     monthlyCallCount,
     monthlyCallLimit
-  };
+  }), [
+    combinedIsLoading,
+    currentPlan,
+    subscription,
+    callCount,
+    showLimitDialog,
+    closeLimitDialog,
+    fetchCurrentSubscription,
+    activateLifetimePlan,
+    getPlanDetailsById,
+    error,
+    hasReachedLimit,
+    callLimit,
+    trialExpired,
+    checkAndShowLimitDialog,
+    dailyCallCount,
+    dailyCallLimit,
+    monthlyCallCount,
+    monthlyCallLimit
+  ]);
 };

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSubscription } from '@/hooks/subscription';
 import { TrialExpiredNotice } from '@/components/campaign/TrialExpiredNotice';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -10,12 +10,15 @@ import { PlusCircle } from 'lucide-react';
 
 const CampaignsPage = () => {
   const { currentPlan } = useSubscription();
-  const isLifetimePlan = currentPlan === 'lifetime';
   const navigate = useNavigate();
   
-  const handleCreateCampaign = () => {
+  // Memoize this value to prevent recalculation on each render
+  const isLifetimePlan = useMemo(() => currentPlan === 'lifetime', [currentPlan]);
+  
+  // Memoize this function to prevent recreation on each render
+  const handleCreateCampaign = React.useCallback(() => {
     navigate('/campaign');
-  };
+  }, [navigate]);
   
   return (
     <ProtectedRoute>

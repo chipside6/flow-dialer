@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -31,49 +30,58 @@ export const DashboardSidebar = () => {
   const [activeItem, setActiveItem] = useState('');
   const { openMobile, setOpenMobile, isMobile } = useSidebar();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  // Only grab what's needed from subscription to prevent unnecessary re-renders
   const { currentPlan, subscription } = useSubscription();
   
-  // Check for lifetime plan OR any active subscription plan that's not a trial
-  const isSubscribed = currentPlan === 'lifetime' || 
-                      (subscription?.plan_id === 'lifetime' || 
-                      (subscription?.status === 'active' && subscription?.plan_id !== 'trial'));
+  // Memoize isSubscribed check to prevent recalculation on each render
+  const isSubscribed = useMemo(() => {
+    return currentPlan === 'lifetime' || 
+           (subscription?.plan_id === 'lifetime' || 
+           (subscription?.status === 'active' && subscription?.plan_id !== 'trial'));
+  }, [currentPlan, subscription]);
 
+  // Use useEffect with location dependency to update active item
   useEffect(() => {
     const path = location.pathname;
+    let newActiveItem = '';
+    
     if (path.includes('/dashboard')) {
-      setActiveItem('dashboard');
+      newActiveItem = 'dashboard';
     } else if (path.includes('/campaigns') || path.includes('/campaign')) {
-      setActiveItem('campaigns');
+      newActiveItem = 'campaigns';
     } else if (path.includes('/contacts')) {
-      setActiveItem('leads');
+      newActiveItem = 'leads';
     } else if (path.includes('/transfers')) {
-      setActiveItem('transfers');
+      newActiveItem = 'transfers';
     } else if (path.includes('/greetings')) {
-      setActiveItem('audio');
+      newActiveItem = 'audio';
     } else if (path.includes('/goip-setup')) {
-      setActiveItem('device');
+      newActiveItem = 'device';
     } else if (path.includes('/profile')) {
-      setActiveItem('profile');
+      newActiveItem = 'profile';
     } else if (path.includes('/settings')) {
-      setActiveItem('settings');
+      newActiveItem = 'settings';
     } else if (path.includes('/diagnostics')) {
-      setActiveItem('diagnostics');
+      newActiveItem = 'diagnostics';
     } else if (path.includes('/admin')) {
-      setActiveItem('admin');
+      newActiveItem = 'admin';
     } else if (path.includes('/upgrade')) {
-      setActiveItem('upgrade');
+      newActiveItem = 'upgrade';
     } else if (path.includes('/asterisk-config')) {
-      setActiveItem('asterisk-config');
+      newActiveItem = 'asterisk-config';
     }
+    
+    setActiveItem(newActiveItem);
   }, [location]);
 
-  const handleCloseSidebar = () => {
+  // Use useCallback to prevent recreation of these functions on each render
+  const handleCloseSidebar = useCallback(() => {
     if (setOpenMobile) {
       setOpenMobile(false);
     }
-  };
+  }, [setOpenMobile]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     if (isLoggingOut) return;
     
     setIsLoggingOut(true);
@@ -96,7 +104,20 @@ export const DashboardSidebar = () => {
     } finally {
       setIsLoggingOut(false);
     }
-  };
+  }, [isLoggingOut, signOut]);
+
+  // Use useEffect with body class for sidebar state
+  useEffect(() => {
+    if (isMobile && openMobile) {
+      document.body.classList.add('mobile-menu-open');
+    } else {
+      document.body.classList.remove('mobile-menu-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+    };
+  }, [isMobile, openMobile]);
 
   return (
     <div 

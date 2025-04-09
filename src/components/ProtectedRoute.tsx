@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,6 +21,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [hasSubscription, setHasSubscription] = useState(true);
   const [checkingSubscription, setCheckingSubscription] = useState(false);
   const location = useLocation();
+  const hasRedirectedRef = useRef(false);
+  const touchIntervalRef = useRef<number | null>(null);
   
   // Double-check session validity as a safety measure
   const sessionIsValid = isSessionValid();
@@ -37,13 +39,21 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         console.log('Session touched in ProtectedRoute component');
       }, 30000); // Every 30 seconds
       
-      return () => clearInterval(touchInterval);
+      // Store the interval ID in the ref
+      touchIntervalRef.current = touchInterval as unknown as number;
+      
+      return () => {
+        if (touchIntervalRef.current) {
+          clearInterval(touchIntervalRef.current);
+          touchIntervalRef.current = null;
+        }
+      };
     }
   }, [isActuallyAuthenticated]);
   
   // Check subscription if required
   useEffect(() => {
-    if (requireSubscription && isActuallyAuthenticated && user?.id) {
+    if (requireSubscription && isActuallyAuthenticated && user?.id && !checkingSubscription) {
       setCheckingSubscription(true);
       checkSubscriptionStatus(user.id)
         .then(hasActive => {
@@ -53,7 +63,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           setCheckingSubscription(false);
         });
     }
-  }, [requireSubscription, isActuallyAuthenticated, user]);
+  }, [requireSubscription, isActuallyAuthenticated, user, checkingSubscription]);
   
   // Show loading state while auth is being determined
   if ((isLoading || !sessionChecked) || (requireSubscription && checkingSubscription)) {
@@ -72,18 +82,21 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
   
   // If not authenticated, redirect to login
-  if (!isActuallyAuthenticated) {
+  if (!isActuallyAuthenticated && !hasRedirectedRef.current) {
     console.log('Not authenticated, redirecting to login');
+    hasRedirectedRef.current = true;
     return <Navigate to="/login" state={{ returnTo: location.pathname }} replace />;
   }
   
   // If admin required but user is not admin, redirect to unauthorized
-  if (requireAdmin && !isAdmin) {
+  if (requireAdmin && !isAdmin && !hasRedirectedRef.current) {
+    hasRedirectedRef.current = true;
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
   
   // If subscription required but user has no active subscription
-  if (requireSubscription && !hasSubscription) {
+  if (requireSubscription && !hasSubscription && !hasRedirectedRef.current) {
+    hasRedirectedRef.current = true;
     return <Navigate to="/upgrade" state={{ from: location }} replace />;
   }
   

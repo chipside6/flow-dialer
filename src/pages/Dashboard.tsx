@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { DashboardContent } from '@/components/layout/DashboardContent';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
@@ -15,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 
 const Dashboard = () => {
+  // Ensure this doesn't rerun during each render
   const [activeTab, setActiveTab] = useState<string>("overview");
   const { campaigns, isLoading, error, refreshCampaigns } = useCampaigns();
   const { isOnline } = useNetworkStatus();
@@ -22,23 +22,18 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Log campaigns to debug
-  useEffect(() => {
-    console.log("Dashboard campaigns:", campaigns);
-  }, [campaigns]);
-  
-  // Handle retry
-  const handleRetry = () => {
+  // Use useCallback to prevent recreation of these functions on each render
+  const handleRetry = useCallback(() => {
     setRetryCount(prev => prev + 1);
     refreshCampaigns();
-  };
+  }, [refreshCampaigns]);
   
-  const handleCreateCampaign = () => {
+  const handleCreateCampaign = useCallback(() => {
     navigate('/campaign', { state: { showCreateWizard: true } });
-  };
+  }, [navigate]);
   
-  // Add a refresh function explicitly for the dashboard
-  const handleRefreshCampaigns = async () => {
+  // Memoize refresh function
+  const handleRefreshCampaigns = useCallback(async () => {
     try {
       const success = await refreshCampaigns();
       if (success) {
@@ -50,7 +45,12 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error refreshing campaigns:", error);
     }
-  };
+  }, [refreshCampaigns, toast]);
+  
+  // Log campaigns only when they change
+  useEffect(() => {
+    console.log("Dashboard campaigns:", campaigns);
+  }, [campaigns]);
   
   return (
     <DashboardLayout>
