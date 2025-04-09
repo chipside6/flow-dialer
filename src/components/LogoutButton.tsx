@@ -5,6 +5,7 @@ import { LogOut, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { clearSession } from "@/services/auth/session";
+import { clearAllAuthData } from "@/utils/sessionCleanup";
 
 interface LogoutButtonProps {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -34,17 +35,17 @@ const LogoutButton = ({
       // Call optional callback if provided
       if (onClick) onClick();
       
+      // IMMEDIATELY clear all auth data to prevent auto re-login
+      clearAllAuthData();
+      
       // Call the signOut function from auth context
-      // This is better than directly clearing session as it follows proper auth flow
       const result = await signOut();
       
-      if (result.success) {
-        // Navigate to login page on successful logout
-        navigate("/login", { replace: true });
-      } else {
+      // Force navigation regardless of signOut result
+      navigate("/login", { replace: true });
+      
+      if (!result.success) {
         console.error("Error during logout:", result.error);
-        // Force navigation even on error
-        navigate("/login", { replace: true });
       }
     } catch (error: any) {
       console.error("Logout error:", error);

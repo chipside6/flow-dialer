@@ -245,7 +245,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Enhanced sign out function with token clearing
+  // Enhanced sign out function with immediate token clearing
   const signOut = async () => {
     try {
       console.log("Signing out user");
@@ -257,9 +257,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Clear all auth data from storage
       clearSession();
+      clearAllAuthData();
       
-      // Sign out from Supabase
-      await supabase.auth.signOut();
+      try {
+        // Sign out from Supabase
+        await supabase.auth.signOut();
+      } catch (supabaseError) {
+        console.error("Error signing out from Supabase:", supabaseError);
+        // We continue even if this fails
+      }
       
       console.log("Sign out completed");
       
