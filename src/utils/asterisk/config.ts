@@ -1,95 +1,96 @@
 
-// Configuration values for Asterisk connection
+/**
+ * Asterisk API configuration utilities
+ */
 
-// Get values directly from env variables for production
-export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || '';
-export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || '';
-export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || '';
-export const ASTERISK_SERVER_IP = import.meta.env.VITE_ASTERISK_SERVER_IP || ''; // Add this line
+// Default values - these will be overridden by localStorage if available
+export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || 'http://localhost:8088/ari';
+export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || 'admin';
+export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || 'admin';
+
+// Storage key
+const STORAGE_KEY = 'asterisk_config';
+
+// Config interface
+export interface AsteriskConfig {
+  apiUrl: string;
+  username: string;
+  password: string;
+}
 
 /**
- * Helper function to create basic auth header
+ * Get configuration from localStorage
  */
-export const createBasicAuthHeader = (username: string, password: string) => {
-  return `Basic ${btoa(`${username}:${password}`)}`;
-};
-
-/**
- * Check if running in Lovable hosted environment
- */
-export const isHostedEnvironment = (): boolean => {
-  return window.location.hostname.includes('lovableproject.com');
-};
-
-/**
- * Check if environment variables are set
- * This handles both direct env vars and Supabase-stored configuration
- */
-export const hasConfiguredEnvironment = (): boolean => {
-  // In hosted environments, we always return true since config can be set via the UI
-  if (isHostedEnvironment()) {
-    return true;
-  }
-  
-  // For local development, check if environment variables are set
-  return Boolean(ASTERISK_API_URL && ASTERISK_API_USERNAME && ASTERISK_API_PASSWORD);
-};
-
-/**
- * Get environment variables from localStorage if in hosted environment
- * This allows users to set config via the UI that persists across sessions
- */
-export const getConfigFromStorage = () => {
-  if (!isHostedEnvironment()) {
-    return {
-      apiUrl: ASTERISK_API_URL,
-      username: ASTERISK_API_USERNAME,
-      password: ASTERISK_API_PASSWORD,
-      serverIp: ASTERISK_SERVER_IP // Add this line
-    };
-  }
-  
+export const getConfigFromStorage = (): AsteriskConfig => {
   try {
-    const savedApiUrl = localStorage.getItem('asterisk_api_url') || ASTERISK_API_URL;
-    const savedUsername = localStorage.getItem('asterisk_username') || ASTERISK_API_USERNAME;
-    const savedPassword = localStorage.getItem('asterisk_password') || ASTERISK_API_PASSWORD;
-    const savedServerIp = localStorage.getItem('asterisk_server_ip') || ASTERISK_SERVER_IP; // Add this line
-    
-    return {
-      apiUrl: savedApiUrl,
-      username: savedUsername,
-      password: savedPassword,
-      serverIp: savedServerIp // Add this line
-    };
-  } catch (error) {
-    console.error('Error accessing localStorage:', error);
-    return {
-      apiUrl: ASTERISK_API_URL,
-      username: ASTERISK_API_USERNAME,
-      password: ASTERISK_API_PASSWORD,
-      serverIp: ASTERISK_SERVER_IP // Add this line
-    };
-  }
-};
-
-/**
- * Save environment variables to localStorage in hosted environment
- */
-export const saveConfigToStorage = (apiUrl: string, username: string, password: string, serverIp: string = ''): void => {
-  if (!isHostedEnvironment()) {
-    console.log('Not in hosted environment, skipping storage of configuration');
-    return;
-  }
-  
-  try {
-    localStorage.setItem('asterisk_api_url', apiUrl);
-    localStorage.setItem('asterisk_username', username);
-    localStorage.setItem('asterisk_password', password);
-    if (serverIp) {
-      localStorage.setItem('asterisk_server_ip', serverIp);
+    const storedConfig = localStorage.getItem(STORAGE_KEY);
+    if (storedConfig) {
+      return JSON.parse(storedConfig);
     }
-    console.log('Saved Asterisk configuration to localStorage');
   } catch (error) {
-    console.error('Error saving to localStorage:', error);
+    console.error('Error reading Asterisk configuration from localStorage:', error);
+  }
+  
+  // Return defaults if nothing is stored
+  return {
+    apiUrl: ASTERISK_API_URL,
+    username: ASTERISK_API_USERNAME,
+    password: ASTERISK_API_PASSWORD
+  };
+};
+
+/**
+ * Save configuration to localStorage
+ */
+export const saveConfigToStorage = (config: AsteriskConfig): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  } catch (error) {
+    console.error('Error saving Asterisk configuration to localStorage:', error);
+  }
+};
+
+/**
+ * Clear configuration from localStorage
+ */
+export const clearConfigFromStorage = (): void => {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.error('Error clearing Asterisk configuration from localStorage:', error);
+  }
+};
+
+/**
+ * Test if the current configuration can connect to Asterisk
+ */
+export const testAsteriskConnection = async (): Promise<{ success: boolean; message: string }> => {
+  const config = getConfigFromStorage();
+  
+  try {
+    const response = await fetch(`${config.apiUrl}/applications`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
+      }
+    });
+    
+    if (response.ok) {
+      return { 
+        success: true, 
+        message: 'Successfully connected to Asterisk ARI' 
+      };
+    } else {
+      const errorData = await response.json();
+      return { 
+        success: false, 
+        message: `Error connecting to Asterisk: ${errorData.message || response.statusText}` 
+      };
+    }
+  } catch (error) {
+    return { 
+      success: false, 
+      message: `Error connecting to Asterisk: ${error instanceof Error ? error.message : String(error)}` 
+    };
   }
 };

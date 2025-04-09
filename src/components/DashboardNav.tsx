@@ -59,6 +59,11 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
       icon: Smartphone,
     },
     {
+      href: "/asterisk-config",
+      label: "Asterisk Config",
+      icon: Server,
+    },
+    {
       href: "/upgrade",
       label: "Upgrade",
       icon: CreditCard,
@@ -72,12 +77,6 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
       href: "/diagnostics",
       label: "Diagnostics",
       icon: Activity,
-    },
-    // Asterisk Config is already available to all users
-    {
-      href: "/asterisk-config",
-      label: "Asterisk Config",
-      icon: Phone,
     }
   ];
 
