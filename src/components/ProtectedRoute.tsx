@@ -1,10 +1,10 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
+import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
 import { touchSession, isSessionValid } from '@/services/auth/session';
-import { useSubscription } from '@/hooks/subscription';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,31 +18,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireSubscription = false
 }) => {
   const { isAuthenticated, isAdmin, isLoading, user, sessionChecked } = useAuth();
-  const { 
-    hasLifetimePlan, 
-    isLoading: subscriptionLoading, 
-    fetchCurrentSubscription 
-  } = useSubscription();
+  const [hasSubscription, setHasSubscription] = useState(true);
+  const [checkingSubscription, setCheckingSubscription] = useState(false);
   const location = useLocation();
-  const [hasFetchedSubscription, setHasFetchedSubscription] = useState(false);
-  const redirectingRef = useRef(false);
   
   // Double-check session validity as a safety measure
   const sessionIsValid = isSessionValid();
   const isActuallyAuthenticated = isAuthenticated && sessionIsValid;
   
-  // Fetch subscription data only once when needed
-  useEffect(() => {
-    if (requireSubscription && isActuallyAuthenticated && user?.id && !hasFetchedSubscription) {
-      fetchCurrentSubscription()
-        .then(() => setHasFetchedSubscription(true))
-        .catch(err => {
-          console.error("Failed to fetch subscription:", err);
-          setHasFetchedSubscription(true); // Mark as fetched even on error to prevent retries
-        });
-    }
-  }, [requireSubscription, isActuallyAuthenticated, user, fetchCurrentSubscription, hasFetchedSubscription]);
-
   // Touch session every 30 seconds to ensure it stays alive
   useEffect(() => {
     if (isActuallyAuthenticated) {
@@ -58,8 +41,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }, [isActuallyAuthenticated]);
   
+  // Check subscription if required
+  useEffect(() => {
+    if (requireSubscription && isActuallyAuthenticated && user?.id) {
+      setCheckingSubscription(true);
+      checkSubscriptionStatus(user.id)
+        .then(hasActive => {
+          setHasSubscription(hasActive);
+        })
+        .finally(() => {
+          setCheckingSubscription(false);
+        });
+    }
+  }, [requireSubscription, isActuallyAuthenticated, user]);
+  
   // Show loading state while auth is being determined
-  if ((isLoading || !sessionChecked) || (requireSubscription && subscriptionLoading && !hasFetchedSubscription)) {
+  if ((isLoading || !sessionChecked) || (requireSubscription && checkingSubscription)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="w-full max-w-md space-y-4 p-4">
@@ -86,9 +83,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
   
   // If subscription required but user has no active subscription
-  if (requireSubscription && !hasLifetimePlan && !redirectingRef.current) {
-    console.log('No lifetime plan, redirecting to upgrade page');
-    redirectingRef.current = true; // Prevent multiple redirects
+  if (requireSubscription && !hasSubscription) {
     return <Navigate to="/upgrade" state={{ from: location }} replace />;
   }
   

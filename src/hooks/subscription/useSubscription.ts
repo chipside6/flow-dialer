@@ -26,17 +26,12 @@ export const useSubscription = (): UseSubscriptionReturn => {
   } = useSubscriptionState();
 
   // Manage subscription cache
-  const { updateCache, loadFromCache } = useSubscriptionCache({
+  const { updateCache } = useSubscriptionCache({
     initializedRef,
     setCurrentPlan,
     setSubscription,
     setTrialExpired
   });
-
-  // Always try to load from cache first
-  useCallback(() => {
-    loadFromCache();
-  }, [loadFromCache])();
 
   // Handle subscription data fetching
   const {
@@ -117,9 +112,6 @@ export const useSubscription = (): UseSubscriptionReturn => {
     };
   };
 
-  // Check if the user has a lifetime subscription
-  const hasLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
-
   // Combine isLoading with isInitializing for more accurate loading state
   const combinedIsLoading = isLoading || isInitializing;
 
@@ -137,11 +129,10 @@ export const useSubscription = (): UseSubscriptionReturn => {
     hasReachedLimit,
     callLimit,
     trialExpired,
-    checkAndShowLimitDialog,
+    checkAndShowLimitDialog, // Now returns Promise<boolean>
     dailyCallCount,
     dailyCallLimit,
     monthlyCallCount,
-    monthlyCallLimit,
-    hasLifetimePlan // New property for easier checking
+    monthlyCallLimit
   };
 };

@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/auth";
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LimitReachedDialog } from "@/components/LimitReachedDialog";
-import { useSubscription } from "@/hooks/subscription";
+import { useSubscription } from "@/hooks/useSubscription";
 import { CallStatisticsCard } from '@/components/dashboard/CallStatisticsCard';
 
 export const DashboardContent = () => {
@@ -13,7 +13,8 @@ export const DashboardContent = () => {
   const { 
     showLimitDialog, 
     closeLimitDialog, 
-    hasLifetimePlan,
+    currentPlan, 
+    subscription,
     fetchCurrentSubscription
   } = useSubscription();
   
@@ -24,6 +25,9 @@ export const DashboardContent = () => {
       console.error("Failed to fetch subscription:", err);
     });
   }, [fetchCurrentSubscription]);
+  
+  // Check if the user has a lifetime subscription
+  const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
   
   return (
     <>
@@ -60,7 +64,7 @@ export const DashboardContent = () => {
                 </div>
                 <div className="ml-3">
                   <div className="text-sm text-blue-700">
-                    {hasLifetimePlan ? (
+                    {isLifetimePlan ? (
                       <p>You have lifetime access to all features.</p>
                     ) : (
                       <p>You can set up your account but need to <Link to="/upgrade" className="font-medium text-blue-700 underline">upgrade to Lifetime</Link> to run campaigns.</p>

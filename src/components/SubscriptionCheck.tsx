@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/subscription';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,24 +14,27 @@ export function SubscriptionCheck({
   requireSubscription = true,
   children 
 }: SubscriptionCheckProps) {
-  const { hasLifetimePlan, isLoading, fetchCurrentSubscription } = useSubscription();
+  const { currentPlan, subscription, isLoading, fetchCurrentSubscription } = useSubscription();
   const navigate = useNavigate();
   const [retryCount, setRetryCount] = useState(0);
   const [hasValidSubscription, setHasValidSubscription] = useState<boolean | null>(null);
-  const [hasCheckedSubscription, setHasCheckedSubscription] = useState(false);
-  const hasRedirectedRef = useRef(false);
+  
+  // Check if user has a valid subscription - explicitly check for lifetime plan
+  const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
   
   // Determine if the user's subscription status meets requirements
-  const subscriptionValid = !requireSubscription || hasLifetimePlan;
+  const subscriptionValid = !requireSubscription || isLifetimePlan;
   
-  // Effect to handle subscription checks with retry logic - only runs once
+  // Effect to handle subscription checks with retry logic
   useEffect(() => {
-    if (isLoading || hasCheckedSubscription) return;
+    if (isLoading) return;
     
     // Log subscription status for debugging
     console.log('Subscription check:', { 
-      hasLifetimePlan, 
-      subscriptionValid
+      currentPlan, 
+      isLifetimePlan, 
+      subscriptionValid, 
+      subscription 
     });
     
     // Validate subscription in Supabase directly as a double-check
@@ -43,10 +46,7 @@ export function SubscriptionCheck({
           console.log("Performing database verification of subscription status");
           
           const { data: authData } = await supabase.auth.getSession();
-          if (!authData.session) {
-            setHasCheckedSubscription(true);
-            return;
-          }
+          if (!authData.session) return;
           
           const { data: subData, error } = await supabase
             .from('subscriptions')
@@ -58,7 +58,6 @@ export function SubscriptionCheck({
           
           if (error) {
             console.error("Error validating subscription in DB:", error);
-            setHasCheckedSubscription(true);
             return;
           }
           
@@ -66,57 +65,46 @@ export function SubscriptionCheck({
           // refetch subscription data to sync local state
           if (subData && !subscriptionValid) {
             console.log("Found valid subscription in database despite cache miss, refetching");
-            await fetchCurrentSubscription();
+            fetchCurrentSubscription();
             setRetryCount(prev => prev + 1);
-            setHasValidSubscription(!!subData);
-          } else {
-            // Cache the validated subscription result
-            setHasValidSubscription(!!subData);
-            setHasCheckedSubscription(true);
+            return;
           }
-        } else {
-          setHasCheckedSubscription(true);
+          
+          // Cache the validated subscription result
+          setHasValidSubscription(!!subData);
         }
       } catch (error) {
         console.error("Error during subscription validation:", error);
-        setHasCheckedSubscription(true);
       }
     };
     
     validateSubscriptionInDb();
-  }, [
-    isLoading, 
-    subscriptionValid, 
-    requireSubscription, 
-    retryCount, 
-    fetchCurrentSubscription, 
-    hasValidSubscription,
-    hasLifetimePlan,
-    hasCheckedSubscription
-  ]);
-
-  // Handle redirect in a separate effect to avoid render loops
-  useEffect(() => {
-    if (hasCheckedSubscription && !hasRedirectedRef.current) {
-      // Handle redirects after checking subscription status
-      if (requireSubscription && !subscriptionValid && (retryCount >= 3 || hasValidSubscription === false)) {
-        console.log('User has no lifetime subscription, redirecting to upgrade page');
-        hasRedirectedRef.current = true;
-        navigate('/upgrade', { replace: true });
+    
+    // After loading subscription data, check if redirection is needed
+    if (!isLoading) {
+      if (requireSubscription && !subscriptionValid) {
+        // The user needs a subscription but doesn't have one
+        if (retryCount >= 3 || hasValidSubscription === false) {
+          console.log('User has no lifetime subscription, redirecting to upgrade page');
+          navigate('/upgrade', { replace: true });
+        }
       } else if (!requireSubscription && subscriptionValid) {
+        // The user already has a subscription and is on a page that doesn't require one (like upgrade)
         console.log('User already has a lifetime subscription, redirecting to dashboard');
-        hasRedirectedRef.current = true;
         navigate(redirectTo, { replace: true });
       }
     }
   }, [
-    hasCheckedSubscription, 
-    requireSubscription, 
+    isLoading, 
     subscriptionValid, 
-    retryCount, 
-    hasValidSubscription, 
+    requireSubscription, 
     navigate, 
-    redirectTo
+    redirectTo, 
+    retryCount, 
+    fetchCurrentSubscription, 
+    hasValidSubscription,
+    currentPlan,
+    subscription
   ]);
 
   // Don't show any loading state - just render children if appropriate
