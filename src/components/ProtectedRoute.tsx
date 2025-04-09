@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
-import { isSessionValid, touchSession } from '@/services/auth/session';
+import { touchSession, isSessionValid } from '@/services/auth/session';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -26,7 +26,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const sessionIsValid = isSessionValid();
   const isActuallyAuthenticated = isAuthenticated && sessionIsValid;
   
-  // Touch session every 5 seconds to ensure it stays alive
+  // Touch session every 30 seconds to ensure it stays alive
   useEffect(() => {
     if (isActuallyAuthenticated) {
       // Initial touch
@@ -34,8 +34,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       
       const touchInterval = setInterval(() => {
         touchSession();
-        console.log('Session touched in ProtectedRoute');
-      }, 5000);
+        console.log('Session touched in ProtectedRoute component');
+      }, 30000); // Every 30 seconds
       
       return () => clearInterval(touchInterval);
     }

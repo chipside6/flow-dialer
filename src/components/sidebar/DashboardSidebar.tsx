@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Sidebar, SidebarContent, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
 import { 
   Home, 
@@ -35,8 +35,8 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   
   // Check for lifetime plan OR any active subscription plan that's not a trial
   const isSubscribed = currentPlan === 'lifetime' || 
-                       subscription?.plan_id === 'lifetime' || 
-                       (subscription?.status === 'active' && subscription?.plan_id !== 'trial');
+                      (subscription?.plan_id === 'lifetime' || 
+                      (subscription?.status === 'active' && subscription?.plan_id !== 'trial'));
   
   const handleItemClick = () => {
     if (isMobile) {
@@ -60,7 +60,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
   ];
   
-  // Show upgrade link only if user is NOT on a paid subscription
+  // Only show upgrade link if user is NOT on a paid subscription
   if (!isSubscribed) {
     navItems.push({
       name: "Upgrade",
@@ -70,7 +70,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   }
   
   // Admin navItems - only displayed to admin users
-  const adminNavItems = [
+  const adminNavItems = profile?.is_admin === true ? [
     {
       name: "Admin Panel",
       path: "/admin",
@@ -81,7 +81,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
       path: "/asterisk-config",
       icon: <PhoneCall className="h-5 w-5" />
     }
-  ];
+  ] : [];
   
   return (
     <Sidebar collapsible="offcanvas">
@@ -117,7 +117,7 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
           ))}
           
           {/* Admin Links */}
-          {profile?.is_admin === true && adminNavItems.length > 0 && (
+          {adminNavItems.length > 0 && (
             <>
               <div className="my-2 px-3">
                 <p className="text-xs uppercase font-semibold text-slate-500 dark:text-slate-400 mt-4 mb-2 px-2">
@@ -147,4 +147,4 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
       </SidebarContent>
     </Sidebar>
   );
-}
+};

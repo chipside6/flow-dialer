@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +11,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CampaignTable } from '@/components/campaigns/CampaignTable';
 import { CampaignProvider } from '@/contexts/campaign/CampaignContext';
 import { Badge } from '@/components/ui/badge';
-import { touchSession } from '@/services/auth/session';
-import { useAuth } from '@/contexts/auth';
 
 const Campaign = () => {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
@@ -22,52 +19,31 @@ const Campaign = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { isAuthenticated, user } = useAuth();
 
-  // Touch session when the component mounts and periodically
-  useEffect(() => {
-    console.log('Campaign component mounted, setting up session touch');
-    // Initial touch
-    touchSession();
-    
-    // Set up interval to touch session every 10 seconds
-    const intervalId = setInterval(() => {
-      touchSession();
-      console.log('Session touched in Campaign component');
-    }, 10000);
-    
-    return () => clearInterval(intervalId);
-  }, []);
-
-  // Initial data loading effect
+  // Initial data loading effect with better error handling
   useEffect(() => {
     const loadInitialData = async () => {
-      console.log('Attempting to load initial campaign data');
-      if (isAuthenticated && user) {
-        try {
-          await refreshCampaigns();
-          console.log('Initial campaign data loaded successfully');
-        } catch (err) {
-          console.error('Error loading initial campaign data:', err);
-        }
+      try {
+        await refreshCampaigns();
+        console.log('Initial campaign data loaded successfully');
+      } catch (err) {
+        console.error('Error loading initial campaign data:', err);
       }
     };
     
     loadInitialData();
-  }, [isAuthenticated, user, refreshCampaigns]);
+    
+    // Check if the URL has a state indicating to show the create wizard
+    if (location.state && location.state.showCreateWizard) {
+      setShowCreateWizard(true);
+    }
+  }, [refreshCampaigns, location.state]);
 
   // Filter campaigns for active, paused, and completed tabs
   const activeFilteredCampaigns = campaigns ? campaigns.filter(c => c.status === 'running') : [];
   const pausedFilteredCampaigns = campaigns ? campaigns.filter(c => c.status === 'paused') : [];
   const completedFilteredCampaigns = campaigns ? campaigns.filter(c => c.status === 'completed') : [];
   
-  useEffect(() => {
-    // Check if the URL has a state indicating to show the create wizard
-    if (location.state && location.state.showCreateWizard) {
-      setShowCreateWizard(true);
-    }
-  }, [location.state]);
-
   const handleCampaignCreated = (newCampaign: any) => {
     toast({
       title: "Campaign Created",

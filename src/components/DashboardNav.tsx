@@ -31,8 +31,8 @@ export function DashboardNav({ isCollapsed }: DashboardNavProps) {
   
   // Check for lifetime plan OR any active subscription plan that's not a trial
   const isSubscribed = currentPlan === 'lifetime' || 
-                       subscription?.plan_id === 'lifetime' || 
-                       (subscription?.status === 'active' && subscription?.plan_id !== 'trial');
+                      (subscription?.plan_id === 'lifetime' || 
+                      (subscription?.status === 'active' && subscription?.plan_id !== 'trial'));
 
   const routes = [
     {
