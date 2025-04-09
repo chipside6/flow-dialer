@@ -13,6 +13,7 @@ import { CampaignTable } from '@/components/campaigns/CampaignTable';
 import { CampaignProvider } from '@/contexts/campaign/CampaignContext';
 import { Badge } from '@/components/ui/badge';
 import { touchSession } from '@/services/auth/session';
+import { useAuth } from '@/contexts/auth';
 
 const Campaign = () => {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
@@ -21,9 +22,11 @@ const Campaign = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { isAuthenticated, user } = useAuth();
 
   // Touch session when the component mounts and periodically
   useEffect(() => {
+    console.log('Campaign component mounted, setting up session touch');
     // Initial touch
     touchSession();
     
@@ -35,6 +38,23 @@ const Campaign = () => {
     
     return () => clearInterval(intervalId);
   }, []);
+
+  // Initial data loading effect
+  useEffect(() => {
+    const loadInitialData = async () => {
+      console.log('Attempting to load initial campaign data');
+      if (isAuthenticated && user) {
+        try {
+          await refreshCampaigns();
+          console.log('Initial campaign data loaded successfully');
+        } catch (err) {
+          console.error('Error loading initial campaign data:', err);
+        }
+      }
+    };
+    
+    loadInitialData();
+  }, [isAuthenticated, user, refreshCampaigns]);
 
   // Filter campaigns for active, paused, and completed tabs
   const activeFilteredCampaigns = campaigns ? campaigns.filter(c => c.status === 'running') : [];

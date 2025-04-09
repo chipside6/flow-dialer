@@ -33,8 +33,10 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
   const { setOpenMobile } = useSidebar();
   const isMobile = useIsMobile();
   
-  // Specifically check for lifetime plan
-  const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
+  // Check for lifetime plan OR any active subscription plan that's not a trial
+  const isSubscribed = currentPlan === 'lifetime' || 
+                       subscription?.plan_id === 'lifetime' || 
+                       (subscription?.status === 'active' && subscription?.plan_id !== 'trial');
   
   const handleItemClick = () => {
     if (isMobile) {
@@ -58,8 +60,8 @@ export const DashboardSidebar = ({ onCloseMobile }: DashboardSidebarProps) => {
     { name: "Profile", path: "/profile", icon: <User className="h-5 w-5" /> },
   ];
   
-  // Show upgrade link only if user is not on lifetime plan
-  if (!isLifetimePlan) {
+  // Show upgrade link only if user is NOT on a paid subscription
+  if (!isSubscribed) {
     navItems.push({
       name: "Upgrade",
       path: "/upgrade",
