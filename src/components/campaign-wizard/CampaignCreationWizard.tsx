@@ -4,11 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCampaignForm } from './hooks/useCampaignForm';
-import { BasicsForm } from './steps/BasicsForm';
-import { ContactListSelector } from './steps/ContactListSelector';
-import { GreetingSelector } from './steps/GreetingSelector';
-import { TransferNumberStep } from './steps/TransferNumberStep';
-import { ReviewStep } from './steps/ReviewStep';
+import { BasicsStep } from './BasicsStep';
+import { ContactsStep } from './ContactsStep';
+import { AudioStep } from './AudioStep';
+import { TransfersStep } from './TransfersStep';
+import { ReviewStep } from './ReviewStep';
+import { useContactLists } from '@/hooks/useContactLists';
+import { useGreetingFiles } from '@/hooks/useGreetingFiles';
 
 export interface CampaignCreationWizardProps {
   isOpen: boolean;
@@ -30,6 +32,9 @@ export const CampaignCreationWizard: React.FC<CampaignCreationWizardProps> = ({
     handleComplete
   } = useCampaignForm(onSuccess);
 
+  const { contactLists, isLoading: isLoadingLists } = useContactLists();
+  const { greetingFiles, isLoading: isLoadingGreetings } = useGreetingFiles();
+
   const handleFinish = async () => {
     await handleComplete();
   };
@@ -46,57 +51,70 @@ export const CampaignCreationWizard: React.FC<CampaignCreationWizardProps> = ({
 
         <Tabs value={step} className="mt-4">
           <TabsList className="grid grid-cols-5 mb-4">
-            <TabsTrigger value="basics" onClick={() => setStep('basics')}>Basics</TabsTrigger>
-            <TabsTrigger value="contacts" onClick={() => setStep('contacts')}>Contacts</TabsTrigger>
-            <TabsTrigger value="greeting" onClick={() => setStep('greeting')}>Greeting</TabsTrigger>
-            <TabsTrigger value="transfer" onClick={() => setStep('transfer')}>Transfer</TabsTrigger>
-            <TabsTrigger value="review" onClick={() => setStep('review')}>Review</TabsTrigger>
+            <TabsTrigger value="basics" onClick={() => setStep("basics")}>Basics</TabsTrigger>
+            <TabsTrigger value="contacts" onClick={() => setStep("contacts")}>Contacts</TabsTrigger>
+            <TabsTrigger value="audio" onClick={() => setStep("audio")}>Audio</TabsTrigger>
+            <TabsTrigger value="transfers" onClick={() => setStep("transfers")}>Transfer</TabsTrigger>
+            <TabsTrigger value="review" onClick={() => setStep("review")}>Review</TabsTrigger>
           </TabsList>
 
           <TabsContent value="basics">
-            <BasicsForm
+            <BasicsStep
               campaign={campaign}
-              handleInputChange={handleInputChange}
-              handleSelectChange={handleSelectChange}
-              onNext={() => setStep('contacts')}
+              onChange={handleInputChange}
             />
+            <div className="flex justify-end mt-4">
+              <Button onClick={() => setStep("contacts")}>Next</Button>
+            </div>
           </TabsContent>
 
           <TabsContent value="contacts">
-            <ContactListSelector
-              selectedContactListId={campaign.contactListId}
-              onSelect={(id) => handleSelectChange('contactListId', id)}
-              onNext={() => setStep('greeting')}
-              onBack={() => setStep('basics')}
+            <ContactsStep
+              campaign={campaign}
+              contactLists={contactLists || []}
+              onSelectChange={handleSelectChange}
+              isLoading={isLoadingLists}
             />
+            <div className="flex justify-between mt-4">
+              <Button variant="outline" onClick={() => setStep("basics")}>Back</Button>
+              <Button onClick={() => setStep("audio")}>Next</Button>
+            </div>
           </TabsContent>
 
-          <TabsContent value="greeting">
-            <GreetingSelector
-              selectedGreetingId={campaign.greetingFileId}
-              onSelect={(id) => handleSelectChange('greetingFileId', id)}
-              onNext={() => setStep('transfer')}
-              onBack={() => setStep('contacts')}
+          <TabsContent value="audio">
+            <AudioStep
+              campaign={campaign}
+              greetingFiles={greetingFiles || []}
+              onSelectChange={handleSelectChange}
             />
+            <div className="flex justify-between mt-4">
+              <Button variant="outline" onClick={() => setStep("contacts")}>Back</Button>
+              <Button onClick={() => setStep("transfers")}>Next</Button>
+            </div>
           </TabsContent>
 
-          <TabsContent value="transfer">
-            <TransferNumberStep
-              transferNumber={campaign.transferNumber}
-              portNumber={campaign.portNumber}
-              onTransferNumberChange={(value) => handleSelectChange('transferNumber', value)}
-              onPortNumberChange={(value) => handleSelectChange('portNumber', value)}
-              onNext={() => setStep('review')}
-              onBack={() => setStep('greeting')}
+          <TabsContent value="transfers">
+            <TransfersStep
+              campaign={campaign}
+              onChange={handleInputChange}
+              onSelectChange={handleSelectChange}
             />
+            <div className="flex justify-between mt-4">
+              <Button variant="outline" onClick={() => setStep("audio")}>Back</Button>
+              <Button onClick={() => setStep("review")}>Next</Button>
+            </div>
           </TabsContent>
 
           <TabsContent value="review">
             <ReviewStep
               campaign={campaign}
-              onBack={() => setStep('transfer')}
-              onComplete={handleFinish}
+              contactLists={contactLists || []}
+              greetingFiles={greetingFiles || []}
             />
+            <div className="flex justify-between mt-4">
+              <Button variant="outline" onClick={() => setStep("transfers")}>Back</Button>
+              <Button onClick={handleFinish} className="bg-green-600 hover:bg-green-700">Create Campaign</Button>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>

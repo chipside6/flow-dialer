@@ -1,196 +1,228 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Play, Pause, Stop, Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import { useMutation } from '@tanstack/react-query';
-import { pauseCampaign, resumeCampaign, stopCampaign } from '@/services/campaignService';
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Play, Pause, Square } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { startCampaign, pauseCampaign, stopCampaign, resumeCampaign } from '@/services/campaignService';
 
 interface DialerJobControlProps {
-  campaignId?: string;
-  campaignStatus?: string;
-  refetchCampaign: () => void;
+  campaignId: string;
+  status: string;
+  onStatusChange: () => void;
 }
 
-export const DialerJobControl: React.FC<DialerJobControlProps> = ({ 
-  campaignId, 
-  campaignStatus, 
-  refetchCampaign 
+export const DialerJobControl: React.FC<DialerJobControlProps> = ({
+  campaignId,
+  status,
+  onStatusChange
 }) => {
+  const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
-  const [isPausing, setIsPausing] = useState(false);
-  const [isResuming, setIsResuming] = useState(false);
-  const [isStopping, setIsStopping] = useState(false);
-  const [canStart, setCanStart] = useState(false);
-  const [canPause, setCanPause] = useState(false);
-  const [canStop, setCanStop] = useState(false);
 
-  // Mutations for campaign control
-  const pauseMutation = useMutation({
-    mutationFn: pauseCampaign,
-    onSuccess: () => {
+  const handleStartCampaign = async () => {
+    setIsLoading(true);
+    try {
+      await startCampaign(campaignId);
       toast({
-        title: "Campaign Paused",
-        description: "The campaign has been paused successfully.",
-        variant: "default"
+        title: 'Campaign started',
+        description: 'The campaign has been started successfully.',
       });
-      refetchCampaign();
-    },
-    onError: (error: any) => {
+      onStatusChange();
+    } catch (error) {
+      console.error('Error starting campaign:', error);
       toast({
-        title: "Error Pausing Campaign",
-        description: error.message || "Failed to pause the campaign. Please try again.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to start campaign. Please try again.',
+        variant: 'destructive',
       });
-    },
-    onSettled: () => {
-      setIsPausing(false);
+    } finally {
+      setIsLoading(false);
     }
-  });
-
-  const resumeMutation = useMutation({
-    mutationFn: resumeCampaign,
-    onSuccess: () => {
-      toast({
-        title: "Campaign Resumed",
-        description: "The campaign has been resumed successfully."
-      });
-      refetchCampaign();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error Resuming Campaign",
-        description: error.message || "Failed to resume the campaign. Please try again.",
-        variant: "destructive"
-      });
-    },
-    onSettled: () => {
-      setIsResuming(false);
-    }
-  });
-
-  const stopMutation = useMutation({
-    mutationFn: stopCampaign,
-    onSuccess: () => {
-      toast({
-        title: "Campaign Stopped",
-        description: "The campaign has been stopped successfully."
-      });
-      refetchCampaign();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error Stopping Campaign",
-        description: error.message || "Failed to stop the campaign. Please try again.",
-        variant: "destructive"
-      });
-    },
-    onSettled: () => {
-      setIsStopping(false);
-    }
-  });
-
-  useEffect(() => {
-    // Determine button states based on campaign status
-    setCanStart(campaignStatus === 'created' || campaignStatus === 'paused');
-    setCanPause(campaignStatus === 'running');
-    setCanStop(campaignStatus === 'running' || campaignStatus === 'paused');
-  }, [campaignStatus]);
-
-  const handlePause = async () => {
-    if (!campaignId) {
-      toast({
-        title: "Campaign ID Missing",
-        description: "Campaign ID is required to pause the campaign.",
-        variant: "destructive"
-      });
-      return;
-    }
-    setIsPausing(true);
-    pauseMutation.mutate(campaignId);
   };
 
-  const handleResume = async () => {
-    if (!campaignId) {
+  const handlePauseCampaign = async () => {
+    setIsLoading(true);
+    try {
+      await pauseCampaign(campaignId);
       toast({
-        title: "Campaign ID Missing",
-        description: "Campaign ID is required to resume the campaign.",
-        variant: "destructive"
+        title: 'Campaign paused',
+        description: 'The campaign has been paused successfully.',
       });
-      return;
+      onStatusChange();
+    } catch (error) {
+      console.error('Error pausing campaign:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to pause campaign. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
-    setIsResuming(true);
-    resumeMutation.mutate(campaignId);
   };
 
-  const handleStop = async () => {
-    if (!campaignId) {
+  const handleResumeCampaign = async () => {
+    setIsLoading(true);
+    try {
+      await resumeCampaign(campaignId);
       toast({
-        title: "Campaign ID Missing",
-        description: "Campaign ID is required to stop the campaign.",
-        variant: "destructive"
+        title: 'Campaign resumed',
+        description: 'The campaign has been resumed successfully.',
       });
-      return;
+      onStatusChange();
+    } catch (error) {
+      console.error('Error resuming campaign:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to resume campaign. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
-    setIsStopping(true);
-    stopMutation.mutate(campaignId);
+  };
+
+  const handleStopCampaign = async () => {
+    setIsLoading(true);
+    try {
+      await stopCampaign(campaignId);
+      toast({
+        title: 'Campaign stopped',
+        description: 'The campaign has been stopped successfully.',
+      });
+      onStatusChange();
+    } catch (error) {
+      console.error('Error stopping campaign:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to stop campaign. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="flex space-x-2">
-      {canStart && (
+    <div className="flex flex-col space-y-4">
+      {status === 'pending' && (
         <Button
-          onClick={handleResume}
-          disabled={isResuming}
+          onClick={handleStartCampaign}
+          disabled={isLoading}
+          className="w-full"
         >
-          {isResuming ? (
+          {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Resuming
+              Starting...
             </>
           ) : (
             <>
               <Play className="mr-2 h-4 w-4" />
-              Resume
+              Start Campaign
             </>
           )}
         </Button>
       )}
-      
-      {canPause && (
-        <Button
-          onClick={handlePause}
-          disabled={isPausing}
-        >
-          {isPausing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Pausing
-            </>
-          ) : (
-            <>
-              <Pause className="mr-2 h-4 w-4" />
-              Pause
-            </>
-          )}
-        </Button>
+
+      {status === 'running' && (
+        <>
+          <Button
+            onClick={handlePauseCampaign}
+            disabled={isLoading}
+            variant="outline"
+            className="w-full"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Pausing...
+              </>
+            ) : (
+              <>
+                <Pause className="mr-2 h-4 w-4" />
+                Pause Campaign
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={handleStopCampaign}
+            disabled={isLoading}
+            variant="destructive"
+            className="w-full"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Stopping...
+              </>
+            ) : (
+              <>
+                <Square className="mr-2 h-4 w-4" />
+                Stop Campaign
+              </>
+            )}
+          </Button>
+        </>
       )}
-      
-      {canStop && (
+
+      {status === 'paused' && (
+        <>
+          <Button
+            onClick={handleResumeCampaign}
+            disabled={isLoading}
+            className="w-full"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Resuming...
+              </>
+            ) : (
+              <>
+                <Play className="mr-2 h-4 w-4" />
+                Resume Campaign
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={handleStopCampaign}
+            disabled={isLoading}
+            variant="destructive"
+            className="w-full"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Stopping...
+              </>
+            ) : (
+              <>
+                <Square className="mr-2 h-4 w-4" />
+                Stop Campaign
+              </>
+            )}
+          </Button>
+        </>
+      )}
+
+      {status === 'completed' && (
         <Button
-          variant="destructive"
-          onClick={handleStop}
-          disabled={isStopping}
+          onClick={handleStartCampaign}
+          disabled={isLoading}
+          variant="outline"
+          className="w-full"
         >
-          {isStopping ? (
+          {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Stopping
+              Restarting...
             </>
           ) : (
             <>
-              <Stop className="mr-2 h-4 w-4" />
-              Stop
+              <Play className="mr-2 h-4 w-4" />
+              Restart Campaign
             </>
           )}
         </Button>
