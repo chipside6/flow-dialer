@@ -1,6 +1,6 @@
 
 export interface CampaignData {
-  id: string; // Changed from optional to required
+  id?: string; // Make id optional for creation
   title: string;
   description: string;
   contactListId: string;
@@ -9,7 +9,7 @@ export interface CampaignData {
   portNumber?: number; // Added port number for GoIP
   schedule: {
     startDate: string;
-    maxConcurrentCalls: number;
+    maxConcurrentCalls?: number;
   };
   status?: "pending" | "running" | "completed" | "paused";
   progress?: number;
@@ -26,6 +26,7 @@ export type WizardStep = "basics" | "contacts" | "audio" | "transfers" | "review
 export interface ContactList {
   id: string;
   name: string;
+  contactCount?: number;
 }
 
 // Updated to match the interface in useGreetingFiles.ts

@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/auth";
 import { getPlanById } from "@/hooks/subscription/subscriptionApi";
 import { useSubscriptionLimit } from "./useSubscriptionLimit";
 import { useLifetimePlan } from "./useLifetimePlan";
-import { UseSubscriptionReturn } from "./types";
+import { UseSubscriptionReturn, PlanDetails } from "./types";
 import { useSubscriptionState } from "./useSubscriptionState";
 import { useSubscriptionCache } from "./useSubscriptionCache";
 import { useSubscriptionFetch } from "./useSubscriptionFetch";
@@ -37,7 +37,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
   const {
     isLoading,
     error,
-    fetchCurrentSubscription
+    fetchCurrentSubscription: fetchSubscription
   } = useSubscriptionFetch({
     userId: user?.id,
     setCurrentPlan,
@@ -46,6 +46,11 @@ export const useSubscription = (): UseSubscriptionReturn => {
     setIsInitializing,
     updateCache
   });
+
+  // Wrapper to ensure void return type
+  const fetchCurrentSubscription = async (): Promise<void> => {
+    await fetchSubscription();
+  };
 
   // Use the subscription limit hook with optimized parameters
   const { 
@@ -89,6 +94,24 @@ export const useSubscription = (): UseSubscriptionReturn => {
     }
   }, [activatePlan, setCurrentPlan]);
 
+  // Wrapper for getPlanById to ensure it returns PlanDetails
+  const getPlanDetailsById = (planId: string): PlanDetails | null => {
+    const plan = getPlanById(planId);
+    if (!plan) return null;
+    
+    return {
+      id: plan.id,
+      name: plan.name,
+      description: plan.description,
+      price: plan.price,
+      features: plan.features,
+      isLifetime: plan.isLifetime || false,
+      isTrial: plan.isTrial || false,
+      callLimit: plan.featuresObj?.maxCalls || 1000,
+      trialDays: plan.trialDays
+    };
+  };
+
   // Combine isLoading with isInitializing for more accurate loading state
   const combinedIsLoading = isLoading || isInitializing;
 
@@ -101,7 +124,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
     closeLimitDialog,
     fetchCurrentSubscription,
     activateLifetimePlan,
-    getPlanById,
+    getPlanById: getPlanDetailsById,
     error,
     hasReachedLimit,
     callLimit,

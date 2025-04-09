@@ -3,28 +3,20 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
 interface NavItemProps {
-  item: {
-    name: string;
-    path: string;
-    icon: React.ReactNode;
-  };
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  isActive: boolean;
   onClick?: () => void;
 }
 
-export const SidebarNavItem = ({ item, onClick }: NavItemProps) => {
-  const location = useLocation();
-  
-  // Check for exact match or if the path is a parent route
-  // Example: /greetings should be active when the route is /greetings or /greetings/*
-  const isActive = location.pathname === item.path || 
-                  (item.path !== "/" && location.pathname.startsWith(item.path));
-  
+export const SidebarNavItem = ({ href, label, icon, isActive, onClick }: NavItemProps) => {
   // We need to specifically track if this is the GoIP setup page for mobile CSS
-  const isGoipSetup = item.path === "/goip-setup";
+  const isGoipSetup = href === "/goip-setup";
   
   return (
     <Link
-      to={item.path}
+      to={href}
       onClick={onClick}
       className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors w-full ${
         isActive 
@@ -34,10 +26,12 @@ export const SidebarNavItem = ({ item, onClick }: NavItemProps) => {
     >
       <div className="flex items-center w-full">
         <span className={`w-5 h-5 flex items-center justify-center mr-3 ${isActive ? "text-indigo-600 dark:text-indigo-400" : "text-slate-500 dark:text-slate-400"}`}>
-          {item.icon}
+          {icon}
         </span>
-        <span>{item.name}</span>
+        <span>{label}</span>
       </div>
     </Link>
   );
 };
+
+export type { NavItemProps };

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useLocation, Link, NavLink } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Phone, 
@@ -10,10 +10,7 @@ import {
   ExternalLink,
   Menu,
   X,
-  MessageSquare,
-  UserCircle,
-  LogOut,
-  BarChart3
+  UserCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -73,7 +70,7 @@ export const DashboardSidebar = ({ isMobile = false, onCloseMobile }: { isMobile
             isActive={activeItem === 'dashboard'}
           />
           <SidebarNavItem
-            icon={<BarChart3 className="h-4 w-4" />}
+            icon={<Phone className="h-4 w-4" />}
             href="/campaigns"
             label="Campaigns"
             isActive={activeItem === 'campaigns'}

@@ -4,6 +4,7 @@ import { CampaignData } from '../types';
 import { User } from '@/contexts/auth/types';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 type Step = 'basics' | 'contacts' | 'audio' | 'transfers' | 'review';
 
@@ -20,10 +21,10 @@ export const useCampaignForm = (
     contactListId: '',
     greetingFileId: '',
     transferNumber: '',
-    status: 'draft',
+    status: 'pending', // Changed from 'draft' to 'pending'
     schedule: {
       startDate: new Date().toISOString().split('T')[0],
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      maxConcurrentCalls: 1 // Added with the right property name
     },
     user_id: user?.id || '',
   });
@@ -36,7 +37,7 @@ export const useCampaignForm = (
       setCampaign(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof CampaignData],
+          ...(prev[parent as keyof CampaignData] as object),
           [child]: value
         }
       }));
@@ -48,13 +49,13 @@ export const useCampaignForm = (
     }
   };
 
-  const handleSelectChange = (name: string, value: string) => {
+  const handleSelectChange = (name: string, value: string | number) => {
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setCampaign(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof CampaignData],
+          ...(prev[parent as keyof CampaignData] as object),
           [child]: value
         }
       }));
@@ -68,10 +69,11 @@ export const useCampaignForm = (
 
   const handleComplete = async () => {
     try {
-      const updatedCampaign = {
+      const updatedCampaign: CampaignData = {
         ...campaign,
-        status: 'ready',
-        created_at: new Date().toISOString(),
+        id: campaign.id || uuidv4(), // Generate ID if not present
+        status: 'pending' as const, // Use const assertion to fix type
+        createdAt: new Date().toISOString(),
         user_id: user?.id || '',
       };
       

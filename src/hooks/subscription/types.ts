@@ -1,5 +1,5 @@
 
-import { SupabaseError } from "@supabase/supabase-js";
+import { PostgrestError } from "@supabase/supabase-js";
 
 export interface Subscription {
   id: string;
@@ -36,7 +36,7 @@ export interface UseSubscriptionReturn {
   fetchCurrentSubscription: () => Promise<void>;
   activateLifetimePlan: (planId?: string) => Promise<{ success: boolean; error?: Error }>;
   getPlanById: (planId: string) => PlanDetails | null;
-  error: SupabaseError | Error | null;
+  error: PostgrestError | Error | null;
   hasReachedLimit: boolean;
   callLimit: number;
   trialExpired: boolean;
