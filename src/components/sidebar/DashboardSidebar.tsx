@@ -18,6 +18,7 @@ import LogoutButton from '../LogoutButton';
 import { SidebarNavItem } from './SidebarNavItem';
 import { useAuth } from '@/contexts/auth';
 import { useSidebar } from '@/components/ui/sidebar';
+import { Logo } from '@/components/ui/Logo';
 
 export const DashboardSidebar = () => {
   const location = useLocation();
@@ -61,7 +62,7 @@ export const DashboardSidebar = () => {
     >
       <div className="flex h-14 items-center px-4 border-b" data-sidebar="header">
         <Link to="/dashboard" className="flex items-center gap-2">
-          <span className="font-bold text-lg">Autodialer</span>
+          <Logo size="sm" withText={true} />
         </Link>
         {isMobile && (
           <Button
