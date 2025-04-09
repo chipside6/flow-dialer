@@ -1,9 +1,8 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
-import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
 import { touchSession, isSessionValid } from '@/services/auth/session';
 import { useSubscription } from '@/hooks/subscription';
 
@@ -19,9 +18,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireSubscription = false
 }) => {
   const { isAuthenticated, isAdmin, isLoading, user, sessionChecked } = useAuth();
-  const { hasLifetimePlan, isLoading: subscriptionLoading, fetchCurrentSubscription } = useSubscription();
+  const { 
+    hasLifetimePlan, 
+    isLoading: subscriptionLoading, 
+    fetchCurrentSubscription 
+  } = useSubscription();
   const location = useLocation();
   const [hasFetchedSubscription, setHasFetchedSubscription] = useState(false);
+  const redirectingRef = useRef(false);
   
   // Double-check session validity as a safety measure
   const sessionIsValid = isSessionValid();
@@ -82,7 +86,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
   
   // If subscription required but user has no active subscription
-  if (requireSubscription && !hasLifetimePlan) {
+  if (requireSubscription && !hasLifetimePlan && !redirectingRef.current) {
+    console.log('No lifetime plan, redirecting to upgrade page');
+    redirectingRef.current = true; // Prevent multiple redirects
     return <Navigate to="/upgrade" state={{ from: location }} replace />;
   }
   

@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/subscription';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,7 +19,7 @@ export function SubscriptionCheck({
   const [retryCount, setRetryCount] = useState(0);
   const [hasValidSubscription, setHasValidSubscription] = useState<boolean | null>(null);
   const [hasCheckedSubscription, setHasCheckedSubscription] = useState(false);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const hasRedirectedRef = useRef(false);
   
   // Determine if the user's subscription status meets requirements
   const subscriptionValid = !requireSubscription || hasLifetimePlan;
@@ -74,19 +73,9 @@ export function SubscriptionCheck({
             // Cache the validated subscription result
             setHasValidSubscription(!!subData);
             setHasCheckedSubscription(true);
-            
-            // Determine if redirect is needed after checks
-            if (requireSubscription && !subData) {
-              setShouldRedirect(true);
-            }
           }
         } else {
           setHasCheckedSubscription(true);
-          
-          // Handle redirect for users with subscriptions on pages that don't require one
-          if (!requireSubscription && subscriptionValid) {
-            setShouldRedirect(true);
-          }
         }
       } catch (error) {
         console.error("Error during subscription validation:", error);
@@ -108,18 +97,19 @@ export function SubscriptionCheck({
 
   // Handle redirect in a separate effect to avoid render loops
   useEffect(() => {
-    if (shouldRedirect && hasCheckedSubscription) {
+    if (hasCheckedSubscription && !hasRedirectedRef.current) {
       // Handle redirects after checking subscription status
       if (requireSubscription && !subscriptionValid && (retryCount >= 3 || hasValidSubscription === false)) {
         console.log('User has no lifetime subscription, redirecting to upgrade page');
+        hasRedirectedRef.current = true;
         navigate('/upgrade', { replace: true });
       } else if (!requireSubscription && subscriptionValid) {
         console.log('User already has a lifetime subscription, redirecting to dashboard');
+        hasRedirectedRef.current = true;
         navigate(redirectTo, { replace: true });
       }
     }
   }, [
-    shouldRedirect, 
     hasCheckedSubscription, 
     requireSubscription, 
     subscriptionValid, 
