@@ -1,3 +1,4 @@
+
 /**
  * Generates the master Asterisk configuration for the autodialer system
  */
@@ -87,9 +88,9 @@ exten => _X.,n,Set(CAMPAIGN_ID=\${CUT(EXTEN,_,2)})
 exten => _X.,n,Set(CACHE_FILE=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.conf)
 exten => _X.,n,Set(CACHE_TIME=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.time)
 exten => _X.,n,TrySystem(test -f \${CACHE_FILE})
-exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?cache_check:fetch_new)
+exten => _X.,n,GotoIf($["\${SYSTEMSTATUS}" = "SUCCESS"]?cache_check:fetch_new)
 exten => _X.,n(cache_check),TrySystem(find \${CACHE_FILE} -mmin -60 | grep -q \${CACHE_FILE})
-exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?use_cache:fetch_new)
+exten => _X.,n,GotoIf($["\${SYSTEMSTATUS}" = "SUCCESS"]?use_cache:fetch_new)
 exten => _X.,n(use_cache),NoOp(Using cached configuration)
 exten => _X.,n,Goto(campaign-\${CAMPAIGN_ID},s,1)
 exten => _X.,n(fetch_new),NoOp(Fetching fresh configuration)
@@ -228,9 +229,9 @@ exten => _X.,n,Set(CAMPAIGN_ID=\${CUT(EXTEN,_,2)})
 exten => _X.,n,Set(CACHE_FILE=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.conf)
 exten => _X.,n,Set(CACHE_TIME=/tmp/campaign-config-\${USER_ID}-\${CAMPAIGN_ID}.time)
 exten => _X.,n,TrySystem(test -f \${CACHE_FILE})
-exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?cache_check:fetch_new)
+exten => _X.,n,GotoIf($["\${SYSTEMSTATUS}" = "SUCCESS"]?cache_check:fetch_new)
 exten => _X.,n(cache_check),TrySystem(find \${CACHE_FILE} -mmin -60 | grep -q \${CACHE_FILE})
-exten => _X.,n,GotoIf($[${SYSTEMSTATUS} = SUCCESS]?use_cache:fetch_new)
+exten => _X.,n,GotoIf($["\${SYSTEMSTATUS}" = "SUCCESS"]?use_cache:fetch_new)
 exten => _X.,n(use_cache),NoOp(Using cached configuration)
 exten => _X.,n,Goto(campaign-\${CAMPAIGN_ID},s,1)
 exten => _X.,n(fetch_new),NoOp(Fetching fresh configuration)
@@ -290,12 +291,12 @@ EOF
 chmod +x /var/lib/asterisk/agi-bin/autodialer.agi
 
 # Update main configuration files to include our configuration
-if ! grep -q "#include \"sip_autodialer.conf\"" /etc/asterisk/sip.conf; then
-  echo "#include \"sip_autodialer.conf\"" >> /etc/asterisk/sip.conf
+if ! grep -q "#include \\"sip_autodialer.conf\\"" /etc/asterisk/sip.conf; then
+  echo "#include \\"sip_autodialer.conf\\"" >> /etc/asterisk/sip.conf
 fi
 
-if ! grep -q "#include \"extensions_autodialer.conf\"" /etc/asterisk/extensions.conf; then
-  echo "#include \"extensions_autodialer.conf\"" >> /etc/asterisk/extensions.conf
+if ! grep -q "#include \\"extensions_autodialer.conf\\"" /etc/asterisk/extensions.conf; then
+  echo "#include \\"extensions_autodialer.conf\\"" >> /etc/asterisk/extensions.conf
 fi
 
 # Restart Asterisk
@@ -311,7 +312,7 @@ asterisk -rx "dialplan reload"
 echo "Installation complete!"
 echo "Your Asterisk server is now configured for the autodialer system."
 echo "Check the status with: systemctl status asterisk"
-echo "View SIP peers with: asterisk -rx \"sip show peers\""
+echo "View SIP peers with: asterisk -rx \\"sip show peers\\""
 `;
   },
   
