@@ -146,27 +146,30 @@ export const goipService = {
       const deviceMap = new Map<string, GoipDevice>();
       
       data?.forEach(trunk => {
-        if (!deviceMap.has(trunk.trunk_name)) {
-          deviceMap.set(trunk.trunk_name, {
-            id: trunk.id,
-            device_name: trunk.trunk_name,
-            device_ip: trunk.device_ip || 'dynamic', // Use default value if device_ip is not present
+        // Ensure we're working with the UserTrunk interface that includes device_ip
+        const userTrunk = trunk as UserTrunk;
+        
+        if (!deviceMap.has(userTrunk.trunk_name)) {
+          deviceMap.set(userTrunk.trunk_name, {
+            id: userTrunk.id,
+            device_name: userTrunk.trunk_name,
+            device_ip: userTrunk.device_ip || 'dynamic', // Use default value if device_ip is not present
             num_ports: 0,
-            user_id: trunk.user_id,
+            user_id: userTrunk.user_id,
             ports: [],
-            created_at: trunk.created_at,
-            updated_at: trunk.updated_at
+            created_at: userTrunk.created_at,
+            updated_at: userTrunk.updated_at
           });
         }
         
-        const device = deviceMap.get(trunk.trunk_name);
+        const device = deviceMap.get(userTrunk.trunk_name);
         if (device) {
           device.num_ports++;
           device.ports.push({
-            port_number: trunk.port_number,
-            sip_user: trunk.sip_user,
-            sip_pass: trunk.sip_pass,
-            status: trunk.status
+            port_number: userTrunk.port_number,
+            sip_user: userTrunk.sip_user,
+            sip_pass: userTrunk.sip_pass,
+            status: userTrunk.status
           });
         }
       });
