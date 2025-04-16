@@ -12,6 +12,7 @@ import {
 import { connectionService } from './connectionService';
 import { dialingService } from './dialingService';
 import { securityUtils } from './utils/securityUtils';
+import { goipService } from './services/goipService';
 
 // Combined service for easier importing
 export const asteriskService = {
@@ -24,7 +25,10 @@ export const asteriskService = {
   configureCallFlow: dialingService.configureCallFlow,
   getDialingStatus: dialingService.getDialingStatus,
   startDialing: dialingService.startDialing,
-  stopDialing: dialingService.stopDialing
+  stopDialing: dialingService.stopDialing,
+  
+  // GoIP Management
+  goip: goipService
 };
 
 // Configuration exports

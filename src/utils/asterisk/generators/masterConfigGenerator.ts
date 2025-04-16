@@ -316,11 +316,11 @@ echo "View SIP peers with: asterisk -rx \\"sip show peers\\""
 `;
   },
   
-  generateSipConfig: (userId: string, portNumber: number, password: string) => {
+  generateSipConfig: (userId: string, portNumber: number, password: string, ipAddress?: string) => {
     return `
 [goip_${userId}_port${portNumber}]
 type=peer
-host=dynamic
+host=${ipAddress || 'dynamic'}
 port=5060
 username=goip_${userId}_port${portNumber}
 secret=${password}
@@ -337,5 +337,67 @@ directmedia=no
 rtp_timeout=30
 transport=udp
 `;
+  },
+  
+  // Generate multi-port GoIP configuration for a user
+  generateMultiPortConfig: (userId: string, deviceName: string, deviceIp: string, numPorts: number) => {
+    const ports = [];
+    
+    for (let port = 1; port <= numPorts; port++) {
+      const password = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+      
+      ports.push({
+        port_number: port,
+        sip_user: `goip_${userId}_port${port}`,
+        sip_pass: password,
+        device_name: deviceName,
+        device_ip: deviceIp
+      });
+      
+      const configBlock = `
+[goip_${userId}_port${port}]
+type=peer
+host=${deviceIp || 'dynamic'}
+port=5060
+username=goip_${userId}_port${port}
+secret=${password}
+fromuser=goip_${userId}_port${port}
+context=from-goip
+disallow=all
+allow=ulaw
+allow=alaw
+dtmfmode=rfc2833
+insecure=port,invite
+nat=force_rport,comedia
+qualify=yes
+directmedia=no
+rtp_timeout=30
+transport=udp
+`;
+    }
+    
+    return {
+      ports,
+      config: ports.map(port => `
+[goip_${userId}_port${port.port_number}]
+type=peer
+host=${deviceIp || 'dynamic'}
+port=5060
+username=${port.sip_user}
+secret=${port.sip_pass}
+fromuser=${port.sip_user}
+context=from-goip
+disallow=all
+allow=ulaw
+allow=alaw
+dtmfmode=rfc2833
+insecure=port,invite
+nat=force_rport,comedia
+qualify=yes
+directmedia=no
+rtp_timeout=30
+transport=udp
+`).join('\n')
+    };
   }
 };

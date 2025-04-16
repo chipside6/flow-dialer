@@ -1,49 +1,48 @@
 
-import { getConfigFromStorage } from '../config';
-
 /**
- * Security utilities for Asterisk integration
+ * Security utilities for the Asterisk services
  */
 export const securityUtils = {
   /**
-   * Create a basic auth header for Asterisk API
+   * Generate a secure random token
    */
-  getAuthHeader: (): string => {
-    const config = getConfigFromStorage();
-    return `Basic ${btoa(`${config.username}:${config.password}`)}`;
-  },
-  
-  /**
-   * Sanitize a string for use in a command
-   */
-  sanitizeCommandInput: (input: string): string => {
-    return input.replace(/[;&|"`'$*?#()[]{}~<>\\]/g, '');
-  },
-  
-  /**
-   * Check if an API URL is valid
-   */
-  isValidApiUrl: (url: string): boolean => {
-    try {
-      const parsedUrl = new URL(url);
-      return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
-    } catch (error) {
-      return false;
-    }
-  },
-  
-  /**
-   * Generate a secure token for authentication
-   */
-  generateSecureToken: (): string => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  generateSecureToken: (length: number = 16): string => {
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=';
     let result = '';
-    const length = 32;
+    const randomValues = new Uint8Array(length);
+    crypto.getRandomValues(randomValues);
     
     for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
+      result += charset.charAt(randomValues[i] % charset.length);
     }
     
     return result;
+  },
+  
+  /**
+   * Generate a simple password (more user-friendly)
+   */
+  generateSimplePassword: (length: number = 10): string => {
+    const charset = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let result = '';
+    const randomValues = new Uint8Array(length);
+    crypto.getRandomValues(randomValues);
+    
+    for (let i = 0; i < length; i++) {
+      result += charset.charAt(randomValues[i] % charset.length);
+    }
+    
+    return result;
+  },
+  
+  /**
+   * Hash a password (for local storage only)
+   */
+  hashPassword: async (password: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 };
