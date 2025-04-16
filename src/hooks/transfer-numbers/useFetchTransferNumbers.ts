@@ -1,5 +1,5 @@
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { fetchUserTransferNumbers } from "@/services/supabase/transferNumbersService";
 import { TransferNumber } from "@/types/transferNumber";
@@ -18,7 +18,6 @@ export const useFetchTransferNumbers = ({
   setError,
 }: UseFetchTransferNumbersState) => {
   const { user, isAuthenticated } = useAuth();
-  const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   // Define function outside useCachedFetch to avoid recreation
   const fetchData = async () => {
@@ -33,16 +32,8 @@ export const useFetchTransferNumbers = ({
     console.log(`Fetching transfer numbers for user: ${user.id}`);
     
     try {
-      // Cancel previous fetch if it exists
-      if (abortController) {
-        abortController.abort();
-      }
-      
-      // Create a new abort controller for this fetch
-      const controller = new AbortController();
-      setAbortController(controller);
-      
       // Set a reasonable timeout for the fetch operation
+      const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
       
       // Fetch transfer numbers
@@ -76,19 +67,12 @@ export const useFetchTransferNumbers = ({
       setTransferNumbers([]);
       setIsLoading(false);
       
-      // Ensure at least the loading state is set to false
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 100);
-      
       return [];
-    } finally {
-      setAbortController(null);
     }
   };
 
   // Use our cached fetch hook with optimized parameters
-  const { refetch: refetchNumbers, isLoading } = useCachedFetch(
+  const { refetch: fetchTransferNumbers, isLoading } = useCachedFetch(
     fetchData,
     {
       cacheKey: user?.id ? `transfer-numbers-${user.id}` : undefined,
@@ -99,19 +83,11 @@ export const useFetchTransferNumbers = ({
     }
   );
 
-  // Enhanced fetch with timeout safety net
-  const fetchTransferNumbers = useCallback(() => {
-    setIsLoading(true);
-    refetchNumbers();
-    
-    // Safety timeout to prevent indefinite loading state
-    const safetyTimeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 10000);
-    
-    return () => clearTimeout(safetyTimeout);
-  }, [refetchNumbers, setIsLoading]);
-
   // Return the fetch function
-  return { fetchTransferNumbers };
+  return { 
+    fetchTransferNumbers: useCallback(() => {
+      setIsLoading(true);
+      fetchTransferNumbers();
+    }, [fetchTransferNumbers, setIsLoading])
+  };
 };

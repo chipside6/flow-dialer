@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { TransferNumber } from "@/types/transferNumber";
 import { AddTransferNumberForm } from "./AddTransferNumberForm";
 import { TransferNumbersList } from "./TransferNumbersList";
@@ -33,7 +33,6 @@ export const TransferNumbersContent = ({
   const [forceShowContent, setForceShowContent] = useState(false);
   const [localTransferNumbers, setLocalTransferNumbers] = useState<TransferNumber[]>(transferNumbers);
   const [loadingTimeoutReached, setLoadingTimeoutReached] = useState(false);
-  const loadingTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Update local transfer numbers when prop changes
   useEffect(() => {
@@ -42,37 +41,15 @@ export const TransferNumbersContent = ({
   
   // Force show content after a short timeout for better UX
   useEffect(() => {
-    // Clear any existing timer
-    if (loadingTimerRef.current) {
-      clearTimeout(loadingTimerRef.current);
-      loadingTimerRef.current = null;
-    }
-    
-    if (isLoading) {
-      // Short timeout to show loading indicator
-      loadingTimerRef.current = setTimeout(() => {
+    const timer = setTimeout(() => {
+      if (isLoading) {
         setForceShowContent(true);
-      }, 1000);
-      
-      // Longer timeout to show warning
-      loadingTimerRef.current = setTimeout(() => {
-        if (isLoading) {
-          setLoadingTimeoutReached(true);
-          
-          // Auto retry after timeout
-          if (localTransferNumbers.length === 0 && !error) {
-            onRefresh();
-          }
-        }
-      }, 5000);
-    }
-    
-    return () => {
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current);
+        setLoadingTimeoutReached(true);
       }
-    };
-  }, [isLoading, localTransferNumbers.length, error, onRefresh]);
+    }, 3000); // Show content after 3 seconds even if still loading
+    
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   // Reset loading timeout state whenever loading state changes
   useEffect(() => {
@@ -164,7 +141,7 @@ export const TransferNumbersContent = ({
     }
   };
   
-  // Show appropriate loading state based on conditions
+  // Show simple loading indicator for very quick loads (under 3 seconds)
   if (isLoading && !forceShowContent && localTransferNumbers.length === 0) {
     return (
       <Card className="mb-8">
@@ -194,14 +171,8 @@ export const TransferNumbersContent = ({
       
       {/* Show an indicator if loading is taking too long */}
       {isLoading && loadingTimeoutReached && transferNumbers.length === 0 && (
-        <div className="text-center text-muted-foreground text-sm mt-4 p-2 border rounded bg-muted/10">
-          <p>Loading is taking longer than expected.</p>
-          <button 
-            onClick={onRefresh} 
-            className="text-primary text-xs underline mt-1 focus:outline-none"
-          >
-            Retry
-          </button>
+        <div className="text-center text-muted-foreground text-sm mt-4">
+          Loading is taking longer than expected. Please wait...
         </div>
       )}
     </>

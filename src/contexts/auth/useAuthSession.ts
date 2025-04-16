@@ -13,7 +13,6 @@ export const useAuthSession = () => {
   const [sessionExpiryTime, setSessionExpiryTime] = useState<number | null>(null);
   const [refreshError, setRefreshError] = useState<Error | null>(null);
   const [refreshInProgress, setRefreshInProgress] = useState(false);
-  const [initializationStartTime] = useState(Date.now());
 
   // Enhanced session refresh function with better error handling
   const refreshSession = useCallback(async (silent = false): Promise<boolean> => {
@@ -104,15 +103,6 @@ export const useAuthSession = () => {
     
     fetchInitialSession();
     
-    // Ensure the loading state is eventually set to false even if there are issues
-    const loadingTimeout = setTimeout(() => {
-      if (loading) {
-        console.warn('Auth session initialization timed out after 5 seconds');
-        setIsLoading(false);
-        setInitialized(true);
-      }
-    }, 5000);
-    
     // Listen for auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -142,10 +132,9 @@ export const useAuthSession = () => {
     );
     
     return () => {
-      clearTimeout(loadingTimeout);
       authListener?.subscription.unsubscribe();
     };
-  }, [refreshSession, loading]);
+  }, [refreshSession]);
 
   // Get the time remaining in the current session
   const getSessionTimeRemaining = useCallback((): number => {
@@ -160,12 +149,6 @@ export const useAuthSession = () => {
     // Return true if less than 10 minutes remaining
     return timeRemaining > 0 && timeRemaining < 10 * 60 * 1000;
   }, [getSessionTimeRemaining]);
-
-  // Calculate initialization time for debugging
-  const initializationTime = Date.now() - initializationStartTime;
-  if (initialized && !loading) {
-    console.log(`Auth session initialized in ${initializationTime}ms`);
-  }
 
   return {
     session,
