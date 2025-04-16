@@ -7,6 +7,9 @@ import { useAuth } from '@/contexts/auth/useAuth';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SetupInstructions } from '@/components/goip/SetupInstructions';
+import { AsteriskGuide } from '@/components/goip/AsteriskGuide';
 
 const GoipSetupContent = () => {
   const { user } = useAuth();
@@ -18,17 +21,35 @@ const GoipSetupContent = () => {
         
         <Alert className="mb-6">
           <InfoIcon className="h-4 w-4" />
-          <AlertTitle>Bring Your Own Device</AlertTitle>
+          <AlertTitle>Asterisk Server Configuration</AlertTitle>
           <AlertDescription>
-            This system is designed for users to bring their own GoIP devices. You only need to generate 
-            SIP credentials and configure your device - no system-wide Asterisk configuration is needed.
+            This page helps you set up and configure Asterisk on your server to work with your GoIP devices.
+            If you want to register a GoIP device, please visit the "GoIP Devices" page.
           </AlertDescription>
         </Alert>
 
-        <div className="grid grid-cols-1 gap-6">
-          {/* SIP Credentials Generator */}
-          <CredentialSection userId={user?.id} />
-        </div>
+        <Tabs defaultValue="credentials">
+          <TabsList className="mb-6">
+            <TabsTrigger value="credentials">SIP Credentials</TabsTrigger>
+            <TabsTrigger value="instructions">Asterisk Setup</TabsTrigger>
+            <TabsTrigger value="technical">Technical Guide</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="credentials">
+            <div className="grid grid-cols-1 gap-6">
+              {/* SIP Credentials Generator */}
+              <CredentialSection userId={user?.id} />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="instructions">
+            <SetupInstructions />
+          </TabsContent>
+          
+          <TabsContent value="technical">
+            <AsteriskGuide />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

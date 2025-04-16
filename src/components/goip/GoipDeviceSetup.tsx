@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -14,6 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertCircle, Check, Copy, Server } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { GoipDeviceInstructions } from './GoipDeviceInstructions';
+import { useLoadingStateManager } from '@/hooks/useLoadingStateManager';
+import { LoadingState } from '@/components/upgrade/LoadingState';
 
 // Define the form schema
 const formSchema = z.object({
@@ -25,10 +27,21 @@ const formSchema = z.object({
 export function GoipDeviceSetup() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationData, setRegistrationData] = useState<any>(null);
   const [copiedPort, setCopiedPort] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('register');
+  
+  const { isLoading, setIsLoading } = useLoadingStateManager({
+    initialState: false,
+    timeout: 15000,
+    onTimeout: () => {
+      toast({
+        title: "Operation timed out",
+        description: "Device registration is taking longer than expected. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,7 +62,7 @@ export function GoipDeviceSetup() {
       return;
     }
     
-    setIsSubmitting(true);
+    setIsLoading(true);
     
     try {
       // Generate random passwords and create configurations
@@ -170,7 +183,7 @@ transport=udp
         variant: "destructive"
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   }
   
@@ -194,82 +207,89 @@ transport=udp
           <TabsList className="mb-4">
             <TabsTrigger value="register">Register Device</TabsTrigger>
             <TabsTrigger value="credentials" disabled={!registrationData}>Credentials</TabsTrigger>
-            <TabsTrigger value="instructions" disabled={!registrationData}>Setup Instructions</TabsTrigger>
+            <TabsTrigger value="instructions">Setup Guide</TabsTrigger>
           </TabsList>
           
           <TabsContent value="register">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="deviceName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Device Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="My GoIP 8" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        A friendly name to identify your GoIP device
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="deviceIp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Device IP Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="192.168.1.100" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Public IP address or hostname of your GoIP device
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="numPorts"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Ports</FormLabel>
-                      <Select
-                        onValueChange={(value) => field.onChange(parseInt(value))}
-                        defaultValue={field.value.toString()}
-                      >
+            {isLoading ? (
+              <LoadingState 
+                message="Registering your device..." 
+                timeout={10000}
+              />
+            ) : (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="deviceName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Device Name</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select number of ports" />
-                          </SelectTrigger>
+                          <Input placeholder="My GoIP 8" {...field} />
                         </FormControl>
-                        <SelectContent>
-                          {[1, 2, 4, 8].map((num) => (
-                            <SelectItem key={num} value={num.toString()}>
-                              {num} {num === 1 ? 'Port' : 'Ports'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        How many ports does your GoIP device have?
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Registering...' : 'Register Device'}
-                </Button>
-              </form>
-            </Form>
+                        <FormDescription>
+                          A friendly name to identify your GoIP device
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="deviceIp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Device IP Address</FormLabel>
+                        <FormControl>
+                          <Input placeholder="192.168.1.100" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Public IP address or hostname of your GoIP device
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="numPorts"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Number of Ports</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                          defaultValue={field.value.toString()}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select number of ports" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {[1, 2, 4, 8].map((num) => (
+                              <SelectItem key={num} value={num.toString()}>
+                                {num} {num === 1 ? 'Port' : 'Ports'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          How many ports does your GoIP device have?
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? 'Registering...' : 'Register Device'}
+                  </Button>
+                </form>
+              </Form>
+            )}
           </TabsContent>
           
           <TabsContent value="credentials">
@@ -334,68 +354,7 @@ transport=udp
           </TabsContent>
           
           <TabsContent value="instructions">
-            {registrationData && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-medium">Setup Instructions for {registrationData.deviceName}</h3>
-                
-                <div className="space-y-4">
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-medium">1. Login to GoIP web panel</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Open a web browser and navigate to http://{registrationData.deviceIp}
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-medium">2. Go to 'VoIP Settings' &gt; 'SIP'</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Find the SIP configuration section in your GoIP device admin panel
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-medium">3. Enter the credentials shown</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      For each port, configure the SIP settings with the credentials provided
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-medium">4. Set server IP to: {registrationData.serverIp}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Enter our Asterisk server IP address in the 'SIP Server' field
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-medium">5. Set SIP port: 5060</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Use the standard SIP port 5060 for communication
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-medium">6. Save and reboot device</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      After saving the configuration, reboot your GoIP device to apply the changes
-                    </p>
-                  </div>
-                </div>
-                
-                <Alert>
-                  <Server className="h-4 w-4" />
-                  <AlertTitle>Connection Status</AlertTitle>
-                  <AlertDescription>
-                    After reboot, your GoIP device should register with our Asterisk server automatically. 
-                    You can check connection status in the Campaigns dashboard.
-                  </AlertDescription>
-                </Alert>
-                
-                <Button onClick={() => setActiveTab('credentials')}>
-                  Back to Credentials
-                </Button>
-              </div>
-            )}
+            <GoipDeviceInstructions />
           </TabsContent>
         </Tabs>
       </CardContent>
