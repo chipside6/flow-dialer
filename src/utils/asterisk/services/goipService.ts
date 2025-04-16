@@ -27,6 +27,20 @@ interface SipCredential {
   port: number;
 }
 
+// Define the interface for the UserTrunk model from Supabase
+interface UserTrunk {
+  id: string;
+  user_id: string;
+  trunk_name: string;
+  port_number: number;
+  sip_user: string;
+  sip_pass: string;
+  status: string;
+  device_ip?: string; // Make this optional to match potential database state
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Service for managing GoIP devices
  */
@@ -84,6 +98,13 @@ export const goipService = {
       // Sync the configuration with Asterisk
       await goipService.syncConfiguration(userId);
       
+      const processedPorts = insertedData ? insertedData.map(trunk => ({
+        port_number: trunk.port_number,
+        sip_user: trunk.sip_user,
+        sip_pass: trunk.sip_pass,
+        status: trunk.status
+      })) : [];
+      
       return {
         success: true,
         message: `Device ${deviceName} with ${numPorts} ports registered successfully`,
@@ -92,7 +113,7 @@ export const goipService = {
           device_ip: deviceIp,
           num_ports: numPorts,
           user_id: userId,
-          ports: insertedData as GoipPort[]
+          ports: processedPorts
         }
       };
     } catch (error) {
@@ -272,3 +293,4 @@ export const goipService = {
     }
   }
 };
+
