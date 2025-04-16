@@ -8,20 +8,29 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLoadingStateManager } from '@/hooks/useLoadingStateManager';
 
 const Campaign = () => {
-  const { currentPlan, isLoading } = useSubscription();
+  const { currentPlan, isLoading: isSubscriptionLoading } = useSubscription();
   const isLifetimePlan = currentPlan === 'lifetime';
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
+  
+  // Use our loading state manager with timeout fallback
+  const { isLoading: isCheckingSubscription, setIsLoading } = useLoadingStateManager({
+    initialState: true,
+    timeout: 5000, // 5 second timeout
+    onTimeout: () => {
+      console.warn("Subscription check timed out, showing available content");
+    }
+  });
   
   // Effect to prevent flash of content by ensuring subscription check is complete
   useEffect(() => {
-    if (!isLoading) {
-      setIsCheckingSubscription(false);
+    if (!isSubscriptionLoading) {
+      setIsLoading(false);
     }
-  }, [isLoading]);
+  }, [isSubscriptionLoading, setIsLoading]);
   
   // Event handlers for the CampaignCreationWizard
   const handleComplete = (campaignData: any) => {

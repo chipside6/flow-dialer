@@ -1,22 +1,27 @@
 
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 interface UploadProgressProps {
   isUploading: boolean;
   uploadProgress: number;
   error?: string | null;
+  onRetry?: () => void;
 }
 
 export const UploadProgress = ({ 
   isUploading, 
   uploadProgress, 
-  error 
+  error,
+  onRetry
 }: UploadProgressProps) => {
   const [showLoader, setShowLoader] = useState(false);
   const [displayProgress, setDisplayProgress] = useState(0);
   const [isStuck, setIsStuck] = useState(false);
+  const [lastProgress, setLastProgress] = useState(0);
+  const [stuckTime, setStuckTime] = useState(0);
   
   // Only show the loader after a brief delay to prevent flashing for quick uploads
   useEffect(() => {
@@ -54,22 +59,30 @@ export const UploadProgress = ({
     }
   }, [uploadProgress, displayProgress]);
   
-  // Detect stuck upload (no progress for 10 seconds while uploading)
+  // More aggressive detection of stuck uploads
   useEffect(() => {
-    let stuckTimeout: NodeJS.Timeout;
-    
-    if (isUploading && uploadProgress > 0 && uploadProgress < 100) {
-      stuckTimeout = setTimeout(() => {
-        setIsStuck(true);
-      }, 10000); // 10 seconds with no progress change
-    } else {
+    // Reset stuck detection when progress changes
+    if (uploadProgress !== lastProgress) {
+      setLastProgress(uploadProgress);
+      setStuckTime(0);
       setIsStuck(false);
+      return;
     }
     
-    return () => {
-      if (stuckTimeout) clearTimeout(stuckTimeout);
-    };
-  }, [isUploading, uploadProgress]);
+    // Check if we're in the middle of an upload
+    if (isUploading && uploadProgress > 0 && uploadProgress < 100) {
+      // Check every second if progress has stalled
+      const interval = setInterval(() => {
+        setStuckTime(prev => prev + 1);
+        // Consider it stuck after 5 seconds with no progress
+        if (stuckTime >= 5) {
+          setIsStuck(true);
+        }
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isUploading, uploadProgress, lastProgress, stuckTime]);
   
   // Always show the progress if we're uploading or at 100%
   const shouldShow = showLoader || isUploading || uploadProgress === 100 || error || isStuck;
@@ -83,7 +96,7 @@ export const UploadProgress = ({
   if (uploadProgress === 100 && !isUploading) {
     statusText = 'Upload complete!';
   } else if (isStuck) {
-    statusText = 'Upload may be stuck. You can try again.';
+    statusText = 'Upload may be stuck.';
   } else if (uploadProgress < 20) {
     statusText = 'Preparing upload...';
   } else if (uploadProgress < 80) {
@@ -111,6 +124,20 @@ export const UploadProgress = ({
         value={error ? 100 : displayProgress} 
         className={`h-2 ${error ? 'bg-destructive/20' : isStuck ? 'bg-amber-200' : ''}`}
       />
+      
+      {isStuck && onRetry && (
+        <div className="flex justify-center mt-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onRetry}
+            className="flex items-center text-xs"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Retry Upload
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
