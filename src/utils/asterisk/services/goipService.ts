@@ -74,7 +74,8 @@ export const goipService = {
           sip_pass: port.sip_pass,
           status: port.status,
           trunk_name: deviceName,
-          user_id: userId
+          user_id: userId,
+          device_ip: deviceIp  // Add device_ip to the database record
         })))
         .select();
       

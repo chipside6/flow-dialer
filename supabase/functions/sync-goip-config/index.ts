@@ -140,10 +140,14 @@ serve(async (req) => {
     
     // Generate SIP configuration for each trunk
     if (userTrunks.length > 0) {
-      configContent = userTrunks.map(trunk => `
+      configContent = userTrunks.map(trunk => {
+        // Use device_ip from the trunk if available, otherwise use 'dynamic'
+        const hostSetting = trunk.device_ip ? `host=${trunk.device_ip}` : 'host=dynamic';
+        
+        return `
 [goip_${trunk.user_id}_port${trunk.port_number}]
 type=peer
-host=dynamic
+${hostSetting}
 port=5060
 username=${trunk.sip_user}
 secret=${trunk.sip_pass}
@@ -156,7 +160,8 @@ insecure=invite,port
 nat=yes
 qualify=yes
 directmedia=no
-      `.trim()).join('\n\n');
+      `.trim();
+      }).join('\n\n');
       
       // In production this would connect to Asterisk server via SSH
       // but since we can't use SSH2 in Deno, we'll simulate the operation
