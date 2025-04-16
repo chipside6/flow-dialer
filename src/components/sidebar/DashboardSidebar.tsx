@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Phone, 
@@ -26,6 +26,7 @@ import { useSubscription } from '@/hooks/subscription';
 
 export const DashboardSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAdmin, signOut } = useAuth();
   const [activeItem, setActiveItem] = useState('');
   const { openMobile, setOpenMobile, isMobile } = useSidebar();
@@ -93,18 +94,24 @@ export const DashboardSidebar = () => {
       // Call the signOut function from auth context
       if (signOut) await signOut();
       
+      // Navigate to login page first
+      navigate('/login');
+      
       // Force app reload after signOut to ensure complete state reset
-      forceLogoutWithReload();
+      setTimeout(() => {
+        forceLogoutWithReload();
+      }, 100);
     } catch (error) {
       console.error("Logout error:", error);
       
       // If all else fails, clear session directly and force reload
       clearAllAuthData();
+      navigate('/login');
       forceLogoutWithReload();
     } finally {
       setIsLoggingOut(false);
     }
-  }, [isLoggingOut, signOut]);
+  }, [isLoggingOut, signOut, navigate]);
 
   // Use useEffect with body class for sidebar state
   useEffect(() => {
@@ -266,7 +273,7 @@ export const DashboardSidebar = () => {
           disabled={isLoggingOut}
         >
           <LogOut className="h-4 w-4 mr-2" /> 
-          <span>Logout</span>
+          <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
         </Button>
       </div>
     </div>

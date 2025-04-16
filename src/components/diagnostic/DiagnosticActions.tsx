@@ -25,13 +25,21 @@ export const DiagnosticActions = ({ onRefresh }: { onRefresh: () => void }) => {
         console.warn("DiagnosticActions - Error during sign out:", error);
       });
       
-      // Force a complete application reload to reset all state
-      forceLogoutWithReload();
+      // Navigate to login page before reload
+      navigate('/login');
+      
+      // Force a complete application reload to reset all state after a short delay
+      setTimeout(() => {
+        forceLogoutWithReload();
+      }, 100);
     } catch (error: any) {
       console.error("DiagnosticActions - Error signing out:", error);
       
-      // Even on error, force app reload
+      // Even on error, navigate and force app reload
+      navigate('/login');
       forceLogoutWithReload();
+    } finally {
+      setIsLoggingOut(false);
     }
   };
   

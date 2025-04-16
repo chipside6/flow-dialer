@@ -41,13 +41,19 @@ const LogoutButton = ({
       // Call the signOut function from auth context
       await signOut();
       
-      // Force app reload after signOut to ensure complete state reset
-      forceLogoutWithReload();
+      // Navigate to login page before reload to ensure a clean state
+      navigate('/login');
+      
+      // Force app reload after signOut and navigation to ensure complete state reset
+      setTimeout(() => {
+        forceLogoutWithReload();
+      }, 100);
     } catch (error: any) {
       console.error("Logout error:", error);
       
       // If all else fails, clear session directly and force reload
       clearSession();
+      navigate('/login');
       forceLogoutWithReload();
     } finally {
       setIsLoggingOut(false);

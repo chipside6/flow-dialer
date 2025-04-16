@@ -26,12 +26,18 @@ export const clearAllAuthData = () => {
     }
   });
   
-  // Force clear localStorage completely as a fallback if needed
+  // Clear session/local storage caches that might be used by the app
   try {
-    // We only clear Supabase related items to not affect other app functionality
-    localStorage.removeItem('supabase.auth.token');
+    // Clear application-specific caches
+    Object.keys(localStorage).forEach(key => {
+      if (key.includes('cache-') || key.includes('-cache')) {
+        localStorage.removeItem(key);
+      }
+    });
+    // Clear session storage as well
+    sessionStorage.clear();
   } catch (e) {
-    console.error("Error clearing Supabase auth state:", e);
+    console.error("Error clearing caches:", e);
   }
 };
 
@@ -48,10 +54,10 @@ export const debouncedClearAllAuthData = () => {
   }, 50) as unknown as number;
 };
 
-// Add the missing forceAppReload function
+// Force app reload with cache busting
 export const forceAppReload = () => {
   // Force a page reload to reset application state
-  window.location.reload();
+  window.location.href = window.location.origin + '/login?t=' + new Date().getTime();
 };
 
 // Force logout with app reload
