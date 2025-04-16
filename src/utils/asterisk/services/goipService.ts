@@ -36,7 +36,7 @@ interface UserTrunk {
   sip_user: string;
   sip_pass: string;
   status: string;
-  device_ip?: string; // Make this optional to match potential database state
+  device_ip?: string; // Add device_ip as an optional property
   created_at: string;
   updated_at: string;
 }
@@ -89,7 +89,7 @@ export const goipService = {
           status: port.status,
           trunk_name: deviceName,
           user_id: userId,
-          device_ip: deviceIp  // Add device_ip to the database record
+          device_ip: deviceIp  // Make sure device_ip is properly added to the database record
         })))
         .select();
       
@@ -150,7 +150,7 @@ export const goipService = {
           deviceMap.set(trunk.trunk_name, {
             id: trunk.id,
             device_name: trunk.trunk_name,
-            device_ip: trunk.device_ip || 'dynamic',
+            device_ip: trunk.device_ip || 'dynamic', // Use default value if device_ip is not present
             num_ports: 0,
             user_id: trunk.user_id,
             ports: [],
