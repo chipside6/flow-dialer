@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { GreetingFile } from "./greeting-files/types";
 import { useGreetingFilesQuery } from "./greeting-files/useGreetingFilesQuery";
@@ -20,7 +20,9 @@ export function useGreetingFiles() {
     data: greetingFiles = [], 
     error, 
     refetch,
-    isLoading: isQueryLoading
+    isLoading: isQueryLoading,
+    isFetching,
+    isError
   } = useGreetingFilesQuery(user?.id);
   
   // Handle errors
@@ -32,28 +34,56 @@ export function useGreetingFiles() {
   // Handle refreshing the files
   const { refreshGreetingFiles } = useRefreshGreetingFiles(user?.id);
 
-  // Set up a safety timeout to prevent stuck loading state
+  const forceRefresh = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await refetch();
+    } catch (err) {
+      console.error("Error forcing refresh:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [refetch]);
+
+  // Set up loading state management
   useEffect(() => {
-    setIsLoading(isQueryLoading);
+    // Only set loading to true when starting a new query
+    if (isQueryLoading && !isFetching) {
+      setIsLoading(true);
+    }
     
-    // Set a timeout to end loading state after 15 seconds, regardless of query state
+    // When query is done or there's an error, end loading state
+    if (!isQueryLoading || isError) {
+      setIsLoading(false);
+    }
+    
+    // Set a timeout to end loading state after 10 seconds, reduced from 15
     const loadingTimeout = setTimeout(() => {
       if (isLoading) {
         console.log("Fetch timeout reached, ending loading state");
         setIsLoading(false);
         
         if (!greetingFiles || greetingFiles.length === 0) {
+          // Only show toast if we haven't loaded files yet
           toast({
             title: "Could not load files",
-            description: "There was a problem loading your audio files. Please try again later.",
-            variant: "destructive"
+            description: "There was a problem loading your audio files. Please try refreshing the page.",
+            variant: "destructive",
+            action: (
+              <button 
+                className="bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
+                onClick={forceRefresh}
+              >
+                Retry
+              </button>
+            ),
           });
         }
       }
-    }, 15000);
+    }, 10000); // Reduced from 15 seconds to 10 seconds
     
     return () => clearTimeout(loadingTimeout);
-  }, [isQueryLoading, greetingFiles]);
+  }, [isQueryLoading, isFetching, isLoading, isError, greetingFiles, forceRefresh]);
 
   return { 
     greetingFiles, 
@@ -61,6 +91,7 @@ export function useGreetingFiles() {
     error, 
     isError: !!error,
     refreshGreetingFiles,
-    deleteGreetingFile // Return the mutation result directly
+    deleteGreetingFile, // Return the mutation result directly
+    forceRefresh
   };
 }

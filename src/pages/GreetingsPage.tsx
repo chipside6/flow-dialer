@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Loader2, FileAudio } from "lucide-react";
+import { Loader2, FileAudio, RefreshCw } from "lucide-react";
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useAuth } from '@/contexts/auth';
 import { touchSession } from '@/services/auth/session';
@@ -12,10 +12,22 @@ import { Button } from '@/components/ui/button';
 import { GreetingFilesList } from '@/components/greeting-files/GreetingFilesList';
 import { useNavigate } from 'react-router-dom';
 
-const GreetingsFallback = () => (
-  <div className="w-full h-48 flex items-center justify-center">
-    <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
-    <span>Loading audio files...</span>
+const GreetingsFallback = ({ onRetry }: { onRetry?: () => void }) => (
+  <div className="w-full h-48 flex flex-col items-center justify-center">
+    <Loader2 className="h-6 w-6 animate-spin text-primary mb-4" />
+    <span className="text-muted-foreground">Loading audio files...</span>
+    
+    {onRetry && (
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="mt-4"
+        onClick={onRetry}
+      >
+        <RefreshCw className="h-4 w-4 mr-2" />
+        Retry Loading
+      </Button>
+    )}
   </div>
 );
 
@@ -47,15 +59,30 @@ const GreetingsContent = () => {
     isLoading, 
     error, 
     refreshGreetingFiles, 
-    deleteGreetingFile: deleteGreetingFileMutation 
+    deleteGreetingFile: deleteGreetingFileMutation,
+    forceRefresh 
   } = useGreetingFiles();
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   
   // Touch the session on component mount to prevent premature session expiration
   useEffect(() => {
     touchSession();
   }, []);
+
+  // Add automatic retry if we're stuck in loading for too long
+  useEffect(() => {
+    if (isLoading && retryCount < 3) {
+      const retryTimer = setTimeout(() => {
+        console.log(`Auto-retry attempt #${retryCount + 1}`);
+        forceRefresh();
+        setRetryCount(prev => prev + 1);
+      }, 20000); // After 20 seconds of loading, try automatic refresh
+      
+      return () => clearTimeout(retryTimer);
+    }
+  }, [isLoading, retryCount, forceRefresh]);
 
   const handleDelete = async (fileId: string) => {
     try {
@@ -77,6 +104,11 @@ const GreetingsContent = () => {
       setIsDeleting(false);
     }
   };
+
+  const handleRetry = () => {
+    forceRefresh();
+    setRetryCount(0); // Reset retry count on manual retry
+  };
   
   return (
     <div className="container mx-auto py-4 max-w-7xl">
@@ -88,21 +120,34 @@ const GreetingsContent = () => {
           </p>
         </div>
         
-        <Button 
-          className="bg-primary text-primary-foreground"
-          onClick={() => navigate('/greetings/upload')}
-        >
-          + Upload Audio
-        </Button>
+        <div className="flex gap-2">
+          {!isLoading && (
+            <Button
+              variant="outline"
+              onClick={handleRetry}
+              size="icon"
+              title="Refresh files"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          )}
+          
+          <Button 
+            className="bg-primary text-primary-foreground"
+            onClick={() => navigate('/greetings/upload')}
+          >
+            + Upload Audio
+          </Button>
+        </div>
       </div>
       
       {/* Show error if present */}
       {error && (
-        <GreetingFilesError error={error as Error} onRetry={refreshGreetingFiles} />
+        <GreetingFilesError error={error as Error} onRetry={handleRetry} />
       )}
       
       {/* Show loading state */}
-      {isLoading && <GreetingsFallback />}
+      {isLoading && <GreetingsFallback onRetry={handleRetry} />}
       
       {/* Show content when loaded and no error */}
       {!isLoading && !error && (

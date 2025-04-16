@@ -43,25 +43,33 @@ export const useGreetingFilesQuery = (userId: string | undefined) => {
       // First ensure the bucket exists
       const bucketExists = await ensureStorageBucket();
       if (!bucketExists) {
-        toast({
-          title: 'Storage setup error',
-          description: 'Could not set up storage for audio files',
-          variant: 'destructive'
-        });
+        console.warn('Storage setup issue: bucket creation failed');
+        // Continue anyway - we might still be able to fetch existing files
       }
       
-      const { data, error } = await supabase
-        .from('greeting_files')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        throw error;
+      try {
+        const { data, error } = await supabase
+          .from('greeting_files')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Supabase query error:', error);
+          throw new Error(`Failed to load files: ${error.message}`);
+        }
+        
+        console.log(`Successfully fetched ${data?.length || 0} greeting files`);
+        return data as GreetingFile[];
+      } catch (error: any) {
+        console.error('Error in greeting files query:', error);
+        throw new Error(error?.message || 'Unknown error loading files');
       }
-      
-      return data as GreetingFile[];
     },
-    enabled: !!userId
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
+    refetchOnWindowFocus: false
   });
 };
