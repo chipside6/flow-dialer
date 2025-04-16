@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { CredentialGenerator } from './CredentialGenerator';
 import { CredentialTable } from './CredentialTable';
-import { SetupInstructions } from './SetupInstructions';
 import { EmptyCredentialsState } from './EmptyCredentialsState';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -21,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { SetupInstructions } from './SetupInstructions';
 
 // Schema for the trunk name form
 const trunkNameSchema = z.object({
