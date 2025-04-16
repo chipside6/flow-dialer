@@ -7,6 +7,7 @@
 export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || 'http://localhost:8088/ari';
 export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || 'admin';
 export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || 'admin';
+export const ASTERISK_SERVER_IP = import.meta.env.VITE_ASTERISK_SERVER_IP || '';
 
 // Storage key
 const STORAGE_KEY = 'asterisk_config';
@@ -16,6 +17,7 @@ export interface AsteriskConfig {
   apiUrl: string;
   username: string;
   password: string;
+  serverIp?: string;
 }
 
 /**
@@ -35,7 +37,8 @@ export const getConfigFromStorage = (): AsteriskConfig => {
   return {
     apiUrl: ASTERISK_API_URL,
     username: ASTERISK_API_USERNAME,
-    password: ASTERISK_API_PASSWORD
+    password: ASTERISK_API_PASSWORD,
+    serverIp: ASTERISK_SERVER_IP
   };
 };
 

@@ -233,13 +233,18 @@ export const goipService = {
       // Sync the configuration with Asterisk
       await goipService.syncConfiguration(userId);
       
+      // Use actual server IP from environment, fallback to previous value if available
+      const serverIp = import.meta.env.VITE_ASTERISK_SERVER_IP || 
+                       import.meta.env.ASTERISK_SERVER_IP || 
+                       'your-asterisk-server.com';
+      
       return {
         success: true,
         message: 'Credentials regenerated successfully',
         credential: {
           username: trunk.sip_user,
           password: newPassword,
-          server: import.meta.env.VITE_ASTERISK_SERVER_IP || 'your-asterisk-server-ip',
+          server: serverIp,
           port: 5060
         }
       };

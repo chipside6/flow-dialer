@@ -1,11 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { testAsteriskConnection } from "@/utils/asterisk/config";
+import { testAsteriskConnection, getConfigFromStorage, saveConfigToStorage } from "@/utils/asterisk/config";
 import { useToast } from "@/components/ui/use-toast";
 import { Settings, RefreshCw, AlertCircle, CheckCircle, Lock } from "lucide-react";
 
@@ -13,9 +13,11 @@ interface EnvironmentSetupProps {
   apiUrl: string;
   username: string;
   password: string;
+  serverIp?: string; // Add serverIp as an optional prop
   setApiUrl: (url: string) => void;
   setUsername: (username: string) => void;
   setPassword: (password: string) => void;
+  setServerIp?: (ip: string) => void; // Add setter for serverIp
   onSave?: () => void;
 }
 
@@ -23,14 +25,29 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
   apiUrl,
   username,
   password,
+  serverIp = '',
   setApiUrl,
   setUsername,
   setPassword,
+  setServerIp,
   onSave
 }) => {
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const { toast } = useToast();
+
+  // Load configuration from storage on component mount
+  useEffect(() => {
+    const loadedConfig = getConfigFromStorage();
+    if (loadedConfig) {
+      setApiUrl(loadedConfig.apiUrl || apiUrl);
+      setUsername(loadedConfig.username || username);
+      setPassword(loadedConfig.password || password);
+      if (setServerIp && loadedConfig.serverIp) {
+        setServerIp(loadedConfig.serverIp);
+      }
+    }
+  }, []);
 
   const handleTestConnection = async () => {
     setIsTesting(true);
@@ -69,9 +86,22 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
   };
 
   const handleSave = () => {
+    // Save configuration to localStorage
+    saveConfigToStorage({
+      apiUrl,
+      username,
+      password,
+      serverIp: serverIp
+    });
+    
     if (onSave) {
       onSave();
     }
+    
+    toast({
+      title: "Configuration saved",
+      description: "Asterisk server configuration has been saved"
+    });
   };
 
   return (
@@ -99,6 +129,21 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
               The URL of your Asterisk REST Interface (ARI)
             </p>
           </div>
+          
+          {setServerIp && (
+            <div className="space-y-2">
+              <Label htmlFor="serverIp">Asterisk Server IP</Label>
+              <Input
+                id="serverIp"
+                placeholder="Enter your Asterisk server IP address"
+                value={serverIp}
+                onChange={(e) => setServerIp(e.target.value)}
+              />
+              <p className="text-sm text-muted-foreground">
+                The IP address of your Asterisk server for SIP connections
+              </p>
+            </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
