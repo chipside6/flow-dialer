@@ -74,7 +74,7 @@ export function useGreetingFiles() {
               altText: "Retry",
               onClick: () => forceRefresh(),
               children: "Retry"
-            }
+            } as any
           });
         }
       }
