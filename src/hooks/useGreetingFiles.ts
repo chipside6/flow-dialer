@@ -7,6 +7,7 @@ import { useDeleteGreetingFile } from "./greeting-files/useDeleteGreetingFile";
 import { useRefreshGreetingFiles } from "./greeting-files/useRefreshGreetingFiles";
 import { useErrorHandling } from "./greeting-files/useErrorHandling";
 import { toast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 // Re-export the GreetingFile type for backward compatibility
 export type { GreetingFile } from "./greeting-files/types";
@@ -69,10 +70,9 @@ export function useGreetingFiles() {
             title: "Could not load files",
             description: "There was a problem loading your audio files. Please try refreshing the page.",
             variant: "destructive",
-            action: {
-              label: "Retry",
-              onClick: () => forceRefresh()
-            }
+            action: <ToastAction altText="Retry" onClick={() => forceRefresh()}>
+              Retry
+            </ToastAction>
           });
         }
       }
