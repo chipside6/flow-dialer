@@ -69,14 +69,10 @@ export function useGreetingFiles() {
             title: "Could not load files",
             description: "There was a problem loading your audio files. Please try refreshing the page.",
             variant: "destructive",
-            action: (
-              <button 
-                className="bg-white text-red-600 px-3 py-1 rounded-md text-xs font-medium"
-                onClick={forceRefresh}
-              >
-                Retry
-              </button>
-            ),
+            action: {
+              label: "Retry",
+              onClick: () => forceRefresh()
+            }
           });
         }
       }
