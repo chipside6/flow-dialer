@@ -70,9 +70,11 @@ export function useGreetingFiles() {
             title: "Could not load files",
             description: "There was a problem loading your audio files. Please try refreshing the page.",
             variant: "destructive",
-            action: <ToastAction altText="Retry" onClick={() => forceRefresh()}>
-              Retry
-            </ToastAction>
+            action: {
+              altText: "Retry",
+              onClick: () => forceRefresh(),
+              children: "Retry"
+            }
           });
         }
       }
