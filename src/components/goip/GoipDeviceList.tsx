@@ -1,92 +1,52 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
-import { Badge } from '@/components/ui/badge';
-import { AddPortDialog } from './AddPortDialog';
-
-interface GoipDevice {
-  id: string;
-  device_name: string;
-  ip_address: string;
-  ports: Array<{
-    id: string;
-    port_number: number;
-    sip_username: string;
-    status: string;
-  }>;
-}
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { PortStatusBadge } from './PortStatusBadge';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 export const GoipDeviceList = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [devices, setDevices] = useState<GoipDevice[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchDevices = async () => {
-    if (!user?.id) return;
-
-    try {
-      const { data: devicesData, error: devicesError } = await supabase
+  const { data: devices, isLoading } = useQuery({
+    queryKey: ['goip-devices', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
         .from('goip_devices')
         .select('*')
         .eq('user_id', user.id);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id
+  });
 
-      if (devicesError) throw devicesError;
-
-      const devicesWithPorts = await Promise.all(
-        devicesData.map(async (device) => {
-          const { data: portsData } = await supabase
-            .from('goip_ports')
-            .select('*')
-            .eq('device_id', device.id)
-            .order('port_number');
-
-          return {
-            ...device,
-            ports: portsData || []
-          };
-        })
-      );
-
-      setDevices(devicesWithPorts);
-    } catch (error) {
-      console.error('Error fetching devices:', error);
-      toast({
-        title: "Error loading devices",
-        description: "Failed to load your devices. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDevices();
-  }, [user?.id]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'available':
-        return 'bg-green-500';
-      case 'busy':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
+        <CardContent className="flex items-center justify-center py-6">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!devices?.length) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Devices</CardTitle>
+          <CardDescription>No devices registered yet</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Register your first GoIP device using the form above.
+          </p>
         </CardContent>
       </Card>
     );
@@ -95,41 +55,29 @@ export const GoipDeviceList = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Your GoIP Devices</CardTitle>
-        <CardDescription>Manage your registered devices and ports</CardDescription>
+        <CardTitle>Your Devices</CardTitle>
+        <CardDescription>Manage your registered GoIP devices</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {devices.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <p>No devices registered yet.</p>
-          </div>
-        ) : (
-          devices.map((device) => (
-            <div key={device.id} className="border rounded-lg p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">{device.device_name}</h3>
-                  <p className="text-sm text-muted-foreground">{device.ip_address}</p>
+      <CardContent>
+        <div className="space-y-4">
+          {devices.map((device) => (
+            <Card key={device.id}>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">{device.device_name}</CardTitle>
+                  <PortStatusBadge status="idle" />
                 </div>
-                <AddPortDialog deviceId={device.id} onPortAdded={fetchDevices} />
-              </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                {device.ports.map((port) => (
-                  <div key={port.id} className="border rounded p-2 text-sm">
-                    <div className="flex items-center justify-between mb-1">
-                      <span>Port {port.port_number}</span>
-                      <div className={`h-2 w-2 rounded-full ${getStatusColor(port.status)}`} />
-                    </div>
-                    <div className="truncate text-xs text-muted-foreground">
-                      {port.sip_username}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))
-        )}
+                <CardDescription>{device.ip_address}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">View Ports</Button>
+                  <Button variant="outline" size="sm">Test Connection</Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
