@@ -1,4 +1,6 @@
 
+import { supabase } from '@/integrations/supabase/client';
+
 /**
  * Generate Asterisk dialplan configuration for a campaign
  */
