@@ -59,9 +59,9 @@ export function useGreetingFiles() {
         // Only show toast if we still don't have data
         if (!greetingFiles || greetingFiles.length === 0) {
           toast({
-            title: "Loading timeout",
-            description: "Loading is taking longer than expected. Please try again.",
-            variant: "destructive",
+            title: "Loading taking longer than expected",
+            description: "We're having trouble loading your audio files. Please try again.",
+            variant: "warning", // Changed from "destructive" to "warning"
             action: (
               <ToastAction altText="Retry" onClick={forceRefresh}>
                 Retry Loading

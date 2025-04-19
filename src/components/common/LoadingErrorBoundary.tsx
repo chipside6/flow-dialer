@@ -69,7 +69,7 @@ export const LoadingErrorBoundary: React.FC<LoadingErrorBoundaryProps> = ({
   if (isLoading) {
     if (isStuck) {
       return (
-        <div className="p-4 rounded-md mb-6 bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
+        <div className="p-4 rounded-md mb-6 bg-amber-50 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
           <h3 className="font-medium flex items-center gap-2">
             <AlertCircle className="h-5 w-5" />
             Loading is taking longer than expected
