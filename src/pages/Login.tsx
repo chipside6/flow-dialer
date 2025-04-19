@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
@@ -48,6 +49,9 @@ const Login = () => {
     setErrorMessage(null);
 
     try {
+      // Clear any existing sessions to prevent conflicts
+      await supabase.auth.signOut({ scope: 'local' });
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -86,14 +90,18 @@ const Login = () => {
         });
         
         // Fetch admin status and store it
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', userData.id)
-          .maybeSingle();
-          
-        if (profileData) {
-          storeAdminStatus(!!profileData.is_admin);
+        try {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', userData.id)
+            .maybeSingle();
+            
+          if (profileData) {
+            storeAdminStatus(!!profileData.is_admin);
+          }
+        } catch (profileError) {
+          console.error("Error fetching admin status:", profileError);
         }
         
         localStorage.setItem('sessionLastUpdated', Date.now().toString());

@@ -9,6 +9,9 @@ export const clearAllAuthData = () => {
   localStorage.removeItem('supabase.auth.expires_at');
   localStorage.removeItem('supabase.auth.refresh_token');
   
+  // Clear current Supabase session
+  localStorage.removeItem('supabase.auth.token');
+  
   // Clear our custom session storage
   localStorage.removeItem('user_session');
   

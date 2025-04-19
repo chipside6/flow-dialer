@@ -21,6 +21,33 @@ export function SubscriptionCheck({
   const [retryCount, setRetryCount] = useState(0);
   const [hasValidSubscription, setHasValidSubscription] = useState<boolean | null>(null);
   const hasRedirectedRef = useRef(false);
+  const [sessionValid, setSessionValid] = useState<boolean | null>(null);
+  
+  // First check if the user has a valid session
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error || !data.session) {
+          console.log("No valid session found in SubscriptionCheck");
+          setSessionValid(false);
+          
+          if (!hasRedirectedRef.current) {
+            hasRedirectedRef.current = true;
+            navigate('/login', { replace: true });
+          }
+          return;
+        }
+        
+        setSessionValid(true);
+      } catch (err) {
+        console.error("Error checking session:", err);
+        setSessionValid(false);
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
   
   // Check if user has a valid subscription - explicitly check for lifetime plan
   const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
@@ -33,7 +60,7 @@ export function SubscriptionCheck({
     try {
       // Only perform this check if our local check indicates no valid subscription
       // This avoids unnecessary DB queries
-      if (requireSubscription && !subscriptionValid && retryCount < 3) {
+      if (requireSubscription && !subscriptionValid && retryCount < 3 && sessionValid) {
         console.log("Performing database verification of subscription status");
         
         const { data: authData } = await supabase.auth.getSession();
@@ -74,16 +101,25 @@ export function SubscriptionCheck({
     } catch (error) {
       console.error("Error during subscription validation:", error);
     }
-  }, [requireSubscription, subscriptionValid, retryCount, fetchCurrentSubscription]);
+  }, [requireSubscription, subscriptionValid, retryCount, fetchCurrentSubscription, sessionValid]);
   
   // Effect to handle subscription checks with retry logic
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || sessionValid === null) return;
+    
+    // First ensure session is valid
+    if (!sessionValid) {
+      if (!hasRedirectedRef.current) {
+        hasRedirectedRef.current = true;
+        navigate('/login', { replace: true });
+      }
+      return;
+    }
     
     validateSubscriptionInDb();
     
     // After loading subscription data, check if redirection is needed
-    if (!isLoading && !hasRedirectedRef.current) {
+    if (!isLoading && !hasRedirectedRef.current && sessionValid) {
       if (requireSubscription && !subscriptionValid) {
         // The user needs a subscription but doesn't have one
         if (retryCount >= 3 || hasValidSubscription === false) {
@@ -113,11 +149,12 @@ export function SubscriptionCheck({
     redirectTo, 
     retryCount,
     hasValidSubscription,
-    validateSubscriptionInDb
+    validateSubscriptionInDb,
+    sessionValid
   ]);
 
   // Don't show any loading state - just render children if appropriate
-  if (children) {
+  if (sessionValid && children) {
     return subscriptionValid ? <>{children}</> : null;
   }
 

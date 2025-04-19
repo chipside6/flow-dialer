@@ -6,6 +6,10 @@ export const refreshAdminStatus = async (userId: string): Promise<boolean> => {
   try {
     if (!userId) return false;
     
+    // First check if the session is valid
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) return false;
+    
     // Fetch the current admin status from profiles
     const { data, error } = await supabase
       .from('profiles')
@@ -32,6 +36,13 @@ export const checkSubscriptionStatus = async (userId: string): Promise<boolean> 
     if (!userId) return false;
     
     console.log(`Checking subscription status for user: ${userId}`);
+    
+    // Verify if the session is still valid
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      console.error('Session invalid when checking subscription status');
+      return false;
+    }
     
     // First try the subscriptions table
     const { data: subscriptionData, error: subscriptionError } = await supabase

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AuthContext } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from './types';
-import { clearAllAuthData, forceAppReload } from '@/utils/sessionCleanup';
+import { clearAllAuthData } from '@/utils/sessionCleanup';
 import { toast } from '@/components/ui/use-toast';
 import { 
   getStoredSession, 
@@ -23,6 +23,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sessionChecked, setSessionChecked] = useState(false);
   const [sessionCheckInProgress, setSessionCheckInProgress] = useState(false);
 
+  // Function to validate a session
+  const validateSession = useCallback(async (silent = false) => {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("Error validating session:", error);
+        if (!silent) {
+          setError(error);
+        }
+        return false;
+      }
+      
+      if (!data.session) {
+        if (!silent) {
+          console.log("No valid session found");
+        }
+        return false;
+      }
+      
+      return true;
+    } catch (err) {
+      console.error("Exception validating session:", err);
+      return false;
+    }
+  }, []);
+
   useEffect(() => {
     // Touch session to keep it active
     touchSession();
@@ -35,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(intervalId);
   }, []);
 
+  // Initial session and auth state check
   useEffect(() => {
     // Check for existing session on mount
     const getSession = async () => {
@@ -57,38 +85,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log("Found stored session, using it for initial state");
           setUser(storedSession.user);
           
-          // Verify session with Supabase as well (in background)
-          supabase.auth.getSession().then(async ({ data }) => {
-            if (data.session?.user) {
-              console.log("Supabase session verified");
-              
-              // Simple admin check
-              try {
-                const { data: profileData } = await supabase
-                  .from('profiles')
-                  .select('*')
-                  .eq('id', data.session.user.id)
-                  .maybeSingle();
-                  
-                if (profileData) {
-                  setProfile(profileData);
-                  setIsAdmin(!!profileData.is_admin);
-                  // Store admin status for persistence
-                  storeAdminStatus(!!profileData.is_admin);
-                }
-              } catch (profileError) {
-                console.error("Error fetching profile:", profileError);
+          // Verify session with Supabase
+          const isValid = await validateSession(true);
+          
+          if (!isValid) {
+            console.warn("Stored session invalid, clearing it");
+            clearSession();
+            setUser(null);
+          } else {
+            // Session is valid, try to fetch profile information
+            try {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', storedSession.user.id)
+                .maybeSingle();
+                
+              if (profileData) {
+                setProfile(profileData);
+                setIsAdmin(!!profileData.is_admin);
+                // Store admin status for persistence
+                storeAdminStatus(!!profileData.is_admin);
               }
-            } else {
-              console.warn("Stored session invalid, clearing it");
-              clearSession();
-              setUser(null);
+            } catch (profileError) {
+              console.error("Error fetching profile:", profileError);
             }
-          }).catch(err => {
-            console.error("Error verifying session with Supabase:", err);
-          });
+          }
         } else {
-          // No stored session, check with Supabase
+          // No stored session, check with Supabase directly
           const { data } = await supabase.auth.getSession();
           
           if (data.session?.user) {
@@ -110,17 +134,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             });
             
             // Simple admin check
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', data.session.user.id)
-              .maybeSingle();
-              
-            if (profileData) {
-              setProfile(profileData);
-              setIsAdmin(!!profileData.is_admin);
-              // Store admin status for persistence
-              storeAdminStatus(!!profileData.is_admin);
+            try {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', data.session.user.id)
+                .maybeSingle();
+                
+              if (profileData) {
+                setProfile(profileData);
+                setIsAdmin(!!profileData.is_admin);
+                // Store admin status for persistence
+                storeAdminStatus(!!profileData.is_admin);
+              }
+            } catch (profileError) {
+              console.error("Error fetching profile:", profileError);
             }
           }
         }
@@ -207,7 +235,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [validateSession]);
+
+  // Enhanced sign out function with immediate token clearing
+  const signOut = async () => {
+    try {
+      console.log("Signing out user");
+      
+      // Clear user state first for immediate UI response
+      setUser(null);
+      setProfile(null);
+      setIsAdmin(false);
+      
+      // Clear all auth data from storage
+      clearSession();
+      clearAllAuthData();
+      
+      try {
+        // Sign out from Supabase
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (supabaseError) {
+        console.error("Error signing out from Supabase:", supabaseError);
+        // Continue even if this fails
+      }
+      
+      console.log("Sign out completed");
+      
+      return { success: true, error: null };
+    } catch (error) {
+      console.error("Error during sign out:", error);
+      
+      // Even if there's an error, still clear local state
+      clearAllAuthData();
+      
+      return { 
+        success: false, 
+        error: error instanceof Error ? error : new Error(String(error)) 
+      };
+    }
+  };
 
   // Simplified profile update
   const updateProfile = async (data: any) => {
@@ -245,44 +311,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Enhanced sign out function with immediate token clearing
-  const signOut = async () => {
-    try {
-      console.log("Signing out user");
-      
-      // Clear user state first for immediate UI response
-      setUser(null);
-      setProfile(null);
-      setIsAdmin(false);
-      
-      // Clear all auth data from storage
-      clearSession();
-      clearAllAuthData();
-      
-      try {
-        // Sign out from Supabase
-        await supabase.auth.signOut();
-      } catch (supabaseError) {
-        console.error("Error signing out from Supabase:", supabaseError);
-        // We continue even if this fails
-      }
-      
-      console.log("Sign out completed");
-      
-      return { success: true, error: null };
-    } catch (error) {
-      console.error("Error during sign out:", error);
-      
-      // Even if there's an error, still clear local state
-      clearAllAuthData();
-      
-      return { 
-        success: false, 
-        error: error instanceof Error ? error : new Error(String(error)) 
-      };
-    }
-  };
-
   const value = {
     user,
     profile,
@@ -294,7 +322,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionChecked,
     setProfile,
     updateProfile,
-    signOut
+    signOut,
+    validateSession
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

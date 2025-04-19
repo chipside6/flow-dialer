@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
 import { touchSession, isSessionValid } from '@/services/auth/session';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -21,9 +22,37 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { isAuthenticated, isAdmin, isLoading, user, sessionChecked } = useAuth();
   const [hasSubscription, setHasSubscription] = useState(true);
   const [checkingSubscription, setCheckingSubscription] = useState(false);
+  const [validatingSession, setValidatingSession] = useState(true);
   const location = useLocation();
   const hasRedirectedRef = useRef(false);
   const touchIntervalRef = useRef<number | null>(null);
+  
+  // Verify the session is still valid with Supabase directly
+  useEffect(() => {
+    const verifySession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        const sessionIsValid = !error && !!data.session;
+        
+        // If there's a mismatch between auth context and actual session, reload the page
+        if (isAuthenticated && !sessionIsValid && !hasRedirectedRef.current) {
+          console.warn("Session mismatch detected, redirecting to login");
+          hasRedirectedRef.current = true;
+          return <Navigate to="/login" state={{ returnTo: location.pathname }} replace />;
+        }
+        
+      } catch (error) {
+        console.error("Error verifying session:", error);
+      } finally {
+        setValidatingSession(false);
+      }
+    };
+    
+    if (!isLoading) {
+      verifySession();
+    }
+  }, [isAuthenticated, isLoading, location.pathname]);
   
   // Double-check session validity as a safety measure
   const sessionIsValid = isSessionValid();
@@ -74,7 +103,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }, [requireSubscription, isActuallyAuthenticated, user, checkingSubscription]);
   
   // Show loading state while auth is being determined
-  if ((isLoading || !sessionChecked) || (requireSubscription && checkingSubscription)) {
+  if ((isLoading || !sessionChecked || validatingSession) || (requireSubscription && checkingSubscription)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="w-full max-w-md space-y-4 p-4">
