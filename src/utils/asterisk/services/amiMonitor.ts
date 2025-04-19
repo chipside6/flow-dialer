@@ -113,19 +113,7 @@ export const amiMonitor = {
     callDetails?: Record<string, any>
   ): Promise<boolean> => {
     try {
-      // First, check if the channel_logs table exists
-      const { count, error: countError } = await supabase
-        .from('call_logs') // Use call_logs instead of channel_logs
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .limit(1);
-      
-      if (countError) {
-        console.error('Error checking channel_logs table:', countError);
-        return false;
-      }
-      
-      // Log to call_logs table instead
+      // Log to call_logs table instead of channel_logs
       const { error } = await supabase
         .from('call_logs')
         .insert({
