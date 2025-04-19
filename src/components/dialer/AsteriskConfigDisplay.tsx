@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -288,7 +287,7 @@ Register Expiry: 600
       <CardFooter className="flex justify-between">
         <Button
           variant="outline"
-          onClick={() => handleDownload(masterConfigGenerator.generateMasterConfig(), 'asterisk-autodialer-master.conf')}
+          onClick={() => handleDownload(masterConfigGenerator.generateMasterConfig(username, "config"), 'asterisk-autodialer-master.conf')}
         >
           <Download className="h-4 w-4 mr-2" />
           Download Master Config

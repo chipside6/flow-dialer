@@ -1,10 +1,11 @@
+
 import { sipConfigGenerator } from './sipConfigGenerator';
 
 export const masterConfigGenerator = {
   /**
    * Generate master configuration for a GoIP device installation
    */
-  generateMasterConfig: (userId: string, deviceId: string): string => {
+  generateMasterConfig: (userId: string = 'default', deviceId: string = 'default'): string => {
     let config = `; Master Asterisk Configuration for GoIP device ${deviceId} and user ${userId}\n\n`;
 
     // Generate SIP configuration for the device

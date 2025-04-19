@@ -57,7 +57,7 @@ export const amiMonitor = {
         .map(trunk => ({
           channel: `SIP/goip_${userId}_port${trunk.port_number}-00000001`,
           state: 'Up',
-          callerIdNum: trunk.current_call_id || 'unknown',
+          callerIdNum: trunk.sip_user || 'unknown', // Changed from current_call_id to sip_user
           callerIdName: `GoIP Port ${trunk.port_number}`,
           duration: 60, // Simulated duration
           portNumber: trunk.port_number,
@@ -97,6 +97,57 @@ export const amiMonitor = {
       return true;
     } catch (error) {
       console.error('Error logging channel event:', error);
+      return false;
+    }
+  },
+
+  /**
+   * Update port statuses from AMI data for a user
+   */
+  updatePortStatusFromAmi: async (userId: string): Promise<boolean> => {
+    try {
+      // In a real implementation, this would query the Asterisk AMI
+      // and update port statuses based on active channels
+      console.log(`Updating port statuses from AMI for user ${userId}`);
+      
+      // Get active channels from AMI (simulated)
+      const channels = await amiMonitor.getUserChannels(userId);
+      
+      // Get user's ports
+      const { data: ports, error: portsError } = await supabase
+        .from('user_trunks')
+        .select('*')
+        .eq('user_id', userId);
+        
+      if (portsError) throw portsError;
+      
+      if (!ports || ports.length === 0) {
+        return false;
+      }
+      
+      // Update each port status based on AMI data
+      for (const port of ports) {
+        const isActive = channels.some(channel => 
+          channel.portNumber === port.port_number
+        );
+        
+        // Update port status
+        if (isActive && port.status !== 'busy') {
+          await supabase
+            .from('user_trunks')
+            .update({ status: 'busy' })
+            .eq('id', port.id);
+        } else if (!isActive && port.status === 'busy') {
+          await supabase
+            .from('user_trunks')
+            .update({ status: 'active' })
+            .eq('id', port.id);
+        }
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating port status from AMI:', error);
       return false;
     }
   }

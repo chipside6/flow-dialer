@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -21,7 +20,7 @@ const AsteriskConfigPageContent = () => {
   const { isAdmin } = useAuth();
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("config");
-  const masterConfig = masterConfigGenerator.generateMasterConfig();
+  const masterConfig = masterConfigGenerator.generateMasterConfig("admin", "master");
   
   // Redirect regular users to GoIP setup page after a short delay
   useEffect(() => {
