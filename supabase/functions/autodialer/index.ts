@@ -1,5 +1,5 @@
 
-// autodialer edge function - handles dialing operations
+// autodialer edge function - handles dialing operations with multi-port support
 import { serve } from "https://deno.land/std@0.184.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -18,6 +18,7 @@ const AGI_SCRIPT_PATH = Deno.env.get("AGI_SCRIPT_PATH") || "autodialer.agi";
 interface DialerJobRequest {
   campaignId: string;
   userId: string;
+  maxConcurrentCalls?: number; // Maximum number of concurrent calls (limited by ports)
 }
 
 interface OriginateResponse {
@@ -27,28 +28,35 @@ interface OriginateResponse {
   success?: boolean;
 }
 
-serve(async (req) => {
-  // CORS headers
-  const headers = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  };
+// Type for port allocation
+interface PortAllocation {
+  portNumber: number;
+  sipUser: string;
+  status: 'available' | 'busy' | 'offline';
+}
 
+// CORS headers
+const corsHeaders = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers, status: 204 });
+    return new Response(null, { headers: corsHeaders, status: 204 });
   }
 
   try {
     // Get request body
     const body = await req.json() as DialerJobRequest;
-    const { campaignId, userId } = body;
+    const { campaignId, userId, maxConcurrentCalls = 1 } = body;
 
     if (!campaignId || !userId) {
       return new Response(
         JSON.stringify({ error: "Campaign ID and User ID are required" }),
-        { headers, status: 400 }
+        { headers: corsHeaders, status: 400 }
       );
     }
 
@@ -63,7 +71,7 @@ serve(async (req) => {
     if (campaignError || !campaign) {
       return new Response(
         JSON.stringify({ error: "Campaign not found", details: campaignError }),
-        { headers, status: 404 }
+        { headers: corsHeaders, status: 404 }
       );
     }
 
@@ -78,7 +86,7 @@ serve(async (req) => {
             !campaign.greeting_file_url ? "greeting_file_url" : null,
           ].filter(Boolean)
         }),
-        { headers, status: 400 }
+        { headers: corsHeaders, status: 400 }
       );
     }
 
@@ -97,7 +105,7 @@ serve(async (req) => {
     if (jobError || !job) {
       return new Response(
         JSON.stringify({ error: "Failed to create dialer job", details: jobError }),
-        { headers, status: 500 }
+        { headers: corsHeaders, status: 500 }
       );
     }
 
@@ -106,7 +114,7 @@ serve(async (req) => {
       await updateJobStatus(job.id, "failed", "No contact list assigned to campaign");
       return new Response(
         JSON.stringify({ error: "No contact list assigned to campaign" }),
-        { headers, status: 400 }
+        { headers: corsHeaders, status: 400 }
       );
     }
 
@@ -120,7 +128,7 @@ serve(async (req) => {
       await updateJobStatus(job.id, "failed", "Failed to fetch contacts");
       return new Response(
         JSON.stringify({ error: "Failed to fetch contacts", details: contactsError }),
-        { headers, status: 500 }
+        { headers: corsHeaders, status: 500 }
       );
     }
 
@@ -133,16 +141,47 @@ serve(async (req) => {
       await updateJobStatus(job.id, "failed", "No valid phone numbers in contact list");
       return new Response(
         JSON.stringify({ error: "No valid phone numbers in contact list" }),
-        { headers, status: 400 }
+        { headers: corsHeaders, status: 400 }
       );
     }
 
-    // Update job with total calls count
+    // Fetch available GoIP ports for this user
+    const { data: userPorts, error: portsError } = await supabase
+      .from("user_trunks")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("status", "active")  // Only get available ports
+      .order("port_number", { ascending: true });
+
+    if (portsError) {
+      await updateJobStatus(job.id, "failed", "Failed to fetch user ports");
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch user ports", details: portsError }),
+        { headers: corsHeaders, status: 500 }
+      );
+    }
+
+    // Map to port allocation format
+    const availablePorts: PortAllocation[] = (userPorts || []).map(port => ({
+      portNumber: port.port_number,
+      sipUser: port.sip_user,
+      status: 'available'
+    }));
+
+    // Limit maximum concurrent calls by available ports
+    const actualMaxConcurrentCalls = Math.min(
+      maxConcurrentCalls, 
+      availablePorts.length || 1
+    );
+
+    // Update job with total calls count and port information
     await supabase
       .from("dialer_jobs")
       .update({ 
         total_calls: phoneNumbers.length,
-        status: "in_progress"
+        status: "in_progress",
+        max_concurrent_calls: actualMaxConcurrentCalls,
+        available_ports: availablePorts.length
       })
       .eq("id", job.id);
 
@@ -152,7 +191,8 @@ serve(async (req) => {
       user_id: userId,
       campaign_id: campaignId,
       phone_number: phoneNumber,
-      status: "queued"
+      status: "queued",
+      port_number: null  // Will be assigned when call is made
     }));
 
     const { error: queueError } = await supabase
@@ -163,27 +203,29 @@ serve(async (req) => {
       await updateJobStatus(job.id, "failed", "Failed to queue phone numbers");
       return new Response(
         JSON.stringify({ error: "Failed to queue phone numbers", details: queueError }),
-        { headers, status: 500 }
+        { headers: corsHeaders, status: 500 }
       );
     }
 
-    // Start the background dialing process
-    EdgeRuntime.waitUntil(processDialerQueue(job.id, campaign));
+    // Start the background dialing process with multi-port support
+    EdgeRuntime.waitUntil(processDialerQueueMultiPort(job.id, campaign, actualMaxConcurrentCalls));
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Dialer job created and started",
+        message: `Dialer job created and started with ${actualMaxConcurrentCalls} concurrent calls`,
         jobId: job.id,
-        totalCalls: phoneNumbers.length
+        totalCalls: phoneNumbers.length,
+        concurrentCalls: actualMaxConcurrentCalls,
+        availablePorts: availablePorts.length
       }),
-      { headers, status: 200 }
+      { headers: corsHeaders, status: 200 }
     );
   } catch (error) {
     console.error("Error processing dialer job:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error", details: error.message }),
-      { headers, status: 500 }
+      { headers: corsHeaders, status: 500 }
     );
   }
 });
@@ -241,15 +283,79 @@ async function getJobCampaignId(jobId: string): Promise<string | null> {
   return data?.campaign_id || null;
 }
 
-// Process the dialer queue in batches with concurrency control
-async function processDialerQueue(jobId: string, campaign: any) {
+// Get available port for a call
+async function getAvailablePort(userId: string): Promise<PortAllocation | null> {
+  // Get available trunks
+  const { data: trunks, error } = await supabase
+    .from("user_trunks")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .limit(1);  // Just need one available port
+    
+  if (error || !trunks || trunks.length === 0) {
+    return null;
+  }
+  
+  const trunk = trunks[0];
+  
+  // Mark this trunk as busy
+  const { error: updateError } = await supabase
+    .from("user_trunks")
+    .update({ 
+      status: "busy",
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", trunk.id);
+    
+  if (updateError) {
+    console.error("Error marking port as busy:", updateError);
+    return null;
+  }
+  
+  return {
+    portNumber: trunk.port_number,
+    sipUser: trunk.sip_user,
+    status: 'busy'
+  };
+}
+
+// Release a port after call is done
+async function releasePort(userId: string, portNumber: number): Promise<boolean> {
+  const { error } = await supabase
+    .from("user_trunks")
+    .update({ 
+      status: "active",
+      updated_at: new Date().toISOString(),
+      current_call_id: null,
+      current_campaign_id: null
+    })
+    .eq("user_id", userId)
+    .eq("port_number", portNumber);
+    
+  if (error) {
+    console.error("Error releasing port:", error);
+    return false;
+  }
+  
+  return true;
+}
+
+// Process the dialer queue in batches with multi-port concurrency control
+async function processDialerQueueMultiPort(jobId: string, campaign: any, maxConcurrentCalls: number) {
   try {
-    const maxConcurrentCalls = campaign.max_concurrent_calls || 1;
+    const userId = campaign.user_id;
     let activeCalls = 0;
     let completedCalls = 0;
     let successfulCalls = 0;
     let failedCalls = 0;
     let isProcessing = true;
+    let activePorts: Record<number, boolean> = {};
+
+    // Initialize port tracking
+    for (let i = 1; i <= maxConcurrentCalls; i++) {
+      activePorts[i] = false;
+    }
 
     while (isProcessing) {
       // Check if job was cancelled
@@ -264,7 +370,7 @@ async function processDialerQueue(jobId: string, campaign: any) {
         break;
       }
 
-      // Get next batch of numbers to dial
+      // Get next batch of numbers to dial based on available ports
       const availableSlots = maxConcurrentCalls - activeCalls;
       
       if (availableSlots <= 0) {
@@ -301,7 +407,17 @@ async function processDialerQueue(jobId: string, campaign: any) {
 
       // Process each queue item
       for (const item of queueItems) {
+        // Get an available port
+        const port = await getAvailablePort(userId);
+        
+        if (!port) {
+          console.log("No available ports, waiting...");
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          continue;
+        }
+        
         activeCalls++;
+        activePorts[port.portNumber] = true;
         
         // Mark as processing
         await supabase
@@ -309,13 +425,16 @@ async function processDialerQueue(jobId: string, campaign: any) {
           .update({ 
             status: "processing",
             attempts: item.attempts + 1,
-            last_attempt: new Date().toISOString()
+            last_attempt: new Date().toISOString(),
+            port_number: port.portNumber
           })
           .eq("id", item.id);
 
         // Make the call in background
         EdgeRuntime.waitUntil((async () => {
           try {
+            console.log(`Originating call to ${item.phone_number} on port ${port.portNumber}`);
+            
             // Generate the Asterisk call command
             const result = await originateCall(
               item.phone_number,
@@ -323,7 +442,8 @@ async function processDialerQueue(jobId: string, campaign: any) {
               campaign.transfer_number,
               campaign.greeting_file_url,
               campaign.user_id,
-              campaign.id
+              campaign.id,
+              port.portNumber
             );
 
             // Update queue item status
@@ -340,6 +460,7 @@ async function processDialerQueue(jobId: string, campaign: any) {
                 user_id: campaign.user_id,
                 campaign_id: campaign.id,
                 phone_number: item.phone_number,
+                port_number: port.portNumber,
                 status: result.message || status,
                 notes: JSON.stringify(result)
               });
@@ -380,6 +501,7 @@ async function processDialerQueue(jobId: string, campaign: any) {
                 user_id: campaign.user_id,
                 campaign_id: campaign.id,
                 phone_number: item.phone_number,
+                port_number: port.portNumber,
                 status: "error",
                 notes: error.message || "Unknown error"
               });
@@ -396,7 +518,11 @@ async function processDialerQueue(jobId: string, campaign: any) {
               })
               .eq("id", jobId);
           } finally {
+            // Release the port for reuse
             activeCalls--;
+            activePorts[port.portNumber] = false;
+            await releasePort(userId, port.portNumber);
+            console.log(`Released port ${port.portNumber} after call to ${item.phone_number}`);
           }
         })());
       }
@@ -409,6 +535,14 @@ async function processDialerQueue(jobId: string, campaign: any) {
     await updateJobStatus(jobId, "completed");
     console.log(`Job ${jobId} completed. Total calls: ${completedCalls}`);
 
+    // Ensure all ports are released
+    for (const portNum in activePorts) {
+      if (activePorts[portNum]) {
+        await releasePort(userId, parseInt(portNum));
+        console.log(`Released port ${portNum} after job completion`);
+      }
+    }
+    
   } catch (error) {
     console.error(`Error processing dialer queue for job ${jobId}:`, error);
     await updateJobStatus(jobId, "failed", error.message);
@@ -422,30 +556,34 @@ async function originateCall(
   transferNumber: string,
   greetingFile: string,
   userId: string,
-  campaignId: string
+  campaignId: string,
+  portNumber: number
 ): Promise<OriginateResponse> {
   try {
     // Normalize phone number by removing non-numeric characters
     phoneNumber = phoneNumber.replace(/\D/g, "");
     
-    // The port to use on GoIP device (default to 1)
-    const port = 1;
-
     // Construct ARI API URL for the originate action
     const ariUrl = `http://${ASTERISK_HOST}:${ASTERISK_PORT}/ari/channels`;
     
-    // Prepare the originate parameters
+    // Use specific port in the endpoint
+    const sipUser = `goip_${userId.substring(0, 8)}_port${portNumber}`;
+    
+    // Prepare the originate parameters with port-specific settings
     const originateData = {
-      endpoint: `SIP/goip/${port}/${phoneNumber}`,
+      endpoint: `PJSIP/${sipUser}/${phoneNumber}`,
       callerId: callerId,
-      context: "autodialer",
+      context: "campaign-autodialer",
       priority: 1,
       extension: "s",
       variables: {
         GREETING_FILE: greetingFile,
         TRANSFER_NUMBER: transferNumber,
         USER_ID: userId,
-        CAMPAIGN_ID: campaignId
+        CAMPAIGN_ID: campaignId,
+        PORT_NUMBER: portNumber.toString(),
+        GROUP_LIMIT: "1",
+        GROUP_NAME: `port_${userId}_${portNumber}`
       }
     };
 
@@ -474,7 +612,7 @@ async function originateCall(
     return {
       response: "success",
       actionid: responseData.id || "unknown",
-      message: "Call originated successfully",
+      message: `Call originated successfully on port ${portNumber}`,
       success: true
     };
   } catch (error) {

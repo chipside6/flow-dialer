@@ -1,9 +1,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { goipPortManager } from '@/utils/asterisk/services/goipPortManager';
 
 interface CreateJobParams {
   campaignId: string;
   userId: string;
+  maxConcurrentCalls?: number;
 }
 
 interface DialerJob {
@@ -15,6 +17,8 @@ interface DialerJob {
   failed_calls: number;
   created_at: string;
   updated_at: string;
+  max_concurrent_calls: number;
+  available_ports: number;
 }
 
 /**
@@ -24,15 +28,21 @@ export const autoDialerService = {
   /**
    * Start a new dialer job for the specified campaign
    */
-  async startDialerJob({ campaignId, userId }: CreateJobParams): Promise<{ success: boolean; jobId?: string; error?: string }> {
+  async startDialerJob({ campaignId, userId, maxConcurrentCalls = 0 }: CreateJobParams): Promise<{ success: boolean; jobId?: string; error?: string }> {
     try {
+      // Get available ports count if maxConcurrentCalls isn't specified
+      if (maxConcurrentCalls <= 0) {
+        const availablePorts = await goipPortManager.getAvailablePorts(userId, campaignId);
+        maxConcurrentCalls = availablePorts.length || 1;
+      }
+      
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/autodialer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
         },
-        body: JSON.stringify({ campaignId, userId })
+        body: JSON.stringify({ campaignId, userId, maxConcurrentCalls })
       });
 
       if (!response.ok) {
@@ -115,6 +125,9 @@ export const autoDialerService = {
           error: `Error cancelling job: ${error.message}` 
         };
       }
+      
+      // Reset all ports for this user
+      await goipPortManager.resetPorts(userId);
 
       return { success: true };
     } catch (error) {
@@ -155,6 +168,78 @@ export const autoDialerService = {
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error fetching call logs' 
+      };
+    }
+  },
+  
+  /**
+   * Make a test call using the first available port
+   */
+  async makeTestCall(phoneNumber: string, campaignId: string, userId: string): Promise<{ success: boolean; message: string; portNumber?: number }> {
+    try {
+      // Get an available port
+      const availablePorts = await goipPortManager.getAvailablePorts(userId, 'test');
+      
+      if (availablePorts.length === 0) {
+        return {
+          success: false,
+          message: 'No available GoIP ports found for test call'
+        };
+      }
+      
+      // Use the first available port
+      const port = availablePorts[0];
+      
+      // Create a test call ID
+      const callId = `test_${Math.random().toString(36).substring(2, 9)}`;
+      
+      // Mark the port as busy
+      await goipPortManager.markPortBusy(userId, port.portNumber, 'test', callId);
+      
+      // Call the dialer API
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dialer-api`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({
+          campaignId,
+          phoneNumber,
+          transferNumber: '12345678', // Default transfer for test
+          portNumber: port.portNumber,
+          isTest: true
+        })
+      });
+      
+      if (!response.ok) {
+        // Release the port if call failed
+        await goipPortManager.releasePort(userId, port.portNumber);
+        const errorData = await response.json();
+        return {
+          success: false,
+          message: errorData.error || `Error making test call: ${response.status}`
+        };
+      }
+      
+      const data = await response.json();
+      
+      // Release the port after 30 seconds (simulating a call)
+      setTimeout(async () => {
+        await goipPortManager.releasePort(userId, port.portNumber);
+        console.log(`Released port ${port.portNumber} after test call`);
+      }, 30000);
+      
+      return {
+        success: true,
+        message: `Test call initiated to ${phoneNumber} using port ${port.portNumber}`,
+        portNumber: port.portNumber
+      };
+    } catch (error) {
+      console.error('Error making test call:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error making test call'
       };
     }
   }
