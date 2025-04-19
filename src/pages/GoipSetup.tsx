@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { CredentialSection } from '@/components/goip/CredentialSection';
 import { useAuth } from '@/contexts/auth';
 import { Info } from 'lucide-react';
-import { SetupInstructions } from '@/components/goip/SetupInstructions';
 import { GoipDeviceSetup } from '@/components/goip/GoipDeviceSetup';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
@@ -39,9 +38,6 @@ const GoipSetupContent = () => {
         <div className="grid gap-6">
           {/* Device Registration Form */}
           <GoipDeviceSetup />
-
-          {/* Step-by-step instructions for GoIP setup */}
-          <SetupInstructions />
           
           {/* SIP Credentials Generator */}
           <CredentialSection userId={user?.id} />
