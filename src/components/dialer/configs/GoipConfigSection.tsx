@@ -1,20 +1,16 @@
-
 import React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Copy, CheckCircle } from 'lucide-react';
+import { useConfigActions } from '@/hooks/useConfigActions';
 
 interface GoipConfigSectionProps {
   goipConfig: string;
-  onCopy: (text: string) => void;
-  copied: boolean;
 }
 
-export const GoipConfigSection = ({
-  goipConfig,
-  onCopy,
-  copied
-}: GoipConfigSectionProps) => {
+export const GoipConfigSection = ({ goipConfig }: GoipConfigSectionProps) => {
+  const { copied, handleCopy } = useConfigActions();
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
@@ -29,7 +25,7 @@ export const GoipConfigSection = ({
             size="icon" 
             variant="outline" 
             className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-            onClick={() => onCopy(goipConfig)}
+            onClick={() => handleCopy(goipConfig)}
           >
             {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
           </Button>

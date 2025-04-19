@@ -8,6 +8,7 @@ import { masterConfigGenerator } from '@/utils/asterisk/generators/masterConfigG
 import { SipConfigSection } from './configs/SipConfigSection';
 import { ExtensionsSection } from './configs/ExtensionsSection';
 import { GoipConfigSection } from './configs/GoipConfigSection';
+import { useConfigActions } from '@/hooks/useConfigActions';
 
 interface AsteriskConfigDisplayProps {
   username: string;
@@ -23,7 +24,7 @@ export const AsteriskConfigDisplay: React.FC<AsteriskConfigDisplayProps> = ({
   port
 }) => {
   const [activeTab, setActiveTab] = useState('sip');
-  const [copied, setCopied] = useState(false);
+  const { copied, handleCopy, handleDownload } = useConfigActions();
   const { toast } = useToast();
   
   // Config templates
@@ -112,34 +113,6 @@ Authentication Password: ${password}
 Register Expiry: 600
 `;
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    
-    toast({
-      title: "Copied to clipboard",
-      description: "Configuration has been copied to your clipboard"
-    });
-    
-    setTimeout(() => setCopied(false), 2000);
-  };
-  
-  const handleDownload = (text: string, filename: string) => {
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: "Downloaded configuration",
-      description: `${filename} has been downloaded`
-    });
-  };
-  
   return (
     <Card>
       <CardHeader>
@@ -160,30 +133,18 @@ Register Expiry: 600
           </TabsList>
           
           <TabsContent value="sip">
-            <SipConfigSection 
-              sipConfig={sipConfig}
-              onCopy={handleCopy}
-              onDownload={handleDownload}
-              copied={copied}
-            />
+            <SipConfigSection sipConfig={sipConfig} />
           </TabsContent>
           
           <TabsContent value="extensions">
             <ExtensionsSection 
               extensionsConfig={extensionsConfig}
               agiScript={agiScript}
-              onCopy={handleCopy}
-              onDownload={handleDownload}
-              copied={copied}
             />
           </TabsContent>
           
           <TabsContent value="goip">
-            <GoipConfigSection 
-              goipConfig={goipConfig}
-              onCopy={handleCopy}
-              copied={copied}
-            />
+            <GoipConfigSection goipConfig={goipConfig} />
           </TabsContent>
         </Tabs>
       </CardContent>

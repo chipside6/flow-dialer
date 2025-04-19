@@ -3,22 +3,19 @@ import React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Copy, Download, CheckCircle } from 'lucide-react';
+import { useConfigActions } from '@/hooks/useConfigActions';
 
 interface ExtensionsSectionProps {
   extensionsConfig: string;
   agiScript: string;
-  onCopy: (text: string) => void;
-  onDownload: (text: string, filename: string) => void;
-  copied: boolean;
 }
 
 export const ExtensionsSection = ({
   extensionsConfig,
-  agiScript,
-  onCopy,
-  onDownload,
-  copied
+  agiScript
 }: ExtensionsSectionProps) => {
+  const { copied, handleCopy, handleDownload } = useConfigActions();
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
@@ -33,7 +30,7 @@ export const ExtensionsSection = ({
             size="icon" 
             variant="outline" 
             className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-            onClick={() => onCopy(extensionsConfig)}
+            onClick={() => handleCopy(extensionsConfig)}
           >
             {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
           </Button>
@@ -41,7 +38,7 @@ export const ExtensionsSection = ({
             size="icon" 
             variant="outline" 
             className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-            onClick={() => onDownload(extensionsConfig, 'extensions_autodialer.conf')}
+            onClick={() => handleDownload(extensionsConfig, 'extensions_autodialer.conf')}
           >
             <Download className="h-4 w-4" />
           </Button>
@@ -61,7 +58,7 @@ export const ExtensionsSection = ({
               size="icon" 
               variant="outline" 
               className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-              onClick={() => onCopy(agiScript)}
+              onClick={() => handleCopy(agiScript)}
             >
               {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
             </Button>
@@ -69,7 +66,7 @@ export const ExtensionsSection = ({
               size="icon" 
               variant="outline" 
               className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-              onClick={() => onDownload(agiScript, 'autodialer.agi')}
+              onClick={() => handleDownload(agiScript, 'autodialer.agi')}
             >
               <Download className="h-4 w-4" />
             </Button>

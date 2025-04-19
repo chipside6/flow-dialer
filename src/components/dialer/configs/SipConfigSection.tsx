@@ -3,20 +3,15 @@ import React from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Copy, Download, CheckCircle } from 'lucide-react';
+import { useConfigActions } from '@/hooks/useConfigActions';
 
 interface SipConfigSectionProps {
   sipConfig: string;
-  onCopy: (text: string) => void;
-  onDownload: (text: string, filename: string) => void;
-  copied: boolean;
 }
 
-export const SipConfigSection = ({
-  sipConfig,
-  onCopy,
-  onDownload,
-  copied
-}: SipConfigSectionProps) => {
+export const SipConfigSection = ({ sipConfig }: SipConfigSectionProps) => {
+  const { copied, handleCopy, handleDownload } = useConfigActions();
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
@@ -31,7 +26,7 @@ export const SipConfigSection = ({
             size="icon" 
             variant="outline" 
             className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-            onClick={() => onCopy(sipConfig)}
+            onClick={() => handleCopy(sipConfig)}
           >
             {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
           </Button>
@@ -39,7 +34,7 @@ export const SipConfigSection = ({
             size="icon" 
             variant="outline" 
             className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-            onClick={() => onDownload(sipConfig, 'sip_goip.conf')}
+            onClick={() => handleDownload(sipConfig, 'sip_goip.conf')}
           >
             <Download className="h-4 w-4" />
           </Button>
