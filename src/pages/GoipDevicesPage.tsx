@@ -1,18 +1,35 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { GoipDeviceSetup } from '@/components/goip/GoipDeviceSetup';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import { GoipDeviceRegistration } from '@/components/goip/GoipDeviceRegistration';
+import { RegisteredDevicesList } from '@/components/goip/RegisteredDevicesList';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Info } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Server, Info } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const GoipDevicesPage = () => {
+  const [activeTab, setActiveTab] = useState('register');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  const refreshDevicesList = () => {
+    setRefreshTrigger(prev => prev + 1);
+    setActiveTab('devices');
+  };
+
   return (
     <ProtectedRoute>
       <DashboardLayout>
         <div className="container mx-auto py-6">
-          <h1 className="text-2xl font-bold mb-6">GoIP Device Management</h1>
+          <div className="flex items-center mb-6">
+            <Server className="h-6 w-6 mr-2 text-primary" />
+            <div>
+              <h1 className="text-2xl font-bold">Manage Your GoIP Devices</h1>
+              <p className="text-muted-foreground">
+                Register and manage your GoIP devices for outbound campaigns. Each port can make one call at a time.
+              </p>
+            </div>
+          </div>
           
           <Card className="mb-6">
             <CardHeader className="pb-3">
@@ -21,43 +38,30 @@ const GoipDevicesPage = () => {
                 <CardTitle>About GoIP Integration</CardTitle>
               </div>
               <CardDescription>
-                GoIP devices let you make outbound calls using regular phone lines or GSM networks.
+                GoIP devices allow you to make outbound calls using regular phone lines or GSM networks.
                 Register your devices here to use them with our autodialer system.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Our platform supports GoIP devices with 1, 2, 4, or 8 ports. Each port can be used for a 
-                separate campaign, allowing you to run multiple campaigns simultaneously.
+                After registration, you'll receive SIP credentials for each port on your device. 
+                Configure these credentials in your GoIP device to connect it with our system.
               </p>
             </CardContent>
           </Card>
           
-          <Tabs defaultValue="register">
+          <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
               <TabsTrigger value="register">Register Device</TabsTrigger>
-              <TabsTrigger value="manage">Manage Devices</TabsTrigger>
+              <TabsTrigger value="devices">Manage Devices</TabsTrigger>
             </TabsList>
             
             <TabsContent value="register">
-              <GoipDeviceSetup />
+              <GoipDeviceRegistration onDeviceRegistered={refreshDevicesList} />
             </TabsContent>
             
-            <TabsContent value="manage">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Manage Your Devices</CardTitle>
-                  <CardDescription>
-                    View, update, or delete your registered GoIP devices
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    This feature is coming soon. For now, you can register new devices
-                    which will replace any existing devices with the same name.
-                  </p>
-                </CardContent>
-              </Card>
+            <TabsContent value="devices">
+              <RegisteredDevicesList refreshTrigger={refreshTrigger} />
             </TabsContent>
           </Tabs>
         </div>
