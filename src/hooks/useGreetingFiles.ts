@@ -67,15 +67,17 @@ export function useGreetingFiles() {
               title: "Loading timeout",
               description: "Loading is taking longer than expected. Please try again.",
               variant: "destructive",
-              action: (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => forceRefresh()}
-                >
-                  Retry Loading
-                </Button>
-              )
+              action: function() {
+                return (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => forceRefresh()}
+                  >
+                    Retry Loading
+                  </Button>
+                );
+              }
             });
           }
         }
