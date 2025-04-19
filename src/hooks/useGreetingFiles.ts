@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/auth";
 import { GreetingFile } from "./greeting-files/types";
@@ -66,8 +65,9 @@ export function useGreetingFiles() {
               title: "Loading timeout",
               description: "Loading is taking longer than expected. Please try again.",
               variant: "destructive",
+              // Use the proper format for action
               action: {
-                label: "Retry",
+                altText: "Retry loading",
                 onClick: () => forceRefresh()
               }
             });
