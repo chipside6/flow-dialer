@@ -1,9 +1,13 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TransferNumber } from '@/types/transferNumber';
 import { AddTransferNumberCard } from './AddTransferNumberCard';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, RefreshCw, Phone } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 interface TransferNumbersListProps {
   transferNumbers: TransferNumber[];
@@ -24,6 +28,100 @@ export const TransferNumbersList: React.FC<TransferNumbersListProps> = ({
   onDeleteTransferNumber,
   onRefresh
 }) => {
+  const [realtimeEnabled, setRealtimeEnabled] = useState(false);
+  const [activeCallCounts, setActiveCallCounts] = useState<Record<string, number>>({});
+  
+  // Setup realtime subscription for transfer numbers
+  useEffect(() => {
+    if (!realtimeEnabled) return;
+    
+    // Subscribe to realtime updates on transfer_numbers
+    const numberChannel = supabase
+      .channel('transfer-numbers-updates')
+      .on(
+        'postgres_changes',
+        { 
+          event: '*',
+          schema: 'public', 
+          table: 'transfer_numbers'
+        },
+        (payload) => {
+          console.log('Transfer number update:', payload);
+          
+          // Refresh list on important changes
+          if (onRefresh) {
+            onRefresh();
+          }
+        }
+      )
+      .subscribe();
+      
+    // Subscribe to active calls count for transfer numbers
+    const callsChannel = supabase
+      .channel('transfer-number-calls')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'active_calls'
+        },
+        (payload) => {
+          console.log('Active call update:', payload);
+          
+          // Get active call counts for each transfer number
+          fetchActiveCallCounts();
+        }
+      )
+      .subscribe();
+      
+    // Initial fetch of active call counts
+    fetchActiveCallCounts();
+    
+    return () => {
+      supabase.removeChannel(numberChannel);
+      supabase.removeChannel(callsChannel);
+    };
+  }, [realtimeEnabled, onRefresh]);
+  
+  // Fetch active call counts for transfer numbers
+  const fetchActiveCallCounts = async () => {
+    try {
+      // This query depends on your specific database structure
+      // Assuming there's a field like transfer_number_id in active_calls
+      const { data, error } = await supabase
+        .from('active_calls')
+        .select('transfer_number_id, id')
+        .is('end_time', null); // Only count active calls
+        
+      if (error) throw error;
+      
+      // Count calls per transfer number
+      const counts: Record<string, number> = {};
+      
+      (data || []).forEach(call => {
+        if (call.transfer_number_id) {
+          counts[call.transfer_number_id] = (counts[call.transfer_number_id] || 0) + 1;
+        }
+      });
+      
+      setActiveCallCounts(counts);
+    } catch (error) {
+      console.error('Error fetching active call counts:', error);
+    }
+  };
+  
+  const toggleRealtime = () => {
+    setRealtimeEnabled(prev => !prev);
+    
+    toast({
+      title: realtimeEnabled ? 'Realtime updates disabled' : 'Realtime updates enabled',
+      description: realtimeEnabled 
+        ? 'You will need to refresh manually to see updates' 
+        : 'You will now see live updates to transfer numbers and active calls',
+    });
+  };
+
   return (
     <div className="space-y-6">
       <AddTransferNumberCard
@@ -31,20 +129,58 @@ export const TransferNumbersList: React.FC<TransferNumbersListProps> = ({
         isSubmitting={isSubmitting}
       />
 
-      {transferNumbers.length > 0 && (
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Your Transfer Numbers</h2>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleRealtime}
+            className={realtimeEnabled ? "bg-primary/10" : ""}
+          >
+            {realtimeEnabled ? "Realtime: ON" : "Realtime: OFF"}
+          </Button>
+          {onRefresh && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              <span className="ml-2">Refresh</span>
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {transferNumbers.length > 0 ? (
         <Card>
-          <CardHeader>
-            <CardTitle>Your Transfer Numbers</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="divide-y">
               {transferNumbers.map((tn) => (
                 <div key={tn.id} className="py-4 first:pt-0 last:pb-0 flex justify-between items-center">
                   <div>
-                    <h3 className="font-medium">{tn.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium">{tn.name}</h3>
+                      {activeCallCounts[tn.id] > 0 && (
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          <Phone className="h-3 w-3 mr-1" /> {activeCallCounts[tn.id]} active
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">{tn.number}</p>
                     {tn.description && (
                       <p className="text-sm text-muted-foreground mt-1">{tn.description}</p>
+                    )}
+                    {tn.call_count > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Total calls: {tn.call_count}
+                      </p>
                     )}
                   </div>
                   <Button
@@ -52,12 +188,25 @@ export const TransferNumbersList: React.FC<TransferNumbersListProps> = ({
                     size="sm"
                     onClick={() => onDeleteTransferNumber(tn.id)}
                     className="text-destructive hover:text-destructive/90"
+                    disabled={activeCallCounts[tn.id] > 0}
                   >
                     Delete
                   </Button>
                 </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-dashed border-muted">
+          <CardContent className="flex flex-col items-center justify-center py-8">
+            <p className="text-muted-foreground text-center">
+              {isLoading ? (
+                <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+              ) : (
+                "You haven't added any transfer numbers yet."
+              )}
+            </p>
           </CardContent>
         </Card>
       )}
