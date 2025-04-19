@@ -8,6 +8,8 @@ interface PortStatus {
   sip_username: string;
   status: 'available' | 'busy' | 'error';
   last_used: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export const portStatusManager = {
@@ -24,7 +26,20 @@ export const portStatusManager = {
         .order('last_used', { ascending: true });
 
       if (error) throw error;
-      return data || [];
+      
+      // Map the data to ensure type safety
+      const ports: PortStatus[] = (data || []).map(port => ({
+        id: port.id,
+        device_id: port.device_id,
+        port_number: port.port_number,
+        sip_username: port.sip_username,
+        status: port.status as 'available' | 'busy' | 'error',
+        last_used: port.last_used,
+        created_at: port.created_at,
+        updated_at: port.updated_at
+      }));
+
+      return ports;
     } catch (error) {
       console.error('Error getting available ports:', error);
       throw error;
