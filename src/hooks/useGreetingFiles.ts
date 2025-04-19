@@ -7,7 +7,7 @@ import { useDeleteGreetingFile } from "./greeting-files/useDeleteGreetingFile";
 import { useRefreshGreetingFiles } from "./greeting-files/useRefreshGreetingFiles";
 import { useErrorHandling } from "./greeting-files/useErrorHandling";
 import { toast } from "@/components/ui/use-toast";
-import { ToastAction } from "@/components/ui/toast";
+import { Button } from "@/components/ui/button";
 
 // Re-export the GreetingFile type for backward compatibility
 export type { GreetingFile } from "./greeting-files/types";
