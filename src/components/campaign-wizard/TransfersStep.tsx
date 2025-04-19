@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { InfoCircle, PhoneIcon } from "lucide-react";
+import { Info, PhoneIcon } from "lucide-react";
 import { CampaignData } from './types';
 
 interface TransfersStepProps {
@@ -81,7 +81,7 @@ export const TransfersStep: React.FC<TransfersStepProps> = ({
           )}
 
           <Alert>
-            <InfoCircle className="h-4 w-4 text-blue-500" />
+            <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription className="text-sm">
               When someone answers your call and presses 1, they will be immediately transferred to this number.
               <br />

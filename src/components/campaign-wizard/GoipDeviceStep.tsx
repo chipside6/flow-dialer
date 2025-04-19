@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoCircle, AlertCircle, CheckCircle } from "lucide-react";
+import { Info, AlertCircle, CheckCircle } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import { useToast } from '@/components/ui/use-toast';
@@ -225,7 +224,7 @@ export const GoipDeviceStep: React.FC<GoipDeviceStepProps> = ({
             </div>
           ) : ports.length === 0 ? (
             <Alert>
-              <InfoCircle className="h-4 w-4" />
+              <Info className="h-4 w-4" />
               <AlertDescription>
                 No ports found for this device. Please check your device configuration.
               </AlertDescription>
