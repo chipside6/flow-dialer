@@ -19,6 +19,22 @@ interface ChannelStatus {
   userId?: string;
 }
 
+// Define the correct type for user_trunks
+interface UserTrunk {
+  id: string;
+  user_id: string;
+  trunk_name: string;
+  port_number: number;
+  sip_user: string;
+  sip_pass: string;
+  status: string;
+  current_campaign_id?: string;
+  current_call_id?: string;
+  device_ip?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Service for monitoring Asterisk channels via AMI
  */
@@ -58,7 +74,7 @@ export const amiMonitor = {
       // Convert to channel status format - in real implementation, we'd query Asterisk
       return trunks
         .filter(trunk => trunk.status === 'busy') // Only include busy ports
-        .map(trunk => ({
+        .map((trunk: UserTrunk) => ({
           channel: `SIP/goip_${userId}_port${trunk.port_number}-00000001`,
           state: 'Up',
           callerIdNum: trunk.current_call_id || 'unknown',
@@ -97,15 +113,29 @@ export const amiMonitor = {
     callDetails?: Record<string, any>
   ): Promise<boolean> => {
     try {
+      // First, check if the channel_logs table exists
+      const { count, error: countError } = await supabase
+        .from('call_logs') // Use call_logs instead of channel_logs
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .limit(1);
+      
+      if (countError) {
+        console.error('Error checking channel_logs table:', countError);
+        return false;
+      }
+      
+      // Log to call_logs table instead
       const { error } = await supabase
-        .from('channel_logs')
+        .from('call_logs')
         .insert({
           user_id: userId,
-          port_number: portNumber,
-          event_type: event,
-          channel_id: channelId,
-          call_details: callDetails,
-          timestamp: new Date().toISOString()
+          status: event, // Using event type as status
+          phone_number: callDetails?.phone_number || 'unknown',
+          campaign_id: callDetails?.campaign_id,
+          notes: `Port ${portNumber} - ${event} - ${channelId || 'No channel ID'}`,
+          duration: 0, // Default duration
+          transfer_requested: false
         });
       
       if (error) throw error;

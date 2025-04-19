@@ -137,14 +137,23 @@ export const goipPortManager = {
       let selectedPort: PortStatus;
       
       if (strategy === 'round-robin') {
-        // Get the last used port for this campaign
-        const { data: campaignData } = await supabase
-          .from('campaigns')
-          .select('last_port_used')
-          .eq('id', campaignId)
-          .single();
+        // Check if the port_number column exists in campaigns
+        let lastPortUsed = 0;
         
-        const lastPortUsed = campaignData?.last_port_used || 0;
+        try {
+          // Try to get the value from campaigns table if it exists
+          const { data: campaignData } = await supabase
+            .from('campaigns')
+            .select('port_number')  // Use port_number instead of last_port_used
+            .eq('id', campaignId)
+            .single();
+          
+          if (campaignData && campaignData.port_number !== null) {
+            lastPortUsed = campaignData.port_number;
+          }
+        } catch (err) {
+          console.log("Error fetching last port used, defaulting to 0:", err);
+        }
         
         // Find the next port in rotation
         const portNumbers = availablePorts.map(port => port.portNumber);
@@ -157,11 +166,18 @@ export const goipPortManager = {
         
         selectedPort = availablePorts[nextIndex];
         
-        // Update the last port used
-        await supabase
-          .from('campaigns')
-          .update({ last_port_used: selectedPort.portNumber })
-          .eq('id', campaignId);
+        // Update the port_number in campaigns to track last used port
+        try {
+          await supabase
+            .from('campaigns')
+            .update({ 
+              port_number: selectedPort.portNumber 
+            })
+            .eq('id', campaignId);
+        } catch (updateErr) {
+          console.log("Error updating port number in campaign:", updateErr);
+          // Continue even if this fails
+        }
       } else {
         // First available strategy - just take the first port
         selectedPort = availablePorts[0];

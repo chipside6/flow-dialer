@@ -57,13 +57,14 @@ export const useBackgroundDialer = (campaignId: string) => {
         let portNumberExists = false;
         try {
           // Use the Supabase Edge Function to check if the column exists
+          const { session } = await supabase.auth.getSession();
           const response = await fetch(
             'https://grhvoclalziyjbjlhpml.supabase.co/functions/v1/check-column-exists',
             {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabase.auth.getSession()}`
+                'Authorization': `Bearer ${session?.access_token}`
               },
               body: JSON.stringify({
                 table_name: 'campaigns',
