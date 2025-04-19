@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, Copy, Download, CheckCircle } from 'lucide-react';
-import { masterConfigGenerator } from '@/utils/asterisk/generators/masterConfigGenerator';
+import { Download, FileText } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { masterConfigGenerator } from '@/utils/asterisk/generators/masterConfigGenerator';
+import { SipConfigSection } from './configs/SipConfigSection';
+import { ExtensionsSection } from './configs/ExtensionsSection';
+import { GoipConfigSection } from './configs/GoipConfigSection';
 
 interface AsteriskConfigDisplayProps {
   username: string;
@@ -24,6 +26,7 @@ export const AsteriskConfigDisplay: React.FC<AsteriskConfigDisplayProps> = ({
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
   
+  // Config templates
   const sipConfig = `
 [${username}]
 type=peer
@@ -39,7 +42,6 @@ nat=force_rport,comedia
 qualify=yes
 directmedia=no
 `;
-
   const extensionsConfig = `
 [from-goip]
 exten => _X.,1,NoOp(Incoming call from GoIP device)
@@ -64,7 +66,6 @@ exten => 1,n,Hangup()
 ; Handle hangup
 exten => h,1,NoOp(Call ended)
 `;
-
   const agiScript = `#!/usr/bin/env python3
 import sys
 import os
@@ -99,7 +100,6 @@ else:
 agi.verbose("AGI script completed")
 sys.exit(0)
 `;
-
   const goipConfig = `
 Account Settings:
 Local Port: 5060
@@ -159,128 +159,31 @@ Register Expiry: 600
             <TabsTrigger value="goip">GoIP Setup</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="sip" className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Add this configuration to <code>/etc/asterisk/sip.conf</code> on your Asterisk server:
-            </p>
-            <div className="relative">
-              <ScrollArea className="h-[300px] w-full rounded-md border p-4 bg-muted">
-                <pre className="text-xs">{sipConfig}</pre>
-              </ScrollArea>
-              <div className="absolute top-2 right-2 flex gap-2">
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-                  onClick={() => handleCopy(sipConfig)}
-                >
-                  {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                </Button>
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-                  onClick={() => handleDownload(sipConfig, 'sip_goip.conf')}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+          <TabsContent value="sip">
+            <SipConfigSection 
+              sipConfig={sipConfig}
+              onCopy={handleCopy}
+              onDownload={handleDownload}
+              copied={copied}
+            />
           </TabsContent>
           
-          <TabsContent value="extensions" className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Add this dialplan to <code>/etc/asterisk/extensions.conf</code> on your Asterisk server:
-            </p>
-            <div className="relative">
-              <ScrollArea className="h-[300px] w-full rounded-md border p-4 bg-muted">
-                <pre className="text-xs">{extensionsConfig}</pre>
-              </ScrollArea>
-              <div className="absolute top-2 right-2 flex gap-2">
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-                  onClick={() => handleCopy(extensionsConfig)}
-                >
-                  {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                </Button>
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-                  onClick={() => handleDownload(extensionsConfig, 'extensions_autodialer.conf')}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            
-            <div className="mt-4">
-              <p className="text-sm text-muted-foreground mb-2">
-                And this AGI script to <code>/var/lib/asterisk/agi-bin/autodialer.agi</code>:
-              </p>
-              <div className="relative">
-                <ScrollArea className="h-[200px] w-full rounded-md border p-4 bg-muted">
-                  <pre className="text-xs">{agiScript}</pre>
-                </ScrollArea>
-                <div className="absolute top-2 right-2 flex gap-2">
-                  <Button 
-                    size="icon" 
-                    variant="outline" 
-                    className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-                    onClick={() => handleCopy(agiScript)}
-                  >
-                    {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                  <Button 
-                    size="icon" 
-                    variant="outline" 
-                    className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-                    onClick={() => handleDownload(agiScript, 'autodialer.agi')}
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Remember to make the AGI script executable with: <code>chmod +x /var/lib/asterisk/agi-bin/autodialer.agi</code>
-              </p>
-            </div>
+          <TabsContent value="extensions">
+            <ExtensionsSection 
+              extensionsConfig={extensionsConfig}
+              agiScript={agiScript}
+              onCopy={handleCopy}
+              onDownload={handleDownload}
+              copied={copied}
+            />
           </TabsContent>
           
-          <TabsContent value="goip" className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Configure your GoIP device with these settings:
-            </p>
-            <div className="relative">
-              <ScrollArea className="h-[200px] w-full rounded-md border p-4 bg-muted">
-                <pre className="text-xs">{goipConfig}</pre>
-              </ScrollArea>
-              <div className="absolute top-2 right-2 flex gap-2">
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  className="h-8 w-8 bg-background/80 backdrop-blur-sm"
-                  onClick={() => handleCopy(goipConfig)}
-                >
-                  {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-            
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md mt-4">
-              <h4 className="text-sm font-medium mb-2 text-blue-700 dark:text-blue-300">
-                GoIP Device Setup Instructions
-              </h4>
-              <ul className="text-xs text-blue-600 dark:text-blue-400 space-y-1 list-disc pl-4">
-                <li>Access your GoIP device's web interface (typically by typing its IP address in a browser)</li>
-                <li>Go to the "Configuration" or "SIP Settings" section</li>
-                <li>Enter the settings above - make sure to use the correct SIP user and password</li>
-                <li>Save the configuration and restart the device if required</li>
-                <li>Check the registration status to ensure it's connected to your Asterisk server</li>
-              </ul>
-            </div>
+          <TabsContent value="goip">
+            <GoipConfigSection 
+              goipConfig={goipConfig}
+              onCopy={handleCopy}
+              copied={copied}
+            />
           </TabsContent>
         </Tabs>
       </CardContent>
