@@ -25,6 +25,9 @@ import UpgradePage from '@/pages/UpgradePage';
 import Campaign from '@/pages/Campaign';
 import PricingPage from '@/pages/PricingPage';
 import FeaturesPage from '@/pages/FeaturesPage';
+import AdminPanel from '@/pages/AdminPanel';
+import UnauthorizedPage from '@/pages/UnauthorizedPage';
+import ForgotPassword from '@/pages/ForgotPassword';
 
 import PublicLayout from '@/components/layout/PublicLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -42,6 +45,7 @@ function App() {
             <Route path="/upgrade" element={<UpgradePage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
           </Route>
           
           {/* Protected routes */}
@@ -61,6 +65,10 @@ function App() {
           
           {/* Admin-only routes */}
           <Route path="/asterisk-config" element={<ProtectedRoute requireAdmin={true}><AsteriskConfigPage /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminPanel /></ProtectedRoute>} />
+          
+          {/* Unauthorized page */}
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
           
           {/* Redirect for unknown routes */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -27,6 +27,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const hasRedirectedRef = useRef(false);
   const touchIntervalRef = useRef<number | null>(null);
   
+  // Debug logs to help identify issues
+  useEffect(() => {
+    console.log('ProtectedRoute Props:', { requireAdmin, requireSubscription });
+    console.log('Auth State:', { isAuthenticated, isAdmin, isLoading, sessionChecked });
+    console.log('Current Location:', location.pathname);
+  }, [isAuthenticated, isAdmin, isLoading, sessionChecked, requireAdmin, requireSubscription, location.pathname]);
+  
   // Verify the session is still valid with Supabase directly
   useEffect(() => {
     const verifySession = async () => {
@@ -34,6 +41,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         const { data, error } = await supabase.auth.getSession();
         
         const sessionIsValid = !error && !!data.session;
+        
+        console.log('Session verification result:', { sessionIsValid, hasSession: !!data.session });
         
         // If there's a mismatch between auth context and actual session, reload the page
         if (isAuthenticated && !sessionIsValid && !hasRedirectedRef.current) {
@@ -141,6 +150,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   
   // If admin required but user is not admin, redirect to unauthorized
   if (requireAdmin && !isAdmin && !hasRedirectedRef.current) {
+    console.log('Admin required but user is not an admin, redirecting to unauthorized');
     hasRedirectedRef.current = true;
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
