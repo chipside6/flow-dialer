@@ -1,4 +1,3 @@
-
 import { securityUtils } from '../utils/securityUtils';
 
 /**
@@ -137,7 +136,7 @@ exten => s,1,NoOp(Campaign ${campaignId} call handler)
 
 ; Handle DTMF input 1 for transfer
 exten => 1,1,NoOp(Transfer requested)
- same => n,Dial(SIP/\\${TRANSFER_NUMBER},30)
+ same => n,Dial(SIP/\\${TRANSFER_NUMBER}, 30)
  same => n,Hangup()
 
 `;
@@ -150,7 +149,7 @@ exten => _X.,1,NoOp(Outbound call via port ${port})
  same => n,Set(PORT_NUMBER=${port})
  same => n,Set(GROUP(port_${userId}_${port})=\\${CHANNEL})
  same => n,GotoIf($[\\${GROUP_COUNT(port_${userId}_${port})} > 1]?busy)
- same => n,Dial(SIP/goip_${userId.substring(0, 8)}_port${port}/\\${EXTEN},30,g)
+ same => n,Dial(SIP/goip_${userId.substring(0, 8)}_port${port}/\\${EXTEN}, 30, g)
  same => n,Hangup()
  same => n(busy),NoOp(Port ${port} is busy, not placing call)
  same => n,Hangup()
