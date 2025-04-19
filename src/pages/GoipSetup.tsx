@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { GoipHeader } from '@/components/goip/GoipHeader';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { CredentialSection } from '@/components/goip/CredentialSection';
 import { useAuth } from '@/contexts/auth';
 import { Info } from 'lucide-react';
 import { SetupInstructions } from '@/components/goip/SetupInstructions';
+import { GoipDeviceSetup } from '@/components/goip/GoipDeviceSetup';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 const GoipSetupContent = () => {
@@ -37,6 +37,9 @@ const GoipSetupContent = () => {
         </Card>
         
         <div className="grid gap-6">
+          {/* Device Registration Form */}
+          <GoipDeviceSetup />
+
           {/* Step-by-step instructions for GoIP setup */}
           <SetupInstructions />
           
