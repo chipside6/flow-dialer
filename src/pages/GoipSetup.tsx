@@ -1,6 +1,5 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { GoipHeader } from '@/components/goip/GoipHeader';
 import { CredentialSection } from '@/components/goip/CredentialSection';
@@ -9,12 +8,6 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 
 const GoipSetupContent = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    // Redirect to the new GoIP Devices page
-    navigate('/goip-devices', { replace: true });
-  }, [navigate]);
   
   return (
     <DashboardLayout>

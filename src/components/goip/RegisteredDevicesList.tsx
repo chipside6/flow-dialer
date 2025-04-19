@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { goipService } from '@/utils/asterisk/services/goipService';
@@ -172,16 +173,7 @@ export const RegisteredDevicesList: React.FC<RegisteredDevicesListProps> = ({ re
               <p className="text-muted-foreground mb-4">
                 You haven't registered any GoIP devices yet
               </p>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  // Fix: Use querySelector with proper type checking
-                  const registerTab = document.querySelector('[data-value="register"]');
-                  if (registerTab && registerTab instanceof HTMLElement) {
-                    registerTab.click();
-                  }
-                }}
-              >
+              <Button variant="outline" onClick={() => document.querySelector('[data-value="register"]')?.click()}>
                 Register Your First Device
               </Button>
             </div>

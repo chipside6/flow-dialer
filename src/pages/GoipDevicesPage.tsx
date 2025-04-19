@@ -52,7 +52,7 @@ const GoipDevicesPage = () => {
           
           <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
-              <TabsTrigger value="register" data-value="register">Register Device</TabsTrigger>
+              <TabsTrigger value="register">Register Device</TabsTrigger>
               <TabsTrigger value="devices">Manage Devices</TabsTrigger>
             </TabsList>
             
