@@ -27,19 +27,26 @@ export const LoadingErrorBoundary: React.FC<LoadingErrorBoundaryProps> = ({
   
   // Reset stuck state when loading or error state changes
   useEffect(() => {
+    // Clear any existing timers
+    let stuckTimer: NodeJS.Timeout | undefined;
+    
     if (!isLoading) {
       setIsStuck(false);
-      return;
+      return () => {
+        if (stuckTimer) clearTimeout(stuckTimer);
+      };
     }
     
     // Set a timeout to detect stuck loading states
-    const timer = setTimeout(() => {
+    stuckTimer = setTimeout(() => {
       if (isLoading) {
         setIsStuck(true);
       }
     }, timeout);
     
-    return () => clearTimeout(timer);
+    return () => {
+      if (stuckTimer) clearTimeout(stuckTimer);
+    };
   }, [isLoading, timeout]);
   
   // If there's an error, show error state

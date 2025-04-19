@@ -46,22 +46,22 @@ export function useGreetingFiles() {
 
   // Set up loading state management
   useEffect(() => {
-    // Clear previous timeout to prevent multiple timeouts
     let loadingTimeout: NodeJS.Timeout | undefined;
     
     if (isQueryLoading || isFetching) {
       setIsLoading(true);
       
+      // Clear any previous timeout
+      if (loadingTimeout) clearTimeout(loadingTimeout);
+      
       // Set a reasonable timeout to prevent infinite loading states
       loadingTimeout = setTimeout(() => {
-        setIsLoading(false);
-        
-        // Only show toast if we still don't have data
-        if (!greetingFiles || greetingFiles.length === 0) {
+        // Only show toast if we're still loading after timeout
+        if (isQueryLoading || isFetching) {
           toast({
             title: "Loading taking longer than expected",
             description: "We're having trouble loading your audio files. Please try again.",
-            variant: "warning", // Changed from "destructive" to "warning"
+            variant: "warning",
             action: (
               <ToastAction altText="Retry" onClick={forceRefresh}>
                 Retry Loading
@@ -69,15 +69,12 @@ export function useGreetingFiles() {
             )
           });
         }
-      }, 6000); // 6 seconds timeout
+        setIsLoading(false);
+      }, 8000); // Increased from 6000 to 8000ms to give more time
     } else {
       // When query is done, end loading state after a short delay
       // This ensures we have a minimum loading time for UI consistency
-      const minLoadingDelay = setTimeout(() => {
-        setIsLoading(false);
-      }, 300);
-      
-      return () => clearTimeout(minLoadingDelay);
+      setIsLoading(false);
     }
     
     return () => {
