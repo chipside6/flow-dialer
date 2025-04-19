@@ -20,6 +20,7 @@ import AsteriskConfigPage from '@/pages/AsteriskConfigPage';
 import GoipSetup from '@/pages/GoipSetup';
 import TransfersPage from '@/pages/TransfersPage';
 import GreetingsPage from '@/pages/GreetingsPage';
+import GreetingUploadPage from '@/pages/GreetingUploadPage';
 import UpgradePage from '@/pages/UpgradePage';
 import Campaign from '@/pages/Campaign';
 import PricingPage from '@/pages/PricingPage';
@@ -56,6 +57,7 @@ function App() {
           <Route path="/goip-setup" element={<ProtectedRoute><GoipSetup /></ProtectedRoute>} />
           <Route path="/transfers" element={<ProtectedRoute><TransfersPage /></ProtectedRoute>} />
           <Route path="/greetings" element={<ProtectedRoute><GreetingsPage /></ProtectedRoute>} />
+          <Route path="/greetings/upload" element={<ProtectedRoute><GreetingUploadPage /></ProtectedRoute>} />
           
           {/* Admin-only routes */}
           <Route path="/asterisk-config" element={<ProtectedRoute requireAdmin={true}><AsteriskConfigPage /></ProtectedRoute>} />
