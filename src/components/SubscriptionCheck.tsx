@@ -1,7 +1,9 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/subscription';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 interface SubscriptionCheckProps {
   redirectTo: string;
@@ -35,7 +37,14 @@ export function SubscriptionCheck({
         console.log("Performing database verification of subscription status");
         
         const { data: authData } = await supabase.auth.getSession();
-        if (!authData.session) return;
+        if (!authData.session) {
+          toast({
+            title: "Authentication Required",
+            description: "Please sign in to access this feature",
+            variant: "destructive"
+          });
+          return;
+        }
         
         const { data: subData, error } = await supabase
           .from('subscriptions')
@@ -80,6 +89,13 @@ export function SubscriptionCheck({
         if (retryCount >= 3 || hasValidSubscription === false) {
           console.log('User has no lifetime subscription, redirecting to upgrade page');
           hasRedirectedRef.current = true;
+          
+          toast({
+            title: "Subscription Required",
+            description: "You need a lifetime subscription to access this feature",
+            variant: "destructive"
+          });
+          
           navigate('/upgrade', { replace: true });
         }
       } else if (!requireSubscription && subscriptionValid) {

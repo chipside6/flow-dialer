@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/auth";
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LimitReachedDialog } from "@/components/LimitReachedDialog";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription } from "@/hooks/subscription";
 import { CallStatisticsCard } from '@/components/dashboard/CallStatisticsCard';
 
 export const DashboardContent = () => {

@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { checkSubscriptionStatus } from '@/contexts/auth/authUtils';
 import { touchSession, isSessionValid } from '@/services/auth/session';
+import { toast } from '@/components/ui/use-toast';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -58,6 +59,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       checkSubscriptionStatus(user.id)
         .then(hasActive => {
           setHasSubscription(hasActive);
+          if (!hasActive && requireSubscription) {
+            toast({
+              title: "Subscription Required",
+              description: "You need an active subscription to access this feature.",
+              variant: "destructive"
+            });
+          }
         })
         .finally(() => {
           setCheckingSubscription(false);
