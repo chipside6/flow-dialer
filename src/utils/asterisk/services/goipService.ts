@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { securityUtils } from '../utils/securityUtils';
 
@@ -295,7 +296,7 @@ export const goipService = {
       console.error('Error syncing configuration:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'An unknown error occurred'
+        message: error instanceof Error ? error.message : 'An unexpected error occurred'
       };
     }
   }
