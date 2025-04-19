@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +30,9 @@ export const PortMonitor = ({ userId }: PortMonitorProps) => {
 
       if (error) throw error;
 
-      setPorts(data || []);
+      // Ensure data is an array of Port objects
+      const portData = data ? data as Port[] : [];
+      setPorts(portData);
     } catch (error) {
       console.error('Error fetching port status:', error);
       toast({

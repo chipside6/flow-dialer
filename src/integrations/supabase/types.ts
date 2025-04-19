@@ -767,6 +767,16 @@ export type Database = {
         Args: { admin_email: string; admin_password: string }
         Returns: string
       }
+      get_port_status: {
+        Args: { user_id_param: string }
+        Returns: {
+          id: string
+          device_name: string
+          port_number: number
+          status: string
+          campaign_name: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
