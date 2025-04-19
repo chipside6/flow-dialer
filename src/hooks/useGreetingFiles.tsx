@@ -8,6 +8,7 @@ import { useRefreshGreetingFiles } from "./greeting-files/useRefreshGreetingFile
 import { useErrorHandling } from "./greeting-files/useErrorHandling";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { ToastAction } from "@/components/ui/toast";
 
 // Re-export the GreetingFile type for backward compatibility
 export type { GreetingFile } from "./greeting-files/types";
@@ -67,17 +68,11 @@ export function useGreetingFiles() {
               title: "Loading timeout",
               description: "Loading is taking longer than expected. Please try again.",
               variant: "destructive",
-              action: function() {
-                return (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => forceRefresh()}
-                  >
-                    Retry Loading
-                  </Button>
-                );
-              }
+              action: (
+                <ToastAction altText="Retry" onClick={() => forceRefresh()}>
+                  Retry Loading
+                </ToastAction>
+              )
             });
           }
         }
