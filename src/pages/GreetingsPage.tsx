@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Loader2, FileAudio, RefreshCw } from "lucide-react";
@@ -110,7 +111,7 @@ const GreetingsContent = () => {
         error={error as Error}
         onRetry={handleRetry}
         loadingComponent={<GreetingsFallback onRetry={handleRetry} />}
-        timeout={8000}
+        timeout={6000}
       >
         <GreetingFilesList 
           files={greetingFiles || []}

@@ -2,7 +2,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { GreetingFile } from './types';
-import { toast } from '@/components/ui/use-toast';
 
 export const ensureStorageBucket = async () => {
   try {
@@ -39,6 +38,8 @@ export const useGreetingFilesQuery = (userId: string | undefined) => {
       if (!userId) {
         return [];
       }
+      
+      console.log("Fetching greeting files for user:", userId);
       
       // First ensure the bucket exists
       const bucketExists = await ensureStorageBucket();
