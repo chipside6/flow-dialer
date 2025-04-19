@@ -39,7 +39,7 @@ const UpgradeButton = () => {
 const AffiliateStatus = () => null;
 
 export function Sidebar() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, isAdmin } = useAuth()
   const subscription = null; // Placeholder until we implement subscription hook
 
   return (
@@ -93,7 +93,7 @@ export function Sidebar() {
             <AffiliateStatus />
           </div>
         </div>
-        {user && user.role === 'admin' && (
+        {isAdmin && (
           <div className="px-3 py-2">
             <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
               Admin

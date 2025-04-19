@@ -11,8 +11,8 @@ import { Toaster } from "@/components/ui/toaster";
 
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
+import SignupPage from './pages/SignUp'; // Fixed import path
+import ResetPasswordPage from './pages/ResetPassword'; // Fixed import path
 import DashboardPage from './pages/DashboardPage';
 import CampaignsPage from './pages/CampaignsPage';
 import NewCampaignPage from './pages/Campaign';
