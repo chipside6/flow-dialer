@@ -1,4 +1,3 @@
-
 import React from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import { BasicsStep } from "./BasicsStep";
@@ -13,6 +12,7 @@ import { useCampaignForm } from "./hooks/useCampaignForm";
 import { useFormValidation } from "./utils/formValidation";
 import { useGreetingFiles, GreetingFile } from "@/hooks/useGreetingFiles";
 import { useContactLists } from "@/hooks/useContactLists";
+import { GoipDeviceStep } from './GoipDeviceStep';
 
 interface CampaignCreationWizardProps {
   onComplete: (campaign: CampaignData) => void;
@@ -73,6 +73,15 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
           campaign={campaign}
           greetingFiles={greetingFiles as GreetingFile[]}
           onSelectChange={handleSelectChange}
+        />
+      </TabsContent>
+      
+      <TabsContent value="goip">
+        <GoipDeviceStep
+          selectedDeviceId={campaign.goip_device_id || ''}
+          selectedPortIds={campaign.port_ids || []}
+          onDeviceChange={(deviceId) => handleSelectChange('goip_device_id', deviceId)}
+          onPortsChange={(portIds) => handleSelectChange('port_ids', portIds)}
         />
       </TabsContent>
       

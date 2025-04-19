@@ -150,6 +150,42 @@ export type Database = {
           },
         ]
       }
+      campaign_ports: {
+        Row: {
+          campaign_id: string | null
+          created_at: string | null
+          id: string
+          port_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string | null
+          id?: string
+          port_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string | null
+          id?: string
+          port_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_ports_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_ports_port_id_fkey"
+            columns: ["port_id"]
+            isOneToOne: false
+            referencedRelation: "goip_ports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           answered_calls: number | null
@@ -159,6 +195,7 @@ export type Database = {
           created_at: string
           description: string | null
           failed_calls: number | null
+          goip_device_id: string | null
           greeting_file_name: string | null
           greeting_file_url: string | null
           id: string
@@ -182,6 +219,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           failed_calls?: number | null
+          goip_device_id?: string | null
           greeting_file_name?: string | null
           greeting_file_url?: string | null
           id?: string
@@ -205,6 +243,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           failed_calls?: number | null
+          goip_device_id?: string | null
           greeting_file_name?: string | null
           greeting_file_url?: string | null
           id?: string
@@ -226,6 +265,13 @@ export type Database = {
             columns: ["contact_list_id"]
             isOneToOne: false
             referencedRelation: "contact_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_goip_device_id_fkey"
+            columns: ["goip_device_id"]
+            isOneToOne: false
+            referencedRelation: "goip_devices"
             referencedColumns: ["id"]
           },
           {

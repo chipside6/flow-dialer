@@ -1,4 +1,3 @@
-
 export interface CampaignData {
   id?: string; // Make id optional for creation
   title: string;
@@ -19,9 +18,11 @@ export interface CampaignData {
   failedCalls?: number;
   createdAt?: string;
   user_id?: string;
+  goip_device_id?: string;
+  port_ids?: string[];
 }
 
-export type WizardStep = "basics" | "contacts" | "audio" | "transfers" | "review";
+export type WizardStep = "basics" | "contacts" | "audio" | "goip" | "transfers" | "review";
 
 export interface ContactList {
   id: string;

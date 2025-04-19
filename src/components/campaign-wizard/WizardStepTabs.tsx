@@ -1,63 +1,79 @@
-
-import React from "react";
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { WizardStep } from "./types";
-import { FileText, Users, Radio, PhoneForwarded, ClipboardCheck } from "lucide-react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BasicsIcon, ContactsIcon, AudioIcon, ReviewIcon, Server } from "./WizardIcons";
+import { WizardStep, CampaignData } from "./types";
 
 interface WizardStepTabsProps {
   currentStep: WizardStep;
   setStep: (step: WizardStep) => void;
-  isStepAvailable: Record<WizardStep, boolean>;
+  isStepAvailable: { [key: string]: boolean };
 }
 
-export const WizardStepTabs: React.FC<WizardStepTabsProps> = ({
+export const WizardStepTabs = ({
   currentStep,
   setStep,
   isStepAvailable
-}) => {
-  const isMobile = useIsMobile();
-  
-  const steps = [
-    { id: "basics", label: "Basics", icon: <FileText className="h-4 w-4" /> },
-    { id: "contacts", label: "Contacts", icon: <Users className="h-4 w-4" /> },
-    { id: "audio", label: "Audio", icon: <Radio className="h-4 w-4" /> },
-    { id: "transfers", label: "Transfers", icon: <PhoneForwarded className="h-4 w-4" /> },
-    { id: "review", label: "Review", icon: <ClipboardCheck className="h-4 w-4" /> }
-  ];
-
+}: WizardStepTabsProps) => {
   return (
-    <div className="wizard-tabs-container w-full overflow-x-auto">
-      <ScrollArea className="w-full">
-        <TabsList className="mb-4 mx-auto flex min-w-full justify-start sm:justify-center no-vertical-scroll">
-          {steps.map((step) => (
-            <TabsTrigger
-              key={step.id}
-              value={step.id}
-              onClick={() => {
-                if (isStepAvailable[step.id as WizardStep]) {
-                  setStep(step.id as WizardStep);
-                }
-              }}
-              disabled={!isStepAvailable[step.id as WizardStep]}
-              className={`flex-shrink-0 flex flex-col items-center justify-center py-2 px-2 sm:px-3 ${
-                currentStep === step.id
-                  ? "bg-primary text-primary-foreground font-medium"
-                  : "text-muted-foreground"
-              } ${!isStepAvailable[step.id as WizardStep] ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              <span className="flex items-center justify-center mb-1">
-                {step.icon}
-              </span>
-              <span className="text-xs truncate max-w-[70px] sm:max-w-full">
-                {isMobile && step.id === "transfers" ? "Transfer" : step.label}
-              </span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-    </div>
+    <TabsList className="grid grid-cols-6 bg-muted w-full rounded-none border-b">
+      <TabsTrigger
+        value="basics"
+        disabled={!isStepAvailable.basics}
+        onClick={() => setStep('basics')}
+        className="data-[state=active]:bg-background"
+      >
+        <BasicsIcon className="h-4 w-4 mr-2" />
+        <span className="hidden sm:inline">Basics</span>
+      </TabsTrigger>
+
+      <TabsTrigger
+        value="contacts"
+        disabled={!isStepAvailable.contacts}
+        onClick={() => setStep('contacts')}
+        className="data-[state=active]:bg-background"
+      >
+        <ContactsIcon className="h-4 w-4 mr-2" />
+        <span className="hidden sm:inline">Contacts</span>
+      </TabsTrigger>
+
+      <TabsTrigger
+        value="audio"
+        disabled={!isStepAvailable.audio}
+        onClick={() => setStep('audio')}
+        className="data-[state=active]:bg-background"
+      >
+        <AudioIcon className="h-4 w-4 mr-2" />
+        <span className="hidden sm:inline">Audio</span>
+      </TabsTrigger>
+      
+      <TabsTrigger
+        value="goip"
+        disabled={!isStepAvailable.goip}
+        onClick={() => setStep('goip')}
+        className="data-[state=active]:bg-background"
+      >
+        <Server className="h-4 w-4 mr-2" />
+        <span className="hidden sm:inline">GoIP Device</span>
+      </TabsTrigger>
+
+      <TabsTrigger
+        value="transfers"
+        disabled={!isStepAvailable.transfers}
+        onClick={() => setStep('transfers')}
+        className="data-[state=active]:bg-background"
+      >
+        <ReviewIcon className="h-4 w-4 mr-2" />
+        <span className="hidden sm:inline">Transfers</span>
+      </TabsTrigger>
+
+      <TabsTrigger
+        value="review"
+        disabled={!isStepAvailable.review}
+        onClick={() => setStep('review')}
+        className="data-[state=active]:bg-background"
+      >
+        <ReviewIcon className="h-4 w-4 mr-2" />
+        <span className="hidden sm:inline">Review</span>
+      </TabsTrigger>
+    </TabsList>
   );
 };
