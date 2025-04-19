@@ -60,8 +60,8 @@ match=${sipUser}
     return `
 ; Extension for user ${userId} port ${portNumber}
 exten => goip_${userId.substring(0, 8)}_port${portNumber},1,NoOp(Incoming call from GoIP port ${portNumber})
- same => n,Set(GROUP(port_${userId}_${portNumber})=\${CHANNEL})
- same => n,GotoIf($[\${GROUP_COUNT(port_${userId}_${portNumber})} > 1]?busy)
+ same => n,Set(GROUP(port_${userId}_${portNumber})=\\${CHANNEL})
+ same => n,GotoIf($[\\${GROUP_COUNT(port_${userId}_${portNumber})} > 1]?busy)
  same => n,Answer()
  same => n,Wait(1)
  same => n,Playback(hello-world)
@@ -79,12 +79,12 @@ exten => goip_${userId.substring(0, 8)}_port${portNumber},1,NoOp(Incoming call f
 ; Campaign ${campaignId} outbound dialplan
 [campaign-${campaignId}-outbound]
 exten => _X.,1,NoOp(Outbound call for campaign ${campaignId})
- same => n,Set(CALLERID(all)=Campaign ${campaignId} <\${EXTEN}>)
- same => n,Set(GROUP(campaign_${campaignId})=\${CHANNEL})
- same => n,GotoIf($[\${GROUP_COUNT(campaign_${campaignId}_\${PORT_NUMBER})} > 1]?busy)
- same => n,Dial(SIP/goip_${userId.substring(0, 8)}_port\${PORT_NUMBER}/\${EXTEN},30,g)
+ same => n,Set(CALLERID(all)=Campaign ${campaignId} <\\${EXTEN}>)
+ same => n,Set(GROUP(campaign_${campaignId})=\\${CHANNEL})
+ same => n,GotoIf($[\\${GROUP_COUNT(campaign_${campaignId}_\\${PORT_NUMBER})} > 1]?busy)
+ same => n,Dial(SIP/goip_${userId.substring(0, 8)}_port\\${PORT_NUMBER}/\\${EXTEN},30,g)
  same => n,Hangup()
- same => n(busy),NoOp(Port \${PORT_NUMBER} is busy, not placing call)
+ same => n(busy),NoOp(Port \\${PORT_NUMBER} is busy, not placing call)
  same => n,Hangup()
 `;
   },
