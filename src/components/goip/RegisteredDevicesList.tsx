@@ -173,7 +173,16 @@ export const RegisteredDevicesList: React.FC<RegisteredDevicesListProps> = ({ re
               <p className="text-muted-foreground mb-4">
                 You haven't registered any GoIP devices yet
               </p>
-              <Button variant="outline" onClick={() => document.querySelector('[data-value="register"]')?.click()}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  // Fix: Use querySelector with optional chaining and conditional to check if click() exists
+                  const registerTab = document.querySelector('[data-value="register"]');
+                  if (registerTab && 'click' in registerTab) {
+                    (registerTab as HTMLElement).click();
+                  }
+                }}
+              >
                 Register Your First Device
               </Button>
             </div>
