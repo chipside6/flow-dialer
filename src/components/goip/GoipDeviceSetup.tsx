@@ -5,8 +5,14 @@ import { GoipDeviceForm } from './GoipDeviceForm';
 
 export const GoipDeviceSetup = () => {
   return (
-    <div>
-      <GoipDeviceForm />
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Register New Device</CardTitle>
+        <CardDescription>Add a new GoIP device to your account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <GoipDeviceForm />
+      </CardContent>
+    </Card>
   );
 };
