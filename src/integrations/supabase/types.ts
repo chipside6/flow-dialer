@@ -20,6 +20,7 @@ export type Database = {
           port_id: string | null
           start_time: string | null
           status: string
+          transfer_number_id: string | null
         }
         Insert: {
           call_result?: string | null
@@ -31,6 +32,7 @@ export type Database = {
           port_id?: string | null
           start_time?: string | null
           status: string
+          transfer_number_id?: string | null
         }
         Update: {
           call_result?: string | null
@@ -42,6 +44,7 @@ export type Database = {
           port_id?: string | null
           start_time?: string | null
           status?: string
+          transfer_number_id?: string | null
         }
         Relationships: [
           {
@@ -149,6 +152,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      call_quality_metrics: {
+        Row: {
+          call_id: string
+          created_at: string
+          device_id: string
+          id: string
+          jitter_ms: number
+          latency_ms: number
+          mos_score: number
+          packet_loss_percent: number
+          port_id: string
+        }
+        Insert: {
+          call_id: string
+          created_at?: string
+          device_id: string
+          id?: string
+          jitter_ms: number
+          latency_ms: number
+          mos_score: number
+          packet_loss_percent: number
+          port_id: string
+        }
+        Update: {
+          call_id?: string
+          created_at?: string
+          device_id?: string
+          id?: string
+          jitter_ms?: number
+          latency_ms?: number
+          mos_score?: number
+          packet_loss_percent?: number
+          port_id?: string
+        }
+        Relationships: []
       }
       campaign_ports: {
         Row: {
@@ -629,6 +668,45 @@ export type Database = {
         }
         Relationships: []
       }
+      port_activity: {
+        Row: {
+          activity_type: string
+          call_id: string | null
+          call_status: string | null
+          campaign_id: string | null
+          created_at: string
+          error_details: Json | null
+          id: string
+          port_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          call_id?: string | null
+          call_status?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          error_details?: Json | null
+          id?: string
+          port_id: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          call_id?: string | null
+          call_status?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          error_details?: Json | null
+          id?: string
+          port_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_name: string | null
@@ -767,8 +845,16 @@ export type Database = {
       user_trunks: {
         Row: {
           created_at: string
+          current_call_id: string | null
+          current_campaign_id: string | null
+          error_code: string | null
+          error_message: string | null
+          error_timestamp: string | null
           id: string
+          last_quality_issue: string | null
+          last_used: string | null
           port_number: number
+          quality_warning: boolean | null
           sip_pass: string
           sip_user: string
           status: string | null
@@ -778,8 +864,16 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_call_id?: string | null
+          current_campaign_id?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          error_timestamp?: string | null
           id?: string
+          last_quality_issue?: string | null
+          last_used?: string | null
           port_number: number
+          quality_warning?: boolean | null
           sip_pass: string
           sip_user: string
           status?: string | null
@@ -789,8 +883,16 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_call_id?: string | null
+          current_campaign_id?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          error_timestamp?: string | null
           id?: string
+          last_quality_issue?: string | null
+          last_used?: string | null
           port_number?: number
+          quality_warning?: boolean | null
           sip_pass?: string
           sip_user?: string
           status?: string | null

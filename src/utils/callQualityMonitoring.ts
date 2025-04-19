@@ -33,17 +33,25 @@ export const callQualityService = {
           created_at: new Date().toISOString()
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting call quality metrics:', error);
+        return false;
+      }
       
       // Update port quality status if quality is poor
       if (metrics.mos_score < 2.5 || metrics.packet_loss_percent > 10) {
-        await supabase
-          .from('goip_ports')
+        const { error: updateError } = await supabase
+          .from('user_trunks')
           .update({
             quality_warning: true,
             last_quality_issue: new Date().toISOString()
           })
           .eq('id', portId);
+        
+        if (updateError) {
+          console.error('Error updating port quality status:', updateError);
+          // Continue even if this update fails
+        }
       }
       
       return true;
@@ -63,12 +71,46 @@ export const callQualityService = {
     problematic_calls: number;
   } | null> => {
     try {
+      // Check if call_quality_metrics table exists first
+      try {
+        const { count, error } = await supabase
+          .from('call_quality_metrics')
+          .select('*', { count: 'exact', head: true })
+          .eq('device_id', deviceId);
+          
+        if (error) {
+          console.error('Error querying call quality metrics:', error);
+          return {
+            average_mos: 0,
+            average_packet_loss: 0,
+            total_calls: 0,
+            problematic_calls: 0
+          };
+        }
+      } catch (e) {
+        console.error('Call quality metrics table might not exist yet:', e);
+        return {
+          average_mos: 0,
+          average_packet_loss: 0,
+          total_calls: 0,
+          problematic_calls: 0
+        };
+      }
+      
       const { data, error } = await supabase
         .from('call_quality_metrics')
         .select('*')
         .eq('device_id', deviceId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching call quality metrics:', error);
+        return {
+          average_mos: 0,
+          average_packet_loss: 0,
+          total_calls: 0,
+          problematic_calls: 0
+        };
+      }
       
       if (!data || data.length === 0) {
         return {

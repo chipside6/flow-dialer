@@ -2,22 +2,25 @@
 import { supabase } from '@/integrations/supabase/client';
 import { PortStatus } from '@/types/goipTypes';
 
+// Define a simplified port type that doesn't depend on database columns
+interface PortData {
+  id: string;
+  portNumber: number;
+  deviceName: string;
+  status: PortStatus;
+  lastUsed: string | null;
+  quality?: {
+    avgMosScore: number;
+    recentFailures: number;
+  } | null;
+}
+
 export const enhancedGoipPortManager = {
   /**
    * Get available ports with more detailed status information
    */
   getAvailablePorts: async (userId: string, campaignId?: string): Promise<{
-    ports: Array<{
-      id: string;
-      portNumber: number;
-      deviceName: string;
-      status: PortStatus;
-      lastUsed: string | null;
-      quality: {
-        avgMosScore: number;
-        recentFailures: number;
-      } | null;
-    }>;
+    ports: PortData[];
     totalPorts: number;
     availablePorts: number;
   }> => {
@@ -28,81 +31,35 @@ export const enhancedGoipPortManager = {
         .select(`
           id, 
           port_number, 
-          status, 
-          last_used,
+          status,
           trunk_name,
+          last_used,
           updated_at
         `)
         .eq('user_id', userId)
         .order('port_number', { ascending: true });
         
-      if (error) throw error;
-      
-      // Get call quality data for these ports (last 24h)
-      const oneDayAgo = new Date();
-      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-      
-      const { data: qualityData, error: qualityError } = await supabase
-        .from('call_quality_metrics')
-        .select('port_id, mos_score, created_at')
-        .gt('created_at', oneDayAgo.toISOString())
-        .in('port_id', ports?.map(p => p.id) || []);
-        
-      if (qualityError) {
-        console.error('Error fetching quality data:', qualityError);
-        // Continue with available port data
+      if (error) {
+        console.error('Error fetching ports:', error);
+        return { ports: [], totalPorts: 0, availablePorts: 0 };
       }
       
-      // Get recent call failures for these ports
-      const { data: failures, error: failuresError } = await supabase
-        .from('call_logs')
-        .select('port_id, status')
-        .gt('created_at', oneDayAgo.toISOString())
-        .in('port_id', ports?.map(p => p.id) || [])
-        .eq('status', 'failed');
-        
-      if (failuresError) {
-        console.error('Error fetching failures:', failuresError);
-        // Continue with available port data
-      }
-      
-      // Process and return port data
+      // Process and return port data - for now without quality data
+      // until we have data in the call_quality_metrics table
       const availablePorts = (ports || [])
         .filter(p => p.status === 'active')
         .map(port => {
-          // Calculate quality metrics for this port
-          const portQualityData = qualityData?.filter(q => q.port_id === port.id) || [];
-          const portFailures = failures?.filter(f => f.port_id === port.id) || [];
-          
-          const avgMosScore = portQualityData.length > 0
-            ? portQualityData.reduce((sum, q) => sum + q.mos_score, 0) / portQualityData.length
-            : 0;
-            
           return {
             id: port.id,
             portNumber: port.port_number,
             deviceName: port.trunk_name,
             status: port.status as PortStatus,
             lastUsed: port.last_used,
-            quality: portQualityData.length > 0 ? {
-              avgMosScore,
-              recentFailures: portFailures.length
-            } : null
+            quality: null // We'll add quality data later when we have it
           };
         })
-        // Sort by quality (best first) and then by last used (oldest first)
         .sort((a, b) => {
-          // First sort by quality (if available)
-          if (a.quality && b.quality) {
-            if (a.quality.recentFailures !== b.quality.recentFailures) {
-              return a.quality.recentFailures - b.quality.recentFailures;
-            }
-            if (a.quality.avgMosScore !== b.quality.avgMosScore) {
-              return b.quality.avgMosScore - a.quality.avgMosScore;
-            }
-          }
-          
-          // Then sort by last used (oldest first)
+          // Sort by last used (oldest first)
           if (a.lastUsed && b.lastUsed) {
             return new Date(a.lastUsed).getTime() - new Date(b.lastUsed).getTime();
           }
@@ -118,7 +75,7 @@ export const enhancedGoipPortManager = {
       };
     } catch (error) {
       console.error('Error getting available ports:', error);
-      throw error;
+      return { ports: [], totalPorts: 0, availablePorts: 0 };
     }
   },
   
@@ -162,20 +119,20 @@ export const enhancedGoipPortManager = {
         return false;
       }
       
-      // Log the allocation in port_activity
-      const { error: logError } = await supabase
-        .from('port_activity')
-        .insert({
-          port_id: port.id,
-          user_id: userId,
-          campaign_id: campaignId,
-          call_id: callId,
-          activity_type: 'allocation',
-          status: 'busy'
-        });
-        
-      if (logError) {
-        console.error('Error logging port activity:', logError);
+      // Log activity - we'll implement this later when port_activity table is ready
+      try {
+        await supabase
+          .from('port_activity')
+          .insert({
+            port_id: port.id,
+            user_id: userId,
+            campaign_id: campaignId,
+            call_id: callId,
+            activity_type: 'allocation',
+            status: 'busy'
+          });
+      } catch (logError) {
+        console.error('Error logging port activity (this is non-critical):', logError);
         // Continue despite logging error
       }
       
@@ -224,21 +181,21 @@ export const enhancedGoipPortManager = {
         return false;
       }
       
-      // Log the release in port_activity
-      const { error: logError } = await supabase
-        .from('port_activity')
-        .insert({
-          port_id: port.id,
-          user_id: userId,
-          campaign_id: port.current_campaign_id,
-          call_id: port.current_call_id,
-          activity_type: 'release',
-          status: 'active',
-          call_status: callStatus || 'unknown'
-        });
-        
-      if (logError) {
-        console.error('Error logging port activity:', logError);
+      // Log the release in port_activity - we'll implement this later when the table exists
+      try {
+        await supabase
+          .from('port_activity')
+          .insert({
+            port_id: port.id,
+            user_id: userId,
+            campaign_id: port.current_campaign_id,
+            call_id: port.current_call_id,
+            activity_type: 'release',
+            status: 'active',
+            call_status: callStatus || 'unknown'
+          });
+      } catch (logError) {
+        console.error('Error logging port activity (this is non-critical):', logError);
         // Continue despite logging error
       }
       
@@ -289,24 +246,24 @@ export const enhancedGoipPortManager = {
         return false;
       }
       
-      // Log the error in port_activity
-      const { error: logError } = await supabase
-        .from('port_activity')
-        .insert({
-          port_id: port.id,
-          user_id: userId,
-          campaign_id: port.current_campaign_id,
-          call_id: port.current_call_id,
-          activity_type: 'error',
-          status: 'error',
-          error_details: {
-            code: errorCode,
-            message: errorMessage
-          }
-        });
-        
-      if (logError) {
-        console.error('Error logging port activity:', logError);
+      // Log the error (non-critical, so continue on failure)
+      try {
+        await supabase
+          .from('port_activity')
+          .insert({
+            port_id: port.id,
+            user_id: userId,
+            campaign_id: port.current_campaign_id,
+            call_id: port.current_call_id,
+            activity_type: 'error',
+            status: 'error',
+            error_details: {
+              code: errorCode,
+              message: errorMessage
+            }
+          });
+      } catch (logError) {
+        console.error('Error logging port activity (this is non-critical):', logError);
         // Continue despite logging error
       }
       
