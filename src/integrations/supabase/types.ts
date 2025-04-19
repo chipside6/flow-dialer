@@ -9,6 +9,64 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      active_calls: {
+        Row: {
+          call_result: string | null
+          campaign_id: string | null
+          contact_id: string | null
+          created_at: string | null
+          end_time: string | null
+          id: string
+          port_id: string | null
+          start_time: string | null
+          status: string
+        }
+        Insert: {
+          call_result?: string | null
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          port_id?: string | null
+          start_time?: string | null
+          status: string
+        }
+        Update: {
+          call_result?: string | null
+          campaign_id?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          port_id?: string | null
+          start_time?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_calls_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "active_calls_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "active_calls_port_id_fkey"
+            columns: ["port_id"]
+            isOneToOne: false
+            referencedRelation: "goip_ports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asterisk_configs: {
         Row: {
           active: boolean | null
@@ -390,6 +448,7 @@ export type Database = {
           created_at: string | null
           device_name: string
           id: string
+          ip_address: string | null
           updated_at: string | null
           user_id: string
         }
@@ -397,6 +456,7 @@ export type Database = {
           created_at?: string | null
           device_name: string
           id?: string
+          ip_address?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -404,6 +464,7 @@ export type Database = {
           created_at?: string | null
           device_name?: string
           id?: string
+          ip_address?: string | null
           updated_at?: string | null
           user_id?: string
         }
