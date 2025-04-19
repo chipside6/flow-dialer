@@ -385,6 +385,74 @@ export type Database = {
           },
         ]
       }
+      goip_devices: {
+        Row: {
+          created_at: string | null
+          device_name: string
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_name: string
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_name?: string
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      goip_ports: {
+        Row: {
+          created_at: string | null
+          device_id: string
+          id: string
+          last_used: string | null
+          port_number: number
+          sip_password: string
+          sip_username: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          device_id: string
+          id?: string
+          last_used?: string | null
+          port_number: number
+          sip_password: string
+          sip_username: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          device_id?: string
+          id?: string
+          last_used?: string | null
+          port_number?: number
+          sip_password?: string
+          sip_username?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goip_ports_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "goip_devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       greeting_files: {
         Row: {
           created_at: string
