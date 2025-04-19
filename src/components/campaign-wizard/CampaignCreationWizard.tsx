@@ -1,3 +1,4 @@
+
 import React from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import { BasicsStep } from "./BasicsStep";
@@ -6,11 +7,11 @@ import { AudioStep } from "./AudioStep";
 import { TransfersStep } from "./TransfersStep";
 import { ReviewStep } from "./ReviewStep";
 import { WizardContainer } from "./WizardContainer";
-import { CampaignData } from "./types";
-import { useAuth } from "@/contexts/auth/useAuth";
+import { CampaignData, WizardStep } from "./types";
+import { useAuth } from "@/contexts/auth";
 import { useCampaignForm } from "./hooks/useCampaignForm";
 import { useFormValidation } from "./utils/formValidation";
-import { useGreetingFiles, GreetingFile } from "@/hooks/useGreetingFiles";
+import { useGreetingFiles } from "@/hooks/useGreetingFiles";
 import { useContactLists } from "@/hooks/useContactLists";
 import { GoipDeviceStep } from './GoipDeviceStep';
 
@@ -71,7 +72,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
       <TabsContent value="audio">
         <AudioStep 
           campaign={campaign}
-          greetingFiles={greetingFiles as GreetingFile[]}
+          greetingFiles={greetingFiles}
           onSelectChange={handleSelectChange}
         />
       </TabsContent>
@@ -97,7 +98,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
         <ReviewStep 
           campaign={campaign}
           contactLists={contactLists}
-          greetingFiles={greetingFiles as GreetingFile[]}
+          greetingFiles={greetingFiles}
         />
       </TabsContent>
     </WizardContainer>

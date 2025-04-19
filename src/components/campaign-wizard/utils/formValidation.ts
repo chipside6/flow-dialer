@@ -1,3 +1,4 @@
+
 import { CampaignData, WizardStep } from "../types";
 
 export const getStepAvailability = (campaign: CampaignData) => ({
@@ -64,4 +65,14 @@ export const getPreviousStep = (step: WizardStep): WizardStep => {
     default:
       return "review";
   }
+};
+
+// Create a hook to export the form validation functions
+export const useFormValidation = () => {
+  return {
+    validateStep,
+    getNextStep,
+    getPreviousStep,
+    getStepAvailability
+  };
 };

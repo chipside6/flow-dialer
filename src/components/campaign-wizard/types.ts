@@ -1,3 +1,4 @@
+
 export interface CampaignData {
   id?: string; // Make id optional for creation
   title: string;

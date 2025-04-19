@@ -1,12 +1,10 @@
 
 import { useState } from 'react';
-import { CampaignData } from '../types';
+import { CampaignData, WizardStep } from '../types';
 import { User } from '@/contexts/auth/types';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
-
-type Step = 'basics' | 'contacts' | 'audio' | 'transfers' | 'review';
 
 export const useCampaignForm = (
   onComplete: (campaign: CampaignData) => void,
@@ -14,19 +12,20 @@ export const useCampaignForm = (
 ) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [step, setStep] = useState<Step>('basics');
+  const [step, setStep] = useState<WizardStep>('basics');
   const [campaign, setCampaign] = useState<CampaignData>({
     title: '',
     description: '',
     contactListId: '',
     greetingFileId: '',
     transferNumber: '',
-    status: 'pending', // Changed from 'draft' to 'pending'
+    status: 'pending',
     schedule: {
       startDate: new Date().toISOString().split('T')[0],
-      maxConcurrentCalls: 1 // Added with the right property name
+      maxConcurrentCalls: 1
     },
     user_id: user?.id || '',
+    port_ids: [], // Initialize empty array for port_ids
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -49,7 +48,7 @@ export const useCampaignForm = (
     }
   };
 
-  const handleSelectChange = (name: string, value: string | number) => {
+  const handleSelectChange = (name: string, value: string | number | string[]) => {
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setCampaign(prev => ({
@@ -71,8 +70,8 @@ export const useCampaignForm = (
     try {
       const updatedCampaign: CampaignData = {
         ...campaign,
-        id: campaign.id || uuidv4(), // Generate ID if not present
-        status: 'pending' as const, // Use const assertion to fix type
+        id: campaign.id || uuidv4(),
+        status: 'pending' as const,
         createdAt: new Date().toISOString(),
         user_id: user?.id || '',
       };
