@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { goipService } from '@/utils/asterisk/services/goipService';
@@ -176,10 +175,10 @@ export const RegisteredDevicesList: React.FC<RegisteredDevicesListProps> = ({ re
               <Button 
                 variant="outline" 
                 onClick={() => {
-                  // Fix: Use querySelector with optional chaining and conditional to check if click() exists
+                  // Fix: Use querySelector with proper type checking
                   const registerTab = document.querySelector('[data-value="register"]');
-                  if (registerTab && 'click' in registerTab) {
-                    (registerTab as HTMLElement).click();
+                  if (registerTab && registerTab instanceof HTMLElement) {
+                    registerTab.click();
                   }
                 }}
               >

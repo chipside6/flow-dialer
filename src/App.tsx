@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter,
@@ -5,8 +6,8 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom';
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -14,20 +15,20 @@ import SignupPage from './pages/SignupPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import DashboardPage from './pages/DashboardPage';
 import CampaignsPage from './pages/CampaignsPage';
-import NewCampaignPage from './pages/NewCampaignPage';
+import NewCampaignPage from './pages/Campaign';
 import CampaignDetailPage from './pages/CampaignDetailPage';
-import ContactListsPage from './pages/ContactListsPage';
-import ContactListDetailPage from './pages/ContactListDetailPage';
-import GreetingFilesPage from './pages/GreetingFilesPage';
-import TransferNumbersPage from './pages/TransferNumbersPage';
+import ContactListsPage from './pages/ContactLists';
+import ContactListDetailPage from './pages/ContactListPage';
+import GreetingFilesPage from './pages/GreetingsPage';
+import TransferNumbersPage from './pages/TransfersPage';
 import ProfilePage from './pages/ProfilePage';
 import UpgradePage from './pages/UpgradePage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
-import AdminUsersPage from './pages/AdminUsersPage';
-import AdminAsteriskPage from './pages/AdminAsteriskPage';
-import AdminReadinessPage from './pages/AdminReadinessPage';
-import BackgroundDialerPage from './pages/BackgroundDialerPage';
-import PhoneListPage from './pages/PhoneListPage';
+import AdminDashboardPage from './pages/AdminPanel';
+import AdminUsersPage from './pages/AdminPanel';
+import AdminAsteriskPage from './pages/AsteriskConfigPage';
+import AdminReadinessPage from './pages/AdminPanel';
+import BackgroundDialerPage from './pages/CampaignDialer';
+import PhoneListPage from './pages/SipProvidersPage';
 import DiagnosticPage from './pages/DiagnosticPage';
 import GoipSetup from './pages/GoipSetup';
 import GoipDevicesPage from './pages/GoipDevicesPage';
