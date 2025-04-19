@@ -11,6 +11,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { GreetingFilesList } from '@/components/greeting-files/GreetingFilesList';
 import { useNavigate } from 'react-router-dom';
+import { LoadingErrorBoundary } from '@/components/common/LoadingErrorBoundary';
 
 const GreetingsFallback = ({ onRetry }: { onRetry?: () => void }) => (
   <div className="w-full h-48 flex flex-col items-center justify-center">
@@ -31,27 +32,6 @@ const GreetingsFallback = ({ onRetry }: { onRetry?: () => void }) => (
   </div>
 );
 
-// Error component for greeting files
-const GreetingFilesError = ({ error, onRetry }: { error: Error | null, onRetry: () => void }) => (
-  <div className="bg-destructive/10 text-destructive p-4 rounded-md mb-6">
-    <h3 className="font-medium flex items-center gap-2">
-      <FileAudio className="h-5 w-5" />
-      Could not load files
-    </h3>
-    <p className="mt-1">
-      {error?.message || "There was a problem loading your audio files. Please try again."}
-    </p>
-    <Button 
-      variant="outline" 
-      size="sm" 
-      className="mt-2"
-      onClick={onRetry}
-    >
-      Retry
-    </Button>
-  </div>
-);
-
 const GreetingsContent = () => {
   const { isAuthenticated, user } = useAuth();
   const { 
@@ -64,25 +44,11 @@ const GreetingsContent = () => {
   } = useGreetingFiles();
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   
   // Touch the session on component mount to prevent premature session expiration
   useEffect(() => {
     touchSession();
   }, []);
-
-  // Add automatic retry if we're stuck in loading for too long
-  useEffect(() => {
-    if (isLoading && retryCount < 3) {
-      const retryTimer = setTimeout(() => {
-        console.log(`Auto-retry attempt #${retryCount + 1}`);
-        forceRefresh();
-        setRetryCount(prev => prev + 1);
-      }, 20000); // After 20 seconds of loading, try automatic refresh
-      
-      return () => clearTimeout(retryTimer);
-    }
-  }, [isLoading, retryCount, forceRefresh]);
 
   const handleDelete = async (fileId: string) => {
     try {
@@ -107,7 +73,6 @@ const GreetingsContent = () => {
 
   const handleRetry = () => {
     forceRefresh();
-    setRetryCount(0); // Reset retry count on manual retry
   };
   
   return (
@@ -141,22 +106,19 @@ const GreetingsContent = () => {
         </div>
       </div>
       
-      {/* Show error if present */}
-      {error && (
-        <GreetingFilesError error={error as Error} onRetry={handleRetry} />
-      )}
-      
-      {/* Show loading state */}
-      {isLoading && <GreetingsFallback onRetry={handleRetry} />}
-      
-      {/* Show content when loaded and no error */}
-      {!isLoading && !error && (
+      <LoadingErrorBoundary
+        isLoading={isLoading}
+        error={error as Error}
+        onRetry={handleRetry}
+        loadingComponent={<GreetingsFallback onRetry={handleRetry} />}
+        timeout={8000}
+      >
         <GreetingFilesList 
           files={greetingFiles || []}
           onDelete={handleDelete}
           isDeleting={isDeleting}
         />
-      )}
+      </LoadingErrorBoundary>
     </div>
   );
 };

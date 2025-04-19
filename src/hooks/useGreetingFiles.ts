@@ -42,46 +42,58 @@ export function useGreetingFiles() {
     } catch (err) {
       console.error("Error forcing refresh:", err);
     } finally {
-      setIsLoading(false);
+      // We'll let the effect below handle setting isLoading to false
+      // This prevents the UI from flickering if loading state changes rapidly
     }
   }, [refetch]);
 
   // Set up loading state management
   useEffect(() => {
-    // Only set loading to true when starting a new query
-    if (isQueryLoading && !isFetching) {
+    // Clear previous timeout to prevent multiple timeouts
+    let loadingTimeout: NodeJS.Timeout;
+    
+    if (isQueryLoading) {
       setIsLoading(true);
-    }
-    
-    // When query is done or there's an error, end loading state
-    if (!isQueryLoading || isError) {
-      setIsLoading(false);
-    }
-    
-    // Set a timeout to end loading state after 10 seconds, reduced from 15
-    const loadingTimeout = setTimeout(() => {
-      if (isLoading) {
-        console.log("Fetch timeout reached, ending loading state");
-        setIsLoading(false);
-        
-        if (!greetingFiles || greetingFiles.length === 0) {
-          // Only show toast if we haven't loaded files yet
-          toast({
-            title: "Could not load files",
-            description: "There was a problem loading your audio files. Please try refreshing the page.",
-            variant: "destructive",
-            action: {
-              altText: "Retry",
-              onClick: () => forceRefresh(),
-              children: "Retry"
-            } as any
-          });
+      
+      // Set a reasonable timeout to prevent infinite loading states
+      loadingTimeout = setTimeout(() => {
+        if (isLoading) {
+          console.log("Loading timeout reached, ending loading state");
+          setIsLoading(false);
+          
+          // Only show toast if we still don't have data
+          if (!greetingFiles || greetingFiles.length === 0) {
+            toast({
+              title: "Loading timeout",
+              description: "Loading is taking longer than expected. Please try again.",
+              variant: "destructive",
+              action: (
+                <Button 
+                  variant="outline"
+                  onClick={() => forceRefresh()}
+                  size="sm"
+                >
+                  Retry
+                </Button>
+              )
+            });
+          }
         }
-      }
-    }, 10000); // Reduced from 15 seconds to 10 seconds
+      }, 8000); // 8 seconds timeout
+    } else {
+      // When query is done, end loading state after a short delay
+      // This ensures we have a minimum loading time for UI consistency
+      const minLoadingDelay = setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+      
+      return () => clearTimeout(minLoadingDelay);
+    }
     
-    return () => clearTimeout(loadingTimeout);
-  }, [isQueryLoading, isFetching, isLoading, isError, greetingFiles, forceRefresh]);
+    return () => {
+      if (loadingTimeout) clearTimeout(loadingTimeout);
+    };
+  }, [isQueryLoading, isFetching, isLoading, greetingFiles, forceRefresh]);
 
   return { 
     greetingFiles, 
@@ -89,7 +101,7 @@ export function useGreetingFiles() {
     error, 
     isError: !!error,
     refreshGreetingFiles,
-    deleteGreetingFile, // Return the mutation result directly
+    deleteGreetingFile,
     forceRefresh
   };
 }

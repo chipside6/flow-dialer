@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/components/ui/use-toast';
@@ -12,14 +13,33 @@ interface AsteriskConfigSectionProps {
 export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isStuck, setIsStuck] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{
     success: boolean;
     message: string;
   } | null>(null);
 
+  useEffect(() => {
+    // Handle stuck loading state
+    let stuckTimer: NodeJS.Timeout;
+    
+    if (isLoading) {
+      stuckTimer = setTimeout(() => {
+        setIsStuck(true);
+      }, 10000); // Consider it stuck after 10 seconds
+    } else {
+      setIsStuck(false);
+    }
+    
+    return () => {
+      if (stuckTimer) clearTimeout(stuckTimer);
+    };
+  }, [isLoading]);
+
   const handleApiSync = async () => {
     setIsLoading(true);
     setConnectionStatus(null);
+    setIsStuck(false);
 
     try {
       const result = await asteriskService.syncConfiguration(userId, 'sync_user');
@@ -60,13 +80,18 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
       <CardContent className="space-y-4">
         <Button 
           onClick={handleApiSync} 
-          disabled={isLoading}
+          disabled={isLoading && !isStuck}
           className="w-full"
         >
-          {isLoading ? (
+          {isLoading && !isStuck ? (
             <>
               <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
               Syncing Configuration...
+            </>
+          ) : isStuck ? (
+            <>
+              <AlertCircle className="mr-2 h-4 w-4 text-amber-500" />
+              Retry Sync (Taking Longer Than Expected)
             </>
           ) : (
             'Sync Asterisk Configuration'
