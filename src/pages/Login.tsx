@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { storeSession, storeAdminStatus } from '@/services/auth/session';
+import { clearAllAuthData } from '@/utils/sessionCleanup';
 
 import { AuthContainer } from '@/components/auth/AuthContainer';
 import { AuthHeader } from '@/components/auth/AuthHeader';
@@ -51,6 +52,7 @@ const Login = () => {
     try {
       // Clear any existing sessions to prevent conflicts
       await supabase.auth.signOut({ scope: 'local' });
+      clearAllAuthData(); // Use our enhanced cleanup function
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,

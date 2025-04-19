@@ -45,6 +45,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       } catch (error) {
         console.error("Error verifying session:", error);
       } finally {
+        // Always complete validation even if there's an error
         setValidatingSession(false);
       }
     };
@@ -102,8 +103,21 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }, [requireSubscription, isActuallyAuthenticated, user, checkingSubscription]);
   
+  // Force loading state to complete after a reasonable timeout (3 seconds)
+  useEffect(() => {
+    const loadingTimeout = setTimeout(() => {
+      if (validatingSession) {
+        console.log("Forcing validation state to complete after timeout");
+        setValidatingSession(false);
+      }
+    }, 3000);
+    
+    return () => clearTimeout(loadingTimeout);
+  }, [validatingSession]);
+  
   // Show loading state while auth is being determined
   if ((isLoading || !sessionChecked || validatingSession) || (requireSubscription && checkingSubscription)) {
+    // Shorter loading skeleton instead of an infinite spinner
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="w-full max-w-md space-y-4 p-4">

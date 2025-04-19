@@ -29,7 +29,7 @@ export const clearAllAuthData = () => {
     }
   });
   
-  // Clear session/local storage caches that might be used by the app
+  // Also clear cache items that might cause stale data
   try {
     // Clear application-specific caches
     Object.keys(localStorage).forEach(key => {
