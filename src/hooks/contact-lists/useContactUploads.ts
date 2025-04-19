@@ -36,13 +36,33 @@ export const useContactUploads = (
               return;
             }
             
+            // Smart column mapping
+            const findColumnIndex = (possibleHeaders: string[]) => {
+              const headers = Object.keys(contacts[0]);
+              return possibleHeaders.find(header => 
+                headers.some(h => h.toLowerCase().includes(header.toLowerCase()))
+              );
+            };
+
+            const phoneColumn = findColumnIndex(['phone', 'number', 'phone_number', 'phonenumber', 'tel']);
+            const firstNameColumn = findColumnIndex(['first', 'first_name', 'firstname']);
+            const lastNameColumn = findColumnIndex(['last', 'last_name', 'lastname']);
+            const emailColumn = findColumnIndex(['email']);
+            
+            if (!phoneColumn || !firstNameColumn || !lastNameColumn) {
+              reject(new Error("Could not find required columns: phone number, first name, or last name"));
+              return;
+            }
+
             // Check for required fields
             const missingFields = contacts.some(contact => 
-              !contact.first_name || !contact.last_name || !contact.phone_number
+              !contact[firstNameColumn] || 
+              !contact[lastNameColumn] || 
+              !contact[phoneColumn]
             );
             
             if (missingFields) {
-              reject(new Error("Some contacts are missing required fields (first_name, last_name, phone_number)"));
+              reject(new Error("Some contacts are missing required fields"));
               return;
             }
             
@@ -54,10 +74,10 @@ export const useContactUploads = (
               const { data: newContact, error: contactError } = await supabase
                 .from('contacts')
                 .insert({
-                  first_name: contact.first_name,
-                  last_name: contact.last_name,
-                  phone_number: contact.phone_number,
-                  email: contact.email || null,
+                  first_name: contact[firstNameColumn],
+                  last_name: contact[lastNameColumn],
+                  phone_number: contact[phoneColumn],
+                  email: emailColumn ? contact[emailColumn] : null,
                   user_id: user.id
                 })
                 .select()
