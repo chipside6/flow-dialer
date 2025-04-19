@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { TransferNumber } from "@/types/transferNumber";
 import { AddTransferNumberForm } from "./AddTransferNumberForm";
@@ -156,15 +155,12 @@ export const TransferNumbersContent = ({
     <>
       <ErrorAlert error={error} onRetry={onRefresh} />
       
-      <AddTransferNumberForm 
-        onAddTransferNumber={handleAddTransferNumber} 
-        isSubmitting={isSubmitting}
-      />
-      
       <TransferNumbersList 
         transferNumbers={localTransferNumbers}
+        isSubmitting={isSubmitting}
         isLoading={isLoading && localTransferNumbers.length === 0}
         error={error}
+        onAddTransferNumber={handleAddTransferNumber}
         onDeleteTransferNumber={handleDeleteTransferNumber}
         onRefresh={onRefresh}
       />

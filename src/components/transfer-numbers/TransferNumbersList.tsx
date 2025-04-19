@@ -8,15 +8,21 @@ import { AddTransferNumberCard } from './AddTransferNumberCard';
 interface TransferNumbersListProps {
   transferNumbers: TransferNumber[];
   isSubmitting: boolean;
+  isLoading?: boolean;
+  error?: string | null;
   onAddTransferNumber: (name: string, number: string, description: string) => Promise<any>;
   onDeleteTransferNumber: (id: string) => Promise<boolean>;
+  onRefresh?: () => void;
 }
 
 export const TransferNumbersList: React.FC<TransferNumbersListProps> = ({
   transferNumbers,
   isSubmitting,
+  isLoading,
+  error,
   onAddTransferNumber,
-  onDeleteTransferNumber
+  onDeleteTransferNumber,
+  onRefresh
 }) => {
   return (
     <div className="space-y-6">
