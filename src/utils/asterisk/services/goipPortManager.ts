@@ -16,78 +16,92 @@ export interface GoipDevice {
   deviceName: string;
   userId: string;
   ports: PortStatus[];
+  ipAddress?: string;
+  totalPorts: number;
+  onlinePorts: number;
 }
 
 /**
- * Manages GoIP port availability and status tracking
+ * Utility for managing GoIP port allocation and status
  */
 export const goipPortManager = {
   /**
-   * Get all ports for a user
+   * Get all available ports for a user
    */
-  getUserPorts: async (userId: string): Promise<PortStatus[]> => {
+  getAvailablePorts: async (userId: string, campaignId?: string): Promise<{ portId: string; portNumber: number; deviceId: string }[]> => {
     try {
-      // Get user's trunks from the database
-      const { data: trunks, error } = await supabase
-        .from('user_trunks')
-        .select('*')
-        .eq('user_id', userId)
-        .order('port_number', { ascending: true });
+      // Get all available ports for this user's devices
+      const { data, error } = await supabase
+        .from('goip_ports')
+        .select(`
+          id,
+          port_number,
+          device_id,
+          status,
+          goip_devices!inner(user_id)
+        `)
+        .eq('status', 'available')
+        .eq('goip_devices.user_id', userId);
       
       if (error) throw error;
       
-      if (!trunks || trunks.length === 0) {
-        return [];
-      }
-      
-      // Format as port status objects
-      return trunks.map(trunk => ({
-        portNumber: trunk.port_number || 1,
-        sipUser: trunk.sip_user,
-        status: trunk.status === 'active' ? 'available' : 'offline',
-        lastStatusChange: new Date(trunk.updated_at || Date.now()),
-        campaignId: null,
-        callId: null
+      // Map to a simpler structure
+      return (data || []).map(port => ({
+        portId: port.id,
+        portNumber: port.port_number,
+        deviceId: port.device_id
       }));
     } catch (error) {
-      console.error('Error getting user ports:', error);
-      throw error;
-    }
-  },
-  
-  /**
-   * Get available ports for a campaign
-   */
-  getAvailablePorts: async (userId: string, campaignId: string): Promise<PortStatus[]> => {
-    try {
-      const ports = await goipPortManager.getUserPorts(userId);
-      
-      // Filter to only available ports
-      return ports.filter(port => port.status === 'available');
-    } catch (error) {
       console.error('Error getting available ports:', error);
-      throw error;
+      return [];
     }
   },
   
   /**
-   * Mark a port as busy
+   * Mark a port as busy for a specific campaign or operation
    */
-  markPortBusy: async (userId: string, portNumber: number, campaignId: string, callId: string): Promise<boolean> => {
+  markPortBusy: async (userId: string, portNumber: number, operation: string, operationId: string): Promise<boolean> => {
     try {
-      // Update the port status in the database
-      const { error } = await supabase
-        .from('user_trunks')
+      // First verify the user owns this port
+      const { data: ports, error: findError } = await supabase
+        .from('goip_ports')
+        .select(`
+          id,
+          device_id,
+          goip_devices!inner(user_id)
+        `)
+        .eq('port_number', portNumber)
+        .eq('goip_devices.user_id', userId)
+        .eq('status', 'available');
+      
+      if (findError) throw findError;
+      
+      if (!ports || ports.length === 0) {
+        return false; // Port not found or not available
+      }
+      
+      // Update the port status
+      const portId = ports[0].id;
+      const { error: updateError } = await supabase
+        .from('goip_ports')
         .update({
           status: 'busy',
-          updated_at: new Date().toISOString(),
-          current_campaign_id: campaignId,
-          current_call_id: callId
+          updated_at: new Date().toISOString()
         })
-        .eq('user_id', userId)
-        .eq('port_number', portNumber);
+        .eq('id', portId);
       
-      if (error) throw error;
+      if (updateError) throw updateError;
+      
+      // Create an active call record
+      const { error: callError } = await supabase
+        .from('active_calls')
+        .insert({
+          port_id: portId,
+          campaign_id: operation === 'campaign' ? operationId : null,
+          status: 'active'
+        });
+      
+      if (callError) throw callError;
       
       return true;
     } catch (error) {
@@ -97,141 +111,88 @@ export const goipPortManager = {
   },
   
   /**
-   * Mark a port as available
-   */
-  markPortAvailable: async (userId: string, portNumber: number): Promise<boolean> => {
-    try {
-      // Update the port status in the database
-      const { error } = await supabase
-        .from('user_trunks')
-        .update({
-          status: 'active',
-          updated_at: new Date().toISOString(),
-          current_campaign_id: null,
-          current_call_id: null
-        })
-        .eq('user_id', userId)
-        .eq('port_number', portNumber);
-      
-      if (error) throw error;
-      
-      return true;
-    } catch (error) {
-      console.error('Error marking port as available:', error);
-      return false;
-    }
-  },
-  
-  /**
-   * Assign a port to a campaign call (round-robin or first available)
-   */
-  assignPortToCall: async (userId: string, campaignId: string, callId: string, strategy: 'round-robin' | 'first-available' = 'first-available'): Promise<PortStatus | null> => {
-    try {
-      // Get available ports
-      const availablePorts = await goipPortManager.getAvailablePorts(userId, campaignId);
-      
-      if (availablePorts.length === 0) {
-        return null; // No ports available
-      }
-      
-      let selectedPort: PortStatus;
-      
-      if (strategy === 'round-robin') {
-        // Check if the port_number column exists in campaigns
-        let lastPortUsed = 0;
-        
-        try {
-          // Try to get the value from campaigns table if it exists
-          const { data: campaignData } = await supabase
-            .from('campaigns')
-            .select('port_number')  // Use port_number instead of last_port_used
-            .eq('id', campaignId)
-            .single();
-          
-          if (campaignData && campaignData.port_number !== null) {
-            lastPortUsed = campaignData.port_number;
-          }
-        } catch (err) {
-          console.log("Error fetching last port used, defaulting to 0:", err);
-        }
-        
-        // Find the next port in rotation
-        const portNumbers = availablePorts.map(port => port.portNumber);
-        let nextIndex = portNumbers.findIndex(num => num > lastPortUsed);
-        
-        if (nextIndex === -1) {
-          // Wrap around to the start
-          nextIndex = 0;
-        }
-        
-        selectedPort = availablePorts[nextIndex];
-        
-        // Update the port_number in campaigns to track last used port
-        try {
-          await supabase
-            .from('campaigns')
-            .update({ 
-              port_number: selectedPort.portNumber 
-            })
-            .eq('id', campaignId);
-        } catch (updateErr) {
-          console.log("Error updating port number in campaign:", updateErr);
-          // Continue even if this fails
-        }
-      } else {
-        // First available strategy - just take the first port
-        selectedPort = availablePorts[0];
-      }
-      
-      // Mark the port as busy
-      const success = await goipPortManager.markPortBusy(userId, selectedPort.portNumber, campaignId, callId);
-      
-      if (!success) {
-        throw new Error('Failed to mark port as busy');
-      }
-      
-      return {
-        ...selectedPort,
-        status: 'busy',
-        lastStatusChange: new Date(),
-        campaignId,
-        callId
-      };
-    } catch (error) {
-      console.error('Error assigning port to call:', error);
-      return null;
-    }
-  },
-  
-  /**
-   * Release a port after a call is completed
+   * Release a port that was previously marked busy
    */
   releasePort: async (userId: string, portNumber: number): Promise<boolean> => {
-    return goipPortManager.markPortAvailable(userId, portNumber);
-  },
-  
-  /**
-   * Reset all ports for a user to available
-   */
-  resetPorts: async (userId: string): Promise<boolean> => {
     try {
-      // Update all ports to available
-      const { error } = await supabase
-        .from('user_trunks')
-        .update({
-          status: 'active',
-          updated_at: new Date().toISOString(),
-          current_campaign_id: null,
-          current_call_id: null
-        })
-        .eq('user_id', userId);
+      // First verify the user owns this port
+      const { data: ports, error: findError } = await supabase
+        .from('goip_ports')
+        .select(`
+          id,
+          device_id,
+          goip_devices!inner(user_id)
+        `)
+        .eq('port_number', portNumber)
+        .eq('goip_devices.user_id', userId);
       
-      if (error) throw error;
+      if (findError) throw findError;
+      
+      if (!ports || ports.length === 0) {
+        return false; // Port not found
+      }
+      
+      const portId = ports[0].id;
+      
+      // End any active calls using this port
+      const { error: callError } = await supabase
+        .from('active_calls')
+        .update({
+          end_time: new Date().toISOString(),
+          status: 'completed'
+        })
+        .eq('port_id', portId)
+        .is('end_time', null);
+      
+      if (callError) throw callError;
+      
+      // Update the port status
+      const { error: updateError } = await supabase
+        .from('goip_ports')
+        .update({
+          status: 'available',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', portId);
+      
+      if (updateError) throw updateError;
       
       return true;
     } catch (error) {
-      console.error('Error resetting ports:', error);
+      console.error('Error releasing port:', error);
       return false;
+    }
+  },
+  
+  /**
+   * Get all ports for a specific device
+   */
+  getDevicePorts: async (deviceId: string): Promise<PortStatus[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('goip_ports')
+        .select(`
+          id,
+          port_number,
+          sip_username,
+          status,
+          updated_at,
+          active_calls(campaign_id)
+        `)
+        .eq('device_id', deviceId);
+      
+      if (error) throw error;
+      
+      return (data || []).map(port => ({
+        portNumber: port.port_number,
+        sipUser: port.sip_username,
+        status: port.status as 'available' | 'busy' | 'offline',
+        lastStatusChange: new Date(port.updated_at),
+        campaignId: port.active_calls?.[0]?.campaign_id
+      }));
+    } catch (error) {
+      console.error('Error getting device ports:', error);
+      return [];
     }
   }
 };

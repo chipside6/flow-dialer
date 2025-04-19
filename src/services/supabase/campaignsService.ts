@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { CampaignData } from '@/components/campaign-wizard/types';
 
 /**
  * Fetches all campaigns for a specific user
@@ -30,19 +31,18 @@ export const fetchCampaigns = async (userId: string) => {
 /**
  * Creates a new campaign
  */
-export const createCampaign = async (campaign: any, userId: string) => {
+export const createCampaign = async (campaign: CampaignData, userId: string) => {
   console.log(`[CampaignsService] Creating campaign for user: ${userId}`);
   
   try {
-    // Make sure all field names match the database column names (snake_case)
-    const { data, error } = await supabase
+    // First, insert the campaign
+    const { data: campaignData, error: campaignError } = await supabase
       .from('campaigns')
       .insert({
         user_id: userId,
         title: campaign.title,
         description: campaign.description,
-        greeting_file_url: campaign.greetingFileUrl || null,
-        greeting_file_name: campaign.greetingFileName || null,
+        greeting_file_id: campaign.greetingFileId || null,
         transfer_number: campaign.transferNumber || null,
         status: campaign.status || 'pending',
         progress: campaign.progress || 0,
@@ -51,21 +51,73 @@ export const createCampaign = async (campaign: any, userId: string) => {
         transferred_calls: campaign.transferredCalls || 0,
         failed_calls: campaign.failedCalls || 0,
         contact_list_id: campaign.contactListId || null,
-        port_number: campaign.portNumber || 1 // Default to port 1 if not specified
+        port_number: campaign.portNumber || 1, // Default to port 1 if not specified
+        goip_device_id: campaign.goip_device_id || null
       })
       .select()
       .single();
     
-    if (error) {
-      console.error(`[CampaignsService] Error in createCampaign:`, error);
-      throw error;
+    if (campaignError) {
+      console.error(`[CampaignsService] Error in createCampaign:`, campaignError);
+      throw campaignError;
     }
     
-    console.log(`[CampaignsService] Successfully created campaign:`, data);
+    // If we have port IDs, insert campaign port associations
+    if (campaign.port_ids && campaign.port_ids.length > 0) {
+      const portMappings = campaign.port_ids.map(portId => ({
+        campaign_id: campaignData.id,
+        port_id: portId
+      }));
+      
+      const { error: portError } = await supabase
+        .from('campaign_ports')
+        .insert(portMappings);
+      
+      if (portError) {
+        console.error(`[CampaignsService] Error adding port associations:`, portError);
+        // Continue despite port association error - campaign was created successfully
+      }
+    }
     
-    return data;
+    console.log(`[CampaignsService] Successfully created campaign:`, campaignData);
+    
+    return campaignData;
   } catch (error) {
     console.error(`[CampaignsService] Error in createCampaign:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Get campaign details including ports
+ */
+export const getCampaignWithPorts = async (campaignId: string) => {
+  try {
+    // Get campaign details
+    const { data: campaign, error: campaignError } = await supabase
+      .from('campaigns')
+      .select(`
+        *,
+        goip_devices(*),
+        campaign_ports(port_id)
+      `)
+      .eq('id', campaignId)
+      .single();
+    
+    if (campaignError) {
+      console.error(`[CampaignsService] Error fetching campaign:`, campaignError);
+      throw campaignError;
+    }
+    
+    // Format the campaign with port IDs
+    const formattedCampaign = {
+      ...campaign,
+      port_ids: campaign.campaign_ports?.map((p: any) => p.port_id) || []
+    };
+    
+    return formattedCampaign;
+  } catch (error) {
+    console.error(`[CampaignsService] Error in getCampaignWithPorts:`, error);
     throw error;
   }
 };

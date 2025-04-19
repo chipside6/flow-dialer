@@ -20,7 +20,7 @@ export interface CampaignData {
   createdAt?: string;
   user_id?: string;
   goip_device_id?: string;
-  port_ids?: string[];
+  port_ids?: string[]; // Store array of port IDs
 }
 
 export type WizardStep = "basics" | "contacts" | "audio" | "goip" | "transfers" | "review";
