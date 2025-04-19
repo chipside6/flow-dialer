@@ -9,20 +9,25 @@ import { SipConfigSection } from './configs/SipConfigSection';
 import { ExtensionsSection } from './configs/ExtensionsSection';
 import { GoipConfigSection } from './configs/GoipConfigSection';
 import { useConfigActions } from '@/hooks/useConfigActions';
+import { DialplanSection } from './configs/DialplanSection';
 
 interface AsteriskConfigDisplayProps {
   username: string;
   password: string;
   host: string;
   port: number;
+  campaignId?: string;  // Add campaignId prop
+  userId?: string;      // Add userId prop
 }
 
-export const AsteriskConfigDisplay: React.FC<AsteriskConfigDisplayProps> = ({
+export const AsteriskConfigDisplay = ({
   username,
   password,
   host,
-  port
-}) => {
+  port,
+  campaignId,
+  userId
+}: AsteriskConfigDisplayProps) => {
   const [activeTab, setActiveTab] = useState('sip');
   const { copied, handleCopy, handleDownload } = useConfigActions();
   const { toast } = useToast();
@@ -126,14 +131,28 @@ Register Expiry: 600
       </CardHeader>
       <CardContent>
         <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-3 mb-4">
+          <TabsList className="w-full grid grid-cols-4 mb-4">
             <TabsTrigger value="sip">SIP Config</TabsTrigger>
-            <TabsTrigger value="extensions">Dialplan</TabsTrigger>
+            <TabsTrigger value="dialplan">Dialplan</TabsTrigger>
+            <TabsTrigger value="extensions">Extensions</TabsTrigger>
             <TabsTrigger value="goip">GoIP Setup</TabsTrigger>
           </TabsList>
           
           <TabsContent value="sip">
             <SipConfigSection sipConfig={sipConfig} />
+          </TabsContent>
+          
+          <TabsContent value="dialplan">
+            {campaignId && userId ? (
+              <DialplanSection
+                campaignId={campaignId}
+                userId={userId}
+              />
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                Campaign information required to generate dialplan
+              </p>
+            )}
           </TabsContent>
           
           <TabsContent value="extensions">
