@@ -2,7 +2,6 @@
 import React from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { CredentialSection } from '@/components/goip/CredentialSection';
 import { useAuth } from '@/contexts/auth';
 import { Info } from 'lucide-react';
 import { GoipDeviceSetup } from '@/components/goip/GoipDeviceSetup';
@@ -29,8 +28,8 @@ const GoipSetupContent = () => {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Our platform supports GoIP devices with 1, 2, 4, or 8 ports. Each port will need to be
-              configured with the SIP credentials generated below.
+              Our platform supports GoIP devices with 1, 2, 4, or 8 ports. Register your device
+              and configure each port to connect with our system.
             </p>
           </CardContent>
         </Card>
@@ -38,9 +37,6 @@ const GoipSetupContent = () => {
         <div className="grid gap-6">
           {/* Device Registration Form */}
           <GoipDeviceSetup />
-          
-          {/* SIP Credentials Generator */}
-          <CredentialSection userId={user?.id} />
         </div>
       </div>
     </DashboardLayout>

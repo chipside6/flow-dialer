@@ -8,9 +8,13 @@ export const GoipDeviceSetup = () => {
     <Card>
       <CardHeader>
         <CardTitle>Register New Device</CardTitle>
-        <CardDescription>Add a new GoIP device to your account</CardDescription>
+        <CardDescription>Add your GoIP device to connect it with our platform</CardDescription>
       </CardHeader>
       <CardContent>
+        <p className="text-sm text-muted-foreground mb-4">
+          Enter your GoIP device details below. Once registered, you can manage your device 
+          and its ports from the Devices page.
+        </p>
         <GoipDeviceForm />
       </CardContent>
     </Card>
