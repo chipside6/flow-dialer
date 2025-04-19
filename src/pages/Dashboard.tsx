@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { DashboardContent } from '@/components/dashboard/DashboardContent';
+import { DashboardContent as LayoutDashboardContent } from '@/components/layout/DashboardContent';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { CampaignProvider } from '@/contexts/campaign/CampaignContext';
 import { CampaignTable } from '@/components/campaigns/CampaignTable';
@@ -96,7 +97,7 @@ const Dashboard = () => {
         <div className="w-full flex-1 overflow-hidden dashboard-content">
           {activeTab === "overview" && (
             <div className="w-full h-full overflow-auto">
-              <DashboardContent>
+              <LayoutDashboardContent>
                 <div className="dashboard-overview-content py-4 space-y-6 mx-auto text-center">
                   <h2 className="text-xl font-semibold text-center">Campaign Analytics</h2>
                   <p className="text-muted-foreground text-center">
@@ -177,13 +178,13 @@ const Dashboard = () => {
                     )}
                   </div>
                 </div>
-              </DashboardContent>
+              </LayoutDashboardContent>
             </div>
           )}
           
           {activeTab === "dialer" && (
             <div className="w-full h-full overflow-auto">
-              <DashboardContent>
+              <LayoutDashboardContent>
                 <div className="max-w-4xl mx-auto p-4 text-center">
                   <h2 className="text-xl font-semibold mb-3 text-center">Quick Dialer</h2>
                   <p className="text-muted-foreground text-sm mb-6 text-center">
@@ -197,13 +198,13 @@ const Dashboard = () => {
                     <Button className="mt-4 mx-auto" disabled>Start Quick Call</Button>
                   </div>
                 </div>
-              </DashboardContent>
+              </LayoutDashboardContent>
             </div>
           )}
           
           {activeTab === "campaigns" && (
             <div className="w-full h-full overflow-auto">
-              <DashboardContent>
+              <LayoutDashboardContent>
                 {/* Add create campaign button at the top */}
                 <div className="flex justify-center mb-4 pt-4">
                   <Button 
@@ -221,7 +222,7 @@ const Dashboard = () => {
                     <CampaignTable />
                   </div>
                 </CampaignProvider>
-              </DashboardContent>
+              </LayoutDashboardContent>
             </div>
           )}
         </div>
