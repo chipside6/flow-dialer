@@ -20,6 +20,7 @@ export const DashboardContent = () => {
   
   // Initial data fetch on component mount
   useEffect(() => {
+    console.log("DashboardContent mounting, fetching subscription data");
     // Always try to fetch subscription data regardless of user state
     fetchCurrentSubscription().catch(err => {
       console.error("Failed to fetch subscription:", err);
@@ -28,6 +29,8 @@ export const DashboardContent = () => {
   
   // Check if the user has a lifetime subscription
   const isLifetimePlan = currentPlan === 'lifetime' || subscription?.plan_id === 'lifetime';
+  
+  console.log("Dashboard rendering with user:", user?.email);
   
   return (
     <>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { DashboardContent } from '@/components/layout/DashboardContent';
+import { DashboardContent } from '@/components/dashboard/DashboardContent';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { CampaignProvider } from '@/contexts/campaign/CampaignContext';
 import { CampaignTable } from '@/components/campaigns/CampaignTable';
@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 
 const Dashboard = () => {
+  console.log("Dashboard component rendering");
   // Ensure this doesn't rerun during each render
   const [activeTab, setActiveTab] = useState<string>("overview");
   const { campaigns, isLoading, error, refreshCampaigns } = useCampaigns();
