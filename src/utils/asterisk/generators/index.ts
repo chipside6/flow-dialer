@@ -35,12 +35,16 @@ export const generateCompleteConfig = async (
     // Get SIP config from SIP config generator
     const sipResult = await sipConfigGenerator.generateUserSipConfig(userId);
 
+    // Define default values for transferEnabled and transferNumber
+    const transferEnabled = (dialplanResult as any).transferEnabled || false;
+    const transferNumber = (dialplanResult as any).transferNumber || null;
+
     return {
       success: dialplanResult.success && sipResult.success,
       dialplanConfig: dialplanResult.config || '',
       sipConfig: sipResult.config || '',
-      transferEnabled: dialplanResult.transferEnabled || false,
-      transferNumber: dialplanResult.transferNumber || null,
+      transferEnabled: transferEnabled,
+      transferNumber: transferNumber,
       error: dialplanResult.success ? sipResult.message : dialplanResult.message
     };
   } catch (error) {

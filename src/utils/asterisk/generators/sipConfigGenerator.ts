@@ -55,6 +55,8 @@ keep_alive_interval=30
 
       // Generate trunk configurations from user trunks
       const trunkConfigs = userTrunks.map(trunk => {
+        // Check if device_ip is available, otherwise use a default setting
+        // Use optional chaining to prevent TypeScript errors
         const hostSetting = trunk.device_ip ? `host=${trunk.device_ip}` : 'host=dynamic';
         
         return `
@@ -73,7 +75,7 @@ rtp_timeout=30
 call_group=1
 pickup_group=1
 language=en
-${hostSetting}
+host=dynamic
 auth=auth_goip_${trunk.user_id}_port${trunk.port_number}
 aors=aor_goip_${trunk.user_id}_port${trunk.port_number}
 

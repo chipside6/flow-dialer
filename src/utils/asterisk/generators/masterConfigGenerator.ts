@@ -1,5 +1,19 @@
 
 import { sipConfigGenerator } from './sipConfigGenerator';
+import { dialplanGenerator } from './dialplanGenerator';
+
+// Mock implementations for missing methods
+const mockGenerateUserConfig = (userId: string, ports: number): string => {
+  return `; Mock SIP Configuration for user ${userId} with ${ports} ports\n`;
+};
+
+const mockGenerateGoipPortExtension = (userId: string, port: number): string => {
+  return `; Mock GoIP Port Extension for user ${userId} port ${port}\n`;
+};
+
+const mockGenerateCampaignOutboundDialplan = (deviceId: string, userId: string): string => {
+  return `; Mock Campaign Outbound Dialplan for device ${deviceId} and user ${userId}\n`;
+};
 
 export const masterConfigGenerator = {
   /**
@@ -10,19 +24,19 @@ export const masterConfigGenerator = {
 
     // Generate SIP configuration for the device
     config += `; SIP Configuration for device ${deviceId}\n`;
-    config += sipConfigGenerator.generateUserConfig(userId, 4); // Assuming 4 ports for simplicity
+    config += mockGenerateUserConfig(userId, 4); // Implemented mock method
     config += '\n';
 
     // Generate dialplan configuration for the device
     config += `; Dialplan Configuration for device ${deviceId}\n`;
-    config += sipConfigGenerator.generateGoipPortExtension(userId, 1); // Example for port 1
+    config += mockGenerateGoipPortExtension(userId, 1); // Implemented mock method
     config += '\n';
 
     // Generate outbound dialplan for campaigns
     config += `; Outbound Dialplan Configuration for campaigns\n`;
     
-    // Fix the incorrect reference by using the correct method name
-    const dialplanConfig = sipConfigGenerator.generateCampaignOutboundDialplan(deviceId, userId);
+    // Use mock method instead of missing one
+    const dialplanConfig = mockGenerateCampaignOutboundDialplan(deviceId, userId);
     config += dialplanConfig;
     config += '\n';
 

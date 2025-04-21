@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -11,7 +12,7 @@ import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { DialerJobControl } from '@/components/dialer/DialerJobControl';
 import { CallLogsTable } from '@/components/dialer/CallLogsTable';
-import { AsteriskConfigDisplay } from '@/components/dialer/AsteriskConfigDisplay';
+import AsteriskConfigDisplay from '@/components/dialer/AsteriskConfigDisplay';
 import { TransferNumberSelector } from '@/components/dialer/TransferNumberSelector';
 import { CallerIdSelector } from '@/components/dialer/CallerIdSelector';
 import { useCallLogs } from '@/hooks/useCallLogs';
