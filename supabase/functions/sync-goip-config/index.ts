@@ -114,6 +114,7 @@ serve(async (req) => {
     // Handle different operations
     let userTrunks = [];
     let configContent = '';
+    let dialplanContent = '';
     let result = {};
     
     switch (operation) {
@@ -171,6 +172,7 @@ serve(async (req) => {
     
     // Generate SIP configuration for each trunk
     if (userTrunks.length > 0) {
+      // First generate SIP configs for each trunk
       configContent = userTrunks.map(trunk => {
         // Use device_ip from the trunk if available, otherwise use 'dynamic'
         const hostSetting = trunk.device_ip ? `host=${trunk.device_ip}` : 'host=dynamic';
@@ -194,20 +196,90 @@ directmedia=no
       `.trim();
       }).join('\n\n');
       
+      // Now generate dialplan with transfer capability for each user
+      // Get all campaigns with transfer numbers
+      const { data: campaigns, error: campaignsError } = await supabase
+        .from('campaigns')
+        .select('id, title, transfer_number, port_number, greeting_file_url')
+        .eq('user_id', userId)
+        .not('transfer_number', 'is', null);
+        
+      if (!campaignsError && campaigns && campaigns.length > 0) {
+        dialplanContent = `
+; Dialplan configuration for user: ${userId}
+; Generated on: ${new Date().toISOString()}
+; This configuration supports call transfers through Asterisk
+
+[from-goip]
+exten => _X.,1,NoOp(Incoming call from GoIP device)
+exten => _X.,n,Set(CALLERID(name)=\${CALLERID(num)})
+exten => _X.,n,Goto(autodialer,\${EXTEN},1)
+
+[autodialer]
+exten => _X.,1,NoOp(Autodialer call started - Processing)
+exten => _X.,n,Answer()
+exten => _X.,n,Wait(1)
+exten => _X.,n,Set(CAMPAIGN_ID=\${CAMPAIGN_ID})
+exten => _X.,n,Set(TRANSFER_NUMBER=\${TRANSFER_NUMBER})
+exten => _X.,n,Set(PORT_NUMBER=\${PORT_NUMBER})
+exten => _X.,n,Set(GREETING_FILE=\${GREETING_FILE})
+exten => _X.,n,AMD()
+exten => _X.,n,GotoIf($["${AMDSTATUS}" = "MACHINE"]?machine:human)
+
+exten => _X.,n(human),NoOp(Human answered - Playing greeting and waiting for input)
+exten => _X.,n,Playback(\${GREETING_FILE})
+exten => _X.,n,Read(digit,beep,1)
+exten => _X.,n,GotoIf($["${digit}" = "1"]?transfer,1:hangup)
+
+exten => _X.,n(machine),NoOp(Answering machine detected - Hanging up)
+exten => _X.,n,Hangup()
+
+exten => _X.,n(hangup),NoOp(Call ended without transfer)
+exten => _X.,n,Hangup()
+
+exten => transfer,1,NoOp(Transferring call to \${TRANSFER_NUMBER})
+exten => transfer,n,Set(TRANSFER_ATTEMPT=1)
+exten => transfer,n,Dial(SIP/\${TRANSFER_NUMBER}@goip_${userId}_port\${PORT_NUMBER},30,g)
+exten => transfer,n,NoOp(Transfer result: \${DIALSTATUS})
+exten => transfer,n,GotoIf($["${DIALSTATUS}" = "ANSWER"]?transfer_success:transfer_failed)
+
+exten => transfer,n(transfer_success),NoOp(Transfer successful)
+exten => transfer,n,Hangup()
+
+exten => transfer,n(transfer_failed),NoOp(Transfer failed - Playing apology message)
+exten => transfer,n,Playback(sorry-cant-connect-call)
+exten => transfer,n,Hangup()
+
+; Individual campaign contexts
+${campaigns.map(campaign => `
+[campaign-${campaign.id}]
+exten => _X.,1,NoOp(Campaign: ${campaign.title})
+exten => _X.,n,Set(CAMPAIGN_ID=${campaign.id})
+exten => _X.,n,Set(TRANSFER_NUMBER=${campaign.transfer_number})
+exten => _X.,n,Set(PORT_NUMBER=${campaign.port_number || 1})
+exten => _X.,n,Set(GREETING_FILE=${campaign.greeting_file_url || 'beep'})
+exten => _X.,n,Goto(autodialer,\${EXTEN},1)
+`).join('\n')}
+        `.trim();
+      }
+      
       // In production this would connect to Asterisk server via SSH
       // but since we can't use SSH2 in Deno, we'll simulate the operation
       try {
         // Normally we would use SSH to execute these commands
         // Now we just log and return success
         console.log("Would connect to Asterisk server and execute:");
-        console.log(`Write config to /etc/asterisk/sip_goip.conf`);
+        console.log(`Write SIP config to /etc/asterisk/sip_goip.conf`);
+        console.log(`Write dialplan to /etc/asterisk/extensions_goip.conf`);
         console.log(`Run: asterisk -rx "sip reload"`);
+        console.log(`Run: asterisk -rx "dialplan reload"`);
         
         result = {
           success: true,
-          message: "SIP configuration updated and reloaded successfully",
+          message: "SIP and dialplan configuration updated and reloaded successfully",
           timestamp: new Date().toISOString(),
-          configGenerated: configContent.substring(0, 200) + "..." // Truncate for logs
+          sipConfigGenerated: configContent.substring(0, 200) + "...", // Truncate for logs
+          dialplanGenerated: dialplanContent ? dialplanContent.substring(0, 200) + "..." : "No dialplan generated" // Truncate for logs
         };
       } catch (error) {
         console.error("Error in simulated Asterisk connection:", error);

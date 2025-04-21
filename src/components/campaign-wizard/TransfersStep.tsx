@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Info, PhoneIcon } from "lucide-react";
+import { Info, PhoneIcon, ArrowRight } from "lucide-react";
 import { CampaignData } from './types';
 
 interface TransfersStepProps {
@@ -80,12 +80,37 @@ export const TransfersStep: React.FC<TransfersStepProps> = ({
             </Alert>
           )}
 
-          <Alert>
+          <Alert className="bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-sm text-blue-700">
+              <span className="font-medium">How the transfer works:</span>
+              <div className="mt-2 flex flex-col space-y-2">
+                <div className="flex items-center">
+                  <span className="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">1</span>
+                  <span className="ml-2">When someone answers your call, they'll hear your greeting message</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">2</span>
+                  <span className="ml-2">If they press 1 on their phone keypad, we'll use your GoIP device</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">3</span>
+                  <div className="ml-2 flex items-center">
+                    <span>To immediately connect them to this number</span>
+                    <ArrowRight className="mx-2 h-4 w-4 text-blue-500" />
+                    <span className="font-semibold">{campaign.transferNumber || "Your transfer number"}</span>
+                  </div>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+          
+          <Alert>
+            <Info className="h-4 w-4" />
             <AlertDescription className="text-sm">
-              When someone answers your call and presses 1, they will be immediately transferred to this number.
-              <br />
-              Make sure the number is correct and has someone available to answer transferred calls.
+              <span className="font-semibold">Important:</span> Make sure the transfer number is correct and has someone 
+              available to answer transferred calls. The same GoIP port used for the initial call will be used for the 
+              transfer, ensuring seamless connectivity.
             </AlertDescription>
           </Alert>
         </CardContent>

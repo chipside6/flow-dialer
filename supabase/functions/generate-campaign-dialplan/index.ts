@@ -1,9 +1,11 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json"
 };
 
 interface DialplanRequest {
@@ -23,7 +25,7 @@ serve(async (req) => {
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: "No authorization header" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -57,7 +59,7 @@ serve(async (req) => {
     if (userError || !user) {
       return new Response(
         JSON.stringify({ error: "Invalid user token" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -76,7 +78,7 @@ serve(async (req) => {
     if (userId !== user.id && !isAdmin) {
       return new Response(
         JSON.stringify({ error: "You don't have permission to access this resource" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 403, headers: corsHeaders }
       );
     }
 
@@ -85,7 +87,8 @@ serve(async (req) => {
       .from('campaigns')
       .select(`
         *,
-        transfer_numbers(phone_number)
+        port_ids,
+        goip_device(id, device_name)
       `)
       .eq('id', campaignId)
       .single();
@@ -93,11 +96,24 @@ serve(async (req) => {
     if (campaignError || !campaign) {
       return new Response(
         JSON.stringify({ error: "Campaign not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 404, headers: corsHeaders }
       );
     }
 
-    // Generate AGI script
+    // Get port details if available
+    let portDetails = [];
+    if (campaign.port_ids && campaign.port_ids.length > 0) {
+      const { data: ports } = await supabase
+        .from('goip_ports')
+        .select('*')
+        .in('id', campaign.port_ids);
+        
+      if (ports) {
+        portDetails = ports;
+      }
+    }
+
+    // Generate AGI script for transfer handling
     const agiScript = `#!/usr/bin/env php
 <?php
 
@@ -105,13 +121,14 @@ require_once('phpagi.php');
 
 // Initialize AGI
 $agi = new AGI();
-$agi->verbose("Campaign Handler Started");
+$agi->verbose("Campaign Transfer Handler Started");
 
 // Get the dialed number
 $dialed_number = $agi->request['agi_dnid'];
 $campaign_id = '${campaignId}';
-$greeting_url = '${campaign.greeting_file_url}';
-$transfer_number = '${campaign.transfer_number}';
+$greeting_url = '${campaign.greeting_file_url || "beep"}';
+$transfer_number = '${campaign.transfer_number || ""}';
+$port_number = ${campaign.port_number || 1};
 
 // Log call start
 $start_time = time();
@@ -138,12 +155,35 @@ if ($amd_status['data'] === 'HUMAN') {
     $agi->stream_file($greeting_url);
     
     // Wait for keypress
+    $agi->verbose("Waiting for transfer keypress (1)");
     $result = $agi->get_data('beep', 5000, 1);
     
     if ($result['result'] === '1') {
         $agi->verbose("User pressed 1, transferring to $transfer_number");
-        logCallResult('transferred', $start_time);
-        $agi->exec('Dial', "SIP/$transfer_number,30,g");
+        
+        // Set variables for the transfer
+        $agi->set_variable('TRANSFER_REQUESTED', '1');
+        $agi->set_variable('TRANSFER_DESTINATION', $transfer_number);
+        $agi->set_variable('PORT_NUMBER', $port_number);
+        
+        // Execute the transfer
+        $agi->verbose("Dialing transfer number using port $port_number");
+        $agi->exec('Dial', "SIP/$transfer_number@goip_${userId}_port$port_number,30,g");
+        
+        // Check transfer status
+        $dialstatus = $agi->get_variable('DIALSTATUS');
+        $agi->verbose("Transfer dial status: " . $dialstatus['data']);
+        
+        if ($dialstatus['data'] === 'ANSWER') {
+            logCallResult('transferred', $start_time);
+            $agi->verbose("Transfer successful");
+        } else {
+            logCallResult('transfer_failed', $start_time);
+            $agi->verbose("Transfer failed: " . $dialstatus['data']);
+            
+            // Play apology message
+            $agi->stream_file('sorry-cant-connect-call');
+        }
     } else {
         $agi->verbose("No keypress received");
         logCallResult('no_transfer', $start_time);
@@ -154,6 +194,8 @@ $agi->hangup();
 
 // Log call result to Supabase
 function logCallResult($result, $start_time) {
+    global $campaign_id, $dialed_number;
+    
     $duration = time() - $start_time;
     
     $curl = curl_init();
@@ -162,11 +204,11 @@ function logCallResult($result, $start_time) {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST => 'POST',
         CURLOPT_POSTFIELDS => json_encode([
-            'campaign_id' => '${campaignId}',
+            'campaign_id' => $campaign_id,
             'status' => $result,
             'duration' => $duration,
             'phone_number' => $dialed_number,
-            'transfer_requested' => $result === 'transferred',
+            'transfer_requested' => $result === 'transferred' || $result === 'transfer_failed',
             'transfer_successful' => $result === 'transferred'
         ]),
         CURLOPT_HTTPHEADER => [
@@ -182,34 +224,56 @@ function logCallResult($result, $start_time) {
 }
 `;
 
-    // Generate dialplan configuration
+    // Generate dialplan configuration with transfer capabilities
+    const portsList = portDetails.length > 0 
+      ? portDetails.map(p => `Port ${p.port_number}`).join(', ') 
+      : `Port ${campaign.port_number || 1}`;
+
     const dialplanConfig = `
-; Campaign ${campaignId} Dialplan
+; Campaign ${campaignId} Dialplan with Transfer Capabilities
 ; Created for user ${userId}
+; Using: ${portsList}
+; Generated on: ${new Date().toISOString()}
 
 [from-goip]
 exten => _X.,1,NoOp(Incoming call from GoIP device)
 exten => _X.,n,Set(CALLERID(name)=\${CALLERID(num)})
-exten => _X.,n,AGI(campaign_handler.php,\${EXTEN})
+exten => _X.,n,AGI(campaign_handler.php,\${EXTEN},${campaignId})
 exten => _X.,n,Hangup()
 
 [campaign-${campaignId}]
-; Handle incoming calls for campaign ${campaignId}
+; Handle outbound calls for campaign ${campaignId}
 exten => _X.,1,NoOp(Campaign ${campaignId} call handler)
 exten => _X.,n,Answer()
 exten => _X.,n,AMD()
 exten => _X.,n,GotoIf($["${AMDSTATUS}" = "MACHINE"]?machine:human)
 
-exten => _X.,n(machine),NoOp(Answering machine detected)
+exten => _X.,n(human),NoOp(Human answered - Playing greeting)
+exten => _X.,n,Playback(${campaign.greeting_file_url || "beep"})
+exten => _X.,n,Read(digit,,1)
+exten => _X.,n,GotoIf($["${digit}" = "1"]?transfer:hangup)
+
+exten => _X.,n(machine),NoOp(Answering machine detected - Hanging up)
 exten => _X.,n,Hangup()
 
-exten => _X.,n(human),NoOp(Human answered)
-exten => _X.,n,Playback(${campaign.greeting_file_url})
-exten => _X.,n,WaitExten(5)
+exten => _X.,n(hangup),NoOp(Call ended without transfer)
+exten => _X.,n,Hangup()
 
-exten => 1,1,NoOp(Transfer requested)
-exten => 1,n,Dial(SIP/${campaign.transfer_number},30,g)
-exten => 1,n,Hangup()
+; Transfer handler using the same GoIP port
+exten => transfer,1,NoOp(Transferring call to ${campaign.transfer_number || "transfer number"})
+exten => transfer,n,Set(TRANSFER_ATTEMPT=1)
+exten => transfer,n,Set(TRANSFER_DESTINATION=${campaign.transfer_number || ""})
+exten => transfer,n,Set(PORT_NUMBER=${campaign.port_number || 1})
+exten => transfer,n,Dial(SIP/${campaign.transfer_number || ""}@goip_${userId}_port${campaign.port_number || 1},30,g)
+exten => transfer,n,NoOp(Transfer result: \${DIALSTATUS})
+exten => transfer,n,GotoIf($["${DIALSTATUS}" = "ANSWER"]?transfer_success:transfer_failed)
+
+exten => transfer,n(transfer_success),NoOp(Transfer successful)
+exten => transfer,n,Hangup()
+
+exten => transfer,n(transfer_failed),NoOp(Transfer failed - Playing apology message)
+exten => transfer,n,Playback(sorry-cant-connect-call)
+exten => transfer,n,Hangup()
 
 exten => h,1,NoOp(Call ended)
 exten => h,n,System(curl -X POST "${Deno.env.get("SUPABASE_URL")}/rest/v1/call_logs" \\
@@ -226,9 +290,12 @@ exten => h,n,System(curl -X POST "${Deno.env.get("SUPABASE_URL")}/rest/v1/call_l
         success: true,
         dialplanConfig,
         agiScript,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        transferEnabled: Boolean(campaign.transfer_number),
+        transferNumber: campaign.transfer_number,
+        portNumber: campaign.port_number || 1
       }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { headers: corsHeaders }
     );
   } catch (error) {
     console.error("Error generating campaign dialplan:", error);
@@ -237,7 +304,7 @@ exten => h,n,System(curl -X POST "${Deno.env.get("SUPABASE_URL")}/rest/v1/call_l
         error: String(error),
         message: "Error generating campaign dialplan configuration"
       }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: corsHeaders }
     );
   }
 });

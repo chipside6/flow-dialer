@@ -53,5 +53,54 @@ export const dialplanGenerator = {
         message: error instanceof Error ? error.message : 'Unknown error generating dialplan'
       };
     }
+  },
+  
+  /**
+   * Generate transfer-enabled dialplan for a campaign
+   */
+  generateTransferDialplan: async (
+    campaignId: string,
+    transferNumber: string,
+    portNumber: number,
+    greetingFile: string
+  ): Promise<string> => {
+    return `
+; Campaign ${campaignId} Transfer-Enabled Dialplan
+; Generated on ${new Date().toISOString()}
+
+[campaign-${campaignId}]
+exten => _X.,1,NoOp(Campaign ${campaignId} call handler)
+exten => _X.,n,Answer()
+exten => _X.,n,Set(CAMPAIGN_ID=${campaignId})
+exten => _X.,n,Set(TRANSFER_NUMBER=${transferNumber})
+exten => _X.,n,Set(PORT_NUMBER=${portNumber})
+exten => _X.,n,Set(GREETING_FILE=${greetingFile})
+exten => _X.,n,AMD()
+exten => _X.,n,GotoIf($["${AMDSTATUS}" = "MACHINE"]?machine:human)
+
+exten => _X.,n(human),NoOp(Human answered - Playing greeting and waiting for input)
+exten => _X.,n,Playback(${greetingFile})
+exten => _X.,n,Read(digit,beep,1)
+exten => _X.,n,GotoIf($["${digit}" = "1"]?transfer,1:hangup)
+
+exten => _X.,n(machine),NoOp(Answering machine detected - Hanging up)
+exten => _X.,n,Hangup()
+
+exten => _X.,n(hangup),NoOp(Call ended without transfer)
+exten => _X.,n,Hangup()
+
+exten => transfer,1,NoOp(Transferring call to ${transferNumber})
+exten => transfer,n,Set(TRANSFER_ATTEMPT=1)
+exten => transfer,n,Dial(SIP/${transferNumber}@goip_port${portNumber},30,g)
+exten => transfer,n,NoOp(Transfer result: ${DIALSTATUS})
+exten => transfer,n,GotoIf($["${DIALSTATUS}" = "ANSWER"]?transfer_success:transfer_failed)
+
+exten => transfer,n(transfer_success),NoOp(Transfer successful)
+exten => transfer,n,Hangup()
+
+exten => transfer,n(transfer_failed),NoOp(Transfer failed - Playing apology message)
+exten => transfer,n,Playback(sorry-cant-connect-call)
+exten => transfer,n,Hangup()
+`;
   }
 };

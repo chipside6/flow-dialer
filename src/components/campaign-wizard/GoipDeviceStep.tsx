@@ -1,28 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, AlertCircle, CheckCircle } from "lucide-react";
+import { Phone, AlertCircle, Info } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
-import { useToast } from '@/components/ui/use-toast';
-
-interface Port {
-  id: string;
-  port_number: number;
-  status: string;
-}
-
-interface Device {
-  id: string;
-  device_name: string;
-  ip_address: string;
-  ports?: Port[];
-}
+import { asteriskService } from '@/utils/asteriskService';
+import { Button } from "@/components/ui/button";
 
 interface GoipDeviceStepProps {
   selectedDeviceId: string;
@@ -39,60 +27,74 @@ export const GoipDeviceStep: React.FC<GoipDeviceStepProps> = ({
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [ports, setPorts] = useState<Port[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Fetch devices on component mount
+  const [devices, setDevices] = useState<any[]>([]);
+  const [ports, setPorts] = useState<any[]>([]);
+  const [isLoadingDevices, setIsLoadingDevices] = useState(false);
+  const [isLoadingPorts, setIsLoadingPorts] = useState(false);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
+  const [portStatus, setPortStatus] = useState<Record<string, boolean>>({});
+  
+  // Load devices
   useEffect(() => {
-    if (user) {
-      fetchGoipDevices();
+    if (user?.id) {
+      loadDevices();
     }
-  }, [user]);
-
-  // Fetch ports when device is selected
+  }, [user?.id]);
+  
+  // Load ports when device changes
   useEffect(() => {
     if (selectedDeviceId) {
-      fetchDevicePorts(selectedDeviceId);
+      loadPorts(selectedDeviceId);
     } else {
       setPorts([]);
     }
   }, [selectedDeviceId]);
-
-  const fetchGoipDevices = async () => {
-    setIsLoading(true);
-    setError(null);
+  
+  // Load the user's GoIP devices
+  const loadDevices = async () => {
+    if (!user?.id) return;
+    
+    setIsLoadingDevices(true);
     
     try {
       const { data, error } = await supabase
         .from('goip_devices')
         .select('*')
-        .eq('user_id', user?.id);
-      
+        .eq('user_id', user.id);
+        
       if (error) throw error;
       
-      setDevices(data || []);
-      
-      // If no device is selected but we have devices, select the first one
-      if (!selectedDeviceId && data && data.length > 0) {
-        onDeviceChange(data[0].id);
+      if (data && data.length > 0) {
+        setDevices(data);
+        
+        // If no device is selected, select the first one
+        if (!selectedDeviceId) {
+          onDeviceChange(data[0].id);
+        }
+      } else {
+        toast({
+          title: "No GoIP devices found",
+          description: "Please add a GoIP device in your account settings before continuing",
+          variant: "destructive"
+        });
       }
-    } catch (err) {
-      console.error('Error fetching GoIP devices:', err);
-      setError('Failed to load your GoIP devices');
+    } catch (error) {
+      console.error('Error loading GoIP devices:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load GoIP devices. Please try again.',
-        variant: 'destructive'
+        title: "Error",
+        description: error instanceof Error ? error.message : 'Error loading GoIP devices',
+        variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingDevices(false);
     }
   };
-
-  const fetchDevicePorts = async (deviceId: string) => {
-    setIsLoading(true);
+  
+  // Load ports for a specific device
+  const loadPorts = async (deviceId: string) => {
+    if (!user?.id) return;
+    
+    setIsLoadingPorts(true);
     
     try {
       const { data, error } = await supabase
@@ -100,179 +102,214 @@ export const GoipDeviceStep: React.FC<GoipDeviceStepProps> = ({
         .select('*')
         .eq('device_id', deviceId)
         .order('port_number', { ascending: true });
-      
+        
       if (error) throw error;
       
-      setPorts(data || []);
-      
-      // Reset selected ports when device changes
-      if (selectedDeviceId !== deviceId) {
+      if (data) {
+        setPorts(data);
+        
+        // Reset selected ports when device changes
         onPortsChange([]);
+        
+        // Check status of ports
+        checkPortsStatus(data);
       }
-    } catch (err) {
-      console.error('Error fetching device ports:', err);
-      setPorts([]);
+    } catch (error) {
+      console.error('Error loading GoIP ports:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load device ports. Please try again.',
-        variant: 'destructive'
+        title: "Error",
+        description: error instanceof Error ? error.message : 'Error loading GoIP ports',
+        variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingPorts(false);
     }
   };
-
-  const handleDeviceChange = (value: string) => {
+  
+  // Check status of ports
+  const checkPortsStatus = async (portsToCheck: any[]) => {
+    if (!user?.id || portsToCheck.length === 0) return;
+    
+    setIsCheckingStatus(true);
+    
+    try {
+      const portStatusMap: Record<string, boolean> = {};
+      
+      // Check each port status
+      for (const port of portsToCheck) {
+        try {
+          const result = await asteriskService.checkGoipStatus(user.id, port.port_number);
+          portStatusMap[port.id] = result.online;
+        } catch (error) {
+          console.error(`Error checking port ${port.port_number} status:`, error);
+          portStatusMap[port.id] = false;
+        }
+      }
+      
+      setPortStatus(portStatusMap);
+    } catch (error) {
+      console.error('Error checking port status:', error);
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+  
+  // Handle device selection
+  const handleDeviceSelect = (value: string) => {
     onDeviceChange(value);
   };
-
+  
+  // Handle port selection/deselection
   const handlePortToggle = (portId: string) => {
-    const updatedPorts = selectedPortIds.includes(portId)
-      ? selectedPortIds.filter(id => id !== portId)
-      : [...selectedPortIds, portId];
+    const isSelected = selectedPortIds.includes(portId);
     
-    onPortsChange(updatedPorts);
-  };
-
-  const handleSelectAllPorts = () => {
-    const availablePorts = ports
-      .filter(port => port.status === 'available')
-      .map(port => port.id);
-    
-    onPortsChange(availablePorts);
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'available':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Available</Badge>;
-      case 'busy':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Busy</Badge>;
-      case 'offline':
-        return <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-200">Offline</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
+    if (isSelected) {
+      // Remove port
+      onPortsChange(selectedPortIds.filter(id => id !== portId));
+    } else {
+      // Add port
+      onPortsChange([...selectedPortIds, portId]);
     }
   };
-
-  if (devices.length === 0 && !isLoading) {
-    return (
+  
+  // Refresh port status
+  const handleRefreshStatus = () => {
+    checkPortsStatus(ports);
+  };
+  
+  return (
+    <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>No GoIP Devices Found</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Phone className="h-5 w-5" />
+            GoIP Device Selection
+          </CardTitle>
           <CardDescription>
-            You need to add at least one GoIP device before creating a campaign.
+            Select which GoIP device and ports to use for this campaign
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Please go to the GoIP Setup page to add your devices first.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-        <CardFooter>
-          <Button variant="outline" onClick={() => window.location.href = '/goip-setup'}>
-            Go to GoIP Setup
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="goip-device">Select GoIP Device</Label>
-        <Select
-          value={selectedDeviceId}
-          onValueChange={handleDeviceChange}
-          disabled={isLoading || devices.length === 0}
-        >
-          <SelectTrigger id="goip-device">
-            <SelectValue placeholder={isLoading ? "Loading devices..." : "Select a GoIP device"} />
-          </SelectTrigger>
-          <SelectContent>
-            {devices.map(device => (
-              <SelectItem key={device.id} value={device.id}>
-                {device.device_name} {device.ip_address ? `(${device.ip_address})` : ''}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {selectedDeviceId && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label>Select Available Ports</Label>
-            {ports.filter(port => port.status === 'available').length > 0 && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleSelectAllPorts}
-              >
-                Select All Available
-              </Button>
-            )}
-          </div>
-          
-          {isLoading ? (
-            <div className="flex justify-center py-4">
-              <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : ports.length === 0 ? (
-            <Alert>
-              <Info className="h-4 w-4" />
+        <CardContent className="space-y-4">
+          {devices.length === 0 && !isLoadingDevices ? (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                No ports found for this device. Please check your device configuration.
+                No GoIP devices found. Please add a GoIP device in your account settings before continuing.
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {ports.map(port => (
-                <div 
-                  key={port.id}
-                  className={`
-                    p-3 border rounded-md flex flex-col items-center space-y-2
-                    ${port.status === 'available' ? 'bg-background' : 'bg-muted opacity-60'}
-                    ${selectedPortIds.includes(port.id) ? 'border-primary' : 'border-border'}
-                  `}
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="goipDevice">GoIP Device</Label>
+                <Select 
+                  value={selectedDeviceId} 
+                  onValueChange={handleDeviceSelect}
+                  disabled={isLoadingDevices}
                 >
-                  <span className="text-sm font-medium">Port {port.port_number}</span>
-                  {getStatusBadge(port.status)}
-                  <div className="pt-1">
-                    <Checkbox
-                      checked={selectedPortIds.includes(port.id)}
-                      onCheckedChange={() => handlePortToggle(port.id)}
-                      disabled={port.status !== 'available'}
-                    />
+                  <SelectTrigger id="goipDevice">
+                    <SelectValue placeholder={isLoadingDevices ? "Loading devices..." : "Select a GoIP device"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {devices.map(device => (
+                      <SelectItem key={device.id} value={device.id}>
+                        {device.device_name} {device.ip_address ? `(${device.ip_address})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {selectedDeviceId && (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label>Available Ports</Label>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleRefreshStatus}
+                      disabled={isCheckingStatus || ports.length === 0}
+                    >
+                      Refresh Status
+                    </Button>
                   </div>
+                  
+                  {isLoadingPorts ? (
+                    <div className="py-4 text-center text-muted-foreground">
+                      Loading ports...
+                    </div>
+                  ) : ports.length === 0 ? (
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        No ports found for this device. Please add ports in your device configuration.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                      {ports.map(port => {
+                        const isOnline = portStatus[port.id] === true;
+                        
+                        return (
+                          <div 
+                            key={port.id}
+                            className={`
+                              border rounded-md p-3 flex items-start space-x-3
+                              ${isOnline ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}
+                              ${selectedPortIds.includes(port.id) ? 'ring-2 ring-primary' : ''}
+                            `}
+                          >
+                            <Checkbox 
+                              id={`port-${port.id}`}
+                              checked={selectedPortIds.includes(port.id)}
+                              onCheckedChange={() => handlePortToggle(port.id)}
+                              disabled={!isOnline}
+                            />
+                            <div className="space-y-1 flex-1">
+                              <Label 
+                                htmlFor={`port-${port.id}`}
+                                className="font-medium cursor-pointer"
+                              >
+                                Port {port.port_number}
+                              </Label>
+                              <div className="text-xs text-muted-foreground">
+                                SIP: {port.sip_username}
+                              </div>
+                              <div className={`text-xs ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
+                                {isOnline ? 'Online' : 'Offline'}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  
+                  {selectedPortIds.length === 0 && ports.length > 0 && (
+                    <Alert variant="warning" className="mt-2">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Please select at least one port to use for this campaign.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
-              ))}
-            </div>
+              )}
+              
+              <Alert className="mt-4">
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  <p className="font-medium">Call Transfer: Using GoIP ports</p>
+                  <p className="text-sm mt-1">
+                    Your selected ports will be used to make outbound calls. When a call recipient presses "1", 
+                    the same port will be used to create a second outbound call to your transfer number, and both 
+                    calls will be bridged together.
+                  </p>
+                </AlertDescription>
+              </Alert>
+            </>
           )}
-          
-          {ports.length > 0 && selectedPortIds.length === 0 && (
-            <Alert className="mt-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Please select at least one port to proceed.
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          {selectedPortIds.length > 0 && (
-            <Alert className="mt-4 bg-green-50 border-green-200">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-700">
-                {selectedPortIds.length} port{selectedPortIds.length > 1 ? 's' : ''} selected.
-              </AlertDescription>
-            </Alert>
-          )}
-        </div>
-      )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

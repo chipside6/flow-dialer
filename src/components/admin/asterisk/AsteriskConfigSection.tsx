@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/components/ui/use-toast';
-import { FileText, RefreshCw, AlertCircle, CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import { FileText, RefreshCw, AlertCircle, CheckCircle, AlertTriangle, Info, PhoneIcon } from 'lucide-react';
 import { asteriskService } from '@/utils/asteriskService';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -129,6 +129,16 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
             This process will sync your GoIP device configuration with the Asterisk server. 
             It generates SIP configuration for all your registered trunks and reloads the Asterisk configuration.
           </p>
+          <div className="mt-3 border-t border-slate-200 pt-3">
+            <div className="flex items-center">
+              <PhoneIcon className="h-4 w-4 mr-2 text-slate-500" />
+              <span className="text-sm text-slate-700 font-medium">Call Transfer Support</span>
+            </div>
+            <p className="text-sm text-slate-600 mt-1">
+              The sync includes call transfer dialplan logic that allows your campaigns to transfer calls 
+              when recipients press 1, using the same GoIP port for both the original and transfer calls.
+            </p>
+          </div>
         </div>
         
         <Button 
