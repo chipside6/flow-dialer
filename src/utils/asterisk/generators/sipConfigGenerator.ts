@@ -1,113 +1,112 @@
-import { securityUtils } from '../utils/securityUtils';
+
+import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Generates SIP configurations for users and devices
+ * SIP configuration generator for Asterisk
+ * Handles generation of SIP provider configurations
  */
 export const sipConfigGenerator = {
   /**
-   * Generate a SIP configuration for a GoIP port
+   * Generate user-specific SIP configuration with security best practices
+   * for all GoIP devices and trunks
    */
-  generateGoipPortConfig: (userId: string, portNumber: number, password?: string): string => {
-    const sipUser = `goip_${userId.substring(0, 8)}_port${portNumber}`;
-    const sipPassword = password || securityUtils.generateSimplePassword(12);
-    
-    return `
-[${sipUser}](goip-endpoint)
+  generateUserSipConfig: async (
+    userId: string
+  ): Promise<{ success: boolean; message: string; config?: string }> => {
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      
+      if (!session?.session?.access_token) {
+        throw new Error('Authentication required');
+      }
+      
+      // Fetch user trunks data
+      const { data: userTrunks, error: trunksError } = await supabase
+        .from('user_trunks')
+        .select('*')
+        .eq('user_id', userId);
+        
+      if (trunksError) {
+        throw new Error(`Error fetching user trunks: ${trunksError.message}`);
+      }
+      
+      if (!userTrunks || userTrunks.length === 0) {
+        return {
+          success: false,
+          message: 'No SIP trunks found for user'
+        };
+      }
+      
+      // Generate SIP configuration with secure defaults
+      let configContent = `
+;=====================================================
+; Auto-generated SIP/PJSIP Configuration 
+; User ID: ${userId}
+; Generated: ${new Date().toISOString()}
+;=====================================================
+
+[global]
+type=global
+user_agent=FlowDialer
+max_forwards=70
+keep_alive_interval=30
+
+`.trim();
+
+      // Generate trunk configurations from user trunks
+      const trunkConfigs = userTrunks.map(trunk => {
+        const hostSetting = trunk.device_ip ? `host=${trunk.device_ip}` : 'host=dynamic';
+        
+        return `
+[goip_${trunk.user_id}_port${trunk.port_number}]
 type=endpoint
+transport=transport-udp
 context=from-goip
 disallow=all
-allow=ulaw,alaw
-transport=transport-udp
+allow=ulaw
+allow=alaw
 direct_media=no
-force_rport=yes
-rewrite_contact=yes
-ice_support=no
-dtmf_mode=rfc4733
-call_group=${userId}_port${portNumber}
-pickup_group=${userId}_ports
-max_audio_streams=1
-max_contacts=1
+trust_id_inbound=no
 device_state_busy_at=1
+dtmf_mode=rfc4733
 rtp_timeout=30
+call_group=1
+pickup_group=1
+language=en
+${hostSetting}
+auth=auth_goip_${trunk.user_id}_port${trunk.port_number}
+aors=aor_goip_${trunk.user_id}_port${trunk.port_number}
 
-[${sipUser}](goip-auth)
+[auth_goip_${trunk.user_id}_port${trunk.port_number}]
 type=auth
 auth_type=userpass
-username=${sipUser}
-password=${sipPassword}
+username=${trunk.sip_user}
+password=${trunk.sip_pass}
 
-[${sipUser}](goip-aor)
+[aor_goip_${trunk.user_id}_port${trunk.port_number}]
 type=aor
-max_contacts=1
-qualify_frequency=30
-maximum_expiration=3600
-minimum_expiration=60
-default_expiration=120
+max_contacts=5
 remove_existing=yes
-
-[${sipUser}](goip-identify)
-type=identify
-endpoint=${sipUser}
-match=${sipUser}
-`;
-  },
-  
-  /**
-   * Generate dialplan extension for GoIP port
-   */
-  generateGoipPortExtension: (userId: string, portNumber: number): string => {
-    return `
-; Extension for user ${userId} port ${portNumber}
-exten => goip_${userId.substring(0, 8)}_port${portNumber},1,NoOp(Incoming call from GoIP port ${portNumber})
- same => n,Set(GROUP(port_${userId}_${portNumber})=\${CHANNEL})
- same => n,GotoIf($[\${GROUP_COUNT(port_${userId}_${portNumber})} > 1]?busy)
- same => n,Answer()
- same => n,Wait(1)
- same => n,Playback(hello-world)
- same => n,Hangup()
- same => n(busy),Busy()
- same => n,Hangup()
-`;
-  },
-  
-  /**
-   * Generate outbound dialplan for a campaign
-   */
-  generateCampaignOutboundDialplan: (campaignId: string, userId: string): string => {
-    return `
-; Campaign ${campaignId} outbound dialplan
-[campaign-${campaignId}-outbound]
-exten => _X.,1,NoOp(Outbound call for campaign ${campaignId})
- same => n,Set(CALLERID(all)=Campaign ${campaignId} <\${EXTEN}>)
- same => n,Set(GROUP(campaign_${campaignId})=\${CHANNEL})
- same => n,GotoIf($[\${GROUP_COUNT(campaign_${campaignId}_\${PORT_NUMBER})} > 1]?busy)
- same => n,Dial(SIP/goip_${userId.substring(0, 8)}_port\${PORT_NUMBER}/\${EXTEN},30,g)
- same => n,Hangup()
- same => n(busy),NoOp(Port \${PORT_NUMBER} is busy, not placing call)
- same => n,Hangup()
-`;
-  },
-  
-  /**
-   * Generate full user configuration for all ports
-   */
-  generateUserConfig: (userId: string, numPorts: number): string => {
-    let config = `; SIP Configuration for user ${userId} with ${numPorts} ports\n\n`;
-    
-    // Generate SIP configuration for each port
-    for (let port = 1; port <= numPorts; port++) {
-      config += sipConfigGenerator.generateGoipPortConfig(userId, port);
-      config += '\n';
+minimum_expiration=60
+maximum_expiration=3600
+qualify_frequency=60
+`.trim();
+      }).join('\n\n');
+      
+      // Add the trunk configurations to the main config
+      configContent = `${configContent}\n\n${trunkConfigs}\n`;
+      
+      return {
+        success: true,
+        message: 'SIP configuration generated successfully',
+        config: configContent
+      };
+    } catch (error) {
+      console.error('Error generating SIP configuration:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error generating SIP configuration'
+      };
     }
-    
-    // Generate a transports section
-    config += `
-[transport-udp-${userId}]
-type=transport
-protocol=udp
-bind=0.0.0.0
-`;
-    
-    return config;
   }
 };

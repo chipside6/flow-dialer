@@ -1,59 +1,66 @@
 
+/**
+ * Central export file for all Asterisk generators
+ * This ensures consistent access to generators across the application
+ */
+import { dialplanGenerator } from './dialplanGenerator';
+import { apiGenerator } from './apiGenerator';
 import { baseGenerator } from './baseGenerator';
 import { campaignGenerator } from './campaignGenerator';
-import { userGenerator } from './userGenerator';
-import { apiGenerator } from './apiGenerator';
 import { masterConfigGenerator } from './masterConfigGenerator';
+import { sipConfigGenerator } from './sipConfigGenerator';
 
-/**
- * Configuration generators for Asterisk
- */
-export const asteriskConfig = {
-  // Re-export base generators
-  generateSipTrunkConfig: baseGenerator.generateSipTrunkConfig,
-  generateDialplan: baseGenerator.generateDialplan,
-  
-  // Re-export campaign generators
-  generateFullConfig: campaignGenerator.generateFullConfig,
-  generateAllCampaignsConfig: campaignGenerator.generateAllCampaignsConfig,
-  generateAutoConfig: campaignGenerator.generateAutoConfig,
-  
-  // Re-export user generators
-  generateUserCampaignConfig: userGenerator.generateSipConfig, // Map to existing method
-  
-  // Re-export API generators
-  generateConfigFromApi: apiGenerator.generateConfigFromApi,
-  
-  // Re-export master config generator
-  generateMasterServerConfig: masterConfigGenerator.generateMasterConfig
+// Core generators export
+export {
+  dialplanGenerator,
+  apiGenerator,
+  baseGenerator,
+  campaignGenerator,
+  masterConfigGenerator,
+  sipConfigGenerator
 };
 
-/**
- * Generate a complete SIP configuration that includes the user's transfer number and greeting file
- * @deprecated Use asteriskConfig.generateFullConfig instead
- */
-export const generateCompleteConfig = (
+// Utility function to generate complete configuration for a campaign
+export const generateCompleteConfig = async (
   campaignId: string,
-  sipDetails: {
-    providerName: string;
-    host: string;
-    port: string;
-    username: string;
-    password: string;
-  },
-  userConfig: {
-    transferNumber: string;
-    greetingFile: string;
-  }
+  userId: string
 ) => {
-  return asteriskConfig.generateFullConfig(
-    campaignId,
-    sipDetails.providerName,
-    sipDetails.host,
-    sipDetails.port,
-    sipDetails.username,
-    sipDetails.password,
-    userConfig.greetingFile,
-    userConfig.transferNumber
-  );
+  try {
+    // Get dialplan from the dialplan generator
+    const dialplanResult = await dialplanGenerator.generateCampaignDialplan(
+      campaignId,
+      userId
+    );
+
+    // Get SIP config from SIP config generator
+    const sipResult = await sipConfigGenerator.generateUserSipConfig(userId);
+
+    return {
+      success: dialplanResult.success && sipResult.success,
+      dialplanConfig: dialplanResult.config || '',
+      sipConfig: sipResult.config || '',
+      transferEnabled: dialplanResult.transferEnabled || false,
+      transferNumber: dialplanResult.transferNumber || null,
+      error: dialplanResult.success ? sipResult.message : dialplanResult.message
+    };
+  } catch (error) {
+    console.error('Error generating complete configuration:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error generating configuration',
+      dialplanConfig: '',
+      sipConfig: ''
+    };
+  }
+};
+
+// Convenience function to access all Asterisk config generators
+export const asteriskConfig = {
+  dialplan: dialplanGenerator,
+  sip: sipConfigGenerator,
+  campaign: campaignGenerator,
+  master: masterConfigGenerator,
+  api: apiGenerator,
+  base: baseGenerator,
+  generateComplete: generateCompleteConfig
 };

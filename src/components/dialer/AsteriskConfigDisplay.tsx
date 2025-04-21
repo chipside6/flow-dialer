@@ -1,181 +1,272 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Download, FileText } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { masterConfigGenerator } from '@/utils/asterisk/generators/masterConfigGenerator';
-import { SipConfigSection } from './configs/SipConfigSection';
-import { ExtensionsSection } from './configs/ExtensionsSection';
-import { GoipConfigSection } from './configs/GoipConfigSection';
-import { useConfigActions } from '@/hooks/useConfigActions';
-import { DialplanSection } from './configs/DialplanSection';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Copy, Server, ServerCog, ShieldAlert, Terminal, Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-interface AsteriskConfigDisplayProps {
+const AsteriskConfigDisplay = ({
+  username,
+  password,
+  host,
+  port
+}: {
   username: string;
   password: string;
   host: string;
   port: number;
-  campaignId?: string;  // Add campaignId prop
-  userId?: string;      // Add userId prop
-}
-
-export const AsteriskConfigDisplay = ({
-  username,
-  password,
-  host,
-  port,
-  campaignId,
-  userId
-}: AsteriskConfigDisplayProps) => {
-  const [activeTab, setActiveTab] = useState('sip');
-  const { copied, handleCopy, handleDownload } = useConfigActions();
+}) => {
   const { toast } = useToast();
+  const [showCommand, setShowCommand] = useState<boolean>(false);
   
-  // Config templates
+  // Format deployment command
+  const deployCommand = `
+#!/bin/bash
+# Production Asterisk deployment script
+# This script should be run on your Asterisk server
+
+# Save your campaign ID and user ID here
+CAMPAIGN_ID="your-campaign-id"  # Replace with your actual campaign ID
+USER_ID="your-user-id"          # Replace with your actual user ID
+SUPABASE_URL="your-supabase-url" # Replace with your Supabase URL
+JWT_TOKEN="your-service-role-jwt" # Get from Supabase dashboard (service role key)
+
+# Run the deployment script
+node deploy-asterisk-config.js $CAMPAIGN_ID $USER_ID $SUPABASE_URL $JWT_TOKEN
+`.trim();
+
+  const handleCopyConfig = (text: string, type: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        toast({
+          title: "Copied to clipboard",
+          description: `${type} configuration copied successfully`,
+        });
+      })
+      .catch((err) => {
+        console.error('Failed to copy:', err);
+        toast({
+          title: "Copy failed",
+          description: "Unable to copy to clipboard",
+          variant: "destructive",
+        });
+      });
+  };
+
   const sipConfig = `
+; SIP Configuration for Asterisk (PJSIP)
 [${username}]
-type=peer
-host=dynamic
+type=endpoint
+transport=transport-udp
 context=from-goip
-secret=${password}
 disallow=all
 allow=ulaw
 allow=alaw
-dtmfmode=rfc2833
-insecure=port,invite
-nat=force_rport,comedia
-qualify=yes
-directmedia=no
-`;
-  const extensionsConfig = `
-[from-goip]
-exten => _X.,1,NoOp(Incoming call from GoIP device)
-exten => _X.,n,Set(CALLERID(name)=\${CALLERID(num)})
-exten => _X.,n,Goto(autodialer,s,1)
+direct_media=no
+trust_id_inbound=no
+device_state_busy_at=1
+dtmf_mode=rfc4733
+rtp_timeout=30
+call_group=1
+pickup_group=1
+language=en
+host=${host}
+auth=auth_${username}
+aors=aor_${username}
 
-[autodialer]
-exten => s,1,NoOp(Autodialer call started)
-exten => s,n,Answer()
-exten => s,n,Wait(1)
-exten => s,n,Set(TIMEOUT(digit)=5)
-exten => s,n,Set(TIMEOUT(response)=10)
-exten => s,n,Playback(greeting)
-exten => s,n,WaitExten(5)
-exten => s,n,Hangup()
+[auth_${username}]
+type=auth
+auth_type=userpass
+username=${username}
+password=${password}
 
-; Handle key press 1 for transfer
-exten => 1,1,NoOp(Transferring call)
-exten => 1,n,Dial(SIP/transfer-number,30,g)
-exten => 1,n,Hangup()
+[aor_${username}]
+type=aor
+max_contacts=5
+remove_existing=yes
+minimum_expiration=60
+maximum_expiration=3600
+qualify_frequency=60
+`.trim();
 
-; Handle hangup
-exten => h,1,NoOp(Call ended)
-`;
-  const agiScript = `#!/usr/bin/env python3
-import sys
-import os
-from asterisk.agi import AGI
+  const securityNote = `
+# SECURITY NOTES FOR PRODUCTION DEPLOYMENT
 
-# Initialize AGI
-agi = AGI()
-agi.verbose("Autodialer AGI script started")
+## Asterisk Server Hardening
+- Use strong passwords for all SIP accounts
+- Configure proper firewall rules (allow only necessary ports)
+- Keep Asterisk updated with security patches
+- Use TLS for SIP communication when possible
+- Limit API access by IP address
 
-# Get campaign ID and user ID from arguments
-campaign_id = sys.argv[1] if len(sys.argv) > 1 else "unknown"
-user_id = sys.argv[2] if len(sys.argv) > 2 else "unknown"
-transfer_number = sys.argv[3] if len(sys.argv) > 3 else "0"
+## JWT Token Security
+- Never expose your service role JWT in client-side code
+- Store JWT securely on your server
+- Rotate JWT regularly
+- Use storage encryption for sensitive credentials
 
-# Log call start
-agi.verbose(f"Processing call for campaign {campaign_id} and user {user_id}")
-
-# Play greeting
-agi.appexec("Playback", "greeting")
-
-# Wait for digit
-result = agi.get_data("beep", 10000, 1)
-
-# Check if user pressed 1
-if result == "1":
-    agi.verbose("User pressed 1, transferring to " + transfer_number)
-    agi.set_variable("TRANSFER_REQUESTED", "1")
-    agi.appexec("Dial", f"SIP/{transfer_number},30,g")
-else:
-    agi.verbose("No digit received or not 1, hanging up")
-
-agi.verbose("AGI script completed")
-sys.exit(0)
-`;
-  const goipConfig = `
-Account Settings:
-Local Port: 5060
-Register Port: 5060
-Register Server: ${host}
-Proxy Server: ${host}
-User ID: ${username}
-Authentication ID: ${username}
-Authentication Password: ${password}
-Register Expiry: 600
-`;
+## Deployment Best Practices
+- Run deployment scripts only from secure, trusted environments
+- Monitor logs for unusual activity
+- Implement rate limiting on your Asterisk server
+- Use separate user accounts with limited permissions
+- Back up configurations regularly
+`.trim();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Server Configuration
-        </CardTitle>
-        <CardDescription>
-          Copy these configurations to your Asterisk server
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-4 mb-4">
-            <TabsTrigger value="sip">SIP Config</TabsTrigger>
-            <TabsTrigger value="dialplan">Dialplan</TabsTrigger>
-            <TabsTrigger value="extensions">Extensions</TabsTrigger>
-            <TabsTrigger value="goip">GoIP Setup</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="sip">
-            <SipConfigSection sipConfig={sipConfig} />
-          </TabsContent>
-          
-          <TabsContent value="dialplan">
-            {campaignId && userId ? (
-              <DialplanSection
-                campaignId={campaignId}
-                userId={userId}
-              />
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                Campaign information required to generate dialplan
-              </p>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="extensions">
-            <ExtensionsSection 
-              extensionsConfig={extensionsConfig}
-              agiScript={agiScript}
-            />
-          </TabsContent>
-          
-          <TabsContent value="goip">
-            <GoipConfigSection goipConfig={goipConfig} />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={() => handleDownload(masterConfigGenerator.generateMasterConfig(username, "config"), 'asterisk-autodialer-master.conf')}
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Download Master Config
-        </Button>
-      </CardFooter>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Server className="h-5 w-5 mr-2" />
+              Asterisk Production Configuration
+            </div>
+            <Badge variant="outline" className="ml-2">Production Ready</Badge>
+          </CardTitle>
+          <CardDescription>
+            Configuration settings for your Asterisk server in production
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Tabs defaultValue="sip">
+            <TabsList className="grid grid-cols-3">
+              <TabsTrigger value="sip">SIP Config</TabsTrigger>
+              <TabsTrigger value="deploy">Deployment</TabsTrigger>
+              <TabsTrigger value="security">Security</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="sip" className="space-y-4">
+              <div className="relative">
+                <div className="absolute top-2 right-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleCopyConfig(sipConfig, 'SIP')}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <ScrollArea className="h-80 w-full rounded-md border p-4">
+                  <pre className="text-sm">{sipConfig}</pre>
+                </ScrollArea>
+              </div>
+              
+              <div className="bg-muted rounded-md p-4">
+                <h4 className="font-medium mb-2">Connection Details:</h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="font-medium">Username:</div>
+                  <div>{username}</div>
+                  <div className="font-medium">Password:</div>
+                  <div>{password.replace(/./g, '•')}</div>
+                  <div className="font-medium">Host:</div>
+                  <div>{host}</div>
+                  <div className="font-medium">Port:</div>
+                  <div>{port}</div>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="deploy" className="space-y-4">
+              <Alert variant="default">
+                <AlertTitle className="flex items-center">
+                  <ServerCog className="h-4 w-4 mr-2" />
+                  Deployment Instructions
+                </AlertTitle>
+                <AlertDescription>
+                  <p className="mb-2">To deploy on your production Asterisk server:</p>
+                  <ol className="list-decimal pl-5 space-y-1">
+                    <li>Install Node.js on your Asterisk server</li>
+                    <li>Copy the <code>deploy-asterisk-config.js</code> script to your server</li>
+                    <li>Install dependencies: <code>npm install node-fetch@^3</code></li>
+                    <li>Run the script as shown below with your campaign ID</li>
+                  </ol>
+                </AlertDescription>
+              </Alert>
+              
+              <div className="relative">
+                <div className="absolute top-2 right-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleCopyConfig(deployCommand, 'Deployment')}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <ScrollArea className="h-[300px] w-full rounded-md border p-4">
+                  <pre className="text-sm">{deployCommand}</pre>
+                </ScrollArea>
+              </div>
+              
+              <Button 
+                variant="outline" 
+                onClick={() => setShowCommand(!showCommand)}
+                className="w-full"
+              >
+                {showCommand ? (
+                  <>
+                    <EyeOff className="h-4 w-4 mr-2" />
+                    Hide Example Command
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Show Example Command
+                  </>
+                )}
+              </Button>
+              
+              {showCommand && (
+                <div className="bg-muted rounded-md p-4">
+                  <h4 className="font-medium mb-2 flex items-center">
+                    <Terminal className="h-4 w-4 mr-2" />
+                    Example Deployment Command:
+                  </h4>
+                  <code className="block text-sm bg-background p-2 rounded border">
+                    node deploy-asterisk-config.js campaign-123 user-456 https://your-project.supabase.co eyJhbGciOiJIU...
+                  </code>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Note: Replace with your actual campaign ID, user ID, Supabase URL, and JWT token.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="security" className="space-y-4">
+              <Alert variant="warning">
+                <AlertTitle className="flex items-center">
+                  <ShieldAlert className="h-4 w-4 mr-2" />
+                  Security Recommendations
+                </AlertTitle>
+                <AlertDescription>
+                  Follow these security recommendations for your production setup.
+                </AlertDescription>
+              </Alert>
+              
+              <div className="relative">
+                <div className="absolute top-2 right-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleCopyConfig(securityNote, 'Security')}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <ScrollArea className="h-[300px] w-full rounded-md border p-4">
+                  <pre className="text-sm">{securityNote}</pre>
+                </ScrollArea>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
+
+export default AsteriskConfigDisplay;
