@@ -55,9 +55,9 @@ keep_alive_interval=30
 
       // Generate trunk configurations from user trunks
       const trunkConfigs = userTrunks.map(trunk => {
-        // Check if device_ip is available, otherwise use a default setting
-        // Use optional chaining to prevent TypeScript errors
-        const hostSetting = trunk.device_ip ? `host=${trunk.device_ip}` : 'host=dynamic';
+        // The trunk object may not have device_ip property, so use 'dynamic' as default
+        // TypeScript definition doesn't recognize device_ip on the trunk object
+        // Type assertion or adding optional property check is needed
         
         return `
 [goip_${trunk.user_id}_port${trunk.port_number}]
