@@ -71,13 +71,20 @@ export const asteriskService = {
       });
       
       if (!response.ok) {
-        throw new Error(`Error checking GoIP status: ${response.statusText}`);
+        throw new Error(`Error checking GoIP status: ${response.status} ${response.statusText}`);
+      }
+      
+      // Check content type to ensure it's JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Invalid response format:', await response.text());
+        throw new Error('Invalid response format from server');
       }
       
       const result = await response.json();
       
       if (!result.success) {
-        throw new Error(result.error || 'Unknown error checking GoIP status');
+        throw new Error(result.error || result.message || 'Unknown error checking GoIP status');
       }
       
       // Find the status for the specific port
@@ -118,6 +125,8 @@ export const asteriskService = {
         throw new Error('Authentication required');
       }
       
+      console.log('Starting Asterisk configuration sync with Edge Function...');
+      
       // Call the edge function to sync configuration
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-goip-config`, {
         method: 'POST',
@@ -131,22 +140,43 @@ export const asteriskService = {
         })
       });
       
+      // Handle HTTP errors
       if (!response.ok) {
-        throw new Error(`Error syncing configuration: ${response.statusText}`);
-      }
-      
-      // Get the content type to check if it's JSON
-      const contentType = response.headers.get('content-type');
-      
-      if (!contentType || !contentType.includes('application/json')) {
-        console.error('Response is not JSON:', await response.text());
+        console.error('HTTP error in sync:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Error response body:', errorText);
+        
         return {
           success: false,
-          message: 'Invalid response format from server. Please check Supabase function deployment.'
+          message: `Server error: ${response.status} ${response.statusText}`
         };
       }
       
-      const result = await response.json();
+      // Check content type and get response as text first
+      const contentType = response.headers.get('content-type');
+      const responseText = await response.text();
+      
+      console.log('Response from Edge Function:', responseText);
+      
+      // If empty response
+      if (!responseText.trim()) {
+        return {
+          success: false,
+          message: 'Empty response from server'
+        };
+      }
+      
+      // Try to parse as JSON, with error handling
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        return {
+          success: false,
+          message: `Invalid response from server: ${responseText.substring(0, 100)}...`
+        };
+      }
       
       return {
         success: result.success || false,
@@ -159,11 +189,6 @@ export const asteriskService = {
       let errorMessage = 'Unknown error syncing configuration';
       if (error instanceof Error) {
         errorMessage = error.message;
-        
-        // Handle JSON parsing errors specifically
-        if (error.message.includes('JSON')) {
-          errorMessage = 'Invalid response from server. The Supabase function might need to be redeployed.';
-        }
       }
       
       return {

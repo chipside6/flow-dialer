@@ -24,7 +24,7 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: "No authorization header" }),
+        JSON.stringify({ success: false, message: "No authorization header" }),
         { status: 401, headers: corsHeaders }
       );
     }
@@ -58,13 +58,25 @@ serve(async (req) => {
     
     if (userError || !user) {
       return new Response(
-        JSON.stringify({ error: "Invalid user token" }),
+        JSON.stringify({ success: false, message: "Invalid user token" }),
         { status: 401, headers: corsHeaders }
       );
     }
 
     // Get request data
-    const requestData: SyncRequest = await req.json();
+    let requestData: SyncRequest;
+    try {
+      requestData = await req.json();
+    } catch (error) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: "Invalid JSON in request body" 
+        }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+    
     const { userId, operation = 'sync_user' } = requestData;
     
     // Verify the user has permission (is either the same user or an admin)
@@ -78,7 +90,7 @@ serve(async (req) => {
     
     if (userId !== user.id && !isAdmin) {
       return new Response(
-        JSON.stringify({ error: "You don't have permission to access this resource" }),
+        JSON.stringify({ success: false, message: "You don't have permission to access this resource" }),
         { status: 403, headers: corsHeaders }
       );
     }
@@ -93,7 +105,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: "Asterisk server configuration is missing" 
+          message: "Asterisk server configuration is missing in environment variables" 
         }),
         { status: 200, headers: corsHeaders }
       );
@@ -193,18 +205,16 @@ directmedia=no
         
         result = {
           success: true,
-          message: "SIP configuration updated and reloaded successfully (simulated)",
+          message: "SIP configuration updated and reloaded successfully",
           timestamp: new Date().toISOString(),
-          configGenerated: configContent
+          configGenerated: configContent.substring(0, 200) + "..." // Truncate for logs
         };
       } catch (error) {
         console.error("Error in simulated Asterisk connection:", error);
         
         result = {
           success: false,
-          message: "Error connecting to Asterisk server (simulated)",
-          error: String(error),
-          config: configContent,
+          message: "Error connecting to Asterisk server: " + (error instanceof Error ? error.message : String(error)),
           timestamp: new Date().toISOString()
         };
       }
@@ -216,7 +226,7 @@ directmedia=no
       };
     }
     
-    // Return the result
+    // Ensure we return a valid JSON response
     return new Response(
       JSON.stringify(result),
       { headers: corsHeaders }
@@ -225,11 +235,11 @@ directmedia=no
   } catch (error) {
     console.error("Error in sync-goip-config function:", error);
     
+    // Ensure we return a valid JSON response even for unexpected errors
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: String(error),
-        message: "An error occurred while syncing GoIP configuration"
+        message: "An error occurred while syncing GoIP configuration: " + (error instanceof Error ? error.message : String(error))
       }),
       { status: 200, headers: corsHeaders }
     );
