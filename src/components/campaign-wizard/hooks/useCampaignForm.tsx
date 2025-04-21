@@ -18,19 +18,18 @@ export const useCampaignForm = (
     description: '',
     contactListId: '',
     greetingFileId: '',
-    transferNumber: '',
+    transfer_number_id: '', // Now using transfer_number_id
     status: 'pending',
     schedule: {
       startDate: new Date().toISOString().split('T')[0],
       maxConcurrentCalls: 1
     },
     user_id: user?.id || '',
-    port_ids: [], // Initialize empty array for port_ids
+    port_ids: [],
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setCampaign(prev => ({
@@ -68,14 +67,14 @@ export const useCampaignForm = (
 
   const handleComplete = async () => {
     try {
-      // Validate that a transfer number is selected
-      if (!campaign.transferNumber) {
+      // Validate transfer_number_id
+      if (!campaign.transfer_number_id) {
         toast({
           title: "Transfer number required",
           description: "Please select a transfer number for this campaign.",
           variant: "destructive",
         });
-        setStep('transfers');
+        setStep('transfer-number');
         return;
       }
 
@@ -86,14 +85,14 @@ export const useCampaignForm = (
         createdAt: new Date().toISOString(),
         user_id: user?.id || '',
       };
-      
+
       onComplete(updatedCampaign);
-      
+
       toast({
         title: "Campaign created",
         description: "Your campaign has been created successfully.",
       });
-      
+
       navigate('/campaigns');
     } catch (error) {
       console.error('Error creating campaign:', error);

@@ -5,7 +5,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { WizardStepTabs } from "./WizardStepTabs";
 import { WizardNavigation } from "./WizardNavigation";
 import { CampaignData, WizardStep } from "./types";
-import { getStepAvailability } from "./utils/formValidation";
+import { useFormValidation } from "./utils/formValidation";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WizardContainerProps {
@@ -31,6 +31,7 @@ export const WizardContainer: React.FC<WizardContainerProps> = ({
   onComplete,
   children
 }) => {
+  const { getStepAvailability } = useFormValidation();
   const isStepAvailable = getStepAvailability(campaign);
   const isMobile = useIsMobile();
 

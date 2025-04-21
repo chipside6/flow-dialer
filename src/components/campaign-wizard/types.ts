@@ -1,11 +1,18 @@
-export type WizardStep = 'basics' | 'contacts' | 'audio' | 'goip' | 'transfers' | 'review';
+
+export type WizardStep =
+  | 'basics'
+  | 'contacts'
+  | 'audio'
+  | 'goip'
+  | 'transfer-number'
+  | 'review';
 
 export interface CampaignData {
   id?: string;
   title: string;
   description: string;
   greetingFileId?: string;
-  transferNumber?: string;
+  transfer_number_id?: string; // Link to transfer_numbers
   status?: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'failed';
   progress?: number;
   createdAt?: string;

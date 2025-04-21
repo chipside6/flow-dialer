@@ -10,10 +10,12 @@ import { WizardContainer } from "./WizardContainer";
 import { CampaignData, WizardStep } from "./types";
 import { useAuth } from "@/contexts/auth";
 import { useCampaignForm } from "./hooks/useCampaignForm";
-import { useFormValidation } from "./utils/formValidation";
+import { useFormValidation, getStepAvailability } from "./utils/formValidation";
 import { useGreetingFiles } from "@/hooks/useGreetingFiles";
 import { useContactLists } from "@/hooks/useContactLists";
 import { GoipDeviceStep } from './GoipDeviceStep';
+import { TransferNumberStep } from './TransferNumberStep';
+import { useTransferNumbers } from "@/hooks/useTransferNumbers";
 
 interface CampaignCreationWizardProps {
   onComplete: (campaign: CampaignData) => void;
@@ -25,7 +27,8 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
   const { validateStep, getNextStep, getPreviousStep } = useFormValidation();
   const { greetingFiles } = useGreetingFiles();
   const { lists: contactLists, isLoading: isLoadingLists } = useContactLists();
-  
+  const { transferNumbers, isLoading: isLoadingTransfers } = useTransferNumbers();
+
   const {
     campaign,
     step,
@@ -59,7 +62,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
       <TabsContent value="basics">
         <BasicsStep campaign={campaign} onChange={handleInputChange} />
       </TabsContent>
-      
+
       <TabsContent value="contacts">
         <ContactsStep 
           campaign={campaign}
@@ -68,7 +71,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
           isLoading={isLoadingLists}
         />
       </TabsContent>
-      
+
       <TabsContent value="audio">
         <AudioStep 
           campaign={campaign}
@@ -76,7 +79,7 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
           onSelectChange={handleSelectChange}
         />
       </TabsContent>
-      
+
       <TabsContent value="goip">
         <GoipDeviceStep
           selectedDeviceId={campaign.goip_device_id || ''}
@@ -86,6 +89,15 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
         />
       </TabsContent>
       
+      <TabsContent value="transfer-number">
+        <TransferNumberStep
+          campaign={campaign}
+          transferNumbers={transferNumbers}
+          isLoading={isLoadingTransfers}
+          onSelectChange={handleSelectChange}
+        />
+      </TabsContent>
+
       <TabsContent value="transfers">
         <TransfersStep 
           campaign={campaign} 
@@ -93,12 +105,14 @@ export const CampaignCreationWizard = ({ onComplete, onCancel }: CampaignCreatio
           onSelectChange={handleSelectChange}
         />
       </TabsContent>
-      
+
       <TabsContent value="review">
         <ReviewStep 
           campaign={campaign}
           contactLists={contactLists}
           greetingFiles={greetingFiles}
+          // You may want to pass transferNumbers for display
+          transferNumbers={transferNumbers}
         />
       </TabsContent>
     </WizardContainer>
