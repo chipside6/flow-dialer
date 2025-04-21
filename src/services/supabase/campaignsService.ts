@@ -9,13 +9,13 @@ export const fetchCampaigns = async (userId: string) => {
   console.log(`[CampaignsService] Fetching campaigns for user: ${userId}`);
   
   try {
+    // First, fetch the campaigns without the join that's causing issues
     const { data, error } = await supabase
       .from('campaigns')
       .select(`
         *,
         goip_devices(*),
-        campaign_ports(port_id),
-        transfer_numbers!campaigns_transfer_number_id_fkey(*)
+        campaign_ports(port_id)
       `)
       .eq('user_id', userId);
     
@@ -26,16 +26,11 @@ export const fetchCampaigns = async (userId: string) => {
     
     console.log(`[CampaignsService] Fetched ${data.length} campaigns successfully`);
     
+    // Process the campaign data with the transfer_number directly from campaigns table
     return data.map((campaign) => {
-      // Get transfer number from the join if available
-      let transferNumber = campaign.transfer_number;
-      if (campaign.transfer_numbers && campaign.transfer_numbers.phone_number) {
-        transferNumber = campaign.transfer_numbers.phone_number;
-      }
-      
       return {
         ...campaign,
-        transferNumber,
+        transferNumber: campaign.transfer_number || null,
         port_ids: campaign.campaign_ports?.map((p: any) => p.port_id) || []
       };
     });
@@ -60,7 +55,7 @@ export const createCampaign = async (campaign: CampaignData, userId: string) => 
         title: campaign.title,
         description: campaign.description,
         greeting_file_id: campaign.greetingFileId || null,
-        transfer_number: campaign.transferNumber || null,
+        transfer_number: campaign.transferNumber || null, // Store the plain number directly
         status: campaign.status || 'pending',
         progress: campaign.progress || 0,
         total_calls: campaign.totalCalls || 0,
@@ -110,14 +105,13 @@ export const createCampaign = async (campaign: CampaignData, userId: string) => 
  */
 export const getCampaignWithPorts = async (campaignId: string) => {
   try {
-    // Get campaign details
+    // Get campaign details without the problematic join
     const { data: campaign, error: campaignError } = await supabase
       .from('campaigns')
       .select(`
         *,
         goip_devices(*),
-        campaign_ports(port_id),
-        transfer_numbers!campaigns_transfer_number_id_fkey(*)
+        campaign_ports(port_id)
       `)
       .eq('id', campaignId)
       .single();
@@ -128,14 +122,9 @@ export const getCampaignWithPorts = async (campaignId: string) => {
     }
     
     // Format the campaign with transfer number and port IDs
-    let transferNumber = campaign.transfer_number;
-    if (campaign.transfer_numbers && campaign.transfer_numbers.phone_number) {
-      transferNumber = campaign.transfer_numbers.phone_number;
-    }
-    
     const formattedCampaign = {
       ...campaign,
-      transferNumber,
+      transferNumber: campaign.transfer_number || null,
       port_ids: campaign.campaign_ports?.map((p: any) => p.port_id) || []
     };
     
