@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/components/ui/use-toast';
-import { FileText, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import { FileText, RefreshCw, AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react';
 import { asteriskService } from '@/utils/asteriskService';
 
 interface AsteriskConfigSectionProps {
@@ -42,7 +42,9 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
     setIsStuck(false);
 
     try {
+      console.log('Starting Asterisk configuration sync for user:', userId);
       const result = await asteriskService.syncConfiguration(userId, 'sync_user');
+      console.log('Sync result:', result);
       
       setConnectionStatus(result);
       toast({
@@ -51,6 +53,7 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
         variant: result.success ? "default" : "destructive"
       });
     } catch (error) {
+      console.error('Error in handleApiSync:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setConnectionStatus({
         success: false,
@@ -78,6 +81,13 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {isStuck && (
+          <div className="p-3 bg-amber-50 text-amber-800 rounded-md mb-4">
+            <AlertTriangle className="inline-block mr-2 h-4 w-4" />
+            The request is taking longer than expected. There might be an issue with the server connection.
+          </div>
+        )}
+        
         <Button 
           onClick={handleApiSync} 
           disabled={isLoading && !isStuck}

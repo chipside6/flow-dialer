@@ -135,6 +135,17 @@ export const asteriskService = {
         throw new Error(`Error syncing configuration: ${response.statusText}`);
       }
       
+      // Get the content type to check if it's JSON
+      const contentType = response.headers.get('content-type');
+      
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Response is not JSON:', await response.text());
+        return {
+          success: false,
+          message: 'Invalid response format from server. Please check Supabase function deployment.'
+        };
+      }
+      
       const result = await response.json();
       
       return {
@@ -143,9 +154,21 @@ export const asteriskService = {
       };
     } catch (error) {
       console.error('Error syncing configuration:', error);
+      
+      // Improved error message to help diagnose the issue
+      let errorMessage = 'Unknown error syncing configuration';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Handle JSON parsing errors specifically
+        if (error.message.includes('JSON')) {
+          errorMessage = 'Invalid response from server. The Supabase function might need to be redeployed.';
+        }
+      }
+      
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error syncing configuration'
+        message: errorMessage
       };
     }
   }

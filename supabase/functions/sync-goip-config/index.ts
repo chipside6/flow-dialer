@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.3";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json"
 };
 
 interface SyncRequest {
@@ -24,7 +25,7 @@ serve(async (req) => {
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: "No authorization header" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -58,7 +59,7 @@ serve(async (req) => {
     if (userError || !user) {
       return new Response(
         JSON.stringify({ error: "Invalid user token" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -78,7 +79,7 @@ serve(async (req) => {
     if (userId !== user.id && !isAdmin) {
       return new Response(
         JSON.stringify({ error: "You don't have permission to access this resource" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 403, headers: corsHeaders }
       );
     }
 
@@ -90,8 +91,11 @@ serve(async (req) => {
     
     if (!ASTERISK_SERVER_HOST || !ASTERISK_SERVER_USER || !ASTERISK_SERVER_PASS) {
       return new Response(
-        JSON.stringify({ error: "Asterisk server configuration is missing" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ 
+          success: false, 
+          message: "Asterisk server configuration is missing" 
+        }),
+        { status: 200, headers: corsHeaders }
       );
     }
 
@@ -105,8 +109,11 @@ serve(async (req) => {
         // Only admin can sync all
         if (!isAdmin) {
           return new Response(
-            JSON.stringify({ error: "Only admins can sync all users" }),
-            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            JSON.stringify({ 
+              success: false, 
+              message: "Only admins can sync all users" 
+            }),
+            { status: 200, headers: corsHeaders }
           );
         }
         
@@ -116,7 +123,13 @@ serve(async (req) => {
           .select('*');
           
         if (trunksError) {
-          throw new Error(`Error fetching trunks: ${trunksError.message}`);
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              message: `Error fetching trunks: ${trunksError.message}` 
+            }),
+            { status: 200, headers: corsHeaders }
+          );
         }
         
         userTrunks = allTrunks || [];
@@ -131,7 +144,13 @@ serve(async (req) => {
           .eq('user_id', userId);
           
         if (userTrunksError) {
-          throw new Error(`Error fetching user trunks: ${userTrunksError.message}`);
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              message: `Error fetching user trunks: ${userTrunksError.message}` 
+            }),
+            { status: 200, headers: corsHeaders }
+          );
         }
         
         userTrunks = userTrunksData || [];
@@ -200,7 +219,7 @@ directmedia=no
     // Return the result
     return new Response(
       JSON.stringify(result),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { headers: corsHeaders }
     );
     
   } catch (error) {
@@ -208,10 +227,11 @@ directmedia=no
     
     return new Response(
       JSON.stringify({ 
+        success: false,
         error: String(error),
         message: "An error occurred while syncing GoIP configuration"
       }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: corsHeaders }
     );
   }
 });
