@@ -5,6 +5,20 @@ import { supabase } from '@/integrations/supabase/client';
  * SIP configuration generator for Asterisk
  * Handles generation of SIP provider configurations
  */
+
+// Add UserTrunk interface to explicitly include device_ip
+interface UserTrunk {
+  user_id: string;
+  port_number: number;
+  sip_user: string;
+  sip_pass: string;
+  trunk_name: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  device_ip?: string; // Optional property
+}
+
 export const sipConfigGenerator = {
   /**
    * Generate user-specific SIP configuration with security best practices
@@ -54,10 +68,9 @@ keep_alive_interval=30
 `.trim();
 
       // Generate trunk configurations from user trunks
-      const trunkConfigs = userTrunks.map(trunk => {
-        // The trunk object may not have device_ip property, so use 'dynamic' as default
-        // TypeScript definition doesn't recognize device_ip on the trunk object
-        // Type assertion or adding optional property check is needed
+      const trunkConfigs = userTrunks.map(trunkRaw => {
+        const trunk = trunkRaw as UserTrunk;
+        const hostSetting = trunk.device_ip ? `host=${trunk.device_ip}` : 'host=dynamic';
         
         return `
 [goip_${trunk.user_id}_port${trunk.port_number}]
@@ -75,7 +88,7 @@ rtp_timeout=30
 call_group=1
 pickup_group=1
 language=en
-host=dynamic
+${hostSetting}
 auth=auth_goip_${trunk.user_id}_port${trunk.port_number}
 aors=aor_goip_${trunk.user_id}_port${trunk.port_number}
 
@@ -112,3 +125,4 @@ qualify_frequency=60
     }
   }
 };
+
