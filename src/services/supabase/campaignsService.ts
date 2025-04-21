@@ -55,7 +55,8 @@ export const createCampaign = async (campaign: CampaignData, userId: string) => 
         title: campaign.title,
         description: campaign.description,
         greeting_file_id: campaign.greetingFileId || null,
-        transfer_number: campaign.transferNumber || null, // Store the plain number directly
+        transfer_number: campaign.transferNumber || null, // Use transferNumber directly
+        transfer_number_id: campaign.transfer_number_id || null, // Also store the transfer_number_id
         status: campaign.status || 'pending',
         progress: campaign.progress || 0,
         total_calls: campaign.totalCalls || 0,

@@ -31,7 +31,7 @@ export const TransfersStep: React.FC<TransfersStepProps> = ({
   };
 
   // Determine if we have a valid selection
-  const hasValidTransferNumber = Boolean(campaign.transferNumber);
+  const hasValidTransferNumber = Boolean(campaign.transfer_number_id || campaign.transferNumber);
 
   return (
     <div className="space-y-4">
@@ -87,7 +87,7 @@ export const TransfersStep: React.FC<TransfersStepProps> = ({
                   <div className="ml-2 flex items-center">
                     <span>To immediately connect them to this number</span>
                     <ArrowRight className="mx-2 h-4 w-4 text-blue-500" />
-                    <span className="font-semibold">{campaign.transferNumber || "Your transfer number"}</span>
+                    <span className="font-semibold">{campaign.transferNumber || campaign.transfer_number_id || "Your transfer number"}</span>
                   </div>
                 </div>
               </div>

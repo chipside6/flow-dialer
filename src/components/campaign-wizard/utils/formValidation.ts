@@ -8,6 +8,7 @@ export const wizardSteps: WizardStep[] = [
   "audio",
   "goip",
   "transfer-number",
+  "transfers",
   "review",
 ];
 
@@ -33,6 +34,8 @@ export const useFormValidation = () => {
         return !!campaign.goip_device_id && campaign.port_ids && campaign.port_ids.length > 0;
       case "transfer-number":
         return !!campaign.transfer_number_id;
+      case "transfers":
+        return !!campaign.transferNumber || !!campaign.transfer_number_id;
       default:
         return true;
     }
@@ -44,8 +47,20 @@ export const useFormValidation = () => {
     audio: !!campaign.contactListId,
     goip: !!campaign.greetingFileId,
     "transfer-number": !!campaign.goip_device_id && campaign.port_ids && campaign.port_ids.length > 0,
-    review: !!campaign.transfer_number_id,
+    transfers: !!campaign.transfer_number_id,
+    review: !!(campaign.transferNumber || campaign.transfer_number_id),
   });
 
   return { validateStep, getNextStep, getPreviousStep, getStepAvailability };
 };
+
+// Export the getStepAvailability function for direct use
+export const getStepAvailability = (campaign: CampaignData) => ({
+  basics: true,
+  contacts: !!campaign.title,
+  audio: !!campaign.contactListId,
+  goip: !!campaign.greetingFileId,
+  "transfer-number": !!campaign.goip_device_id && campaign.port_ids && campaign.port_ids.length > 0,
+  transfers: !!campaign.transfer_number_id,
+  review: !!(campaign.transferNumber || campaign.transfer_number_id),
+});

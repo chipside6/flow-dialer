@@ -1,7 +1,7 @@
 
 import React from "react";
 import { CampaignData } from "./types";
-import { ContactList } from "@/hooks/useContactLists";
+import { ContactList } from "./types";
 import { GreetingFile } from "@/hooks/useGreetingFiles";
 import { TransferNumber } from "@/types/transferNumber";
 
@@ -45,7 +45,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
       <div>
         <strong>Transfer Number:</strong>{" "}
         {transferNumber
-          ? `${transferNumber.name} (${transferNumber.phone_number})`
+          ? `${transferNumber.name} (${transferNumber.number})`
           : "N/A"}
       </div>
     </div>

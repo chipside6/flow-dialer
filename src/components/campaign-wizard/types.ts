@@ -5,6 +5,7 @@ export type WizardStep =
   | 'audio'
   | 'goip'
   | 'transfer-number'
+  | 'transfers'
   | 'review';
 
 export interface CampaignData {
@@ -13,6 +14,7 @@ export interface CampaignData {
   description: string;
   greetingFileId?: string;
   transfer_number_id?: string; // Link to transfer_numbers
+  transferNumber?: string; // Additional field for direct transfer number storage
   status?: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'failed';
   progress?: number;
   createdAt?: string;
@@ -30,4 +32,13 @@ export interface CampaignData {
     startDate: string;
     maxConcurrentCalls: number;
   };
+}
+
+// Add ContactList interface for components that need it
+export interface ContactList {
+  id: string;
+  name: string;
+  description?: string;
+  count?: number;
+  createdAt?: string;
 }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -216,6 +215,9 @@ const CampaignDialer = () => {
                       <TransferNumberSelector
                         campaignId={campaignId || ''}
                         onTransferNumberSelect={handleTransferNumberSelect}
+                        transferNumbers={[]} // Provide empty array as fallback
+                        isLoading={false} // Set appropriate loading state
+                        selectedTransferNumber={campaign.transfer_number || ''}
                       />
                       
                       <CallerIdSelector

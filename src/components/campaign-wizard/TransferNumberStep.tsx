@@ -43,7 +43,7 @@ export const TransferNumberStep: React.FC<TransferNumberStepProps> = ({
             ) : (
               transferNumbers.map(num => (
                 <SelectItem key={num.id} value={num.id}>
-                  {num.name} ({num.phone_number})
+                  {num.name} ({num.number})
                 </SelectItem>
               ))
             )}
@@ -59,7 +59,7 @@ export const TransferNumberStep: React.FC<TransferNumberStepProps> = ({
         </Alert>
       )}
       <p className="text-muted-foreground text-xs mt-2">
-        The selected number will be used for “Press-1” call transfers in your campaign.
+        The selected number will be used for "Press-1" call transfers in your campaign.
       </p>
     </div>
   );

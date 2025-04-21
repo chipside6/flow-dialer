@@ -1,6 +1,7 @@
+
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BasicsIcon, ContactsIcon, AudioIcon, ReviewIcon, Server } from "./WizardIcons";
-import { WizardStep, CampaignData } from "./types";
+import { WizardStep } from "./types";
 
 interface WizardStepTabsProps {
   currentStep: WizardStep;
@@ -56,13 +57,13 @@ export const WizardStepTabs = ({
       </TabsTrigger>
 
       <TabsTrigger
-        value="transfers"
-        disabled={!isStepAvailable.transfers}
-        onClick={() => setStep('transfers')}
+        value="transfer-number"
+        disabled={!isStepAvailable["transfer-number"]}
+        onClick={() => setStep('transfer-number')}
         className="data-[state=active]:bg-background"
       >
         <ReviewIcon className="h-4 w-4 mr-2" />
-        <span className="hidden sm:inline">Transfers</span>
+        <span className="hidden sm:inline">Transfer</span>
       </TabsTrigger>
 
       <TabsTrigger
