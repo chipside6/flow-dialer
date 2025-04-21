@@ -2,13 +2,12 @@
 /**
  * Asterisk API configuration utilities
  */
-import { ASTERISK_CONFIG } from '@/config/productionConfig';
 
 // Default values - these will be overridden by localStorage if available
-export const ASTERISK_API_URL = ASTERISK_CONFIG.apiUrl || 'http://localhost:8088/ari';
-export const ASTERISK_API_USERNAME = ASTERISK_CONFIG.username || 'admin';
-export const ASTERISK_API_PASSWORD = ASTERISK_CONFIG.password || 'admin';
-export const ASTERISK_SERVER_IP = ASTERISK_CONFIG.serverIp || '';
+export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || 'http://localhost:8088/ari';
+export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || 'admin';
+export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || 'admin';
+export const ASTERISK_SERVER_IP = import.meta.env.VITE_ASTERISK_SERVER_IP || '';
 
 // Storage key
 const STORAGE_KEY = 'asterisk_config';
