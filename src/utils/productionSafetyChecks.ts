@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { SESSION_CONFIG } from '@/services/api/productionConfig';
+import { ASTERISK_CONFIG, API_CONFIG } from '@/config/productionConfig';
 
 /**
  * Production safety checks and utilities
@@ -21,12 +22,12 @@ export const productionSafetyChecks = {
     }
     
     // Check API configuration
-    if (!import.meta.env.VITE_API_URL) {
+    if (!API_CONFIG.baseUrl) {
       missingConfigs.push('API URL Configuration');
     }
     
     // Check Asterisk configuration
-    if (!import.meta.env.VITE_ASTERISK_API_URL) {
+    if (!ASTERISK_CONFIG.apiUrl) {
       missingConfigs.push('Asterisk API Configuration');
     }
     
