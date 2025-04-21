@@ -1,11 +1,11 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Info, ArrowRight } from "lucide-react";
 import { CampaignData } from './types';
 import { TransferNumberSelector } from '../dialer/TransferNumberSelector';
+import { useTransferNumbers } from '@/hooks/useTransferNumbers';
 
 interface TransfersStepProps {
   campaign: CampaignData;
@@ -18,10 +18,20 @@ export const TransfersStep: React.FC<TransfersStepProps> = ({
   onChange,
   onSelectChange
 }) => {
+  const { transferNumbers, refreshTransferNumbers, isLoading } = useTransferNumbers();
+  
+  // Fetch transfer numbers when component mounts
+  useEffect(() => {
+    refreshTransferNumbers();
+  }, [refreshTransferNumbers]);
+
   // Handle transfer number selection
   const handleTransferNumberSelect = (transferNumber: string) => {
     onSelectChange('transferNumber', transferNumber);
   };
+
+  // Determine if we have a valid selection
+  const hasValidTransferNumber = Boolean(campaign.transferNumber);
 
   return (
     <div className="space-y-4">
@@ -36,7 +46,28 @@ export const TransfersStep: React.FC<TransfersStepProps> = ({
           <TransferNumberSelector
             campaignId={campaign.id || ''}
             onTransferNumberSelect={handleTransferNumberSelect}
+            transferNumbers={transferNumbers}
+            isLoading={isLoading}
+            selectedTransferNumber={campaign.transferNumber || ''}
           />
+
+          {!hasValidTransferNumber && !isLoading && transferNumbers.length > 0 && (
+            <Alert className="bg-amber-50 border-amber-200">
+              <Info className="h-4 w-4 text-amber-500" />
+              <AlertDescription className="text-sm text-amber-700">
+                Please select a transfer number to continue. This is required for the campaign.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {transferNumbers.length === 0 && !isLoading && (
+            <Alert className="bg-amber-50 border-amber-200">
+              <Info className="h-4 w-4 text-amber-500" />
+              <AlertDescription className="text-sm text-amber-700">
+                You don't have any transfer numbers yet. Please add some on the Transfer Numbers page before creating a campaign.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <Alert className="bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />

@@ -68,6 +68,17 @@ export const useCampaignForm = (
 
   const handleComplete = async () => {
     try {
+      // Validate that a transfer number is selected
+      if (!campaign.transferNumber) {
+        toast({
+          title: "Transfer number required",
+          description: "Please select a transfer number for this campaign.",
+          variant: "destructive",
+        });
+        setStep('transfers');
+        return;
+      }
+
       const updatedCampaign: CampaignData = {
         ...campaign,
         id: campaign.id || uuidv4(),

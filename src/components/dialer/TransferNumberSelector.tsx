@@ -1,88 +1,58 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
-import { useTransferNumbers } from '@/hooks/useTransferNumbers';
+import { TransferNumber } from '@/types/transferNumber';
 
 interface TransferNumberSelectorProps {
   campaignId: string;
   onTransferNumberSelect: (transferNumber: string) => void;
+  transferNumbers: TransferNumber[];
+  isLoading: boolean;
+  selectedTransferNumber: string;
   disabled?: boolean;
 }
 
 export const TransferNumberSelector: React.FC<TransferNumberSelectorProps> = ({
   campaignId,
   onTransferNumberSelect,
+  transferNumbers,
+  isLoading,
+  selectedTransferNumber,
   disabled = false
 }) => {
-  const { user } = useAuth();
   const { toast } = useToast();
-  const { transferNumbers, isLoading, refreshTransferNumbers } = useTransferNumbers();
-  const [selectedNumber, setSelectedNumber] = useState<string>('');
-  
-  // Load transfer numbers from the custom hook
-  useEffect(() => {
-    if (user?.id) {
-      refreshTransferNumbers();
-    }
-  }, [user?.id, refreshTransferNumbers]);
-  
-  // Load current transfer number for the campaign
-  useEffect(() => {
-    if (campaignId) {
-      loadCampaignTransferNumber();
-    }
-  }, [campaignId]);
-
-  // Load the current transfer number for the campaign
-  const loadCampaignTransferNumber = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('transfer_number')
-        .eq('id', campaignId)
-        .single();
-        
-      if (error) throw error;
-      
-      if (data && data.transfer_number) {
-        setSelectedNumber(data.transfer_number);
-      }
-    } catch (err) {
-      console.error('Error loading campaign transfer number:', err);
-    }
-  };
   
   // Handle selection of a transfer number
   const handleTransferNumberChange = async (value: string) => {
     if (disabled) return;
     
-    setSelectedNumber(value);
     onTransferNumberSelect(value);
     
-    // Update the campaign with the selected transfer number
-    try {
-      const { error } = await supabase
-        .from('campaigns')
-        .update({ transfer_number: value })
-        .eq('id', campaignId);
+    // Update the campaign with the selected transfer number if we have a campaign ID
+    if (campaignId) {
+      try {
+        const { error } = await supabase
+          .from('campaigns')
+          .update({ transfer_number: value })
+          .eq('id', campaignId);
+          
+        if (error) throw error;
         
-      if (error) throw error;
-      
-      toast({
-        title: 'Transfer number updated',
-        description: 'The campaign transfer number has been updated'
-      });
-    } catch (err) {
-      console.error('Error updating transfer number:', err);
-      toast({
-        title: 'Error updating transfer number',
-        description: err instanceof Error ? err.message : 'An unknown error occurred',
-        variant: 'destructive'
-      });
+        toast({
+          title: 'Transfer number updated',
+          description: 'The campaign transfer number has been updated'
+        });
+      } catch (err) {
+        console.error('Error updating transfer number:', err);
+        toast({
+          title: 'Error updating transfer number',
+          description: err instanceof Error ? err.message : 'An unknown error occurred',
+          variant: 'destructive'
+        });
+      }
     }
   };
 
@@ -91,7 +61,7 @@ export const TransferNumberSelector: React.FC<TransferNumberSelectorProps> = ({
       <Label htmlFor="transferNumber">Transfer Number</Label>
       <Select
         onValueChange={handleTransferNumberChange}
-        value={selectedNumber}
+        value={selectedTransferNumber}
         disabled={disabled || isLoading || transferNumbers.length === 0}
       >
         <SelectTrigger id="transferNumber">

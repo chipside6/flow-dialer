@@ -1,45 +1,26 @@
+export type WizardStep = 'basics' | 'contacts' | 'audio' | 'goip' | 'transfers' | 'review';
 
 export interface CampaignData {
-  id?: string; // Make id optional for creation
+  id?: string;
   title: string;
   description: string;
-  contactListId: string;
-  greetingFileId: string;
-  transferNumber: string;
-  portNumber?: number; // Added port number for GoIP
-  schedule: {
-    startDate: string;
-    maxConcurrentCalls?: number;
-  };
-  status?: "pending" | "running" | "completed" | "paused";
+  greetingFileId?: string;
+  transferNumber?: string;
+  status?: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'failed';
   progress?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  user_id?: string;
   totalCalls?: number;
   answeredCalls?: number;
   transferredCalls?: number;
   failedCalls?: number;
-  createdAt?: string;
-  user_id?: string;
+  contactListId?: string;
+  portNumber?: number;
   goip_device_id?: string;
-  port_ids?: string[]; // Store array of port IDs
-}
-
-export type WizardStep = "basics" | "contacts" | "audio" | "goip" | "transfers" | "review";
-
-export interface ContactList {
-  id: string;
-  name: string;
-  contactCount?: number;
-}
-
-// Updated to match the interface in useGreetingFiles.ts
-export interface GreetingFile {
-  id: string;
-  user_id: string;
-  filename: string;
-  url: string;
-  file_path: string;
-  file_type?: string;
-  file_size?: number;
-  duration_seconds?: number | null;
-  created_at: string;
+  port_ids?: string[];
+  schedule?: {
+    startDate: string;
+    maxConcurrentCalls: number;
+  };
 }

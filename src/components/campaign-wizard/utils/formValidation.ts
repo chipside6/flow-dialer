@@ -1,29 +1,82 @@
-
+import { toast } from "@/components/ui/use-toast";
 import { CampaignData, WizardStep } from "../types";
 
-export const getStepAvailability = (campaign: CampaignData) => ({
-  basics: true,
-  contacts: !!campaign.title,
-  audio: !!campaign.contactListId,
-  goip: !!campaign.greetingFileId,
-  transfers: !!campaign.goip_device_id && (campaign.port_ids?.length ?? 0) > 0,
-  review: !!campaign.transferNumber
-});
+const validateBasics = (campaign: CampaignData): boolean => {
+  if (!campaign.title) {
+    toast({
+      title: "Campaign Title Required",
+      description: "Please enter a title for this campaign",
+      variant: "destructive",
+    });
+    return false;
+  }
+  return true;
+};
+
+const validateContacts = (campaign: CampaignData): boolean => {
+  if (!campaign.contactListId) {
+    toast({
+      title: "Contact List Required",
+      description: "Please select a contact list for this campaign",
+      variant: "destructive",
+    });
+    return false;
+  }
+  return true;
+};
+
+const validateAudio = (campaign: CampaignData): boolean => {
+  if (!campaign.greetingFileId) {
+    toast({
+      title: "Greeting Audio Required",
+      description: "Please select a greeting audio for this campaign",
+      variant: "destructive",
+    });
+    return false;
+  }
+  return true;
+};
+
+const validateGoip = (campaign: CampaignData): boolean => {
+  if (!campaign.goip_device_id || campaign.port_ids?.length === 0) {
+    toast({
+      title: "GoIP Device and Port Required",
+      description: "Please select a GoIP device and at least one port for this campaign",
+      variant: "destructive",
+    });
+    return false;
+  }
+  return true;
+};
+
+const validateSchedule = (campaign: CampaignData): boolean => {
+  if (!campaign.schedule?.startDate || !campaign.schedule?.maxConcurrentCalls) {
+    toast({
+      title: "Schedule Required",
+      description: "Please configure the schedule for this campaign",
+      variant: "destructive",
+    });
+    return false;
+  }
+  return true;
+};
 
 export const validateStep = (step: WizardStep, campaign: CampaignData): boolean => {
   switch (step) {
-    case "basics":
-      return !!campaign.title;
-    case "contacts":
-      return !!campaign.contactListId;
-    case "audio":
-      return !!campaign.greetingFileId;
-    case "goip":
-      return !!campaign.goip_device_id && (campaign.port_ids?.length ?? 0) > 0;
-    case "transfers":
-      return !!campaign.transferNumber;
-    case "review":
-      return true;
+    case 'basics':
+      return validateBasics(campaign);
+    case 'contacts':
+      return validateContacts(campaign);
+    case 'audio':
+      return validateAudio(campaign);
+    case 'goip':
+      return validateGoip(campaign);
+    case 'transfers':
+      return validateTransfers(campaign);
+    case 'schedule':
+      return validateSchedule(campaign);
+    case 'review':
+      return true; // Review is always valid
     default:
       return false;
   }
@@ -31,48 +84,48 @@ export const validateStep = (step: WizardStep, campaign: CampaignData): boolean 
 
 export const getNextStep = (step: WizardStep): WizardStep => {
   switch (step) {
-    case "basics":
-      return "contacts";
-    case "contacts":
-      return "audio";
-    case "audio":
-      return "goip";
-    case "goip":
-      return "transfers";
-    case "transfers":
-      return "review";
-    case "review":
-      return "review"; // Stay on review
+    case 'basics':
+      return 'contacts';
+    case 'contacts':
+      return 'audio';
+    case 'audio':
+      return 'goip';
+    case 'goip':
+      return 'transfers';
+    case 'transfers':
+      return 'review';
+    case 'review':
+      return 'review'; // Stay on review
     default:
-      return "basics";
+      return 'basics';
   }
 };
 
 export const getPreviousStep = (step: WizardStep): WizardStep => {
   switch (step) {
-    case "basics":
-      return "basics";
-    case "contacts":
-      return "basics";
-    case "audio":
-      return "contacts";
-    case "goip":
-      return "audio";
-    case "transfers":
-      return "goip";
-    case "review":
-      return "transfers";
+    case 'contacts':
+      return 'basics';
+    case 'audio':
+      return 'contacts';
+    case 'goip':
+      return 'audio';
+    case 'transfers':
+      return 'goip';
+    case 'review':
+      return 'transfers';
     default:
-      return "review";
+      return 'basics';
   }
 };
 
-// Create a hook to export the form validation functions
-export const useFormValidation = () => {
-  return {
-    validateStep,
-    getNextStep,
-    getPreviousStep,
-    getStepAvailability
-  };
+const validateTransfers = (campaign: CampaignData): boolean => {
+  if (!campaign.transferNumber) {
+    toast({
+      title: "Transfer Number Required",
+      description: "Please select a transfer number for this campaign",
+      variant: "destructive",
+    });
+    return false;
+  }
+  return true;
 };
