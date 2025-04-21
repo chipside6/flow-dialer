@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
+import { useTransferNumbers } from '@/hooks/useTransferNumbers';
 
 interface TransferNumberSelectorProps {
   campaignId: string;
@@ -19,16 +20,15 @@ export const TransferNumberSelector: React.FC<TransferNumberSelectorProps> = ({
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [transferNumbers, setTransferNumbers] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { transferNumbers, isLoading, refreshTransferNumbers } = useTransferNumbers();
   const [selectedNumber, setSelectedNumber] = useState<string>('');
   
-  // Load transfer numbers from the database
+  // Load transfer numbers from the custom hook
   useEffect(() => {
     if (user?.id) {
-      loadTransferNumbers();
+      refreshTransferNumbers();
     }
-  }, [user?.id]);
+  }, [user?.id, refreshTransferNumbers]);
   
   // Load current transfer number for the campaign
   useEffect(() => {
@@ -37,35 +37,6 @@ export const TransferNumberSelector: React.FC<TransferNumberSelectorProps> = ({
     }
   }, [campaignId]);
 
-  // Load transfer numbers from the database
-  const loadTransferNumbers = async () => {
-    if (!user?.id) return;
-    
-    setIsLoading(true);
-    
-    try {
-      const { data, error } = await supabase
-        .from('transfer_numbers')
-        .select('*')
-        .eq('user_id', user.id);
-        
-      if (error) throw error;
-      
-      if (data) {
-        setTransferNumbers(data);
-      }
-    } catch (err) {
-      console.error('Error loading transfer numbers:', err);
-      toast({
-        title: 'Error loading transfer numbers',
-        description: err instanceof Error ? err.message : 'An unknown error occurred',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
   // Load the current transfer number for the campaign
   const loadCampaignTransferNumber = async () => {
     try {
@@ -128,13 +99,13 @@ export const TransferNumberSelector: React.FC<TransferNumberSelectorProps> = ({
         </SelectTrigger>
         <SelectContent>
           {transferNumbers.map(number => (
-            <SelectItem key={number.id} value={number.phone_number}>
-              {number.name} ({number.phone_number})
+            <SelectItem key={number.id} value={number.number}>
+              {number.name} ({number.number})
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground mt-1">
         This is the number where calls will be transferred when users press 1
       </p>
     </div>

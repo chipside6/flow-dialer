@@ -11,7 +11,12 @@ export const fetchCampaigns = async (userId: string) => {
   try {
     const { data, error } = await supabase
       .from('campaigns')
-      .select('*')
+      .select(`
+        *,
+        goip_devices(*),
+        campaign_ports(port_id),
+        transfer_numbers!campaigns_transfer_number_id_fkey(*)
+      `)
       .eq('user_id', userId);
     
     if (error) {
@@ -21,7 +26,19 @@ export const fetchCampaigns = async (userId: string) => {
     
     console.log(`[CampaignsService] Fetched ${data.length} campaigns successfully`);
     
-    return data;
+    return data.map((campaign) => {
+      // Get transfer number from the join if available
+      let transferNumber = campaign.transfer_number;
+      if (campaign.transfer_numbers && campaign.transfer_numbers.phone_number) {
+        transferNumber = campaign.transfer_numbers.phone_number;
+      }
+      
+      return {
+        ...campaign,
+        transferNumber,
+        port_ids: campaign.campaign_ports?.map((p: any) => p.port_id) || []
+      };
+    });
   } catch (error) {
     console.error(`[CampaignsService] Error in fetchCampaigns:`, error);
     throw error;
@@ -99,7 +116,8 @@ export const getCampaignWithPorts = async (campaignId: string) => {
       .select(`
         *,
         goip_devices(*),
-        campaign_ports(port_id)
+        campaign_ports(port_id),
+        transfer_numbers!campaigns_transfer_number_id_fkey(*)
       `)
       .eq('id', campaignId)
       .single();
@@ -109,9 +127,15 @@ export const getCampaignWithPorts = async (campaignId: string) => {
       throw campaignError;
     }
     
-    // Format the campaign with port IDs
+    // Format the campaign with transfer number and port IDs
+    let transferNumber = campaign.transfer_number;
+    if (campaign.transfer_numbers && campaign.transfer_numbers.phone_number) {
+      transferNumber = campaign.transfer_numbers.phone_number;
+    }
+    
     const formattedCampaign = {
       ...campaign,
+      transferNumber,
       port_ids: campaign.campaign_ports?.map((p: any) => p.port_id) || []
     };
     

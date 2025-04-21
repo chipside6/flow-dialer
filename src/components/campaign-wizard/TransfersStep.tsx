@@ -2,10 +2,10 @@
 import React from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Info, PhoneIcon, ArrowRight } from "lucide-react";
+import { Info, ArrowRight } from "lucide-react";
 import { CampaignData } from './types';
+import { TransferNumberSelector } from '../dialer/TransferNumberSelector';
 
 interface TransfersStepProps {
   campaign: CampaignData;
@@ -18,28 +18,9 @@ export const TransfersStep: React.FC<TransfersStepProps> = ({
   onChange,
   onSelectChange
 }) => {
-  // Basic phone number validation regex - can be enhanced for specific requirements
-  const isValidPhoneNumber = (phone: string) => {
-    // Allow +, spaces, dashes, and numbers
-    const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
-    return phoneRegex.test(phone);
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove any characters that aren't numbers, +, (, ), -, or spaces
-    const sanitizedValue = e.target.value.replace(/[^\d\+\(\)\-\s]/g, '');
-    
-    // Create a synthetic event with the sanitized value
-    const syntheticEvent = {
-      ...e,
-      target: {
-        ...e.target,
-        name: e.target.name,
-        value: sanitizedValue
-      }
-    };
-    
-    onChange(syntheticEvent);
+  // Handle transfer number selection
+  const handleTransferNumberSelect = (transferNumber: string) => {
+    onSelectChange('transferNumber', transferNumber);
   };
 
   return (
@@ -52,33 +33,10 @@ export const TransfersStep: React.FC<TransfersStepProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="transferNumber" className="text-base font-medium">
-              Transfer Number
-            </Label>
-            <div className="mt-2 relative">
-              <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                id="transferNumber"
-                name="transferNumber"
-                value={campaign.transferNumber}
-                onChange={handlePhoneChange}
-                placeholder="+1 (555) 123-4567"
-                className="pl-10"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Enter the full phone number where calls will be transferred when someone presses 1
-            </p>
-          </div>
-
-          {campaign.transferNumber && !isValidPhoneNumber(campaign.transferNumber) && (
-            <Alert variant="destructive">
-              <AlertDescription>
-                Please enter a valid phone number including country code if needed
-              </AlertDescription>
-            </Alert>
-          )}
+          <TransferNumberSelector
+            campaignId={campaign.id || ''}
+            onTransferNumberSelect={handleTransferNumberSelect}
+          />
 
           <Alert className="bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />

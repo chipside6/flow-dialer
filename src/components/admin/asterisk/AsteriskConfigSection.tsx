@@ -137,6 +137,7 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
             <p className="text-sm text-slate-600 mt-1">
               The sync includes call transfer dialplan logic that allows your campaigns to transfer calls 
               when recipients press 1, using the same GoIP port for both the original and transfer calls.
+              You can select from your saved transfer numbers when setting up campaigns.
             </p>
           </div>
         </div>

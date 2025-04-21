@@ -82,13 +82,14 @@ serve(async (req) => {
       );
     }
 
-    // Get campaign details
+    // Get campaign details with transfer number
     const { data: campaign, error: campaignError } = await supabase
       .from('campaigns')
       .select(`
         *,
         port_ids,
-        goip_device(id, device_name)
+        goip_device(id, device_name),
+        transfer_numbers(id, phone_number, name)
       `)
       .eq('id', campaignId)
       .single();
@@ -98,6 +99,12 @@ serve(async (req) => {
         JSON.stringify({ error: "Campaign not found" }),
         { status: 404, headers: corsHeaders }
       );
+    }
+
+    // Extract transfer number (either directly from campaign or from join)
+    let transferNumber = campaign.transfer_number;
+    if (campaign.transfer_numbers && campaign.transfer_numbers.phone_number) {
+      transferNumber = campaign.transfer_numbers.phone_number;
     }
 
     // Get port details if available
@@ -127,7 +134,7 @@ $agi->verbose("Campaign Transfer Handler Started");
 $dialed_number = $agi->request['agi_dnid'];
 $campaign_id = '${campaignId}';
 $greeting_url = '${campaign.greeting_file_url || "beep"}';
-$transfer_number = '${campaign.transfer_number || ""}';
+$transfer_number = '${transferNumber || ""}';
 $port_number = ${campaign.port_number || 1};
 
 // Log call start
@@ -229,10 +236,15 @@ function logCallResult($result, $start_time) {
       ? portDetails.map(p => `Port ${p.port_number}`).join(', ') 
       : `Port ${campaign.port_number || 1}`;
 
+    const transferNumberInfo = campaign.transfer_numbers 
+      ? `${campaign.transfer_numbers.name} (${campaign.transfer_numbers.phone_number})` 
+      : (transferNumber || "None configured");
+
     const dialplanConfig = `
 ; Campaign ${campaignId} Dialplan with Transfer Capabilities
 ; Created for user ${userId}
 ; Using: ${portsList}
+; Transfer Number: ${transferNumberInfo}
 ; Generated on: ${new Date().toISOString()}
 
 [from-goip]
@@ -246,12 +258,12 @@ exten => _X.,n,Hangup()
 exten => _X.,1,NoOp(Campaign ${campaignId} call handler)
 exten => _X.,n,Answer()
 exten => _X.,n,AMD()
-exten => _X.,n,GotoIf($["${AMDSTATUS}" = "MACHINE"]?machine:human)
+exten => _X.,n,GotoIf($["\${AMDSTATUS}" = "MACHINE"]?machine:human)
 
 exten => _X.,n(human),NoOp(Human answered - Playing greeting)
 exten => _X.,n,Playback(${campaign.greeting_file_url || "beep"})
 exten => _X.,n,Read(digit,,1)
-exten => _X.,n,GotoIf($["${digit}" = "1"]?transfer:hangup)
+exten => _X.,n,GotoIf($["\${digit}" = "1"]?transfer:hangup)
 
 exten => _X.,n(machine),NoOp(Answering machine detected - Hanging up)
 exten => _X.,n,Hangup()
@@ -260,13 +272,13 @@ exten => _X.,n(hangup),NoOp(Call ended without transfer)
 exten => _X.,n,Hangup()
 
 ; Transfer handler using the same GoIP port
-exten => transfer,1,NoOp(Transferring call to ${campaign.transfer_number || "transfer number"})
+exten => transfer,1,NoOp(Transferring call to ${transferNumber || "transfer number"})
 exten => transfer,n,Set(TRANSFER_ATTEMPT=1)
-exten => transfer,n,Set(TRANSFER_DESTINATION=${campaign.transfer_number || ""})
+exten => transfer,n,Set(TRANSFER_DESTINATION=${transferNumber || ""})
 exten => transfer,n,Set(PORT_NUMBER=${campaign.port_number || 1})
-exten => transfer,n,Dial(SIP/${campaign.transfer_number || ""}@goip_${userId}_port${campaign.port_number || 1},30,g)
+exten => transfer,n,Dial(SIP/${transferNumber || ""}@goip_${userId}_port${campaign.port_number || 1},30,g)
 exten => transfer,n,NoOp(Transfer result: \${DIALSTATUS})
-exten => transfer,n,GotoIf($["${DIALSTATUS}" = "ANSWER"]?transfer_success:transfer_failed)
+exten => transfer,n,GotoIf($["\${DIALSTATUS}" = "ANSWER"]?transfer_success:transfer_failed)
 
 exten => transfer,n(transfer_success),NoOp(Transfer successful)
 exten => transfer,n,Hangup()
@@ -291,8 +303,9 @@ exten => h,n,System(curl -X POST "${Deno.env.get("SUPABASE_URL")}/rest/v1/call_l
         dialplanConfig,
         agiScript,
         timestamp: new Date().toISOString(),
-        transferEnabled: Boolean(campaign.transfer_number),
-        transferNumber: campaign.transfer_number,
+        transferEnabled: Boolean(transferNumber),
+        transferNumber: transferNumber,
+        transferNumberName: campaign.transfer_numbers?.name || null,
         portNumber: campaign.port_number || 1
       }),
       { headers: corsHeaders }
