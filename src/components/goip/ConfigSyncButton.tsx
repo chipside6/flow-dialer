@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Server } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { clearSession } from '@/services/auth/session';
 
 interface ConfigSyncButtonProps {
   userId: string;
@@ -20,6 +22,7 @@ export const ConfigSyncButton = ({
 }: ConfigSyncButtonProps) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const handleSync = async () => {
     if (!userId) {
@@ -34,12 +37,23 @@ export const ConfigSyncButton = ({
     setIsSyncing(true);
     
     try {
-      const { data: session } = await supabase.auth.getSession();
-      const accessToken = session.session?.access_token;
+      // Get fresh session to ensure we have valid tokens
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
-      if (!accessToken) {
-        throw new Error('You must be logged in to sync configurations');
+      if (sessionError || !sessionData.session) {
+        toast({
+          title: "Session Error",
+          description: "Your session has expired. Please log in again.",
+          variant: "destructive"
+        });
+        
+        // Clear session and redirect to login
+        clearSession();
+        navigate('/login', { replace: true });
+        return;
       }
+      
+      const accessToken = sessionData.session.access_token;
       
       // Get the Supabase URL from environment
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -69,6 +83,20 @@ export const ConfigSyncButton = ({
         } catch (e) {
           // If we can't parse JSON, use the status text
           errorMessage = `Error syncing configuration: ${response.statusText}`;
+        }
+        
+        // Check if it's an auth error (401, 403)
+        if (response.status === 401 || response.status === 403) {
+          toast({
+            title: "Authentication Error",
+            description: "Your session has expired. Please log in again.",
+            variant: "destructive"
+          });
+          
+          // Clear session and redirect to login
+          clearSession();
+          navigate('/login', { replace: true });
+          return;
         }
         
         throw new Error(errorMessage);

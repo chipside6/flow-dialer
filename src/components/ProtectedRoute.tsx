@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
@@ -22,7 +21,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { isAuthenticated, isAdmin, isLoading, user, sessionChecked } = useAuth();
   const [hasSubscription, setHasSubscription] = useState(true);
   const [checkingSubscription, setCheckingSubscription] = useState(false);
-  const [validatingSession, setValidatingSession] = useState(true);
+  const [validatingSupabaseSession, setValidatingSupabaseSession] = useState(true);
+  const [supabaseSessionValid, setSupabaseSessionValid] = useState<boolean | null>(null);
   const location = useLocation();
   const hasRedirectedRef = useRef(false);
   const touchIntervalRef = useRef<number | null>(null);
@@ -34,49 +34,57 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     console.log('Current Location:', location.pathname);
   }, [isAuthenticated, isAdmin, isLoading, sessionChecked, requireAdmin, requireSubscription, location.pathname]);
   
-  // Verify the session is still valid with Supabase directly
+  // Directly verify session with Supabase API
   useEffect(() => {
-    const verifySession = async () => {
+    const verifySupabaseSession = async () => {
       try {
+        console.log("ProtectedRoute: Verifying session with Supabase API");
         const { data, error } = await supabase.auth.getSession();
         
         const sessionIsValid = !error && !!data.session;
+        setSupabaseSessionValid(sessionIsValid);
         
-        console.log('Session verification result:', { sessionIsValid, hasSession: !!data.session });
+        console.log('Supabase session verification:', { 
+          isValid: sessionIsValid, 
+          hasSession: !!data.session,
+          error: error ? true : false
+        });
         
-        // If there's a mismatch between auth context and actual session, reload the page
+        // If there's a mismatch between auth context and actual Supabase session
         if (isAuthenticated && !sessionIsValid && !hasRedirectedRef.current) {
-          console.warn("Session mismatch detected, redirecting to login");
+          console.warn("Session mismatch: Auth context says authenticated but Supabase disagrees");
           hasRedirectedRef.current = true;
-          return <Navigate to="/login" state={{ returnTo: location.pathname }} replace />;
+          toast({
+            title: "Session expired",
+            description: "Your session has expired. Please sign in again.",
+            variant: "destructive"
+          });
         }
         
       } catch (error) {
-        console.error("Error verifying session:", error);
+        console.error("Error verifying session with Supabase:", error);
+        setSupabaseSessionValid(false);
       } finally {
-        // Always complete validation even if there's an error
-        setValidatingSession(false);
+        // Always complete validation
+        setValidatingSupabaseSession(false);
       }
     };
     
-    if (!isLoading) {
-      verifySession();
+    if (!isLoading && sessionChecked) {
+      verifySupabaseSession();
     }
-  }, [isAuthenticated, isLoading, location.pathname]);
+  }, [isAuthenticated, isLoading, sessionChecked, location.pathname]);
   
-  // Double-check session validity as a safety measure
-  const sessionIsValid = isSessionValid();
-  const isActuallyAuthenticated = isAuthenticated && sessionIsValid;
-  
-  // Touch session every 30 seconds to ensure it stays alive
+  // Touch session regularly to keep it alive if we have a valid session
   useEffect(() => {
-    if (isActuallyAuthenticated) {
+    if (isAuthenticated && supabaseSessionValid) {
       // Initial touch
       touchSession();
+      console.log('Initial session touch in ProtectedRoute');
       
       const touchInterval = setInterval(() => {
         touchSession();
-        console.log('Session touched in ProtectedRoute component');
+        console.log('Session touched in ProtectedRoute interval');
       }, 30000); // Every 30 seconds
       
       // Store the interval ID in the ref
@@ -89,11 +97,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         }
       };
     }
-  }, [isActuallyAuthenticated]);
+  }, [isAuthenticated, supabaseSessionValid]);
   
   // Check subscription if required
   useEffect(() => {
-    if (requireSubscription && isActuallyAuthenticated && user?.id && !checkingSubscription) {
+    if (requireSubscription && isAuthenticated && user?.id && !checkingSubscription) {
       setCheckingSubscription(true);
       checkSubscriptionStatus(user.id)
         .then(hasActive => {
@@ -110,23 +118,30 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           setCheckingSubscription(false);
         });
     }
-  }, [requireSubscription, isActuallyAuthenticated, user, checkingSubscription]);
+  }, [requireSubscription, isAuthenticated, user, checkingSubscription]);
   
-  // Force loading state to complete after a reasonable timeout (3 seconds)
+  // Force loading state to complete after a timeout
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
-      if (validatingSession) {
+      if (validatingSupabaseSession) {
         console.log("Forcing validation state to complete after timeout");
-        setValidatingSession(false);
+        setValidatingSupabaseSession(false);
+        // Set a default for supabaseSessionValid if it's still null
+        if (supabaseSessionValid === null) {
+          setSupabaseSessionValid(isAuthenticated); // Use auth context as fallback
+        }
       }
     }, 3000);
     
     return () => clearTimeout(loadingTimeout);
-  }, [validatingSession]);
+  }, [validatingSupabaseSession, supabaseSessionValid, isAuthenticated]);
+  
+  // Combined auth state that uses both context and direct Supabase verification
+  const isActuallyAuthenticated = isAuthenticated && 
+    (supabaseSessionValid === true || (supabaseSessionValid === null && isSessionValid()));
   
   // Show loading state while auth is being determined
-  if ((isLoading || !sessionChecked || validatingSession) || (requireSubscription && checkingSubscription)) {
-    // Shorter loading skeleton instead of an infinite spinner
+  if (isLoading || !sessionChecked || validatingSupabaseSession || (requireSubscription && checkingSubscription)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="w-full max-w-md space-y-4 p-4">
@@ -161,7 +176,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/upgrade" state={{ from: location }} replace />;
   }
   
-  // User is authenticated (and admin if required and has subscription if required), render children
+  // User is properly authenticated, render children
   return <>{children}</>;
 };
 

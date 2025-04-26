@@ -1,8 +1,8 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/auth/AuthProvider';
+import { initializeSessionRefresher } from '@/utils/sessionRefresher';
 
 // Page imports
 import HomePage from '@/pages/HomePage';
@@ -33,6 +33,12 @@ import PublicLayout from '@/components/layout/PublicLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 function App() {
+  // Initialize session refresher on app load
+  useEffect(() => {
+    const cleanupRefresher = initializeSessionRefresher();
+    return () => cleanupRefresher();
+  }, []);
+
   return (
     <Router>
       <AuthProvider>
