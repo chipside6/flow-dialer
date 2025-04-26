@@ -54,6 +54,7 @@ export const ConfigSyncButton = ({
         return;
       }
       
+      // Get the access token from the session
       const accessToken = sessionData.session.access_token;
       
       // Get the Supabase URL from the utility function
@@ -62,6 +63,8 @@ export const ConfigSyncButton = ({
       if (!supabaseUrl) {
         throw new Error('Could not determine Supabase URL');
       }
+      
+      console.log('Making request to sync config with URL:', `${supabaseUrl}/functions/v1/sync-goip-config`);
       
       const response = await fetch(`${supabaseUrl}/functions/v1/sync-goip-config`, {
         method: 'POST',
@@ -75,15 +78,19 @@ export const ConfigSyncButton = ({
         })
       });
       
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
         // Try to get error message from response
         let errorMessage = `Error syncing configuration: ${response.status}`;
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorData.message || errorMessage;
+          console.log('Error response data:', errorData);
         } catch (e) {
           // If we can't parse JSON, use the status text
           errorMessage = `Error syncing configuration: ${response.statusText}`;
+          console.log('Could not parse error response as JSON');
         }
         
         // Check if it's an auth error (401, 403)

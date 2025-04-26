@@ -20,9 +20,12 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Starting sync-goip-config function");
+    
     // Get authorization header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
+      console.log("Request rejected: No authorization header");
       return new Response(
         JSON.stringify({ success: false, message: "No authorization header" }),
         { status: 401, headers: corsHeaders }
@@ -57,17 +60,22 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError || !user) {
+      console.log("Authentication failed:", userError?.message);
       return new Response(
-        JSON.stringify({ success: false, message: "Invalid user token" }),
+        JSON.stringify({ success: false, message: "Invalid user token", error: userError?.message }),
         { status: 401, headers: corsHeaders }
       );
     }
+
+    console.log(`Authenticated user: ${user.id}`);
 
     // Get request data
     let requestData: SyncRequest;
     try {
       requestData = await req.json();
+      console.log("Request data:", requestData);
     } catch (error) {
+      console.log("Invalid JSON in request body:", error);
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -88,7 +96,10 @@ serve(async (req) => {
       
     const isAdmin = userProfile?.is_admin === true;
     
+    console.log(`User ${user.id} is admin: ${isAdmin}, requested userId: ${userId}`);
+    
     if (userId !== user.id && !isAdmin) {
+      console.log(`Permission denied: User ${user.id} cannot access ${userId}'s data`);
       return new Response(
         JSON.stringify({ success: false, message: "You don't have permission to access this resource" }),
         { status: 403, headers: corsHeaders }
@@ -100,6 +111,8 @@ serve(async (req) => {
     const ASTERISK_SERVER_USER = Deno.env.get("ASTERISK_SERVER_USER");
     const ASTERISK_SERVER_PASS = Deno.env.get("ASTERISK_SERVER_PASS");
     const ASTERISK_SERVER_PORT = parseInt(Deno.env.get("ASTERISK_SERVER_PORT") || "22");
+    
+    console.log(`Asterisk config - Host: ${ASTERISK_SERVER_HOST ? "Set" : "Not set"}, User: ${ASTERISK_SERVER_USER ? "Set" : "Not set"}`);
     
     if (!ASTERISK_SERVER_HOST || !ASTERISK_SERVER_USER || !ASTERISK_SERVER_PASS) {
       return new Response(
@@ -136,6 +149,7 @@ serve(async (req) => {
           .select('*');
           
         if (trunksError) {
+          console.log("Error fetching all trunks:", trunksError);
           return new Response(
             JSON.stringify({ 
               success: false, 
@@ -157,6 +171,7 @@ serve(async (req) => {
           .eq('user_id', userId);
           
         if (userTrunksError) {
+          console.log("Error fetching user trunks:", userTrunksError);
           return new Response(
             JSON.stringify({ 
               success: false, 
@@ -169,6 +184,8 @@ serve(async (req) => {
         userTrunks = userTrunksData || [];
         break;
     }
+    
+    console.log(`Found ${userTrunks.length} trunks to process`);
     
     // Generate SIP configuration for each trunk
     if (userTrunks.length > 0) {
@@ -297,6 +314,8 @@ exten => _X.,n,Goto(autodialer,\${EXTEN},1)
         timestamp: new Date().toISOString()
       };
     }
+    
+    console.log("Sync complete, returning result:", result.success ? "success" : "failure");
     
     // Ensure we return a valid JSON response
     return new Response(
