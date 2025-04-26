@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { connectionService } from "@/utils/asterisk/connectionService";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertCircle, CheckCircle, RefreshCw, Server, Settings } from 'lucide-react';
+import { AlertCircle, CheckCircle, RefreshCw, Server, Settings, RotateCw } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { getConfigFromStorage } from "@/utils/asterisk/config";
 import { Link } from 'react-router-dom';
@@ -19,8 +19,18 @@ export const AsteriskConnectionTest: React.FC = () => {
 
   // Refresh config when component mounts
   useEffect(() => {
-    setCurrentConfig(getConfigFromStorage());
+    loadCurrentConfig();
   }, []);
+
+  const loadCurrentConfig = () => {
+    const config = getConfigFromStorage();
+    setCurrentConfig(config);
+    console.log("Loaded Asterisk config:", {
+      apiUrl: config.apiUrl,
+      username: config.username,
+      serverIp: config.serverIp
+    });
+  };
 
   const testConnection = async () => {
     setIsTestingConnection(true);
@@ -49,17 +59,37 @@ export const AsteriskConnectionTest: React.FC = () => {
       });
     } finally {
       setIsTestingConnection(false);
+      // Refresh the config after testing
+      loadCurrentConfig();
     }
+  };
+
+  const handleRefreshConfig = () => {
+    loadCurrentConfig();
+    toast({
+      title: "Configuration Refreshed",
+      description: "Asterisk connection details have been refreshed from storage."
+    });
   };
 
   return (
     <div className="space-y-4">
       <div className="grid gap-4 mb-4">
         <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-md border border-slate-200 dark:border-slate-800">
-          <h3 className="text-sm font-medium mb-2 flex items-center">
-            <Server className="h-4 w-4 mr-2" />
-            Current Asterisk Configuration
-          </h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-sm font-medium flex items-center">
+              <Server className="h-4 w-4 mr-2" />
+              Current Asterisk Configuration
+            </h3>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleRefreshConfig} 
+              title="Refresh configuration"
+            >
+              <RotateCw className="h-4 w-4" />
+            </Button>
+          </div>
           <div className="text-sm space-y-1">
             <p><span className="font-medium">API URL:</span> {currentConfig.apiUrl || 'Not set'}</p>
             <p><span className="font-medium">Username:</span> {currentConfig.username || 'Not set'}</p>
