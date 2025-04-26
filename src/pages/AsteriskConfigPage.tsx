@@ -6,6 +6,8 @@ import { AsteriskConfigSection } from '@/components/admin/asterisk/AsteriskConfi
 import { AsteriskConnectionTest } from '@/components/diagnostic/AsteriskConnectionTest';
 import { useAuth } from "@/contexts/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const AsteriskConfigPageContent = () => {
   const { user, isAdmin } = useAuth();
