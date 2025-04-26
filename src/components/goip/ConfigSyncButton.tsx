@@ -39,28 +39,19 @@ export const ConfigSyncButton = ({
     setIsSyncing(true);
     
     try {
+      // Use the withSessionRefresh utility to ensure we have a valid session
       await withSessionRefresh(async () => {
-        // Get fresh session to ensure we have valid tokens
+        // Check if we have a valid session first
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError || !sessionData.session) {
-          console.error("Session error:", sessionError);
-          toast({
-            title: "Session Error",
-            description: "Your session has expired. Please log in again.",
-            variant: "destructive"
-          });
-          
-          // Clear session and redirect to login
-          clearSession();
-          navigate('/login', { replace: true });
-          return;
+          throw new Error(sessionError?.message || "No active session found");
         }
-        
+
         // Get the access token from the session
         const accessToken = sessionData.session.access_token;
         
-        // Get the Supabase URL from the utility function
+        // Get the Supabase URL
         const supabaseUrl = getSupabaseUrl();
         
         if (!supabaseUrl) {
@@ -68,8 +59,8 @@ export const ConfigSyncButton = ({
         }
         
         console.log('Making request to sync config with URL:', `${supabaseUrl}/functions/v1/sync-goip-config`);
-        console.log('Using auth token:', accessToken ? 'Token exists (not showing for security)' : 'No token');
         
+        // Make the request to the edge function
         const response = await fetch(`${supabaseUrl}/functions/v1/sync-goip-config`, {
           method: 'POST',
           headers: {
@@ -82,61 +73,52 @@ export const ConfigSyncButton = ({
           })
         });
         
+        // Log the response status for debugging
         console.log('Response status:', response.status);
         
         if (!response.ok) {
-          // Try to get error message from response
-          let errorMessage = `Error syncing configuration: ${response.status}`;
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.error || errorData.message || errorMessage;
-            console.log('Error response data:', errorData);
-          } catch (e) {
-            // If we can't parse JSON, use the status text
-            errorMessage = `Error syncing configuration: ${response.statusText}`;
-            console.log('Could not parse error response as JSON');
-          }
-          
-          // Check if it's an auth error (401, 403)
+          // If we get a 401 or 403, it's likely an auth issue - redirect to login
           if (response.status === 401 || response.status === 403) {
             toast({
-              title: "Authentication Error",
+              title: "Session Expired",
               description: "Your session has expired. Please log in again.",
               variant: "destructive"
             });
             
-            // Clear session and redirect to login
             clearSession();
             navigate('/login', { replace: true });
             return;
           }
           
+          // Try to get error message from response
+          let errorMessage = `Error syncing configuration: ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch (e) {
+            // If parsing fails, use status text
+            errorMessage = `Error syncing configuration: ${response.statusText}`;
+          }
+          
           throw new Error(errorMessage);
         }
         
-        // Check content type
-        const contentType = response.headers.get('content-type');
+        // Parse the response and show appropriate message
+        const result = await response.json();
         
-        if (contentType && contentType.includes('application/json')) {
-          const result = await response.json();
-          
-          if (!result.success) {
-            throw new Error(result.message || result.error || 'Unknown error syncing configuration');
-          }
-          
-          toast({
-            title: "Configuration Synced",
-            description: result.message || "Your GoIP configuration has been synced with the Asterisk server.",
-          });
-        } else {
-          // If we didn't get JSON back, it's an error
-          const responseText = await response.text();
-          console.error('Invalid response format:', responseText);
-          throw new Error('Invalid response format from server');
+        if (!result.success) {
+          throw new Error(result.message || "Unknown error occurred");
         }
+        
+        toast({
+          title: "Configuration Synced",
+          description: result.message || "Your GoIP configuration has been synced with the Asterisk server.",
+        });
       });
     } catch (error) {
       console.error('Error syncing configuration:', error);
+      
+      // Show a user-friendly error message
       toast({
         title: "Error Syncing Configuration",
         description: error instanceof Error ? error.message : "An unexpected error occurred",

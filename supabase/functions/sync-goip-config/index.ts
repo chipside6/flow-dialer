@@ -27,7 +27,7 @@ serve(async (req) => {
     if (!authHeader) {
       console.log("Request rejected: No authorization header");
       return new Response(
-        JSON.stringify({ success: false, message: "No authorization header" }),
+        JSON.stringify({ success: false, message: "Authentication required", error: "No authorization header" }),
         { status: 401, headers: corsHeaders }
       );
     }
@@ -62,7 +62,7 @@ serve(async (req) => {
     if (userError || !user) {
       console.log("Authentication failed:", userError?.message);
       return new Response(
-        JSON.stringify({ success: false, message: "Invalid user token", error: userError?.message }),
+        JSON.stringify({ success: false, message: "Invalid or expired session", error: userError?.message }),
         { status: 401, headers: corsHeaders }
       );
     }
@@ -79,7 +79,8 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: "Invalid JSON in request body" 
+          message: "Invalid request format", 
+          error: "Could not parse JSON body" 
         }),
         { status: 400, headers: corsHeaders }
       );
@@ -294,9 +295,7 @@ exten => _X.,n,Goto(autodialer,\${EXTEN},1)
         result = {
           success: true,
           message: "SIP and dialplan configuration updated and reloaded successfully",
-          timestamp: new Date().toISOString(),
-          sipConfigGenerated: configContent.substring(0, 200) + "...", // Truncate for logs
-          dialplanGenerated: dialplanContent ? dialplanContent.substring(0, 200) + "..." : "No dialplan generated" // Truncate for logs
+          timestamp: new Date().toISOString()
         };
       } catch (error) {
         console.error("Error in simulated Asterisk connection:", error);
@@ -317,7 +316,7 @@ exten => _X.,n,Goto(autodialer,\${EXTEN},1)
     
     console.log("Sync complete, returning result:", result.success ? "success" : "failure");
     
-    // Ensure we return a valid JSON response
+    // Return the result
     return new Response(
       JSON.stringify(result),
       { headers: corsHeaders }
@@ -326,13 +325,13 @@ exten => _X.,n,Goto(autodialer,\${EXTEN},1)
   } catch (error) {
     console.error("Error in sync-goip-config function:", error);
     
-    // Ensure we return a valid JSON response even for unexpected errors
+    // Ensure we return a valid JSON response with CORS headers
     return new Response(
       JSON.stringify({ 
         success: false,
         message: "An error occurred while syncing GoIP configuration: " + (error instanceof Error ? error.message : String(error))
       }),
-      { status: 200, headers: corsHeaders }
+      { status: 500, headers: corsHeaders }
     );
   }
 });
