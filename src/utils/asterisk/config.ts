@@ -1,4 +1,3 @@
-
 /**
  * Asterisk API configuration utilities
  */
@@ -58,17 +57,26 @@ export const getConfigFromStorage = (): AsteriskConfig => {
   return defaultConfig;
 };
 
-/**
- * Save configuration to localStorage
- */
 export const saveConfigToStorage = (config: AsteriskConfig): void => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    // Validate that config has required fields
+    if (!config.apiUrl || !config.username) {
+      console.warn('Attempted to save incomplete Asterisk configuration');
+      return;
+    }
+
+    // Remove any trailing slashes from apiUrl to standardize
+    const cleanedConfig = {
+      ...config,
+      apiUrl: config.apiUrl.replace(/\/+$/, '')
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedConfig));
     console.log('Saved Asterisk config to storage:', { 
-      apiUrl: config.apiUrl, 
-      username: config.username, 
-      password: config.password ? '******' : 'not set',
-      serverIp: config.serverIp
+      apiUrl: cleanedConfig.apiUrl, 
+      username: cleanedConfig.username, 
+      password: cleanedConfig.password ? '******' : 'not set',
+      serverIp: cleanedConfig.serverIp
     });
   } catch (error) {
     console.error('Error saving Asterisk configuration to localStorage:', error);
