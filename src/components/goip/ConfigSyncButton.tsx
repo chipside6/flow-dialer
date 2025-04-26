@@ -55,11 +55,11 @@ export const ConfigSyncButton = ({
       
       const accessToken = sessionData.session.access_token;
       
-      // Get the Supabase URL from environment
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      // Get the Supabase URL from the client directly
+      const supabaseUrl = supabase.getUrl();
       
       if (!supabaseUrl) {
-        throw new Error('VITE_SUPABASE_URL environment variable is not set');
+        throw new Error('Could not determine Supabase URL');
       }
       
       const response = await fetch(`${supabaseUrl}/functions/v1/sync-goip-config`, {

@@ -7,6 +7,7 @@ import { FileText, RefreshCw, AlertCircle, CheckCircle, AlertTriangle, Info, Pho
 import { asteriskService } from '@/utils/asteriskService';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getConfigFromStorage } from '@/utils/asterisk/config';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AsteriskConfigSectionProps {
   userId: string;
@@ -22,8 +23,9 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
     message: string;
   } | null>(null);
   const [configValid, setConfigValid] = useState(true);
+  const [supabaseUrl, setSupabaseUrl] = useState<string | null>(null);
 
-  // Check if config is valid on mount
+  // Check if config is valid and get Supabase URL on mount
   useEffect(() => {
     const config = getConfigFromStorage();
     const isValid = !!(config.apiUrl && config.username && config.password);
@@ -33,14 +35,20 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
       setSyncError("Asterisk configuration is incomplete. Please configure it in the settings.");
     }
     
-    // Also check if VITE_SUPABASE_URL is defined
-    if (!import.meta.env.VITE_SUPABASE_URL) {
-      setSyncError((prev) => 
-        prev ? `${prev} VITE_SUPABASE_URL is not defined.` : "VITE_SUPABASE_URL is not defined."
-      );
-      setConfigValid(false);
+    // Get Supabase URL from the client directly
+    if (!supabaseUrl) {
+      // Extract from supabase client or fall back to hardcoded URL
+      const url = supabase.getUrl();
+      setSupabaseUrl(url);
+      
+      if (!url) {
+        setSyncError((prev) => 
+          prev ? `${prev} Supabase URL is not available.` : "Supabase URL is not available."
+        );
+        setConfigValid(false);
+      }
     }
-  }, []);
+  }, [supabaseUrl]);
 
   useEffect(() => {
     // Handle stuck loading state
@@ -64,6 +72,15 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
       toast({
         title: "Configuration incomplete",
         description: "Please configure Asterisk settings before syncing",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!supabaseUrl) {
+      toast({
+        title: "Missing Supabase URL",
+        description: "Cannot connect to Supabase functions. Please reload the page or contact support.",
         variant: "destructive"
       });
       return;
@@ -136,8 +153,8 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
             <AlertTitle>Configuration incomplete</AlertTitle>
             <AlertDescription>
               Please configure your Asterisk server settings in the settings page before syncing.
-              {!import.meta.env.VITE_SUPABASE_URL && (
-                <p className="mt-2 font-semibold">VITE_SUPABASE_URL environment variable is not set!</p>
+              {!supabaseUrl && (
+                <p className="mt-2 font-semibold">Supabase URL is not available! This is needed to connect to edge functions.</p>
               )}
             </AlertDescription>
           </Alert>

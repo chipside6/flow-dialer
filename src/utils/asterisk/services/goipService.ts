@@ -269,7 +269,14 @@ export const goipService = {
         throw new Error('Authentication required');
       }
       
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-goip-config`, {
+      // Get the Supabase URL directly from client
+      const supabaseUrl = supabase.getUrl();
+      
+      if (!supabaseUrl) {
+        throw new Error('Could not determine Supabase URL');
+      }
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/sync-goip-config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

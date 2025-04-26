@@ -57,8 +57,15 @@ export const asteriskService = {
         throw new Error('Authentication required');
       }
       
+      // Get base URL from the supabase client
+      const supabaseUrl = supabase.getUrl();
+      
+      if (!supabaseUrl) {
+        throw new Error('Could not determine Supabase URL');
+      }
+      
       // Call the edge function to check GoIP status
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/goip-asterisk-integration`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/goip-asterisk-integration`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,12 +134,14 @@ export const asteriskService = {
       
       console.log('Starting Asterisk configuration sync with Edge Function...');
       
-      // Get the Supabase URL from config
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      // Get the Supabase URL directly from the client
+      const supabaseUrl = supabase.getUrl();
       
       if (!supabaseUrl) {
-        throw new Error('VITE_SUPABASE_URL environment variable is not set');
+        throw new Error('Could not determine Supabase URL');
       }
+      
+      console.log(`Using Supabase URL: ${supabaseUrl}`);
       
       // Call the edge function to sync configuration
       const response = await fetch(`${supabaseUrl}/functions/v1/sync-goip-config`, {
