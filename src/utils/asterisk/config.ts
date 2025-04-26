@@ -4,10 +4,10 @@
  */
 
 // Default values - these will be overridden by localStorage if available
-export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || 'http://localhost:8088/ari';
+export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || 'http://10.0.2.15:8088/ari/';
 export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || 'admin';
 export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || 'admin';
-export const ASTERISK_SERVER_IP = import.meta.env.VITE_ASTERISK_SERVER_IP || '';
+export const ASTERISK_SERVER_IP = import.meta.env.VITE_ASTERISK_SERVER_IP || '10.0.2.15';
 
 // Storage key
 const STORAGE_KEY = 'asterisk_config';
@@ -34,6 +34,15 @@ export const getConfigFromStorage = (): AsteriskConfig => {
         password: parsedConfig.password ? '******' : 'not set',
         serverIp: parsedConfig.serverIp
       });
+      
+      // Always ensure we're using the hardcoded URL
+      if (parsedConfig.apiUrl !== 'http://10.0.2.15:8088/ari/') {
+        parsedConfig.apiUrl = 'http://10.0.2.15:8088/ari/';
+        console.log('Overriding stored API URL with hardcoded value:', parsedConfig.apiUrl);
+        // Save the corrected URL
+        saveConfigToStorage(parsedConfig);
+      }
+      
       return parsedConfig;
     }
   } catch (error) {
@@ -67,38 +76,29 @@ export const saveConfigToStorage = (config: AsteriskConfig): void => {
   });
 
   try {
-    // Force set the URL to the known working value if not provided
-    if (!config.apiUrl) {
-      config.apiUrl = 'http://10.0.2.15:8088/ari/';
-      console.log('Setting default API URL:', config.apiUrl);
-    }
+    // Force set the URL to the known working value
+    config.apiUrl = 'http://10.0.2.15:8088/ari/';
+    console.log('Setting hardcoded API URL:', config.apiUrl);
 
     // Ensure username is set
     if (!config.username) {
       config.username = 'admin';
       console.log('Setting default username:', config.username);
     }
-
-    // Remove any trailing slashes from apiUrl to standardize, but ensure we have one trailing slash
-    let apiUrl = config.apiUrl.replace(/\/+$/, '');
-    if (!apiUrl.endsWith('/ari')) {
-      apiUrl = apiUrl.endsWith('/') ? `${apiUrl}ari/` : `${apiUrl}/ari/`;
-    } else {
-      apiUrl = `${apiUrl}/`;
+    
+    // Ensure password is set
+    if (!config.password) {
+      config.password = 'admin';
+      console.log('Setting default password: *****');
     }
 
-    const cleanedConfig = {
-      ...config,
-      apiUrl
-    };
-
     // Save the configuration to localStorage
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedConfig));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
     console.log('Successfully saved Asterisk config to storage:', { 
-      apiUrl: cleanedConfig.apiUrl, 
-      username: cleanedConfig.username, 
-      password: cleanedConfig.password ? '******' : 'not set',
-      serverIp: cleanedConfig.serverIp
+      apiUrl: config.apiUrl, 
+      username: config.username, 
+      password: config.password ? '******' : 'not set',
+      serverIp: config.serverIp
     });
   } catch (error) {
     console.error('Error saving Asterisk configuration to localStorage:', error);

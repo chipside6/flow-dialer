@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { connectionService } from "@/utils/asterisk/connectionService";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertCircle, CheckCircle, RefreshCw, Server, Settings } from 'lucide-react';
+import { AlertCircle, CheckCircle, RefreshCw, Server, Settings, Info } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { getConfigFromStorage, saveConfigToStorage } from "@/utils/asterisk/config";
 import { Link } from 'react-router-dom';
@@ -61,6 +61,11 @@ export const AsteriskConnectionTest: React.FC = () => {
         saveConfigToStorage(updatedConfig);
         setCurrentConfig(updatedConfig);
       }
+
+      toast({
+        title: "Testing Connection",
+        description: "Attempting to connect to Asterisk server...",
+      });
 
       const result = await connectionService.testConnection();
       setConnectionResult(result);
@@ -127,6 +132,15 @@ export const AsteriskConnectionTest: React.FC = () => {
         </div>
       </div>
       
+      <Alert variant="warning" className="bg-amber-50 text-amber-800 border-amber-300 mb-4">
+        <Info className="h-4 w-4" />
+        <AlertTitle>CORS Configuration Required</AlertTitle>
+        <AlertDescription>
+          To connect to your Asterisk server from this web application, you may need to configure CORS headers on your Asterisk server.
+          Make sure your Asterisk HTTP server configuration includes the appropriate CORS headers.
+        </AlertDescription>
+      </Alert>
+      
       <Button 
         onClick={testConnection} 
         disabled={isTestingConnection}
@@ -159,14 +173,42 @@ export const AsteriskConnectionTest: React.FC = () => {
       )}
 
       {connectionResult && !connectionResult.success && (
-        <div className="mt-2">
-          <Link to="/settings">
-            <Button variant="outline" size="sm" className="w-full">
-              <Settings className="mr-2 h-4 w-4" />
-              Configure Asterisk Settings
-            </Button>
-          </Link>
-        </div>
+        <>
+          <Alert variant="warning" className="bg-amber-50 text-amber-800 border-amber-300">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Troubleshooting Steps</AlertTitle>
+            <AlertDescription className="space-y-2">
+              <p>1. Ensure your Asterisk server is running and accessible at 10.0.2.15:8088.</p>
+              <p>2. Check that the correct username and password are set (default: admin/admin).</p>
+              <p>3. Verify that CORS is properly configured on your Asterisk server.</p>
+              <p>4. You may need to add the following to your Asterisk HTTP configuration:</p>
+              <pre className="p-2 bg-slate-100 dark:bg-slate-800 rounded text-xs overflow-auto">
+{`[general]
+enabled=yes
+bindaddr=0.0.0.0
+bindport=8088
+prefix=
+tlsenable=no
+
+; Add CORS headers
+cors_origin_policy=all
+cors_access_control_allow_origin=*
+cors_access_control_allow_headers=*
+cors_access_control_allow_methods=*`}
+              </pre>
+              <p className="mt-2">After making changes, restart the Asterisk HTTP service.</p>
+            </AlertDescription>
+          </Alert>
+          
+          <div className="mt-2">
+            <Link to="/settings">
+              <Button variant="outline" size="sm" className="w-full">
+                <Settings className="mr-2 h-4 w-4" />
+                Configure Asterisk Settings
+              </Button>
+            </Link>
+          </div>
+        </>
       )}
     </div>
   );
