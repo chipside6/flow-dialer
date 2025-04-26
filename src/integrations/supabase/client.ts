@@ -13,5 +13,5 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Extension function to get the Supabase URL
-supabase.getUrl = () => SUPABASE_URL;
+// Export the Supabase URL as a separate function
+export const getSupabaseUrl = () => SUPABASE_URL;

@@ -1,6 +1,7 @@
 
 import { getConfigFromStorage } from './asterisk/config';
 import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseUrl } from '@/integrations/supabase/client';
 
 export const asteriskService = {
   /**
@@ -57,8 +58,8 @@ export const asteriskService = {
         throw new Error('Authentication required');
       }
       
-      // Get base URL from the supabase client
-      const supabaseUrl = supabase.getUrl();
+      // Get base URL from the utility function
+      const supabaseUrl = getSupabaseUrl();
       
       if (!supabaseUrl) {
         throw new Error('Could not determine Supabase URL');
@@ -134,8 +135,8 @@ export const asteriskService = {
       
       console.log('Starting Asterisk configuration sync with Edge Function...');
       
-      // Get the Supabase URL directly from the client
-      const supabaseUrl = supabase.getUrl();
+      // Get the Supabase URL from the utility function
+      const supabaseUrl = getSupabaseUrl();
       
       if (!supabaseUrl) {
         throw new Error('Could not determine Supabase URL');

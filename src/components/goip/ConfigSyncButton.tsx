@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Server } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseUrl } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { clearSession } from '@/services/auth/session';
 
@@ -55,8 +56,8 @@ export const ConfigSyncButton = ({
       
       const accessToken = sessionData.session.access_token;
       
-      // Get the Supabase URL from the client directly
-      const supabaseUrl = supabase.getUrl();
+      // Get the Supabase URL from the utility function
+      const supabaseUrl = getSupabaseUrl();
       
       if (!supabaseUrl) {
         throw new Error('Could not determine Supabase URL');

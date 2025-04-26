@@ -1,5 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseUrl } from '@/integrations/supabase/client';
 import { securityUtils } from '../utils/securityUtils';
 
 interface GoipPort {
@@ -269,8 +269,8 @@ export const goipService = {
         throw new Error('Authentication required');
       }
       
-      // Get the Supabase URL directly from client
-      const supabaseUrl = supabase.getUrl();
+      // Get the Supabase URL from utility function
+      const supabaseUrl = getSupabaseUrl();
       
       if (!supabaseUrl) {
         throw new Error('Could not determine Supabase URL');

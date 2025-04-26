@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { FileText, RefreshCw, AlertCircle, CheckCircle, AlertTriangle, Info, Pho
 import { asteriskService } from '@/utils/asteriskService';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getConfigFromStorage } from '@/utils/asterisk/config';
-import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseUrl } from '@/integrations/supabase/client';
 
 interface AsteriskConfigSectionProps {
   userId: string;
@@ -35,10 +34,9 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
       setSyncError("Asterisk configuration is incomplete. Please configure it in the settings.");
     }
     
-    // Get Supabase URL from the client directly
+    // Get Supabase URL from the utility function
     if (!supabaseUrl) {
-      // Extract from supabase client or fall back to hardcoded URL
-      const url = supabase.getUrl();
+      const url = getSupabaseUrl();
       setSupabaseUrl(url);
       
       if (!url) {
@@ -50,8 +48,8 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
     }
   }, [supabaseUrl]);
 
+  // Handle stuck loading state
   useEffect(() => {
-    // Handle stuck loading state
     let stuckTimer: NodeJS.Timeout;
     
     if (isLoading) {
