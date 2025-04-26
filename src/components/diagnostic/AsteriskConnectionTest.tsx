@@ -3,8 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { connectionService } from "@/utils/asterisk/connectionService";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, CheckCircle, RefreshCw, Server, Settings } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { getConfigFromStorage } from "@/utils/asterisk/config";
+import { Link } from 'react-router-dom';
 
 export const AsteriskConnectionTest: React.FC = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -13,6 +15,12 @@ export const AsteriskConnectionTest: React.FC = () => {
     message: string;
   } | null>(null);
   const { toast } = useToast();
+  const [currentConfig, setCurrentConfig] = useState(() => getConfigFromStorage());
+
+  // Refresh config when component mounts
+  useEffect(() => {
+    setCurrentConfig(getConfigFromStorage());
+  }, []);
 
   const testConnection = async () => {
     setIsTestingConnection(true);
@@ -46,6 +54,21 @@ export const AsteriskConnectionTest: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <div className="grid gap-4 mb-4">
+        <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-md border border-slate-200 dark:border-slate-800">
+          <h3 className="text-sm font-medium mb-2 flex items-center">
+            <Server className="h-4 w-4 mr-2" />
+            Current Asterisk Configuration
+          </h3>
+          <div className="text-sm space-y-1">
+            <p><span className="font-medium">API URL:</span> {currentConfig.apiUrl || 'Not set'}</p>
+            <p><span className="font-medium">Username:</span> {currentConfig.username || 'Not set'}</p>
+            <p><span className="font-medium">Password:</span> {currentConfig.password ? '••••••••' : 'Not set'}</p>
+            <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp || 'Not set'}</p>
+          </div>
+        </div>
+      </div>
+      
       <Button 
         onClick={testConnection} 
         disabled={isTestingConnection}
@@ -75,6 +98,17 @@ export const AsteriskConnectionTest: React.FC = () => {
             {connectionResult.message}
           </AlertDescription>
         </Alert>
+      )}
+
+      {connectionResult && !connectionResult.success && (
+        <div className="mt-2">
+          <Link to="/settings">
+            <Button variant="outline" size="sm" className="w-full">
+              <Settings className="mr-2 h-4 w-4" />
+              Configure Asterisk Settings
+            </Button>
+          </Link>
+        </div>
       )}
     </div>
   );

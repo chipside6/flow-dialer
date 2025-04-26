@@ -54,6 +54,17 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
     setTestResult(null);
     
     try {
+      // Temporarily save the current config for testing
+      const tempConfig = {
+        apiUrl,
+        username,
+        password,
+        serverIp
+      };
+      
+      // Save this config temporarily for the test
+      saveConfigToStorage(tempConfig);
+      
       const result = await testAsteriskConnection();
       setTestResult(result);
       
@@ -86,9 +97,16 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
   };
 
   const handleSave = () => {
+    // Add http:// prefix if not present
+    let formattedApiUrl = apiUrl;
+    if (formattedApiUrl && !formattedApiUrl.match(/^https?:\/\//)) {
+      formattedApiUrl = `http://${formattedApiUrl}`;
+      setApiUrl(formattedApiUrl);
+    }
+
     // Save configuration to localStorage
     saveConfigToStorage({
-      apiUrl,
+      apiUrl: formattedApiUrl,
       username,
       password,
       serverIp: serverIp
@@ -102,6 +120,26 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
       title: "Configuration saved",
       description: "Asterisk server configuration has been saved"
     });
+  };
+
+  // Helper function to suggest common port and path for Asterisk ARI
+  const suggestAriFormatting = () => {
+    if (!apiUrl.includes(':') && !apiUrl.includes('/')) {
+      // If no port and path is specified, suggest the standard ARI endpoint
+      return `${apiUrl}:8088/ari`;
+    }
+    
+    if (apiUrl.includes(':') && !apiUrl.includes('/')) {
+      // If port is specified but no path, suggest adding /ari
+      return `${apiUrl}/ari`;
+    }
+    
+    return apiUrl;
+  };
+
+  const handleApiUrlSuggest = () => {
+    const suggestion = suggestAriFormatting();
+    setApiUrl(suggestion);
   };
 
   return (
@@ -119,12 +157,25 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
             <Label htmlFor="apiUrl">Asterisk ARI URL</Label>
-            <Input
-              id="apiUrl"
-              placeholder="http://your-asterisk-server:8088/ari"
-              value={apiUrl}
-              onChange={(e) => setApiUrl(e.target.value)}
-            />
+            <div className="flex gap-2">
+              <Input
+                id="apiUrl"
+                placeholder="http://your-asterisk-server:8088/ari"
+                value={apiUrl}
+                onChange={(e) => setApiUrl(e.target.value)}
+                className="flex-1"
+              />
+              {apiUrl && !apiUrl.includes("/ari") && (
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleApiUrlSuggest}
+                >
+                  Format URL
+                </Button>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">
               The URL of your Asterisk REST Interface (ARI)
             </p>
@@ -180,6 +231,15 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
               <AlertCircle className="h-4 w-4" />
             )}
             <AlertDescription>{testResult.message}</AlertDescription>
+          </Alert>
+        )}
+
+        {!testResult?.success && apiUrl && !apiUrl.match(/^https?:\/\//) && (
+          <Alert variant="warning" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Your API URL should start with http:// or https://
+            </AlertDescription>
           </Alert>
         )}
       </CardContent>

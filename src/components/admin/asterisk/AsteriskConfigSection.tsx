@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { asteriskService } from '@/utils/asteriskService';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getConfigFromStorage } from '@/utils/asterisk/config';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 
 interface AsteriskConfigSectionProps {
   userId: string;
@@ -23,10 +25,12 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
   } | null>(null);
   const [configValid, setConfigValid] = useState(true);
   const [supabaseUrl, setSupabaseUrl] = useState<string | null>(null);
+  const [currentConfig, setCurrentConfig] = useState(() => getConfigFromStorage());
 
   // Check if config is valid and get Supabase URL on mount
   useEffect(() => {
     const config = getConfigFromStorage();
+    setCurrentConfig(config);
     const isValid = !!(config.apiUrl && config.username && config.password);
     setConfigValid(isValid);
     
@@ -145,6 +149,20 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Current Configuration Display */}
+        <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-md border border-slate-200 dark:border-slate-800">
+          <h3 className="text-sm font-medium mb-2 flex items-center">
+            <Server className="h-4 w-4 mr-2" />
+            Current Asterisk Configuration
+          </h3>
+          <div className="text-sm space-y-1">
+            <p><span className="font-medium">API URL:</span> {currentConfig.apiUrl || 'Not set'}</p>
+            <p><span className="font-medium">Username:</span> {currentConfig.username || 'Not set'}</p>
+            <p><span className="font-medium">Password:</span> {currentConfig.password ? '••••••••' : 'Not set'}</p>
+            <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp || 'Not set'}</p>
+          </div>
+        </div>
+
         {!configValid && (
           <Alert variant="destructive" className="bg-red-50 text-red-800 border-red-300">
             <AlertCircle className="h-4 w-4" />
@@ -239,14 +257,15 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
         )}
       </CardContent>
       <CardFooter className="flex justify-end">
-        <Button 
-          variant="outline"
-          size="sm"
-          onClick={() => window.location.href = '/settings'}
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          Configure Asterisk Settings
-        </Button>
+        <Link to="/settings">
+          <Button 
+            variant="outline"
+            size="sm"
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Configure Asterisk Settings
+          </Button>
+        </Link>
       </CardFooter>
     </Card>
   );

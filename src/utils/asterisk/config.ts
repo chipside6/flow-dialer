@@ -27,19 +27,35 @@ export const getConfigFromStorage = (): AsteriskConfig => {
   try {
     const storedConfig = localStorage.getItem(STORAGE_KEY);
     if (storedConfig) {
-      return JSON.parse(storedConfig);
+      const parsedConfig = JSON.parse(storedConfig);
+      console.log('Loaded Asterisk config from storage:', { 
+        apiUrl: parsedConfig.apiUrl, 
+        username: parsedConfig.username, 
+        password: parsedConfig.password ? '******' : 'not set',
+        serverIp: parsedConfig.serverIp
+      });
+      return parsedConfig;
     }
   } catch (error) {
     console.error('Error reading Asterisk configuration from localStorage:', error);
   }
   
   // Return defaults if nothing is stored
-  return {
+  const defaultConfig = {
     apiUrl: ASTERISK_API_URL,
     username: ASTERISK_API_USERNAME,
     password: ASTERISK_API_PASSWORD,
     serverIp: ASTERISK_SERVER_IP
   };
+  
+  console.log('Using default Asterisk config:', { 
+    apiUrl: defaultConfig.apiUrl, 
+    username: defaultConfig.username, 
+    password: defaultConfig.password ? '******' : 'not set',
+    serverIp: defaultConfig.serverIp
+  });
+  
+  return defaultConfig;
 };
 
 /**
@@ -48,6 +64,12 @@ export const getConfigFromStorage = (): AsteriskConfig => {
 export const saveConfigToStorage = (config: AsteriskConfig): void => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    console.log('Saved Asterisk config to storage:', { 
+      apiUrl: config.apiUrl, 
+      username: config.username, 
+      password: config.password ? '******' : 'not set',
+      serverIp: config.serverIp
+    });
   } catch (error) {
     console.error('Error saving Asterisk configuration to localStorage:', error);
   }
