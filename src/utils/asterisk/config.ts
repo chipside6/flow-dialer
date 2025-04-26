@@ -1,4 +1,3 @@
-
 /**
  * Asterisk API configuration utilities
  */
@@ -35,13 +34,9 @@ export const getConfigFromStorage = (): AsteriskConfig => {
         serverIp: parsedConfig.serverIp
       });
       
-      // Always ensure we're using the hardcoded URL
-      if (parsedConfig.apiUrl !== 'http://10.0.2.15:8088/ari/') {
-        parsedConfig.apiUrl = 'http://10.0.2.15:8088/ari/';
-        console.log('Overriding stored API URL with hardcoded value:', parsedConfig.apiUrl);
-        // Save the corrected URL
-        saveConfigToStorage(parsedConfig);
-      }
+      // Always ensure we're using the hardcoded URL - this is critical
+      parsedConfig.apiUrl = 'http://10.0.2.15:8088/ari/';
+      console.log('Using hardcoded API URL:', parsedConfig.apiUrl);
       
       return parsedConfig;
     }
@@ -76,9 +71,9 @@ export const saveConfigToStorage = (config: AsteriskConfig): void => {
   });
 
   try {
-    // Force set the URL to the known working value
+    // Always force set the URL to the known working value
     config.apiUrl = 'http://10.0.2.15:8088/ari/';
-    console.log('Setting hardcoded API URL:', config.apiUrl);
+    console.log('Using hardcoded API URL:', config.apiUrl);
 
     // Ensure username is set
     if (!config.username) {
@@ -94,12 +89,7 @@ export const saveConfigToStorage = (config: AsteriskConfig): void => {
 
     // Save the configuration to localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-    console.log('Successfully saved Asterisk config to storage:', { 
-      apiUrl: config.apiUrl, 
-      username: config.username, 
-      password: config.password ? '******' : 'not set',
-      serverIp: config.serverIp
-    });
+    console.log('Successfully saved Asterisk config to storage');
   } catch (error) {
     console.error('Error saving Asterisk configuration to localStorage:', error);
   }

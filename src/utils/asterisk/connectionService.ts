@@ -1,4 +1,3 @@
-
 import { getConfigFromStorage } from './config';
 
 export const connectionService = {
@@ -24,17 +23,31 @@ export const connectionService = {
     console.log(`Using credentials: ${config.username}:****`);
     
     try {
-      // Try with no-cors mode to diagnose CORS issues
-      console.log("Attempting connection with credentials");
+      // Try a more basic way to connect to avoid CORS issues
+      console.log("Attempting simple fetch request to test connectivity...");
       
-      // Attempt the connection
+      // First try a no-auth request to check if server is reachable at all
+      try {
+        const pingResponse = await fetch(`${apiUrl}ping`, { 
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Accept': '*/*'
+          }
+        });
+        console.log('Initial ping response:', pingResponse.status);
+      } catch (e) {
+        console.log('Ping failed, will still try authenticated request:', e);
+      }
+      
+      // Attempt the actual connection with auth
       const response = await fetch(`${apiUrl}applications`, {
         method: 'GET',
         headers: {
           'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`,
-          'Accept': 'application/json'
-        },
-        mode: 'cors' // Explicitly set CORS mode
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
       
       console.log('Connection response status:', response.status);
@@ -64,36 +77,11 @@ export const connectionService = {
     } catch (error) {
       console.error('Connection error:', error);
       
-      // Provide more helpful error messages based on the error
+      // Handle network errors better, especially CORS
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        console.log('Failed to fetch error detected');
-        
-        // Try to ping the server without authentication to determine if it's reachable
-        try {
-          console.log('Attempting to ping server without authentication');
-          const pingResponse = await fetch(`${apiUrl}ping`, { 
-            method: 'HEAD',
-            mode: 'no-cors' // Try with no-cors to see if server is reachable
-          });
-          console.log('Ping response:', pingResponse);
-          
-          return { 
-            success: false, 
-            message: `The Asterisk server at ${apiUrl} is reachable, but authentication failed. Please check your username and password.` 
-          };
-        } catch (pingError) {
-          console.log('Ping also failed:', pingError);
-          return { 
-            success: false, 
-            message: `Could not reach Asterisk server at ${apiUrl}. Please ensure your server is running, accessible, and CORS is properly configured.` 
-          };
-        }
-      }
-      
-      if (error instanceof TypeError && error.message.includes('NetworkError')) {
         return { 
           success: false, 
-          message: `Network error connecting to ${apiUrl}. This is likely due to CORS restrictions. Please ensure your Asterisk server has CORS headers enabled.` 
+          message: `Network error connecting to ${apiUrl}. This is likely due to CORS restrictions. Please follow the CORS configuration instructions below.` 
         };
       }
       

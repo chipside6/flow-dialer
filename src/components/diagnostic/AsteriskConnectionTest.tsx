@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { connectionService } from "@/utils/asterisk/connectionService";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertCircle, CheckCircle, RefreshCw, Server, Settings, Info } from 'lucide-react';
+import { AlertCircle, CheckCircle, RefreshCw, Server, Settings, Info, Code } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { getConfigFromStorage, saveConfigToStorage } from "@/utils/asterisk/config";
 import { Link } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export const AsteriskConnectionTest: React.FC = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -14,6 +15,7 @@ export const AsteriskConnectionTest: React.FC = () => {
     success: boolean;
     message: string;
   } | null>(null);
+  const [showCorsHelp, setShowCorsHelp] = useState(false);
   const { toast } = useToast();
   const [currentConfig, setCurrentConfig] = useState(() => {
     const config = getConfigFromStorage();
@@ -75,6 +77,11 @@ export const AsteriskConnectionTest: React.FC = () => {
         description: result.message,
         variant: result.success ? "default" : "destructive"
       });
+      
+      // If we get a CORS error, suggest showing the help dialog
+      if (!result.success && result.message.toLowerCase().includes('cors')) {
+        setTimeout(() => setShowCorsHelp(true), 500);
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setConnectionResult({
@@ -136,8 +143,14 @@ export const AsteriskConnectionTest: React.FC = () => {
         <Info className="h-4 w-4" />
         <AlertTitle>CORS Configuration Required</AlertTitle>
         <AlertDescription>
-          To connect to your Asterisk server from this web application, you may need to configure CORS headers on your Asterisk server.
-          Make sure your Asterisk HTTP server configuration includes the appropriate CORS headers.
+          You must configure CORS headers on your Asterisk server to allow web connections.
+          <Button 
+            variant="link" 
+            className="p-0 h-auto text-amber-800 underline" 
+            onClick={() => setShowCorsHelp(true)}
+          >
+            View CORS setup instructions
+          </Button>
         </AlertDescription>
       </Alert>
       
@@ -180,23 +193,16 @@ export const AsteriskConnectionTest: React.FC = () => {
             <AlertDescription className="space-y-2">
               <p>1. Ensure your Asterisk server is running and accessible at 10.0.2.15:8088.</p>
               <p>2. Check that the correct username and password are set (default: admin/admin).</p>
-              <p>3. Verify that CORS is properly configured on your Asterisk server.</p>
-              <p>4. You may need to add the following to your Asterisk HTTP configuration:</p>
-              <pre className="p-2 bg-slate-100 dark:bg-slate-800 rounded text-xs overflow-auto">
-{`[general]
-enabled=yes
-bindaddr=0.0.0.0
-bindport=8088
-prefix=
-tlsenable=no
-
-; Add CORS headers
-cors_origin_policy=all
-cors_access_control_allow_origin=*
-cors_access_control_allow_headers=*
-cors_access_control_allow_methods=*`}
-              </pre>
-              <p className="mt-2">After making changes, restart the Asterisk HTTP service.</p>
+              <p>3. <strong>Verify that CORS is properly configured on your Asterisk server.</strong></p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowCorsHelp(true)}
+                className="mt-2"
+              >
+                <Code className="mr-2 h-4 w-4" />
+                View CORS Configuration Help
+              </Button>
             </AlertDescription>
           </Alert>
           
@@ -210,6 +216,67 @@ cors_access_control_allow_methods=*`}
           </div>
         </>
       )}
+      
+      <Dialog open={showCorsHelp} onOpenChange={setShowCorsHelp}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Configuring CORS for Asterisk</DialogTitle>
+            <DialogDescription>
+              Follow these steps to configure CORS on your Asterisk server
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <h3 className="font-medium text-lg">Step 1: Edit http.conf</h3>
+            <p>SSH into your Asterisk server and edit the http.conf file:</p>
+            <pre className="bg-slate-100 dark:bg-slate-800 p-3 rounded-md overflow-x-auto text-xs">
+              sudo nano /etc/asterisk/http.conf
+            </pre>
+            
+            <h3 className="font-medium text-lg">Step 2: Add CORS Headers</h3>
+            <p>Add or modify these lines in the [general] section:</p>
+            <pre className="bg-slate-100 dark:bg-slate-800 p-3 rounded-md overflow-x-auto text-xs">
+{`[general]
+enabled=yes
+bindaddr=0.0.0.0   ; Allow connections from any IP address
+bindport=8088
+tlsenable=no
+
+; CORS configuration
+cors_origin_policy=all
+cors_access_control_allow_origin=*
+cors_access_control_allow_methods=*
+cors_access_control_allow_headers=*
+cors_access_control_max_age=1728000`}
+            </pre>
+            
+            <h3 className="font-medium text-lg">Step 3: Reload Asterisk HTTP Server</h3>
+            <p>After saving the changes, reload the Asterisk HTTP server with these commands:</p>
+            <pre className="bg-slate-100 dark:bg-slate-800 p-3 rounded-md overflow-x-auto text-xs">
+              sudo asterisk -rx "module reload res_http_websocket.so"<br/>
+              sudo asterisk -rx "module reload res_http_server.so"
+            </pre>
+            
+            <h3 className="font-medium text-lg">Step 4: Verify Configuration</h3>
+            <p>Check that the HTTP server is running with the correct settings:</p>
+            <pre className="bg-slate-100 dark:bg-slate-800 p-3 rounded-md overflow-x-auto text-xs">
+              sudo asterisk -rx "http show status"
+            </pre>
+            
+            <Alert className="mt-4">
+              <Info className="h-4 w-4" />
+              <AlertTitle>Important</AlertTitle>
+              <AlertDescription>
+                After making these changes, try testing the connection again. If you're still having issues, you may need to restart the Asterisk server completely with <code>sudo systemctl restart asterisk</code>.
+              </AlertDescription>
+            </Alert>
+          </div>
+          
+          <div className="flex justify-end mt-4">
+            <Button onClick={() => setShowCorsHelp(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
