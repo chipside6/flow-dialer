@@ -84,11 +84,19 @@ export const testAsteriskConnection = async (): Promise<{ success: boolean; mess
         message: 'Successfully connected to Asterisk ARI' 
       };
     } else {
-      const errorData = await response.json();
-      return { 
-        success: false, 
-        message: `Error connecting to Asterisk: ${errorData.message || response.statusText}` 
-      };
+      try {
+        const errorData = await response.json();
+        return { 
+          success: false, 
+          message: `Error connecting to Asterisk: ${errorData.message || response.statusText}` 
+        };
+      } catch (error) {
+        // If we can't parse JSON, return the status text
+        return { 
+          success: false, 
+          message: `Error connecting to Asterisk: ${response.statusText}` 
+        };
+      }
     }
   } catch (error) {
     return { 

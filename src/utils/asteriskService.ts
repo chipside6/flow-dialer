@@ -127,8 +127,15 @@ export const asteriskService = {
       
       console.log('Starting Asterisk configuration sync with Edge Function...');
       
+      // Get the Supabase URL from config
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
+      if (!supabaseUrl) {
+        throw new Error('VITE_SUPABASE_URL environment variable is not set');
+      }
+      
       // Call the edge function to sync configuration
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-goip-config`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/sync-goip-config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,35 +159,25 @@ export const asteriskService = {
         };
       }
       
-      // Check content type and get response as text first
+      // Check content type and parse response
       const contentType = response.headers.get('content-type');
+      
+      // For JSON responses
+      if (contentType && contentType.includes('application/json')) {
+        const result = await response.json();
+        return {
+          success: result.success || false,
+          message: result.message || 'Configuration synced successfully'
+        };
+      }
+      
+      // For non-JSON responses
       const responseText = await response.text();
-      
-      console.log('Response from Edge Function:', responseText);
-      
-      // If empty response
-      if (!responseText.trim()) {
-        return {
-          success: false,
-          message: 'Empty response from server'
-        };
-      }
-      
-      // Try to parse as JSON, with error handling
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('JSON parsing error:', parseError);
-        return {
-          success: false,
-          message: `Invalid response from server: ${responseText.substring(0, 100)}...`
-        };
-      }
+      console.error('Unexpected response format:', responseText);
       
       return {
-        success: result.success || false,
-        message: result.message || 'Configuration synced successfully'
+        success: false,
+        message: 'Invalid response format from server. Please check the edge function URL and configuration.'
       };
     } catch (error) {
       console.error('Error syncing configuration:', error);

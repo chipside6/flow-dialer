@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Server } from 'lucide-react';
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 
 interface ConfigSyncButtonProps {
@@ -19,6 +19,7 @@ export const ConfigSyncButton = ({
   size = 'default'
 }: ConfigSyncButtonProps) => {
   const [isSyncing, setIsSyncing] = useState(false);
+  const { toast } = useToast();
   
   const handleSync = async () => {
     if (!userId) {
@@ -40,7 +41,14 @@ export const ConfigSyncButton = ({
         throw new Error('You must be logged in to sync configurations');
       }
       
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-goip-config`, {
+      // Get the Supabase URL from environment
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
+      if (!supabaseUrl) {
+        throw new Error('VITE_SUPABASE_URL environment variable is not set');
+      }
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/sync-goip-config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,16 +61,39 @@ export const ConfigSyncButton = ({
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Error syncing configuration: ${response.status}`);
+        // Try to get error message from response
+        let errorMessage = `Error syncing configuration: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch (e) {
+          // If we can't parse JSON, use the status text
+          errorMessage = `Error syncing configuration: ${response.statusText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
       
-      const result = await response.json();
+      // Check content type
+      const contentType = response.headers.get('content-type');
       
-      toast({
-        title: "Configuration Synced",
-        description: result.message || "Your GoIP configuration has been synced with the Asterisk server.",
-      });
+      if (contentType && contentType.includes('application/json')) {
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.message || result.error || 'Unknown error syncing configuration');
+        }
+        
+        toast({
+          title: "Configuration Synced",
+          description: result.message || "Your GoIP configuration has been synced with the Asterisk server.",
+        });
+      } else {
+        // If we didn't get JSON back, it's an error
+        const responseText = await response.text();
+        console.error('Invalid response format:', responseText);
+        throw new Error('Invalid response format from server');
+      }
     } catch (error) {
       console.error('Error syncing configuration:', error);
       toast({
