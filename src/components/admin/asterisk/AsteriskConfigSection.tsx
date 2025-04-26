@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/components/ui/use-toast';
-import { FileText, RefreshCw, AlertCircle, CheckCircle, AlertTriangle, Info, PhoneIcon, Server } from 'lucide-react';
+import { FileText, RefreshCw, AlertCircle, CheckCircle, AlertTriangle, Info, PhoneIcon, Server, Settings } from 'lucide-react';
 import { asteriskService } from '@/utils/asteriskService';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getConfigFromStorage } from '@/utils/asterisk/config';
