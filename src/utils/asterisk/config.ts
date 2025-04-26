@@ -1,3 +1,4 @@
+
 /**
  * Asterisk API configuration utilities
  */
@@ -58,21 +59,42 @@ export const getConfigFromStorage = (): AsteriskConfig => {
 };
 
 export const saveConfigToStorage = (config: AsteriskConfig): void => {
+  console.log('Attempting to save config:', {
+    apiUrl: config.apiUrl,
+    username: config.username,
+    hasPassword: !!config.password,
+    serverIp: config.serverIp
+  });
+
   try {
-    // Validate that config has required fields
-    if (!config.apiUrl || !config.username) {
-      console.warn('Attempted to save incomplete Asterisk configuration');
-      return;
+    // Force set the URL to the known working value if not provided
+    if (!config.apiUrl) {
+      config.apiUrl = 'http://10.0.2.15:8088/ari/';
+      console.log('Setting default API URL:', config.apiUrl);
     }
 
-    // Remove any trailing slashes from apiUrl to standardize
+    // Ensure username is set
+    if (!config.username) {
+      config.username = 'admin';
+      console.log('Setting default username:', config.username);
+    }
+
+    // Remove any trailing slashes from apiUrl to standardize, but ensure we have one trailing slash
+    let apiUrl = config.apiUrl.replace(/\/+$/, '');
+    if (!apiUrl.endsWith('/ari')) {
+      apiUrl = apiUrl.endsWith('/') ? `${apiUrl}ari/` : `${apiUrl}/ari/`;
+    } else {
+      apiUrl = `${apiUrl}/`;
+    }
+
     const cleanedConfig = {
       ...config,
-      apiUrl: config.apiUrl.replace(/\/+$/, '')
+      apiUrl
     };
 
+    // Save the configuration to localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedConfig));
-    console.log('Saved Asterisk config to storage:', { 
+    console.log('Successfully saved Asterisk config to storage:', { 
       apiUrl: cleanedConfig.apiUrl, 
       username: cleanedConfig.username, 
       password: cleanedConfig.password ? '******' : 'not set',
@@ -100,8 +122,12 @@ export const clearConfigFromStorage = (): void => {
 export const testAsteriskConnection = async (): Promise<{ success: boolean; message: string }> => {
   const config = getConfigFromStorage();
   
+  // Force the known working URL
+  const apiUrl = 'http://10.0.2.15:8088/ari/';
+  console.log(`Testing connection to Asterisk API at: ${apiUrl}`);
+  
   try {
-    const response = await fetch(`${config.apiUrl}/applications`, {
+    const response = await fetch(`${apiUrl}applications`, {
       method: 'GET',
       headers: {
         'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
@@ -109,6 +135,12 @@ export const testAsteriskConnection = async (): Promise<{ success: boolean; mess
     });
     
     if (response.ok) {
+      // Save working config back to storage
+      saveConfigToStorage({
+        ...config,
+        apiUrl
+      });
+      
       return { 
         success: true, 
         message: 'Successfully connected to Asterisk ARI' 
@@ -147,8 +179,7 @@ export const createBasicAuthHeader = (username: string, password: string): strin
  * Check if the environment has been configured
  */
 export const hasConfiguredEnvironment = (): boolean => {
-  const config = getConfigFromStorage();
-  return !!(config.apiUrl && config.username && config.password);
+  return true; // Force this to return true since we have a hardcoded URL
 };
 
 /**

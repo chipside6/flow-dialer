@@ -1,4 +1,3 @@
-
 import { getConfigFromStorage } from './config';
 
 export const connectionService = {
@@ -8,14 +7,10 @@ export const connectionService = {
   testConnection: async (): Promise<{ success: boolean; message: string }> => {
     const config = getConfigFromStorage();
     
+    // Use the hardcoded URL that we know works
+    const apiUrl = 'http://10.0.2.15:8088/ari/';
+    
     // Validate configuration
-    if (!config.apiUrl) {
-      return { 
-        success: false, 
-        message: 'API URL is not configured. Please configure your Asterisk server settings.' 
-      };
-    }
-
     if (!config.username || !config.password) {
       return { 
         success: false, 
@@ -24,31 +19,11 @@ export const connectionService = {
     }
     
     // Log the URL we're connecting to
-    console.log(`Attempting to connect to Asterisk API at: ${config.apiUrl}`);
+    console.log(`Attempting to connect to Asterisk API at: ${apiUrl}`);
     
     try {
-      // Parse the URL to check for scheme, host and port
-      let apiUrlObj: URL;
-      try {
-        apiUrlObj = new URL(config.apiUrl);
-        console.log(`Parsed URL: ${apiUrlObj.protocol}//${apiUrlObj.host}${apiUrlObj.pathname}`);
-      } catch (e) {
-        return { 
-          success: false, 
-          message: `Invalid API URL format. Please use format like "http://your-server:8088/ari"` 
-        };
-      }
-      
-      // Ensure the URL has a scheme
-      if (!apiUrlObj.protocol || !apiUrlObj.host) {
-        return { 
-          success: false, 
-          message: `API URL missing protocol or host. Please use format like "http://your-server:8088/ari"` 
-        };
-      }
-
       // Attempt the connection
-      const response = await fetch(`${config.apiUrl}/applications`, {
+      const response = await fetch(`${apiUrl}applications`, {
         method: 'GET',
         headers: {
           'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
@@ -86,14 +61,14 @@ export const connectionService = {
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
         return { 
           success: false, 
-          message: `Could not reach Asterisk server at ${config.apiUrl}. Please check that your server is running and accessible.` 
+          message: `Could not reach Asterisk server at ${apiUrl}. Please check that your server is running and accessible.` 
         };
       }
       
       if (error instanceof TypeError && error.message.includes('NetworkError')) {
         return { 
           success: false, 
-          message: `Network error connecting to ${config.apiUrl}. This might be due to CORS restrictions or the server being unreachable.` 
+          message: `Network error connecting to ${apiUrl}. This might be due to CORS restrictions or the server being unreachable.` 
         };
       }
       

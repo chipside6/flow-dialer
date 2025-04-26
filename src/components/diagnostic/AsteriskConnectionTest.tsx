@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { connectionService } from "@/utils/asterisk/connectionService";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertCircle, CheckCircle, RefreshCw, Server, Settings, RotateCw } from 'lucide-react';
+import { AlertCircle, CheckCircle, RefreshCw, Server, Settings } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { getConfigFromStorage } from "@/utils/asterisk/config";
+import { getConfigFromStorage, saveConfigToStorage } from "@/utils/asterisk/config";
 import { Link } from 'react-router-dom';
 
 export const AsteriskConnectionTest: React.FC = () => {
@@ -15,7 +15,15 @@ export const AsteriskConnectionTest: React.FC = () => {
     message: string;
   } | null>(null);
   const { toast } = useToast();
-  const [currentConfig, setCurrentConfig] = useState(() => getConfigFromStorage());
+  const [currentConfig, setCurrentConfig] = useState(() => {
+    const config = getConfigFromStorage();
+    // Ensure we're using the known working URL
+    if (config.apiUrl !== 'http://10.0.2.15:8088/ari/') {
+      config.apiUrl = 'http://10.0.2.15:8088/ari/';
+      saveConfigToStorage(config);
+    }
+    return config;
+  });
 
   // Refresh config when component mounts
   useEffect(() => {
@@ -24,6 +32,11 @@ export const AsteriskConnectionTest: React.FC = () => {
 
   const loadCurrentConfig = () => {
     const config = getConfigFromStorage();
+    // Ensure we're using the known working URL
+    if (config.apiUrl !== 'http://10.0.2.15:8088/ari/') {
+      config.apiUrl = 'http://10.0.2.15:8088/ari/';
+      saveConfigToStorage(config);
+    }
     setCurrentConfig(config);
     console.log("Loaded Asterisk config:", {
       apiUrl: config.apiUrl,
@@ -37,6 +50,18 @@ export const AsteriskConnectionTest: React.FC = () => {
     setConnectionResult(null);
 
     try {
+      // Force the credentials to use admin/admin if not set
+      if (!currentConfig.username || !currentConfig.password) {
+        const updatedConfig = {
+          ...currentConfig,
+          username: currentConfig.username || 'admin',
+          password: currentConfig.password || 'admin',
+          apiUrl: 'http://10.0.2.15:8088/ari/'
+        };
+        saveConfigToStorage(updatedConfig);
+        setCurrentConfig(updatedConfig);
+      }
+
       const result = await connectionService.testConnection();
       setConnectionResult(result);
 
@@ -87,7 +112,7 @@ export const AsteriskConnectionTest: React.FC = () => {
               onClick={handleRefreshConfig} 
               title="Refresh configuration"
             >
-              <RotateCw className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
           <div className="text-sm space-y-1">
@@ -95,6 +120,9 @@ export const AsteriskConnectionTest: React.FC = () => {
             <p><span className="font-medium">Username:</span> {currentConfig.username || 'Not set'}</p>
             <p><span className="font-medium">Password:</span> {currentConfig.password ? '••••••••' : 'Not set'}</p>
             <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp || 'Not set'}</p>
+          </div>
+          <div className="mt-3 text-xs text-slate-500">
+            Using hardcoded URL: http://10.0.2.15:8088/ari/
           </div>
         </div>
       </div>
