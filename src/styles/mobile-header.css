@@ -118,11 +118,6 @@
     margin-bottom: 0 !important;
   }
   
-  /* Adjust main content when on support page */
-  body[data-page="support"] main {
-    padding-top: 70px !important;
-  }
-  
   /* Fix navbar height to match reference image */
   header.fixed {
     height: 60px !important;

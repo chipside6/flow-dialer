@@ -1,83 +1,9 @@
 
 /* Header styles */
 
-.sip-header {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.phone-number {
-  color: #ff6c2c;
-  font-weight: 500;
-}
-
-.support-link, .login-link {
-  color: #ff6c2c;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.support-link:hover, .login-link:hover {
-  text-decoration: underline;
-}
-
-.get-started-button {
-  background-color: #ff6c2c;
-  color: white;
-  border-radius: 9999px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
-
-.get-started-button:hover {
-  background-color: #e95d1e;
-}
-
-/* Phone number and label alignment */
-.sip-header .w-full.bg-gray-100 .flex.items-center {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.sip-header .text-gray-600,
-.sip-header a.text-[#ff6c2c] {
-  display: inline-flex;
-  align-items: center;
-  line-height: 1.5;
-}
-
-@media (max-width: 768px) {
-  .top-info-bar {
-    font-size: 0.8rem;
-    padding: 0.5rem 1rem;
-  }
-  
-  .main-header {
-    padding: 0.75rem 1rem;
-  }
-  
-  .get-started-button {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-  }
-  
-  /* Improved phone label alignment on mobile */
-  .sip-header .w-full.bg-gray-100 .flex.items-center {
-    gap: 2px;
-  }
-  
-  .sip-header .text-gray-600,
-  .sip-header a.text-[#ff6c2c] {
-    line-height: 1.5;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .sip-header a.text-[#ff6c2c] {
-    margin-left: 2px;
-  }
-}
+/* Import modular header styles */
+@import './components/header/header-base.css';
+@import './components/header/header-responsive.css';
 
 /* Price highlight animation */
 @keyframes pulse-subtle {

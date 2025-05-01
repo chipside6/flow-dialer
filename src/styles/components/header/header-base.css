@@ -46,3 +46,71 @@
   align-items: center;
   line-height: 1.5;
 }
+
+/* Additional header fixes that were previously in header-fixes.css */
+/* Fix for logout button positioning */
+.user-menu-trigger {
+  position: relative;
+}
+
+/* Fix for header stacking and z-index issues */
+header, .navbar, .sip-header {
+  z-index: 50;
+  position: relative;
+  background-color: var(--background);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Fix for mobile menu overlay */
+.mobile-menu {
+  z-index: 100;
+}
+
+/* Ensure proper vertical alignment in navigation items */
+.nav-items {
+  display: flex;
+  align-items: center;
+}
+
+/* Fix for header dropdowns */
+.header-dropdown {
+  z-index: 60;
+}
+
+/* Sky blue styling for Get Started button */
+.sip-header .max-w-7xl .flex.items-center a[href="/signup"],
+header a[href="/signup"] {
+  background-color: #4f46e5;
+  color: white;
+  border-radius: 9999px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.sip-header .max-w-7xl .flex.items-center a[href="/signup"]:hover,
+header a[href="/signup"]:hover {
+  background-color: #4338ca;
+  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.25);
+}
+
+/* Logo specific styling */
+.sip-header .max-w-7xl a:first-child .relative.rounded-full,
+header .max-w-7xl a:first-child .relative.rounded-full {
+  border: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+/* Ensure logo image has proper dimensions and scaling */
+.sip-header .max-w-7xl a:first-child img,
+header .max-w-7xl a:first-child img,
+.mobile-menu .logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
