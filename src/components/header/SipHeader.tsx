@@ -36,26 +36,6 @@ export const SipHeader = () => {
 
   return (
     <div className="w-full flex flex-col sip-header">
-      {/* Top info bar */}
-      <div className="w-full bg-gray-100 py-1 px-2 md:px-8 text-xs">
-        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
-          <div className="flex items-center gap-1">
-            <span className="text-gray-600 mr-1">Phone:</span>
-            <a href="tel:+18002506510" className="text-[#ff6c2c] hover:underline font-medium">
-              (800) 250-6510
-            </a>
-            <span className="mx-2 text-gray-400">|</span>
-            <Link to="/support" className="text-[#ff6c2c] hover:underline font-medium">
-              Support
-            </Link>
-            <span className="mx-2 text-gray-400">|</span>
-            <Link to="/login" className="text-[#ff6c2c] hover:underline font-medium">
-              Customer Login
-            </Link>
-          </div>
-        </div>
-      </div>
-      
       {/* Main header */}
       <div className="w-full bg-white py-2 px-3 md:px-8 shadow-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center w-full">
@@ -67,12 +47,22 @@ export const SipHeader = () => {
           {/* Button and menu aligned to the extreme right with no spacing between them */}
           <div className="flex items-center gap-1">
             <Button 
-              className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-4 py-1 text-sm font-medium transition-colors h-8 mr-1"
+              className="text-white rounded-full px-4 py-1 text-sm font-medium transition-colors h-8 mr-1"
               asChild
               variant="skyblue"
             >
               <Link to="/signup">
                 Get Started
+              </Link>
+            </Button>
+
+            <Button 
+              className="text-white rounded-full px-4 py-1 text-sm font-medium transition-colors h-8 mr-1"
+              asChild
+              variant="outline"
+            >
+              <Link to="/login">
+                Login
               </Link>
             </Button>
             

@@ -6,17 +6,20 @@ import { RefreshCw } from "lucide-react";
 interface ConnectionTestButtonProps {
   isTestingConnection: boolean;
   onClick: () => void;
+  variant?: "default" | "skyblue";
 }
 
 export const ConnectionTestButton: React.FC<ConnectionTestButtonProps> = ({
   isTestingConnection,
-  onClick
+  onClick,
+  variant = "default"
 }) => {
   return (
     <Button 
       onClick={onClick} 
       disabled={isTestingConnection}
       className="w-full"
+      variant={variant}
     >
       {isTestingConnection ? (
         <>
