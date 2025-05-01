@@ -59,6 +59,7 @@ export const SipHeader = () => {
             <Button 
               className="rounded-full px-4 py-1 text-sm font-medium transition-colors h-8 mr-1 border border-sky-500 text-sky-500 hover:bg-sky-50"
               asChild
+              variant="outline"
             >
               <Link to="/login">
                 Login
