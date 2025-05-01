@@ -3,42 +3,39 @@ export const clearAllAuthData = () => {
   console.log("Clearing all auth data");
   
   // Clear specific Supabase session data
-  localStorage.removeItem('sb-auth-token');
-  localStorage.removeItem('supabase.auth.token');
-  localStorage.removeItem('sb-refresh-token');
-  localStorage.removeItem('supabase.auth.expires_at');
-  localStorage.removeItem('supabase.auth.refresh_token');
+  sessionStorage.removeItem('sb-auth-token');
+  sessionStorage.removeItem('supabase.auth.token');
+  sessionStorage.removeItem('sb-refresh-token');
+  sessionStorage.removeItem('supabase.auth.expires_at');
+  sessionStorage.removeItem('supabase.auth.refresh_token');
   
   // Clear current Supabase session
-  localStorage.removeItem('supabase.auth.token');
+  sessionStorage.removeItem('supabase.auth.token');
   
   // Clear our custom session storage
-  localStorage.removeItem('user_session');
+  sessionStorage.removeItem('user_session');
   
-  // Clear any auth-related localStorage items
-  localStorage.removeItem('user_is_admin');
-  localStorage.removeItem('admin_check_timestamp');
-  localStorage.removeItem('sessionLastUpdated');
-  localStorage.removeItem('session_access_timestamp');
+  // Clear any auth-related sessionStorage items
+  sessionStorage.removeItem('user_is_admin');
+  sessionStorage.removeItem('admin_check_timestamp');
+  sessionStorage.removeItem('sessionLastUpdated');
+  sessionStorage.removeItem('session_access_timestamp');
 
   // Clear ALL Supabase auth-related items
-  // This comprehensive approach will clear any item that might be storing auth data
-  Object.keys(localStorage).forEach(key => {
+  Object.keys(sessionStorage).forEach(key => {
     if (key.includes('supabase.auth.') || key.includes('sb-') || key.includes('supa') || key.includes('auth')) {
-      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
     }
   });
   
   // Also clear cache items that might cause stale data
   try {
     // Clear application-specific caches
-    Object.keys(localStorage).forEach(key => {
+    Object.keys(sessionStorage).forEach(key => {
       if (key.includes('cache-') || key.includes('-cache')) {
-        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
       }
     });
-    // Clear session storage as well
-    sessionStorage.clear();
   } catch (e) {
     console.error("Error clearing caches:", e);
   }

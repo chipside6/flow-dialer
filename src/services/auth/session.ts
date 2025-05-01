@@ -2,9 +2,9 @@
 import { Session } from './types';
 import { debouncedClearAllAuthData, forceAppReload } from '@/utils/sessionCleanup';
 
-// Storage key for local session data
+// Storage key for session data
 const SESSION_STORAGE_KEY = 'user_session';
-const ADMIN_STATUS_KEY = 'user_is_admin'; // Add a specific key for admin status
+const ADMIN_STATUS_KEY = 'user_is_admin'; 
 const SESSION_ACCESS_TIMESTAMP = 'session_access_timestamp';
 
 // Cache the session in memory for faster access
@@ -33,7 +33,7 @@ export const getStoredSession = (): Session | null => {
   const now = Date.now();
   
   // Update last access time to prevent premature session expiry
-  localStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
+  sessionStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
   lastAccessTime = now;
   
   // Check memory cache first for better performance
@@ -43,7 +43,7 @@ export const getStoredSession = (): Session | null => {
   
   try {
     // Use a more efficient approach for retrieving and parsing session data
-    const storedSession = localStorage.getItem(SESSION_STORAGE_KEY);
+    const storedSession = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!storedSession) return null;
     
     let session: Session;
@@ -52,7 +52,6 @@ export const getStoredSession = (): Session | null => {
       session = JSON.parse(storedSession) as Session;
     } catch (parseError) {
       console.error('Error parsing stored session:', parseError);
-      // Don't remove the session on parse error - it might be a temporary issue
       sessionCache = null;
       return null;
     }
@@ -67,8 +66,7 @@ export const getStoredSession = (): Session | null => {
     // Validate session structure
     if (!isValidSession(session)) {
       console.error('Invalid session structure:', session);
-      // Invalid sessions should be removed
-      localStorage.removeItem(SESSION_STORAGE_KEY);
+      sessionStorage.removeItem(SESSION_STORAGE_KEY);
       sessionCache = null;
       return null;
     }
@@ -102,7 +100,6 @@ export const getStoredSession = (): Session | null => {
     return session;
   } catch (error) {
     console.error('Error retrieving stored session:', error);
-    // Don't clear local storage on retrieval errors
     sessionCache = null;
     return null;
   }
@@ -126,12 +123,12 @@ export const storeSession = (session: Session): void => {
   }
   
   try {
-    // Store session in localStorage
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+    // Store session in sessionStorage
+    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
     
     // Update last access time
     const currentTime = Date.now();
-    localStorage.setItem(SESSION_ACCESS_TIMESTAMP, currentTime.toString());
+    sessionStorage.setItem(SESSION_ACCESS_TIMESTAMP, currentTime.toString());
     lastAccessTime = currentTime;
     
     // Update memory cache
@@ -148,7 +145,7 @@ export const storeSession = (session: Session): void => {
       sessionCacheExpiry = currentTime + 1 * 60 * 1000;
     }
   } catch (error) {
-    console.error('Failed to store session in localStorage:', error);
+    console.error('Failed to store session in sessionStorage:', error);
   }
 };
 
@@ -157,13 +154,13 @@ export const storeSession = (session: Session): void => {
  */
 export const storeAdminStatus = (isAdmin: boolean): void => {
   try {
-    localStorage.setItem(ADMIN_STATUS_KEY, isAdmin ? 'true' : 'false');
+    sessionStorage.setItem(ADMIN_STATUS_KEY, isAdmin ? 'true' : 'false');
     adminStatusCache = isAdmin;
     
     // Store timestamp to know when this was last checked
-    localStorage.setItem('admin_check_timestamp', Date.now().toString());
+    sessionStorage.setItem('admin_check_timestamp', Date.now().toString());
   } catch (error) {
-    console.error('Failed to store admin status in localStorage:', error);
+    console.error('Failed to store admin status in sessionStorage:', error);
   }
 };
 
@@ -175,13 +172,13 @@ export const getStoredAdminStatus = (): boolean | null => {
   if (adminStatusCache !== null) return adminStatusCache;
   
   try {
-    const status = localStorage.getItem(ADMIN_STATUS_KEY);
+    const status = sessionStorage.getItem(ADMIN_STATUS_KEY);
     if (status === null) return null;
     
     adminStatusCache = status === 'true';
     return adminStatusCache;
   } catch (error) {
-    console.error('Failed to retrieve admin status from localStorage:', error);
+    console.error('Failed to retrieve admin status from sessionStorage:', error);
     return null;
   }
 };
@@ -197,10 +194,10 @@ export const clearSession = (): void => {
     adminStatusCache = null;
     
     // Remove specific session key
-    localStorage.removeItem(SESSION_STORAGE_KEY);
-    localStorage.removeItem(ADMIN_STATUS_KEY);
-    localStorage.removeItem('admin_check_timestamp');
-    localStorage.removeItem(SESSION_ACCESS_TIMESTAMP);
+    sessionStorage.removeItem(SESSION_STORAGE_KEY);
+    sessionStorage.removeItem(ADMIN_STATUS_KEY);
+    sessionStorage.removeItem('admin_check_timestamp');
+    sessionStorage.removeItem(SESSION_ACCESS_TIMESTAMP);
     
     // Use our debounced cleanup utility for more efficient thorough session clearing
     debouncedClearAllAuthData();
@@ -221,30 +218,29 @@ export const refreshSession = (newExpiresAt: number): void => {
     
     // Update last access time
     const now = Date.now();
-    localStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
+    sessionStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
     lastAccessTime = now;
   }
 };
 
 /**
  * Touch session to update last access time without changing anything else
- * This helps prevent premature session expiration during navigation
  */
 export const touchSession = (): void => {
   const now = Date.now();
-  localStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
+  sessionStorage.setItem(SESSION_ACCESS_TIMESTAMP, now.toString());
   lastAccessTime = now;
   console.log("Session touched at:", new Date(now).toISOString());
 };
 
 /**
- * Check if the session is valid and not expired - optimized for performance
+ * Check if the session is valid and not expired
  */
 export const isSessionValid = (): boolean => {
   // Touch the session to record the access
   touchSession();
   
-  // Use memory cache if available before hitting localStorage
+  // Use memory cache if available before hitting sessionStorage
   if (sessionCache && sessionCacheExpiry > Date.now()) {
     return true;
   }
@@ -261,13 +257,12 @@ export const isSessionValid = (): boolean => {
 
 /**
  * Session validation utility that can be used for quick session checks
- * without loading the full session data
  */
 export const hasValidSession = (): boolean => {
   try {
     // Quick check just looking for existence of token
     if (sessionCache) return true;
-    return !!localStorage.getItem(SESSION_STORAGE_KEY);
+    return !!sessionStorage.getItem(SESSION_STORAGE_KEY);
   } catch (e) {
     return false;
   }

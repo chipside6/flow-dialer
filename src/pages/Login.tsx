@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
@@ -75,7 +74,7 @@ const Login = () => {
         return;
       }
       
-      // Store the session information for persistence
+      // Store the session information in sessionStorage for persistence
       if (data.session) {
         const userData = data.session.user;
         
@@ -106,7 +105,7 @@ const Login = () => {
           console.error("Error fetching admin status:", profileError);
         }
         
-        localStorage.setItem('sessionLastUpdated', Date.now().toString());
+        sessionStorage.setItem('sessionLastUpdated', Date.now().toString());
       }
       
       toast({
