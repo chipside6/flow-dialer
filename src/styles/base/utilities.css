@@ -1,0 +1,49 @@
+
+/* Utility classes */
+
+.container-fluid {
+  width: 100%;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  margin-right: auto;
+  margin-left: auto;
+  box-sizing: border-box;
+}
+
+.card {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* Global responsive fixes */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+  }
+  
+  /* Ensure page content is scrollable on mobile */
+  #root {
+    min-height: 100%;
+    height: auto;
+    overflow-y: auto;
+  }
+  
+  main {
+    min-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+  
+  /* Fix table display on mobile */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+  
+  /* Prevent text cutoff */
+  h1, h2, h3, p {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
+}

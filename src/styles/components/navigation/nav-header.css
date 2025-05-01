@@ -1,0 +1,31 @@
+
+/* Navigation header styles */
+
+@media screen and (max-width: 768px) {
+  /* Mobile card/section headers */
+  .card-header,
+  .section-header,
+  .content-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  /* Mobile header actions */
+  .header-actions,
+  .card-actions,
+  .section-actions {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+  
+  /* Fix auth header */
+  .auth-header,
+  .login-header,
+  .signup-header {
+    margin-bottom: 16px !important;
+  }
+}

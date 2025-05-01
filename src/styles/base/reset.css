@@ -1,0 +1,41 @@
+
+/* Reset styles */
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  overflow-x: hidden;
+}
+
+body, html {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-width: 100vw;
+  height: auto;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix image paths for public directory */
+[src^="/public/"] {
+  content: attr(src);
+  content: attr(src) url(attr(src));
+}
+
+/* Image handling */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Better focus states */
+button:focus, a:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}

@@ -1,0 +1,90 @@
+
+/* Button layout styling */
+
+.button-container {
+  display: flex;
+  gap: 8px;
+}
+
+/* Full width buttons on small screens */
+@media (max-width: 480px) {
+  .w-full-sm {
+    width: 100% !important;
+  }
+  
+  .sm\:w-auto {
+    width: 100% !important;
+  }
+    
+  /* Ensure text wraps properly on small screens */
+  button span,
+  .button span {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+/* Centered buttons in forms */
+.form-actions button,
+.form-actions .button {
+  margin-top: 16px;
+}
+
+/* Icon alignment */
+button svg,
+.button svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Center button containers */
+@media screen and (max-width: 768px) {
+  .button-container,
+  .action-buttons,
+  .form-actions,
+  .button-group,
+  .flex-col > button,
+  .space-y-4 > button,
+  div[class*="space-y"] > button,
+  .space-y-4,
+  .unauthorized-page-buttons {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    justify-content: center !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  /* Center all buttons and button containers */
+  .button-container,
+  .form-actions,
+  .actions-container,
+  .flex.justify-end,
+  .flex.justify-between,
+  .flex.justify-start {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure action buttons are properly centered */
+  .action-buttons,
+  .form-actions button,
+  .form-actions .button,
+  .action-container button,
+  .action-container .button {
+    margin: 0 auto !important;
+  }
+  
+  /* Center button groups */
+  .button-group,
+  .inline-flex {
+    justify-content: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}

@@ -1,0 +1,27 @@
+
+/* Dark mode theme */
+
+.dark {
+  --primary: #38bdf8;
+  --primary-hover: #0ea5e9;
+  --primary-foreground: #ffffff;
+  
+  --secondary: #334155;
+  --secondary-foreground: #f8fafc;
+  
+  --accent: #fb923c;
+  --accent-foreground: #ffffff;
+  
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  
+  --border: #1e293b;
+  --input: #334155;
+  
+  --success: #34d399;
+  --warning: #fbbf24;
+  --error: #f87171;
+}

@@ -1,0 +1,38 @@
+
+/* Mobile navigation styling */
+
+@media (max-width: 768px) {
+  /* Mobile specific styles for navigation */
+  .mobile-menu-button,
+  [data-mobile-menu-button="true"],
+  .mobile-sidebar-button {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    border-radius: 50% !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12) !important;
+    position: fixed !important;
+    right: 16px !important;
+    top: 16px !important;
+    z-index: 60 !important;
+  }
+  
+  /* FIX: Ensure error messages don't appear as popups at the bottom */
+  .error-toast,
+  .data-error-message,
+  .error-notification {
+    position: fixed !important;
+    top: 20px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 90% !important;
+    max-width: 400px !important;
+    z-index: 9999 !important;
+    background-color: white !important;
+    border: 1px solid #f44336 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    padding: 16px !important;
+  }
+}

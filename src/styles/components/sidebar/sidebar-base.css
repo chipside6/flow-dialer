@@ -1,0 +1,47 @@
+
+/* Sidebar base styles */
+
+@media (max-width: 768px) {
+  /* Make the sidebar appear cleaner on mobile */
+  [data-sidebar][data-mobile="true"] {
+    background-color: white !important;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Make sure sidebar is full height */
+  [data-sidebar="sidebar"] {
+    min-height: 100vh !important;
+  }
+  
+  /* Adjust sidebar width for mobile */
+  [data-sidebar][data-mobile="true"] {
+    width: 85% !important;
+  }
+  
+  /* Make sidebar position fixed to prevent scrolling issues */
+  .SheetContent-root {
+    position: fixed !important;
+  }
+  
+  /* Style the sidebar header to match the purple design */
+  [data-sidebar="header"].bg-\[\#9b87f5\] {
+    background-color: #9b87f5 !important;
+    color: white !important;
+  }
+  
+  /* Hide the default Radix close button in mobile sidebar */
+  [data-sidebar][data-mobile="true"] .SheetPrimitive-Close {
+    display: none !important;
+  }
+  
+  /* Improve tap target area for the mobile sidebar button */
+  .mobile-sidebar-button {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    z-index: 45 !important;
+  }
+  
+  /* Hide any duplicate close buttons in the sheet content */
+  [data-sidebar][data-mobile="true"] .SheetContent-root > button {
+    display: none !important;
+  }
+}
