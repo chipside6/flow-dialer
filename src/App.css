@@ -4,7 +4,6 @@
 @import './styles/mobile.css';
 @import './styles/dashboard.css';
 @import './styles/header.css';
-/* Removed header-fixes.css import */
 @import './styles/mobile-header.css';
 @import './styles/mobile-navbar.css';
 @import './styles/animations.css';
