@@ -1,3 +1,4 @@
+
 import { getConfigFromStorage } from './config';
 
 export const connectionService = {
@@ -7,8 +8,8 @@ export const connectionService = {
   testConnection: async (): Promise<{ success: boolean; message: string }> => {
     const config = getConfigFromStorage();
     
-    // Use the hardcoded URL that we know works
-    const apiUrl = 'http://10.0.2.15:8088/ari/';
+    // Use the config URL but also log all details for debugging
+    const apiUrl = config.apiUrl;
     
     // Validate configuration
     if (!config.username || !config.password) {
@@ -23,11 +24,12 @@ export const connectionService = {
     console.log(`Using credentials: ${config.username}:****`);
     
     try {
-      // Try a more basic way to connect to avoid CORS issues
+      // Try a more basic way to connect to help debug CORS issues
       console.log("Attempting simple fetch request to test connectivity...");
       
       // First try a no-auth request to check if server is reachable at all
       try {
+        console.log('Sending initial ping to:', `${apiUrl}ping`);
         const pingResponse = await fetch(`${apiUrl}ping`, { 
           method: 'GET',
           mode: 'cors',
@@ -35,12 +37,19 @@ export const connectionService = {
             'Accept': '*/*'
           }
         });
-        console.log('Initial ping response:', pingResponse.status);
+        console.log('Initial ping response status:', pingResponse.status);
+        console.log('Initial ping response headers:', Object.fromEntries([...pingResponse.headers]));
+        
+        // If we get a 401, that's actually good - it means the server is reachable but requires auth
+        if (pingResponse.status === 401) {
+          console.log('Got 401 on ping - this is expected as authentication is required');
+        }
       } catch (e) {
         console.log('Ping failed, will still try authenticated request:', e);
       }
       
       // Attempt the actual connection with auth
+      console.log('Sending authenticated request to:', `${apiUrl}applications`);
       const response = await fetch(`${apiUrl}applications`, {
         method: 'GET',
         headers: {
@@ -51,12 +60,24 @@ export const connectionService = {
       });
       
       console.log('Connection response status:', response.status);
+      console.log('Connection response headers:', Object.fromEntries([...response.headers]));
       
       if (response.ok) {
-        return { 
-          success: true, 
-          message: 'Successfully connected to Asterisk ARI' 
-        };
+        // Try to parse the response to validate it's proper JSON
+        try {
+          const data = await response.json();
+          console.log('Connection successful, received data:', data);
+          return { 
+            success: true, 
+            message: 'Successfully connected to Asterisk ARI' 
+          };
+        } catch (error) {
+          console.log('Failed to parse JSON response:', error);
+          return { 
+            success: false, 
+            message: `Connected to server but received invalid JSON. Check if this is actually an ARI endpoint.`
+          };
+        }
       } else {
         // Try to parse error response
         try {
@@ -68,9 +89,18 @@ export const connectionService = {
           };
         } catch (error) {
           // If we can't parse JSON, return the status text
+          console.log('Failed to parse error response, raw response:', error);
+          let responseText = '';
+          try {
+            responseText = await response.text();
+            console.log('Raw response text:', responseText);
+          } catch (e) {
+            console.log('Failed to get response text:', e);
+          }
+          
           return { 
             success: false, 
-            message: `Error connecting to Asterisk: ${response.statusText} (Status: ${response.status})` 
+            message: `Error connecting to Asterisk: ${response.statusText} (Status: ${response.status})${responseText ? ` - Response: ${responseText}` : ''}`
           };
         }
       }
@@ -81,7 +111,7 @@ export const connectionService = {
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
         return { 
           success: false, 
-          message: `Network error connecting to ${apiUrl}. This is likely due to CORS restrictions. Please follow the CORS configuration instructions below.` 
+          message: `Network error connecting to ${apiUrl}. This is likely due to CORS restrictions. Follow the CORS configuration instructions, then restart Asterisk with 'sudo systemctl restart asterisk'.` 
         };
       }
       
