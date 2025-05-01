@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle, HelpCircle, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Info } from "lucide-react";
 
 interface CorsAlertProps {
   onShowCorsHelp: () => void;
@@ -10,19 +10,32 @@ interface CorsAlertProps {
 
 export const CorsAlert: React.FC<CorsAlertProps> = ({ onShowCorsHelp }) => {
   return (
-    <Alert variant="warning" className="bg-amber-50 text-amber-800 border-amber-300 mb-4">
-      <Info className="h-4 w-4" />
-      <AlertTitle>CORS Configuration Required</AlertTitle>
-      <AlertDescription>
-        You must configure CORS headers on your Asterisk server to allow web connections.
-        <Button 
-          variant="link" 
-          className="p-0 h-auto text-amber-800 underline" 
-          onClick={onShowCorsHelp}
-        >
-          View CORS setup instructions
-        </Button>
-      </AlertDescription>
+    <Alert variant="warning" className="mb-4">
+      <div className="flex items-start">
+        <Network className="h-4 w-4 mt-0.5 mr-2" />
+        <div className="flex-1">
+          <AlertTitle className="font-medium">
+            Network Connectivity Issues?
+          </AlertTitle>
+          <AlertDescription className="flex flex-col space-y-2">
+            <p>
+              If you encounter network errors connecting to your Asterisk server, it 
+              may be due to CORS restrictions or network connectivity issues.
+            </p>
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onShowCorsHelp}
+                className="flex items-center"
+              >
+                <HelpCircle className="h-4 w-4 mr-1" />
+                Troubleshooting Help
+              </Button>
+            </div>
+          </AlertDescription>
+        </div>
+      </div>
     </Alert>
   );
 };

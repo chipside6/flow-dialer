@@ -11,6 +11,8 @@ import { CorsAlert } from "./asterisk-connection/CorsAlert";
 import { CorsInstructionsDialog } from "./asterisk-connection/CorsInstructionsDialog";
 import { TroubleshootingGuide } from "./asterisk-connection/TroubleshootingGuide";
 import { useAsteriskConfig } from "./asterisk-connection/useAsteriskConfig";
+import { Button } from '@/components/ui/button';
+import { Settings, RefreshCw } from 'lucide-react';
 
 export const AsteriskConnectionTest: React.FC = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -27,13 +29,23 @@ export const AsteriskConnectionTest: React.FC = () => {
     setConnectionResult(null);
 
     try {
+      // Ensure the URL has proper format
+      if (currentConfig.apiUrl && !currentConfig.apiUrl.startsWith('http')) {
+        const updatedConfig = {
+          ...currentConfig,
+          apiUrl: `http://${currentConfig.apiUrl}`
+        };
+        saveConfigToStorage(updatedConfig);
+        setCurrentConfig(updatedConfig);
+      }
+
       // Force the credentials to use admin/admin if not set
       if (!currentConfig.username || !currentConfig.password) {
         const updatedConfig = {
           ...currentConfig,
           username: currentConfig.username || 'admin',
           password: currentConfig.password || 'admin',
-          apiUrl: 'http://10.0.2.15:8088/ari/'
+          apiUrl: currentConfig.apiUrl || 'http://10.0.2.15:8088/ari/'
         };
         saveConfigToStorage(updatedConfig);
         setCurrentConfig(updatedConfig);
@@ -53,8 +65,12 @@ export const AsteriskConnectionTest: React.FC = () => {
         variant: result.success ? "default" : "destructive"
       });
       
-      // If we get a CORS error, suggest showing the help dialog
-      if (!result.success && result.message.toLowerCase().includes('cors')) {
+      // If we get a network error, suggest showing the help dialog
+      if (!result.success && (
+          result.message.toLowerCase().includes('network') || 
+          result.message.toLowerCase().includes('connectivity') ||
+          result.message.toLowerCase().includes('cannot reach')
+        )) {
         setTimeout(() => setShowCorsHelp(true), 500);
       }
     } catch (error) {
@@ -76,6 +92,27 @@ export const AsteriskConnectionTest: React.FC = () => {
     }
   };
 
+  const handleForceDefaultsAndTest = () => {
+    // Set known working defaults
+    const updatedConfig = {
+      ...currentConfig,
+      apiUrl: 'http://10.0.2.15:8088/ari/',
+      username: 'admin',
+      password: 'admin',
+      serverIp: '10.0.2.15'
+    };
+    
+    saveConfigToStorage(updatedConfig);
+    setCurrentConfig(updatedConfig);
+    
+    toast({
+      title: "Defaults Applied",
+      description: "Set to known working configuration values. Testing connection..."
+    });
+    
+    setTimeout(() => testConnection(), 500);
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid gap-4 mb-4">
@@ -87,10 +124,23 @@ export const AsteriskConnectionTest: React.FC = () => {
       
       <CorsAlert onShowCorsHelp={() => setShowCorsHelp(true)} />
       
-      <ConnectionTestButton 
-        isTestingConnection={isTestingConnection}
-        onClick={testConnection}
-      />
+      <div className="flex flex-col sm:flex-row gap-2">
+        <ConnectionTestButton 
+          isTestingConnection={isTestingConnection}
+          onClick={testConnection}
+          variant="default"
+        />
+        
+        <Button 
+          onClick={handleForceDefaultsAndTest}
+          variant="outline"
+          disabled={isTestingConnection}
+          className="flex items-center gap-2"
+        >
+          <Settings className="h-4 w-4" />
+          Try Default Settings
+        </Button>
+      </div>
 
       <ConnectionResultDisplay result={connectionResult} />
 

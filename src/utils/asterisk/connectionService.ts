@@ -9,7 +9,13 @@ export const connectionService = {
     const config = getConfigFromStorage();
     
     // Use the config URL but also log all details for debugging
-    const apiUrl = config.apiUrl;
+    let apiUrl = config.apiUrl;
+    
+    // Make sure the URL has the proper format
+    if (apiUrl && !apiUrl.startsWith('http')) {
+      apiUrl = `http://${apiUrl}`;
+      console.log(`Adding http:// prefix to API URL: ${apiUrl}`);
+    }
     
     // Validate configuration
     if (!config.username || !config.password) {
@@ -19,45 +25,58 @@ export const connectionService = {
       };
     }
     
+    if (!apiUrl) {
+      return {
+        success: false,
+        message: 'Asterisk server URL is not configured. Please enter a valid API URL.'
+      };
+    }
+    
     // Log the URL we're connecting to
     console.log(`Attempting to connect to Asterisk API at: ${apiUrl}`);
     console.log(`Using credentials: ${config.username}:****`);
     
     try {
-      // Try with plain fetch and no credentials first to test basic connectivity
-      console.log("Testing basic network connectivity to Asterisk server...");
+      // First try a simple network connectivity test
+      console.log("Testing basic network connectivity...");
+      
       try {
-        const networkTestResponse = await fetch(apiUrl, { 
-          method: 'GET',
-          mode: 'cors',
+        // Use fetch with a short timeout just to test basic connectivity
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const testUrl = new URL(apiUrl);
+        const networkTestUrl = `${testUrl.protocol}//${testUrl.host}/`;
+        
+        console.log(`Testing connection to base URL: ${networkTestUrl}`);
+        const networkTestResponse = await fetch(networkTestUrl, { 
+          method: 'HEAD',
+          mode: 'no-cors', // This prevents CORS issues during the test
           cache: 'no-cache',
-          headers: {
-            'Accept': '*/*'
-          },
-          // Very short timeout to quickly identify network issues
-          signal: AbortSignal.timeout(3000)
+          signal: controller.signal
+        }).catch(e => {
+          console.error("Network test fetch error:", e);
+          throw new Error(`Network connectivity error: Cannot reach the server at ${testUrl.host}. Please verify the server is running and accessible.`);
         });
         
-        console.log('Basic network test response:', networkTestResponse.status);
-        if (networkTestResponse.status === 0) {
-          return {
-            success: false,
-            message: 'Cannot reach Asterisk server. Please verify the server is running and accessible on the network.'
-          };
-        }
+        clearTimeout(timeoutId);
+        console.log(`Network connectivity test response:`, networkTestResponse);
       } catch (networkError) {
-        console.error('Network test error:', networkError);
-        // Check for specific network error types
-        if (networkError instanceof TypeError) {
-          return {
-            success: false,
-            message: `Network connectivity error: ${networkError.message}. Please verify the Asterisk server IP address is correct and the server is running.`
-          };
-        }
+        // If we can't even reach the server, return a helpful error message
+        console.error('Network connectivity test failed:', networkError);
+        return {
+          success: false,
+          message: networkError instanceof Error 
+            ? networkError.message
+            : `Network connectivity error: Cannot reach the Asterisk server. Please verify the server IP address is correct and the server is running.`
+        };
       }
       
       // Now try the actual authenticated request
       console.log('Sending authenticated request to:', `${apiUrl}applications`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch(`${apiUrl}applications`, {
         method: 'GET',
         headers: {
@@ -65,12 +84,11 @@ export const connectionService = {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        // Add timeout to prevent hanging on network issues
-        signal: AbortSignal.timeout(5000)
+        signal: controller.signal
       });
       
+      clearTimeout(timeoutId);
       console.log('Connection response status:', response.status);
-      console.log('Connection response headers:', Object.fromEntries([...response.headers]));
       
       if (response.ok) {
         // Try to parse the response to validate it's proper JSON
@@ -99,7 +117,7 @@ export const connectionService = {
           };
         } catch (error) {
           // If we can't parse JSON, return the status text
-          console.log('Failed to parse error response, raw response:', error);
+          console.log('Failed to parse error response:', error);
           let responseText = '';
           try {
             responseText = await response.text();
@@ -121,16 +139,25 @@ export const connectionService = {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return {
           success: false,
-          message: `Connection to Asterisk timed out. Please verify the server is running and reachable at ${config.serverIp || config.apiUrl}.`
+          message: `Connection to Asterisk timed out. Please verify the server is running and reachable at ${config.serverIp || new URL(apiUrl).hostname}.`
         };
       }
       
-      // Handle network errors better, especially CORS
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        return { 
-          success: false, 
-          message: `Network error connecting to ${apiUrl}. This may be due to CORS restrictions or the Asterisk server being unavailable. Check server status and CORS configuration.` 
-        };
+      // Improve error messages for common network errors
+      if (error instanceof TypeError) {
+        if (error.message.includes('Failed to fetch')) {
+          return { 
+            success: false, 
+            message: `Network connectivity error: Cannot connect to the Asterisk server. Please verify the server IP address is correct and the server is running.` 
+          };
+        }
+        
+        if (error.message.includes('Invalid URL')) {
+          return {
+            success: false,
+            message: `Invalid Asterisk server URL: "${apiUrl}". Please check the URL format and try again.`
+          };
+        }
       }
       
       return { 
