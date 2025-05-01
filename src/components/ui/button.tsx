@@ -21,7 +21,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         success: "bg-green-600 text-white hover:bg-green-700 shadow-sm",
         orange: "bg-[#ff6c2c] text-white hover:bg-[#e95d1e]",
-        skyblue: "bg-sky-500 text-white hover:bg-sky-600", // Updated to use sky-500/600
+        skyblue: "bg-sky-500 text-white hover:bg-sky-600",
       },
       size: {
         default: "h-10 px-4 py-2",

@@ -15,19 +15,14 @@ export const ConnectionResultDisplay: React.FC<ConnectionResultDisplayProps> = (
 }) => {
   if (!result) return null;
   
+  const Icon = result.success ? CheckCircle : AlertCircle;
+  const title = result.success ? "Connection Successful" : "Connection Failed";
+  
   return (
     <Alert variant={result.success ? "default" : "destructive"}>
-      {result.success ? (
-        <CheckCircle className="h-4 w-4" />
-      ) : (
-        <AlertCircle className="h-4 w-4" />
-      )}
-      <AlertTitle>
-        {result.success ? "Connection Successful" : "Connection Failed"}
-      </AlertTitle>
-      <AlertDescription>
-        {result.message}
-      </AlertDescription>
+      <Icon className="h-4 w-4" />
+      <AlertTitle>{title}</AlertTitle>
+      <AlertDescription>{result.message}</AlertDescription>
     </Alert>
   );
 };

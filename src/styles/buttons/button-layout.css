@@ -1,0 +1,27 @@
+
+/* Button layout styling */
+
+.button-container {
+  display: flex;
+  gap: 8px;
+}
+
+/* Full width buttons on small screens */
+@media (max-width: 480px) {
+  .w-full-sm {
+    width: 100% !important;
+  }
+}
+
+/* Centered buttons in forms */
+.form-actions button,
+.form-actions .button {
+  margin-top: 16px;
+}
+
+/* Icon alignment */
+button svg,
+.button svg {
+  display: inline-block;
+  vertical-align: middle;
+}

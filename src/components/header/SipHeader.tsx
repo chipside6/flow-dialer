@@ -44,12 +44,12 @@ export const SipHeader = () => {
             <Logo size="sm" />
           </Link>
           
-          {/* Button and menu aligned to the extreme right with no spacing between them */}
+          {/* Action buttons aligned to the extreme right */}
           <div className="flex items-center gap-1">
             <Button 
-              className="text-white rounded-full px-4 py-1 text-sm font-medium transition-colors h-8 mr-1"
               asChild
               variant="skyblue"
+              className="text-white rounded-full px-4 py-1 text-sm font-medium transition-colors h-8 mr-1"
             >
               <Link to="/signup">
                 Get Started
@@ -57,9 +57,9 @@ export const SipHeader = () => {
             </Button>
 
             <Button 
-              className="rounded-full px-4 py-1 text-sm font-medium transition-colors h-8 mr-1 border border-sky-500 text-sky-500 hover:bg-sky-50"
               asChild
               variant="outline"
+              className="rounded-full px-4 py-1 text-sm font-medium transition-colors h-8 mr-1 border border-sky-500 text-sky-500 hover:bg-sky-50"
             >
               <Link to="/login">
                 Login

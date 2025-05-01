@@ -1,0 +1,42 @@
+
+/* Button variants styling */
+
+/* Primary button */
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Success button */
+.btn-success {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  background-color: #059669;
+}
+
+/* Sky blue button */
+.btn-skyblue {
+  background-color: #0ea5e9;
+  color: #ffffff;
+}
+
+.btn-skyblue:hover {
+  background-color: #0284c7;
+}
+
+/* Outline button */
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid currentColor;
+}
+
+.btn-outline:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
