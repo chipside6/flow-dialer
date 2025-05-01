@@ -1,7 +1,0 @@
-
-/* Header styles index */
-
-@import './header-base.css';
-@import './header-responsive.css';
-
-/* We're removing the import to header-fixes.css and will include that content directly in the files above */

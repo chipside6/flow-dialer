@@ -2,7 +2,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
-import './styles/index.css'
+import './index.css'
+import './App.css'
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/providers"
