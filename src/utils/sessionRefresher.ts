@@ -24,11 +24,11 @@ export const refreshUserSession = async (silent = false): Promise<boolean> => {
   
   // Check if we've exceeded max attempts
   if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
-    console.warn("Maximum session refresh attempts reached");
+    console.log("Maximum session refresh attempts reached");
     if (!silent) {
       toast({
         title: "Authentication issue",
-        description: "Unable to refresh your session. Please try logging in again.",
+        description: "Please try logging in again.",
         variant: "destructive"
       });
     }
@@ -47,13 +47,6 @@ export const refreshUserSession = async (silent = false): Promise<boolean> => {
     
     if (error) {
       console.error("Error refreshing session:", error);
-      if (!silent) {
-        toast({
-          title: "Session expired",
-          description: "Your session has expired. Please login again.",
-          variant: "destructive"
-        });
-      }
       return false;
     }
     
@@ -95,9 +88,10 @@ export const initializeSessionRefresher = () => {
   
   // Set up interval to check and refresh session
   const intervalId = setInterval(async () => {
-    // Only attempt refresh if we have a valid session to start with
-    if (isSessionValid()) {
-      // Get remaining time in session
+    // Only attempt refresh if we're not in a refresh cooldown
+    const now = Date.now();
+    if (now - lastRefreshTime > REFRESH_COOLDOWN && isSessionValid()) {
+      // Get the current session
       const { data } = await supabase.auth.getSession();
       
       // If session exists and expires in less than 10 minutes, refresh it

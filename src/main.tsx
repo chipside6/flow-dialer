@@ -9,12 +9,15 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/providers"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-// Create the query client outside the render function
+// Create the query client with improved error and retry handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      staleTime: 5 * 60 * 1000, // 5 minutes
       refetchOnWindowFocus: false,
+      refetchOnMount: true,
     },
   },
 })
