@@ -24,31 +24,39 @@ export const connectionService = {
     console.log(`Using credentials: ${config.username}:****`);
     
     try {
-      // Try a more basic way to connect to help debug CORS issues
-      console.log("Attempting simple fetch request to test connectivity...");
-      
-      // First try a no-auth request to check if server is reachable at all
+      // Try with plain fetch and no credentials first to test basic connectivity
+      console.log("Testing basic network connectivity to Asterisk server...");
       try {
-        console.log('Sending initial ping to:', `${apiUrl}ping`);
-        const pingResponse = await fetch(`${apiUrl}ping`, { 
+        const networkTestResponse = await fetch(apiUrl, { 
           method: 'GET',
           mode: 'cors',
+          cache: 'no-cache',
           headers: {
             'Accept': '*/*'
-          }
+          },
+          // Very short timeout to quickly identify network issues
+          signal: AbortSignal.timeout(3000)
         });
-        console.log('Initial ping response status:', pingResponse.status);
-        console.log('Initial ping response headers:', Object.fromEntries([...pingResponse.headers]));
         
-        // If we get a 401, that's actually good - it means the server is reachable but requires auth
-        if (pingResponse.status === 401) {
-          console.log('Got 401 on ping - this is expected as authentication is required');
+        console.log('Basic network test response:', networkTestResponse.status);
+        if (networkTestResponse.status === 0) {
+          return {
+            success: false,
+            message: 'Cannot reach Asterisk server. Please verify the server is running and accessible on the network.'
+          };
         }
-      } catch (e) {
-        console.log('Ping failed, will still try authenticated request:', e);
+      } catch (networkError) {
+        console.error('Network test error:', networkError);
+        // Check for specific network error types
+        if (networkError instanceof TypeError) {
+          return {
+            success: false,
+            message: `Network connectivity error: ${networkError.message}. Please verify the Asterisk server IP address is correct and the server is running.`
+          };
+        }
       }
       
-      // Attempt the actual connection with auth
+      // Now try the actual authenticated request
       console.log('Sending authenticated request to:', `${apiUrl}applications`);
       const response = await fetch(`${apiUrl}applications`, {
         method: 'GET',
@@ -56,7 +64,9 @@ export const connectionService = {
           'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json'
-        }
+        },
+        // Add timeout to prevent hanging on network issues
+        signal: AbortSignal.timeout(5000)
       });
       
       console.log('Connection response status:', response.status);
@@ -107,11 +117,19 @@ export const connectionService = {
     } catch (error) {
       console.error('Connection error:', error);
       
+      // Handle timeout errors explicitly
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return {
+          success: false,
+          message: `Connection to Asterisk timed out. Please verify the server is running and reachable at ${config.serverIp || config.apiUrl}.`
+        };
+      }
+      
       // Handle network errors better, especially CORS
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
         return { 
           success: false, 
-          message: `Network error connecting to ${apiUrl}. This is likely due to CORS restrictions. Follow the CORS configuration instructions, then restart Asterisk with 'sudo systemctl restart asterisk'.` 
+          message: `Network error connecting to ${apiUrl}. This may be due to CORS restrictions or the Asterisk server being unavailable. Check server status and CORS configuration.` 
         };
       }
       

@@ -28,6 +28,17 @@ export const getConfigFromStorage = (): AsteriskConfig => {
     const storedConfig = localStorage.getItem(STORAGE_KEY);
     if (storedConfig) {
       const parsedConfig = JSON.parse(storedConfig);
+      
+      // Make sure we have the server IP from the API URL if it's not explicitly set
+      if (!parsedConfig.serverIp && parsedConfig.apiUrl) {
+        try {
+          const url = new URL(parsedConfig.apiUrl);
+          parsedConfig.serverIp = url.hostname;
+        } catch (e) {
+          console.warn('Could not parse server IP from API URL:', e);
+        }
+      }
+      
       console.log('Loaded Asterisk config from storage:', { 
         apiUrl: parsedConfig.apiUrl, 
         username: parsedConfig.username, 
@@ -59,6 +70,9 @@ export const getConfigFromStorage = (): AsteriskConfig => {
   return defaultConfig;
 };
 
+/**
+ * Save configuration to localStorage
+ */
 export const saveConfigToStorage = (config: AsteriskConfig): void => {
   console.log('Saving config:', {
     apiUrl: config.apiUrl,
@@ -78,6 +92,18 @@ export const saveConfigToStorage = (config: AsteriskConfig): void => {
     if (!config.password) {
       config.password = 'admin';
       console.log('Setting default password: *****');
+    }
+    
+    // Extract server IP from API URL if not explicitly set
+    if (!config.serverIp && config.apiUrl) {
+      try {
+        const url = new URL(config.apiUrl);
+        config.serverIp = url.hostname;
+        console.log('Extracted server IP from API URL:', config.serverIp);
+      } catch (e) {
+        console.warn('Could not parse server IP from API URL:', e);
+        config.serverIp = '10.0.2.15'; // Default fallback
+      }
     }
 
     // Save the configuration to localStorage
@@ -112,7 +138,9 @@ export const testAsteriskConnection = async (): Promise<{ success: boolean; mess
       method: 'GET',
       headers: {
         'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
-      }
+      },
+      // Add timeout to prevent hanging
+      signal: AbortSignal.timeout(5000)
     });
     
     if (response.ok) {
@@ -141,6 +169,13 @@ export const testAsteriskConnection = async (): Promise<{ success: boolean; mess
       }
     }
   } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return {
+        success: false,
+        message: `Connection to Asterisk timed out after 5 seconds. Please verify the server is running.`
+      };
+    }
+    
     return { 
       success: false, 
       message: `Error connecting to Asterisk: ${error instanceof Error ? error.message : String(error)}` 
