@@ -8,7 +8,7 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CheckCircle2, Cog, Network, PhoneCall, Server, Shield } from 'lucide-react';
+import { CheckCircle2, Cog, Network, PhoneCall, Server, Shield, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export const WorkflowInstructions: React.FC = () => {
@@ -34,28 +34,52 @@ export const WorkflowInstructions: React.FC = () => {
           <TabsContent value="overview" className="space-y-4">
             <Alert>
               <CheckCircle2 className="h-4 w-4" />
-              <AlertTitle>Automatic Configuration</AlertTitle>
+              <AlertTitle>Fully Automated Configuration</AlertTitle>
               <AlertDescription>
-                Our system now automatically generates SIP credentials when you register a device.
-                This eliminates manual configuration on your GoIP device.
+                Our system now automatically validates, configures and connects your GoIP device.
+                Just provide your device's IP address and we handle everything else!
               </AlertDescription>
             </Alert>
 
-            <h3 className="text-lg font-semibold">Workflow Steps</h3>
+            <h3 className="text-lg font-semibold">Automated Workflow</h3>
             <ol className="list-decimal pl-5 space-y-2">
-              <li>Register your GoIP device through our platform</li>
-              <li>System automatically generates SIP credentials for each port</li>
-              <li>Configure your GoIP device network settings using the generated credentials</li>
-              <li>System connects your device to our Asterisk server</li>
-              <li>Device ready to use for outbound campaigns</li>
+              <li>Register your GoIP device (provide name, IP address, and number of ports)</li>
+              <li>System automatically validates that your GoIP device is reachable</li>
+              <li>SIP credentials are generated automatically for each port</li>
+              <li>Configuration is applied to our Asterisk server</li>
+              <li>Device is immediately ready to use for outbound campaigns</li>
             </ol>
+            
+            <div className="bg-slate-50 rounded-md p-4 mt-4 border">
+              <h4 className="text-md font-semibold text-slate-700 mb-2">What happens behind the scenes:</h4>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <ArrowRight className="h-4 w-4 text-primary mt-1" />
+                  <p className="text-sm">System checks if your GoIP device is online and reachable</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <ArrowRight className="h-4 w-4 text-primary mt-1" />
+                  <p className="text-sm">Secure SIP credentials are generated for each port</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <ArrowRight className="h-4 w-4 text-primary mt-1" />
+                  <p className="text-sm">Asterisk configuration is generated and applied</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <ArrowRight className="h-4 w-4 text-primary mt-1" />
+                  <p className="text-sm">Device registration is stored securely in our database</p>
+                </div>
+              </div>
+            </div>
             
             <h3 className="text-lg font-semibold mt-4">Benefits</h3>
             <ul className="list-disc pl-5 space-y-1">
               <li>No manual SIP configuration required</li>
-              <li>Secure credential generation</li>
-              <li>Automatic Asterisk integration</li>
+              <li>IP validation prevents setup errors</li>
+              <li>Secure credential generation and storage</li>
+              <li>Automatic Asterisk integration and configuration</li>
               <li>Ready for immediate campaign assignment</li>
+              <li>Support for multiple ports per device</li>
             </ul>
           </TabsContent>
           
@@ -64,46 +88,62 @@ export const WorkflowInstructions: React.FC = () => {
             <div className="space-y-3">
               <div className="border rounded-md p-3">
                 <div className="font-semibold flex items-center gap-2">
-                  <Server className="h-4 w-4" /> 1. Device Registration
+                  <Server className="h-4 w-4" /> 1. Device Validation & Registration
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  When you register a device, our system stores the device details in the database and 
-                  generates unique SIP credentials for each port.
+                  When you register a device, our system first validates that the GoIP device is 
+                  reachable at the specified IP address. Once validated, device details are 
+                  securely stored in our database.
                 </p>
               </div>
               
               <div className="border rounded-md p-3">
                 <div className="font-semibold flex items-center gap-2">
-                  <Shield className="h-4 w-4" /> 2. Secure Credential Generation
+                  <Shield className="h-4 w-4" /> 2. SIP Configuration Generation
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  For each port, a secure username and password are automatically generated and stored.
-                  These credentials are then linked to your user account and specific device.
+                  For each port on your GoIP device, our system generates a secure SIP configuration 
+                  with unique credentials. This configuration follows best practices for security 
+                  and reliability with your Asterisk server.
                 </p>
+                <div className="mt-2 bg-slate-50 p-2 rounded text-xs font-mono overflow-x-auto">
+                  [goip-USER_ID-port1]<br/>
+                  type=friend<br/>
+                  host=192.168.1.100<br/>
+                  port=5060<br/>
+                  username=goip_user_port1<br/>
+                  secret=********<br/>
+                  context=from-goip<br/>
+                  disallow=all<br/>
+                  allow=ulaw<br/>
+                  insecure=port,invite<br/>
+                  nat=no<br/>
+                  qualify=yes
+                </div>
               </div>
               
               <div className="border rounded-md p-3">
                 <div className="font-semibold flex items-center gap-2">
-                  <Network className="h-4 w-4" /> 3. Asterisk Configuration
+                  <Network className="h-4 w-4" /> 3. Asterisk Integration
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Our system automatically generates the necessary Asterisk SIP configurations and 
-                  dialplan entries for your device, then syncs them with our Asterisk server.
+                  The system automatically applies the generated SIP configuration to the Asterisk 
+                  server and reloads the SIP module to make the changes active immediately. Your 
+                  device is now ready to make calls through our platform.
                 </p>
               </div>
             </div>
             
-            <h3 className="text-lg font-semibold mt-4">GoIP Device Setup</h3>
+            <h3 className="text-lg font-semibold mt-4">GoIP Device Requirements</h3>
             <div className="space-y-2">
-              <p className="text-sm">Configure your GoIP device with these settings:</p>
-              <div className="bg-muted p-3 rounded-md font-mono text-xs overflow-x-auto">
-                <p>SIP Server: {process.env.ASTERISK_SERVER_IP || 'your-asterisk-server.com'}</p>
-                <p>SIP Port: 5060</p>
-                <p>Username: [auto-generated username shown in dashboard]</p>
-                <p>Password: [auto-generated password shown in dashboard]</p>
-                <p>Authentication: Yes</p>
-                <p>Registration Period: 120 seconds</p>
-              </div>
+              <p className="text-sm">For successful automatic configuration, ensure:</p>
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                <li>GoIP device is powered on and connected to your network</li>
+                <li>Device has a static IP or DHCP reservation (recommended)</li>
+                <li>Network allows connections to the device on port 80 (for validation)</li>
+                <li>SIP traffic (port 5060) can flow between the GoIP and our servers</li>
+                <li>RTP ports (10000-20000) are open for voice traffic</li>
+              </ul>
             </div>
           </TabsContent>
           
@@ -112,35 +152,53 @@ export const WorkflowInstructions: React.FC = () => {
             
             <div className="space-y-3">
               <div className="border rounded-md p-3">
-                <div className="font-semibold">Device Not Registering</div>
+                <div className="font-semibold">Device Validation Fails</div>
                 <p className="text-sm text-muted-foreground">
-                  Check network connectivity, verify SIP credentials match exactly what's shown in dashboard,
-                  ensure no firewalls are blocking SIP traffic (port 5060).
+                  If the system cannot reach your GoIP device during registration:
+                  <ul className="list-disc pl-5 mt-1">
+                    <li>Verify the IP address is correct</li>
+                    <li>Ensure the device is powered on and connected to your network</li>
+                    <li>Check that your network allows connections to the device on port 80</li>
+                    <li>Try pinging the device from your computer to verify basic connectivity</li>
+                  </ul>
                 </p>
               </div>
               
               <div className="border rounded-md p-3">
-                <div className="font-semibold">Calls Not Connecting</div>
+                <div className="font-semibold">Device Registers But Not Connected</div>
                 <p className="text-sm text-muted-foreground">
-                  Verify your GoIP device is showing as online in our dashboard, check call logs in your 
-                  GoIP device admin panel, ensure the called number is in the correct format.
+                  If your device shows as registered but doesn't connect to our Asterisk server:
+                  <ul className="list-disc pl-5 mt-1">
+                    <li>Verify your firewall allows SIP traffic (port 5060)</li>
+                    <li>Check if your network uses NAT and may require additional configuration</li>
+                    <li>Ensure RTP ports (10000-20000) are open for voice traffic</li>
+                    <li>Check the device status in the dashboard to see if there are any reported errors</li>
+                  </ul>
                 </p>
               </div>
               
               <div className="border rounded-md p-3">
                 <div className="font-semibold">Poor Audio Quality</div>
                 <p className="text-sm text-muted-foreground">
-                  Check your internet connection stability, reduce network congestion, verify 
-                  GoIP firmware is updated to the latest version.
+                  If calls connect but audio quality is poor:
+                  <ul className="list-disc pl-5 mt-1">
+                    <li>Check your internet connection stability</li>
+                    <li>Ensure your GoIP has adequate bandwidth (at least 100kbps per port)</li>
+                    <li>Verify network QoS settings prioritize VoIP traffic</li>
+                    <li>Update GoIP firmware to the latest version</li>
+                  </ul>
                 </p>
               </div>
               
               <div className="border rounded-md p-3">
-                <div className="font-semibold">Dialplan Issues</div>
+                <div className="font-semibold">IP Address Changes</div>
                 <p className="text-sm text-muted-foreground">
-                  If calls connect but transfers fail, check the transfer settings in your campaign.
-                  If a call is connected but no audio, check if the call status variable is correctly set.
-                  If the campaign doesn't detect key presses, verify the DTMF settings.
+                  If your GoIP device's IP address changes:
+                  <ul className="list-disc pl-5 mt-1">
+                    <li>Re-register the device with the new IP address</li>
+                    <li>Consider setting up a static IP or DHCP reservation to prevent future changes</li>
+                    <li>Update any campaigns using the device to ensure continued operation</li>
+                  </ul>
                 </p>
               </div>
             </div>
@@ -148,8 +206,8 @@ export const WorkflowInstructions: React.FC = () => {
             <Alert>
               <AlertTitle>Need Help?</AlertTitle>
               <AlertDescription>
-                If you continue experiencing issues, please contact our support team with your device ID and 
-                specific error messages from the GoIP device logs.
+                If you continue experiencing issues, please contact our support team with your device ID, 
+                IP address, and specific error messages from the registration process or device logs.
               </AlertDescription>
             </Alert>
           </TabsContent>
