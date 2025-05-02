@@ -5,6 +5,7 @@ import { GoipDeviceSetup } from '@/components/goip/GoipDeviceSetup';
 import { GoipDeviceList } from '@/components/goip/GoipDeviceList';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
+import { WorkflowInstructions } from '@/components/goip/WorkflowInstructions';
 
 const GoipDevicesPage = () => {
   return (
@@ -34,6 +35,7 @@ const GoipDevicesPage = () => {
         <div className="grid gap-6">
           <GoipDeviceSetup />
           <GoipDeviceList />
+          <WorkflowInstructions />
         </div>
       </div>
     </DashboardLayout>

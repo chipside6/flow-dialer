@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,40 +10,57 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
+import { goipService } from '@/utils/asterisk/services/goipService';
+import { Spinner } from 'lucide-react';
 
 const formSchema = z.object({
   deviceName: z.string().min(3, 'Device name must be at least 3 characters'),
-  ipAddress: z.string().ip({ message: 'Must be a valid IP address' }).or(z.string().regex(/^[\w.-]+\.[\w.-]+/, { message: 'Must be a valid hostname' }))
+  ipAddress: z.string().ip({ message: 'Must be a valid IP address' }).or(z.string().regex(/^[\w.-]+\.[\w.-]+/, { message: 'Must be a valid hostname' })),
+  numPorts: z.coerce.number().int().min(1).max(8).default(1)
 });
 
 export const RegisterDeviceForm = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [isRegistering, setIsRegistering] = useState(false);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       deviceName: '',
-      ipAddress: ''
+      ipAddress: '',
+      numPorts: 1
     }
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to register a device.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsRegistering(true);
 
     try {
-      const { error } = await supabase
-        .from('goip_devices')
-        .insert({
-          user_id: user.id,
-          device_name: values.deviceName,
-          ip_address: values.ipAddress
-        });
+      // Use the goipService to register the device with auto-generated credentials
+      const result = await goipService.registerDevice(
+        user.id,
+        values.deviceName,
+        values.ipAddress,
+        values.numPorts
+      );
 
-      if (error) throw error;
+      if (!result.success) {
+        throw new Error(result.message);
+      }
 
       toast({
         title: "Device registered successfully",
-        description: "Your GoIP device has been registered."
+        description: `Your GoIP device "${values.deviceName}" has been registered with ${values.numPorts} ports.`,
       });
 
       form.reset();
@@ -51,9 +68,11 @@ export const RegisterDeviceForm = () => {
       console.error('Error registering device:', error);
       toast({
         title: "Error registering device",
-        description: "Failed to register your device. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to register your device. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -92,7 +111,39 @@ export const RegisterDeviceForm = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">Register Device</Button>
+            <FormField
+              control={form.control}
+              name="numPorts"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Number of Ports</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min={1} 
+                      max={8} 
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value))} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isRegistering}
+            >
+              {isRegistering ? (
+                <>
+                  <Spinner className="mr-2 h-4 w-4 animate-spin" />
+                  Registering...
+                </>
+              ) : (
+                'Register Device'
+              )}
+            </Button>
           </form>
         </Form>
       </CardContent>

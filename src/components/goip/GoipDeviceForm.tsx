@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
+import { goipService } from '@/utils/asterisk/services/goipService';
+import { Loader2, Shield, Sparkles } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formSchema = z.object({
   deviceName: z.string().min(3, 'Device name must be at least 3 characters'),
@@ -24,6 +27,9 @@ type FormValues = z.infer<typeof formSchema>;
 export const GoipDeviceForm = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [showCredNotice, setShowCredNotice] = useState(true);
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,19 +44,24 @@ export const GoipDeviceForm = () => {
   const onSubmit = async (values: FormValues) => {
     if (!user?.id) return;
 
+    setIsRegistering(true);
+    
     try {
-      // Register the device
-      const { error } = await supabase.from('goip_devices').insert({
-        user_id: user.id,
-        device_name: values.deviceName,
-        ip_address: values.ipAddress,
-      });
+      // Use the goipService to register the device with auto-generated credentials
+      const result = await goipService.registerDevice(
+        user.id,
+        values.deviceName,
+        values.ipAddress,
+        values.numPorts
+      );
 
-      if (error) throw error;
+      if (!result.success) {
+        throw new Error(result.message);
+      }
 
       toast({
         title: "Device registered successfully",
-        description: "Your GoIP device has been registered and configured."
+        description: "Your GoIP device has been registered and SIP credentials automatically generated."
       });
 
       form.reset();
@@ -58,9 +69,11 @@ export const GoipDeviceForm = () => {
       console.error('Error registering device:', error);
       toast({
         title: "Error registering device",
-        description: "Failed to register your device. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to register your device. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -71,6 +84,24 @@ export const GoipDeviceForm = () => {
         <CardDescription>Add a new GoIP device to your account</CardDescription>
       </CardHeader>
       <CardContent>
+        {showCredNotice && (
+          <Alert className="mb-4" variant="default">
+            <Sparkles className="h-4 w-4" />
+            <AlertTitle>Automatic SIP Credentials</AlertTitle>
+            <AlertDescription className="text-sm">
+              SIP credentials are now automatically generated when you register a device. 
+              You'll find them in the device details after registration.
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-xs" 
+                onClick={() => setShowCredNotice(false)}
+              >
+                Dismiss
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -149,7 +180,23 @@ export const GoipDeviceForm = () => {
               )}
             />
 
-            <Button type="submit" className="w-full">Register Device</Button>
+            <Button 
+              type="submit" 
+              className="w-full flex gap-2 items-center"
+              disabled={isRegistering}
+            >
+              {isRegistering ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Registering and Generating Credentials...
+                </>
+              ) : (
+                <>
+                  <Shield className="h-4 w-4" />
+                  Register Device with Auto-Generated Credentials
+                </>
+              )}
+            </Button>
           </form>
         </Form>
       </CardContent>
