@@ -11,7 +11,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import { goipService } from '@/utils/asterisk/services/goipService';
-import { Spinner } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   deviceName: z.string().min(3, 'Device name must be at least 3 characters'),
@@ -137,7 +137,7 @@ export const RegisterDeviceForm = () => {
             >
               {isRegistering ? (
                 <>
-                  <Spinner className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Registering...
                 </>
               ) : (
