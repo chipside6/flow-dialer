@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/auth';
 import { goipService } from '@/utils/asterisk/services/goipService';
 import { Loader2, CheckCircle, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getSupabaseUrl } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
   deviceName: z.string().min(3, 'Device name must be at least 3 characters'),
@@ -50,10 +51,9 @@ export const RegisterDeviceForm = () => {
 
     try {
       // Get the Supabase URL to call the edge function
-      const supabaseUrl = supabase.channel.getUrl();
-      const baseUrl = supabaseUrl.split('/realtime')[0];
+      const supabaseUrl = getSupabaseUrl();
       
-      if (!baseUrl) {
+      if (!supabaseUrl) {
         throw new Error('Could not determine Supabase URL');
       }
       
@@ -65,7 +65,7 @@ export const RegisterDeviceForm = () => {
       }
       
       // Call the edge function to register the device
-      const response = await fetch(`${baseUrl}/functions/v1/register-goip-device`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/register-goip-device`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
