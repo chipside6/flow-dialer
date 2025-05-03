@@ -11,9 +11,10 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import { goipService } from '@/utils/asterisk/services/goipService';
-import { Loader2, CheckCircle, Info } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, CheckCircle, Info, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
+import { tryCatchWithErrorHandling, DialerErrorType } from '@/utils/errorHandlingUtils';
 
 const formSchema = z.object({
   deviceName: z.string().min(3, 'Device name must be at least 3 characters'),
@@ -26,6 +27,7 @@ export const RegisterDeviceForm = () => {
   const { toast } = useToast();
   const [isRegistering, setIsRegistering] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registrationError, setRegistrationError] = useState<string | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,8 +50,11 @@ export const RegisterDeviceForm = () => {
     
     setIsRegistering(true);
     setRegistrationSuccess(false);
+    setRegistrationError(null);
 
     try {
+      console.log("Starting device registration for:", values);
+      
       // Get the Supabase URL to call the edge function
       const supabaseUrl = getSupabaseUrl();
       
@@ -57,12 +62,17 @@ export const RegisterDeviceForm = () => {
         throw new Error('Could not determine Supabase URL');
       }
       
-      // Get session for authentication
-      const { data: session } = await supabase.auth.getSession();
+      console.log("Using Supabase URL:", supabaseUrl);
       
-      if (!session?.session?.access_token) {
-        throw new Error('Authentication required');
+      // Get session for authentication
+      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.session?.access_token) {
+        console.error("Authentication error:", sessionError);
+        throw new Error('Authentication required: ' + (sessionError?.message || 'Unable to get session'));
       }
+      
+      console.log("Authentication successful, proceeding with device registration");
       
       // Call the edge function to register the device
       const response = await fetch(`${supabaseUrl}/functions/v1/register-goip-device`, {
@@ -79,15 +89,17 @@ export const RegisterDeviceForm = () => {
         })
       });
       
+      console.log("Edge function response status:", response.status);
+      
+      const responseData = await response.json();
+      console.log("Edge function response data:", responseData);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Error: ${response.status} ${response.statusText}`);
+        throw new Error(responseData.message || `Error: ${response.status} ${response.statusText}`);
       }
       
-      const result = await response.json();
-      
-      if (!result.success) {
-        throw new Error(result.message);
+      if (!responseData.success) {
+        throw new Error(responseData.message || 'Unknown error occurred during device registration');
       }
 
       // Registration successful
@@ -100,9 +112,17 @@ export const RegisterDeviceForm = () => {
       form.reset();
     } catch (error) {
       console.error('Error registering device:', error);
+      
+      // Set the error message for display
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Failed to register your device. Please try again.";
+      
+      setRegistrationError(errorMessage);
+      
       toast({
         title: "Error registering device",
-        description: error instanceof Error ? error.message : "Failed to register your device. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -123,6 +143,16 @@ export const RegisterDeviceForm = () => {
             <AlertDescription className="text-green-700">
               Device registered successfully! SIP credentials have been automatically generated.
               You can view them in your device details.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {registrationError && (
+          <Alert className="mb-4 bg-red-50 border-red-200" variant="destructive">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertTitle>Registration Failed</AlertTitle>
+            <AlertDescription className="text-red-700">
+              {registrationError}
             </AlertDescription>
           </Alert>
         )}

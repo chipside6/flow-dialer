@@ -118,7 +118,10 @@ serve(async (req) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
       
-      const pingResponse = await fetch(`http://${ipAddress}:80`, { 
+      const pingUrl = `http://${ipAddress}:80`;
+      console.log(`Attempting to connect to: ${pingUrl}`);
+      
+      const pingResponse = await fetch(pingUrl, { 
         method: 'HEAD',
         signal: controller.signal
       }).catch(error => {
@@ -128,11 +131,24 @@ serve(async (req) => {
       
       clearTimeout(timeoutId);
       
-      if (!pingResponse || !pingResponse.ok) {
+      if (!pingResponse) {
         return new Response(
           JSON.stringify({ 
             success: false, 
-            message: `Could not reach GoIP device at ${ipAddress}. Please verify the IP address and ensure the device is online.` 
+            message: `Could not reach GoIP device at ${ipAddress}. Please verify the IP address and ensure the device is online.`,
+            errorType: "connection"
+          }),
+          { headers: corsHeaders }
+        );
+      }
+      
+      if (!pingResponse.ok) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            message: `Device at ${ipAddress} responded with status ${pingResponse.status}. Verify this is a GoIP device.`,
+            errorType: "validation",
+            statusCode: pingResponse.status
           }),
           { headers: corsHeaders }
         );
@@ -144,7 +160,8 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: `Error validating GoIP device: ${error instanceof Error ? error.message : String(error)}` 
+          message: `Error validating GoIP device: ${error instanceof Error ? error.message : String(error)}`,
+          errorType: "validation_error"
         }),
         { headers: corsHeaders }
       );
@@ -174,22 +191,46 @@ serve(async (req) => {
     // Store device information and SIP credentials in Supabase
     console.log(`Storing ${numPorts} trunks for device ${deviceName}`);
     
-    // Delete any existing trunks with the same name
-    const { error: deleteError } = await supabase
+    // Check if any existing trunks with the same name exist
+    const { data: existingTrunks, error: checkError } = await supabase
       .from('user_trunks')
-      .delete()
+      .select('*')
       .eq('user_id', userId)
       .eq('trunk_name', deviceName);
-    
-    if (deleteError) {
-      console.error("Error deleting existing trunks:", deleteError);
+      
+    if (checkError) {
+      console.error("Error checking existing trunks:", checkError);
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: `Error deleting existing trunks: ${deleteError.message}` 
+          message: `Error checking existing trunks: ${checkError.message}`,
+          errorType: "database" 
         }),
         { headers: corsHeaders }
       );
+    }
+    
+    if (existingTrunks && existingTrunks.length > 0) {
+      console.log(`Found ${existingTrunks.length} existing trunks with name ${deviceName}, deleting...`);
+      
+      // Delete any existing trunks with the same name
+      const { error: deleteError } = await supabase
+        .from('user_trunks')
+        .delete()
+        .eq('user_id', userId)
+        .eq('trunk_name', deviceName);
+      
+      if (deleteError) {
+        console.error("Error deleting existing trunks:", deleteError);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            message: `Error deleting existing trunks: ${deleteError.message}`,
+            errorType: "database" 
+          }),
+          { headers: corsHeaders }
+        );
+      }
     }
     
     // Insert the new trunks
@@ -203,7 +244,8 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: `Error registering device: ${insertError.message}` 
+          message: `Error registering device: ${insertError.message}`,
+          errorType: "database" 
         }),
         { headers: corsHeaders }
       );
@@ -233,8 +275,10 @@ qualify=yes
     const ASTERISK_SERVER_PORT = parseInt(Deno.env.get("ASTERISK_SERVER_PORT") || "22");
     
     if (!ASTERISK_SERVER_HOST || !ASTERISK_SERVER_USER || !ASTERISK_SERVER_PASS) {
+      console.log("Asterisk server not configured, storing configuration in database only");
+      
       // Store configuration in the database even if we can't connect to Asterisk
-      await supabase
+      const { error: configError } = await supabase
         .from('asterisk_configs')
         .insert({
           user_id: userId,
@@ -244,7 +288,12 @@ qualify=yes
           active: true
         });
         
-      console.log("Stored SIP configuration in database (Asterisk server not configured)");
+      if (configError) {
+        console.error("Error storing Asterisk configuration:", configError);
+        // Don't return error here as the device is registered, just log it
+      } else {
+        console.log("Stored SIP configuration in database");
+      }
       
       return new Response(
         JSON.stringify({ 
@@ -262,13 +311,13 @@ qualify=yes
       );
     }
 
-    // In production, connect to Asterisk server and update config
+    // In production, this would connect to Asterisk server and update config
     console.log("Would connect to Asterisk server and:");
     console.log(`1. Write config to /etc/asterisk/sip_goip_${userId.substring(0, 8)}.conf`);
     console.log("2. Reload SIP configuration with 'asterisk -rx \"sip reload\"'");
     
     // Store the configuration in the database regardless
-    await supabase
+    const { error: configError } = await supabase
       .from('asterisk_configs')
       .insert({
         user_id: userId,
@@ -278,9 +327,12 @@ qualify=yes
         active: true
       });
     
-    // In a production environment, we would connect to the Asterisk server via SSH
-    // and write the SIP configuration file, then reload Asterisk
-    // This is simulated here and would need actual implementation
+    if (configError) {
+      console.error("Error storing Asterisk configuration:", configError);
+      // Don't return error here as the device is registered, just log it
+    } else {
+      console.log("Stored SIP configuration in database");
+    }
     
     // Return success response
     return new Response(
@@ -304,7 +356,8 @@ qualify=yes
       JSON.stringify({ 
         success: false,
         message: "An error occurred while registering your GoIP device",
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
+        errorType: "unhandled_error"
       }),
       { status: 500, headers: corsHeaders }
     );
