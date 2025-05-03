@@ -30,6 +30,15 @@ export const RegisterDeviceForm = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const [requestTimeout, setRequestTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<{
+    checking: boolean;
+    error: string | null;
+    success: boolean;
+  }>({
+    checking: false,
+    error: null,
+    success: false
+  });
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,6 +63,60 @@ export const RegisterDeviceForm = () => {
     if (requestTimeout) {
       clearTimeout(requestTimeout);
       setRequestTimeout(null);
+    }
+  };
+
+  const checkAsteriskConnection = async () => {
+    try {
+      setConnectionStatus({
+        checking: true,
+        error: null,
+        success: false
+      });
+
+      // First test the basic connection to Asterisk server
+      const result = await fetch('/api/check-asterisk-connection', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!result.ok) {
+        const errorData = await result.json();
+        throw new Error(errorData.message || 'Failed to connect to Asterisk server');
+      }
+
+      const data = await result.json();
+      
+      if (data.success) {
+        setConnectionStatus({
+          checking: false,
+          error: null,
+          success: true
+        });
+        
+        toast({
+          title: "Asterisk Server Connected",
+          description: "Successfully connected to Asterisk server",
+        });
+      } else {
+        throw new Error(data.message || 'Asterisk server configuration is invalid');
+      }
+    } catch (error) {
+      console.error('Error checking Asterisk connection:', error);
+      
+      setConnectionStatus({
+        checking: false,
+        error: error instanceof Error ? error.message : 'Unknown error connecting to Asterisk',
+        success: false
+      });
+      
+      toast({
+        title: "Asterisk Connection Failed",
+        description: error instanceof Error ? error.message : 'Failed to connect to Asterisk server',
+        variant: "destructive"
+      });
     }
   };
 
@@ -123,6 +186,25 @@ export const RegisterDeviceForm = () => {
       
       console.log("Edge function response status:", response.status);
       
+      // Check if we got a response
+      if (!response) {
+        throw new Error("No response received from server");
+      }
+
+      // Handle non-OK responses before trying to parse JSON
+      if (!response.ok) {
+        let errorMessage = `Error: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData?.message || errorMessage;
+          console.error("Error response:", errorData);
+        } catch (parseError) {
+          console.error("Failed to parse error response:", parseError);
+        }
+        throw new Error(errorMessage);
+      }
+      
+      // Try to parse the successful response
       let responseData;
       try {
         responseData = await response.json();
@@ -130,12 +212,6 @@ export const RegisterDeviceForm = () => {
       } catch (parseError) {
         console.error("Error parsing response:", parseError);
         throw new Error("Server returned an invalid response format");
-      }
-      
-      if (!response.ok) {
-        const errorMessage = responseData?.message || `Error: ${response.status} ${response.statusText}`;
-        console.error("Error response:", errorMessage);
-        throw new Error(errorMessage);
       }
       
       if (!responseData.success) {
@@ -150,6 +226,12 @@ export const RegisterDeviceForm = () => {
       });
 
       form.reset();
+      
+      // Check Asterisk connection after successful registration
+      setTimeout(() => {
+        checkAsteriskConnection();
+      }, 1000);
+      
     } catch (error) {
       console.error('Error registering device:', error);
       
@@ -208,6 +290,29 @@ export const RegisterDeviceForm = () => {
             </AlertDescription>
           </Alert>
           
+          {connectionStatus.error && (
+            <Alert className="mb-4 bg-amber-50 border-amber-200">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-700">Asterisk Connection Issue</AlertTitle>
+              <AlertDescription className="text-amber-700">
+                {connectionStatus.error}
+                <p className="mt-2 text-sm">
+                  Please check your Asterisk server configuration in the settings page.
+                </p>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {connectionStatus.success && (
+            <Alert className="mb-4 bg-green-50 border-green-200">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertTitle className="text-green-700">Asterisk Connected</AlertTitle>
+              <AlertDescription className="text-green-700">
+                Your Asterisk server is properly configured and connected.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -255,20 +360,38 @@ export const RegisterDeviceForm = () => {
                   </FormItem>
                 )}
               />
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={isRegistering}
-              >
-                {isRegistering ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Registering...
-                  </>
-                ) : (
-                  'Register Device'
-                )}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button 
+                  type="submit" 
+                  className="flex-1"
+                  disabled={isRegistering}
+                >
+                  {isRegistering ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Registering...
+                    </>
+                  ) : (
+                    'Register Device'
+                  )}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={checkAsteriskConnection}
+                  disabled={connectionStatus.checking}
+                  className="flex-1"
+                >
+                  {connectionStatus.checking ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    'Check Asterisk Connection'
+                  )}
+                </Button>
+              </div>
             </form>
           </Form>
         </LoadingErrorBoundary>
