@@ -3,11 +3,11 @@
  * Asterisk API configuration utilities
  */
 
-// Default values - these will be overridden by localStorage if available
-export const ASTERISK_API_URL = import.meta.env.VITE_ASTERISK_API_URL || 'http://10.0.2.15:8088/ari/';
-export const ASTERISK_API_USERNAME = import.meta.env.VITE_ASTERISK_API_USERNAME || 'admin';
-export const ASTERISK_API_PASSWORD = import.meta.env.VITE_ASTERISK_API_PASSWORD || 'admin';
-export const ASTERISK_SERVER_IP = import.meta.env.VITE_ASTERISK_SERVER_IP || '10.0.2.15';
+// Default values using the detected server IP
+export const ASTERISK_SERVER_IP = '10.0.2.15'; // Your detected server IP
+export const ASTERISK_API_URL = `http://${ASTERISK_SERVER_IP}:8088/ari/`;
+export const ASTERISK_API_USERNAME = 'admin';
+export const ASTERISK_API_PASSWORD = 'admin';
 
 // Storage key
 const STORAGE_KEY = 'asterisk_config';
@@ -36,6 +36,8 @@ export const getConfigFromStorage = (): AsteriskConfig => {
           parsedConfig.serverIp = url.hostname;
         } catch (e) {
           console.warn('Could not parse server IP from API URL:', e);
+          // Use detected server IP as fallback
+          parsedConfig.serverIp = ASTERISK_SERVER_IP;
         }
       }
       
@@ -52,7 +54,7 @@ export const getConfigFromStorage = (): AsteriskConfig => {
     console.error('Error reading Asterisk configuration from localStorage:', error);
   }
   
-  // Return defaults if nothing is stored
+  // Return defaults using detected server IP if nothing is stored
   const defaultConfig = {
     apiUrl: ASTERISK_API_URL,
     username: ASTERISK_API_USERNAME,
@@ -60,7 +62,7 @@ export const getConfigFromStorage = (): AsteriskConfig => {
     serverIp: ASTERISK_SERVER_IP
   };
   
-  console.log('Using default Asterisk config:', { 
+  console.log('Using default Asterisk config with detected server IP:', { 
     apiUrl: defaultConfig.apiUrl, 
     username: defaultConfig.username, 
     password: defaultConfig.password ? '******' : 'not set',

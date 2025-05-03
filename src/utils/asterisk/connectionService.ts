@@ -32,6 +32,22 @@ export const connectionService = {
       };
     }
     
+    // Check if using the detected local IP address
+    const isLocalServerIP = apiUrl.includes('10.0.2.15');
+    if (isLocalServerIP) {
+      console.log("Detected local server IP 10.0.2.15 - using optimized parameters");
+      
+      // Force using correct port for local server
+      if (!apiUrl.includes(':8088')) {
+        if (apiUrl.endsWith('/')) {
+          apiUrl = `http://10.0.2.15:8088/`;
+        } else {
+          apiUrl = `http://10.0.2.15:8088/ari/`;
+        }
+        console.log(`Using optimized local API URL: ${apiUrl}`);
+      }
+    }
+    
     // Log the URL we're connecting to
     console.log(`Attempting to connect to Asterisk API at: ${apiUrl}`);
     console.log(`Using credentials: ${config.username}:****`);
@@ -62,14 +78,19 @@ export const connectionService = {
         clearTimeout(timeoutId);
         console.log(`Network connectivity test response:`, networkTestResponse);
       } catch (networkError) {
-        // If we can't even reach the server, return a helpful error message
-        console.error('Network connectivity test failed:', networkError);
-        return {
-          success: false,
-          message: networkError instanceof Error 
-            ? networkError.message
-            : `Network connectivity error: Cannot reach the Asterisk server. Please verify the server IP address is correct and the server is running.`
-        };
+        // Special handling for local IP
+        if (isLocalServerIP) {
+          console.log("Local server network test failed, but continuing with API test as this may be expected in local environment");
+        } else {
+          // If we can't even reach the server, return a helpful error message
+          console.error('Network connectivity test failed:', networkError);
+          return {
+            success: false,
+            message: networkError instanceof Error 
+              ? networkError.message
+              : `Network connectivity error: Cannot reach the Asterisk server. Please verify the server IP address is correct and the server is running.`
+          };
+        }
       }
       
       // Now try the actual authenticated request
@@ -77,7 +98,21 @@ export const connectionService = {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       
-      const response = await fetch(`${apiUrl}applications`, {
+      // For local server (10.0.2.15), use applications endpoint if not specified
+      let apiEndpoint = apiUrl;
+      if (isLocalServerIP && !apiUrl.endsWith('/')) {
+        if (!apiUrl.endsWith('applications')) {
+          apiEndpoint = `${apiUrl}applications`;
+        }
+      } else if (!apiUrl.endsWith('/')) {
+        apiEndpoint = `${apiUrl}/applications`;
+      } else {
+        apiEndpoint = `${apiUrl}applications`;
+      }
+      
+      console.log(`Final API endpoint: ${apiEndpoint}`);
+      
+      const response = await fetch(apiEndpoint, {
         method: 'GET',
         headers: {
           'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`,

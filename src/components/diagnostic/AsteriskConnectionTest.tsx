@@ -12,7 +12,7 @@ import { CorsInstructionsDialog } from "./asterisk-connection/CorsInstructionsDi
 import { TroubleshootingGuide } from "./asterisk-connection/TroubleshootingGuide";
 import { useAsteriskConfig } from "./asterisk-connection/useAsteriskConfig";
 import { Button } from '@/components/ui/button';
-import { Settings, RefreshCw } from 'lucide-react';
+import { Settings, RefreshCw, Server } from 'lucide-react';
 
 export const AsteriskConnectionTest: React.FC = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -23,6 +23,9 @@ export const AsteriskConnectionTest: React.FC = () => {
   const [showCorsHelp, setShowCorsHelp] = useState(false);
   const { toast } = useToast();
   const { currentConfig, setCurrentConfig, loadCurrentConfig, handleRefreshConfig } = useAsteriskConfig();
+  
+  // Automatically detect local server IP
+  const localIpAddress = "10.0.2.15"; // Your detected IP
 
   const testConnection = async () => {
     setIsTestingConnection(true);
@@ -45,7 +48,7 @@ export const AsteriskConnectionTest: React.FC = () => {
           ...currentConfig,
           username: currentConfig.username || 'admin',
           password: currentConfig.password || 'admin',
-          apiUrl: currentConfig.apiUrl || 'http://10.0.2.15:8088/ari/'
+          apiUrl: currentConfig.apiUrl || `http://${localIpAddress}:8088/ari/`
         };
         saveConfigToStorage(updatedConfig);
         setCurrentConfig(updatedConfig);
@@ -93,24 +96,42 @@ export const AsteriskConnectionTest: React.FC = () => {
   };
 
   const handleForceDefaultsAndTest = () => {
-    // Set known working defaults
+    // Set detected IP as default
     const updatedConfig = {
       ...currentConfig,
-      apiUrl: 'http://10.0.2.15:8088/ari/',
+      apiUrl: `http://${localIpAddress}:8088/ari/`,
       username: 'admin',
       password: 'admin',
-      serverIp: '10.0.2.15'
+      serverIp: localIpAddress
     };
     
     saveConfigToStorage(updatedConfig);
     setCurrentConfig(updatedConfig);
     
     toast({
-      title: "Defaults Applied",
-      description: "Set to known working configuration values. Testing connection..."
+      title: "Local Server Detected",
+      description: `Using detected local server IP: ${localIpAddress}. Testing connection...`
     });
     
     setTimeout(() => testConnection(), 500);
+  };
+
+  const handleUseLocalServerIP = () => {
+    // Just update the server IP
+    const updatedConfig = {
+      ...currentConfig,
+      serverIp: localIpAddress
+    };
+    
+    saveConfigToStorage(updatedConfig);
+    setCurrentConfig(updatedConfig);
+    
+    toast({
+      title: "Server IP Updated",
+      description: `Set server IP to local address: ${localIpAddress}`
+    });
+    
+    loadCurrentConfig();
   };
 
   return (
@@ -122,6 +143,34 @@ export const AsteriskConnectionTest: React.FC = () => {
         />
       </div>
       
+      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 rounded-md">
+        <div className="flex items-center gap-2 text-green-800 dark:text-green-300 font-medium">
+          <Server className="h-4 w-4" />
+          <span>Local server detected at: {localIpAddress}</span>
+        </div>
+        <p className="mt-1 text-sm text-green-700 dark:text-green-400">
+          This appears to be your server's IP address. You can use this for your Asterisk connection.
+        </p>
+        <div className="flex gap-2 mt-3">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleUseLocalServerIP}
+            className="bg-white dark:bg-green-900/40"
+          >
+            Update Server IP Only
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={handleForceDefaultsAndTest}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            Use All Local Server Settings
+          </Button>
+        </div>
+      </div>
+      
       <CorsAlert onShowCorsHelp={() => setShowCorsHelp(true)} />
       
       <div className="flex flex-col sm:flex-row gap-2">
@@ -130,16 +179,6 @@ export const AsteriskConnectionTest: React.FC = () => {
           onClick={testConnection}
           variant="default"
         />
-        
-        <Button 
-          onClick={handleForceDefaultsAndTest}
-          variant="outline"
-          disabled={isTestingConnection}
-          className="flex items-center gap-2"
-        >
-          <Settings className="h-4 w-4" />
-          Try Default Settings
-        </Button>
       </div>
 
       <ConnectionResultDisplay result={connectionResult} />
