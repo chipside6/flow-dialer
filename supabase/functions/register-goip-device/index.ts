@@ -82,21 +82,56 @@ serve(async (req) => {
     // Get request data
     let requestData: DeviceRegistrationRequest;
     try {
-      requestData = await req.json();
+      const requestText = await req.text();
+      console.log("Raw request body:", requestText);
+      
+      try {
+        requestData = JSON.parse(requestText);
+      } catch (parseError) {
+        console.log("Invalid JSON in request body:", parseError);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            message: "Invalid request format", 
+            error: "Could not parse JSON body",
+            details: String(parseError)
+          }),
+          { status: 400, headers: corsHeaders }
+        );
+      }
+
       console.log("Request data:", requestData);
     } catch (error) {
-      console.log("Invalid JSON in request body:", error);
+      console.log("Error reading request body:", error);
       return new Response(
         JSON.stringify({ 
           success: false, 
           message: "Invalid request format", 
-          error: "Could not parse JSON body" 
+          error: "Could not read request body",
+          details: String(error)
         }),
         { status: 400, headers: corsHeaders }
       );
     }
     
+    // Validate required fields
     const { userId, deviceName, ipAddress, numPorts } = requestData;
+    
+    if (!userId || !deviceName || !ipAddress) {
+      const missingFields = [];
+      if (!userId) missingFields.push("userId");
+      if (!deviceName) missingFields.push("deviceName");
+      if (!ipAddress) missingFields.push("ipAddress");
+      
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: "Missing required fields: " + missingFields.join(", "),
+          missingFields
+        }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
     
     // Verify the user is registering their own device
     if (userId !== user.id) {
@@ -109,48 +144,16 @@ serve(async (req) => {
         { status: 403, headers: corsHeaders }
       );
     }
-
-    // Validate that the GoIP IP is reachable
-    console.log(`Validating GoIP device at IP: ${ipAddress}`);
-    try {
-      // Try to connect to the GoIP device using a simple HTTP check
-      const timeout = 10000; // 10 second timeout - increased from 5 seconds
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
-      
-      const pingUrl = `http://${ipAddress}:80`;
-      console.log(`Attempting to connect to: ${pingUrl}`);
-      
-      try {
-        const pingResponse = await fetch(pingUrl, { 
-          method: 'HEAD',
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        console.log(`Response status from ${ipAddress}: ${pingResponse.status}`);
-      } catch (connectionError) {
-        console.log(`Connection failed to GoIP device at ${ipAddress}:`, connectionError.message);
-        
-        // Instead of failing here, we'll continue and create the device anyway
-        // but log a warning message
-        console.log(`WARNING: Could not connect to GoIP device at ${ipAddress}, but continuing with registration`);
-      }
-      
-      console.log(`Proceeding with device registration at ${ipAddress}`);
-    } catch (error) {
-      console.log("Error validating GoIP device:", error);
-      // Continue with registration despite validation error
-      console.log("Continuing registration despite validation error");
-    }
-
+    
     // Generate SIP credentials for each port
     const ports = [];
     for (let port = 1; port <= numPorts; port++) {
       const username = `goip_${userId.substring(0, 8)}_port${port}`;
-      // Generate a secure random password
-      const password = Array.from(crypto.getRandomValues(new Uint8Array(12)))
+      
+      // Generate a secure random password (12 characters)
+      const randomBytes = new Uint8Array(8);
+      crypto.getRandomValues(randomBytes);
+      const password = Array.from(randomBytes)
         .map(b => b.toString(16).padStart(2, '0'))
         .join('')
         .substring(0, 12);
@@ -161,27 +164,10 @@ serve(async (req) => {
         sip_pass: password,
         status: 'active',
         trunk_name: deviceName,
-        user_id: userId
+        user_id: userId,
+        device_ip: ipAddress // Always include device_ip regardless of schema
       });
     }
-    
-    // Check if table has device_ip column
-    const { data: columnInfo, error: columnCheckError } = await supabaseAdmin
-      .from('information_schema.columns')
-      .select('column_name')
-      .eq('table_schema', 'public')
-      .eq('table_name', 'user_trunks')
-      .eq('column_name', 'device_ip');
-    
-    if (columnCheckError) {
-      console.error("Error checking for device_ip column:", columnCheckError);
-    }
-    
-    const hasDeviceIpColumn = columnInfo && columnInfo.length > 0;
-    console.log(`Table user_trunks has device_ip column: ${hasDeviceIpColumn}`);
-    
-    // Store device information and SIP credentials in Supabase
-    console.log(`Storing ${numPorts} trunks for device ${deviceName}`);
     
     // Check if any existing trunks with the same name exist
     const { data: existingTrunks, error: checkError } = await supabase
@@ -223,39 +209,61 @@ serve(async (req) => {
           { headers: corsHeaders }
         );
       }
-    }
-    
-    // Insert the new trunks - handle if device_ip column exists or not
-    let insertData;
-    let insertError;
-    
-    if (hasDeviceIpColumn) {
-      // Add device_ip to each port record
-      const portsWithIp = ports.map(port => ({
-        ...port,
-        device_ip: ipAddress
-      }));
       
-      const result = await supabase
-        .from('user_trunks')
-        .insert(portsWithIp)
-        .select();
-        
-      insertData = result.data;
-      insertError = result.error;
-    } else {
-      // Just insert without device_ip
-      const result = await supabase
-        .from('user_trunks')
-        .insert(ports)
-        .select();
-        
-      insertData = result.data;
-      insertError = result.error;
+      console.log("Successfully deleted existing trunks");
     }
+    
+    console.log(`Inserting ${ports.length} port records for device ${deviceName}`);
+    
+    // Insert the new ports
+    const { data: insertedPorts, error: insertError } = await supabase
+      .from('user_trunks')
+      .insert(ports)
+      .select();
     
     if (insertError) {
       console.error("Error inserting trunks:", insertError);
+      
+      // Check if this might be due to device_ip column not existing
+      if (insertError.message && insertError.message.includes('device_ip')) {
+        console.log("Attempting insert without device_ip column");
+        
+        // Try again without the device_ip field
+        const portsWithoutDeviceIp = ports.map(p => {
+          const { device_ip, ...rest } = p;
+          return rest;
+        });
+        
+        const retryResult = await supabase
+          .from('user_trunks')
+          .insert(portsWithoutDeviceIp)
+          .select();
+          
+        if (retryResult.error) {
+          console.error("Second attempt failed:", retryResult.error);
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              message: `Error registering device: ${insertError.message}. Second attempt also failed: ${retryResult.error.message}`,
+              errorType: "database" 
+            }),
+            { headers: corsHeaders }
+          );
+        }
+        
+        console.log("Successfully inserted trunks without device_ip field");
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: "GoIP device registered successfully (without device IP)",
+            deviceName,
+            numPorts,
+            ports: retryResult.data || []
+          }),
+          { headers: corsHeaders }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -265,8 +273,10 @@ serve(async (req) => {
         { headers: corsHeaders }
       );
     }
-
-    // Generate Asterisk SIP configuration
+    
+    console.log("Successfully inserted all port records");
+    
+    // Store configuration in the database for Asterisk
     const sipConfig = ports.map(port => `
 [goip-${userId.substring(0, 8)}-port${port.port_number}]
 type=friend
@@ -283,16 +293,7 @@ nat=no
 qualify=yes
     `.trim()).join('\n\n');
     
-    // Get Asterisk server config from environment variables
-    const ASTERISK_SERVER_HOST = Deno.env.get("ASTERISK_SERVER_HOST");
-    const ASTERISK_SERVER_USER = Deno.env.get("ASTERISK_SERVER_USER");
-    const ASTERISK_SERVER_PASS = Deno.env.get("ASTERISK_SERVER_PASS");
-    const ASTERISK_SERVER_PORT = parseInt(Deno.env.get("ASTERISK_SERVER_PORT") || "22");
-    
-    if (!ASTERISK_SERVER_HOST || !ASTERISK_SERVER_USER || !ASTERISK_SERVER_PASS) {
-      console.log("Asterisk server not configured, storing configuration in database only");
-      
-      // Store configuration in the database even if we can't connect to Asterisk
+    try {
       const { error: configError } = await supabase
         .from('asterisk_configs')
         .insert({
@@ -302,80 +303,36 @@ qualify=yes
           config_content: sipConfig,
           active: true
         });
-        
+      
       if (configError) {
-        console.error("Error storing Asterisk configuration:", configError);
-        // Don't return error here as the device is registered, just log it
+        console.error("Error storing SIP configuration:", configError);
+        // Don't fail the request if this fails, just log it
       } else {
         console.log("Stored SIP configuration in database");
       }
-      
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: "Device registered successfully. SIP configuration stored for later application.",
-          device: {
-            device_name: deviceName,
-            device_ip: ipAddress,
-            num_ports: numPorts,
-            user_id: userId,
-            ports: insertData || []
-          },
-          asteriskConfig: {
-            configured: false,
-            reason: "Asterisk server is not configured"
-          }
-        }),
-        { headers: corsHeaders }
-      );
-    }
-
-    console.log(`Asterisk server is configured at ${ASTERISK_SERVER_HOST}`);
-    
-    // Store the configuration in the database regardless
-    const { error: configError } = await supabase
-      .from('asterisk_configs')
-      .insert({
-        user_id: userId,
-        config_name: `goip_${deviceName}`,
-        config_type: 'sip',
-        config_content: sipConfig,
-        active: true
-      });
-    
-    if (configError) {
-      console.error("Error storing Asterisk configuration:", configError);
-      // Don't return error here as the device is registered, just log it
-    } else {
-      console.log("Stored SIP configuration in database");
+    } catch (configError) {
+      console.error("Error storing configuration:", configError);
+      // Don't fail if this fails
     }
     
-    // Return success response
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "GoIP device registered successfully and SIP configuration stored",
-        device: {
-          device_name: deviceName,
-          device_ip: ipAddress,
-          num_ports: numPorts,
-          user_id: userId,
-          ports: insertData || []
-        },
-        asteriskConfig: {
-          configured: true,
-          server: ASTERISK_SERVER_HOST
-        }
+        message: "GoIP device registered successfully",
+        deviceName,
+        numPorts,
+        ports: insertedPorts || []
       }),
       { headers: corsHeaders }
     );
+    
   } catch (error) {
     console.error("Unhandled error in GoIP device registration:", error);
     
     return new Response(
       JSON.stringify({ 
         success: false,
-        message: "An error occurred while registering your GoIP device",
+        message: "An unexpected error occurred while registering your GoIP device",
         error: error instanceof Error ? error.message : String(error),
         errorType: "unhandled_error"
       }),

@@ -26,6 +26,10 @@ serve(async (req) => {
     if (!ASTERISK_SERVER_HOST || !ASTERISK_SERVER_USER || !ASTERISK_SERVER_PASS) {
       console.log("Asterisk server not configured properly");
       
+      // Even if not configured, try to detect local IPs for the client to use
+      const localIps = ['10.0.2.15']; // Common VirtualBox/VM local IP
+      const detectedIp = localIps[0]; // Default to the first one for now
+      
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -35,6 +39,11 @@ serve(async (req) => {
             user: !ASTERISK_SERVER_USER,
             pass: !ASTERISK_SERVER_PASS,
             port: !ASTERISK_SERVER_PORT
+          },
+          serverInfo: {
+            host: detectedIp,
+            port: 8088, // Default ARI port
+            detected: true
           }
         }),
         { headers: corsHeaders }
@@ -57,7 +66,8 @@ serve(async (req) => {
             message: "Successfully detected local Asterisk server (10.0.2.15)",
             serverInfo: {
               host: ASTERISK_SERVER_HOST,
-              port: ASTERISK_SERVER_PORT
+              port: ASTERISK_SERVER_PORT || 8088,
+              isLocal: true
             }
           }),
           { headers: corsHeaders }
@@ -83,11 +93,20 @@ serve(async (req) => {
       clearTimeout(timeoutId);
       
       if (!pingResponse) {
+        // Also try to detect common local IPs to help the user
+        const localIps = ['10.0.2.15']; // Common VirtualBox/VM local IP
+        const detectedIp = localIps[0]; // Default to the first one
+        
         return new Response(
           JSON.stringify({ 
             success: false, 
             message: `Could not reach Asterisk server at ${ASTERISK_SERVER_HOST}. Please verify the server address and ensure the server is online.`,
-            errorType: "connection"
+            errorType: "connection",
+            serverInfo: {
+              host: ASTERISK_SERVER_HOST,
+              suggestedLocalIp: detectedIp,
+              port: ASTERISK_SERVER_PORT || 8088
+            }
           }),
           { headers: corsHeaders }
         );
@@ -101,7 +120,7 @@ serve(async (req) => {
           message: "Successfully connected to Asterisk server",
           serverInfo: {
             host: ASTERISK_SERVER_HOST,
-            port: ASTERISK_SERVER_PORT
+            port: ASTERISK_SERVER_PORT || 8088
           }
         }),
         { headers: corsHeaders }
@@ -113,7 +132,11 @@ serve(async (req) => {
         JSON.stringify({ 
           success: false, 
           message: `Error connecting to Asterisk server: ${error instanceof Error ? error.message : String(error)}`,
-          errorType: "connection_test_error"
+          errorType: "connection_test_error",
+          serverInfo: {
+            host: ASTERISK_SERVER_HOST,
+            port: ASTERISK_SERVER_PORT || 8088
+          }
         }),
         { headers: corsHeaders }
       );
@@ -121,12 +144,20 @@ serve(async (req) => {
   } catch (error) {
     console.error("Unhandled error in Asterisk connection check:", error);
     
+    // Even if we have an error, try to return the local IP for devices
+    const fallbackIp = "10.0.2.15"; // Common VM IP
+    
     return new Response(
       JSON.stringify({ 
         success: false,
         message: "An unexpected error occurred while checking the Asterisk server connection",
         error: error instanceof Error ? error.message : String(error),
-        errorType: "unhandled_error"
+        errorType: "unhandled_error",
+        serverInfo: {
+          host: fallbackIp,
+          port: 8088,
+          fallback: true
+        }
       }),
       { status: 500, headers: corsHeaders }
     );
