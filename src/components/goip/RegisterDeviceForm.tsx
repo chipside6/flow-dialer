@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,6 +14,7 @@ import { goipService } from '@/utils/asterisk/services/goipService';
 import { Loader2, CheckCircle, Info, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
+import { LoadingErrorBoundary } from '@/components/common/LoadingErrorBoundary';
 import { tryCatchWithErrorHandling, DialerErrorType } from '@/utils/errorHandlingUtils';
 
 const formSchema = z.object({
@@ -28,6 +29,7 @@ export const RegisterDeviceForm = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
+  const [requestTimeout, setRequestTimeout] = useState<NodeJS.Timeout | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -37,6 +39,23 @@ export const RegisterDeviceForm = () => {
       numPorts: 1
     }
   });
+
+  // Clear any timeouts when component unmounts to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (requestTimeout) {
+        clearTimeout(requestTimeout);
+      }
+    };
+  }, [requestTimeout]);
+
+  const resetFormState = () => {
+    setIsRegistering(false);
+    if (requestTimeout) {
+      clearTimeout(requestTimeout);
+      setRequestTimeout(null);
+    }
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user?.id) {
@@ -51,6 +70,19 @@ export const RegisterDeviceForm = () => {
     setIsRegistering(true);
     setRegistrationSuccess(false);
     setRegistrationError(null);
+
+    // Set a timeout to prevent infinite loading state
+    const timeout = setTimeout(() => {
+      setIsRegistering(false);
+      setRegistrationError("Request timed out. The server might be busy or unreachable. Please try again later.");
+      toast({
+        title: "Request timed out",
+        description: "The server took too long to respond. Please try again.",
+        variant: "destructive"
+      });
+    }, 30000); // 30 seconds timeout
+    
+    setRequestTimeout(timeout);
 
     try {
       console.log("Starting device registration for:", values);
@@ -91,11 +123,19 @@ export const RegisterDeviceForm = () => {
       
       console.log("Edge function response status:", response.status);
       
-      const responseData = await response.json();
-      console.log("Edge function response data:", responseData);
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log("Edge function response data:", responseData);
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError);
+        throw new Error("Server returned an invalid response format");
+      }
       
       if (!response.ok) {
-        throw new Error(responseData.message || `Error: ${response.status} ${response.statusText}`);
+        const errorMessage = responseData?.message || `Error: ${response.status} ${response.statusText}`;
+        console.error("Error response:", errorMessage);
+        throw new Error(errorMessage);
       }
       
       if (!responseData.success) {
@@ -126,8 +166,16 @@ export const RegisterDeviceForm = () => {
         variant: "destructive"
       });
     } finally {
-      setIsRegistering(false);
+      resetFormState();
     }
+  };
+
+  // Handler for manual retry
+  const handleRetry = () => {
+    const formValues = form.getValues();
+    form.reset(formValues);
+    setRegistrationError(null);
+    setIsRegistering(false);
   };
 
   return (
@@ -137,97 +185,93 @@ export const RegisterDeviceForm = () => {
         <CardDescription>Add a new GoIP device to your account</CardDescription>
       </CardHeader>
       <CardContent>
-        {registrationSuccess && (
-          <Alert className="mb-4 bg-green-50 border-green-200">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-700">
-              Device registered successfully! SIP credentials have been automatically generated.
-              You can view them in your device details.
+        <LoadingErrorBoundary
+          isLoading={false}
+          error={registrationError ? new Error(registrationError) : null}
+          onRetry={handleRetry}
+        >
+          {registrationSuccess && (
+            <Alert className="mb-4 bg-green-50 border-green-200">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-700">
+                Device registered successfully! SIP credentials have been automatically generated.
+                You can view them in your device details.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          <Alert className="mb-4 bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-700">
+              SIP credentials are automatically generated when you register a device.
+              No manual configuration needed.
             </AlertDescription>
           </Alert>
-        )}
-        
-        {registrationError && (
-          <Alert className="mb-4 bg-red-50 border-red-200" variant="destructive">
-            <AlertCircle className="h-4 w-4 text-red-600" />
-            <AlertTitle>Registration Failed</AlertTitle>
-            <AlertDescription className="text-red-700">
-              {registrationError}
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        <Alert className="mb-4 bg-blue-50 border-blue-200">
-          <Info className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-blue-700">
-            SIP credentials are automatically generated when you register a device.
-            No manual configuration needed.
-          </AlertDescription>
-        </Alert>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="deviceName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Device Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="MyGoIP-1" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="ipAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>IP Address or Hostname</FormLabel>
-                  <FormControl>
-                    <Input placeholder="192.168.1.100" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="numPorts"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Number of Ports</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      min={1} 
-                      max={8} 
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value))} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button 
-              type="submit" 
-              className="w-full"
-              disabled={isRegistering}
-            >
-              {isRegistering ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Registering...
-                </>
-              ) : (
-                'Register Device'
-              )}
-            </Button>
-          </form>
-        </Form>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="deviceName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Device Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="MyGoIP-1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ipAddress"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>IP Address or Hostname</FormLabel>
+                    <FormControl>
+                      <Input placeholder="192.168.1.100" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="numPorts"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Number of Ports</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min={1} 
+                        max={8} 
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value))} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isRegistering}
+              >
+                {isRegistering ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Registering...
+                  </>
+                ) : (
+                  'Register Device'
+                )}
+              </Button>
+            </form>
+          </Form>
+        </LoadingErrorBoundary>
       </CardContent>
     </Card>
   );
