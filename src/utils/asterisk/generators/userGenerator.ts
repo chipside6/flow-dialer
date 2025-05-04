@@ -1,4 +1,3 @@
-
 import { securityUtils } from '../utils/securityUtils';
 
 /**
@@ -6,14 +5,19 @@ import { securityUtils } from '../utils/securityUtils';
  */
 export const userGenerator = {
   /**
-   * Generate a secure SIP password
+   * Generate a secure SIP password using a utility function
+   * @returns {string} A secure token for SIP password
    */
   generateSipPassword: (): string => {
     return securityUtils.generateSecureToken();
   },
   
   /**
-   * Generate a SIP configuration for a user
+   * Generate a SIP configuration for a user with customizable port and password
+   * @param {string} userId - The user ID for the SIP configuration
+   * @param {number} [portNumber=1] - The port number to associate with the user
+   * @param {string} [password] - The SIP password, defaults to a generated token
+   * @returns {string} The formatted SIP configuration for the user
    */
   generateSipConfig: (userId: string, portNumber: number = 1, password?: string): string => {
     const sipUser = `goip_${userId}_port${portNumber}`;
@@ -46,7 +50,10 @@ authenticate_qualify=no
   },
   
   /**
-   * Generate an extension configuration for a user
+   * Generate an extension configuration for a user (default port is 1)
+   * @param {string} userId - The user ID for the extension configuration
+   * @param {number} [portNumber=1] - The port number to associate with the user
+   * @returns {string} The formatted extension configuration for the user
    */
   generateExtensionConfig: (userId: string, portNumber: number = 1): string => {
     const sipUser = `goip_${userId}_port${portNumber}`;
@@ -68,8 +75,12 @@ exten => _X.,n,Hangup()
   
   /**
    * Generate GoIP provider SIP configuration
+   * @param {string} providerName - The name of the SIP provider
+   * @returns {string} The formatted GoIP provider SIP configuration
    */
   generateProviderConfig: (providerName: string): string => {
+    const providerPassword = securityUtils.generateSecureToken();
+    
     return `
 [${providerName}]
 type=endpoint
@@ -83,7 +94,7 @@ direct_media=no
 type=auth
 auth_type=userpass
 username=${providerName}
-password=${securityUtils.generateSecureToken()}
+password=${providerPassword}
 
 [${providerName}]
 type=aor
