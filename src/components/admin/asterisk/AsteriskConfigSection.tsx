@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/components/ui/use-toast';
-import { FileText, RefreshCw, AlertCircle, CheckCircle, AlertTriangle, Info, PhoneIcon, Server, Settings } from 'lucide-react';
+import { FileText, RefreshCw, AlertCircle, CheckCircle, AlertTriangle, Info, PhoneIcon, Server, Settings, Terminal } from 'lucide-react';
 import { asteriskService } from '@/utils/asteriskService';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getConfigFromStorage } from '@/utils/asterisk/config';
@@ -26,6 +26,7 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
   const [configValid, setConfigValid] = useState(true);
   const [supabaseUrl, setSupabaseUrl] = useState<string | null>(null);
   const [currentConfig, setCurrentConfig] = useState(() => getConfigFromStorage());
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
 
   // Check if config is valid and get Supabase URL on mount
   useEffect(() => {
@@ -40,12 +41,20 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
     
     // Get Supabase URL from the utility function
     if (!supabaseUrl) {
-      const url = getSupabaseUrl();
-      setSupabaseUrl(url);
-      
-      if (!url) {
-        setSyncError((prev) => 
-          prev ? `${prev} Supabase URL is not available.` : "Supabase URL is not available."
+      try {
+        const url = getSupabaseUrl();
+        setSupabaseUrl(url);
+        
+        if (!url) {
+          setSyncError((prev) => 
+            prev ? `${prev} Supabase URL is not available.` : "Supabase URL is not available."
+          );
+          setConfigValid(false);
+        }
+      } catch (error) {
+        console.error("Error getting Supabase URL:", error);
+        setSyncError((prev) =>
+          prev ? `${prev} Error accessing Supabase configuration.` : "Error accessing Supabase configuration."
         );
         setConfigValid(false);
       }
@@ -95,6 +104,42 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
 
     try {
       console.log('Starting Asterisk configuration sync for user:', userId);
+      
+      // First, check if we can connect to Asterisk
+      const checkResponse = await fetch(`${supabaseUrl}/functions/v1/check-asterisk-connection`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+        },
+        body: JSON.stringify({
+          serverIp: currentConfig.serverIp || '10.0.2.15'
+        })
+      });
+      
+      if (!checkResponse.ok) {
+        throw new Error(`Asterisk connection check failed: ${checkResponse.statusText}`);
+      }
+      
+      const checkResult = await checkResponse.json();
+      console.log('Asterisk connection check result:', checkResult);
+      
+      if (!checkResult.success) {
+        setSyncError(`Cannot connect to Asterisk server: ${checkResult.message}`);
+        setConnectionStatus({
+          success: false,
+          message: checkResult.message
+        });
+        toast({
+          title: "Connection Failed",
+          description: checkResult.message,
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Now perform the sync operation
       const result = await asteriskService.syncConfiguration(userId, 'sync_user');
       console.log('Sync result:', result);
       
@@ -159,8 +204,35 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
             <p><span className="font-medium">API URL:</span> {currentConfig.apiUrl || 'Not set'}</p>
             <p><span className="font-medium">Username:</span> {currentConfig.username || 'Not set'}</p>
             <p><span className="font-medium">Password:</span> {currentConfig.password ? '••••••••' : 'Not set'}</p>
-            <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp || 'Not set'}</p>
+            <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp || '10.0.2.15'} {currentConfig.serverIp === '10.0.2.15' && '(Local Server)'}</p>
           </div>
+          <div className="mt-3 flex justify-end">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowDebugInfo(!showDebugInfo)}
+            >
+              <Terminal className="mr-1 h-4 w-4" />
+              {showDebugInfo ? 'Hide' : 'Show'} Debug Info
+            </Button>
+          </div>
+          
+          {showDebugInfo && (
+            <div className="mt-3 bg-slate-100 dark:bg-slate-800 p-2 rounded text-xs font-mono overflow-x-auto">
+              <pre>
+                {JSON.stringify({
+                  config: {
+                    ...currentConfig,
+                    password: currentConfig.password ? '[REDACTED]' : null
+                  },
+                  supabaseUrl: supabaseUrl,
+                  configValid,
+                  localIp: '10.0.2.15',
+                  timestamp: new Date().toISOString()
+                }, null, 2)}
+              </pre>
+            </div>
+          )}
         </div>
 
         {!configValid && (
@@ -181,7 +253,13 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Request Taking Longer Than Expected</AlertTitle>
             <AlertDescription>
-              The sync request is taking longer than expected. There might be an issue with the server connection.
+              <p className="mb-2">The sync request is taking longer than expected. There might be an issue with the server connection.</p>
+              <p className="text-sm font-medium">Common causes:</p>
+              <ul className="list-disc list-inside text-sm space-y-1 mt-1">
+                <li>Asterisk server is not running</li>
+                <li>Firewall is blocking the connection</li>
+                <li>Network connectivity issues between Supabase and Asterisk</li>
+              </ul>
             </AlertDescription>
           </Alert>
         )}
@@ -256,7 +334,31 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-between">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            // Force using local server settings
+            const updatedConfig = {
+              apiUrl: `http://10.0.2.15:8088/ari/`,
+              username: 'admin',
+              password: 'admin',
+              serverIp: '10.0.2.15'
+            };
+            localStorage.setItem('asterisk_config', JSON.stringify(updatedConfig));
+            setCurrentConfig(updatedConfig);
+            toast({
+              title: "Local Server Settings Applied",
+              description: "Using default settings for local server (10.0.2.15)"
+            });
+            setTimeout(() => window.location.reload(), 1000);
+          }}
+        >
+          <Server className="mr-2 h-4 w-4" />
+          Use Local Server (10.0.2.15)
+        </Button>
+        
         <Link to="/settings">
           <Button 
             variant="outline"

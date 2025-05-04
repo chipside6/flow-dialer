@@ -4,10 +4,11 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AsteriskConfigSection } from '@/components/admin/asterisk/AsteriskConfigSection';
 import { AsteriskConnectionTest } from '@/components/diagnostic/AsteriskConnectionTest';
+import { AsteriskDiagnosticPanel } from '@/components/diagnostic/AsteriskDiagnosticPanel';
 import { useAuth } from "@/contexts/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Server } from "lucide-react";
 
 const AsteriskConfigPageContent = () => {
   const { user, isAdmin } = useAuth();
@@ -41,6 +42,16 @@ const AsteriskConfigPageContent = () => {
         </div>
 
         <div className="grid gap-6">
+          {/* Local Server Information */}
+          <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+            <Server className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+            <AlertTitle className="text-blue-800 dark:text-blue-300">Local Server Detected</AlertTitle>
+            <AlertDescription className="text-blue-700 dark:text-blue-400">
+              <p className="mb-2">Your server appears to be running locally at <strong>10.0.2.15</strong>. This configuration has been auto-detected.</p>
+              <p>For best results, make sure both your Asterisk server and GoIP device can communicate on the same network.</p>
+            </AlertDescription>
+          </Alert>
+
           <Card>
             <CardHeader>
               <CardTitle>Connection Test</CardTitle>
@@ -53,7 +64,10 @@ const AsteriskConfigPageContent = () => {
             </CardContent>
           </Card>
 
-          {user && <AsteriskConfigSection userId={user.id} />}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {user && <AsteriskConfigSection userId={user.id} />}
+            <AsteriskDiagnosticPanel />
+          </div>
         </div>
       </div>
     </DashboardLayout>

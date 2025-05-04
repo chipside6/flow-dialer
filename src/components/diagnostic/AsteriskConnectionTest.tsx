@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { connectionService } from "@/utils/asterisk/connectionService";
 import { useToast } from "@/components/ui/use-toast";
-import { saveConfigToStorage } from "@/utils/asterisk/config";
+import { saveConfigToStorage, getConfigFromStorage } from "@/utils/asterisk/config";
 
 import { CurrentConfigDisplay } from "./asterisk-connection/CurrentConfigDisplay";
 import { ConnectionTestButton } from "./asterisk-connection/ConnectionTestButton";
@@ -12,7 +12,8 @@ import { CorsInstructionsDialog } from "./asterisk-connection/CorsInstructionsDi
 import { TroubleshootingGuide } from "./asterisk-connection/TroubleshootingGuide";
 import { useAsteriskConfig } from "./asterisk-connection/useAsteriskConfig";
 import { Button } from '@/components/ui/button';
-import { Settings, RefreshCw, Server } from 'lucide-react';
+import { Settings, RefreshCw, Server, Terminal, Shield } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 export const AsteriskConnectionTest: React.FC = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -21,6 +22,7 @@ export const AsteriskConnectionTest: React.FC = () => {
     message: string;
   } | null>(null);
   const [showCorsHelp, setShowCorsHelp] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
   const { toast } = useToast();
   const { currentConfig, setCurrentConfig, loadCurrentConfig, handleRefreshConfig } = useAsteriskConfig();
   
@@ -59,8 +61,15 @@ export const AsteriskConnectionTest: React.FC = () => {
         description: "Attempting to connect to Asterisk server...",
       });
 
+      console.log("Starting Asterisk connection test with config:", {
+        apiUrl: currentConfig.apiUrl,
+        username: currentConfig.username,
+        serverIp: currentConfig.serverIp || 'not set'
+      });
+
       const result = await connectionService.testConnection();
       setConnectionResult(result);
+      console.log("Connection test result:", result);
 
       toast({
         title: result.success ? "Connection Successful" : "Connection Failed",
@@ -77,6 +86,7 @@ export const AsteriskConnectionTest: React.FC = () => {
         setTimeout(() => setShowCorsHelp(true), 500);
       }
     } catch (error) {
+      console.error("Connection test error:", error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setConnectionResult({
         success: false,
@@ -179,7 +189,35 @@ export const AsteriskConnectionTest: React.FC = () => {
           onClick={testConnection}
           variant="default"
         />
+        <Button
+          variant="outline"
+          size="icon"
+          className="sm:w-auto"
+          onClick={() => setShowDebug(!showDebug)}
+        >
+          <Terminal className="h-4 w-4" />
+          <span className="sr-only">Debug Info</span>
+        </Button>
       </div>
+
+      {showDebug && (
+        <Alert className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <Terminal className="h-4 w-4" />
+          <AlertTitle>Debug Information</AlertTitle>
+          <AlertDescription>
+            <div className="overflow-x-auto">
+              <pre className="text-xs p-2 bg-slate-100 dark:bg-slate-800 rounded">
+                {JSON.stringify({
+                  config: currentConfig,
+                  localIp: localIpAddress,
+                  connectionResult: connectionResult || 'No test run yet',
+                  timestamp: new Date().toISOString()
+                }, null, 2)}
+              </pre>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <ConnectionResultDisplay result={connectionResult} />
 

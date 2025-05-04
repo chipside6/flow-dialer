@@ -1,207 +1,179 @@
 
 import { getConfigFromStorage } from './asterisk/config';
-import { supabase } from '@/integrations/supabase/client';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 export const asteriskService = {
   /**
-   * Test connection to Asterisk server
+   * Sync user configuration with Asterisk
    */
-  testConnection: async (): Promise<{ success: boolean; message: string }> => {
-    const config = getConfigFromStorage();
-    
+  syncConfiguration: async (userId: string, operation: 'reload' | 'sync_user' | 'sync_all' = 'sync_user'): Promise<{ 
+    success: boolean; 
+    message: string;
+  }> => {
     try {
-      // Try to connect to the Asterisk API
-      const response = await fetch(`${config.apiUrl}/applications`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
-        }
-      });
+      console.log(`Syncing Asterisk configuration for user ${userId}, operation: ${operation}`);
       
-      if (response.ok) {
-        return { 
-          success: true, 
-          message: 'Successfully connected to Asterisk ARI' 
-        };
-      } else {
-        try {
-          const errorData = await response.json();
-          return { 
-            success: false, 
-            message: `Error connecting to Asterisk: ${errorData.message || response.statusText}` 
-          };
-        } catch (e) {
-          return {
-            success: false,
-            message: `Error connecting to Asterisk: ${response.statusText}`
-          };
-        }
-      }
-    } catch (error) {
-      return { 
-        success: false, 
-        message: `Error connecting to Asterisk: ${error instanceof Error ? error.message : String(error)}` 
-      };
-    }
-  },
-  
-  /**
-   * Get status of a GoIP port
-   */
-  checkGoipStatus: async (userId: string, portNumber: number = 1): Promise<{ online: boolean; message: string; lastSeen?: string }> => {
-    try {
-      // Get session for authentication
+      // Get the session
       const { data: session } = await supabase.auth.getSession();
+      const accessToken = session.session?.access_token;
       
-      if (!session?.session?.access_token) {
+      if (!accessToken) {
+        console.error('No access token available');
         throw new Error('Authentication required');
       }
       
-      // Get base URL from the utility function
+      // Get the Supabase URL from utility function
       const supabaseUrl = getSupabaseUrl();
       
       if (!supabaseUrl) {
+        console.error('Could not determine Supabase URL');
         throw new Error('Could not determine Supabase URL');
       }
       
-      // Call the edge function to check GoIP status
-      const response = await fetch(`${supabaseUrl}/functions/v1/goip-asterisk-integration`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.session.access_token}`
-        },
-        body: JSON.stringify({
-          userId,
-          action: 'check_status'
-        })
+      // Get current Asterisk config
+      const config = getConfigFromStorage();
+      console.log('Using Asterisk config:', {
+        apiUrl: config.apiUrl,
+        serverIp: config.serverIp,
+        username: config.username ? '[SET]' : '[NOT SET]'
       });
       
-      if (!response.ok) {
-        throw new Error(`Error checking GoIP status: ${response.status} ${response.statusText}`);
-      }
-      
-      // Check content type to ensure it's JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        console.error('Invalid response format:', await response.text());
-        throw new Error('Invalid response format from server');
-      }
-      
-      const result = await response.json();
-      
-      if (!result.success) {
-        throw new Error(result.error || result.message || 'Unknown error checking GoIP status');
-      }
-      
-      // Find the status for the specific port
-      const portStatus = result.statuses?.find((s: any) => s.port === portNumber);
-      
-      if (!portStatus) {
-        return {
-          online: false,
-          message: `No information available for port ${portNumber}`
-        };
-      }
-      
-      return {
-        online: portStatus.status === 'registered',
-        message: portStatus.status === 'registered' 
-          ? `Port ${portNumber} is online and registered` 
-          : `Port ${portNumber} is offline or not registered`,
-        lastSeen: portStatus.lastSeen
-      };
-    } catch (error) {
-      console.error('Error checking GoIP status:', error);
-      return {
-        online: false,
-        message: error instanceof Error ? error.message : 'Unknown error checking GoIP status'
-      };
-    }
-  },
-  
-  /**
-   * Sync GoIP configuration with Asterisk server
-   */
-  syncConfiguration: async (userId: string, operation: 'reload' | 'sync_user' | 'sync_all' = 'sync_user'): Promise<{ success: boolean; message: string }> => {
-    try {
-      // Get session for authentication
-      const { data: session } = await supabase.auth.getSession();
-      
-      if (!session?.session?.access_token) {
-        throw new Error('Authentication required');
-      }
-      
-      console.log('Starting Asterisk configuration sync with Edge Function...');
-      
-      // Get the Supabase URL from the utility function
-      const supabaseUrl = getSupabaseUrl();
-      
-      if (!supabaseUrl) {
-        throw new Error('Could not determine Supabase URL');
-      }
-      
-      console.log(`Using Supabase URL: ${supabaseUrl}`);
-      
-      // Call the edge function to sync configuration
+      // Make the request to the sync-goip-config edge function
+      console.log(`Calling edge function at ${supabaseUrl}/functions/v1/sync-goip-config`);
       const response = await fetch(`${supabaseUrl}/functions/v1/sync-goip-config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.session.access_token}`
+          'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify({
           userId,
-          operation
+          operation,
+          serverIp: config.serverIp || '10.0.2.15' // Use local IP if not explicitly set
         })
       });
       
-      // Handle HTTP errors
-      if (!response.ok) {
-        console.error('HTTP error in sync:', response.status, response.statusText);
-        const errorText = await response.text();
-        console.error('Error response body:', errorText);
-        
+      // Log the raw response for debugging
+      const responseText = await response.text();
+      console.log('Raw edge function response:', responseText);
+      
+      // Parse the JSON response
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Error parsing response:', e);
         return {
           success: false,
-          message: `Server error: ${response.status} ${response.statusText}`
+          message: `Error parsing response from server: ${responseText.substring(0, 100)}...`
         };
       }
       
-      // Check content type and parse response
-      const contentType = response.headers.get('content-type');
-      
-      // For JSON responses
-      if (contentType && contentType.includes('application/json')) {
-        const result = await response.json();
+      // Handle errors
+      if (!response.ok) {
+        console.error('Error response from sync-goip-config:', result);
         return {
-          success: result.success || false,
-          message: result.message || 'Configuration synced successfully'
+          success: false,
+          message: result?.message || result?.error || `Server returned error: ${response.status} ${response.statusText}`
         };
       }
       
-      // For non-JSON responses
-      const responseText = await response.text();
-      console.error('Unexpected response format:', responseText);
-      
+      // Return the result
       return {
-        success: false,
-        message: 'Invalid response format from server. Please check the edge function URL and configuration.'
+        success: result.success || false,
+        message: result.message || 'Configuration synced successfully'
       };
     } catch (error) {
-      console.error('Error syncing configuration:', error);
-      
-      // Improved error message to help diagnose the issue
-      let errorMessage = 'Unknown error syncing configuration';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
+      console.error('Error in syncConfiguration:', error);
       return {
         success: false,
-        message: errorMessage
+        message: error instanceof Error 
+          ? `Error syncing configuration: ${error.message}` 
+          : 'An unexpected error occurred while syncing configuration'
+      };
+    }
+  },
+  
+  /**
+   * Test connection to Asterisk server
+   */
+  testAsteriskConnection: async (serverIp?: string): Promise<{
+    success: boolean;
+    message: string;
+    details?: any;
+  }> => {
+    try {
+      console.log(`Testing Asterisk connection to server IP: ${serverIp || 'not specified'}`);
+      
+      // Get the Supabase URL from utility function
+      const supabaseUrl = getSupabaseUrl();
+      
+      if (!supabaseUrl) {
+        console.error('Could not determine Supabase URL');
+        return {
+          success: false,
+          message: 'Could not determine Supabase URL'
+        };
+      }
+      
+      // Get the session
+      const { data: session } = await supabase.auth.getSession();
+      const accessToken = session.session?.access_token;
+      
+      if (!accessToken) {
+        console.error('No access token available');
+        return {
+          success: false,
+          message: 'Authentication required'
+        };
+      }
+      
+      // Make the request to the check-asterisk-connection edge function
+      console.log(`Calling edge function at ${supabaseUrl}/functions/v1/check-asterisk-connection`);
+      const response = await fetch(`${supabaseUrl}/functions/v1/check-asterisk-connection`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          serverIp: serverIp || '10.0.2.15' // Use local IP if not specified
+        })
+      });
+      
+      // Log the raw response for debugging
+      const responseText = await response.text();
+      console.log('Raw edge function response:', responseText);
+      
+      // Parse the JSON response
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Error parsing response:', e);
+        return {
+          success: false,
+          message: `Error parsing response from server: ${responseText.substring(0, 100)}...`
+        };
+      }
+      
+      // Return the result
+      return {
+        success: result.success || false,
+        message: result.message || 'Connection test completed',
+        details: result
+      };
+    } catch (error) {
+      console.error('Error in testAsteriskConnection:', error);
+      return {
+        success: false,
+        message: error instanceof Error 
+          ? `Error testing connection: ${error.message}` 
+          : 'An unexpected error occurred while testing connection'
       };
     }
   }
 };
+
+export default asteriskService;
