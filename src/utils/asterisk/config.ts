@@ -4,7 +4,7 @@
  */
 
 // Default values using the detected server IP
-export const ASTERISK_SERVER_IP = '10.0.2.15'; // Your detected server IP
+export const ASTERISK_SERVER_IP = '192.168.0.197'; // Your detected server IP
 export const ASTERISK_API_URL = `http://${ASTERISK_SERVER_IP}:8088/ari/`;
 export const ASTERISK_API_USERNAME = 'admin';
 export const ASTERISK_API_PASSWORD = 'admin';
