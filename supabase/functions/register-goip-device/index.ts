@@ -38,58 +38,31 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase clients
+    // Extract JWT token from Authorization header
+    const token = authHeader.replace("Bearer ", "");
+    
+    // Create Supabase client with the service role key
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { 
-        auth: { 
-          persistSession: false,
-          autoRefreshToken: false,
-          detectSessionInUrl: false 
-        },
-        global: {
-          headers: {
-            Authorization: authHeader,
-          },
-        },
-      }
-    );
-
-    // Verify the user is authenticated - be more explicit about error handling
-    const { data: authData, error: userError } = await supabase.auth.getUser();
     
-    if (userError) {
-      console.log("Authentication failed:", userError.message);
+    // Verify the JWT token
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.log("Authentication error:", authError?.message || "No user found");
       return new Response(
         JSON.stringify({ 
           success: false, 
           message: "Authentication failed", 
-          error: userError.message 
-        }),
-        { status: 401, headers: corsHeaders }
-      );
-    }
-    
-    if (!authData?.user) {
-      console.log("No user found in auth data");
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          message: "Authentication required", 
-          error: "No user found" 
+          error: authError?.message || "Invalid authentication token" 
         }),
         { status: 401, headers: corsHeaders }
       );
     }
 
-    console.log(`Authenticated user: ${authData.user.id}`);
+    console.log(`Authenticated user: ${user.id}`);
 
     // Get request data
     let requestData: DeviceRegistrationRequest;
@@ -144,8 +117,8 @@ serve(async (req) => {
     }
     
     // Verify the user is registering their own device
-    if (userId !== authData.user.id) {
-      console.log(`Permission denied: User ${authData.user.id} cannot register device for ${userId}`);
+    if (userId !== user.id) {
+      console.log(`Permission denied: User ${user.id} cannot register device for ${userId}`);
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -174,12 +147,13 @@ serve(async (req) => {
         sip_pass: password,
         status: 'active',
         trunk_name: deviceName,
-        user_id: userId
+        user_id: userId,
+        device_ip: ipAddress
       });
     }
     
     // Check if any existing trunks with the same name exist
-    let { data: existingTrunks, error: checkError } = await supabase
+    let { data: existingTrunks, error: checkError } = await supabaseAdmin
       .from('user_trunks')
       .select('*')
       .eq('user_id', userId)
@@ -193,7 +167,7 @@ serve(async (req) => {
           message: `Database error: ${checkError.message}`,
           errorType: "database" 
         }),
-        { headers: corsHeaders }
+        { headers: corsHeaders, status: 500 }
       );
     }
     
@@ -201,7 +175,7 @@ serve(async (req) => {
       console.log(`Found ${existingTrunks.length} existing trunks with name ${deviceName}, deleting...`);
       
       // Delete any existing trunks with the same name
-      const { error: deleteError } = await supabase
+      const { error: deleteError } = await supabaseAdmin
         .from('user_trunks')
         .delete()
         .eq('user_id', userId)
@@ -215,7 +189,7 @@ serve(async (req) => {
             message: `Database error: ${deleteError.message}`,
             errorType: "database" 
           }),
-          { headers: corsHeaders }
+          { headers: corsHeaders, status: 500 }
         );
       }
       
@@ -224,69 +198,42 @@ serve(async (req) => {
     
     console.log(`Inserting ${ports.length} port records for device ${deviceName}`);
     
-    // First, try a basic insert without checking for device_ip column
-    const { data: insertedPorts, error: insertError } = await supabase
+    // Check if device_ip column exists in user_trunks table
+    const { error: columnCheckError, data: columnCheckData } = await supabaseAdmin.rpc('column_exists', {
+      'table_name': 'user_trunks',
+      'column_name': 'device_ip'
+    });
+    
+    if (columnCheckError) {
+      console.error("Error checking for device_ip column:", columnCheckError);
+    }
+    
+    let insertData = [];
+    if (columnCheckData === true) {
+      // If device_ip column exists, include it
+      insertData = ports;
+    } else {
+      // If device_ip column doesn't exist, remove it from the insert data
+      insertData = ports.map(port => {
+        const { device_ip, ...rest } = port;
+        return rest;
+      });
+    }
+    
+    const { data: insertedPorts, error: insertError } = await supabaseAdmin
       .from('user_trunks')
-      .insert(ports.map(port => ({
-        ...port,
-        device_ip: ipAddress
-      })))
+      .insert(insertData)
       .select();
     
     if (insertError) {
       console.error("Error inserting trunks:", insertError);
-      
-      // If the error might be related to device_ip column not existing
-      if (insertError.message && insertError.message.includes('device_ip')) {
-        console.log("Attempting insert without device_ip column");
-        
-        // Try again without the device_ip field
-        const portsCopy = ports.map(p => ({
-          port_number: p.port_number,
-          sip_user: p.sip_user,
-          sip_pass: p.sip_pass,
-          status: p.status,
-          trunk_name: p.trunk_name,
-          user_id: p.user_id
-        }));
-        
-        const { data: retryData, error: retryError } = await supabase
-          .from('user_trunks')
-          .insert(portsCopy)
-          .select();
-          
-        if (retryError) {
-          console.error("Second attempt also failed:", retryError);
-          return new Response(
-            JSON.stringify({ 
-              success: false, 
-              message: "Database error: Unable to register device",
-              error: retryError.message
-            }),
-            { headers: corsHeaders }
-          );
-        }
-        
-        console.log("Successfully inserted trunks without device_ip field");
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: "GoIP device registered successfully",
-            deviceName,
-            numPorts,
-            ports: retryData || []
-          }),
-          { headers: corsHeaders }
-        );
-      }
-      
       return new Response(
         JSON.stringify({ 
           success: false, 
           message: "Database error: Unable to register device",
           error: insertError.message
         }),
-        { headers: corsHeaders }
+        { headers: corsHeaders, status: 500 }
       );
     }
     

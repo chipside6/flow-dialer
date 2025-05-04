@@ -100,12 +100,14 @@ export const RegisterDeviceForm = () => {
       }
       
       // Get auth session for authentication
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
-      if (!sessionData?.session?.access_token) {
-        console.error("Auth error: No valid session found");
-        throw new Error('Authentication required: Unable to get session');
+      if (sessionError || !sessionData?.session?.access_token) {
+        console.error("Auth error:", sessionError || "No valid session found");
+        throw new Error(sessionError?.message || 'Authentication required: No valid session');
       }
+      
+      console.log("Got access token for user", user.id);
       
       // Call the edge function to register the device
       const response = await fetch(`${supabaseUrl}/functions/v1/register-goip-device`, {

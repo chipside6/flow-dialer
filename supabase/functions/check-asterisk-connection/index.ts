@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.3";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json"
 };
 
 serve(async (req) => {
@@ -16,20 +17,9 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
     
     // Get authorization header
     const authHeader = req.headers.get("Authorization");
-    
-    // Initialize Supabase clients
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { persistSession: false },
-    });
-    
-    const supabase = authHeader ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: { persistSession: false },
-      global: { headers: { Authorization: authHeader } },
-    }) : null;
     
     // Get request parameters
     let { serverIp, checkOnly } = { serverIp: "", checkOnly: false };
@@ -45,14 +35,14 @@ serve(async (req) => {
       // Continue with defaults if parsing fails
     }
     
-    // Get server configuration - check environment variables first
-    const serverHost = Deno.env.get("ASTERISK_SERVER_HOST") || "127.0.0.1";
-    const serverUser = Deno.env.get("ASTERISK_SERVER_USER") || "";
-    const serverPass = Deno.env.get("ASTERISK_SERVER_PASS") || "";
-    const serverPort = parseInt(Deno.env.get("ASTERISK_SERVER_PORT") || "22");
-    
-    // For IP detection only - return early
+    // For check-only mode, we don't need authentication
     if (checkOnly) {
+      // Get server configuration - check environment variables first
+      const serverHost = Deno.env.get("ASTERISK_SERVER_HOST") || "127.0.0.1";
+      const serverUser = Deno.env.get("ASTERISK_SERVER_USER") || "";
+      const serverPass = Deno.env.get("ASTERISK_SERVER_PASS") || "";
+      const serverPort = parseInt(Deno.env.get("ASTERISK_SERVER_PORT") || "22");
+      
       console.log("Check only mode - returning server info");
       
       return new Response(
@@ -66,39 +56,56 @@ serve(async (req) => {
             password: serverPass ? "[SET]" : "[NOT SET]"
           }
         }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { headers: corsHeaders }
       );
     }
     
-    // Check if user is authenticated for non-checkOnly requests
-    if (supabase) {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !user) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            message: "Authentication required",
-            error: userError?.message
-          }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+    // For non-checkOnly requests, require authentication
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Authentication required",
+          error: "No authorization header"
+        }),
+        { status: 401, headers: corsHeaders }
+      );
     }
     
-    // Try to connect to Asterisk server (simulated here as we can't do SSH)
+    // Extract JWT token from Authorization header
+    const token = authHeader.replace("Bearer ", "");
+    
+    // Create Supabase client with service role key
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Verify the JWT token
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Authentication failed",
+          error: authError?.message || "Invalid token"
+        }),
+        { status: 401, headers: corsHeaders }
+      );
+    }
+    
+    // Get server configuration
+    const serverHost = Deno.env.get("ASTERISK_SERVER_HOST") || "127.0.0.1";
+    const serverUser = Deno.env.get("ASTERISK_SERVER_USER") || "";
+    const serverPass = Deno.env.get("ASTERISK_SERVER_PASS") || "";
+    const serverPort = parseInt(Deno.env.get("ASTERISK_SERVER_PORT") || "22");
+    
+    // Since we're in an edge function, we'll simulate the connection check
     const targetServerIp = serverIp || serverHost || "127.0.0.1";
     
     console.log(`Testing connection to Asterisk server at ${targetServerIp}`);
     
-    // Since we're in an edge function, we'll simulate the connection check
-    // In a real implementation, this would attempt to connect via SSH or API
-    
-    // For now, we'll assume connectivity based on having config values
+    // Simulate a connection test - biased to succeed for local addresses
     const hasCredentials = serverUser && serverPass;
     const isLocalhost = targetServerIp === "127.0.0.1" || targetServerIp === "localhost";
-    
-    // Simulate a connection test - biased to succeed for local addresses
     const connectionSuccessful = hasCredentials || isLocalhost || Math.random() > 0.2;
     
     const result = {
@@ -117,7 +124,7 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify(result),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { headers: corsHeaders }
     );
   } catch (error) {
     console.error("Error in check-asterisk-connection function:", error);
@@ -128,7 +135,7 @@ serve(async (req) => {
         message: "An error occurred while checking Asterisk connection",
         error: error instanceof Error ? error.message : String(error)
       }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: corsHeaders }
     );
   }
 });
