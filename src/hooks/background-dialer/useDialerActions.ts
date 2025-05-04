@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { DialStatus, DialerFormData } from "@/components/background-dialer/types";
 import { autoDialerService } from "@/services/autodialer/autoDialerService";
@@ -7,10 +6,9 @@ import { usePollingInterval } from "@/hooks/usePollingInterval";
 import { goipPortManager } from "@/utils/asterisk/services/goipPortManager";
 import { useAuth } from "@/contexts/auth";
 
-export const useDialerActions = (
-  formData: DialerFormData,
-  campaignId: string
-) => {
+const RETRY_DELAY = 3000; // Retry delay for error handling (3 seconds)
+
+export const useDialerActions = (formData: DialerFormData, campaignId: string) => {
   const { user } = useAuth();
   const [isDialing, setIsDialing] = useState<boolean>(false);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
@@ -20,77 +18,73 @@ export const useDialerActions = (
     totalCalls: 0,
     completedCalls: 0,
     answeredCalls: 0,
-    failedCalls: 0
+    failedCalls: 0,
   });
-  
-  // Get available ports count
-  const getAvailablePorts = useCallback(async () => {
-    if (!user?.id) return;
+
+  const handleToast = useCallback((message: string, variant = "default") => {
+    toast({
+      title: message.title,
+      description: message.description,
+      variant,
+    });
+  }, []);
+
+  // Fetch available ports count
+  const getAvailablePorts = useCallback(async (retry = true) => {
+    if (!user?.id) return 0;
     
     try {
       const ports = await goipPortManager.getUserPorts(user.id);
-      const availableCount = ports.filter(p => p.status === 'available').length;
+      const availableCount = ports.filter((p) => p.status === 'available').length;
       setAvailablePorts(availableCount);
       return availableCount;
     } catch (error) {
       console.error("Error getting available ports:", error);
-      return 1; // Default to 1 if error
+      if (retry) {
+        setTimeout(() => getAvailablePorts(false), RETRY_DELAY); // Retry after 3 seconds
+      }
+      return 0; // Return 0 if error persists
     }
   }, [user?.id]);
-  
-  // Load ports on initial render
+
   useEffect(() => {
     getAvailablePorts();
   }, [getAvailablePorts]);
-  
+
   // Poll for status updates when a job is running
   usePollingInterval(
     async () => {
       if (!currentJobId || !user?.id) return;
-      
+
       try {
         const { success, job } = await autoDialerService.getJobStatus(currentJobId, user.id);
-        
+
         if (success && job) {
-          // Convert string status to our DialStatus type
           const typedStatus = (job.status as "running" | "completed" | "failed" | "stopped" | "idle") || 'idle';
-          
-          // Update to handle the response structure correctly
           setDialStatus({
             status: typedStatus,
             totalCalls: job.total_calls || 0,
             completedCalls: job.completed_calls || 0,
             answeredCalls: job.successful_calls || 0,
-            failedCalls: job.failed_calls || 0
+            failedCalls: job.failed_calls || 0,
           });
-          
+
           if (job.status === 'completed' || job.status === 'failed') {
             setIsDialing(false);
-            
-            if (job.status === 'completed') {
-              toast({
-                title: "Dialing Complete",
-                description: `Successfully completed dialing campaign with ${job.successful_calls || 0} answered calls.`,
-              });
-            } else {
-              toast({
-                title: "Dialing Failed",
-                description: "There was an issue with the dialing operation.",
-                variant: "destructive",
-              });
-            }
-            
-            // Update ports count after job completes
+            const message = job.status === 'completed' 
+              ? `Successfully completed dialing campaign with ${job.successful_calls || 0} answered calls.`
+              : "There was an issue with the dialing operation.";
+            const variant = job.status === 'completed' ? "success" : "destructive";
+            handleToast({ title: "Dialing Complete", description: message }, variant);
             getAvailablePorts();
           }
         }
       } catch (error) {
         console.error("Error polling for status:", error);
-        toast({
+        handleToast({
           title: "Status Update Failed",
           description: "Could not get the latest dialing status.",
-          variant: "destructive",
-        });
+        }, "destructive");
       }
     },
     {
@@ -98,37 +92,26 @@ export const useDialerActions = (
       interval: 3000,
     }
   );
-  
+
   const startDialing = useCallback(async () => {
     if (!formData.contactListId || !user?.id) {
-      toast({
-        title: "Incomplete Configuration",
-        description: "Please select a contact list before starting.",
-        variant: "destructive",
-      });
+      handleToast({ title: "Incomplete Configuration", description: "Please select a contact list before starting." }, "destructive");
       return;
     }
-    
+
     try {
-      // Get available ports count
       const portsCount = await getAvailablePorts();
-      
       if (portsCount === 0) {
-        toast({
-          title: "No Available Ports",
-          description: "All GoIP ports are currently in use. Please try again later.",
-          variant: "destructive",
-        });
+        handleToast({ title: "No Available Ports", description: "All GoIP ports are currently in use. Please try again later." }, "destructive");
         return;
       }
-      
-      // Start dialer job with automatic port assignment
+
       const response = await autoDialerService.startDialerJob({
-        campaignId, 
+        campaignId,
         userId: user.id,
-        maxConcurrentCalls: portsCount // Use all available ports
+        maxConcurrentCalls: portsCount,
       });
-      
+
       if (response.success && response.jobId) {
         setCurrentJobId(response.jobId);
         setIsDialing(true);
@@ -137,95 +120,52 @@ export const useDialerActions = (
           totalCalls: 0,
           completedCalls: 0,
           answeredCalls: 0,
-          failedCalls: 0
+          failedCalls: 0,
         });
-        
-        toast({
-          title: "Dialing Started",
-          description: `The system is now dialing your contact list using ${portsCount} available ports.`,
-        });
+
+        handleToast({ title: "Dialing Started", description: `Dialing using ${portsCount} available ports.` });
       } else {
         throw new Error(response.error || "Unknown error starting dialing");
       }
     } catch (error) {
       console.error("Error starting dialing:", error);
-      toast({
-        title: "Failed to Start Dialing",
-        description: "There was an error starting the dialing process.",
-        variant: "destructive",
-      });
+      handleToast({ title: "Failed to Start Dialing", description: "There was an error starting the dialing process." }, "destructive");
     }
-  }, [campaignId, formData.contactListId, user?.id, getAvailablePorts]);
-  
+  }, [campaignId, formData.contactListId, user?.id, getAvailablePorts, handleToast]);
+
   const stopDialing = useCallback(async () => {
     if (!currentJobId || !user?.id) return;
-    
+
     try {
       await autoDialerService.cancelDialerJob(currentJobId, user.id);
       setIsDialing(false);
-      setDialStatus({
-        ...dialStatus,
-        status: 'stopped'
-      });
-      
-      toast({
-        title: "Dialing Stopped",
-        description: "The dialing operation has been stopped and all ports have been released.",
-      });
-      
-      // Update available ports
+      setDialStatus({ ...dialStatus, status: 'stopped' });
+
+      handleToast({ title: "Dialing Stopped", description: "The dialing operation has been stopped and all ports have been released." });
       getAvailablePorts();
     } catch (error) {
       console.error("Error stopping dialing:", error);
-      toast({
-        title: "Failed to Stop Dialing",
-        description: "There was an error stopping the dialing process.",
-        variant: "destructive",
-      });
+      handleToast({ title: "Failed to Stop Dialing", description: "There was an error stopping the dialing process." }, "destructive");
     }
-  }, [currentJobId, dialStatus, user?.id, getAvailablePorts]);
-  
-  // Make a test call using a single available port
+  }, [currentJobId, dialStatus, user?.id, getAvailablePorts, handleToast]);
+
   const makeTestCall = useCallback(async (phoneNumber: string) => {
     if (!user?.id) {
-      toast({
-        title: "Authentication Required",
-        description: "You must be logged in to make test calls.",
-        variant: "destructive",
-      });
+      handleToast({ title: "Authentication Required", description: "You must be logged in to make test calls." }, "destructive");
       return;
     }
-    
+
     try {
       const result = await autoDialerService.makeTestCall(phoneNumber, campaignId, user.id);
-      
-      if (result.success) {
-        toast({
-          title: "Test Call Initiated",
-          description: result.message,
-        });
-      } else {
-        toast({
-          title: "Test Call Failed",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
-      
-      // Update available ports
-      setTimeout(() => {
-        getAvailablePorts();
-      }, 1000);
+      const variant = result.success ? "success" : "destructive";
+      handleToast({ title: result.success ? "Test Call Initiated" : "Test Call Failed", description: result.message }, variant);
+      setTimeout(() => getAvailablePorts(), 1000);
     } catch (error) {
       console.error("Error making test call:", error);
-      toast({
-        title: "Test Call Failed",
-        description: "Could not initiate test call.",
-        variant: "destructive",
-      });
+      handleToast({ title: "Test Call Failed", description: "Could not initiate test call." }, "destructive");
     }
-  }, [campaignId, user?.id, getAvailablePorts]);
-  
+  }, [campaignId, user?.id, getAvailablePorts, handleToast]);
+
   return {
     isDialing,
     currentJobId,
@@ -234,6 +174,6 @@ export const useDialerActions = (
     startDialing,
     stopDialing,
     makeTestCall,
-    refreshPortsStatus: getAvailablePorts
+    refreshPortsStatus: getAvailablePorts,
   };
 };
