@@ -39,6 +39,7 @@ export const RegisterDeviceForm = () => {
   const [localIpAddress, setLocalIpAddress] = useState<string>('');
   const [testingLocalIp, setTestingLocalIp] = useState(false);
   const [isLoadingIp, setIsLoadingIp] = useState(true);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   // The form
   const form = useForm<z.infer<typeof formSchema>>({
@@ -63,31 +64,61 @@ export const RegisterDeviceForm = () => {
       setIsLoadingIp(true);
       try {
         // Call our edge function to check connection status which includes server IP detection
-        const response = await fetch('/api/check-asterisk-connection', {
-          method: 'GET',
+        const supabaseUrl = getSupabaseUrl();
+        console.log("Detecting local IP using URL:", supabaseUrl);
+        
+        const { data: session } = await supabase.auth.getSession();
+        const accessToken = session?.session?.access_token;
+        
+        if (!accessToken) {
+          console.log("No authentication token available for local IP detection");
+          // Fall back to a default local IP
+          setLocalIpAddress('10.0.2.15');
+          setIsLocalDetection(true);
+          form.setValue('ipAddress', '10.0.2.15');
+          setIsLoadingIp(false);
+          return;
+        }
+        
+        const response = await fetch(`${supabaseUrl}/functions/v1/check-asterisk-connection`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-          }
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({
+            checkOnly: true
+          })
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          if (data.serverInfo?.host) {
-            setLocalIpAddress(data.serverInfo.host);
-            setIsLocalDetection(true);
-            
-            // If it's a local IP, pre-fill the form
-            if (data.serverInfo.host === '10.0.2.15') {
-              form.setValue('ipAddress', data.serverInfo.host);
-              console.log('Pre-filled form with detected local IP:', data.serverInfo.host);
-            }
-          }
+        if (!response.ok) {
+          console.error("Error response from check-asterisk-connection:", response.status, response.statusText);
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log("Local IP detection result:", result);
+        
+        if (result?.serverInfo?.host) {
+          setLocalIpAddress(result.serverInfo.host);
+          setIsLocalDetection(true);
+          
+          // Pre-fill the form with the local IP
+          form.setValue('ipAddress', result.serverInfo.host);
+          console.log('Pre-filled form with detected local IP:', result.serverInfo.host);
+        } else {
+          // Default fallback
+          setLocalIpAddress('10.0.2.15');
+          setIsLocalDetection(true);
+          form.setValue('ipAddress', '10.0.2.15');
+          console.log('Using default local IP:', '10.0.2.15');
         }
       } catch (error) {
         console.error('Error detecting local IP:', error);
         // If detection fails, still set a fallback IP
         setLocalIpAddress('10.0.2.15');
         setIsLocalDetection(true);
+        form.setValue('ipAddress', '10.0.2.15');
       } finally {
         setIsLoadingIp(false);
       }
@@ -114,36 +145,54 @@ export const RegisterDeviceForm = () => {
 
   const testLocalConnection = async () => {
     setTestingLocalIp(true);
+    setDebugInfo(null);
     
     try {
-      const response = await fetch('/api/check-asterisk-connection', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
+      const supabaseUrl = getSupabaseUrl();
+      const { data: session } = await supabase.auth.getSession();
+      const accessToken = session?.session?.access_token;
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Connection test failed: ${errorText}`);
+      if (!accessToken) {
+        throw new Error("Authentication required");
       }
       
-      const data = await response.json();
+      const response = await fetch(`${supabaseUrl}/functions/v1/check-asterisk-connection`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          serverIp: localIpAddress
+        })
+      });
       
-      if (data.success) {
+      const responseText = await response.text();
+      console.log("Raw connection test response:", responseText);
+      
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        throw new Error(`Invalid response format: ${responseText.substring(0, 100)}${responseText.length > 100 ? '...' : ''}`);
+      }
+      
+      if (result.success) {
         toast({
           title: "Connection successful",
-          description: `Successfully connected to server at ${data.serverInfo?.host || 'local IP'}`,
+          description: `Successfully connected to server at ${result.serverInfo?.host || localIpAddress}`,
         });
       } else {
+        setDebugInfo(JSON.stringify(result, null, 2));
         toast({
           title: "Connection failed",
-          description: data.message || "Could not connect to server",
+          description: result.message || "Could not connect to server",
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('Error testing connection:', error);
+      setDebugInfo(error instanceof Error ? error.message : "Unknown error");
       toast({
         title: "Connection test error",
         description: error instanceof Error ? error.message : "Unknown error testing connection",
@@ -168,6 +217,7 @@ export const RegisterDeviceForm = () => {
     setIsRegistering(true);
     setRegistrationSuccess(false);
     setRegistrationError(null);
+    setDebugInfo(null);
 
     // Set a timeout to prevent infinite loading state
     const timeout = setTimeout(() => {
@@ -228,6 +278,7 @@ export const RegisterDeviceForm = () => {
       // Get full response text for debugging
       const responseText = await response.text();
       console.log("Raw response:", responseText);
+      setDebugInfo(responseText);
       
       // Try to parse response as JSON
       let responseData;
@@ -241,7 +292,7 @@ export const RegisterDeviceForm = () => {
       
       // Check if the request was successful
       if (!response.ok || !responseData.success) {
-        throw new Error(responseData.message || `Server error: ${response.status} ${response.statusText}`);
+        throw new Error(responseData.message || responseData.error || `Server error: ${response.status} ${response.statusText}`);
       }
       
       // Handle successful registration
@@ -280,9 +331,9 @@ export const RegisterDeviceForm = () => {
   };
 
   const handleRetry = () => {
-    const formValues = form.getValues();
     setRegistrationError(null);
     setIsRegistering(false);
+    setDebugInfo(null);
   };
 
   return (
@@ -366,6 +417,16 @@ export const RegisterDeviceForm = () => {
                   )}
                 </Button>
               </div>
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {debugInfo && (
+          <Alert className="mb-4 bg-yellow-50 border-yellow-200 overflow-auto max-h-40">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-700">Debug Information</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              <pre className="text-xs overflow-auto whitespace-pre-wrap">{debugInfo}</pre>
             </AlertDescription>
           </Alert>
         )}

@@ -164,13 +164,12 @@ serve(async (req) => {
         sip_pass: password,
         status: 'active',
         trunk_name: deviceName,
-        user_id: userId,
-        device_ip: ipAddress // Always include device_ip regardless of schema
+        user_id: userId
       });
     }
     
     // Check if any existing trunks with the same name exist
-    const { data: existingTrunks, error: checkError } = await supabase
+    let { data: existingTrunks, error: checkError } = await supabase
       .from('user_trunks')
       .select('*')
       .eq('user_id', userId)
@@ -215,10 +214,40 @@ serve(async (req) => {
     
     console.log(`Inserting ${ports.length} port records for device ${deviceName}`);
     
+    // First get table structure to check if device_ip column exists
+    let hasDeviceIpColumn = false;
+    try {
+      const { data: tableInfo, error: tableError } = await supabaseAdmin
+        .from('user_trunks')
+        .select('*')
+        .limit(1);
+        
+      // Check if the result contains a device_ip field in one of the rows
+      if (tableInfo && tableInfo.length > 0) {
+        hasDeviceIpColumn = 'device_ip' in tableInfo[0];
+      }
+      
+      console.log(`Table check - device_ip column exists: ${hasDeviceIpColumn}`);
+    } catch (tableError) {
+      console.error("Error checking table structure:", tableError);
+      // Continue anyway, we'll handle missing columns later
+    }
+    
+    // Prepare ports for insertion based on table structure
+    const portsForInsertion = ports.map(port => {
+      if (hasDeviceIpColumn) {
+        return {
+          ...port,
+          device_ip: ipAddress
+        };
+      }
+      return port;
+    });
+    
     // Insert the new ports
     const { data: insertedPorts, error: insertError } = await supabase
       .from('user_trunks')
-      .insert(ports)
+      .insert(portsForInsertion)
       .select();
     
     if (insertError) {
@@ -230,7 +259,7 @@ serve(async (req) => {
         
         // Try again without the device_ip field
         const portsWithoutDeviceIp = ports.map(p => {
-          const { device_ip, ...rest } = p;
+          const { device_ip, ...rest } = { ...p, device_ip: ipAddress };
           return rest;
         });
         
@@ -268,7 +297,8 @@ serve(async (req) => {
         JSON.stringify({ 
           success: false, 
           message: `Error registering device: ${insertError.message}`,
-          errorType: "database" 
+          errorType: "database",
+          details: insertError
         }),
         { headers: corsHeaders }
       );
@@ -276,43 +306,26 @@ serve(async (req) => {
     
     console.log("Successfully inserted all port records");
     
-    // Store configuration in the database for Asterisk
-    const sipConfig = ports.map(port => `
-[goip-${userId.substring(0, 8)}-port${port.port_number}]
-type=friend
-host=${ipAddress}
-port=5060
-username=${port.sip_user}
-secret=${port.sip_pass}
-fromuser=${port.sip_user}
-context=from-goip
-disallow=all
-allow=ulaw
-insecure=port,invite
-nat=no
-qualify=yes
-    `.trim()).join('\n\n');
-    
+    // Attempt to create a record in goip_devices table if it exists
     try {
-      const { error: configError } = await supabase
-        .from('asterisk_configs')
+      const { data: deviceData, error: deviceError } = await supabase
+        .from('goip_devices')
         .insert({
+          device_name: deviceName,
           user_id: userId,
-          config_name: `goip_${deviceName}`,
-          config_type: 'sip',
-          config_content: sipConfig,
-          active: true
-        });
-      
-      if (configError) {
-        console.error("Error storing SIP configuration:", configError);
-        // Don't fail the request if this fails, just log it
+          ip_address: ipAddress
+        })
+        .select();
+        
+      if (deviceError) {
+        console.log("Note: Could not create goip_devices record, this might be expected:", deviceError.message);
+        // Non-blocking, this table might not exist in all installations
       } else {
-        console.log("Stored SIP configuration in database");
+        console.log("Created device record in goip_devices table");
       }
-    } catch (configError) {
-      console.error("Error storing configuration:", configError);
-      // Don't fail if this fails
+    } catch (deviceError) {
+      console.log("Note: Error creating device in goip_devices (likely table doesn't exist):", deviceError);
+      // Non-blocking
     }
     
     return new Response(
