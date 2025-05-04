@@ -54,12 +54,14 @@ serve(async (req) => {
     // For IP detection only - return early
     if (checkOnly) {
       console.log("Check only mode - returning server info");
+      
+      // For checkOnly mode, we won't require authentication
       return new Response(
         JSON.stringify({
           success: true,
           message: "Returning server configuration only",
           serverInfo: {
-            host: serverIp || serverHost || "10.0.2.15", // Default to local VM IP if not specified
+            host: serverIp || serverHost || "127.0.0.1",
             port: serverPort,
             username: serverUser ? "[SET]" : "[NOT SET]",
             password: serverPass ? "[SET]" : "[NOT SET]"
@@ -86,7 +88,7 @@ serve(async (req) => {
     }
     
     // Try to connect to Asterisk server (simulated here as we can't do SSH)
-    const targetServerIp = serverIp || serverHost || "10.0.2.15";
+    const targetServerIp = serverIp || serverHost || "127.0.0.1";
     
     console.log(`Testing connection to Asterisk server at ${targetServerIp}`);
     
@@ -95,7 +97,7 @@ serve(async (req) => {
     
     // For now, we'll assume connectivity based on having config values
     const hasCredentials = serverUser && serverPass;
-    const isLocalhost = targetServerIp === "127.0.0.1" || targetServerIp === "localhost" || targetServerIp === "10.0.2.15";
+    const isLocalhost = targetServerIp === "127.0.0.1" || targetServerIp === "localhost";
     
     // Simulate a connection test - biased to succeed for local addresses
     const connectionSuccessful = hasCredentials || isLocalhost || Math.random() > 0.2;

@@ -62,22 +62,34 @@ serve(async (req) => {
       }
     );
 
-    // Verify the user is authenticated
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Verify the user is authenticated - be more explicit about error handling
+    const { data: authData, error: userError } = await supabase.auth.getUser();
     
-    if (userError || !user) {
-      console.log("Authentication failed:", userError?.message);
+    if (userError) {
+      console.log("Authentication failed:", userError.message);
       return new Response(
         JSON.stringify({ 
           success: false, 
           message: "Invalid or expired session", 
-          error: userError?.message 
+          error: userError.message 
+        }),
+        { status: 401, headers: corsHeaders }
+      );
+    }
+    
+    if (!authData?.user) {
+      console.log("No user found in auth data");
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: "No user found in session", 
+          error: "Auth session missing!"
         }),
         { status: 401, headers: corsHeaders }
       );
     }
 
-    console.log(`Authenticated user: ${user.id}`);
+    console.log(`Authenticated user: ${authData.user.id}`);
 
     // Get request data
     let requestData: DeviceRegistrationRequest;
@@ -134,8 +146,8 @@ serve(async (req) => {
     }
     
     // Verify the user is registering their own device
-    if (userId !== user.id) {
-      console.log(`Permission denied: User ${user.id} cannot register device for ${userId}`);
+    if (userId !== authData.user.id) {
+      console.log(`Permission denied: User ${authData.user.id} cannot register device for ${userId}`);
       return new Response(
         JSON.stringify({ 
           success: false, 

@@ -17,7 +17,6 @@ export const GoipDeviceSetup = () => {
             <li>Enter a name for your device (e.g., "Office-GoIP1")</li>
             <li>Provide your device's IP address or hostname</li>
             <li>Specify how many ports your device has (usually 1, 4, or 8)</li>
-            <li>For local setups, use the detected server IP (10.0.2.15)</li>
           </ol>
         </AlertDescription>
       </Alert>

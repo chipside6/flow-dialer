@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
-import { Loader2, CheckCircle, Info, AlertCircle, Wifi, RefreshCw } from 'lucide-react';
+import { Loader2, CheckCircle, Info, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
 
@@ -35,10 +35,6 @@ export const RegisterDeviceForm = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const [requestTimeout, setRequestTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [isLocalDetection, setIsLocalDetection] = useState(false);
-  const [localIpAddress, setLocalIpAddress] = useState<string>('');
-  const [testingLocalIp, setTestingLocalIp] = useState(false);
-  const [isLoadingIp, setIsLoadingIp] = useState(true);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   // The form
@@ -52,154 +48,17 @@ export const RegisterDeviceForm = () => {
   });
 
   // Clean up timeouts
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
       if (requestTimeout) clearTimeout(requestTimeout);
     };
   }, [requestTimeout]);
-
-  // Check for local IP on component mount
-  useEffect(() => {
-    const detectLocalIp = async () => {
-      setIsLoadingIp(true);
-      try {
-        // Call our edge function to check connection status which includes server IP detection
-        const supabaseUrl = getSupabaseUrl();
-        console.log("Detecting local IP using URL:", supabaseUrl);
-        
-        const { data: session } = await supabase.auth.getSession();
-        const accessToken = session?.session?.access_token;
-        
-        if (!accessToken) {
-          console.log("No authentication token available for local IP detection");
-          // Fall back to a default local IP
-          setLocalIpAddress('10.0.2.15');
-          setIsLocalDetection(true);
-          form.setValue('ipAddress', '10.0.2.15');
-          setIsLoadingIp(false);
-          return;
-        }
-        
-        const response = await fetch(`${supabaseUrl}/functions/v1/check-asterisk-connection`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-          body: JSON.stringify({
-            checkOnly: true
-          })
-        });
-        
-        if (!response.ok) {
-          console.error("Error response from check-asterisk-connection:", response.status, response.statusText);
-          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-        }
-        
-        const result = await response.json();
-        console.log("Local IP detection result:", result);
-        
-        if (result?.serverInfo?.host) {
-          setLocalIpAddress(result.serverInfo.host);
-          setIsLocalDetection(true);
-          
-          // Pre-fill the form with the local IP
-          form.setValue('ipAddress', result.serverInfo.host);
-          console.log('Pre-filled form with detected local IP:', result.serverInfo.host);
-        } else {
-          // Default fallback
-          setLocalIpAddress('10.0.2.15');
-          setIsLocalDetection(true);
-          form.setValue('ipAddress', '10.0.2.15');
-          console.log('Using default local IP:', '10.0.2.15');
-        }
-      } catch (error) {
-        console.error('Error detecting local IP:', error);
-        // If detection fails, still set a fallback IP
-        setLocalIpAddress('10.0.2.15');
-        setIsLocalDetection(true);
-        form.setValue('ipAddress', '10.0.2.15');
-      } finally {
-        setIsLoadingIp(false);
-      }
-    };
-
-    detectLocalIp();
-  }, [form]);
 
   const resetFormState = () => {
     setIsRegistering(false);
     if (requestTimeout) {
       clearTimeout(requestTimeout);
       setRequestTimeout(null);
-    }
-  };
-
-  const useLocalIp = () => {
-    form.setValue('ipAddress', localIpAddress);
-    toast({
-      title: "Local IP applied",
-      description: `Using local server IP: ${localIpAddress}`,
-    });
-  };
-
-  const testLocalConnection = async () => {
-    setTestingLocalIp(true);
-    setDebugInfo(null);
-    
-    try {
-      const supabaseUrl = getSupabaseUrl();
-      const { data: session } = await supabase.auth.getSession();
-      const accessToken = session?.session?.access_token;
-      
-      if (!accessToken) {
-        throw new Error("Authentication required");
-      }
-      
-      const response = await fetch(`${supabaseUrl}/functions/v1/check-asterisk-connection`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({
-          serverIp: localIpAddress
-        })
-      });
-      
-      const responseText = await response.text();
-      console.log("Raw connection test response:", responseText);
-      
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (e) {
-        throw new Error(`Invalid response format: ${responseText.substring(0, 100)}${responseText.length > 100 ? '...' : ''}`);
-      }
-      
-      if (result.success) {
-        toast({
-          title: "Connection successful",
-          description: `Successfully connected to server at ${result.serverInfo?.host || localIpAddress}`,
-        });
-      } else {
-        setDebugInfo(JSON.stringify(result, null, 2));
-        toast({
-          title: "Connection failed",
-          description: result.message || "Could not connect to server",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Error testing connection:', error);
-      setDebugInfo(error instanceof Error ? error.message : "Unknown error");
-      toast({
-        title: "Connection test error",
-        description: error instanceof Error ? error.message : "Unknown error testing connection",
-        variant: "destructive"
-      });
-    } finally {
-      setTestingLocalIp(false);
     }
   };
 
@@ -242,8 +101,6 @@ export const RegisterDeviceForm = () => {
         throw new Error('Could not determine Supabase URL');
       }
       
-      console.log("Using Supabase URL for edge function:", supabaseUrl);
-      
       // Get auth session for authentication
       const { data: session, error: sessionError } = await supabase.auth.getSession();
       
@@ -252,17 +109,6 @@ export const RegisterDeviceForm = () => {
         throw new Error('Authentication required: ' + (sessionError?.message || 'Unable to get session'));
       }
       
-      console.log("Authentication successful, sending registration request");
-      
-      // Show detailed debugging for the request
-      const requestBody = {
-        userId: user.id,
-        deviceName: values.deviceName,
-        ipAddress: values.ipAddress,
-        numPorts: values.numPorts
-      };
-      console.log("Request payload:", JSON.stringify(requestBody));
-      
       // Call the edge function to register the device
       const response = await fetch(`${supabaseUrl}/functions/v1/register-goip-device`, {
         method: 'POST',
@@ -270,21 +116,22 @@ export const RegisterDeviceForm = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.session.access_token}`
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify({
+          userId: user.id,
+          deviceName: values.deviceName,
+          ipAddress: values.ipAddress,
+          numPorts: values.numPorts
+        })
       });
       
-      console.log("Edge function response status:", response.status);
-
       // Get full response text for debugging
       const responseText = await response.text();
       console.log("Raw response:", responseText);
-      setDebugInfo(responseText);
       
       // Try to parse response as JSON
       let responseData;
       try {
         responseData = JSON.parse(responseText);
-        console.log("Parsed response data:", responseData);
       } catch (parseError) {
         console.error("Failed to parse response as JSON:", parseError);
         throw new Error(`Invalid response format: ${responseText.substring(0, 100)}${responseText.length > 100 ? '...' : ''}`);
@@ -296,7 +143,6 @@ export const RegisterDeviceForm = () => {
       }
       
       // Handle successful registration
-      console.log("Device registration successful:", responseData);
       setRegistrationSuccess(true);
       
       // Clear form fields
@@ -317,6 +163,9 @@ export const RegisterDeviceForm = () => {
         : "Failed to register your device. Please try again.";
       
       setRegistrationError(errorMessage);
+      
+      // Save debug info
+      setDebugInfo(errorMessage);
       
       // Show error toast
       toast({
@@ -382,45 +231,6 @@ export const RegisterDeviceForm = () => {
           </Alert>
         )}
         
-        {isLocalDetection && (
-          <Alert className="mb-4 bg-green-50 border-green-200">
-            <Wifi className="h-4 w-4 text-green-600" />
-            <AlertTitle className="text-green-700">Local IP Detected</AlertTitle>
-            <AlertDescription className="text-green-700">
-              We detected your local IP address: {localIpAddress}
-              <div className="flex gap-2 mt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-white dark:bg-green-900/40"
-                  onClick={useLocalIp}
-                >
-                  Use This IP
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-white dark:bg-green-900/40"
-                  onClick={testLocalConnection}
-                  disabled={testingLocalIp}
-                >
-                  {testingLocalIp ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Testing...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Test Connection
-                    </>
-                  )}
-                </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
-        
         {debugInfo && (
           <Alert className="mb-4 bg-yellow-50 border-yellow-200 overflow-auto max-h-40">
             <AlertCircle className="h-4 w-4 text-yellow-600" />
@@ -453,7 +263,7 @@ export const RegisterDeviceForm = () => {
                 <FormItem>
                   <FormLabel>IP Address or Hostname</FormLabel>
                   <FormControl>
-                    <Input placeholder={isLoadingIp ? "Detecting local IP..." : "192.168.1.100"} {...field} />
+                    <Input placeholder="192.168.1.100" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
