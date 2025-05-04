@@ -6,34 +6,50 @@ import { toast } from "@/components/ui/use-toast";
 
 export const useFetchDialerResources = () => {
   const [contactLists, setContactLists] = useState<ContactList[]>([]);
-  const [isLoadingLists, setIsLoadingLists] = useState(true);
-  
+  const [isLoadingLists, setIsLoadingLists] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
+    let isMounted = true;
+
     const fetchContactLists = async () => {
       try {
         const { data, error } = await supabase
-          .from('contact_lists')
-          .select('id, name');
-        
+          .from("contact_lists")
+          .select("id, name");
+
         if (error) {
           throw new Error(error.message);
         }
-        
-        setContactLists(data || []);
-      } catch (err) {
+
+        if (isMounted) {
+          setContactLists(data ?? []);
+        }
+      } catch (err: any) {
         console.error("Error fetching contact lists:", err);
+        setError(err.message || "Unknown error");
+
         toast({
           title: "Error loading contact lists",
           description: "Could not load your contact lists. Please try again.",
-          variant: "destructive"
+          variant: "destructive",
         });
       } finally {
-        setIsLoadingLists(false);
+        if (isMounted) setIsLoadingLists(false);
       }
     };
-    
+
     fetchContactLists();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
-  
-  return { contactLists, isLoadingLists };
+
+  return {
+    contactLists,
+    isLoadingLists,
+    error,
+    hasData: contactLists.length > 0,
+  };
 };
