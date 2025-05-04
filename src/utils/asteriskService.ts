@@ -2,6 +2,7 @@
 import { getConfigFromStorage } from './asterisk/config';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
+import { connectionService } from './asterisk/connectionService';
 
 export const asteriskService = {
   /**
@@ -171,6 +172,81 @@ export const asteriskService = {
         message: error instanceof Error 
           ? `Error testing connection: ${error.message}` 
           : 'An unexpected error occurred while testing connection'
+      };
+    }
+  },
+
+  /**
+   * Test connection to Asterisk server - alias for testAsteriskConnection for code compatibility
+   */
+  testConnection: async (): Promise<{ success: boolean; message: string }> => {
+    const result = await connectionService.testConnection();
+    return result;
+  },
+  
+  /**
+   * Check GoIP device status
+   */
+  checkGoipStatus: async (userId: string, portNumber: number = 1): Promise<{ 
+    online: boolean; 
+    message: string; 
+    lastSeen?: string | null 
+  }> => {
+    try {
+      // Get authentication session
+      const { data: session } = await supabase.auth.getSession();
+      
+      if (!session?.session?.access_token) {
+        throw new Error('Authentication required');
+      }
+      
+      // Call the edge function to check status
+      const supabaseUrl = getSupabaseUrl();
+      const response = await fetch(`${supabaseUrl}/functions/v1/goip-asterisk-integration`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
+        },
+        body: JSON.stringify({
+          userId,
+          action: 'check_status',
+          portNumber
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error checking GoIP status: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Unknown error checking GoIP status');
+      }
+      
+      // Find the status for the specific port
+      const portStatus = result.statuses?.find((s: any) => s.port === portNumber);
+      
+      if (!portStatus) {
+        return {
+          online: false,
+          message: `No information available for port ${portNumber}`
+        };
+      }
+      
+      return {
+        online: portStatus.status === 'registered',
+        message: portStatus.status === 'registered' 
+          ? `Port ${portNumber} is online and registered` 
+          : `Port ${portNumber} is offline or not registered`,
+        lastSeen: portStatus.lastSeen
+      };
+    } catch (error) {
+      console.error('Error checking GoIP status:', error);
+      return {
+        online: false,
+        message: error instanceof Error ? error.message : 'Unknown error checking GoIP status'
       };
     }
   }
