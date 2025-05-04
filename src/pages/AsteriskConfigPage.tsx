@@ -47,7 +47,7 @@ const AsteriskConfigPageContent = () => {
             <Server className="h-5 w-5 text-blue-500 dark:text-blue-400" />
             <AlertTitle className="text-blue-800 dark:text-blue-300">Local Server Detected</AlertTitle>
             <AlertDescription className="text-blue-700 dark:text-blue-400">
-              <p className="mb-2">Your server appears to be running locally at <strong>10.0.2.15</strong>. This configuration has been auto-detected.</p>
+              <p className="mb-2">Your server appears to be running locally at <strong>192.168.0.197</strong>. This configuration has been auto-detected.</p>
               <p>For best results, make sure both your Asterisk server and GoIP device can communicate on the same network.</p>
             </AlertDescription>
           </Alert>
