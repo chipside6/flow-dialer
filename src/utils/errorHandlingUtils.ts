@@ -39,12 +39,21 @@ export const createDialerError = (
 });
 
 /**
+ * Logs the error to a service (e.g., Sentry, Datadog, etc.) for better visibility
+ * Replace with actual service in production
+ */
+const logErrorToService = (error: DialerError) => {
+  // Placeholder: Replace with actual logging service like Sentry, Datadog, etc.
+  console.error(`Logging error to service: [${error.type}] ${error.message}`, error.originalError);
+};
+
+/**
  * Handles dialer errors with appropriate UI feedback and logging
  */
 export const handleDialerError = (error: DialerError): void => {
-  // Log error for debugging
-  console.error(`Dialer Error [${error.type}]:`, error.message, error.originalError);
-  
+  // Log the error for debugging and monitoring purposes
+  logErrorToService(error);
+
   // Display appropriate toast message based on error type
   switch (error.type) {
     case DialerErrorType.CONNECTION:
@@ -54,7 +63,7 @@ export const handleDialerError = (error: DialerError): void => {
         variant: "destructive",
       });
       break;
-      
+
     case DialerErrorType.CONFIGURATION:
       toast({
         title: "Configuration Error",
@@ -62,7 +71,7 @@ export const handleDialerError = (error: DialerError): void => {
         variant: "destructive",
       });
       break;
-      
+
     case DialerErrorType.PROVIDER:
       toast({
         title: "SIP Provider Error",
@@ -70,7 +79,7 @@ export const handleDialerError = (error: DialerError): void => {
         variant: "destructive",
       });
       break;
-      
+
     case DialerErrorType.CONTACT_LIST:
       toast({
         title: "Contact List Error",
@@ -78,7 +87,7 @@ export const handleDialerError = (error: DialerError): void => {
         variant: "destructive",
       });
       break;
-      
+
     case DialerErrorType.AUTHORIZATION:
       toast({
         title: "Authorization Error",
@@ -86,7 +95,7 @@ export const handleDialerError = (error: DialerError): void => {
         variant: "destructive",
       });
       break;
-      
+
     case DialerErrorType.SERVER:
       toast({
         title: "Server Error",
@@ -94,7 +103,7 @@ export const handleDialerError = (error: DialerError): void => {
         variant: "destructive",
       });
       break;
-      
+
     default:
       toast({
         title: "Unexpected Error",
@@ -109,60 +118,79 @@ export const handleDialerError = (error: DialerError): void => {
  */
 export const categorizeError = (error: unknown): DialerErrorType => {
   if (!error) return DialerErrorType.UNKNOWN;
-  
-  const errorString = String(error).toLowerCase();
-  
-  if (errorString.includes('network') || 
-      errorString.includes('connection') || 
-      errorString.includes('timeout') ||
-      errorString.includes('offline')) {
-    return DialerErrorType.CONNECTION;
+
+  // Check if the error is a known Error instance
+  if (error instanceof Error) {
+    const errorMessage = error.message.toLowerCase();
+
+    if (errorMessage.includes('network') || 
+        errorMessage.includes('connection') || 
+        errorMessage.includes('timeout') ||
+        errorMessage.includes('offline')) {
+      return DialerErrorType.CONNECTION;
+    }
+    
+    if (errorMessage.includes('auth') || 
+        errorMessage.includes('permission') || 
+        errorMessage.includes('unauthorized') ||
+        errorMessage.includes('forbidden')) {
+      return DialerErrorType.AUTHORIZATION;
+    }
+    
+    if (errorMessage.includes('provider') || 
+        errorMessage.includes('sip')) {
+      return DialerErrorType.PROVIDER;
+    }
+    
+    if (errorMessage.includes('contact') || 
+        errorMessage.includes('list')) {
+      return DialerErrorType.CONTACT_LIST;
+    }
+    
+    if (errorMessage.includes('server') || 
+        errorMessage.includes('500')) {
+      return DialerErrorType.SERVER;
+    }
+    
+    if (errorMessage.includes('config') || 
+        errorMessage.includes('parameter') ||
+        errorMessage.includes('invalid')) {
+      return DialerErrorType.CONFIGURATION;
+    }
   }
-  
-  if (errorString.includes('auth') || 
-      errorString.includes('permission') || 
-      errorString.includes('unauthorized') ||
-      errorString.includes('forbidden')) {
-    return DialerErrorType.AUTHORIZATION;
-  }
-  
-  if (errorString.includes('provider') || 
-      errorString.includes('sip')) {
-    return DialerErrorType.PROVIDER;
-  }
-  
-  if (errorString.includes('contact') || 
-      errorString.includes('list')) {
-    return DialerErrorType.CONTACT_LIST;
-  }
-  
-  if (errorString.includes('server') || 
-      errorString.includes('500')) {
-    return DialerErrorType.SERVER;
-  }
-  
-  if (errorString.includes('config') || 
-      errorString.includes('parameter') ||
-      errorString.includes('invalid')) {
-    return DialerErrorType.CONFIGURATION;
-  }
-  
+
   return DialerErrorType.UNKNOWN;
 };
 
 /**
- * Helper function to handle try/catch blocks consistently
+ * Helper function to handle try/catch blocks consistently with retry mechanism
  */
 export const tryCatchWithErrorHandling = async <T>(
   operation: () => Promise<T>,
   errorMessage: string,
-  errorType: DialerErrorType = DialerErrorType.UNKNOWN
+  errorType: DialerErrorType = DialerErrorType.UNKNOWN,
+  retries: number = 3, // Retry up to 3 times
+  delay: number = 1000 // Delay between retries (1 second)
 ): Promise<T | null> => {
-  try {
-    return await operation();
-  } catch (error) {
-    const determinedType = error ? errorType : categorizeError(error);
-    handleDialerError(createDialerError(determinedType, errorMessage, error));
-    return null;
+  let attempt = 0;
+
+  while (attempt < retries) {
+    try {
+      return await operation();
+    } catch (error) {
+      attempt++;
+      const determinedType = error ? categorizeError(error) : errorType;
+      handleDialerError(createDialerError(determinedType, errorMessage, error));
+
+      // If max retries reached, return null
+      if (attempt >= retries) {
+        return null;
+      }
+
+      // Wait before retrying
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
   }
+
+  return null;
 };
