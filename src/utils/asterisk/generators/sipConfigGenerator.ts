@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -64,14 +63,16 @@ type=global
 user_agent=FlowDialer
 max_forwards=70
 keep_alive_interval=30
-
 `.trim();
 
       // Generate trunk configurations from user trunks
-      const trunkConfigs = userTrunks.map(trunkRaw => {
+      const trunkConfigs = userTrunks.map((trunkRaw) => {
         const trunk = trunkRaw as UserTrunk;
-        const hostSetting = trunk.device_ip ? `host=${trunk.device_ip}` : 'host=dynamic';
         
+        // Simplified condition for device_ip
+        const hostSetting = trunk.device_ip ? `host=${trunk.device_ip}` : 'host=dynamic';
+
+        // Return the trunk configuration string for each trunk
         return `
 [goip_${trunk.user_id}_port${trunk.port_number}]
 type=endpoint
@@ -106,9 +107,9 @@ minimum_expiration=60
 maximum_expiration=3600
 qualify_frequency=60
 `.trim();
-      }).join('\n\n');
+      }).join('\n\n'); // Join trunk configurations with double newline
       
-      // Add the trunk configurations to the main config
+      // Add trunk configurations to the main config
       configContent = `${configContent}\n\n${trunkConfigs}\n`;
       
       return {
