@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
-import { Loader2, CheckCircle, Info, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
 
@@ -35,7 +35,6 @@ export const RegisterDeviceForm = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const [requestTimeout, setRequestTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   // The form
   const form = useForm<z.infer<typeof formSchema>>({
@@ -76,7 +75,6 @@ export const RegisterDeviceForm = () => {
     setIsRegistering(true);
     setRegistrationSuccess(false);
     setRegistrationError(null);
-    setDebugInfo(null);
 
     // Set a timeout to prevent infinite loading state
     const timeout = setTimeout(() => {
@@ -102,11 +100,11 @@ export const RegisterDeviceForm = () => {
       }
       
       // Get auth session for authentication
-      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
       
-      if (sessionError || !session?.session?.access_token) {
-        console.error("Auth error:", sessionError);
-        throw new Error('Authentication required: ' + (sessionError?.message || 'Unable to get session'));
+      if (!sessionData?.session?.access_token) {
+        console.error("Auth error: No valid session found");
+        throw new Error('Authentication required: Unable to get session');
       }
       
       // Call the edge function to register the device
@@ -114,7 +112,7 @@ export const RegisterDeviceForm = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.session.access_token}`
+          'Authorization': `Bearer ${sessionData.session.access_token}`
         },
         body: JSON.stringify({
           userId: user.id,
@@ -164,9 +162,6 @@ export const RegisterDeviceForm = () => {
       
       setRegistrationError(errorMessage);
       
-      // Save debug info
-      setDebugInfo(errorMessage);
-      
       // Show error toast
       toast({
         title: "Error registering device",
@@ -182,7 +177,6 @@ export const RegisterDeviceForm = () => {
   const handleRetry = () => {
     setRegistrationError(null);
     setIsRegistering(false);
-    setDebugInfo(null);
   };
 
   return (
@@ -202,14 +196,6 @@ export const RegisterDeviceForm = () => {
           </Alert>
         )}
         
-        <Alert className="mb-4 bg-blue-50 border-blue-200">
-          <Info className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-blue-700">
-            SIP credentials are automatically generated when you register a device.
-            No manual configuration needed.
-          </AlertDescription>
-        </Alert>
-        
         {registrationError && (
           <Alert className="mb-4 bg-red-50 border-red-200">
             <AlertCircle className="h-4 w-4 text-red-600" />
@@ -227,16 +213,6 @@ export const RegisterDeviceForm = () => {
               >
                 Try Again
               </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {debugInfo && (
-          <Alert className="mb-4 bg-yellow-50 border-yellow-200 overflow-auto max-h-40">
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
-            <AlertTitle className="text-yellow-700">Debug Information</AlertTitle>
-            <AlertDescription className="text-yellow-700">
-              <pre className="text-xs overflow-auto whitespace-pre-wrap">{debugInfo}</pre>
             </AlertDescription>
           </Alert>
         )}

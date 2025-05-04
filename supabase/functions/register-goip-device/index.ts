@@ -70,7 +70,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: "Invalid or expired session", 
+          message: "Authentication failed", 
           error: userError.message 
         }),
         { status: 401, headers: corsHeaders }
@@ -82,8 +82,8 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: "No user found in session", 
-          error: "Auth session missing!"
+          message: "Authentication required", 
+          error: "No user found" 
         }),
         { status: 401, headers: corsHeaders }
       );
@@ -105,8 +105,7 @@ serve(async (req) => {
           JSON.stringify({ 
             success: false, 
             message: "Invalid request format", 
-            error: "Could not parse JSON body",
-            details: String(parseError)
+            error: "Could not parse JSON body"
           }),
           { status: 400, headers: corsHeaders }
         );
@@ -119,8 +118,7 @@ serve(async (req) => {
         JSON.stringify({ 
           success: false, 
           message: "Invalid request format", 
-          error: "Could not read request body",
-          details: String(error)
+          error: "Could not read request body" 
         }),
         { status: 400, headers: corsHeaders }
       );
@@ -192,7 +190,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: `Error checking existing trunks: ${checkError.message}`,
+          message: `Database error: ${checkError.message}`,
           errorType: "database" 
         }),
         { headers: corsHeaders }
@@ -214,7 +212,7 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             success: false, 
-            message: `Error deleting existing trunks: ${deleteError.message}`,
+            message: `Database error: ${deleteError.message}`,
             errorType: "database" 
           }),
           { headers: corsHeaders }
@@ -226,67 +224,44 @@ serve(async (req) => {
     
     console.log(`Inserting ${ports.length} port records for device ${deviceName}`);
     
-    // First get table structure to check if device_ip column exists
-    let hasDeviceIpColumn = false;
-    try {
-      const { data: tableInfo, error: tableError } = await supabaseAdmin
-        .from('user_trunks')
-        .select('*')
-        .limit(1);
-        
-      // Check if the result contains a device_ip field in one of the rows
-      if (tableInfo && tableInfo.length > 0) {
-        hasDeviceIpColumn = 'device_ip' in tableInfo[0];
-      }
-      
-      console.log(`Table check - device_ip column exists: ${hasDeviceIpColumn}`);
-    } catch (tableError) {
-      console.error("Error checking table structure:", tableError);
-      // Continue anyway, we'll handle missing columns later
-    }
-    
-    // Prepare ports for insertion based on table structure
-    const portsForInsertion = ports.map(port => {
-      if (hasDeviceIpColumn) {
-        return {
-          ...port,
-          device_ip: ipAddress
-        };
-      }
-      return port;
-    });
-    
-    // Insert the new ports
+    // First, try a basic insert without checking for device_ip column
     const { data: insertedPorts, error: insertError } = await supabase
       .from('user_trunks')
-      .insert(portsForInsertion)
+      .insert(ports.map(port => ({
+        ...port,
+        device_ip: ipAddress
+      })))
       .select();
     
     if (insertError) {
       console.error("Error inserting trunks:", insertError);
       
-      // Check if this might be due to device_ip column not existing
+      // If the error might be related to device_ip column not existing
       if (insertError.message && insertError.message.includes('device_ip')) {
         console.log("Attempting insert without device_ip column");
         
         // Try again without the device_ip field
-        const portsWithoutDeviceIp = ports.map(p => {
-          const { device_ip, ...rest } = { ...p, device_ip: ipAddress };
-          return rest;
-        });
+        const portsCopy = ports.map(p => ({
+          port_number: p.port_number,
+          sip_user: p.sip_user,
+          sip_pass: p.sip_pass,
+          status: p.status,
+          trunk_name: p.trunk_name,
+          user_id: p.user_id
+        }));
         
-        const retryResult = await supabase
+        const { data: retryData, error: retryError } = await supabase
           .from('user_trunks')
-          .insert(portsWithoutDeviceIp)
+          .insert(portsCopy)
           .select();
           
-        if (retryResult.error) {
-          console.error("Second attempt failed:", retryResult.error);
+        if (retryError) {
+          console.error("Second attempt also failed:", retryError);
           return new Response(
             JSON.stringify({ 
               success: false, 
-              message: `Error registering device: ${insertError.message}. Second attempt also failed: ${retryResult.error.message}`,
-              errorType: "database" 
+              message: "Database error: Unable to register device",
+              error: retryError.message
             }),
             { headers: corsHeaders }
           );
@@ -296,10 +271,10 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             success: true, 
-            message: "GoIP device registered successfully (without device IP)",
+            message: "GoIP device registered successfully",
             deviceName,
             numPorts,
-            ports: retryResult.data || []
+            ports: retryData || []
           }),
           { headers: corsHeaders }
         );
@@ -308,9 +283,8 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: `Error registering device: ${insertError.message}`,
-          errorType: "database",
-          details: insertError
+          message: "Database error: Unable to register device",
+          error: insertError.message
         }),
         { headers: corsHeaders }
       );
@@ -318,28 +292,7 @@ serve(async (req) => {
     
     console.log("Successfully inserted all port records");
     
-    // Attempt to create a record in goip_devices table if it exists
-    try {
-      const { data: deviceData, error: deviceError } = await supabase
-        .from('goip_devices')
-        .insert({
-          device_name: deviceName,
-          user_id: userId,
-          ip_address: ipAddress
-        })
-        .select();
-        
-      if (deviceError) {
-        console.log("Note: Could not create goip_devices record, this might be expected:", deviceError.message);
-        // Non-blocking, this table might not exist in all installations
-      } else {
-        console.log("Created device record in goip_devices table");
-      }
-    } catch (deviceError) {
-      console.log("Note: Error creating device in goip_devices (likely table doesn't exist):", deviceError);
-      // Non-blocking
-    }
-    
+    // Success response
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -357,9 +310,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false,
-        message: "An unexpected error occurred while registering your GoIP device",
-        error: error instanceof Error ? error.message : String(error),
-        errorType: "unhandled_error"
+        message: "An unexpected error occurred",
+        error: error instanceof Error ? error.message : String(error)
       }),
       { status: 500, headers: corsHeaders }
     );

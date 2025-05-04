@@ -55,7 +55,6 @@ serve(async (req) => {
     if (checkOnly) {
       console.log("Check only mode - returning server info");
       
-      // For checkOnly mode, we won't require authentication
       return new Response(
         JSON.stringify({
           success: true,
