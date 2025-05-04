@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -18,7 +17,12 @@ export const dialplanGenerator = {
       if (!session?.session?.access_token) {
         throw new Error('Authentication required');
       }
-      
+
+      // Validate campaignId and userId format (e.g., UUID format)
+      if (!validateUUID(campaignId) || !validateUUID(userId)) {
+        throw new Error('Invalid campaignId or userId');
+      }
+
       // Call edge function to generate dialplan
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-campaign-dialplan`,
@@ -34,13 +38,14 @@ export const dialplanGenerator = {
           })
         }
       );
-      
+
       if (!response.ok) {
         throw new Error(`Error generating dialplan: ${response.statusText}`);
       }
-      
+
       const result = await response.json();
-      
+
+      // Return structured success response
       return {
         success: true,
         message: 'Dialplan configuration generated successfully',
@@ -48,13 +53,15 @@ export const dialplanGenerator = {
       };
     } catch (error) {
       console.error('Error generating dialplan:', error);
+      // Use a logging service in production (e.g., Sentry, LogRocket)
+      
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Unknown error generating dialplan'
       };
     }
   },
-  
+
   /**
    * Generate transfer-enabled dialplan for a campaign
    */
@@ -63,8 +70,15 @@ export const dialplanGenerator = {
     transferNumber: string,
     portNumber: number,
     greetingFile: string
-  ): Promise<string> => {
-    return `
+  ): Promise<{ success: boolean; message: string; config?: string }> => {
+    try {
+      // Validate inputs
+      if (!validateUUID(campaignId) || !validatePhoneNumber(transferNumber) || !validatePortNumber(portNumber)) {
+        throw new Error('Invalid input values');
+      }
+      
+      // Generate dialplan configuration
+      const dialplan = `
 ; Campaign ${campaignId} Transfer-Enabled Dialplan
 ; Generated on ${new Date().toISOString()}
 
@@ -102,5 +116,44 @@ exten => transfer,n(transfer_failed),NoOp(Transfer failed - Playing apology mess
 exten => transfer,n,Playback(sorry-cant-connect-call)
 exten => transfer,n,Hangup()
 `;
+
+      // Return structured response
+      return {
+        success: true,
+        message: 'Transfer dialplan generated successfully',
+        config: dialplan
+      };
+    } catch (error) {
+      console.error('Error generating transfer dialplan:', error);
+      // Use a logging service in production (e.g., Sentry, LogRocket)
+      
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error generating transfer dialplan'
+      };
+    }
   }
 };
+
+/**
+ * Validate UUID format
+ */
+function validateUUID(id: string): boolean {
+  const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return regex.test(id);
+}
+
+/**
+ * Validate phone number format (simple validation for example purposes)
+ */
+function validatePhoneNumber(number: string): boolean {
+  const regex = /^\+?[1-9]\d{1,14}$/; // E.164 format
+  return regex.test(number);
+}
+
+/**
+ * Validate port number to ensure it is a positive integer
+ */
+function validatePortNumber(port: number): boolean {
+  return Number.isInteger(port) && port > 0;
+}
