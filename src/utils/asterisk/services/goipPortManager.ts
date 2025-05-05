@@ -1,5 +1,5 @@
 
-iimport { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/types/supabase';
 
 type GoipPort = Database['public']['Tables']['goip_ports']['Row'];

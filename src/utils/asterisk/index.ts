@@ -198,9 +198,7 @@ export const asteriskConfig = {
 // Export security utilities
 export { securityUtils };
 
-// Export configuration constants
-export {
-  process.env.ASTERISK_API_URL as ASTERISK_API_URL,
-  process.env.ASTERISK_API_USERNAME as ASTERISK_API_USERNAME,
-  process.env.ASTERISK_API_PASSWORD as ASTERISK_API_PASSWORD
-};
+// Export configuration constants - Fix the syntax errors here
+export const ASTERISK_API_URL = process.env.ASTERISK_API_URL;
+export const ASTERISK_API_USERNAME = process.env.ASTERISK_API_USERNAME;
+export const ASTERISK_API_PASSWORD = process.env.ASTERISK_API_PASSWORD;
