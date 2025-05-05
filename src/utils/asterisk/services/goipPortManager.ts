@@ -42,12 +42,13 @@ export const goipPortManager = {
     }
   },
 
-  async markPortBusy(userId: string, portNumber: number, campaignId: string): Promise<boolean> {
+  async markPortBusy(userId: string, portNumber: number, campaignId: string, callId?: string): Promise<boolean> {
     try {
       const { data, error } = await supabase.rpc('mark_port_busy_atomic', {
         in_user_id: userId,
         in_port_number: portNumber,
-        in_campaign_id: campaignId
+        in_campaign_id: campaignId,
+        in_call_id: callId || null
       });
 
       if (error) throw error;
@@ -104,6 +105,95 @@ export const goipPortManager = {
       return true;
     } catch (error) {
       console.error('Error releasing port:', error);
+      return false;
+    }
+  },
+
+  // NEW METHODS TO FIX TYPE ERRORS
+  async getUserPorts(userId: string): Promise<PortStatus[]> {
+    try {
+      const { data, error } = await supabase
+        .from('goip_ports')
+        .select(`
+          id, 
+          port_number, 
+          status, 
+          sip_username,
+          updated_at,
+          goip_devices!inner(user_id),
+          active_calls(campaign_id, id)
+        `)
+        .eq('goip_devices.user_id', userId);
+
+      if (error) throw error;
+
+      return (data || []).map(port => {
+        const activeCalls = port.active_calls || [];
+        const activeCall = activeCalls.length > 0 ? activeCalls[0] : null;
+        
+        return {
+          portNumber: port.port_number,
+          sipUser: port.sip_username || '',
+          status: port.status as 'available' | 'busy' | 'offline',
+          lastStatusChange: new Date(port.updated_at),
+          campaignId: activeCall?.campaign_id,
+          callId: activeCall?.id
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching user ports:', error);
+      return [];
+    }
+  },
+
+  async resetPorts(userId: string): Promise<boolean> {
+    try {
+      // First, get all ports for this user
+      const { data: ports, error: portsError } = await supabase
+        .from('goip_ports')
+        .select('id, goip_devices!inner(user_id)')
+        .eq('goip_devices.user_id', userId);
+
+      if (portsError) throw portsError;
+
+      if (!ports || ports.length === 0) {
+        return true; // No ports to reset
+      }
+
+      const portIds = ports.map(p => p.id);
+      const now = new Date().toISOString();
+
+      // End all active calls for these ports
+      const { error: endCallsError } = await supabase
+        .from('active_calls')
+        .update({ end_time: now, status: 'completed' })
+        .in('port_id', portIds)
+        .is('end_time', null);
+
+      if (endCallsError) throw endCallsError;
+
+      // Mark all ports as available
+      const { error: resetError } = await supabase
+        .from('goip_ports')
+        .update({ status: 'available', updated_at: now })
+        .in('id', portIds);
+
+      if (resetError) throw resetError;
+
+      // Log the reset action
+      await supabase.from('port_activity_logs').insert(
+        portIds.map(portId => ({
+          port_id: portId,
+          user_id: userId,
+          action: 'reset',
+          description: 'Port reset to available',
+          timestamp: now
+        }))
+      );
+
+      return true;
+    } catch (error) {
+      console.error('Error resetting ports:', error);
       return false;
     }
   }

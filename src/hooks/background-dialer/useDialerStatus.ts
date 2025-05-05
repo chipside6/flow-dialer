@@ -68,8 +68,18 @@ export function useDialerStatus({
 
       const buildStatus = (
         status: DialerStatus['status'],
-        jobMetrics?: Partial<DialerStatus>,
-        campaignMetrics?: Partial<DialerStatus>
+        jobMetrics?: {
+          totalCalls?: number,
+          completedCalls?: number,
+          answeredCalls?: number,
+          failedCalls?: number
+        },
+        campaignMetrics?: {
+          totalCalls?: number,
+          answeredCalls?: number,
+          transferredCalls?: number,
+          failedCalls?: number
+        }
       ): DialerStatus => ({
         status,
         totalCalls: jobMetrics?.totalCalls ?? campaignMetrics?.totalCalls ?? 0,
@@ -99,10 +109,20 @@ export function useDialerStatus({
             transferredCalls: campaign.transferred_calls ?? 0,
           }));
         } else {
-          setStatus(buildStatus('idle', undefined, campaign));
+          setStatus(buildStatus('idle', undefined, {
+            totalCalls: campaign.total_calls,
+            answeredCalls: campaign.answered_calls,
+            transferredCalls: campaign.transferred_calls,
+            failedCalls: campaign.failed_calls
+          }));
         }
       } else {
-        setStatus(buildStatus('idle', undefined, campaign));
+        setStatus(buildStatus('idle', undefined, {
+          totalCalls: campaign.total_calls,
+          answeredCalls: campaign.answered_calls,
+          transferredCalls: campaign.transferred_calls,
+          failedCalls: campaign.failed_calls
+        }));
       }
 
     } catch (err: any) {

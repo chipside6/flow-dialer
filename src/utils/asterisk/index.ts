@@ -3,17 +3,13 @@ import {
   getConfigFromStorage,
   saveConfigToStorage,
   hasConfiguredEnvironment,
-  isHostedEnvironment,
-  loadEnvironmentVariables
+  isHostedEnvironment
 } from './config';
 
 import { connectionService } from './connectionService';
 import { dialingService } from './dialingService';
 import { securityUtils } from './utils/securityUtils';
 import { goipService } from './services/goipService';
-
-// Load sensitive environment variables securely
-loadEnvironmentVariables();  // This would load variables like ASTERISK_API_URL, ASTERISK_API_USERNAME, ASTERISK_API_PASSWORD
 
 // Combined service for easier importing
 export const asteriskService = {
@@ -146,8 +142,8 @@ export const asteriskService = {
      */
     getGoIPDevices: async (userId: string): Promise<{ success: boolean, devices: any[] }> => {
       try {
-        const devices = await goipService.getGoIPDevices(userId);
-        return { success: true, devices };
+        const devices = await goipService.getUserDevices(userId);
+        return { success: true, devices: devices.devices || [] };
       } catch (error) {
         console.error('Failed to retrieve GoIP devices:', error);
         return { success: false, devices: [], message: error instanceof Error ? error.message : 'Unknown error' };
@@ -159,7 +155,7 @@ export const asteriskService = {
      */
     registerDevice: async (userId: string, deviceData: any): Promise<{ success: boolean, message: string }> => {
       try {
-        const result = await goipService.registerDevice(userId, deviceData);
+        const result = await goipService.registerDevice(userId, deviceData.deviceName, deviceData.deviceIp, deviceData.numPorts);
         return result;
       } catch (error) {
         console.error('Failed to register GoIP device:', error);

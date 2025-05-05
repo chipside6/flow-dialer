@@ -32,7 +32,7 @@ export const autoDialerService = {
     try {
       // Get available ports count if maxConcurrentCalls isn't specified
       if (maxConcurrentCalls <= 0) {
-        const availablePorts = await goipPortManager.getAvailablePorts(userId, campaignId);
+        const availablePorts = await goipPortManager.getAvailablePorts(userId);
         maxConcurrentCalls = availablePorts.length || 1;
       }
       
@@ -177,8 +177,12 @@ export const autoDialerService = {
    */
   async makeTestCall(phoneNumber: string, campaignId: string, userId: string): Promise<{ success: boolean; message: string; portNumber?: number }> {
     try {
+      if (!phoneNumber || !userId || !campaignId) {
+        throw new Error('Missing required parameters for test call');
+      }
+
       // Get an available port
-      const availablePorts = await goipPortManager.getAvailablePorts(userId, 'test');
+      const availablePorts = await goipPortManager.getAvailablePorts(userId);
       
       if (availablePorts.length === 0) {
         return {
@@ -194,7 +198,7 @@ export const autoDialerService = {
       const callId = `test_${Math.random().toString(36).substring(2, 9)}`;
       
       // Mark the port as busy
-      await goipPortManager.markPortBusy(userId, port.portNumber, 'test', callId);
+      await goipPortManager.markPortBusy(userId, port.portNumber, campaignId, callId);
       
       // Call the dialer API
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dialer-api`, {

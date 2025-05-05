@@ -113,7 +113,7 @@ export const dialingService = {
         throw new Error('Missing required parameters');
       }
 
-      const availablePorts = await goipPortManager.getAvailablePorts(userId, campaignId);
+      const availablePorts = await goipPortManager.getAvailablePorts(userId);
 
       if (availablePorts.length === 0) {
         return {

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { DialStatus, DialerFormData } from "@/components/background-dialer/types";
 import { autoDialerService } from "@/services/autodialer/autoDialerService";
@@ -21,7 +22,7 @@ export const useDialerActions = (formData: DialerFormData, campaignId: string) =
     failedCalls: 0,
   });
 
-  const handleToast = useCallback((message: string, variant = "default") => {
+  const handleToast = useCallback((message: { title: string, description: string }, variant: "default" | "destructive" | "warning" = "default") => {
     toast({
       title: message.title,
       description: message.description,
@@ -74,8 +75,11 @@ export const useDialerActions = (formData: DialerFormData, campaignId: string) =
             const message = job.status === 'completed' 
               ? `Successfully completed dialing campaign with ${job.successful_calls || 0} answered calls.`
               : "There was an issue with the dialing operation.";
-            const variant = job.status === 'completed' ? "success" : "destructive";
-            handleToast({ title: "Dialing Complete", description: message }, variant);
+            const variant = job.status === 'completed' ? "default" : "destructive";
+            handleToast({ 
+              title: "Dialing Complete", 
+              description: message
+            }, variant);
             getAvailablePorts();
           }
         }
@@ -83,7 +87,7 @@ export const useDialerActions = (formData: DialerFormData, campaignId: string) =
         console.error("Error polling for status:", error);
         handleToast({
           title: "Status Update Failed",
-          description: "Could not get the latest dialing status.",
+          description: "Could not get the latest dialing status."
         }, "destructive");
       }
     },
@@ -95,14 +99,20 @@ export const useDialerActions = (formData: DialerFormData, campaignId: string) =
 
   const startDialing = useCallback(async () => {
     if (!formData.contactListId || !user?.id) {
-      handleToast({ title: "Incomplete Configuration", description: "Please select a contact list before starting." }, "destructive");
+      handleToast({ 
+        title: "Incomplete Configuration", 
+        description: "Please select a contact list before starting." 
+      }, "destructive");
       return;
     }
 
     try {
       const portsCount = await getAvailablePorts();
       if (portsCount === 0) {
-        handleToast({ title: "No Available Ports", description: "All GoIP ports are currently in use. Please try again later." }, "destructive");
+        handleToast({ 
+          title: "No Available Ports", 
+          description: "All GoIP ports are currently in use. Please try again later." 
+        }, "destructive");
         return;
       }
 
@@ -123,13 +133,19 @@ export const useDialerActions = (formData: DialerFormData, campaignId: string) =
           failedCalls: 0,
         });
 
-        handleToast({ title: "Dialing Started", description: `Dialing using ${portsCount} available ports.` });
+        handleToast({ 
+          title: "Dialing Started", 
+          description: `Dialing using ${portsCount} available ports.` 
+        });
       } else {
         throw new Error(response.error || "Unknown error starting dialing");
       }
     } catch (error) {
       console.error("Error starting dialing:", error);
-      handleToast({ title: "Failed to Start Dialing", description: "There was an error starting the dialing process." }, "destructive");
+      handleToast({ 
+        title: "Failed to Start Dialing", 
+        description: "There was an error starting the dialing process." 
+      }, "destructive");
     }
   }, [campaignId, formData.contactListId, user?.id, getAvailablePorts, handleToast]);
 
@@ -141,28 +157,43 @@ export const useDialerActions = (formData: DialerFormData, campaignId: string) =
       setIsDialing(false);
       setDialStatus({ ...dialStatus, status: 'stopped' });
 
-      handleToast({ title: "Dialing Stopped", description: "The dialing operation has been stopped and all ports have been released." });
+      handleToast({ 
+        title: "Dialing Stopped", 
+        description: "The dialing operation has been stopped and all ports have been released." 
+      });
       getAvailablePorts();
     } catch (error) {
       console.error("Error stopping dialing:", error);
-      handleToast({ title: "Failed to Stop Dialing", description: "There was an error stopping the dialing process." }, "destructive");
+      handleToast({ 
+        title: "Failed to Stop Dialing", 
+        description: "There was an error stopping the dialing process." 
+      }, "destructive");
     }
   }, [currentJobId, dialStatus, user?.id, getAvailablePorts, handleToast]);
 
   const makeTestCall = useCallback(async (phoneNumber: string) => {
     if (!user?.id) {
-      handleToast({ title: "Authentication Required", description: "You must be logged in to make test calls." }, "destructive");
+      handleToast({ 
+        title: "Authentication Required", 
+        description: "You must be logged in to make test calls." 
+      }, "destructive");
       return;
     }
 
     try {
       const result = await autoDialerService.makeTestCall(phoneNumber, campaignId, user.id);
-      const variant = result.success ? "success" : "destructive";
-      handleToast({ title: result.success ? "Test Call Initiated" : "Test Call Failed", description: result.message }, variant);
+      const variant = result.success ? "default" : "destructive";
+      handleToast({ 
+        title: result.success ? "Test Call Initiated" : "Test Call Failed", 
+        description: result.message 
+      }, variant);
       setTimeout(() => getAvailablePorts(), 1000);
     } catch (error) {
       console.error("Error making test call:", error);
-      handleToast({ title: "Test Call Failed", description: "Could not initiate test call." }, "destructive");
+      handleToast({ 
+        title: "Test Call Failed", 
+        description: "Could not initiate test call." 
+      }, "destructive");
     }
   }, [campaignId, user?.id, getAvailablePorts, handleToast]);
 

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { SystemCheck } from "./SystemCheckItem";
 import { asteriskService } from "@/utils/asteriskService";
@@ -169,7 +170,7 @@ export const useReadinessChecker = (user: UserWithId | null) => {
         
         console.log("Testing Asterisk connection...");
         // Add more robust error handling and retry logic
-        const result = await asteriskService.testConnection().catch(err => {
+        const result = await asteriskService.testAsteriskConnection().catch(err => {
           console.error("Connection test error:", err);
           return { success: false, message: err.message, error: err.message };
         });
@@ -233,7 +234,7 @@ export const useReadinessChecker = (user: UserWithId | null) => {
           check.name === "Asterisk Connection" ? {
             ...check,
             status: "error",
-            message: `Connection error: ${error.message || "Unknown error"}`
+            message: `Connection error: ${error instanceof Error ? error.message : String(error)}`
           } : check
         ));
         
