@@ -16,14 +16,15 @@ export const apiGenerator = {
       }
 
       // Get user's configuration from database
+      // Using user_trunks table instead of non-existent user_settings
       const { data, error } = await supabase
-        .from('user_settings')
+        .from('user_trunks')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
 
       if (error) {
-        throw new Error(`Error fetching user settings: ${error.message}`);
+        throw new Error(`Error fetching user trunk settings: ${error.message}`);
       }
 
       // Generate API configuration

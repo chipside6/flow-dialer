@@ -57,16 +57,15 @@ export const generateCompleteConfig = async (
       throw new Error(`SIP config generation failed: ${sipResult.message}`);
     }
 
-    // Define default values for transferEnabled and transferNumber
-    // Extract these from the dialplan result config if it's an object, otherwise use defaults
-    const dialplanConfig = dialplanResult.config || '';
-    const transferEnabled = typeof dialplanResult.config === 'object' 
-      ? (dialplanResult.config as any)?.transferEnabled ?? false
-      : false;
-      
-    const transferNumber = typeof dialplanResult.config === 'object'
-      ? (dialplanResult.config as any)?.transferNumber ?? null
-      : null;
+    // Define default transfer options
+    let transferEnabled = false;
+    let transferNumber = null;
+    
+    // Extract transfer data if available in config object
+    if (typeof dialplanResult.config === 'object' && dialplanResult.config !== null) {
+      transferEnabled = (dialplanResult.config as any)?.transferEnabled ?? false;
+      transferNumber = (dialplanResult.config as any)?.transferNumber ?? null;
+    }
 
     return {
       success: true,

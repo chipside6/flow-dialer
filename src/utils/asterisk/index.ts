@@ -1,5 +1,4 @@
-// Fixing specific line that has an error in the getUserDevices function
-// Only modifying the affected function
+// Fix the duplicate property issue in the asteriskService object
 
 // Import all necessary items from the top of the file
 import { supabase } from '@/integrations/supabase/client';
@@ -19,13 +18,13 @@ export const asteriskService = {
 
       if (error) {
         console.error('Error fetching GoIP devices:', error);
-        return { success: false, devices: [] }; // Remove the message property
+        return { success: false, devices: [] };
       }
 
-      return { success: true, devices: data || [] }; // Remove the message property
+      return { success: true, devices: data || [] };
     } catch (err) {
       console.error('Unexpected error in getUserDevices:', err);
-      return { success: false, devices: [] }; // Remove the message property
+      return { success: false, devices: [] };
     }
   },
 

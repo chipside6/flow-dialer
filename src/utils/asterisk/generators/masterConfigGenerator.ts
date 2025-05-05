@@ -9,20 +9,10 @@ import { sipConfigGenerator } from './sipConfigGenerator';
  */
 const generateSIPConfig = async (userId: string, numPorts: number): Promise<string> => {
   try {
-    // Fetch user's SIP configuration from the database (e.g., Supabase or any data source)
-    const { data, error } = await supabase
-      .from('user_trunks')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    if (error) {
-      throw new Error(`Error fetching SIP configuration for user ${userId}: ${error.message}`);
-    }
-
-    // Generate SIP config using retrieved data
-    return sipConfigGenerator.generateUserSipConfig(userId)
-      .then(result => result.config || '');
+    // Fetch user's SIP configuration from the database using user_trunks table
+    // Removed the deep type instantiation by simplifying the query
+    const result = await sipConfigGenerator.generateUserSipConfig(userId);
+    return result.config || '';
   } catch (error) {
     console.error(`Error generating SIP configuration for user ${userId}:`, error);
     throw new Error('Failed to generate SIP configuration.');
@@ -35,20 +25,26 @@ const generateSIPConfig = async (userId: string, numPorts: number): Promise<stri
  */
 const generateGoIPPortExtension = async (userId: string, port: number): Promise<string> => {
   try {
-    // Fetch port extension data for the user
+    // Fetch port data directly without complex type instantiation
     const { data, error } = await supabase
       .from('goip_ports')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('port', port)
+      .select(`
+        id,
+        port_number,
+        sip_username,
+        sip_password,
+        device_id,
+        goip_devices!inner(device_name)
+      `)
+      .eq('port_number', port)
+      .eq('goip_devices.user_id', userId)
       .single();
 
     if (error) {
-      throw new Error(`Error fetching GoIP port extension for user ${userId}, port ${port}: ${error.message}`);
+      throw new Error(`Error fetching GoIP port extension for port ${port}: ${error.message}`);
     }
 
-    // Generate GoIP port extension based on the fetched data
-    // Since generateGoipPortExtension doesn't exist, we'll create a simple implementation
+    // Generate GoIP port extension with the data we have
     return `
 [goip-user-${userId}-port-${port}]
 exten => _X.,1,NoOp(Incoming call for user ${userId} on port ${port})
@@ -68,21 +64,21 @@ exten => _X.,1,NoOp(Incoming call for user ${userId} on port ${port})
  */
 const generateCampaignOutboundDialplan = async (deviceId: string, userId: string): Promise<string> => {
   try {
-    // Fetch campaign settings for the user
+    // Simplified query to avoid deep type instantiation
     const { data, error } = await supabase
       .from('campaigns')
-      .select('*')
+      .select('id')
       .eq('user_id', userId)
-      .eq('device_id', deviceId)
+      .eq('goip_device_id', deviceId)
       .single();
 
     if (error) {
-      throw new Error(`Error fetching campaign data for device ${deviceId}, user ${userId}: ${error.message}`);
+      throw new Error(`Error fetching campaign data for device ${deviceId}: ${error.message}`);
     }
 
     // Generate campaign-specific dialplan using the main dialplan generator
     const result = await dialplanGenerator.generateCampaignDialplan(data.id, userId);
-    return result.config || '';
+    return typeof result.config === 'string' ? result.config : '';
   } catch (error) {
     console.error(`Error generating outbound dialplan for device ${deviceId}, user ${userId}:`, error);
     throw new Error('Failed to generate campaign outbound dialplan.');
