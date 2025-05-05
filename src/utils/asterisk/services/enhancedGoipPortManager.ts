@@ -48,11 +48,12 @@ export const enhancedGoipPortManager = {
 
       const filtered = (ports || []).filter(p => p.status === 'active');
 
+      // Explicitly cast status to PortStatus
       const portList: PortData[] = filtered.map(p => ({
         id: p.id,
         portNumber: p.port_number,
         deviceName: p.trunk_name,
-        status: p.status,
+        status: p.status as PortStatus,
         lastUsed: p.last_used,
         quality: null
       })).sort((a, b) => {
@@ -201,4 +202,3 @@ export const enhancedGoipPortManager = {
     }
   }
 };
-

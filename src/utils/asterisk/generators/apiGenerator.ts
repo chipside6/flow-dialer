@@ -1,62 +1,59 @@
+
+import { supabase } from '@/integrations/supabase/client';
+
 /**
- * Configuration generators that fetch data from APIs for Asterisk
+ * Generator for Asterisk API integration
  */
 export const apiGenerator = {
   /**
-   * Generate a configuration by fetching data from an API.
-   * This function is ideal for server-side or headless operation.
-   *
-   * @param {Record<string, string>} params - Parameters to be included in the API request.
-   * @returns {Promise<string>} - The generated configuration or error message.
+   * Generate API configuration for Asterisk
    */
-  generateConfigFromApi: (params: Record<string, string>) => {
-    return async (fetchFn: (url: string) => Promise<any>): Promise<string> => {
-      try {
-        // Build API URL from params
-        const urlParams = new URLSearchParams();
-        Object.entries(params).forEach(([key, value]) => {
-          if (value) urlParams.append(key, value);
-        });
-
-        // Configure API request URL
-        const url = `/api/configs/asterisk-campaign?${urlParams.toString()}`;
-
-        // Set up an AbortController for timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
-        
-        // Fetch the configuration from the API
-        const response = await fetchFn(url, {
-          signal: controller.signal, // Attach timeout controller to the fetch
-        });
-
-        clearTimeout(timeoutId); // Clear timeout after fetch completion
-
-        // Validate the response
-        if (!response.ok) {
-          throw new Error(`API request failed with status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (!data || !data.config) {
-          throw new Error("Invalid response from API: Missing 'config' key");
-        }
-
-        // Return the generated configuration
-        return data.config;
-      } catch (error) {
-        console.error("Error generating API config:", error);
-
-        // Return a meaningful error message
-        return `
-; Error generating API configuration
-; ---------------------------------
-; ${error instanceof Error ? error.message : 'Unknown error'}
-; Please check your API connection and parameters
-`.trim();
+  generateApiConfig: async (userId: string): Promise<{ success: boolean; message: string; config?: string }> => {
+    try {
+      // Validate userId
+      if (!userId) {
+        throw new Error('Missing required parameter: userId');
       }
-    };
+
+      // Get user's configuration from database
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) {
+        throw new Error(`Error fetching user settings: ${error.message}`);
+      }
+
+      // Generate API configuration
+      const apiConfig = `
+; Asterisk API configuration for user ${userId}
+; Generated on ${new Date().toISOString()}
+
+[asterisk_api]
+enabled = yes
+port = 8088
+bindaddr = 0.0.0.0
+prefix = /ari
+pretty = yes
+
+[general]
+allowed_origins = *
+      `.trim();
+
+      return {
+        success: true,
+        message: "API configuration generated successfully",
+        config: apiConfig
+      };
+    } catch (error) {
+      console.error("Error generating API configuration:", error);
+      
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Unknown error generating API configuration"
+      };
+    }
   }
 };
-

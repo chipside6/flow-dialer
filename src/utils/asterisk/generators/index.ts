@@ -1,3 +1,4 @@
+
 /**
  * Central export file for all Asterisk generators
  * This ensures consistent access to generators across the application
@@ -19,20 +20,23 @@ export {
   sipConfigGenerator
 };
 
-/**
- * Utility function to generate complete configuration for a campaign
- */
-export const generateCompleteConfig = async (
-  campaignId: string,
-  userId: string
-): Promise<{
+// Interface for config response
+interface ConfigResponse {
   success: boolean;
   dialplanConfig: string;
   sipConfig: string;
   transferEnabled: boolean;
   transferNumber: string | null;
   error?: string;
-}> => {
+}
+
+/**
+ * Utility function to generate complete configuration for a campaign
+ */
+export const generateCompleteConfig = async (
+  campaignId: string,
+  userId: string
+): Promise<ConfigResponse> => {
   try {
     // Get dialplan from the dialplan generator
     const dialplanResult = await dialplanGenerator.generateCampaignDialplan(
@@ -53,13 +57,20 @@ export const generateCompleteConfig = async (
       throw new Error(`SIP config generation failed: ${sipResult.message}`);
     }
 
-    // Define default values for transferEnabled and transferNumber from the dialplan result
-    const transferEnabled = dialplanResult.config?.transferEnabled ?? false;
-    const transferNumber = dialplanResult.config?.transferNumber ?? null;
+    // Define default values for transferEnabled and transferNumber
+    // Extract these from the dialplan result config if it's an object, otherwise use defaults
+    const dialplanConfig = dialplanResult.config || '';
+    const transferEnabled = typeof dialplanResult.config === 'object' 
+      ? (dialplanResult.config as any)?.transferEnabled ?? false
+      : false;
+      
+    const transferNumber = typeof dialplanResult.config === 'object'
+      ? (dialplanResult.config as any)?.transferNumber ?? null
+      : null;
 
     return {
       success: true,
-      dialplanConfig: dialplanResult.config || '',
+      dialplanConfig: typeof dialplanResult.config === 'string' ? dialplanResult.config : '',
       sipConfig: sipResult.config || '',
       transferEnabled,
       transferNumber,
