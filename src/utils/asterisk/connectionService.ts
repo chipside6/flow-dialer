@@ -33,16 +33,16 @@ export const connectionService = {
     }
     
     // Check if using the detected local IP address
-    const isLocalServerIP = apiUrl.includes('10.0.2.15');
+    const isLocalServerIP = apiUrl.includes('192.168.0.197');
     if (isLocalServerIP) {
-      console.log("Detected local server IP 10.0.2.15 - using optimized parameters");
+      console.log("Detected local server IP 192.168.0.197 - using optimized parameters");
       
       // Force using correct port for local server
       if (!apiUrl.includes(':8088')) {
         if (apiUrl.endsWith('/')) {
-          apiUrl = `http://10.0.2.15:8088/`;
+          apiUrl = `http://192.168.0.197:8088/`;
         } else {
-          apiUrl = `http://10.0.2.15:8088/ari/`;
+          apiUrl = `http://192.168.0.197:8088/ari/`;
         }
         console.log(`Using optimized local API URL: ${apiUrl}`);
       }
@@ -98,7 +98,7 @@ export const connectionService = {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       
-      // For local server (10.0.2.15), use applications endpoint if not specified
+      // For local server (192.168.0.197), use applications endpoint if not specified
       let apiEndpoint = apiUrl;
       if (isLocalServerIP && !apiUrl.endsWith('/')) {
         if (!apiUrl.endsWith('applications')) {

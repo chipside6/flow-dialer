@@ -36,7 +36,7 @@ export const CurrentConfigDisplay: React.FC<CurrentConfigDisplayProps> = ({
         <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp || 'Not set'}</p>
       </div>
       <div className="mt-3 text-xs text-slate-500">
-        Using hardcoded URL: http://10.0.2.15:8088/ari/
+        Using detected IP: http://192.168.0.197:8088/ari/
       </div>
     </div>
   );
