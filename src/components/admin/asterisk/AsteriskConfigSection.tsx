@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -113,7 +112,7 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
           'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
         },
         body: JSON.stringify({
-          serverIp: currentConfig.serverIp || '10.0.2.15'
+          serverIp: currentConfig.serverIp || '192.168.0.197'
         })
       });
       
@@ -204,7 +203,7 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
             <p><span className="font-medium">API URL:</span> {currentConfig.apiUrl || 'Not set'}</p>
             <p><span className="font-medium">Username:</span> {currentConfig.username || 'Not set'}</p>
             <p><span className="font-medium">Password:</span> {currentConfig.password ? '••••••••' : 'Not set'}</p>
-            <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp || '10.0.2.15'} {currentConfig.serverIp === '10.0.2.15' && '(Local Server)'}</p>
+            <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp || '192.168.0.197'} {currentConfig.serverIp === '192.168.0.197' && '(Local Server)'}</p>
           </div>
           <div className="mt-3 flex justify-end">
             <Button 
@@ -227,7 +226,7 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
                   },
                   supabaseUrl: supabaseUrl,
                   configValid,
-                  localIp: '10.0.2.15',
+                  localIp: '192.168.0.197',
                   timestamp: new Date().toISOString()
                 }, null, 2)}
               </pre>
@@ -341,22 +340,22 @@ export const AsteriskConfigSection = ({ userId }: AsteriskConfigSectionProps) =>
           onClick={() => {
             // Force using local server settings
             const updatedConfig = {
-              apiUrl: `http://10.0.2.15:8088/ari/`,
+              apiUrl: `http://192.168.0.197:8088/ari/`,
               username: 'admin',
               password: 'admin',
-              serverIp: '10.0.2.15'
+              serverIp: '192.168.0.197'
             };
             localStorage.setItem('asterisk_config', JSON.stringify(updatedConfig));
             setCurrentConfig(updatedConfig);
             toast({
               title: "Local Server Settings Applied",
-              description: "Using default settings for local server (10.0.2.15)"
+              description: "Using default settings for local server (192.168.0.197)"
             });
             setTimeout(() => window.location.reload(), 1000);
           }}
         >
           <Server className="mr-2 h-4 w-4" />
-          Use Local Server (10.0.2.15)
+          Use Local Server (192.168.0.197)
         </Button>
         
         <Link to="/settings">

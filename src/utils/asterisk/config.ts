@@ -41,6 +41,20 @@ export const getConfigFromStorage = (): AsteriskConfig => {
         }
       }
       
+      // Update old server IP if found
+      if (parsedConfig.serverIp === '10.0.2.15') {
+        console.log('Updating old server IP to new IP:', ASTERISK_SERVER_IP);
+        parsedConfig.serverIp = ASTERISK_SERVER_IP;
+        
+        // Also update API URL if it contains the old IP
+        if (parsedConfig.apiUrl && parsedConfig.apiUrl.includes('10.0.2.15')) {
+          parsedConfig.apiUrl = parsedConfig.apiUrl.replace('10.0.2.15', ASTERISK_SERVER_IP);
+        }
+        
+        // Save the updated config
+        saveConfigToStorage(parsedConfig);
+      }
+      
       console.log('Loaded Asterisk config from storage:', { 
         apiUrl: parsedConfig.apiUrl, 
         username: parsedConfig.username, 
@@ -104,7 +118,7 @@ export const saveConfigToStorage = (config: AsteriskConfig): void => {
         console.log('Extracted server IP from API URL:', config.serverIp);
       } catch (e) {
         console.warn('Could not parse server IP from API URL:', e);
-        config.serverIp = '10.0.2.15'; // Default fallback
+        config.serverIp = ASTERISK_SERVER_IP; // Default fallback
       }
     }
 

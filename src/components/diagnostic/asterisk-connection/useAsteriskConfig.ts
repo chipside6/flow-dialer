@@ -49,6 +49,18 @@ export const useAsteriskConfig = () => {
       saveConfigToStorage(config);
     }
     
+    // Update old IP if found
+    if (config.serverIp === '10.0.2.15') {
+      config.serverIp = '192.168.0.197';
+      
+      // Also update API URL if it contains the old IP
+      if (config.apiUrl && config.apiUrl.includes('10.0.2.15')) {
+        config.apiUrl = config.apiUrl.replace('10.0.2.15', '192.168.0.197');
+      }
+      
+      saveConfigToStorage(config);
+    }
+    
     setCurrentConfig(config);
     console.log("Loaded Asterisk config:", {
       apiUrl: config.apiUrl,
