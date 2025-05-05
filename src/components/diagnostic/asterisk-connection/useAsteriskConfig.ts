@@ -20,6 +20,18 @@ export const useAsteriskConfig = () => {
       saveConfigToStorage(config);
     }
     
+    // Update old IP if found
+    if (config.serverIp === '10.0.2.15') {
+      config.serverIp = '192.168.0.197';
+      
+      // Also update API URL if it contains the old IP
+      if (config.apiUrl && config.apiUrl.includes('10.0.2.15')) {
+        config.apiUrl = config.apiUrl.replace('10.0.2.15', '192.168.0.197');
+      }
+      
+      saveConfigToStorage(config);
+    }
+    
     return config;
   });
 
@@ -73,7 +85,7 @@ export const useAsteriskConfig = () => {
     loadCurrentConfig();
     toast({
       title: "Configuration Refreshed",
-      description: "Asterisk connection details have been refreshed from storage."
+      description: "Asterisk connection details have been refreshed."
     });
   };
 

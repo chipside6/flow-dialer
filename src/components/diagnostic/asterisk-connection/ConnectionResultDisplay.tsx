@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle, Network, WifiOff } from "lucide-react";
+import { AlertCircle, CheckCircle, Network } from "lucide-react";
 
 interface ConnectionResultDisplayProps {
   result: {
@@ -15,37 +15,30 @@ export const ConnectionResultDisplay: React.FC<ConnectionResultDisplayProps> = (
 }) => {
   if (!result) return null;
   
-  // Enhanced detection of network errors with more comprehensive checks
-  const isNetworkError = 
-    result.message.toLowerCase().includes('network') || 
-    result.message.toLowerCase().includes('connectivity') ||
-    result.message.toLowerCase().includes('cannot reach') ||
-    result.message.toLowerCase().includes('cannot connect') ||
-    result.message.toLowerCase().includes('timed out') ||
-    result.message.toLowerCase().includes('unreachable') ||
-    result.message.toLowerCase().includes('cors') ||
-    result.message.toLowerCase().includes('failed to fetch');
-  
   return (
     <Alert 
-      variant={result.success ? "default" : isNetworkError ? "warning" : "destructive"}
-      className="mt-2 animate-fadeIn"
+      variant={result.success ? "default" : "destructive"}
+      className={`mt-6 animate-fadeIn ${result.success ? 'bg-green-50 text-green-800 border-green-300' : 'bg-red-50 text-red-800 border-red-300'}`}
     >
       {result.success ? (
-        <CheckCircle className="h-4 w-4" />
-      ) : isNetworkError ? (
-        <WifiOff className="h-4 w-4" />
+        <CheckCircle className="h-5 w-5" />
       ) : (
-        <AlertCircle className="h-4 w-4" />
+        <AlertCircle className="h-5 w-5" />
       )}
-      <AlertTitle>
-        {result.success ? "Connection Successful" : isNetworkError ? "Network Connectivity Issue" : "Connection Failed"}
+      <AlertTitle className="text-lg font-bold">
+        {result.success ? "Connection Successful" : "Connection Failed"}
       </AlertTitle>
-      <AlertDescription className="text-sm">
+      <AlertDescription className="text-base mt-2">
         {result.message}
-        {isNetworkError && (
-          <div className="mt-1 text-xs">
-            Check your server IP address, network connectivity, and make sure the Asterisk server is running.
+        {!result.success && (
+          <div className="mt-4 p-3 bg-white rounded border border-red-200">
+            <p className="font-medium">Common Solutions:</p>
+            <ul className="list-disc list-inside mt-1 space-y-1">
+              <li>Verify the Asterisk server is running on 192.168.0.197</li>
+              <li>Check that port 8088 is open and the ARI module is enabled</li>
+              <li>Make sure username and password are correct (default: admin/admin)</li>
+              <li>If using a firewall, ensure it allows connections to port 8088</li>
+            </ul>
           </div>
         )}
       </AlertDescription>

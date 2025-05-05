@@ -8,13 +8,23 @@ export const connectionService = {
   testConnection: async (): Promise<{ success: boolean; message: string }> => {
     const config = getConfigFromStorage();
     
-    // Use the config URL but also log all details for debugging
-    let apiUrl = config.apiUrl;
+    // Ensure we have the correct server IP - always use 192.168.0.197 as fallback
+    const serverIp = config.serverIp || '192.168.0.197';
     
-    // Make sure the URL has the proper format
-    if (apiUrl && !apiUrl.startsWith('http')) {
+    // Make sure the URL has the proper format and uses the correct server IP
+    let apiUrl = config.apiUrl;
+    if (!apiUrl) {
+      apiUrl = `http://${serverIp}:8088/ari/`;
+      console.log(`Using default API URL: ${apiUrl}`);
+    } else if (!apiUrl.startsWith('http')) {
       apiUrl = `http://${apiUrl}`;
       console.log(`Adding http:// prefix to API URL: ${apiUrl}`);
+    }
+    
+    // Replace any old IP address references with the new one
+    if (apiUrl.includes('10.0.2.15')) {
+      apiUrl = apiUrl.replace('10.0.2.15', '192.168.0.197');
+      console.log(`Replaced old IP with new IP in API URL: ${apiUrl}`);
     }
     
     // Validate configuration
@@ -25,87 +35,23 @@ export const connectionService = {
       };
     }
     
-    if (!apiUrl) {
-      return {
-        success: false,
-        message: 'Asterisk server URL is not configured. Please enter a valid API URL.'
-      };
-    }
-    
-    // Check if using the detected local IP address
-    const isLocalServerIP = apiUrl.includes('192.168.0.197');
-    if (isLocalServerIP) {
-      console.log("Detected local server IP 192.168.0.197 - using optimized parameters");
-      
-      // Force using correct port for local server
-      if (!apiUrl.includes(':8088')) {
-        if (apiUrl.endsWith('/')) {
-          apiUrl = `http://192.168.0.197:8088/`;
-        } else {
-          apiUrl = `http://192.168.0.197:8088/ari/`;
-        }
-        console.log(`Using optimized local API URL: ${apiUrl}`);
-      }
-    }
-    
     // Log the URL we're connecting to
     console.log(`Attempting to connect to Asterisk API at: ${apiUrl}`);
     console.log(`Using credentials: ${config.username}:****`);
+    console.log(`Server IP: ${serverIp}`);
     
     try {
-      // First try a simple network connectivity test
-      console.log("Testing basic network connectivity...");
-      
-      try {
-        // Use fetch with a short timeout just to test basic connectivity
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        
-        const testUrl = new URL(apiUrl);
-        const networkTestUrl = `${testUrl.protocol}//${testUrl.host}/`;
-        
-        console.log(`Testing connection to base URL: ${networkTestUrl}`);
-        const networkTestResponse = await fetch(networkTestUrl, { 
-          method: 'HEAD',
-          mode: 'no-cors', // This prevents CORS issues during the test
-          cache: 'no-cache',
-          signal: controller.signal
-        }).catch(e => {
-          console.error("Network test fetch error:", e);
-          throw new Error(`Network connectivity error: Cannot reach the server at ${testUrl.host}. Please verify the server is running and accessible.`);
-        });
-        
-        clearTimeout(timeoutId);
-        console.log(`Network connectivity test response:`, networkTestResponse);
-      } catch (networkError) {
-        // Special handling for local IP
-        if (isLocalServerIP) {
-          console.log("Local server network test failed, but continuing with API test as this may be expected in local environment");
-        } else {
-          // If we can't even reach the server, return a helpful error message
-          console.error('Network connectivity test failed:', networkError);
-          return {
-            success: false,
-            message: networkError instanceof Error 
-              ? networkError.message
-              : `Network connectivity error: Cannot reach the Asterisk server. Please verify the server IP address is correct and the server is running.`
-          };
-        }
-      }
-      
       // Now try the actual authenticated request
       console.log('Sending authenticated request to:', `${apiUrl}applications`);
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       
-      // For local server (192.168.0.197), use applications endpoint if not specified
+      // Ensure proper endpoint format
       let apiEndpoint = apiUrl;
-      if (isLocalServerIP && !apiUrl.endsWith('/')) {
+      if (!apiUrl.endsWith('/')) {
         if (!apiUrl.endsWith('applications')) {
-          apiEndpoint = `${apiUrl}applications`;
+          apiEndpoint = `${apiUrl}/applications`;
         }
-      } else if (!apiUrl.endsWith('/')) {
-        apiEndpoint = `${apiUrl}/applications`;
       } else {
         apiEndpoint = `${apiUrl}applications`;
       }
@@ -153,17 +99,9 @@ export const connectionService = {
         } catch (error) {
           // If we can't parse JSON, return the status text
           console.log('Failed to parse error response:', error);
-          let responseText = '';
-          try {
-            responseText = await response.text();
-            console.log('Raw response text:', responseText);
-          } catch (e) {
-            console.log('Failed to get response text:', e);
-          }
-          
           return { 
             success: false, 
-            message: `Error connecting to Asterisk: ${response.statusText} (Status: ${response.status})${responseText ? ` - Response: ${responseText}` : ''}`
+            message: `Error connecting to Asterisk: ${response.statusText} (Status: ${response.status})` 
           };
         }
       }
@@ -174,7 +112,7 @@ export const connectionService = {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return {
           success: false,
-          message: `Connection to Asterisk timed out. Please verify the server is running and reachable at ${config.serverIp || new URL(apiUrl).hostname}.`
+          message: `Connection to Asterisk timed out. Please verify the server is running and reachable at ${serverIp}.`
         };
       }
       
@@ -183,7 +121,7 @@ export const connectionService = {
         if (error.message.includes('Failed to fetch')) {
           return { 
             success: false, 
-            message: `Network connectivity error: Cannot connect to the Asterisk server. Please verify the server IP address is correct and the server is running.` 
+            message: `Network connectivity error: Cannot connect to the Asterisk server at ${serverIp}. Please verify the server is running and accessible.` 
           };
         }
         
@@ -198,74 +136,6 @@ export const connectionService = {
       return { 
         success: false, 
         message: `Error connecting to Asterisk: ${error instanceof Error ? error.message : String(error)}` 
-      };
-    }
-  },
-  
-  /**
-   * Reload PJSIP configuration
-   */
-  reloadPjsip: async (): Promise<{ success: boolean; message: string }> => {
-    const config = getConfigFromStorage();
-    
-    try {
-      const response = await fetch(`${config.apiUrl}/asterisk/modules/pjsip/reload`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
-        }
-      });
-      
-      if (response.ok) {
-        return { 
-          success: true, 
-          message: 'Successfully reloaded PJSIP configuration' 
-        };
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        return { 
-          success: false, 
-          message: `Error reloading PJSIP: ${errorData.message || response.statusText}` 
-        };
-      }
-    } catch (error) {
-      return { 
-        success: false, 
-        message: `Error reloading PJSIP: ${error instanceof Error ? error.message : String(error)}` 
-      };
-    }
-  },
-  
-  /**
-   * Reload extensions (dialplan)
-   */
-  reloadExtensions: async (): Promise<{ success: boolean; message: string }> => {
-    const config = getConfigFromStorage();
-    
-    try {
-      const response = await fetch(`${config.apiUrl}/asterisk/reload`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
-        }
-      });
-      
-      if (response.ok) {
-        return { 
-          success: true, 
-          message: 'Successfully reloaded Asterisk configuration' 
-        };
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        return { 
-          success: false, 
-          message: `Error reloading Asterisk: ${errorData.message || response.statusText}` 
-        };
-      }
-    } catch (error) {
-      return { 
-        success: false, 
-        message: `Error reloading Asterisk: ${error instanceof Error ? error.message : String(error)}` 
       };
     }
   }

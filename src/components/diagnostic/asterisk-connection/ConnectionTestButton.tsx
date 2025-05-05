@@ -18,12 +18,13 @@ export const ConnectionTestButton: React.FC<ConnectionTestButtonProps> = ({
     <Button 
       onClick={onClick} 
       disabled={isTestingConnection}
-      className="w-full"
-      variant={variant}
+      className="w-full text-lg py-6" // Made bigger
+      variant={variant === "skyblue" ? "default" : "default"}
+      size="lg"
     >
       {isTestingConnection ? (
         <>
-          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+          <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
           Testing Connection...
         </>
       ) : (

@@ -2,9 +2,7 @@
 import React from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AsteriskConfigSection } from '@/components/admin/asterisk/AsteriskConfigSection';
 import { AsteriskConnectionTest } from '@/components/diagnostic/AsteriskConnectionTest';
-import { AsteriskDiagnosticPanel } from '@/components/diagnostic/AsteriskDiagnosticPanel';
 import { useAuth } from "@/contexts/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -34,9 +32,9 @@ const AsteriskConfigPageContent = () => {
       <div className="container py-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Asterisk Configuration</h1>
+            <h1 className="text-3xl font-bold mb-2">Asterisk Connection Test</h1>
             <p className="text-muted-foreground">
-              Configure and manage your Asterisk server connection
+              Test your connection to the Asterisk server
             </p>
           </div>
         </div>
@@ -63,11 +61,6 @@ const AsteriskConfigPageContent = () => {
               <AsteriskConnectionTest />
             </CardContent>
           </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {user && <AsteriskConfigSection userId={user.id} />}
-            <AsteriskDiagnosticPanel />
-          </div>
         </div>
       </div>
     </DashboardLayout>
