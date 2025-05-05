@@ -1,9 +1,20 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/types/supabase';
 
-type GoipPort = Database['public']['Tables']['goip_ports']['Row'];
-type ActiveCall = Database['public']['Tables']['active_calls']['Row'];
+// Define types locally since '@/types/supabase' can't be found
+interface GoipPort {
+  id: string;
+  port_number: number;
+  status: string;
+  sip_username: string;
+  updated_at: string;
+  device_id: string;
+}
+
+interface ActiveCall {
+  id: string;
+  campaign_id?: string;
+}
 
 export interface PortStatus {
   portNumber: number;
@@ -44,16 +55,73 @@ export const goipPortManager = {
 
   async markPortBusy(userId: string, portNumber: number, campaignId: string, callId?: string): Promise<boolean> {
     try {
-      const { data, error } = await supabase.rpc('mark_port_busy_atomic', {
-        in_user_id: userId,
-        in_port_number: portNumber,
-        in_campaign_id: campaignId,
-        in_call_id: callId || null
-      });
+      // Since the RPC function might not exist, let's use a direct update approach instead
+      // First, find the port
+      const { data: portData, error: portError } = await supabase
+        .from('goip_ports')
+        .select(`
+          id,
+          device_id,
+          goip_devices!inner(user_id)
+        `)
+        .eq('port_number', portNumber)
+        .eq('goip_devices.user_id', userId)
+        .eq('status', 'available')
+        .limit(1)
+        .single();
+        
+      if (portError || !portData) {
+        console.error('Port find error or not found:', portError);
+        return false;
+      }
 
-      if (error) throw error;
+      const portId = portData.id;
+      const now = new Date().toISOString();
 
-      return data === true;
+      // Update the port status
+      const { error: updateError } = await supabase
+        .from('goip_ports')
+        .update({ status: 'busy', updated_at: now })
+        .eq('id', portId);
+
+      if (updateError) {
+        console.error('Port update error:', updateError);
+        return false;
+      }
+
+      // Create active call entry
+      const { error: callError } = await supabase
+        .from('active_calls')
+        .insert({
+          port_id: portId,
+          campaign_id: campaignId,
+          id: callId || undefined,
+          start_time: now,
+          status: 'in_progress'
+        });
+
+      if (callError) {
+        console.error('Call creation error:', callError);
+        // Revert port status if call creation fails
+        await supabase
+          .from('goip_ports')
+          .update({ status: 'available', updated_at: now })
+          .eq('id', portId);
+        return false;
+      }
+
+      // Log activity
+      await supabase.from('port_activity')
+        .insert({
+          port_id: portId,
+          user_id: userId,
+          activity_type: 'allocate',
+          status: 'active',
+          campaign_id: campaignId,
+          call_id: callId || null
+        });
+
+      return true;
     } catch (error) {
       console.error('Error in markPortBusy:', error);
       return false;
@@ -94,13 +162,14 @@ export const goipPortManager = {
       if (updateError) throw updateError;
 
       // Log activity
-      await supabase.from('port_activity_logs').insert({
-        port_id: portId,
-        user_id: userId,
-        action: 'release',
-        description: `Port ${portNumber} released`,
-        timestamp: now
-      });
+      await supabase.from('port_activity')
+        .insert({
+          port_id: portId,
+          user_id: userId,
+          activity_type: 'release',
+          status: 'completed',
+          call_status: 'completed'
+        });
 
       return true;
     } catch (error) {
@@ -109,7 +178,7 @@ export const goipPortManager = {
     }
   },
 
-  // NEW METHODS TO FIX TYPE ERRORS
+  // Add missing getUserPorts method
   async getUserPorts(userId: string): Promise<PortStatus[]> {
     try {
       const { data, error } = await supabase
@@ -146,6 +215,7 @@ export const goipPortManager = {
     }
   },
 
+  // Add missing resetPorts method
   async resetPorts(userId: string): Promise<boolean> {
     try {
       // First, get all ports for this user
@@ -181,15 +251,15 @@ export const goipPortManager = {
       if (resetError) throw resetError;
 
       // Log the reset action
-      await supabase.from('port_activity_logs').insert(
-        portIds.map(portId => ({
-          port_id: portId,
-          user_id: userId,
-          action: 'reset',
-          description: 'Port reset to available',
-          timestamp: now
-        }))
-      );
+      await supabase.from('port_activity')
+        .insert(
+          portIds.map(portId => ({
+            port_id: portId,
+            user_id: userId,
+            activity_type: 'reset',
+            status: 'completed'
+          }))
+        );
 
       return true;
     } catch (error) {

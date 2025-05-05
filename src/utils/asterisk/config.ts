@@ -3,8 +3,8 @@
  * Asterisk API configuration utilities
  */
 
-// Default values using the detected server IP
-export const ASTERISK_SERVER_IP = '192.168.0.197'; // Your detected server IP
+// Default values using the provided server IP
+export const ASTERISK_SERVER_IP = '192.168.0.197'; // Your Asterisk server IP
 export const ASTERISK_API_URL = `http://${ASTERISK_SERVER_IP}:8088/ari/`;
 export const ASTERISK_API_USERNAME = 'admin';
 export const ASTERISK_API_PASSWORD = 'admin';

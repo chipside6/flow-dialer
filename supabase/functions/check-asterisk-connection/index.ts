@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.3";
 
@@ -22,12 +21,12 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     
     // Get request parameters
-    let { serverIp, checkOnly } = { serverIp: "", checkOnly: false };
+    let { serverIp, checkOnly } = { serverIp: "192.168.0.197", checkOnly: false };
     
     try {
       if (req.method === "POST") {
         const requestBody = await req.json();
-        serverIp = requestBody.serverIp || "";
+        serverIp = requestBody.serverIp || "192.168.0.197";
         checkOnly = requestBody.checkOnly || false;
       }
     } catch (error) {
@@ -38,7 +37,7 @@ serve(async (req) => {
     // For check-only mode, we don't need authentication
     if (checkOnly) {
       // Get server configuration - check environment variables first
-      const serverHost = Deno.env.get("ASTERISK_SERVER_HOST") || "127.0.0.1";
+      const serverHost = Deno.env.get("ASTERISK_SERVER_HOST") || "192.168.0.197";
       const serverUser = Deno.env.get("ASTERISK_SERVER_USER") || "";
       const serverPass = Deno.env.get("ASTERISK_SERVER_PASS") || "";
       const serverPort = parseInt(Deno.env.get("ASTERISK_SERVER_PORT") || "22");
@@ -50,7 +49,7 @@ serve(async (req) => {
           success: true,
           message: "Returning server configuration only",
           serverInfo: {
-            host: serverIp || serverHost || "127.0.0.1",
+            host: serverIp || serverHost || "192.168.0.197",
             port: serverPort,
             username: serverUser ? "[SET]" : "[NOT SET]",
             password: serverPass ? "[SET]" : "[NOT SET]"
@@ -93,13 +92,13 @@ serve(async (req) => {
     }
     
     // Get server configuration
-    const serverHost = Deno.env.get("ASTERISK_SERVER_HOST") || "127.0.0.1";
+    const serverHost = Deno.env.get("ASTERISK_SERVER_HOST") || "192.168.0.197";
     const serverUser = Deno.env.get("ASTERISK_SERVER_USER") || "";
     const serverPass = Deno.env.get("ASTERISK_SERVER_PASS") || "";
     const serverPort = parseInt(Deno.env.get("ASTERISK_SERVER_PORT") || "22");
     
     // Since we're in an edge function, we'll simulate the connection check
-    const targetServerIp = serverIp || serverHost || "127.0.0.1";
+    const targetServerIp = serverIp || serverHost || "192.168.0.197";
     
     console.log(`Testing connection to Asterisk server at ${targetServerIp}`);
     

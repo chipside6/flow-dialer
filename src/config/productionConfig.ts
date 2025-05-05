@@ -2,10 +2,10 @@
 // Production configuration values
 
 export const ASTERISK_CONFIG = {
-  apiUrl: import.meta.env.VITE_ASTERISK_API_URL || 'asterisk.example.com:8088',
+  apiUrl: import.meta.env.VITE_ASTERISK_API_URL || `http://192.168.0.197:8088`,
   username: import.meta.env.VITE_ASTERISK_API_USERNAME || 'admin',
   password: import.meta.env.VITE_ASTERISK_API_PASSWORD || 'password',
-  serverIp: import.meta.env.VITE_ASTERISK_SERVER_IP || '123.123.123.123'
+  serverIp: import.meta.env.VITE_ASTERISK_SERVER_IP || '192.168.0.197'
 };
 
 export const API_CONFIG = {

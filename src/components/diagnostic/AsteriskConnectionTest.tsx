@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { connectionService } from "@/utils/asterisk/connectionService";
 import { useToast } from "@/components/ui/use-toast";
@@ -26,8 +25,8 @@ export const AsteriskConnectionTest: React.FC = () => {
   const { toast } = useToast();
   const { currentConfig, setCurrentConfig, loadCurrentConfig, handleRefreshConfig } = useAsteriskConfig();
   
-  // Automatically detect local server IP
-  const localIpAddress = "10.0.2.15"; // Your detected IP
+  // Use the specified server IP
+  const localIpAddress = "192.168.0.197";
 
   const testConnection = async () => {
     setIsTestingConnection(true);
@@ -138,7 +137,7 @@ export const AsteriskConnectionTest: React.FC = () => {
     
     toast({
       title: "Server IP Updated",
-      description: `Set server IP to local address: ${localIpAddress}`
+      description: `Set server IP to: ${localIpAddress}`
     });
     
     loadCurrentConfig();

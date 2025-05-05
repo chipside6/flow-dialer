@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.3";
 
@@ -108,7 +107,7 @@ serve(async (req) => {
     }
 
     // Get Asterisk server config from environment variables
-    const ASTERISK_SERVER_HOST = Deno.env.get("ASTERISK_SERVER_HOST");
+    const ASTERISK_SERVER_HOST = Deno.env.get("ASTERISK_SERVER_HOST") || "192.168.0.197";
     const ASTERISK_SERVER_USER = Deno.env.get("ASTERISK_SERVER_USER");
     const ASTERISK_SERVER_PASS = Deno.env.get("ASTERISK_SERVER_PASS");
     const ASTERISK_SERVER_PORT = parseInt(Deno.env.get("ASTERISK_SERVER_PORT") || "22");

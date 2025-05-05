@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,7 +62,7 @@ export const AsteriskDiagnosticPanel = () => {
       
       // Test 3: Asterisk connection
       messages.push("Testing Asterisk server connection...");
-      const connectionTest = await asteriskService.testAsteriskConnection('10.0.2.15');
+      const connectionTest = await asteriskService.testAsteriskConnection('192.168.0.197');
       if (connectionTest.success) {
         asteriskConnection = true;
         messages.push(`✅ Asterisk server connection successful: ${connectionTest.message}`);
@@ -71,7 +70,7 @@ export const AsteriskDiagnosticPanel = () => {
         messages.push(`⚠️ Asterisk server connection failed: ${connectionTest.message}`);
         
         // Add more details
-        messages.push(`   Server IP: ${config.serverIp || '10.0.2.15'}`);
+        messages.push(`   Server IP: 192.168.0.197`);
         messages.push(`   API URL: ${config.apiUrl || 'Not configured'}`);
       }
       
@@ -196,10 +195,10 @@ export const AsteriskDiagnosticPanel = () => {
         
         <Alert variant="default" className="bg-blue-50 text-blue-800 border-blue-200">
           <Wifi className="h-4 w-4" />
-          <AlertTitle>Local Network Environment</AlertTitle>
+          <AlertTitle>Asterisk Server Environment</AlertTitle>
           <AlertDescription className="text-sm">
-            <p>Your server is detected at IP address <strong>10.0.2.15</strong> which is typically a local VM address.</p>
-            <p className="mt-1">If you're having connection issues, make sure your GoIP device and Asterisk server can communicate on the same network.</p>
+            <p>Your server is configured at IP address <strong>192.168.0.197</strong>.</p>
+            <p className="mt-1">Make sure your GoIP device and Asterisk server can communicate on the same network.</p>
           </AlertDescription>
         </Alert>
       </CardContent>

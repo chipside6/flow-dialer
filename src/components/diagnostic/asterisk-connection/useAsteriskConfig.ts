@@ -8,9 +8,15 @@ export const useAsteriskConfig = () => {
   const [currentConfig, setCurrentConfig] = useState(() => {
     const config = getConfigFromStorage();
     
-    // If API URL is empty or invalid, set a default value
+    // If API URL is empty or invalid, set a default value with the updated IP
     if (!config.apiUrl || !config.apiUrl.includes('://')) {
-      config.apiUrl = 'http://10.0.2.15:8088/ari/';
+      config.apiUrl = 'http://192.168.0.197:8088/ari/';
+      saveConfigToStorage(config);
+    }
+    
+    // Ensure server IP is set to our specified IP
+    if (!config.serverIp) {
+      config.serverIp = '192.168.0.197';
       saveConfigToStorage(config);
     }
     
@@ -31,9 +37,15 @@ export const useAsteriskConfig = () => {
       saveConfigToStorage(config);
     }
     
-    // Set default if empty
+    // Set default if empty using the specified IP
     if (!config.apiUrl) {
-      config.apiUrl = 'http://10.0.2.15:8088/ari/';
+      config.apiUrl = 'http://192.168.0.197:8088/ari/';
+      saveConfigToStorage(config);
+    }
+    
+    // Ensure server IP is always set
+    if (!config.serverIp) {
+      config.serverIp = '192.168.0.197';
       saveConfigToStorage(config);
     }
     

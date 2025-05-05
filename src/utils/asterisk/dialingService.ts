@@ -85,6 +85,7 @@ export const dialingService = {
       const jobId = `job_${Math.random().toString(36).substring(2, 9)}`;
 
       console.log(`[Dialing] Starting for campaign ${campaignId} with port ${portNumber}`);
+      console.log(`[Dialing] Using Asterisk server at 192.168.0.197`);
 
       // Replace with edge function / Asterisk AMI call
 
@@ -124,6 +125,7 @@ export const dialingService = {
 
       const jobId = `job_${Math.random().toString(36).substring(2, 9)}`;
       console.log(`[Dialing] Multi-port dialing on ${availablePorts.length} ports`);
+      console.log(`[Dialing] Using Asterisk server at 192.168.0.197`);
 
       // Replace with call to Asterisk AMI or Edge Function
 
