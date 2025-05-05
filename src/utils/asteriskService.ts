@@ -2,8 +2,7 @@
 import { getConfigFromStorage } from './asterisk/config';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
-import { connectionService } from './asterisk/connectionService';
-import { logger } from './utils/logger';  // Import a logging utility
+import { logger } from './logger';  // Fixed import path
 
 export const asteriskService = {
   /**
