@@ -1,7 +1,6 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { RefreshCw, Server } from "lucide-react";
+import { Server } from "lucide-react";
 import { AsteriskConfig } from "@/utils/asterisk/config";
 
 interface CurrentConfigDisplayProps {
@@ -18,25 +17,14 @@ export const CurrentConfigDisplay: React.FC<CurrentConfigDisplayProps> = ({
       <div className="flex justify-between items-center mb-2">
         <h3 className="text-sm font-medium flex items-center">
           <Server className="h-5 w-5 mr-2" />
-          Current Asterisk Configuration
+          Connection Configuration
         </h3>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onRefreshConfig} 
-          title="Refresh configuration"
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
       </div>
       <div className="text-sm space-y-2">
-        <p><span className="font-medium">API URL:</span> {currentConfig.apiUrl || 'Not set'}</p>
-        <p><span className="font-medium">Username:</span> {currentConfig.username || 'Not set'}</p>
+        <p><span className="font-medium">API URL:</span> {currentConfig.apiUrl}</p>
+        <p><span className="font-medium">Username:</span> {currentConfig.username}</p>
         <p><span className="font-medium">Password:</span> {currentConfig.password ? '••••••••' : 'Not set'}</p>
-        <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp || '192.168.0.197'} {currentConfig.serverIp === '192.168.0.197' && '(Default Local Server)'}</p>
-      </div>
-      <div className="mt-3 text-xs text-slate-500">
-        Default local configuration: http://192.168.0.197:8088/ari/
+        <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp}</p>
       </div>
     </div>
   );

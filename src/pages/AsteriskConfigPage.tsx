@@ -34,27 +34,20 @@ const AsteriskConfigPageContent = () => {
           <div>
             <h1 className="text-3xl font-bold mb-2">Asterisk Connection Test</h1>
             <p className="text-muted-foreground">
-              Test your connection to the Asterisk server
+              Test your connection to the Asterisk server at 192.168.0.197
             </p>
           </div>
         </div>
 
         <div className="grid gap-6">
-          {/* Local Server Information */}
-          <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
-            <Server className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-            <AlertTitle className="text-blue-800 dark:text-blue-300">Local Server Detected</AlertTitle>
-            <AlertDescription className="text-blue-700 dark:text-blue-400">
-              <p className="mb-2">Your server appears to be running locally at <strong>192.168.0.197</strong>. This configuration has been auto-detected.</p>
-              <p>For best results, make sure both your Asterisk server and GoIP device can communicate on the same network.</p>
-            </AlertDescription>
-          </Alert>
-
           <Card>
             <CardHeader>
-              <CardTitle>Connection Test</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Server className="h-5 w-5" />
+                Asterisk API Connection Test
+              </CardTitle>
               <CardDescription>
-                Verify your connection to the Asterisk API
+                Test connection to your Asterisk server's REST Interface
               </CardDescription>
             </CardHeader>
             <CardContent>

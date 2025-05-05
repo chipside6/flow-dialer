@@ -2,14 +2,12 @@
 import React, { useState } from 'react';
 import { connectionService } from "@/utils/asterisk/connectionService";
 import { useToast } from "@/components/ui/use-toast";
-import { saveConfigToStorage, getConfigFromStorage } from "@/utils/asterisk/config";
 
-import { CurrentConfigDisplay } from "./asterisk-connection/CurrentConfigDisplay";
 import { ConnectionTestButton } from "./asterisk-connection/ConnectionTestButton";
 import { ConnectionResultDisplay } from "./asterisk-connection/ConnectionResultDisplay";
-import { useAsteriskConfig } from "./asterisk-connection/useAsteriskConfig";
-import { Button } from '@/components/ui/button';
-import { Settings, RefreshCw, Server } from 'lucide-react';
+import { CurrentConfigDisplay } from "./asterisk-connection/CurrentConfigDisplay";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Server, Info } from "lucide-react";
 
 export const AsteriskConnectionTest: React.FC = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -18,48 +16,21 @@ export const AsteriskConnectionTest: React.FC = () => {
     message: string;
   } | null>(null);
   const { toast } = useToast();
-  const { currentConfig, setCurrentConfig, loadCurrentConfig, handleRefreshConfig } = useAsteriskConfig();
   
   // Use the specified server IP
-  const localIpAddress = "192.168.0.197";
+  const serverIp = "192.168.0.197";
 
   const testConnection = async () => {
     setIsTestingConnection(true);
     setConnectionResult(null);
 
     try {
-      // Ensure the URL has proper format
-      if (currentConfig.apiUrl && !currentConfig.apiUrl.startsWith('http')) {
-        const updatedConfig = {
-          ...currentConfig,
-          apiUrl: `http://${currentConfig.apiUrl}`
-        };
-        saveConfigToStorage(updatedConfig);
-        setCurrentConfig(updatedConfig);
-      }
-
-      // Force the credentials to use admin/admin if not set
-      if (!currentConfig.username || !currentConfig.password) {
-        const updatedConfig = {
-          ...currentConfig,
-          username: currentConfig.username || 'admin',
-          password: currentConfig.password || 'admin',
-          apiUrl: currentConfig.apiUrl || `http://${localIpAddress}:8088/ari/`
-        };
-        saveConfigToStorage(updatedConfig);
-        setCurrentConfig(updatedConfig);
-      }
-
       toast({
         title: "Testing Connection",
-        description: "Attempting to connect to Asterisk server...",
+        description: `Attempting to connect to Asterisk server at ${serverIp}:8088...`,
       });
 
-      console.log("Starting Asterisk connection test with config:", {
-        apiUrl: currentConfig.apiUrl,
-        username: currentConfig.username,
-        serverIp: currentConfig.serverIp || 'not set'
-      });
+      console.log("Starting Asterisk connection test to server:", serverIp);
 
       const result = await connectionService.testConnection();
       setConnectionResult(result);
@@ -85,66 +56,49 @@ export const AsteriskConnectionTest: React.FC = () => {
       });
     } finally {
       setIsTestingConnection(false);
-      // Refresh the config after testing
-      loadCurrentConfig();
     }
-  };
-
-  const handleForceDefaultsAndTest = () => {
-    // Set detected IP as default
-    const updatedConfig = {
-      ...currentConfig,
-      apiUrl: `http://${localIpAddress}:8088/ari/`,
-      username: 'admin',
-      password: 'admin',
-      serverIp: localIpAddress
-    };
-    
-    saveConfigToStorage(updatedConfig);
-    setCurrentConfig(updatedConfig);
-    
-    toast({
-      title: "Local Server Detected",
-      description: `Using detected local server IP: ${localIpAddress}. Testing connection...`
-    });
-    
-    setTimeout(() => testConnection(), 500);
   };
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 mb-4">
-        <CurrentConfigDisplay 
-          currentConfig={currentConfig}
-          onRefreshConfig={handleRefreshConfig}
-        />
+      <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+        <Server className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+        <AlertTitle className="text-blue-800 dark:text-blue-300">Server Information</AlertTitle>
+        <AlertDescription className="text-blue-700 dark:text-blue-400">
+          <p className="mb-2">Connecting to Asterisk server at <strong>{serverIp}:8088</strong> using credentials <strong>admin/admin</strong>.</p>
+        </AlertDescription>
+      </Alert>
+      
+      <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-md border border-slate-200 dark:border-slate-800 mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Info className="h-5 w-5 text-slate-500" />
+          <span className="font-medium">Connection Information</span>
+        </div>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+          This test will attempt to connect to your Asterisk server's REST Interface (ARI) using:
+        </p>
+        <ul className="list-disc list-inside text-sm text-slate-700 dark:text-slate-300 ml-4 space-y-1">
+          <li>Server: <span className="font-mono">{serverIp}</span></li>
+          <li>Port: <span className="font-mono">8088</span></li>
+          <li>Username: <span className="font-mono">admin</span></li>
+          <li>Password: <span className="font-mono">admin</span></li>
+          <li>Endpoint: <span className="font-mono">http://{serverIp}:8088/ari/applications</span></li>
+        </ul>
       </div>
       
-      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 rounded-md mb-6">
-        <div className="flex items-center gap-2 text-green-800 dark:text-green-300 font-medium">
-          <Server className="h-5 w-5" />
-          <span>Local server configured at: {localIpAddress}</span>
-        </div>
-        <p className="mt-2 text-sm text-green-700 dark:text-green-400">
-          This appears to be your server's IP address. Click the button below to use this configuration.
-        </p>
-        <div className="flex gap-2 mt-3">
-          <Button 
-            variant="default" 
-            size="lg" 
-            onClick={handleForceDefaultsAndTest}
-            className="bg-green-600 hover:bg-green-700 text-white w-full py-6 text-lg"
-          >
-            <Server className="mr-2 h-5 w-5" />
-            Use Local Server (192.168.0.197) & Test Connection
-          </Button>
-        </div>
-      </div>
+      <CurrentConfigDisplay 
+        currentConfig={{
+          apiUrl: `http://${serverIp}:8088/ari/`,
+          username: "admin",
+          password: "admin",
+          serverIp: serverIp
+        }}
+        onRefreshConfig={() => {}}
+      />
       
       <ConnectionTestButton 
         isTestingConnection={isTestingConnection}
         onClick={testConnection}
-        variant="default"
       />
 
       <ConnectionResultDisplay result={connectionResult} />

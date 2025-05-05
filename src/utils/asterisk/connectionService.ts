@@ -8,63 +8,40 @@ export const connectionService = {
   testConnection: async (): Promise<{ success: boolean; message: string }> => {
     const config = getConfigFromStorage();
     
-    // Ensure we have the correct server IP - always use 192.168.0.197 as fallback
-    const serverIp = config.serverIp || '192.168.0.197';
+    // Always use 192.168.0.197 as server IP
+    const serverIp = "192.168.0.197";
     
-    // Make sure the URL has the proper format and uses the correct server IP
-    let apiUrl = config.apiUrl;
-    if (!apiUrl) {
-      apiUrl = `http://${serverIp}:8088/ari/`;
-      console.log(`Using default API URL: ${apiUrl}`);
-    } else if (!apiUrl.startsWith('http')) {
-      apiUrl = `http://${apiUrl}`;
-      console.log(`Adding http:// prefix to API URL: ${apiUrl}`);
-    }
+    // Always use http://192.168.0.197:8088/ari/ as the API URL
+    const apiUrl = `http://${serverIp}:8088/ari/`;
     
-    // Replace any old IP address references with the new one
-    if (apiUrl.includes('10.0.2.15')) {
-      apiUrl = apiUrl.replace('10.0.2.15', '192.168.0.197');
-      console.log(`Replaced old IP with new IP in API URL: ${apiUrl}`);
-    }
+    // Always use admin/admin as credentials
+    const username = "admin";
+    const password = "admin";
     
-    // Validate configuration
-    if (!config.username || !config.password) {
-      return { 
-        success: false, 
-        message: 'Username or password is not configured. Please configure your Asterisk server settings.' 
-      };
-    }
-    
-    // Log the URL we're connecting to
+    // Log connection details for debugging
     console.log(`Attempting to connect to Asterisk API at: ${apiUrl}`);
-    console.log(`Using credentials: ${config.username}:****`);
+    console.log(`Using credentials: ${username}:****`);
     console.log(`Server IP: ${serverIp}`);
     
     try {
-      // Now try the actual authenticated request
+      // Try connecting with a longer timeout
       console.log('Sending authenticated request to:', `${apiUrl}applications`);
+      
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // Longer 10s timeout
       
-      // Ensure proper endpoint format
-      let apiEndpoint = apiUrl;
-      if (!apiUrl.endsWith('/')) {
-        if (!apiUrl.endsWith('applications')) {
-          apiEndpoint = `${apiUrl}/applications`;
-        }
-      } else {
-        apiEndpoint = `${apiUrl}applications`;
-      }
-      
+      const apiEndpoint = `${apiUrl}applications`;
       console.log(`Final API endpoint: ${apiEndpoint}`);
       
+      // Using fetch with credentials
       const response = await fetch(apiEndpoint, {
         method: 'GET',
         headers: {
-          'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`,
+          'Authorization': `Basic ${btoa(`${username}:${password}`)}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
+        mode: 'cors', // Explicitly request CORS
         signal: controller.signal
       });
       
@@ -108,7 +85,7 @@ export const connectionService = {
     } catch (error) {
       console.error('Connection error:', error);
       
-      // Handle timeout errors explicitly
+      // Handle different types of errors with better messages
       if (error instanceof DOMException && error.name === 'AbortError') {
         return {
           success: false,
@@ -116,21 +93,11 @@ export const connectionService = {
         };
       }
       
-      // Improve error messages for common network errors
-      if (error instanceof TypeError) {
-        if (error.message.includes('Failed to fetch')) {
-          return { 
-            success: false, 
-            message: `Network connectivity error: Cannot connect to the Asterisk server at ${serverIp}. Please verify the server is running and accessible.` 
-          };
-        }
-        
-        if (error.message.includes('Invalid URL')) {
-          return {
-            success: false,
-            message: `Invalid Asterisk server URL: "${apiUrl}". Please check the URL format and try again.`
-          };
-        }
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        return { 
+          success: false, 
+          message: `Browser cannot connect to ${serverIp}:8088. This is likely due to CORS restrictions or the server not being accessible from your browser. Try accessing http://${serverIp}:8088/ari/applications directly in your browser.` 
+        };
       }
       
       return { 

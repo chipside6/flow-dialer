@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle, Network } from "lucide-react";
+import { AlertCircle, CheckCircle } from "lucide-react";
 
 interface ConnectionResultDisplayProps {
   result: {
@@ -32,12 +32,13 @@ export const ConnectionResultDisplay: React.FC<ConnectionResultDisplayProps> = (
         {result.message}
         {!result.success && (
           <div className="mt-4 p-3 bg-white rounded border border-red-200">
-            <p className="font-medium">Common Solutions:</p>
+            <p className="font-medium">Troubleshooting Steps:</p>
             <ul className="list-disc list-inside mt-1 space-y-1">
-              <li>Verify the Asterisk server is running on 192.168.0.197</li>
-              <li>Check that port 8088 is open and the ARI module is enabled</li>
-              <li>Make sure username and password are correct (default: admin/admin)</li>
-              <li>If using a firewall, ensure it allows connections to port 8088</li>
+              <li>Check that port 8088 is open and accessible from this browser</li>
+              <li>Verify your server is running at 192.168.0.197</li>
+              <li>Make sure the Asterisk HTTP server is enabled</li>
+              <li>Confirm CORS is properly configured on your Asterisk server</li>
+              <li>Try accessing http://192.168.0.197:8088/ari/applications directly in your browser</li>
             </ul>
           </div>
         )}

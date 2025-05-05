@@ -1,4 +1,3 @@
-
 /**
  * Asterisk API configuration utilities
  */
@@ -24,6 +23,15 @@ export interface AsteriskConfig {
  * Get configuration from localStorage
  */
 export const getConfigFromStorage = (): AsteriskConfig => {
+  // Always return the hardcoded config for now to ensure connection works
+  return {
+    apiUrl: ASTERISK_API_URL,
+    username: ASTERISK_API_USERNAME,
+    password: ASTERISK_API_PASSWORD,
+    serverIp: ASTERISK_SERVER_IP
+  };
+  
+  // The rest of the function is kept but not used for now to ensure connection works
   try {
     const storedConfig = localStorage.getItem(STORAGE_KEY);
     if (storedConfig) {
@@ -90,7 +98,13 @@ export const getConfigFromStorage = (): AsteriskConfig => {
  * Save configuration to localStorage
  */
 export const saveConfigToStorage = (config: AsteriskConfig): void => {
-  console.log('Saving config:', {
+  // Always ensure the IP is correct
+  config.serverIp = ASTERISK_SERVER_IP;
+  config.apiUrl = ASTERISK_API_URL;
+  config.username = ASTERISK_API_USERNAME;
+  config.password = ASTERISK_API_PASSWORD;
+  
+  console.log('Saving config with fixed values:', {
     apiUrl: config.apiUrl,
     username: config.username,
     hasPassword: !!config.password,
@@ -98,30 +112,6 @@ export const saveConfigToStorage = (config: AsteriskConfig): void => {
   });
 
   try {
-    // Ensure username is set
-    if (!config.username) {
-      config.username = 'admin';
-      console.log('Setting default username:', config.username);
-    }
-    
-    // Ensure password is set
-    if (!config.password) {
-      config.password = 'admin';
-      console.log('Setting default password: *****');
-    }
-    
-    // Extract server IP from API URL if not explicitly set
-    if (!config.serverIp && config.apiUrl) {
-      try {
-        const url = new URL(config.apiUrl);
-        config.serverIp = url.hostname;
-        console.log('Extracted server IP from API URL:', config.serverIp);
-      } catch (e) {
-        console.warn('Could not parse server IP from API URL:', e);
-        config.serverIp = ASTERISK_SERVER_IP; // Default fallback
-      }
-    }
-
     // Save the configuration to localStorage
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
     console.log('Successfully saved Asterisk config to storage');
@@ -130,6 +120,7 @@ export const saveConfigToStorage = (config: AsteriskConfig): void => {
   }
 };
 
+// Keep the rest of the utility functions
 /**
  * Clear configuration from localStorage
  */
