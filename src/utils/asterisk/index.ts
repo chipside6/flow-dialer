@@ -321,36 +321,5 @@ export const asteriskService = {
       console.error('Error in getAsteriskConfig:', err);
       return { success: false, message: err instanceof Error ? err.message : 'Unknown error' };
     }
-  },
-
-  testAsteriskConnection: async (): Promise<{ success: boolean; message: string }> => {
-    const config = getConfigFromStorage();
-    
-    try {
-      const response = await fetch(`${config.apiUrl}asterisk/modules`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`
-        }
-      });
-      
-      if (response.ok) {
-        return { 
-          success: true, 
-          message: 'Successfully connected to Asterisk' 
-        };
-      } else {
-        const errorData = await response.json();
-        return { 
-          success: false, 
-          message: `Error connecting to Asterisk: ${errorData.message || response.statusText}` 
-        };
-      }
-    } catch (error) {
-      return { 
-        success: false, 
-        message: `Error connecting to Asterisk: ${error instanceof Error ? error.message : String(error)}` 
-      };
-    }
   }
 };
