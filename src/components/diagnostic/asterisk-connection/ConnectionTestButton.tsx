@@ -18,8 +18,8 @@ export const ConnectionTestButton: React.FC<ConnectionTestButtonProps> = ({
   loadingLabel = "Testing Connection..."
 }) => {
   return (
-    <Button 
-      onClick={onClick} 
+    <Button
+      onClick={onClick}
       disabled={isTesting}
       className={`w-full text-lg py-6 text-white ${
         variant === "skyblue"
@@ -39,4 +39,3 @@ export const ConnectionTestButton: React.FC<ConnectionTestButtonProps> = ({
     </Button>
   );
 };
-
