@@ -1,15 +1,14 @@
-
 import React from "react";
 import { Server } from "lucide-react";
 import { AsteriskConfig } from "@/utils/asterisk/config";
 
 interface CurrentConfigDisplayProps {
-  currentConfig: AsteriskConfig;
+  config: AsteriskConfig;
   onRefreshConfig?: () => void;
 }
 
 export const CurrentConfigDisplay: React.FC<CurrentConfigDisplayProps> = ({ 
-  currentConfig,
+  config,
   onRefreshConfig
 }) => {
   return (
@@ -21,10 +20,10 @@ export const CurrentConfigDisplay: React.FC<CurrentConfigDisplayProps> = ({
         </h3>
       </div>
       <div className="text-sm space-y-2">
-        <p><span className="font-medium">API URL:</span> {currentConfig.apiUrl}</p>
-        <p><span className="font-medium">Username:</span> {currentConfig.username}</p>
-        <p><span className="font-medium">Password:</span> {currentConfig.password ? '••••••••' : 'Not set'}</p>
-        <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp}</p>
+        <p><span className="font-medium">API URL:</span> {config.apiUrl}</p>
+        <p><span className="font-medium">Username:</span> {config.username}</p>
+        <p><span className="font-medium">Password:</span> {config.password ? '••••••••' : 'Not set'}</p>
+        <p><span className="font-medium">Server IP:</span> {config.serverIp}</p>
         <p className="text-xs text-muted-foreground mt-2">This configuration is fixed to use the Asterisk server at 192.168.0.197</p>
       </div>
     </div>
