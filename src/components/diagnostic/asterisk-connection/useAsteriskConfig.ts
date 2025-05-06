@@ -36,12 +36,6 @@ export const useAsteriskConfig = () => {
     
     setCurrentConfig(config);
     saveConfigToStorage(config);
-    
-    console.log("Loaded Asterisk config with fixed values:", {
-      apiUrl: config.apiUrl,
-      username: config.username,
-      serverIp: config.serverIp
-    });
   };
 
   const handleRefreshConfig = () => {

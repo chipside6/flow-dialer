@@ -238,6 +238,7 @@ export type Database = {
           greeting_file_name: string | null
           greeting_file_url: string | null
           id: string
+          last_port_used: number | null
           max_concurrent_calls: number | null
           port_number: number | null
           progress: number | null
@@ -262,6 +263,7 @@ export type Database = {
           greeting_file_name?: string | null
           greeting_file_url?: string | null
           id?: string
+          last_port_used?: number | null
           max_concurrent_calls?: number | null
           port_number?: number | null
           progress?: number | null
@@ -286,6 +288,7 @@ export type Database = {
           greeting_file_name?: string | null
           greeting_file_url?: string | null
           id?: string
+          last_port_used?: number | null
           max_concurrent_calls?: number | null
           port_number?: number | null
           progress?: number | null
@@ -321,6 +324,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      channel_logs: {
+        Row: {
+          call_details: Json | null
+          channel_id: string | null
+          created_at: string | null
+          event_type: string
+          id: string
+          port_number: number
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          call_details?: Json | null
+          channel_id?: string | null
+          created_at?: string | null
+          event_type: string
+          id?: string
+          port_number: number
+          timestamp: string
+          user_id: string
+        }
+        Update: {
+          call_details?: Json | null
+          channel_id?: string | null
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          port_number?: number
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       contact_list_items: {
         Row: {
@@ -423,12 +459,14 @@ export type Database = {
       }
       dialer_jobs: {
         Row: {
+          available_ports: number | null
           campaign_id: string | null
           completed_calls: number | null
           created_at: string | null
           end_time: string | null
           failed_calls: number | null
           id: string
+          max_concurrent_calls: number | null
           start_time: string | null
           status: string
           successful_calls: number | null
@@ -437,12 +475,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          available_ports?: number | null
           campaign_id?: string | null
           completed_calls?: number | null
           created_at?: string | null
           end_time?: string | null
           failed_calls?: number | null
           id?: string
+          max_concurrent_calls?: number | null
           start_time?: string | null
           status?: string
           successful_calls?: number | null
@@ -451,12 +491,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          available_ports?: number | null
           campaign_id?: string | null
           completed_calls?: number | null
           created_at?: string | null
           end_time?: string | null
           failed_calls?: number | null
           id?: string
+          max_concurrent_calls?: number | null
           start_time?: string | null
           status?: string
           successful_calls?: number | null
@@ -483,6 +525,7 @@ export type Database = {
           job_id: string
           last_attempt: string | null
           phone_number: string
+          port_number: number | null
           status: string
           updated_at: string | null
           user_id: string
@@ -495,6 +538,7 @@ export type Database = {
           job_id: string
           last_attempt?: string | null
           phone_number: string
+          port_number?: number | null
           status?: string
           updated_at?: string | null
           user_id: string
@@ -507,6 +551,7 @@ export type Database = {
           job_id?: string
           last_attempt?: string | null
           phone_number?: string
+          port_number?: number | null
           status?: string
           updated_at?: string | null
           user_id?: string

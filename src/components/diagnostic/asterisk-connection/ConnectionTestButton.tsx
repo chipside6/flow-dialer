@@ -4,30 +4,34 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 
 interface ConnectionTestButtonProps {
-  isTestingConnection: boolean;
+  isLoading: boolean;
   onClick: () => void;
   variant?: "default" | "skyblue";
+  label: string;
+  loadingLabel?: string;
 }
 
 export const ConnectionTestButton: React.FC<ConnectionTestButtonProps> = ({
-  isTestingConnection,
+  isLoading,
   onClick,
-  variant = "default"
+  variant = "default",
+  label,
+  loadingLabel
 }) => {
   return (
     <Button 
       onClick={onClick} 
-      disabled={isTestingConnection}
+      disabled={isLoading}
       className="w-full text-lg py-6 bg-blue-600 hover:bg-blue-700 text-white"
       size="lg"
     >
-      {isTestingConnection ? (
+      {isLoading ? (
         <>
           <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
-          Testing Connection...
+          {loadingLabel || "Processing..."}
         </>
       ) : (
-        "Test Asterisk API Connection"
+        label
       )}
     </Button>
   );

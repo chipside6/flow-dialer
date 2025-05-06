@@ -5,19 +5,17 @@ import { AsteriskConfig } from "@/utils/asterisk/config";
 
 interface CurrentConfigDisplayProps {
   currentConfig: AsteriskConfig;
-  onRefreshConfig: () => void;
 }
 
 export const CurrentConfigDisplay: React.FC<CurrentConfigDisplayProps> = ({ 
-  currentConfig, 
-  onRefreshConfig 
+  currentConfig 
 }) => {
   return (
     <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-md border border-slate-200 dark:border-slate-800">
       <div className="flex justify-between items-center mb-2">
         <h3 className="text-sm font-medium flex items-center">
           <Server className="h-5 w-5 mr-2" />
-          Connection Configuration
+          Asterisk Connection Configuration
         </h3>
       </div>
       <div className="text-sm space-y-2">
@@ -25,6 +23,7 @@ export const CurrentConfigDisplay: React.FC<CurrentConfigDisplayProps> = ({
         <p><span className="font-medium">Username:</span> {currentConfig.username}</p>
         <p><span className="font-medium">Password:</span> {currentConfig.password ? '••••••••' : 'Not set'}</p>
         <p><span className="font-medium">Server IP:</span> {currentConfig.serverIp}</p>
+        <p className="text-xs text-muted-foreground mt-2">This configuration is fixed to use the Asterisk server at 192.168.0.197</p>
       </div>
     </div>
   );
