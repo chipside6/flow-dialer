@@ -15,17 +15,13 @@ export const ConnectionTestButton: React.FC<ConnectionTestButtonProps> = ({
   onClick,
   variant = "default",
   label = "Test Connection",
-  loadingLabel = "Testing Connection..."
+  loadingLabel = "Testing Connection...",
 }) => {
   return (
     <Button
       onClick={onClick}
       disabled={isTesting}
-      className={`w-full text-lg py-6 text-white ${
-        variant === "skyblue"
-          ? "bg-sky-600 hover:bg-sky-700"
-          : "bg-blue-600 hover:bg-blue-700"
-      }`}
+      className="w-full text-lg py-6 bg-blue-600 hover:bg-blue-700 text-white"
       size="lg"
     >
       {isTesting ? (
