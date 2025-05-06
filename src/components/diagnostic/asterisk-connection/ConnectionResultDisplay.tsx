@@ -7,6 +7,7 @@ interface ConnectionResultDisplayProps {
   result: {
     success: boolean;
     message: string;
+    details?: string; // <-- fix
   } | null;
 }
 
@@ -39,10 +40,12 @@ export const ConnectionResultDisplay: React.FC<ConnectionResultDisplayProps> = (
               <li>Make sure the Asterisk HTTP server is enabled</li>
               <li>Confirm CORS is properly configured on your Asterisk server</li>
               <li>Try accessing http://192.168.0.197:8088/ari/applications directly in your browser</li>
+              {result.details && (
+                <li className="text-red-700 mt-2"><strong>Error Details:</strong> {result.details}</li>
+              )}
             </ul>
           </div>
         )}
       </AlertDescription>
     </Alert>
   );
-};
