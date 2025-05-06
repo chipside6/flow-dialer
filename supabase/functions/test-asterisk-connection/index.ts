@@ -28,7 +28,7 @@ serve(async (req) => {
 
     // Create abort controller for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout (increased from 10)
 
     try {
       // Make request to Asterisk ARI
@@ -94,7 +94,7 @@ serve(async (req) => {
       let errorMessage = "Unknown error connecting to Asterisk";
       
       if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
-        errorMessage = `Connection to Asterisk timed out. Please verify the server is running at ${serverIp}:${port}.`;
+        errorMessage = `Connection to Asterisk timed out. Please verify the server is running at ${serverIp}:${port} and that ARI is enabled.`;
       } else if (fetchError instanceof Error) {
         errorMessage = fetchError.message;
       }

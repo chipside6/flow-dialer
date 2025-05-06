@@ -3,10 +3,12 @@ import React from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AsteriskConnectionTest } from '@/components/diagnostic/AsteriskConnectionTest';
+import { SimpleGoipRegisterForm } from '@/components/goip/SimpleGoipRegisterForm';
 import { useAuth } from "@/contexts/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Server } from "lucide-react";
+import { AlertCircle, Server, Phone } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AsteriskConfigPageContent = () => {
   const { user, isAdmin } = useAuth();
@@ -32,29 +34,53 @@ const AsteriskConfigPageContent = () => {
       <div className="container py-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Asterisk Connection Test</h1>
+            <h1 className="text-3xl font-bold mb-2">Asterisk Configuration</h1>
             <p className="text-muted-foreground">
-              Test your connection to the Asterisk server at 192.168.0.197
+              Manage your Asterisk connection and GoIP devices
             </p>
           </div>
         </div>
 
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Server className="h-5 w-5" />
-                Asterisk API Connection Test
-              </CardTitle>
-              <CardDescription>
-                Test connection to your Asterisk server's REST Interface
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AsteriskConnectionTest />
-            </CardContent>
-          </Card>
-        </div>
+        <Tabs defaultValue="connection">
+          <TabsList className="mb-4">
+            <TabsTrigger value="connection">Asterisk Connection</TabsTrigger>
+            <TabsTrigger value="goip">GoIP Device Registration</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="connection">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Server className="h-5 w-5" />
+                  Asterisk API Connection Test
+                </CardTitle>
+                <CardDescription>
+                  Test connection to your Asterisk server's REST Interface
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AsteriskConnectionTest />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="goip">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Phone className="h-5 w-5" />
+                  GoIP Device Registration
+                </CardTitle>
+                <CardDescription>
+                  Register your GoIP devices to make outbound calls
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SimpleGoipRegisterForm />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

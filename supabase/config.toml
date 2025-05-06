@@ -3,3 +3,4 @@ project_id = "grhvoclalziyjbjlhpml"
 
 [functions."test-asterisk-connection"]
 verify_jwt = false
+

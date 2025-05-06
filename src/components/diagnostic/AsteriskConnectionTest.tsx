@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connectionService } from "@/utils/asterisk/connectionService";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -8,6 +8,7 @@ import { ConnectionResultDisplay } from "./asterisk-connection/ConnectionResultD
 import { CurrentConfigDisplay } from "./asterisk-connection/CurrentConfigDisplay";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Server, Info } from "lucide-react";
+import { getConfigFromStorage } from "@/utils/asterisk/config";
 
 export const AsteriskConnectionTest: React.FC = () => {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -18,7 +19,16 @@ export const AsteriskConnectionTest: React.FC = () => {
   const { toast } = useToast();
   
   // Use the specified server IP
-  const serverIp = "192.168.0.197";
+  const currentConfig = getConfigFromStorage();
+  const serverIp = currentConfig.serverIp || "192.168.0.197";
+  
+  // Auto-test connection on component mount
+  useEffect(() => {
+    // Auto-test connection only if there's no result yet
+    if (!connectionResult) {
+      testConnection();
+    }
+  }, []);
 
   const testConnection = async () => {
     setIsTestingConnection(true);
