@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/auth';
 import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getSupabaseUrl } from '@/integrations/supabase/client';
+import { generateRandomPassword } from '@/utils/passwordGenerator';
 
 // Simple schema that only requires essential fields
 const formSchema = z.object({
@@ -26,6 +27,7 @@ export const SimpleGoipRegisterForm = () => {
   const { toast } = useToast();
   const [isRegistering, setIsRegistering] = useState(false);
   const [registrationResult, setRegistrationResult] = useState<{success: boolean; message: string} | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,21 +50,42 @@ export const SimpleGoipRegisterForm = () => {
     
     setIsRegistering(true);
     setRegistrationResult(null);
+    setDebugInfo(null);
     
     try {
       console.log("Registering device with values:", values);
       
-      // Simple direct request to create the user trunks
-      const { data, error } = await supabase
-        .from('user_trunks')
-        .insert([{
+      // Generate user/pass for all ports
+      const portsData = [];
+      for (let i = 1; i <= values.numPorts; i++) {
+        portsData.push({
           user_id: user.id,
           trunk_name: values.deviceName,
-          port_number: 1,
-          sip_user: `goip_${user.id.substring(0, 8)}_port1`,
+          port_number: i,
+          sip_user: `goip_${user.id.substring(0, 8)}_port${i}`,
           sip_pass: generateRandomPassword(12),
-          status: 'active'
-        }])
+          status: 'active',
+          device_ip: values.ipAddress
+        });
+      }
+      
+      // Check if we have existing trunks with the same name - delete them first
+      const { error: deleteError } = await supabase
+        .from('user_trunks')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('trunk_name', values.deviceName);
+      
+      if (deleteError) {
+        console.warn("Error deleting existing trunks:", deleteError);
+        setDebugInfo(`Delete error: ${deleteError.message}`);
+        // Continue anyway
+      }
+      
+      // Insert all port records
+      const { data, error } = await supabase
+        .from('user_trunks')
+        .insert(portsData)
         .select();
       
       if (error) {
@@ -106,16 +129,6 @@ export const SimpleGoipRegisterForm = () => {
       setIsRegistering(false);
     }
   };
-  
-  // Simple random password generator
-  const generateRandomPassword = (length: number): string => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  };
 
   return (
     <Card>
@@ -137,6 +150,16 @@ export const SimpleGoipRegisterForm = () => {
             </AlertTitle>
             <AlertDescription>
               {registrationResult.message}
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {debugInfo && (
+          <Alert className="mb-4 bg-yellow-50 border-yellow-200">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertTitle>Debug Info</AlertTitle>
+            <AlertDescription className="font-mono text-xs">
+              {debugInfo}
             </AlertDescription>
           </Alert>
         )}

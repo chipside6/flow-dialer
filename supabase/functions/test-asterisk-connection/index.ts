@@ -1,7 +1,6 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
-// CORS headers for browser requests
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -9,113 +8,120 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle preflight CORS requests
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log("Testing connection to Asterisk server");
+    // Define a timeout promise
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Connection timed out after 15 seconds")), 15000);
+    });
 
-    // Hard-coded Asterisk configuration
-    const serverIp = "192.168.0.197";
-    const port = "8088";
-    const username = "admin";
-    const password = "admin";
+    // Parse the request body
+    const requestData = await req.json().catch(err => {
+      console.error("Error parsing request body:", err);
+      return {};
+    });
+
+    // Get server details from request or use defaults
+    const serverIp = requestData.serverIp || Deno.env.get("ASTERISK_SERVER_HOST") || "192.168.0.197";
+    const username = requestData.username || Deno.env.get("ASTERISK_SERVER_USER") || "admin";
+    const password = requestData.password || Deno.env.get("ASTERISK_SERVER_PASS") || "admin";
+    const port = requestData.port || Deno.env.get("ASTERISK_SERVER_PORT") || "8088";
+
+    console.log(`Testing connection to Asterisk server at ${serverIp}:${port}`);
+
+    // Create the auth header (Base64 encoded username:password)
+    const authHeader = `Basic ${btoa(`${username}:${password}`)}`;
+    
+    // Construct the URL
     const url = `http://${serverIp}:${port}/ari/applications`;
 
-    console.log(`Making request to: ${url}`);
-
-    // Create abort controller for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout (increased from 10)
-
     try {
-      // Make request to Asterisk ARI
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Authorization": `Basic ${btoa(`${username}:${password}`)}`,
-          "Accept": "application/json",
-        },
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      console.log("Received response with status:", response.status);
-      
-      if (response.ok) {
-        try {
-          // Parse response to verify it's valid JSON
-          const data = await response.json();
-          console.log("Response data:", data);
-          
-          return new Response(
-            JSON.stringify({
-              success: true,
-              message: "Successfully connected to Asterisk ARI",
-              data: data
-            }),
-            { headers: corsHeaders }
-          );
-        } catch (parseError) {
-          console.error("Error parsing JSON response:", parseError);
-          return new Response(
-            JSON.stringify({
-              success: false,
-              message: "Connected to server but received invalid JSON response"
-            }),
-            { headers: corsHeaders }
-          );
-        }
-      } else {
-        // Handle non-200 responses
-        let errorMessage;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || response.statusText;
-        } catch {
-          errorMessage = response.statusText;
-        }
-        
+      // Make the request with a timeout
+      const response = await Promise.race([
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Authorization": authHeader
+          }
+        }),
+        timeoutPromise
+      ]) as Response;
+
+      console.log(`Received response with status: ${response.status}`);
+
+      // Handle different response status codes
+      if (response.status === 200) {
+        const data = await response.json();
         return new Response(
-          JSON.stringify({
-            success: false,
-            message: `Error connecting to Asterisk: ${errorMessage} (Status: ${response.status})`
+          JSON.stringify({ 
+            success: true, 
+            message: "Connected to Asterisk successfully",
+            details: `Server responded with ${data.length} application(s)` 
+          }),
+          { headers: corsHeaders }
+        );
+      } else if (response.status === 401) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            message: "Authentication failed: Invalid username or password",
+            details: "Check your Asterisk server credentials" 
+          }),
+          { headers: corsHeaders }
+        );
+      } else if (response.status === 404) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            message: "Server found, but API endpoint not available",
+            details: "Make sure Asterisk REST Interface (ARI) is enabled and configured properly" 
+          }),
+          { headers: corsHeaders }
+        );
+      } else {
+        const errorText = await response.text();
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            message: `Unexpected response: ${response.status} ${response.statusText}`,
+            details: errorText 
           }),
           { headers: corsHeaders }
         );
       }
-    } catch (fetchError) {
-      console.error("Fetch error:", fetchError);
+    } catch (error) {
+      console.error("Network error:", error);
       
-      // Handle different types of fetch errors
-      let errorMessage = "Unknown error connecting to Asterisk";
+      let errorMessage = error instanceof Error ? error.message : String(error);
+      let details = "Check your network connection and server configuration";
       
-      if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
-        errorMessage = `Connection to Asterisk timed out. Please verify the server is running at ${serverIp}:${port} and that ARI is enabled.`;
-      } else if (fetchError instanceof Error) {
-        errorMessage = fetchError.message;
+      if (errorMessage.includes("timed out")) {
+        details = "The server didn't respond within the timeout period. It may be offline or unreachable.";
       }
       
       return new Response(
-        JSON.stringify({
-          success: false,
-          message: errorMessage
+        JSON.stringify({ 
+          success: false, 
+          message: `Connection error: ${errorMessage}`,
+          details: details
         }),
         { headers: corsHeaders }
       );
     }
   } catch (error) {
-    console.error("Unhandled error in test-asterisk-connection:", error);
+    console.error("Unexpected error:", error);
     
     return new Response(
-      JSON.stringify({
-        success: false,
-        message: error instanceof Error ? error.message : "Unknown error occurred"
+      JSON.stringify({ 
+        success: false, 
+        message: `Server error: ${error instanceof Error ? error.message : String(error)}`,
+        details: "An unexpected error occurred on the server" 
       }),
-      { status: 500, headers: corsHeaders }
+      { headers: corsHeaders, status: 500 }
     );
   }
 });

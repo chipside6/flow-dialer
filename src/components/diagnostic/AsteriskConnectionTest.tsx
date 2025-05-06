@@ -1,116 +1,124 @@
 
-import React, { useState, useEffect } from 'react';
-import { connectionService } from "@/utils/asterisk/connectionService";
-import { useToast } from "@/components/ui/use-toast";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { ConnectionTestButton } from './asterisk-connection/ConnectionTestButton';
+import { ConnectionResultDisplay } from './asterisk-connection/ConnectionResultDisplay';
+import { CorsAlert } from './asterisk-connection/CorsAlert';
+import { CurrentConfigDisplay } from './asterisk-connection/CurrentConfigDisplay';
+import { TroubleshootingGuide } from './asterisk-connection/TroubleshootingGuide';
+import { useAsteriskConfig } from './asterisk-connection/useAsteriskConfig';
+import { connectionService } from '@/utils/asterisk/connectionService';
 
-import { ConnectionTestButton } from "./asterisk-connection/ConnectionTestButton";
-import { ConnectionResultDisplay } from "./asterisk-connection/ConnectionResultDisplay";
-import { CurrentConfigDisplay } from "./asterisk-connection/CurrentConfigDisplay";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Server, Info } from "lucide-react";
-import { getConfigFromStorage } from "@/utils/asterisk/config";
+interface AsteriskConnectionTestProps {
+  onConnectionChange?: (isConnected: boolean) => void;
+}
 
-export const AsteriskConnectionTest: React.FC = () => {
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
-  const [connectionResult, setConnectionResult] = useState<{
+export const AsteriskConnectionTest: React.FC<AsteriskConnectionTestProps> = ({ 
+  onConnectionChange 
+}) => {
+  const { config, isLoading } = useAsteriskConfig();
+  const [testResult, setTestResult] = useState<{
     success: boolean;
     message: string;
+    details?: string;
   } | null>(null);
-  const { toast } = useToast();
-  
-  // Use the specified server IP
-  const currentConfig = getConfigFromStorage();
-  const serverIp = currentConfig.serverIp || "192.168.0.197";
-  
-  // Auto-test connection on component mount
-  useEffect(() => {
-    // Auto-test connection only if there's no result yet
-    if (!connectionResult) {
-      testConnection();
-    }
-  }, []);
+  const [isTesting, setIsTesting] = useState(false);
+  const [showCorsAlert, setShowCorsAlert] = useState(false);
+  const [showTroubleshooting, setShowTroubleshooting] = useState(false);
 
-  const testConnection = async () => {
-    setIsTestingConnection(true);
-    setConnectionResult(null);
-
+  const runConnectionTest = useCallback(async () => {
+    if (isTesting) return;
+    
+    setIsTesting(true);
+    setTestResult(null);
+    setShowCorsAlert(false);
+    
     try {
-      toast({
-        title: "Testing Connection",
-        description: `Attempting to connect to Asterisk server at ${serverIp}:8088...`,
-      });
-
-      console.log("Starting Asterisk connection test to server:", serverIp);
-
       const result = await connectionService.testConnection();
-      setConnectionResult(result);
+      
       console.log("Connection test result:", result);
-
-      toast({
-        title: result.success ? "Connection Successful" : "Connection Failed",
-        description: result.message,
-        variant: result.success ? "default" : "destructive"
-      });
+      
+      if (result.success) {
+        setTestResult({
+          success: true,
+          message: "Connected to Asterisk successfully!",
+          details: result.message
+        });
+        onConnectionChange?.(true);
+      } else {
+        let errorMessage = result.message || "Unknown error occurred";
+        let showCors = errorMessage.includes('CORS') || errorMessage.includes('Network Error');
+        
+        setTestResult({
+          success: false,
+          message: errorMessage,
+          details: result.details || errorMessage
+        });
+        
+        setShowCorsAlert(showCors);
+        onConnectionChange?.(false);
+      }
     } catch (error) {
-      console.error("Connection test error:", error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      setConnectionResult({
+      console.error("Error during connection test:", error);
+      
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      setTestResult({
         success: false,
-        message: errorMessage
+        message: `Error: ${errorMessage}`,
+        details: "Check the console for more details"
       });
-
-      toast({
-        title: "Error Testing Connection",
-        description: errorMessage,
-        variant: "destructive"
-      });
+      
+      setShowCorsAlert(errorMessage.includes('CORS') || errorMessage.includes('Network Error'));
+      onConnectionChange?.(false);
     } finally {
-      setIsTestingConnection(false);
+      setIsTesting(false);
     }
-  };
+  }, [isTesting, onConnectionChange]);
+
+  // Auto-test on component mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!testResult && !isTesting) {
+        runConnectionTest();
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [runConnectionTest, testResult, isTesting]);
 
   return (
-    <div className="space-y-6">
-      <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
-        <Server className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-        <AlertTitle className="text-blue-800 dark:text-blue-300">Server Information</AlertTitle>
-        <AlertDescription className="text-blue-700 dark:text-blue-400">
-          <p className="mb-2">Connecting to Asterisk server at <strong>{serverIp}:8088</strong> using credentials <strong>admin/admin</strong>.</p>
-        </AlertDescription>
-      </Alert>
+    <div className="space-y-4">
+      <CurrentConfigDisplay config={config} isLoading={isLoading} />
       
-      <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-md border border-slate-200 dark:border-slate-800 mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Info className="h-5 w-5 text-slate-500" />
-          <span className="font-medium">Connection Information</span>
-        </div>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-          This test will attempt to connect to your Asterisk server's REST Interface (ARI) using a secure Supabase Edge Function:
-        </p>
-        <ul className="list-disc list-inside text-sm text-slate-700 dark:text-slate-300 ml-4 space-y-1">
-          <li>Server: <span className="font-mono">{serverIp}</span></li>
-          <li>Port: <span className="font-mono">8088</span></li>
-          <li>Username: <span className="font-mono">admin</span></li>
-          <li>Password: <span className="font-mono">admin</span></li>
-          <li>Endpoint: <span className="font-mono">http://{serverIp}:8088/ari/applications</span></li>
-        </ul>
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+        <ConnectionTestButton 
+          onClick={runConnectionTest} 
+          isTesting={isTesting} 
+        />
+        
+        {testResult && !testResult.success && (
+          <Button 
+            variant="outline" 
+            onClick={() => setShowTroubleshooting(!showTroubleshooting)}
+          >
+            {showTroubleshooting ? 'Hide Troubleshooting' : 'Show Troubleshooting'}
+          </Button>
+        )}
       </div>
       
-      <CurrentConfigDisplay 
-        currentConfig={{
-          apiUrl: `http://${serverIp}:8088/ari/`,
-          username: "admin",
-          password: "admin",
-          serverIp: serverIp
-        }}
-      />
+      {testResult && (
+        <ConnectionResultDisplay 
+          success={testResult.success} 
+          message={testResult.message}
+          details={testResult.details}
+        />
+      )}
       
-      <ConnectionTestButton 
-        isLoading={isTestingConnection}
-        onClick={testConnection}
-      />
-
-      <ConnectionResultDisplay result={connectionResult} />
+      {showCorsAlert && <CorsAlert />}
+      
+      {showTroubleshooting && <TroubleshootingGuide />}
     </div>
   );
 };

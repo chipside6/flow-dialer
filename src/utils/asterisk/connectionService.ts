@@ -1,60 +1,68 @@
 
-import { getConfigFromStorage } from './config';
-import { getSupabaseUrl } from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseUrl } from '@/integrations/supabase/client';
+
+interface AsteriskConfig {
+  serverIp: string;
+  username: string;
+  password: string;
+  port: string;
+}
+
+interface ConnectionTestResult {
+  success: boolean;
+  message: string;
+  details?: string;
+}
 
 export const connectionService = {
-  /**
-   * Test connection to Asterisk server via Supabase Edge Function
-   */
-  testConnection: async (): Promise<{ success: boolean; message: string }> => {
-    const config = getConfigFromStorage();
-    
-    // Log connection details for debugging
-    console.log(`Attempting to connect to Asterisk API at: ${config.apiUrl}`);
-    console.log(`Using credentials: ${config.username}:****`);
-    console.log(`Server IP: ${config.serverIp}`);
-    
+  async testConnection(config?: Partial<AsteriskConfig>): Promise<ConnectionTestResult> {
     try {
-      console.log('Using Supabase Edge Function to test connection');
+      console.log("Starting Asterisk connection test to server:", config?.serverIp || "192.168.0.197");
       
-      // Get the Supabase URL
-      const supabaseUrl = getSupabaseUrl();
-      if (!supabaseUrl) {
-        console.error('Could not determine Supabase URL');
-        return { 
-          success: false, 
-          message: 'Could not determine Supabase URL' 
+      // Get current session for authentication
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData.session) {
+        console.error("Authentication error:", sessionError);
+        return {
+          success: false,
+          message: "Authentication required: Please sign in",
+          details: sessionError?.message
         };
       }
       
-      // Call the Supabase Edge Function
+      // Make the request to the Supabase edge function
       const { data, error } = await supabase.functions.invoke("test-asterisk-connection", {
-        method: 'GET'
+        body: config || {},
       });
       
-      console.log('Edge function response:', data, error);
-      
       if (error) {
-        console.error('Edge function error:', error);
-        return { 
-          success: false, 
-          message: `Error calling Edge Function: ${error.message}` 
+        console.error("Error invoking function:", error);
+        return {
+          success: false,
+          message: `Error calling test function: ${error.message}`,
+          details: JSON.stringify(error)
         };
       }
       
-      // The Edge Function should return { success: boolean, message: string }
-      return {
-        success: data.success,
-        message: data.message
-      };
+      return data as ConnectionTestResult;
     } catch (error) {
-      console.error('Connection error:', error);
-      
-      return { 
-        success: false, 
-        message: `Error connecting to Asterisk: ${error instanceof Error ? error.message : String(error)}` 
+      console.error("Error in testConnection:", error);
+      return {
+        success: false,
+        message: `Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
+        details: "Check the browser console for more details"
       };
     }
+  },
+  
+  getConnectionInfo(): AsteriskConfig {
+    return {
+      serverIp: import.meta.env.VITE_ASTERISK_SERVER_IP || "192.168.0.197",
+      username: "admin",
+      password: "admin",
+      port: "8088"
+    };
   }
 };
