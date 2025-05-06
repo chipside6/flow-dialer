@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
@@ -40,3 +39,4 @@ export const ConnectionTestButton: React.FC<ConnectionTestButtonProps> = ({
     </Button>
   );
 };
+
