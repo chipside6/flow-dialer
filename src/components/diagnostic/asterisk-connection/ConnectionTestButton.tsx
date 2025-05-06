@@ -7,7 +7,7 @@ interface ConnectionTestButtonProps {
   isLoading: boolean;
   onClick: () => void;
   variant?: "default" | "skyblue";
-  label: string;
+  label?: string;
   loadingLabel?: string;
 }
 
@@ -15,8 +15,8 @@ export const ConnectionTestButton: React.FC<ConnectionTestButtonProps> = ({
   isLoading,
   onClick,
   variant = "default",
-  label,
-  loadingLabel
+  label = "Test Connection",
+  loadingLabel = "Testing Connection..."
 }) => {
   return (
     <Button 
@@ -28,7 +28,7 @@ export const ConnectionTestButton: React.FC<ConnectionTestButtonProps> = ({
       {isLoading ? (
         <>
           <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
-          {loadingLabel || "Processing..."}
+          {loadingLabel}
         </>
       ) : (
         label

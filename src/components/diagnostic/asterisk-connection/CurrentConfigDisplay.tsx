@@ -5,10 +5,12 @@ import { AsteriskConfig } from "@/utils/asterisk/config";
 
 interface CurrentConfigDisplayProps {
   currentConfig: AsteriskConfig;
+  onRefreshConfig?: () => void;
 }
 
 export const CurrentConfigDisplay: React.FC<CurrentConfigDisplayProps> = ({ 
-  currentConfig 
+  currentConfig,
+  onRefreshConfig
 }) => {
   return (
     <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-md border border-slate-200 dark:border-slate-800">

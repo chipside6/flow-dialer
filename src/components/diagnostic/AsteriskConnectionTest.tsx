@@ -75,7 +75,7 @@ export const AsteriskConnectionTest: React.FC = () => {
           <span className="font-medium">Connection Information</span>
         </div>
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-          This test will attempt to connect to your Asterisk server's REST Interface (ARI) using:
+          This test will attempt to connect to your Asterisk server's REST Interface (ARI) using a secure Supabase Edge Function:
         </p>
         <ul className="list-disc list-inside text-sm text-slate-700 dark:text-slate-300 ml-4 space-y-1">
           <li>Server: <span className="font-mono">{serverIp}</span></li>
@@ -93,11 +93,10 @@ export const AsteriskConnectionTest: React.FC = () => {
           password: "admin",
           serverIp: serverIp
         }}
-        onRefreshConfig={() => {}}
       />
       
       <ConnectionTestButton 
-        isTestingConnection={isTestingConnection}
+        isLoading={isTestingConnection}
         onClick={testConnection}
       />
 
