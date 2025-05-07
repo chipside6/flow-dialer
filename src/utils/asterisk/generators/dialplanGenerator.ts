@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -24,13 +25,17 @@ export const dialplanGenerator = {
       }
 
       // Call edge function to generate dialplan
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      
+      // Call edge function to generate dialplan
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-campaign-dialplan`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.session.access_token}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             campaignId,
