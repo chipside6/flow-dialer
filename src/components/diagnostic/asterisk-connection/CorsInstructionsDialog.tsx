@@ -1,14 +1,9 @@
 
 import React from "react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle 
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Copy, Code } from "lucide-react";
+import { AlertCircle, Info } from "lucide-react";
 
 interface CorsInstructionsDialogProps {
   open: boolean;
@@ -19,67 +14,64 @@ export const CorsInstructionsDialog: React.FC<CorsInstructionsDialogProps> = ({
   open,
   onOpenChange
 }) => {
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
-
-  const corsConfig = `[general]
-cors_enable=yes
-cors_allow_origin=*
-cors_allow_methods=GET, POST, PUT, DELETE, OPTIONS
-cors_allow_headers=Content-Type, Authorization
-`;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Configuring CORS for Asterisk</DialogTitle>
           <DialogDescription>
-            To allow web browsers to connect to your Asterisk server, you need to configure CORS settings.
+            Follow these steps to configure CORS on your Asterisk server
           </DialogDescription>
         </DialogHeader>
-
+        
         <div className="space-y-4">
-          <div className="bg-amber-50 p-4 rounded-md border border-amber-200 flex">
-            <AlertCircle className="text-amber-500 h-5 w-5 mt-1 mr-3 shrink-0" />
-            <div>
-              <p className="text-sm text-amber-800">
-                CORS (Cross-Origin Resource Sharing) restrictions prevent web applications from making requests to a different domain than the one that served the web page.
-              </p>
-            </div>
-          </div>
-
-          <h3 className="text-lg font-semibold">Steps to configure CORS in Asterisk:</h3>
+          <h3 className="font-medium text-lg">Step 1: Edit http.conf</h3>
+          <p>SSH into your Asterisk server and edit the http.conf file:</p>
+          <pre className="bg-slate-100 dark:bg-slate-800 p-3 rounded-md overflow-x-auto text-xs">
+            sudo nano /etc/asterisk/http.conf
+          </pre>
           
-          <ol className="list-decimal pl-5 space-y-2">
-            <li>SSH into your Asterisk server</li>
-            <li>Edit the HTTP configuration file: <code>sudo nano /etc/asterisk/http.conf</code></li>
-            <li>Add the following configuration:</li>
-          </ol>
+          <h3 className="font-medium text-lg">Step 2: Add CORS Headers</h3>
+          <p>Add or modify these lines in the [general] section:</p>
+          <pre className="bg-slate-100 dark:bg-slate-800 p-3 rounded-md overflow-x-auto text-xs">
+{`[general]
+enabled=yes
+bindaddr=0.0.0.0   ; Allow connections from any IP address
+bindport=8088
+tlsenable=no
 
-          <div className="relative bg-slate-900 text-slate-50 p-4 rounded-md">
-            <pre className="text-sm overflow-x-auto">{corsConfig}</pre>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="absolute right-2 top-2 h-8 w-8 text-slate-200 hover:text-white"
-              onClick={() => handleCopy(corsConfig)}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <ol className="list-decimal pl-5 space-y-2" start={4}>
-            <li>Save the file and exit the editor</li>
-            <li>Restart Asterisk: <code>sudo systemctl restart asterisk</code></li>
-          </ol>
-
-          <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-            <p className="text-sm text-blue-800">
-              <strong>Security Note:</strong> Using <code>cors_allow_origin=*</code> allows any website to connect to your Asterisk server. In production, restrict this to specific domains for better security.
-            </p>
-          </div>
+; CORS configuration
+cors_origin_policy=all
+cors_access_control_allow_origin=*
+cors_access_control_allow_methods=*
+cors_access_control_allow_headers=*
+cors_access_control_max_age=1728000`}
+          </pre>
+          
+          <h3 className="font-medium text-lg">Step 3: Reload Asterisk HTTP Server</h3>
+          <p>After saving the changes, reload the Asterisk HTTP server with these commands:</p>
+          <pre className="bg-slate-100 dark:bg-slate-800 p-3 rounded-md overflow-x-auto text-xs">
+            sudo asterisk -rx "module reload res_http_websocket.so"<br/>
+            sudo asterisk -rx "module reload res_http_server.so"
+          </pre>
+          
+          <h3 className="font-medium text-lg">Step 4: Verify Configuration</h3>
+          <p>Check that the HTTP server is running with the correct settings:</p>
+          <pre className="bg-slate-100 dark:bg-slate-800 p-3 rounded-md overflow-x-auto text-xs">
+            sudo asterisk -rx "http show status"
+          </pre>
+          
+          <Alert className="mt-4">
+            <Info className="h-4 w-4" />
+            <AlertTitle>Important</AlertTitle>
+            <AlertDescription>
+              After making these changes, try testing the connection again. If you're still having issues, you may need to restart the Asterisk server completely with <code>sudo systemctl restart asterisk</code>.
+            </AlertDescription>
+          </Alert>
+        </div>
+        
+        <div className="flex justify-end mt-4">
+          <Button onClick={() => onOpenChange(false)}>Close</Button>
         </div>
       </DialogContent>
     </Dialog>

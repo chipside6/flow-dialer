@@ -9,7 +9,6 @@ import { CurrentConfigDisplay } from './asterisk-connection/CurrentConfigDisplay
 import { TroubleshootingGuide } from './asterisk-connection/TroubleshootingGuide';
 import { useAsteriskConfig } from './asterisk-connection/useAsteriskConfig';
 import { connectionService } from '@/utils/asterisk/connectionService';
-import { CorsInstructionsDialog } from './asterisk-connection/CorsInstructionsDialog';
 
 interface AsteriskConnectionTestProps {
   onConnectionChange?: (isConnected: boolean) => void;
@@ -18,7 +17,7 @@ interface AsteriskConnectionTestProps {
 export const AsteriskConnectionTest: React.FC<AsteriskConnectionTestProps> = ({ 
   onConnectionChange 
 }) => {
-  const { currentConfig, isLoading, handleRefreshConfig } = useAsteriskConfig();
+  const { currentConfig, isLoading } = useAsteriskConfig();
   const [testResult, setTestResult] = useState<{
     success: boolean;
     message: string;
@@ -27,7 +26,6 @@ export const AsteriskConnectionTest: React.FC<AsteriskConnectionTestProps> = ({
   const [isTesting, setIsTesting] = useState(false);
   const [showCorsAlert, setShowCorsAlert] = useState(false);
   const [showTroubleshooting, setShowTroubleshooting] = useState(false);
-  const [showCorsDialog, setShowCorsDialog] = useState(false);
 
   const runConnectionTest = useCallback(async () => {
     if (isTesting) return;
@@ -90,23 +88,17 @@ export const AsteriskConnectionTest: React.FC<AsteriskConnectionTestProps> = ({
 
   // Run connection test on component mount
   useEffect(() => {
-    // Commenting out the auto-run test on mount as it might be intrusive
-    // runConnectionTest();
+    runConnectionTest();
   }, []);
 
   const handleShowTroubleshooting = () => {
     setShowTroubleshooting(true);
   };
 
-  const handleShowCorsHelp = () => {
-    setShowCorsDialog(true);
-  };
-
   return (
     <div className="space-y-4">
       <CurrentConfigDisplay 
         config={currentConfig}
-        onRefreshConfig={handleRefreshConfig}
       />
       
       <ConnectionTestButton
@@ -122,20 +114,15 @@ export const AsteriskConnectionTest: React.FC<AsteriskConnectionTestProps> = ({
       
       {showCorsAlert && (
         <CorsAlert 
-          onShowCorsHelp={handleShowCorsHelp}
+          onShowCorsHelp={handleShowTroubleshooting}
         />
       )}
       
       {showTroubleshooting && (
         <TroubleshootingGuide
-          onShowCorsHelp={handleShowCorsHelp}
+          onShowCorsHelp={handleShowTroubleshooting}
         />
       )}
-
-      <CorsInstructionsDialog 
-        open={showCorsDialog} 
-        onOpenChange={setShowCorsDialog} 
-      />
     </div>
   );
 };
