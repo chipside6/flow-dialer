@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export const useAsteriskConfig = () => {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const [currentConfig, setCurrentConfig] = useState(() => {
     // Always use the hardcoded values
     const config = {
@@ -26,6 +27,7 @@ export const useAsteriskConfig = () => {
   }, []);
 
   const loadCurrentConfig = () => {
+    setIsLoading(true);
     // Always use the hardcoded values
     const config = {
       apiUrl: `http://${ASTERISK_SERVER_IP}:8088/ari/`,
@@ -36,6 +38,7 @@ export const useAsteriskConfig = () => {
     
     setCurrentConfig(config);
     saveConfigToStorage(config);
+    setIsLoading(false);
   };
 
   const handleRefreshConfig = () => {
@@ -48,6 +51,7 @@ export const useAsteriskConfig = () => {
 
   return {
     currentConfig,
+    isLoading,
     setCurrentConfig,
     loadCurrentConfig,
     handleRefreshConfig

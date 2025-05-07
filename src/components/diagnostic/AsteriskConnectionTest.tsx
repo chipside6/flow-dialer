@@ -17,7 +17,7 @@ interface AsteriskConnectionTestProps {
 export const AsteriskConnectionTest: React.FC<AsteriskConnectionTestProps> = ({ 
   onConnectionChange 
 }) => {
-  const { config, isLoading } = useAsteriskConfig();
+  const { currentConfig, isLoading } = useAsteriskConfig();
   const [testResult, setTestResult] = useState<{
     success: boolean;
     message: string;
@@ -43,4 +43,86 @@ export const AsteriskConnectionTest: React.FC<AsteriskConnectionTestProps> = ({
         setTestResult({
           success: true,
           message: "Connected to Asterisk successfully!",
-          details
+          details: result.details || "Connection successful"
+        });
+        
+        if (onConnectionChange) {
+          onConnectionChange(true);
+        }
+      } else {
+        setTestResult({
+          success: false,
+          message: result.message || "Connection failed",
+          details: result.details
+        });
+        
+        // If there's a CORS error, show the CORS alert
+        if (result.message && (
+          result.message.includes("CORS") || 
+          result.message.includes("NetworkError") ||
+          result.message.includes("Failed to fetch")
+        )) {
+          setShowCorsAlert(true);
+        }
+        
+        if (onConnectionChange) {
+          onConnectionChange(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error testing connection:", error);
+      
+      setTestResult({
+        success: false,
+        message: `Connection test error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        details: "An unexpected error occurred while testing the connection"
+      });
+      
+      if (onConnectionChange) {
+        onConnectionChange(false);
+      }
+    } finally {
+      setIsTesting(false);
+    }
+  }, [isTesting, onConnectionChange]);
+
+  // Run connection test on component mount
+  useEffect(() => {
+    runConnectionTest();
+  }, []);
+
+  const handleShowTroubleshooting = () => {
+    setShowTroubleshooting(true);
+  };
+
+  return (
+    <div className="space-y-4">
+      <CurrentConfigDisplay 
+        config={currentConfig}
+      />
+      
+      <ConnectionTestButton
+        onClick={runConnectionTest}
+        isTesting={isTesting}
+      />
+      
+      {testResult && (
+        <ConnectionResultDisplay
+          result={testResult}
+        />
+      )}
+      
+      {showCorsAlert && (
+        <CorsAlert 
+          onShowCorsHelp={handleShowTroubleshooting}
+        />
+      )}
+      
+      {showTroubleshooting && (
+        <TroubleshootingGuide
+          onShowCorsHelp={handleShowTroubleshooting}
+        />
+      )}
+    </div>
+  );
+};
