@@ -1,13 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { getSupabaseUrl } from '@/integrations/supabase/client';
-
-interface AsteriskConfig {
-  serverIp: string;
-  username: string;
-  password: string;
-  port: string;
-}
+import { getConfigFromStorage } from './config';
 
 interface ConnectionTestResult {
   success: boolean;
@@ -16,53 +8,56 @@ interface ConnectionTestResult {
 }
 
 export const connectionService = {
-  async testConnection(config?: Partial<AsteriskConfig>): Promise<ConnectionTestResult> {
+  async testConnection(): Promise<ConnectionTestResult> {
+    const config = getConfigFromStorage();
+    
     try {
-      console.log("Starting Asterisk connection test to server:", config?.serverIp || "192.168.0.197");
+      console.log("Testing connection to Asterisk server at:", config.serverIp);
       
-      // Get current session for authentication
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !sessionData.session) {
-        console.error("Authentication error:", sessionError);
-        return {
-          success: false,
-          message: "Authentication required: Please sign in",
-          details: sessionError?.message
-        };
-      }
-      
-      // Make the request to the Supabase edge function
-      const { data, error } = await supabase.functions.invoke("test-asterisk-connection", {
-        body: config || {},
+      // Make API request to test connection
+      const response = await fetch(`${config.apiUrl}applications`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${btoa(`${config.username}:${config.password}`)}`,
+          'Content-Type': 'application/json'
+        }
       });
       
-      if (error) {
-        console.error("Error invoking function:", error);
+      // If the response is successful, return success
+      if (response.ok) {
+        return {
+          success: true,
+          message: `Successfully connected to Asterisk server at ${config.serverIp}`,
+          details: "API endpoint is accessible and credentials are valid"
+        };
+      } else {
+        // If the response is not successful, return error details
         return {
           success: false,
-          message: `Error calling test function: ${error.message}`,
-          details: JSON.stringify(error)
+          message: `Failed to connect to Asterisk server: ${response.statusText}`,
+          details: `HTTP Status: ${response.status} - ${response.statusText}`
         };
       }
-      
-      return data as ConnectionTestResult;
     } catch (error) {
-      console.error("Error in testConnection:", error);
+      console.error("Error testing Asterisk connection:", error);
+      
+      // Check for common connection errors
+      let errorMessage = "Connection failed";
+      let errorDetails = error instanceof Error ? error.message : String(error);
+      
+      // Check for CORS errors
+      if (errorDetails.includes("CORS") || 
+          errorDetails.includes("NetworkError") || 
+          errorDetails.includes("Failed to fetch")) {
+        errorMessage = "CORS or network error - Check server configuration";
+        errorDetails = "Your browser may be blocked from accessing the Asterisk server due to CORS policy restrictions. Make sure CORS is properly configured on your Asterisk server.";
+      }
+      
       return {
         success: false,
-        message: `Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
-        details: "Check the browser console for more details"
+        message: errorMessage,
+        details: errorDetails
       };
     }
-  },
-  
-  getConnectionInfo(): AsteriskConfig {
-    return {
-      serverIp: import.meta.env.VITE_ASTERISK_SERVER_IP || "192.168.0.197",
-      username: "admin",
-      password: "admin",
-      port: "8088"
-    };
   }
 };

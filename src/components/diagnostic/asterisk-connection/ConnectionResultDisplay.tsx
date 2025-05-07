@@ -7,7 +7,7 @@ interface ConnectionResultDisplayProps {
   result: {
     success: boolean;
     message: string;
-    details?: string; // <-- fix
+    details?: string;
   } | null;
 }
 
@@ -36,7 +36,7 @@ export const ConnectionResultDisplay: React.FC<ConnectionResultDisplayProps> = (
             <p className="font-medium">Troubleshooting Steps:</p>
             <ul className="list-disc list-inside mt-1 space-y-1">
               <li>Check that port 8088 is open and accessible from this browser</li>
-              <li>Verify your server is running at 192.168.0.197</li>
+              <li>Verify your server is running at {result.details?.includes("192.168.") ? "192.168.0.197" : "the configured IP"}</li>
               <li>Make sure the Asterisk HTTP server is enabled</li>
               <li>Confirm CORS is properly configured on your Asterisk server</li>
               <li>Try accessing http://192.168.0.197:8088/ari/applications directly in your browser</li>
@@ -49,3 +49,4 @@ export const ConnectionResultDisplay: React.FC<ConnectionResultDisplayProps> = (
       </AlertDescription>
     </Alert>
   );
+};

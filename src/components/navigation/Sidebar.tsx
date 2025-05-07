@@ -1,86 +1,186 @@
+import React from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import { NavItem } from "@/components/navigation/NavItem";
+import { Icons } from "@/components/icons";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
+import { useLockBody } from "@/hooks/use-lock-body";
+import { useAuth } from "@/contexts/auth";
+import { ModeToggle } from "@/components/ModeToggle";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Server } from "lucide-react";
 
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { 
-  Home, 
-  Users, 
-  MessageSquare, 
-  Settings, 
-  User, 
-  LogOut, 
-  PhoneCall,
-  Server,
-  FileAudio
-} from 'lucide-react';
-import { useAuth } from '@/contexts/auth';
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-interface SidebarProps {
-  collapsed?: boolean;
-}
-
-export default function Sidebar({ collapsed = false }: SidebarProps) {
-  const { signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
-
-  const links = [
-    { to: '/dashboard', label: 'Dashboard', icon: <Home className="h-5 w-5" /> },
-    { to: '/campaigns', label: 'Campaigns', icon: <PhoneCall className="h-5 w-5" /> },
-    { to: '/greetings', label: 'Audio Files', icon: <FileAudio className="h-5 w-5" /> },
-    { to: '/contacts', label: 'Leads', icon: <Users className="h-5 w-5" /> },
-    { to: '/goip-setup', label: 'Device Setup', icon: <Server className="h-5 w-5" /> },
-    { to: '/profile', label: 'Profile', icon: <User className="h-5 w-5" /> },
-    { to: '/settings', label: 'Settings', icon: <Settings className="h-5 w-5" /> },
-  ];
+export const Sidebar = ({ className }: SidebarProps) => {
+  const pathname = usePathname() || "/";
+  const [open, setOpen] = React.useState(false);
+  const { user } = useAuth();
+  useLockBody(open);
 
   return (
-    <aside className={cn(
-      "fixed inset-y-0 left-0 z-20 flex flex-col border-r bg-white transition-all dark:bg-gray-950",
-      collapsed ? "w-16" : "w-64"
-    )}>
-      <div className="flex h-14 items-center border-b px-4">
-        {collapsed ? (
-          <span className="mx-auto font-bold text-xl">A</span>
-        ) : (
-          <span className="font-bold text-xl">Autodialer</span>
-        )}
-      </div>
-      <nav className="flex-1 overflow-auto py-4">
-        <ul className="grid gap-1 px-2">
-          {links.map((link) => (
-            <li key={link.to}>
-              <NavLink 
-                to={link.to} 
-                className={({ isActive }) => cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
-                  isActive && "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50",
-                  collapsed && "justify-center py-3"
-                )}
-              >
-                {link.icon}
-                {!collapsed && <span>{link.label}</span>}
-              </NavLink>
-            </li>
-          ))}
-          <li className="mt-4">
-            <Button 
-              variant="ghost" 
-              className={cn(
-                "w-full justify-start text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50",
-                collapsed && "justify-center py-3"
-              )}
-              onClick={handleSignOut}
+    <div className={cn("pb-12", className)}>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden"
+          >
+            <Icons.menu className="h-5 w-5 rotate-0 lg:hidden" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent
+          side="left"
+          className="h-screen w-[200px] border-r px-0 pt-0"
+        >
+          <ScrollArea className="h-full py-6 pr-2">
+            <SheetHeader className="px-4 pb-4">
+              <SheetTitle className="text-lg font-semibold">Flow Dialer</SheetTitle>
+              <SheetDescription>
+                {user ? user.email : "Please sign in"}
+              </SheetDescription>
+            </SheetHeader>
+            <Separator />
+            <div className="px-3 py-2">
+              <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+                Account
+              </h2>
+              <div className="space-y-1">
+                <div className="grid place-items-center gap-2 px-4">
+                  <Avatar>
+                    <AvatarImage src={user?.user_metadata?.avatar_url || ""} />
+                    <AvatarFallback>
+                      {user?.email ? user.email[0].toUpperCase() : <Skeleton />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.email || <Skeleton />}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <Separator />
+            <div className="px-3 py-2">
+              <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+                Navigation
+              </h2>
+              <div className="space-y-1">
+                <NavItem
+                  to="/"
+                  icon={<Icons.home className="h-4 w-4" />}
+                >
+                  Home
+                </NavItem>
+                <NavItem
+                  to="/trunks"
+                  icon={<Icons.phone className="h-4 w-4" />}
+                >
+                  Trunks
+                </NavItem>
+                <NavItem
+                  to="/settings"
+                  icon={<Icons.settings className="h-4 w-4" />}
+                >
+                  Settings
+                </NavItem>
+                <NavItem
+                  to="/diagnostic"
+                  icon={<Icons.bug className="h-4 w-4" />}
+                >
+                  Diagnostic
+                </NavItem>
+                
+          <NavItem
+            to="/asterisk-connection-test"
+            icon={<Server className="h-4 w-4" />}
+          >
+            Asterisk Connection
+          </NavItem>
+        
+              </div>
+            </div>
+            <Separator />
+            <div className="mt-auto px-3 py-2">
+              <ModeToggle />
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+      <div className="hidden h-full flex-col justify-between space-y-2 py-4 md:flex">
+        <div className="px-3 py-2">
+          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+            Flow Dialer
+          </h2>
+          <div className="space-y-1">
+            <div className="grid place-items-center gap-2 px-4">
+              <Avatar>
+                <AvatarImage src={user?.user_metadata?.avatar_url || ""} />
+                <AvatarFallback>
+                  {user?.email ? user.email[0].toUpperCase() : <Skeleton />}
+                </AvatarFallback>
+              </Avatar>
+              <p className="text-sm text-muted-foreground">
+                {user?.email || <Skeleton />}
+              </p>
+            </div>
+          </div>
+        </div>
+        <Separator />
+        <div className="px-3 py-2">
+          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+            Navigation
+          </h2>
+          <div className="space-y-1">
+            <NavItem
+              to="/"
+              icon={<Icons.home className="h-4 w-4" />}
             >
-              <LogOut className="h-5 w-5" />
-              {!collapsed && <span className="ml-3">Log Out</span>}
-            </Button>
-          </li>
-        </ul>
-      </nav>
-    </aside>
+              Home
+            </NavItem>
+            <NavItem
+              to="/trunks"
+              icon={<Icons.phone className="h-4 w-4" />}
+            >
+              Trunks
+            </NavItem>
+            <NavItem
+              to="/settings"
+              icon={<Icons.settings className="h-4 w-4" />}
+            >
+              Settings
+            </NavItem>
+            <NavItem
+              to="/diagnostic"
+              icon={<Icons.bug className="h-4 w-4" />}
+            >
+              Diagnostic
+            </NavItem>
+            
+          <NavItem
+            to="/asterisk-connection-test"
+            icon={<Server className="h-4 w-4" />}
+          >
+            Asterisk Connection
+          </NavItem>
+        
+          </div>
+        </div>
+        <Separator />
+        <div className="mt-auto px-3 py-2">
+          <ModeToggle />
+        </div>
+      </div>
+    </div>
   );
-}
+};
