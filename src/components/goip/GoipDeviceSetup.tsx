@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { RegisterDeviceForm } from './RegisterDeviceForm';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
+import { RegisterDeviceForm } from './RegisterDeviceForm';
 
 export const GoipDeviceSetup = () => {
   return (

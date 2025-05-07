@@ -1,58 +1,62 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getConfigFromStorage, saveConfigToStorage, ASTERISK_SERVER_IP } from "@/utils/asterisk/config";
 import { useToast } from "@/components/ui/use-toast";
 
 export const useAsteriskConfig = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [currentConfig, setCurrentConfig] = useState(() => {
-    // Always use the hardcoded values
-    const config = {
-      apiUrl: `http://${ASTERISK_SERVER_IP}:8088/ari/`,
-      username: 'admin',
-      password: 'admin',
-      serverIp: ASTERISK_SERVER_IP
-    };
-    
-    // Save to storage to ensure consistency
-    saveConfigToStorage(config);
-    
-    return config;
+  const [currentConfig, setCurrentConfig] = useState({
+    apiUrl: `http://${ASTERISK_SERVER_IP}:8088/ari/`,
+    username: 'admin',
+    password: 'admin',
+    serverIp: ASTERISK_SERVER_IP
   });
 
-  // Refresh config when component mounts
+  // Load config once when component mounts
   useEffect(() => {
     loadCurrentConfig();
+  }, []); // Empty dependency array ensures this runs only once
+
+  const loadCurrentConfig = useCallback(() => {
+    setIsLoading(true);
+    try {
+      // Get config from storage
+      const config = getConfigFromStorage();
+      setCurrentConfig(config);
+    } catch (error) {
+      console.error("Error loading Asterisk configuration:", error);
+      // Use default values if there's an error
+      const defaultConfig = {
+        apiUrl: `http://${ASTERISK_SERVER_IP}:8088/ari/`,
+        username: 'admin',
+        password: 'admin',
+        serverIp: ASTERISK_SERVER_IP
+      };
+      setCurrentConfig(defaultConfig);
+      saveConfigToStorage(defaultConfig);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const loadCurrentConfig = () => {
-    setIsLoading(true);
-    // Always use the hardcoded values
-    const config = {
-      apiUrl: `http://${ASTERISK_SERVER_IP}:8088/ari/`,
-      username: 'admin',
-      password: 'admin',
-      serverIp: ASTERISK_SERVER_IP
-    };
-    
-    setCurrentConfig(config);
-    saveConfigToStorage(config);
-    setIsLoading(false);
-  };
-
-  const handleRefreshConfig = () => {
+  const handleRefreshConfig = useCallback(() => {
     loadCurrentConfig();
     toast({
       title: "Configuration Refreshed",
-      description: "Using hardcoded configuration for 192.168.0.197."
+      description: `Using configuration for ${ASTERISK_SERVER_IP}.`
     });
-  };
+  }, [toast]);
+
+  const updateConfig = useCallback((newConfig) => {
+    setCurrentConfig(newConfig);
+    saveConfigToStorage(newConfig);
+  }, []);
 
   return {
     currentConfig,
     isLoading,
-    setCurrentConfig,
+    setCurrentConfig: updateConfig,
     loadCurrentConfig,
     handleRefreshConfig
   };
