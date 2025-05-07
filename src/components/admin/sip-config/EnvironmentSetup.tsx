@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { testAsteriskConnection, getConfigFromStorage, saveConfigToStorage } from "@/utils/asterisk/config";
+import { getConfigFromStorage, saveConfigToStorage } from "@/utils/asterisk/config";
 import { useToast } from "@/components/ui/use-toast";
 import { Settings, RefreshCw, AlertCircle, CheckCircle, Lock } from "lucide-react";
+import { asteriskService } from "@/utils/asteriskService";
 
 interface EnvironmentSetupProps {
   apiUrl: string;
@@ -65,7 +65,8 @@ const EnvironmentSetup: React.FC<EnvironmentSetupProps> = ({
       // Save this config temporarily for the test
       saveConfigToStorage(tempConfig);
       
-      const result = await testAsteriskConnection();
+      // Use asteriskService directly for testing connection
+      const result = await asteriskService.testAsteriskConnection();
       setTestResult(result);
       
       if (result.success) {

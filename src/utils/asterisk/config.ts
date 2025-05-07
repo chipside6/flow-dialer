@@ -37,3 +37,35 @@ export const isHostedEnvironment = (): boolean => {
   // For now, always return true
   return true;
 };
+
+// Check if Asterisk environment is configured
+export const hasConfiguredEnvironment = (): boolean => {
+  try {
+    const config = getConfigFromStorage();
+    return !!(config.apiUrl && config.username && config.password);
+  } catch (error) {
+    console.error("Error checking configuration:", error);
+    return false;
+  }
+};
+
+// Test connection to Asterisk server
+export const testAsteriskConnection = async (): Promise<{ success: boolean; message: string }> => {
+  try {
+    // Import asteriskService instead of importing it directly to avoid circular dependencies
+    const { asteriskService } = await import('@/utils/asteriskService');
+    
+    // Use the service to test the connection
+    const result = await asteriskService.testAsteriskConnection();
+    return { 
+      success: result.success,
+      message: result.message
+    };
+  } catch (error) {
+    console.error("Error testing Asterisk connection:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error occurred testing connection"
+    };
+  }
+};
