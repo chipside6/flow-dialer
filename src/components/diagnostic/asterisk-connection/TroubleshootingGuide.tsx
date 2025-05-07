@@ -19,7 +19,7 @@ export const TroubleshootingGuide: React.FC<TroubleshootingGuideProps> = ({
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Troubleshooting Steps</AlertTitle>
         <AlertDescription className="space-y-2">
-          <p>1. Ensure your Asterisk server is running and accessible at 10.0.2.15:8088.</p>
+          <p>1. Ensure your Asterisk server is running and accessible at 192.168.0.197:8088.</p>
           <p>2. Check that the correct username and password are set (default: admin/admin).</p>
           <p>3. <strong>Verify that CORS is properly configured on your Asterisk server.</strong></p>
           <Button 
