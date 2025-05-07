@@ -34,7 +34,7 @@ export const connectionService = {
       
       // Make the request to the Supabase edge function
       const { data, error } = await supabase.functions.invoke("test-asterisk-connection", {
-        body: config || {},
+        body: config || { serverIp: "192.168.0.197", port: "8088" },
       });
       
       if (error) {

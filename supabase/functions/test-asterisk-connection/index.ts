@@ -36,7 +36,7 @@ serve(async (req) => {
     // Create the auth header (Base64 encoded username:password)
     const authHeader = `Basic ${btoa(`${username}:${password}`)}`;
     
-    // Construct the URL
+    // Construct the URL - fix: use the correct server IP and port
     const url = `http://${serverIp}:${port}/ari/applications`;
 
     try {
