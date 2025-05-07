@@ -49,3 +49,4 @@ export const ConnectionResultDisplay: React.FC<ConnectionResultDisplayProps> = (
       </AlertDescription>
     </Alert>
   );
+};
