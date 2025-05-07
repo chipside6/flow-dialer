@@ -175,7 +175,8 @@ const CampaignDialer: React.FC<CampaignDialerProps> = ({
       case 'failed':
         return 'destructive';
       case 'paused':
-        return 'warning';
+        // Changed 'warning' to 'outline' since 'warning' isn't a valid variant
+        return 'outline';
       default:
         return 'secondary';
     }

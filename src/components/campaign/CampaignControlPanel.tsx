@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,12 +10,13 @@ interface CampaignControlPanelProps {
   campaignId: string;
 }
 
+// Updated port interface to match what the DB function returns
 interface Port {
   id: string;
-  device_id: string;
+  device_name: string;
   port_number: number;
   status: string;
-  device_name?: string;
+  campaign_name?: string;
 }
 
 export const CampaignControlPanel: React.FC<CampaignControlPanelProps> = ({ campaignId }) => {
@@ -91,6 +91,7 @@ export const CampaignControlPanel: React.FC<CampaignControlPanelProps> = ({ camp
         throw error;
       }
 
+      // Types now match correctly
       setAvailablePorts(data || []);
     } catch (error) {
       console.error('Error fetching ports:', error);
