@@ -8,7 +8,7 @@ import { CorsAlert } from './asterisk-connection/CorsAlert';
 import { CurrentConfigDisplay } from './asterisk-connection/CurrentConfigDisplay';
 import { TroubleshootingGuide } from './asterisk-connection/TroubleshootingGuide';
 import { useAsteriskConfig } from './asterisk-connection/useAsteriskConfig';
-import { connectionService } from '@/utils/asterisk/connectionService';
+import { asteriskService } from '@/utils/asteriskService';
 
 interface AsteriskConnectionTestProps {
   onConnectionChange?: (isConnected: boolean) => void;
@@ -35,7 +35,8 @@ export const AsteriskConnectionTest: React.FC<AsteriskConnectionTestProps> = ({
     setShowCorsAlert(false);
     
     try {
-      const result = await connectionService.testConnection();
+      console.log("Starting connection test using edge function...");
+      const result = await asteriskService.testAsteriskConnection();
       
       console.log("Connection test result:", result);
       
@@ -55,15 +56,6 @@ export const AsteriskConnectionTest: React.FC<AsteriskConnectionTestProps> = ({
           message: result.message || "Connection failed",
           details: result.details
         });
-        
-        // If there's a CORS error, show the CORS alert
-        if (result.message && (
-          result.message.includes("CORS") || 
-          result.message.includes("NetworkError") ||
-          result.message.includes("Failed to fetch")
-        )) {
-          setShowCorsAlert(true);
-        }
         
         if (onConnectionChange) {
           onConnectionChange(false);

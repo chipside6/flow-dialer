@@ -13,7 +13,16 @@ const STORAGE_KEY = "asterisk_config";
 
 // Get configuration from localStorage
 export const getConfigFromStorage = (): AsteriskConfig => {
-  // Always return fixed values for now
+  try {
+    const storedConfig = localStorage.getItem(STORAGE_KEY);
+    if (storedConfig) {
+      return JSON.parse(storedConfig);
+    }
+  } catch (error) {
+    console.error("Error retrieving Asterisk config from localStorage:", error);
+  }
+  
+  // Return default config if nothing in localStorage
   return {
     apiUrl: `http://${ASTERISK_SERVER_IP}:8088/ari/`,
     username: 'admin',

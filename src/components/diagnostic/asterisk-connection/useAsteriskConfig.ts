@@ -7,10 +7,10 @@ export const useAsteriskConfig = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [currentConfig, setCurrentConfig] = useState({
-    apiUrl: `http://${ASTERISK_SERVER_IP}:8088/ari/`,
-    username: 'admin',
-    password: 'admin',
-    serverIp: ASTERISK_SERVER_IP
+    apiUrl: "",
+    username: "",
+    password: "",
+    serverIp: ""
   });
 
   // Load config once when component mounts
