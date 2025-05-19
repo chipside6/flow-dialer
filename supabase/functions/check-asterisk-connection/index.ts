@@ -14,6 +14,11 @@ serve(async (req) => {
   }
 
   try {
+    // Define a timeout promise
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Connection timed out after 15 seconds")), 15000);
+    });
+
     // Parse the request body
     const requestData = await req.json().catch(err => {
       console.error("Error parsing request body:", err);
@@ -25,25 +30,29 @@ serve(async (req) => {
     const username = requestData.username || Deno.env.get("ASTERISK_SERVER_USER") || "admin";
     const password = requestData.password || Deno.env.get("ASTERISK_SERVER_PASS") || "admin";
     const port = requestData.port || Deno.env.get("ASTERISK_SERVER_PORT") || "8088";
-    const apiUrl = requestData.apiUrl || `http://${serverIp}:${port}/ari/applications`;
 
     console.log(`Testing connection to Asterisk server at ${serverIp}:${port}`);
+
+    // Create the auth header (Base64 encoded username:password)
+    const authHeader = `Basic ${btoa(`${username}:${password}`)}`;
     
+    // Construct the URL - fix: use the correct server IP and port
+    const url = `http://${serverIp}:${port}/ari/applications`;
+
     try {
-      // Create the auth header
-      const authHeader = `Basic ${btoa(`${username}:${password}`)}`;
-      
-      // For security, in the edge function we'll make the actual API call to the Asterisk server
-      // This prevents exposing credentials in the browser
-      const response = await fetch(apiUrl, {
-        method: "GET",
-        headers: {
-          "Authorization": authHeader
-        }
-      });
-      
+      // Make the request with a timeout
+      const response = await Promise.race([
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Authorization": authHeader
+          }
+        }),
+        timeoutPromise
+      ]) as Response;
+
       console.log(`Received response with status: ${response.status}`);
-      
+
       // Handle different response status codes
       if (response.status === 200) {
         const data = await response.json();
@@ -74,7 +83,13 @@ serve(async (req) => {
           { headers: corsHeaders }
         );
       } else {
-        const errorText = await response.text();
+        let errorText;
+        try {
+          errorText = await response.text();
+        } catch (e) {
+          errorText = "Could not extract response text";
+        }
+        
         return new Response(
           JSON.stringify({ 
             success: false, 
@@ -87,7 +102,7 @@ serve(async (req) => {
     } catch (error) {
       console.error("Network error:", error);
       
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      let errorMessage = error instanceof Error ? error.message : String(error);
       let details = "Check your network connection and server configuration";
       
       if (errorMessage.includes("timed out")) {

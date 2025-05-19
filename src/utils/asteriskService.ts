@@ -58,7 +58,7 @@ export const asteriskService = {
   /**
    * Test connection to Asterisk server
    */
-  testAsteriskConnection: async (serverIp?: string): Promise<{ success: boolean; message: string; details?: any }> => {
+  testAsteriskConnection: async (serverIp?: string): Promise<{ success: boolean; message: string; details?: string }> => {
     try {
       logger.info(`Testing Asterisk connection to server IP: ${serverIp || 'not specified'}`);
       
@@ -79,20 +79,25 @@ export const asteriskService = {
         return { 
           success: false, 
           message: error.message || 'Error testing connection',
-          details: error
+          details: typeof error === 'string' ? error : JSON.stringify(error)
         };
       }
       
-      return { 
-        success: data.success || false, 
-        message: data.message || 'Connection test completed', 
-        details: data 
+      // Ensure we're always returning strings for details
+      const result = {
+        success: data.success || false,
+        message: data.message || 'Connection test completed',
+        details: typeof data.details === 'string' ? data.details : 
+                (data.details ? JSON.stringify(data.details) : undefined)
       };
+      
+      return result;
     } catch (error) {
       logger.error('Error in testAsteriskConnection:', error);
       return { 
         success: false, 
-        message: error instanceof Error ? `Error testing connection: ${error.message}` : 'Unexpected error while testing connection' 
+        message: error instanceof Error ? `Error testing connection: ${error.message}` : 'Unexpected error while testing connection',
+        details: "Check console logs for more information"
       };
     }
   },

@@ -40,23 +40,21 @@ export const AsteriskConnectionTest: React.FC<AsteriskConnectionTestProps> = ({
       
       console.log("Connection test result:", result);
       
-      if (result.success) {
-        setTestResult({
-          success: true,
-          message: "Connected to Asterisk successfully!",
-          details: result.details || "Connection successful"
-        });
-        
+      // Ensure we're properly handling the result object
+      const processedResult = {
+        success: result.success || false,
+        message: result.message || "Connection status unknown",
+        details: typeof result.details === 'string' ? result.details : 
+                 (result.details ? JSON.stringify(result.details) : undefined)
+      };
+      
+      setTestResult(processedResult);
+      
+      if (processedResult.success) {
         if (onConnectionChange) {
           onConnectionChange(true);
         }
       } else {
-        setTestResult({
-          success: false,
-          message: result.message || "Connection failed",
-          details: result.details
-        });
-        
         if (onConnectionChange) {
           onConnectionChange(false);
         }

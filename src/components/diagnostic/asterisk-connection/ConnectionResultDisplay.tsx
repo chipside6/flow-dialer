@@ -7,7 +7,7 @@ interface ConnectionResultDisplayProps {
   result: {
     success: boolean;
     message: string;
-    details?: string; // <-- fix
+    details?: string;
   } | null;
 }
 
