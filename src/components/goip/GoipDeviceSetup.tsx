@@ -16,6 +16,7 @@ export const GoipDeviceSetup = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [devices, setDevices] = useState([]);
   
   const fetchDevices = async () => {
     if (!user?.id) return;
@@ -40,6 +41,7 @@ export const GoipDeviceSetup = () => {
       // Successfully fetched devices (or empty array)
       logger.info("Successfully fetched devices, count:", data?.length || 0);
       console.log("Successfully fetched devices, count:", data?.length || 0);
+      setDevices(data || []);
       setIsLoading(false);
     } catch (err) {
       console.error("Error fetching devices:", err);

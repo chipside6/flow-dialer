@@ -7,7 +7,7 @@ import { Info } from 'lucide-react';
 import { GoipDeviceSetup } from '@/components/goip/GoipDeviceSetup';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import '../styles/mobile-goip.css';
+import '@/styles/mobile-goip.css';
 
 const ErrorFallback = (error: Error) => (
   <Card className="border-destructive">

@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PortStatusBadge } from './PortStatusBadge';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { logger } from '@/utils/logger';
 import { useToast } from '@/hooks/use-toast';
 
@@ -31,6 +31,8 @@ export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
       if (!user?.id) return [];
       
       logger.info("Fetching user trunks for user:", user.id);
+      console.log("Fetching user trunks for user:", user.id);
+      
       const { data, error } = await supabase
         .from('user_trunks')
         .select('*')
@@ -38,6 +40,7 @@ export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
       
       if (error) {
         logger.error("Error fetching user trunks:", error);
+        console.error("Error fetching user trunks:", error);
         throw new Error(`Failed to fetch devices: ${error.message}`);
       }
       
@@ -46,8 +49,8 @@ export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
       return data || [];
     },
     enabled: !!user?.id,
-    staleTime: 5000, // Consider data fresh for only 5 seconds to ensure updates
-    retry: 3, // Retry failed queries three times
+    retry: 2,
+    staleTime: 10000
   });
 
   // Group trunks by device name
@@ -115,7 +118,6 @@ export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
   };
 
   useEffect(() => {
-    // Log device list state on mount and when data changes
     console.log("GoipDeviceList current state:", {
       isLoading,
       error: error ? (error as Error).message : null,

@@ -1,53 +1,44 @@
 
-/* GoIP Setup specific mobile styling */
+/* Mobile-specific styles for GoIP components */
+
+.goip-device-card {
+  margin-bottom: 16px;
+}
 
 @media (max-width: 768px) {
-  /* Only highlight GoIP setup when it's the active page */
-  .active-goip-setup-link {
-    background-color: #f0f4ff !important;
-    color: #4338ca !important;
-  }
-
-  .dark .active-goip-setup-link {
-    background-color: rgba(79, 70, 229, 0.2) !important;
-    color: #c7d2fe !important;
+  /* Device List Styles */
+  .goip-device-card {
+    border-radius: 8px;
+    overflow: hidden;
   }
   
-  /* Improved GoIP setup cards */
-  .goip-device-card, 
-  .credential-card {
-    border: none !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-    margin-bottom: 1rem !important;
-    background-color: white !important;
-  }
-  
-  .dark .goip-device-card,
-  .dark .credential-card {
-    background-color: hsl(var(--card)) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  }
-  
-  /* Improved status badges */
+  /* Port status badges */
   .status-badge {
-    border-radius: 999px !important;
-    font-size: 0.65rem !important;
-    padding: 0.15rem 0.6rem !important;
+    padding: 2px 6px;
+    font-size: 0.65rem;
+    white-space: nowrap;
   }
   
-  /* Remove all border lines in GoIP page tables */
-  .goip-table tr, 
-  .goip-table td,
-  .goip-table th {
-    border: none !important;
+  /* Port panels */
+  .goip-device-card [role="grid"] {
+    grid-template-columns: repeat(2, 1fr);
   }
   
-  .goip-table tr:not(:last-child) td {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  /* Better padding for port display */
+  .goip-device-card .p-2 {
+    padding: 6px !important;
   }
   
-  .dark .goip-table tr:not(:last-child) td {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  /* Port grid layout */
+  .goip-device-card .grid-cols-2,
+  .goip-device-card .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  /* Make port cards more compact */
+  .goip-device-card .border.rounded {
+    border-radius: 6px;
+    padding: 6px;
   }
 }
