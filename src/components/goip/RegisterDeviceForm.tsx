@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +12,8 @@ import { goipService } from '@/utils/asterisk/services/goipService';
 import { useAuth } from '@/contexts/auth';
 import { Loader2, Shield, AlertCircle, Check } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseUrl } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
   deviceName: z.string().min(3, 'Device name must be at least 3 characters').max(50, 'Device name must be at most 50 characters'),
@@ -55,14 +56,30 @@ export const RegisterDeviceForm = () => {
     try {
       console.log("Registering device with values:", values);
       
-      // Using the goipService to register the device
-      const result = await goipService.registerDevice(
-        user.id,
-        values.deviceName,
-        values.ipAddress,
-        values.numPorts
-      );
+      // Call the Supabase Edge Function directly instead of using goipService
+      // This approach bypasses any potential schema mismatch
+      const { data: session } = await supabase.auth.getSession();
+      const supabaseUrl = getSupabaseUrl();
       
+      if (!session?.session?.access_token || !supabaseUrl) {
+        throw new Error("Authentication required");
+      }
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/register-goip-device`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          deviceName: values.deviceName,
+          ipAddress: values.ipAddress,
+          numPorts: values.numPorts
+        })
+      });
+      
+      const result = await response.json();
       console.log("Registration result:", result);
       
       if (!result.success) {
