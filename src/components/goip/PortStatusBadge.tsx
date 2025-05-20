@@ -1,64 +1,32 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { getConfigFromStorage } from '@/utils/asterisk/config';
-import { logger } from '@/utils/logger';
+import { Circle } from 'lucide-react';
+
+type StatusType = 'idle' | 'in-call' | 'error';
 
 interface PortStatusBadgeProps {
-  status: string;
-  lastSeen?: string | null;
+  status: StatusType;
 }
 
-/**
- * Component to display the status of a port with appropriate styling
- */
-export const PortStatusBadge: React.FC<PortStatusBadgeProps> = ({ status, lastSeen }) => {
-  // Default configuration if needed for asterisk server
-  const config = getConfigFromStorage ? getConfigFromStorage() : { serverIp: '192.168.0.197' };
-
-  // Format last seen time if available
-  const formatLastSeen = () => {
-    if (!lastSeen) return 'Never';
-    
-    try {
-      const date = new Date(lastSeen);
-      return date.toLocaleString();
-    } catch (error) {
-      logger.error('Error formatting last seen date:', error);
-      return lastSeen;
+export const PortStatusBadge = ({ status }: PortStatusBadgeProps) => {
+  const getStatusConfig = (status: StatusType) => {
+    switch (status) {
+      case 'idle':
+        return { variant: 'success' as const, label: 'Idle' };
+      case 'in-call':
+        return { variant: 'destructive' as const, label: 'In Call' };
+      case 'error':
+        return { variant: 'secondary' as const, label: 'Error' };
     }
   };
 
-  // Determine badge color based on status
-  const getBadgeVariant = () => {
-    const normalizedStatus = status.toLowerCase();
-    
-    if (normalizedStatus === 'online' || normalizedStatus === 'registered') {
-      return 'success';
-    } else if (normalizedStatus === 'offline' || normalizedStatus === 'unregistered') {
-      return 'destructive';
-    } else if (normalizedStatus === 'inactive') {
-      return 'warning';
-    } else {
-      return 'default';
-    }
-  };
+  const config = getStatusConfig(status);
 
   return (
-    <div className="flex flex-col gap-1">
-      <Badge 
-        variant={getBadgeVariant() as any}
-        className="status-badge font-medium"
-      >
-        {status}
-      </Badge>
-      {lastSeen && (
-        <span className="text-xs text-muted-foreground">
-          Last seen: {formatLastSeen()}
-        </span>
-      )}
-    </div>
+    <Badge variant={config.variant} className="flex items-center gap-1">
+      <Circle className="h-2 w-2 fill-current" />
+      {config.label}
+    </Badge>
   );
 };
-
-export default PortStatusBadge;

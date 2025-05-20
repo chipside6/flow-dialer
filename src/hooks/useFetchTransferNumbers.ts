@@ -80,7 +80,7 @@ export const useFetchTransferNumbers = ({
   return { 
     fetchTransferNumbers: useCallback(() => {
       setIsLoading(true);
-      fetchTransferNumbers();
+      fetchTransferNumbers(true);
     }, [fetchTransferNumbers, setIsLoading])
   };
 };
