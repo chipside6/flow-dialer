@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { goipService } from '@/utils/asterisk/services/goipService';
 import { useAuth } from '@/contexts/auth';
-import { Loader2, Shield } from 'lucide-react';
+import { Loader2, Shield, AlertCircle, Check } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formSchema = z.object({
   deviceName: z.string().min(3, 'Device name must be at least 3 characters').max(50, 'Device name must be at most 50 characters'),
@@ -25,6 +26,7 @@ export const RegisterDeviceForm = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isRegistering, setIsRegistering] = useState(false);
+  const [registrationResult, setRegistrationResult] = useState<{success: boolean; message: string} | null>(null);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -45,9 +47,14 @@ export const RegisterDeviceForm = () => {
       return;
     }
 
+    // Clear any previous registration result
+    setRegistrationResult(null);
+    // Set registering state to true
     setIsRegistering(true);
     
     try {
+      console.log("Registering device with values:", values);
+      
       // Using the goipService to register the device
       const result = await goipService.registerDevice(
         user.id,
@@ -56,9 +63,17 @@ export const RegisterDeviceForm = () => {
         values.numPorts
       );
       
+      console.log("Registration result:", result);
+      
       if (!result.success) {
         throw new Error(result.message || "Failed to register device");
       }
+
+      // Set successful registration result
+      setRegistrationResult({
+        success: true,
+        message: `Device ${values.deviceName} registered successfully with ${values.numPorts} port(s)`
+      });
 
       toast({
         title: "Device registered successfully",
@@ -69,6 +84,12 @@ export const RegisterDeviceForm = () => {
       form.reset();
     } catch (error) {
       console.error('Error registering device:', error);
+      
+      // Set failed registration result
+      setRegistrationResult({
+        success: false,
+        message: error instanceof Error ? error.message : "An error occurred during device registration."
+      });
       
       toast({
         title: "Error registering device",
@@ -87,6 +108,23 @@ export const RegisterDeviceForm = () => {
         <CardTitle>Register GoIP Device</CardTitle>
       </CardHeader>
       <CardContent>
+        {registrationResult && (
+          <Alert 
+            variant={registrationResult.success ? "default" : "destructive"}
+            className={`mb-4 ${registrationResult.success ? "bg-green-50 border-green-200 dark:bg-green-900/20" : ""}`}
+          >
+            {registrationResult.success ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <AlertCircle className="h-4 w-4" />
+            )}
+            <AlertTitle>
+              {registrationResult.success ? "Registration Successful" : "Registration Failed"}
+            </AlertTitle>
+            <AlertDescription>{registrationResult.message}</AlertDescription>
+          </Alert>
+        )}
+      
         <Form {...form}>
           <form id="register-device-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
