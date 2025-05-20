@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,12 +8,11 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { getSupabaseUrl } from '@/integrations/supabase/client';
 import { generateRandomPassword } from '@/utils/passwordGenerator';
+import { goipService } from '@/utils/asterisk/services/goipService';
 
 // Simple schema that only requires essential fields
 const formSchema = z.object({
@@ -55,61 +54,54 @@ export const SimpleGoipRegisterForm = () => {
     try {
       console.log("Registering device with values:", values);
       
-      // Generate user/pass for all ports
-      const portsData = [];
-      for (let i = 1; i <= values.numPorts; i++) {
-        portsData.push({
-          user_id: user.id,
-          trunk_name: values.deviceName,
-          port_number: i,
-          sip_user: `goip_${user.id.substring(0, 8)}_port${i}`,
-          sip_pass: generateRandomPassword(12),
-          status: 'active',
-          device_ip: values.ipAddress
+      // Use the goipService to register the device
+      const result = await goipService.registerDevice(
+        user.id,
+        values.deviceName,
+        values.ipAddress,
+        values.numPorts
+      );
+      
+      console.log("Registration result:", result);
+      
+      // Always set isRegistering to false regardless of success/failure
+      setIsRegistering(false);
+      
+      if (result.success) {
+        setRegistrationResult({
+          success: true,
+          message: `Device ${values.deviceName} registered successfully with ${values.numPorts} port(s)`
         });
+        
+        toast({
+          title: "Device Registered",
+          description: `GoIP device "${values.deviceName}" registered successfully.`,
+          variant: "default"
+        });
+        
+        // Reset form on success
+        form.reset();
+      } else {
+        setRegistrationResult({
+          success: false,
+          message: `Registration failed: ${result.message || "Unknown error"}`
+        });
+        
+        toast({
+          title: "Registration Failed",
+          description: result.message || "Unknown error occurred",
+          variant: "destructive"
+        });
+        
+        if (result.message) {
+          setDebugInfo(result.message);
+        }
       }
-      
-      // Check if we have existing trunks with the same name - delete them first
-      const { error: deleteError } = await supabase
-        .from('user_trunks')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('trunk_name', values.deviceName);
-      
-      if (deleteError) {
-        console.warn("Error deleting existing trunks:", deleteError);
-        setDebugInfo(`Delete error: ${deleteError.message}`);
-        // Continue anyway
-      }
-      
-      // Insert all port records
-      const { data, error } = await supabase
-        .from('user_trunks')
-        .insert(portsData)
-        .select();
-      
-      if (error) {
-        throw error;
-      }
-      
-      console.log("Registration successful:", data);
-      
-      setRegistrationResult({
-        success: true,
-        message: `Device ${values.deviceName} registered successfully with ${values.numPorts} port(s)`
-      });
-      
-      toast({
-        title: "Device Registered",
-        description: `GoIP device "${values.deviceName}" registered successfully.`,
-        variant: "default"
-      });
-      
-      // Reset form
-      form.reset();
-      
     } catch (error) {
       console.error("Error registering device:", error);
+      
+      // Make sure to set isRegistering to false when there's an error
+      setIsRegistering(false);
       
       const errorMessage = error instanceof Error 
         ? error.message 
@@ -125,8 +117,8 @@ export const SimpleGoipRegisterForm = () => {
         description: errorMessage,
         variant: "destructive"
       });
-    } finally {
-      setIsRegistering(false);
+      
+      setDebugInfo(errorMessage);
     }
   };
 

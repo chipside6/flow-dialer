@@ -8,7 +8,6 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import { goipService } from '@/utils/asterisk/services/goipService';
 import { Loader2, Shield, Sparkles } from 'lucide-react';
@@ -55,6 +54,9 @@ export const GoipDeviceForm = () => {
         values.numPorts
       );
 
+      // Make sure we always set isRegistering to false
+      setIsRegistering(false);
+      
       if (!result.success) {
         throw new Error(result.message);
       }
@@ -67,13 +69,15 @@ export const GoipDeviceForm = () => {
       form.reset();
     } catch (error) {
       console.error('Error registering device:', error);
+      
+      // Ensure loading state is reset
+      setIsRegistering(false);
+      
       toast({
         title: "Error registering device",
         description: error instanceof Error ? error.message : "Failed to register your device. Please try again.",
         variant: "destructive"
       });
-    } finally {
-      setIsRegistering(false);
     }
   };
 

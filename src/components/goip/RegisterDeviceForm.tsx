@@ -55,6 +55,9 @@ export const RegisterDeviceForm = () => {
         values.ipAddress,
         values.numPorts
       );
+      
+      // Always set isRegistering to false regardless of result
+      setIsRegistering(false);
 
       if (!result.success) {
         throw new Error(result.message || "Failed to register device");
@@ -69,13 +72,15 @@ export const RegisterDeviceForm = () => {
       form.reset();
     } catch (error) {
       console.error('Error registering device:', error);
+      
+      // Ensure this always gets called even if the error handling has issues
+      setIsRegistering(false);
+      
       toast({
         title: "Error registering device",
         description: error instanceof Error ? error.message : "An error occurred during device registration.",
         variant: "destructive"
       });
-    } finally {
-      setIsRegistering(false);
     }
   };
 
