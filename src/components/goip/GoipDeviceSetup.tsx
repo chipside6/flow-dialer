@@ -45,7 +45,7 @@ export const GoipDeviceSetup = () => {
       <RegisterDeviceForm />
       
       <LoadingErrorBoundary
-        isLoading={false}
+        isLoading={isLoading}
         error={error}
         onRetry={handleRetry}
         loadingComponent={<PortMonitorLoading onRetry={handleRetry} />}
