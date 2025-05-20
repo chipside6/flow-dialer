@@ -1,44 +1,53 @@
 
-/* Mobile-specific styles for GoIP components */
+/* GoIP Device specific mobile styles */
 
 .goip-device-card {
-  margin-bottom: 16px;
+  transition: all 0.2s ease;
 }
 
-@media (max-width: 768px) {
-  /* Device List Styles */
-  .goip-device-card {
-    border-radius: 8px;
-    overflow: hidden;
+.goip-device-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 640px) {
+  .goip-device-card .card-header {
+    padding: 12px;
   }
   
-  /* Port status badges */
-  .status-badge {
-    padding: 2px 6px;
-    font-size: 0.65rem;
-    white-space: nowrap;
+  .goip-device-card .card-content {
+    padding: 12px;
   }
   
-  /* Port panels */
-  .goip-device-card [role="grid"] {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  /* Better padding for port display */
-  .goip-device-card .p-2 {
-    padding: 6px !important;
-  }
-  
-  /* Port grid layout */
-  .goip-device-card .grid-cols-2,
   .goip-device-card .grid-cols-4 {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
   
-  /* Make port cards more compact */
-  .goip-device-card .border.rounded {
-    border-radius: 6px;
-    padding: 6px;
+  .goip-device-card .grid-cols-2 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
+}
+
+/* Port status badge styling */
+.port-status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+.port-status-badge.idle {
+  background-color: rgba(74, 222, 128, 0.2);
+  color: rgba(22, 101, 52, 1);
+}
+
+.port-status-badge.error {
+  background-color: rgba(248, 113, 113, 0.2);
+  color: rgba(153, 27, 27, 1);
+}
+
+.port-status-badge.busy {
+  background-color: rgba(250, 204, 21, 0.2);
+  color: rgba(161, 98, 7, 1);
 }

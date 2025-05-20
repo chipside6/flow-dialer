@@ -1,29 +1,31 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/auth';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 
 export const useDeviceList = (onRefreshNeeded?: () => void) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [userTrunks, setUserTrunks] = useState<any[]>([]);
 
-  // Use query to fetch user trunk data with better error handling
-  const { 
-    data: userTrunks, 
-    isLoading, 
-    error, 
-    refetch 
-  } = useQuery({
-    queryKey: ['user-trunks', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      
-      logger.info("Fetching user trunks for user:", user.id);
+  const fetchDevices = async () => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
+    
+    const isInitialLoad = isLoading;
+    if (!isInitialLoad) setIsRefreshing(true);
+    setError(null);
+    
+    try {
       console.log("Fetching user trunks for user:", user.id);
+      logger.info("Fetching user trunks for user:", user.id);
       
       const { data, error } = await supabase
         .from('user_trunks')
@@ -31,19 +33,28 @@ export const useDeviceList = (onRefreshNeeded?: () => void) => {
         .eq('user_id', user.id);
       
       if (error) {
-        logger.error("Error fetching user trunks:", error);
         console.error("Error fetching user trunks:", error);
+        logger.error("Error fetching user trunks:", error);
         throw new Error(`Failed to fetch devices: ${error.message}`);
       }
       
-      logger.info("Fetched user trunks successfully:", data?.length || 0, "trunks found");
       console.log("User trunks data:", data); // Log full data for debugging
-      return data || [];
-    },
-    enabled: !!user?.id,
-    retry: 2,
-    staleTime: 10000
-  });
+      logger.info("Fetched user trunks successfully:", data?.length || 0, "trunks found");
+      
+      setUserTrunks(data || []);
+    } catch (err) {
+      console.error("Error in fetchDevices:", err);
+      setError(err instanceof Error ? err : new Error('Failed to fetch devices'));
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  // Fetch devices on component mount
+  useEffect(() => {
+    fetchDevices();
+  }, [user?.id]);
 
   // Group trunks by device name
   const deviceGroups = useMemo(() => {
@@ -84,9 +95,8 @@ export const useDeviceList = (onRefreshNeeded?: () => void) => {
   // Handle refresh with loading state
   const handleRefresh = async () => {
     try {
-      setIsRefreshing(true);
       console.log("Refreshing device list...");
-      await refetch();
+      await fetchDevices();
       
       // Also trigger parent refresh if provided
       if (onRefreshNeeded) {
@@ -104,8 +114,6 @@ export const useDeviceList = (onRefreshNeeded?: () => void) => {
         description: "Failed to refresh device list. Please try again.",
         variant: "destructive"
       });
-    } finally {
-      setIsRefreshing(false);
     }
   };
 

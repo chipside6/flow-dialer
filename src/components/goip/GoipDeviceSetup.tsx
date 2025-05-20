@@ -1,78 +1,34 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 import { RegisterDeviceForm } from './RegisterDeviceForm';
 import { GoipDeviceList } from './GoipDeviceList';
-import { PortMonitorLoading } from './PortMonitorLoading';
-import { LoadingErrorBoundary } from '@/components/common/LoadingErrorBoundary';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth';
-import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 
 export const GoipDeviceSetup = () => {
-  const { toast } = useToast();
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [devices, setDevices] = useState([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
-  const fetchDevices = async () => {
-    if (!user?.id) return;
-    
-    logger.info("Starting to fetch devices for user:", user.id);
-    console.log("Fetching devices for user:", user?.id);
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Attempt to fetch user devices to check if the API is responding
-      const { data, error } = await supabase
-        .from('user_trunks')
-        .select('*')
-        .eq('user_id', user.id);
-      
-      if (error) {
-        console.error("DB error fetching devices:", error);
-        throw error;
-      }
-      
-      // Successfully fetched devices (or empty array)
-      logger.info("Successfully fetched devices, count:", data?.length || 0);
-      console.log("Successfully fetched devices, count:", data?.length || 0);
-      setDevices(data || []);
-      setIsLoading(false);
-    } catch (err) {
-      console.error("Error fetching devices:", err);
-      logger.error("Error fetching devices:", err);
-      setError(err instanceof Error ? err : new Error('Failed to load devices'));
-      setIsLoading(false);
-    }
-  };
-  
-  // Load devices on initial render
-  useEffect(() => {
-    if (user?.id) {
-      fetchDevices();
+  // Log authentication status for debugging
+  React.useEffect(() => {
+    if (user) {
+      logger.info("User authenticated in GoipDeviceSetup:", user.id);
+      console.log("User authenticated in GoipDeviceSetup:", user?.id);
     } else {
-      console.log("No user ID available, cannot fetch devices");
-      setIsLoading(false);
+      logger.warn("No user authenticated in GoipDeviceSetup");
+      console.log("No user authenticated in GoipDeviceSetup");
     }
-  }, [user?.id]);
+  }, [user]);
   
-  const handleRetry = () => {
-    console.log("Retrying device fetch");
-    setIsLoading(true);
-    setError(null);
-    
-    // Simulate refresh/retry
-    toast({
-      title: "Refreshing data",
-      description: "Attempting to reload device information"
-    });
-    
-    fetchDevices();
+  const triggerRefresh = () => {
+    logger.info("Manual refresh triggered");
+    console.log("Manual refresh triggered");
+    setRefreshTrigger(prev => prev + 1);
   };
   
   return (
@@ -90,17 +46,17 @@ export const GoipDeviceSetup = () => {
         </AlertDescription>
       </Alert>
       
-      <RegisterDeviceForm onSuccess={fetchDevices} />
+      <RegisterDeviceForm onSuccess={triggerRefresh} />
       
-      <LoadingErrorBoundary
-        isLoading={isLoading}
-        error={error}
-        onRetry={handleRetry}
-        loadingComponent={<PortMonitorLoading onRetry={handleRetry} />}
-        timeout={8000}
-      >
-        <GoipDeviceList onRefreshNeeded={fetchDevices} />
-      </LoadingErrorBoundary>
+      {!user ? (
+        <Card>
+          <CardContent className="flex items-center justify-center py-6">
+            <p>Please log in to view your devices</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <GoipDeviceList key={refreshTrigger} onRefreshNeeded={triggerRefresh} />
+      )}
     </div>
   );
 };
