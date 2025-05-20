@@ -13,7 +13,7 @@ const GoipSetupContent = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6">GoIP Setup Instructions</h1>
+        <h1 className="text-2xl font-bold mb-6">GoIP Device Setup</h1>
         
         <Card className="mb-6">
           <CardHeader className="pb-3">
@@ -22,20 +22,19 @@ const GoipSetupContent = () => {
               <CardTitle>About GoIP Configuration</CardTitle>
             </div>
             <CardDescription>
-              Connect your GoIP device to our platform for outbound campaigns.
-              Follow the instructions below to set up your device.
+              Register your GoIP device and manage its configuration.
+              View all your registered devices below.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Our platform supports GoIP devices with 1, 2, 4, or 8 ports. Register your device
-              and configure each port to connect with our system.
+              Our platform supports GoIP devices with 1, 2, 4, or 8 ports. After registration,
+              you'll see your devices listed below with their port information.
             </p>
           </CardContent>
         </Card>
         
         <div className="grid gap-6">
-          {/* Device Registration Form */}
           <GoipDeviceSetup />
         </div>
       </div>
