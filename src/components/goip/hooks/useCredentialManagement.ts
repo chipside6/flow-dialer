@@ -1,8 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { generateRandomPassword } from '@/utils/passwordGenerator';
+import { useSyncWithAsterisk } from './useSyncWithAsterisk';
 
 // Interface for the SIP credential
 export interface SipCredential {
@@ -18,9 +19,8 @@ export const useCredentialManagement = (userId: string | undefined) => {
   const [credentials, setCredentials] = useState<SipCredential[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [credentialToDelete, setCredentialToDelete] = useState<string | null>(null);
   const { toast } = useToast();
+  const { syncWithAsterisk } = useSyncWithAsterisk();
 
   // Fetch existing credentials when user loads the page
   useEffect(() => {
@@ -166,86 +166,12 @@ export const useCredentialManagement = (userId: string | undefined) => {
     }
   };
 
-  // Delete credential
-  const initiateDeleteCredential = (id: string) => {
-    setCredentialToDelete(id);
-    setShowDeleteDialog(true);
-  };
-
-  // Confirm delete credential
-  const confirmDeleteCredential = async () => {
-    if (!credentialToDelete) return;
-    
-    try {
-      const { error } = await supabase
-        .from('user_trunks')
-        .delete()
-        .eq('id', credentialToDelete);
-      
-      if (error) throw error;
-      
-      // Refresh the credentials list
-      await fetchCredentials();
-      
-      toast({
-        title: "Credential deleted",
-        description: "The SIP credential has been deleted.",
-      });
-      
-      // Sync with Asterisk
-      if (userId) {
-        await syncWithAsterisk(userId);
-      }
-      
-    } catch (error: any) {
-      console.error('Error deleting credential:', error);
-      toast({
-        title: "Error deleting credential",
-        description: error.message || "Could not delete credential. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setShowDeleteDialog(false);
-      setCredentialToDelete(null);
-    }
-  };
-
-  // Helper function to sync with Asterisk
-  const syncWithAsterisk = async (userId: string) => {
-    const { data: session } = await supabase.auth.getSession();
-    const accessToken = session.session?.access_token;
-    
-    if (accessToken) {
-      try {
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-goip-config`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-          body: JSON.stringify({
-            userId,
-            operation: 'sync_user'
-          })
-        });
-      } catch (syncError) {
-        console.error('Error syncing with Asterisk:', syncError);
-        // Don't fail the main operation if this secondary task fails
-      }
-    }
-  };
-
   return {
     credentials,
     isLoading,
     isGenerating,
-    showDeleteDialog,
-    credentialToDelete,
     fetchCredentials,
     generateCredentials,
     handleRegenerateCredential,
-    initiateDeleteCredential,
-    confirmDeleteCredential,
-    setShowDeleteDialog
   };
 };

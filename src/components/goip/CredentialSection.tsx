@@ -7,7 +7,8 @@ import { EmptyCredentialsState } from './EmptyCredentialsState';
 import { SetupInstructions } from './SetupInstructions';
 import { DeleteCredentialDialog } from './dialogs/DeleteCredentialDialog';
 import { CredentialStatusHeader } from './status/CredentialStatusHeader';
-import { useCredentialManagement } from './hooks/useCredentialManagement';
+import { CredentialLoading } from './CredentialLoading';
+import { useCredentialSection } from './hooks/useCredentialSection';
 
 interface CredentialSectionProps {
   userId: string | undefined;
@@ -19,13 +20,12 @@ export const CredentialSection = ({ userId }: CredentialSectionProps) => {
     isLoading,
     isGenerating,
     showDeleteDialog,
-    credentialToDelete,
     generateCredentials,
     handleRegenerateCredential,
     initiateDeleteCredential,
     confirmDeleteCredential,
     setShowDeleteDialog
-  } = useCredentialManagement(userId);
+  } = useCredentialSection(userId);
 
   return (
     <>
@@ -52,10 +52,7 @@ export const CredentialSection = ({ userId }: CredentialSectionProps) => {
           />
           
           {isLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-              <p className="mt-2 text-muted-foreground">Loading your SIP credentials...</p>
-            </div>
+            <CredentialLoading />
           ) : credentials.length > 0 ? (
             <>
               <CredentialTable 
