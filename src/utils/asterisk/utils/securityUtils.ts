@@ -46,5 +46,13 @@ export const securityUtils = {
       .join('');
     
     return password;
+  },
+  
+  /**
+   * Generates a secure token/password for use with SIP authentication
+   * Uses the generateStrongPassword internally with a default length of 16
+   */
+  generateSecureToken: (length: number = 16): string => {
+    return securityUtils.generateStrongPassword(length);
   }
 };
