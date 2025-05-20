@@ -36,6 +36,16 @@
     padding: 0.15rem 0.6rem !important;
   }
   
+  /* Improved GoIP header on mobile */
+  .goip-header {
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Make sure workflow instructions are readable */
+  .workflow-instruction-card {
+    padding: 0.75rem !important;
+  }
+  
   /* Remove all border lines in GoIP page tables */
   .goip-table tr, 
   .goip-table td,

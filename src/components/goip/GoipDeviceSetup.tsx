@@ -2,8 +2,7 @@
 import React from 'react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
-import { RegisterDeviceForm } from './RegisterDeviceForm';
-import { GoipDeviceList } from './GoipDeviceList';
+import { GoipDeviceForm } from './GoipDeviceForm';
 
 export const GoipDeviceSetup = () => {
   return (
@@ -21,10 +20,7 @@ export const GoipDeviceSetup = () => {
         </AlertDescription>
       </Alert>
       
-      <RegisterDeviceForm />
-      
-      {/* Add the device list here */}
-      <GoipDeviceList />
+      <GoipDeviceForm />
     </div>
   );
 };
