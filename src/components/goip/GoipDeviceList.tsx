@@ -1,19 +1,22 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PortStatusBadge } from './PortStatusBadge';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { logger } from '@/utils/logger';
-import { LoadingErrorBoundary } from '@/components/common/LoadingErrorBoundary';
-import { toast } from '@/components/ui/use-toast';
-import { createDialerError, DialerErrorType, handleDialerError } from '@/utils/errorHandlingUtils';
+import { useToast } from '@/hooks/use-toast';
 
-export const GoipDeviceList = () => {
+interface GoipDeviceListProps {
+  onRefreshNeeded?: () => void;
+}
+
+export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Use query to fetch user trunk data with better error handling
@@ -71,38 +74,63 @@ export const GoipDeviceList = () => {
     try {
       setIsRefreshing(true);
       await refetch();
+      
+      // Also trigger parent refresh if provided
+      if (onRefreshNeeded) {
+        onRefreshNeeded();
+      }
+      
       toast({
         title: "Device list refreshed",
         description: "Your device list has been updated with the latest information.",
       });
     } catch (err) {
-      handleDialerError(createDialerError(
-        DialerErrorType.SERVER,
-        "Failed to refresh device list",
-        err
-      ));
+      toast({
+        title: "Refresh failed",
+        description: "Failed to refresh device list. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  // Render loading state with retry function
-  const loadingComponent = (
-    <Card>
-      <CardContent className="flex items-center justify-center py-6">
-        <Loader2 className="h-6 w-6 animate-spin mr-2" />
-        <span>Loading devices...</span>
-      </CardContent>
-    </Card>
-  );
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-6">
+          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+          <span>Loading devices...</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="border-destructive">
+        <CardHeader>
+          <CardTitle className="text-destructive">Error Loading Devices</CardTitle>
+          <CardDescription>
+            {error instanceof Error ? error.message : "Failed to load devices"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Try Again
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <LoadingErrorBoundary
-      isLoading={isLoading}
-      error={error instanceof Error ? error : null}
-      onRetry={refetch}
-      loadingComponent={loadingComponent}
-    >
+    <>
       {!deviceNames.length ? (
         <Card>
           <CardHeader>
@@ -169,16 +197,13 @@ export const GoipDeviceList = () => {
                             >
                               <div className="flex items-center justify-between">
                                 <span className="font-medium">Port {port.port_number}</span>
-                                <PortStatusBadge status={port.status || "idle"} />
+                                <PortStatusBadge status={port.status === "active" ? "idle" : "error"} />
                               </div>
                               <div className="text-xs text-muted-foreground mt-1">
                                 SIP: {port.sip_user}
                               </div>
                             </div>
                           ))}
-                        </div>
-                        <div className="flex gap-2 mt-2">
-                          <Button variant="outline" size="sm">Test Connection</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -189,6 +214,6 @@ export const GoipDeviceList = () => {
           </CardContent>
         </Card>
       )}
-    </LoadingErrorBoundary>
+    </>
   );
 };

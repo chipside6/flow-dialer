@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 import { RegisterDeviceForm } from './RegisterDeviceForm';
@@ -7,11 +7,43 @@ import { GoipDeviceList } from './GoipDeviceList';
 import { PortMonitorLoading } from './PortMonitorLoading';
 import { LoadingErrorBoundary } from '@/components/common/LoadingErrorBoundary';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 export const GoipDeviceSetup = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  
+  const fetchDevices = async () => {
+    if (!user?.id) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Attempt to fetch user devices to check if the API is responding
+      const { data, error } = await supabase
+        .from('user_trunks')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      // Successfully fetched devices (or empty array)
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Error fetching devices:", err);
+      setError(err instanceof Error ? err : new Error('Failed to load devices'));
+      setIsLoading(false);
+    }
+  };
+  
+  // Load devices on initial render
+  useEffect(() => {
+    fetchDevices();
+  }, [user?.id]);
   
   const handleRetry = () => {
     setIsLoading(true);
@@ -23,8 +55,7 @@ export const GoipDeviceSetup = () => {
       description: "Attempting to reload device information"
     });
     
-    // This would typically trigger a data refetch
-    setTimeout(() => setIsLoading(false), 1000);
+    fetchDevices();
   };
   
   return (
@@ -42,7 +73,7 @@ export const GoipDeviceSetup = () => {
         </AlertDescription>
       </Alert>
       
-      <RegisterDeviceForm />
+      <RegisterDeviceForm onSuccess={fetchDevices} />
       
       <LoadingErrorBoundary
         isLoading={isLoading}
@@ -50,7 +81,7 @@ export const GoipDeviceSetup = () => {
         onRetry={handleRetry}
         loadingComponent={<PortMonitorLoading onRetry={handleRetry} />}
       >
-        <GoipDeviceList />
+        <GoipDeviceList onRefreshNeeded={fetchDevices} />
       </LoadingErrorBoundary>
     </div>
   );

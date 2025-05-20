@@ -1,37 +1,14 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth';
 import { Info } from 'lucide-react';
 import { GoipDeviceSetup } from '@/components/goip/GoipDeviceSetup';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { LoadingErrorBoundary } from '@/components/common/LoadingErrorBoundary';
-import { LoadingState } from '@/components/upgrade/LoadingState';
-import { useToast } from '@/hooks/use-toast';
 
 const GoipSetupContent = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  
-  const handleRetry = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    toast({
-      title: "Refreshing device data",
-      description: "Attempting to reload your GoIP device information"
-    });
-    
-    // Simulate a refresh
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    
-    return true;
-  };
   
   return (
     <DashboardLayout>
@@ -58,19 +35,7 @@ const GoipSetupContent = () => {
         </Card>
         
         <div className="grid gap-6">
-          <LoadingErrorBoundary
-            isLoading={isLoading}
-            error={error}
-            onRetry={handleRetry}
-            loadingComponent={
-              <LoadingState 
-                message="Loading your GoIP configuration..." 
-                onRetry={handleRetry}
-              />
-            }
-          >
-            <GoipDeviceSetup />
-          </LoadingErrorBoundary>
+          <GoipDeviceSetup />
         </div>
       </div>
     </DashboardLayout>
