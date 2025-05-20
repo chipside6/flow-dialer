@@ -5,7 +5,30 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { useAuth } from '@/contexts/auth';
 import { Info } from 'lucide-react';
 import { GoipDeviceSetup } from '@/components/goip/GoipDeviceSetup';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ProtectedRoute from '@/components/ProtectedRoute';
+
+const ErrorFallback = (error: Error) => (
+  <Card className="border-destructive">
+    <CardHeader>
+      <CardTitle className="text-destructive">Error Loading GoIP Setup</CardTitle>
+      <CardDescription>
+        {error.message || "Something went wrong loading the GoIP setup page"}
+      </CardDescription>
+    </CardHeader>
+    <CardContent>
+      <p className="text-sm text-muted-foreground mb-4">
+        Please try refreshing the page or contact support if the problem persists.
+      </p>
+      <button 
+        className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        onClick={() => window.location.reload()}
+      >
+        Refresh Page
+      </button>
+    </CardContent>
+  </Card>
+);
 
 const GoipSetupContent = () => {
   const { user } = useAuth();
@@ -35,7 +58,9 @@ const GoipSetupContent = () => {
         </Card>
         
         <div className="grid gap-6">
-          <GoipDeviceSetup />
+          <ErrorBoundary fallback={ErrorFallback}>
+            <GoipDeviceSetup />
+          </ErrorBoundary>
         </div>
       </div>
     </DashboardLayout>

@@ -9,6 +9,7 @@ import { LoadingErrorBoundary } from '@/components/common/LoadingErrorBoundary';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export const GoipDeviceSetup = () => {
   const { toast } = useToast();
@@ -19,6 +20,7 @@ export const GoipDeviceSetup = () => {
   const fetchDevices = async () => {
     if (!user?.id) return;
     
+    logger.info("Starting to fetch devices for user:", user.id);
     setIsLoading(true);
     setError(null);
     
@@ -32,9 +34,11 @@ export const GoipDeviceSetup = () => {
       if (error) throw error;
       
       // Successfully fetched devices (or empty array)
+      logger.info("Successfully fetched devices, count:", data?.length || 0);
       setIsLoading(false);
     } catch (err) {
       console.error("Error fetching devices:", err);
+      logger.error("Error fetching devices:", err);
       setError(err instanceof Error ? err : new Error('Failed to load devices'));
       setIsLoading(false);
     }
@@ -42,7 +46,9 @@ export const GoipDeviceSetup = () => {
   
   // Load devices on initial render
   useEffect(() => {
-    fetchDevices();
+    if (user?.id) {
+      fetchDevices();
+    }
   }, [user?.id]);
   
   const handleRetry = () => {
