@@ -30,7 +30,7 @@ export const useSubscriptionFetch = ({
     isLoading,
     error,
     refetch: refetchSubscription
-  } = useCachedFetch(
+  } = useCachedFetch<Subscription | null>(
     () => fetchSubscription(userId),
     {
       cacheKey: userId ? `subscription-${userId}` : undefined,
@@ -119,7 +119,7 @@ export const useSubscriptionFetch = ({
       return null;
     }
     
-    await refetchSubscription(true); // Force refresh
+    await refetchSubscription();
     return subscriptionData;
   }, [userId, refetchSubscription, subscriptionData, setCurrentPlan, setSubscription, setTrialExpired, setIsInitializing]);
 

@@ -3,8 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { SidebarNavItem } from './SidebarNavItem';
 import { Separator } from '@/components/ui/separator';
-
-// Import any other necessary components or hooks
+import { Layout, PhoneOutgoing, Users, MessageSquare, PhoneForwarded, Server, User } from 'lucide-react';
 
 interface DashboardSidebarProps {
   // Add any props needed
@@ -50,44 +49,44 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = () => {
           </h2>
           <div className="space-y-1">
             <SidebarNavItem 
-              to="/dashboard" 
+              href="/dashboard" 
               isActive={activeItem === 'dashboard'}
-              icon="Layout"
+              icon={<Layout />}
               label="Dashboard" 
             />
             
             <SidebarNavItem 
-              to="/campaigns" 
+              href="/campaigns" 
               isActive={activeItem === 'campaigns'}
-              icon="PhoneOutgoing"
+              icon={<PhoneOutgoing />}
               label="Campaigns" 
             />
 
             <SidebarNavItem 
-              to="/contacts" 
+              href="/contacts" 
               isActive={activeItem === 'contacts'}
-              icon="Users"
+              icon={<Users />}
               label="Contact Lists" 
             />
 
             <SidebarNavItem 
-              to="/greetings" 
+              href="/greetings" 
               isActive={activeItem === 'greetings'}
-              icon="MessageSquare"
+              icon={<MessageSquare />}
               label="Greeting Files" 
             />
 
             <SidebarNavItem 
-              to="/transfers" 
+              href="/transfers" 
               isActive={activeItem === 'transfers'}
-              icon="PhoneForwarded"
+              icon={<PhoneForwarded />}
               label="Transfer Numbers" 
             />
 
             <SidebarNavItem 
-              to="/goip-setup" 
+              href="/goip-setup" 
               isActive={activeItem === 'goip-setup'}
-              icon="Server"
+              icon={<Server />}
               label="GoIP Setup" 
             />
           </div>
@@ -101,9 +100,9 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = () => {
           </h2>
           <div className="space-y-1">
             <SidebarNavItem 
-              to="/profile" 
+              href="/profile" 
               isActive={activeItem === 'profile'}
-              icon="User"
+              icon={<User />}
               label="Profile" 
             />
           </div>

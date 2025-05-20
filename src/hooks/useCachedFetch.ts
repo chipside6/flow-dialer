@@ -1,75 +1,120 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+interface CachedFetchOptions<T> {
+  cacheKey?: string;
+  cacheDuration?: number;
+  enabled?: boolean;
+  retry?: number;
+  retryDelay?: number;
+  onSuccess?: (data: T) => void;
+  onError?: (error: any) => void;
+}
+
 /**
  * Custom hook for fetching data with caching and loading state management
  * @param fetchFn - Function that returns a Promise with data
- * @param initialData - Default data before fetch completes
- * @param cacheKey - Optional key for caching in localStorage
- * @param dependencyArray - Dependencies to trigger refetch
+ * @param options - Configuration options for the fetch
  */
 export function useCachedFetch<T>(
   fetchFn: () => Promise<T>,
-  initialData: T,
-  cacheKey?: string,
-  dependencyArray: any[] = []
+  options: CachedFetchOptions<T> = {}
 ) {
-  const [data, setData] = useState<T>(initialData);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    cacheKey,
+    cacheDuration = 5 * 60 * 1000, // Default: 5 minutes
+    enabled = true,
+    retry = 0,
+    retryDelay = 2000,
+    onSuccess,
+    onError
+  } = options;
+  
+  const [data, setData] = useState<T | null>(null);
+  const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState<Error | null>(null);
   const [lastFetched, setLastFetched] = useState<number | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Get cached data if available
   useEffect(() => {
     if (!cacheKey) return;
 
     try {
-      const cachedData = localStorage.getItem(cacheKey);
-      if (cachedData) {
-        const { data: storedData, timestamp } = JSON.parse(cachedData);
-        setData(storedData);
-        setLastFetched(timestamp);
+      const cachedItem = localStorage.getItem(cacheKey);
+      if (cachedItem) {
+        const { data: storedData, timestamp } = JSON.parse(cachedItem);
+        const now = Date.now();
         
-        // Still fetch fresh data but don't show loading state
-        setIsLoading(false);
+        // Check if cache is still valid
+        if (now - timestamp < cacheDuration) {
+          setData(storedData);
+          setLastFetched(timestamp);
+          setIsLoading(false);
+        }
       }
     } catch (err) {
       console.error('Error retrieving cached data:', err);
     }
-  }, [cacheKey]);
+  }, [cacheKey, cacheDuration]);
 
   // Define refetch function that doesn't cause infinite loop
   const refetch = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setRetryCount(0);
 
-    try {
-      const result = await fetchFn();
-      setData(result);
-      
-      // Cache the result if cacheKey is provided
-      if (cacheKey) {
-        const now = Date.now();
-        localStorage.setItem(
-          cacheKey,
-          JSON.stringify({ data: result, timestamp: now })
-        );
-        setLastFetched(now);
+    const attemptFetch = async () => {
+      try {
+        const result = await fetchFn();
+        setData(result);
+        
+        // Cache the result if cacheKey is provided
+        if (cacheKey) {
+          const now = Date.now();
+          localStorage.setItem(
+            cacheKey,
+            JSON.stringify({ data: result, timestamp: now })
+          );
+          setLastFetched(now);
+        }
+        
+        setIsLoading(false);
+        if (onSuccess) onSuccess(result);
+        
+        return result;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        
+        if (retryCount < retry) {
+          console.log(`Retry attempt ${retryCount + 1} of ${retry} after ${retryDelay}ms`);
+          setRetryCount(prev => prev + 1);
+          
+          // Wait for retryDelay ms before trying again
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          return attemptFetch();
+        }
+        
+        console.error('Fetch error:', error);
+        setError(error);
+        setIsLoading(false);
+        if (onError) onError(error);
+        
+        throw error;
       }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
-      console.error('Fetch error:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [fetchFn, cacheKey]);
+    };
+    
+    return attemptFetch();
+  }, [fetchFn, cacheKey, retry, retryCount, retryDelay, onSuccess, onError]);
 
-  // Fetch data on mount and when dependencies change
+  // Fetch data on mount if enabled
   useEffect(() => {
-    refetch();
-    // Include all dependencies in the dependency array to prevent infinite loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...dependencyArray, refetch]);
+    if (enabled) {
+      refetch().catch(() => {
+        // Error already handled in refetch
+      });
+    }
+  }, [refetch, enabled]);
 
   return {
     data,
