@@ -21,6 +21,7 @@ export const GoipDeviceSetup = () => {
     if (!user?.id) return;
     
     logger.info("Starting to fetch devices for user:", user.id);
+    console.log("Fetching devices for user:", user?.id);
     setIsLoading(true);
     setError(null);
     
@@ -31,10 +32,14 @@ export const GoipDeviceSetup = () => {
         .select('*')
         .eq('user_id', user.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("DB error fetching devices:", error);
+        throw error;
+      }
       
       // Successfully fetched devices (or empty array)
       logger.info("Successfully fetched devices, count:", data?.length || 0);
+      console.log("Successfully fetched devices, count:", data?.length || 0);
       setIsLoading(false);
     } catch (err) {
       console.error("Error fetching devices:", err);
@@ -48,10 +53,14 @@ export const GoipDeviceSetup = () => {
   useEffect(() => {
     if (user?.id) {
       fetchDevices();
+    } else {
+      console.log("No user ID available, cannot fetch devices");
+      setIsLoading(false);
     }
   }, [user?.id]);
   
   const handleRetry = () => {
+    console.log("Retrying device fetch");
     setIsLoading(true);
     setError(null);
     
@@ -86,6 +95,7 @@ export const GoipDeviceSetup = () => {
         error={error}
         onRetry={handleRetry}
         loadingComponent={<PortMonitorLoading onRetry={handleRetry} />}
+        timeout={8000}
       >
         <GoipDeviceList onRefreshNeeded={fetchDevices} />
       </LoadingErrorBoundary>

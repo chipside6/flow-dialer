@@ -7,6 +7,7 @@ import { Info } from 'lucide-react';
 import { GoipDeviceSetup } from '@/components/goip/GoipDeviceSetup';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import '../styles/mobile-goip.css';
 
 const ErrorFallback = (error: Error) => (
   <Card className="border-destructive">
@@ -32,6 +33,15 @@ const ErrorFallback = (error: Error) => (
 
 const GoipSetupContent = () => {
   const { user } = useAuth();
+  
+  // Log user information for debugging
+  React.useEffect(() => {
+    if (user) {
+      console.log("User authenticated in GoipSetup:", user.id);
+    } else {
+      console.log("No user authenticated in GoipSetup");
+    }
+  }, [user]);
   
   return (
     <DashboardLayout>

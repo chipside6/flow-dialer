@@ -41,38 +41,56 @@ export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
         throw new Error(`Failed to fetch devices: ${error.message}`);
       }
       
-      logger.info("Fetched user trunks:", data?.length || 0);
+      logger.info("Fetched user trunks successfully:", data?.length || 0, "trunks found");
+      console.log("User trunks data:", data); // Log full data for debugging
       return data || [];
     },
     enabled: !!user?.id,
-    staleTime: 30000, // Data considered fresh for 30 seconds
-    retry: 2, // Retry failed queries twice
+    staleTime: 5000, // Consider data fresh for only 5 seconds to ensure updates
+    retry: 3, // Retry failed queries three times
   });
 
   // Group trunks by device name
   const deviceGroups = React.useMemo(() => {
-    if (!userTrunks) return {};
+    if (!userTrunks || !Array.isArray(userTrunks) || userTrunks.length === 0) {
+      console.log("No user trunks found to group");
+      return {};
+    }
     
-    const groups: Record<string, any[]> = {};
-    userTrunks.forEach(trunk => {
-      if (!groups[trunk.trunk_name]) {
-        groups[trunk.trunk_name] = [];
-      }
-      groups[trunk.trunk_name].push(trunk);
-    });
-    
-    return groups;
+    try {
+      const groups: Record<string, any[]> = {};
+      userTrunks.forEach(trunk => {
+        if (!trunk.trunk_name) {
+          console.warn("Found trunk with no name:", trunk);
+          return;
+        }
+        
+        if (!groups[trunk.trunk_name]) {
+          groups[trunk.trunk_name] = [];
+        }
+        groups[trunk.trunk_name].push(trunk);
+      });
+      
+      console.log("Device groups created:", Object.keys(groups).length);
+      return groups;
+    } catch (err) {
+      console.error("Error grouping trunks:", err);
+      return {};
+    }
   }, [userTrunks]);
 
   // Get array of device names
   const deviceNames = React.useMemo(() => {
-    return Object.keys(deviceGroups);
+    const names = Object.keys(deviceGroups);
+    console.log("Device names found:", names);
+    return names;
   }, [deviceGroups]);
 
   // Handle refresh with loading state
   const handleRefresh = async () => {
     try {
       setIsRefreshing(true);
+      console.log("Refreshing device list...");
       await refetch();
       
       // Also trigger parent refresh if provided
@@ -85,6 +103,7 @@ export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
         description: "Your device list has been updated with the latest information.",
       });
     } catch (err) {
+      console.error("Error refreshing device list:", err);
       toast({
         title: "Refresh failed",
         description: "Failed to refresh device list. Please try again.",
@@ -94,6 +113,17 @@ export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
       setIsRefreshing(false);
     }
   };
+
+  useEffect(() => {
+    // Log device list state on mount and when data changes
+    console.log("GoipDeviceList current state:", {
+      isLoading,
+      error: error ? (error as Error).message : null,
+      userTrunksCount: userTrunks?.length || 0,
+      deviceGroupsCount: Object.keys(deviceGroups).length,
+      deviceNamesCount: deviceNames.length
+    });
+  }, [isLoading, error, userTrunks, deviceGroups, deviceNames]);
 
   if (isLoading) {
     return (
@@ -176,7 +206,7 @@ export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
             const firstPort = ports[0]; // Get info from first port for device metadata
             
             return (
-              <Card key={deviceName} className="overflow-hidden">
+              <Card key={deviceName} className="overflow-hidden border-muted goip-device-card">
                 <CardHeader className="pb-2 bg-muted/20">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">{deviceName}</CardTitle>
@@ -184,7 +214,7 @@ export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
                       {ports.length} port{ports.length !== 1 ? 's' : ''}
                     </div>
                   </div>
-                  {firstPort.device_ip && (
+                  {firstPort?.device_ip && (
                     <CardDescription>{firstPort.device_ip}</CardDescription>
                   )}
                 </CardHeader>
@@ -202,7 +232,7 @@ export const GoipDeviceList = ({ onRefreshNeeded }: GoipDeviceListProps) => {
                             <PortStatusBadge status={port.status === "active" ? "idle" : "error"} />
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            SIP: {port.sip_user}
+                            SIP: {port.sip_user || "Unknown"}
                           </div>
                         </div>
                       ))}

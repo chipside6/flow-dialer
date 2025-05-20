@@ -37,9 +37,11 @@ export const LoadingErrorBoundary: React.FC<LoadingErrorBoundaryProps> = ({
       };
     }
     
+    console.log(`Setting loading timeout (${timeout}ms)`);
     // Set a timeout to detect stuck loading states
     stuckTimer = setTimeout(() => {
       if (isLoading) {
+        console.log("Loading timeout reached, showing stuck message");
         setIsStuck(true);
       }
     }, timeout);

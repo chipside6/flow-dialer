@@ -39,7 +39,7 @@ export const PortStatusBadge: React.FC<PortStatusBadgeProps> = ({ status }) => {
         return {
           variant: 'outline',
           className: 'bg-gray-100 text-gray-600 border-gray-200',
-          label: status
+          label: String(status)
         };
     }
   };
@@ -47,7 +47,7 @@ export const PortStatusBadge: React.FC<PortStatusBadgeProps> = ({ status }) => {
   const config = getStatusConfig();
 
   return (
-    <Badge variant="outline" className={`text-xs px-2 py-0.5 ${config.className}`}>
+    <Badge variant="outline" className={`text-xs px-2 py-0.5 ${config.className} status-badge`}>
       {config.label}
     </Badge>
   );
