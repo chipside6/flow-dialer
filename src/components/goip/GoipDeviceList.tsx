@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw, Loader2, Phone, Server } from 'lucide-react';
 import { useDeviceList } from './hooks/useDeviceList';
 import { LoadingDeviceList } from './list/LoadingDeviceList';
+import { Badge } from '@/components/ui/badge';
 
 interface GoipDeviceListProps {
   onRefreshNeeded?: () => void;
@@ -51,12 +52,12 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Your Devices</CardTitle>
+          <CardTitle>Available Devices</CardTitle>
           <CardDescription>No devices registered yet</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Register your first GoIP device using the form on the left.
+            Register your first GoIP device using the form above.
           </p>
         </CardContent>
       </Card>
@@ -68,8 +69,8 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle>Your Devices</CardTitle>
-            <CardDescription>Registered GoIP devices</CardDescription>
+            <CardTitle>Available Devices</CardTitle>
+            <CardDescription>Your registered GoIP devices</CardDescription>
           </div>
           <Button 
             variant="outline" 
@@ -91,7 +92,8 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
         <div className="space-y-3">
           {deviceNames.map((deviceName) => {
             const ports = deviceGroups[deviceName];
-            const firstPort = ports[0]; // Get info from first port for device metadata
+            const firstPort = ports[0];
+            const availablePorts = ports.filter(port => port.status === "active" || port.status === "available").length;
             
             return (
               <Card key={deviceName} className="overflow-hidden border-muted">
@@ -101,9 +103,9 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
                       <Server className="h-4 w-4 mr-2 text-primary" />
                       <CardTitle className="text-base">{deviceName}</CardTitle>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {ports.length} {ports.length === 1 ? 'port' : 'ports'}
-                    </div>
+                    <Badge variant="success" className="text-xs">
+                      {availablePorts} available {availablePorts === 1 ? 'port' : 'ports'}
+                    </Badge>
                   </div>
                   {firstPort?.device_ip && (
                     <CardDescription className="mt-1 text-xs">IP: {firstPort.device_ip}</CardDescription>
@@ -115,13 +117,13 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
                       <div 
                         key={port.id} 
                         className={`text-xs px-3 py-1.5 rounded-full flex items-center ${
-                          port.status === "active" 
+                          port.status === "active" || port.status === "available"
                             ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
                             : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                         }`}
                       >
                         <Phone className="h-3 w-3 mr-1" />
-                        Port {port.port_number}
+                        Port {port.port_number} - {port.status === "active" || port.status === "available" ? "Available" : "Busy"}
                       </div>
                     ))}
                   </div>
@@ -133,4 +135,4 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
       </CardContent>
     </Card>
   );
-};
+}

@@ -27,11 +27,9 @@ const GoipSetupContent = () => {
       <div className="container mx-auto py-6 px-4 sm:px-6">
         <h1 className="text-2xl font-bold mb-6">GoIP Device Setup</h1>
         
-        <div className="grid gap-6">
-          <ErrorBoundary fallback={ErrorFallback}>
-            <GoipDeviceSetup />
-          </ErrorBoundary>
-        </div>
+        <ErrorBoundary fallback={ErrorFallback}>
+          <GoipDeviceSetup />
+        </ErrorBoundary>
       </div>
     </DashboardLayout>
   );

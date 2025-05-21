@@ -5,7 +5,6 @@ import { Info } from 'lucide-react';
 import { SimpleGoipRegisterForm } from './SimpleGoipRegisterForm';
 import { GoipDeviceList } from './GoipDeviceList';
 import { useAuth } from '@/contexts/auth';
-import { Card, CardContent } from '@/components/ui/card';
 
 export const GoipDeviceSetup = () => {
   const { user } = useAuth();
@@ -16,28 +15,19 @@ export const GoipDeviceSetup = () => {
   };
   
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
         <Info className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-        <AlertTitle className="text-blue-800 dark:text-blue-300">GoIP Setup Guide</AlertTitle>
+        <AlertTitle className="text-blue-800 dark:text-blue-300">GoIP Device Registration</AlertTitle>
         <AlertDescription className="text-blue-700 dark:text-blue-400">
-          Enter your device name, IP address, and number of ports to register your GoIP device.
-          After registration, you'll be able to use your device in campaigns.
+          Enter your device details below to register a new GoIP device. After registration, 
+          the device will appear in your available devices list.
         </AlertDescription>
       </Alert>
       
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-1 gap-6">
         <SimpleGoipRegisterForm onSuccess={triggerRefresh} />
-        
-        {!user ? (
-          <Card>
-            <CardContent className="flex items-center justify-center py-6">
-              <p>Please log in to view your devices</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <GoipDeviceList key={refreshTrigger} onRefreshNeeded={triggerRefresh} />
-        )}
+        <GoipDeviceList key={refreshTrigger} onRefreshNeeded={triggerRefresh} />
       </div>
     </div>
   );
