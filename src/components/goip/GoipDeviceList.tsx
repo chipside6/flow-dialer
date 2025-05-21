@@ -2,8 +2,9 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Loader2 } from 'lucide-react';
+import { RefreshCw, Loader2, Phone, Server } from 'lucide-react';
 import { useDeviceList } from './hooks/useDeviceList';
+import { LoadingDeviceList } from './list/LoadingDeviceList';
 
 interface GoipDeviceListProps {
   onRefreshNeeded?: () => void;
@@ -20,14 +21,7 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
   } = useDeviceList(onRefreshNeeded);
 
   if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-6">
-          <Loader2 className="h-6 w-6 animate-spin mr-2" />
-          <span>Loading devices...</span>
-        </CardContent>
-      </Card>
-    );
+    return <LoadingDeviceList />;
   }
 
   if (error) {
@@ -62,7 +56,7 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Register your first GoIP device using the form above.
+            Register your first GoIP device using the form on the left.
           </p>
         </CardContent>
       </Card>
@@ -75,7 +69,7 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
         <div className="flex justify-between items-center">
           <div>
             <CardTitle>Your Devices</CardTitle>
-            <CardDescription>Manage your registered GoIP devices</CardDescription>
+            <CardDescription>Registered GoIP devices</CardDescription>
           </div>
           <Button 
             variant="outline" 
@@ -94,45 +88,42 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {deviceNames.map((deviceName) => {
             const ports = deviceGroups[deviceName];
             const firstPort = ports[0]; // Get info from first port for device metadata
             
             return (
-              <Card key={deviceName} className="overflow-hidden border-muted goip-device-card">
-                <CardHeader className="pb-2 bg-muted/20">
+              <Card key={deviceName} className="overflow-hidden border-muted">
+                <CardHeader className="py-3 bg-muted/20">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{deviceName}</CardTitle>
+                    <div className="flex items-center">
+                      <Server className="h-4 w-4 mr-2 text-primary" />
+                      <CardTitle className="text-base">{deviceName}</CardTitle>
+                    </div>
                     <div className="text-sm text-muted-foreground">
-                      {ports.length} port{ports.length !== 1 ? 's' : ''}
+                      {ports.length} {ports.length === 1 ? 'port' : 'ports'}
                     </div>
                   </div>
                   {firstPort?.device_ip && (
-                    <CardDescription>{firstPort.device_ip}</CardDescription>
+                    <CardDescription className="mt-1 text-xs">IP: {firstPort.device_ip}</CardDescription>
                   )}
                 </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="grid gap-2">
-                    <div className="text-sm font-medium">Ports</div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {ports.map(port => (
-                        <div 
-                          key={port.id} 
-                          className="border rounded p-2 flex flex-col text-sm"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">Port {port.port_number}</span>
-                            <span className={`text-xs px-2 py-1 rounded ${port.status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                              {port.status === "active" ? "Available" : "Error"}
-                            </span>
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            SIP: {port.sip_user || "Unknown"}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                <CardContent className="py-3 px-3">
+                  <div className="flex flex-wrap gap-2">
+                    {ports.map(port => (
+                      <div 
+                        key={port.id} 
+                        className={`text-xs px-3 py-1.5 rounded-full flex items-center ${
+                          port.status === "active" 
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
+                            : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                        }`}
+                      >
+                        <Phone className="h-3 w-3 mr-1" />
+                        Port {port.port_number}
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

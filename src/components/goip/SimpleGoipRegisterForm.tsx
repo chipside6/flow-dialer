@@ -9,9 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from '@/contexts/auth';
-import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { generateRandomPassword } from '@/utils/passwordGenerator';
+import { Loader2, CheckCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { goipService } from '@/utils/asterisk/services/goipService';
 
 // Simple schema that only requires essential fields
@@ -21,18 +20,21 @@ const formSchema = z.object({
   numPorts: z.coerce.number().int().min(1).max(8).default(1)
 });
 
-export const SimpleGoipRegisterForm = () => {
+interface SimpleGoipRegisterFormProps {
+  onSuccess?: () => void;
+}
+
+export const SimpleGoipRegisterForm: React.FC<SimpleGoipRegisterFormProps> = ({ onSuccess }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isRegistering, setIsRegistering] = useState(false);
   const [registrationResult, setRegistrationResult] = useState<{success: boolean; message: string} | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      deviceName: 'MyGoIP',
-      ipAddress: '192.168.1.100',
+      deviceName: '',
+      ipAddress: '',
       numPorts: 1
     }
   });
@@ -49,11 +51,8 @@ export const SimpleGoipRegisterForm = () => {
     
     setIsRegistering(true);
     setRegistrationResult(null);
-    setDebugInfo(null);
     
     try {
-      console.log("Registering device with values:", values);
-      
       // Use the goipService to register the device
       const result = await goipService.registerDevice(
         user.id,
@@ -62,15 +61,12 @@ export const SimpleGoipRegisterForm = () => {
         values.numPorts
       );
       
-      console.log("Registration result:", result);
-      
-      // Always set isRegistering to false regardless of success/failure
       setIsRegistering(false);
       
       if (result.success) {
         setRegistrationResult({
           success: true,
-          message: `Device ${values.deviceName} registered successfully with ${values.numPorts} port(s)`
+          message: `Device "${values.deviceName}" registered successfully`
         });
         
         toast({
@@ -81,26 +77,26 @@ export const SimpleGoipRegisterForm = () => {
         
         // Reset form on success
         form.reset();
+        
+        // Trigger refresh if provided
+        if (onSuccess) {
+          onSuccess();
+        }
       } else {
         setRegistrationResult({
           success: false,
-          message: `Registration failed: ${result.message || "Unknown error"}`
+          message: result.message || "Failed to register device"
         });
         
         toast({
           title: "Registration Failed",
-          description: result.message || "Unknown error occurred",
+          description: result.message || "Failed to register device",
           variant: "destructive"
         });
-        
-        if (result.message) {
-          setDebugInfo(result.message);
-        }
       }
     } catch (error) {
       console.error("Error registering device:", error);
       
-      // Make sure to set isRegistering to false when there's an error
       setIsRegistering(false);
       
       const errorMessage = error instanceof Error 
@@ -109,7 +105,7 @@ export const SimpleGoipRegisterForm = () => {
       
       setRegistrationResult({
         success: false,
-        message: `Registration failed: ${errorMessage}`
+        message: errorMessage
       });
       
       toast({
@@ -117,41 +113,24 @@ export const SimpleGoipRegisterForm = () => {
         description: errorMessage,
         variant: "destructive"
       });
-      
-      setDebugInfo(errorMessage);
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Simple GoIP Registration</CardTitle>
-        <CardDescription>Register a new GoIP device with one step</CardDescription>
+        <CardTitle>Register GoIP Device</CardTitle>
+        <CardDescription>Enter your device details below</CardDescription>
       </CardHeader>
       <CardContent>
         {registrationResult && (
           <Alert 
             variant={registrationResult.success ? "default" : "destructive"}
-            className={`mb-4 ${registrationResult.success ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}
+            className={`mb-4 ${registrationResult.success ? "bg-green-50 border-green-200" : ""}`}
           >
-            {registrationResult.success 
-              ? <CheckCircle className="h-4 w-4 text-green-600" /> 
-              : <AlertCircle className="h-4 w-4 text-red-600" />}
-            <AlertTitle>
-              {registrationResult.success ? "Registration Successful" : "Registration Failed"}
-            </AlertTitle>
             <AlertDescription>
               {registrationResult.message}
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {debugInfo && (
-          <Alert className="mb-4 bg-yellow-50 border-yellow-200">
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
-            <AlertTitle>Debug Info</AlertTitle>
-            <AlertDescription className="font-mono text-xs">
-              {debugInfo}
+              {registrationResult.success && <CheckCircle className="h-4 w-4 inline ml-1 text-green-600" />}
             </AlertDescription>
           </Alert>
         )}
@@ -165,7 +144,7 @@ export const SimpleGoipRegisterForm = () => {
                 <FormItem>
                   <FormLabel>Device Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="Office-GoIP1" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -179,7 +158,7 @@ export const SimpleGoipRegisterForm = () => {
                 <FormItem>
                   <FormLabel>IP Address</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="192.168.1.100" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
