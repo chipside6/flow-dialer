@@ -27,7 +27,7 @@ const GoipSetupContent = () => {
       <div className="container mx-auto py-6 px-4 sm:px-6">
         <h1 className="text-2xl font-bold mb-2">GoIP Device Setup</h1>
         <p className="text-muted-foreground mb-6">
-          Register and manage your GoIP devices to make outbound calls in your campaigns
+          Register and manage your GoIP devices for outbound campaigns
         </p>
         
         <ErrorBoundary fallback={ErrorFallback}>

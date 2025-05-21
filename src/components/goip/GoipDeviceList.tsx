@@ -1,17 +1,20 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Loader2, Phone, Server } from 'lucide-react';
+import { RefreshCw, Loader2, Phone, Server, Info, AlertCircle } from 'lucide-react';
 import { useDeviceList } from './hooks/useDeviceList';
 import { LoadingDeviceList } from './list/LoadingDeviceList';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/components/ui/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface GoipDeviceListProps {
   onRefreshNeeded?: () => void;
 }
 
 export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded }) => {
+  const { toast } = useToast();
   const {
     isLoading,
     error,
@@ -20,6 +23,22 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
     isRefreshing,
     handleRefresh
   } = useDeviceList(onRefreshNeeded);
+  
+  const [totalAvailablePorts, setTotalAvailablePorts] = useState(0);
+  
+  // Calculate total available ports
+  useEffect(() => {
+    if (!deviceGroups) return;
+    
+    let count = 0;
+    Object.values(deviceGroups).forEach(ports => {
+      ports.forEach(port => {
+        if (port.status === "active") count++;
+      });
+    });
+    
+    setTotalAvailablePorts(count);
+  }, [deviceGroups]);
 
   if (isLoading) {
     return <LoadingDeviceList />;
@@ -70,7 +89,15 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
         <div className="flex justify-between items-center">
           <div>
             <CardTitle>Available Devices</CardTitle>
-            <CardDescription>Your registered GoIP devices</CardDescription>
+            <CardDescription className="flex items-center gap-1">
+              {totalAvailablePorts > 0 ? (
+                <Badge variant="success" className="mr-1">
+                  {totalAvailablePorts} {totalAvailablePorts === 1 ? 'port' : 'ports'} available
+                </Badge>
+              ) : (
+                <Badge variant="destructive" className="mr-1">No ports available</Badge>
+              )}
+            </CardDescription>
           </div>
           <Button 
             variant="outline" 
@@ -89,7 +116,17 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        {totalAvailablePorts === 0 && (
+          <Alert className="mb-4 bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <AlertDescription className="text-amber-700">
+              No available ports detected. Campaigns require active ports to function properly.
+              Check your GoIP device connection status or register a new device.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        <div className="space-y-4">
           {deviceNames.map((deviceName) => {
             const ports = deviceGroups[deviceName];
             const firstPort = ports[0];
@@ -103,7 +140,7 @@ export const GoipDeviceList: React.FC<GoipDeviceListProps> = ({ onRefreshNeeded 
                       <Server className="h-4 w-4 mr-2 text-primary" />
                       <CardTitle className="text-base">{deviceName}</CardTitle>
                     </div>
-                    <Badge variant="success" className="text-xs">
+                    <Badge variant={availablePorts > 0 ? "success" : "destructive"} className="text-xs">
                       {availablePorts} available {availablePorts === 1 ? 'port' : 'ports'}
                     </Badge>
                   </div>

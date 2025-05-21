@@ -4,7 +4,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 import { SimpleGoipRegisterForm } from './SimpleGoipRegisterForm';
 import { GoipDeviceList } from './GoipDeviceList';
-import { GoipStatusMonitor } from './GoipStatusMonitor';
+import { PortStatusMonitor } from './PortStatusMonitor';
 import { useAuth } from '@/contexts/auth';
 
 export const GoipDeviceSetup = () => {
@@ -29,7 +29,7 @@ export const GoipDeviceSetup = () => {
       <div className="grid md:grid-cols-1 gap-6">
         <SimpleGoipRegisterForm onSuccess={triggerRefresh} />
         <GoipDeviceList key={refreshTrigger} onRefreshNeeded={triggerRefresh} />
-        <GoipStatusMonitor />
+        <PortStatusMonitor onPortUpdated={triggerRefresh} />
       </div>
     </div>
   );
