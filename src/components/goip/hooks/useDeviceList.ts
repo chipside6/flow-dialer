@@ -56,7 +56,7 @@ export const useDeviceList = (onRefreshNeeded?: () => void) => {
     fetchDevices();
   }, [user?.id]);
 
-  // Group trunks by device name
+  // Group trunks by device name and ensure unique port numbers
   const deviceGroups = useMemo(() => {
     if (!userTrunks || !Array.isArray(userTrunks) || userTrunks.length === 0) {
       console.log("No user trunks found to group");
@@ -65,6 +65,8 @@ export const useDeviceList = (onRefreshNeeded?: () => void) => {
     
     try {
       const groups: Record<string, any[]> = {};
+      
+      // First, group by trunk_name
       userTrunks.forEach(trunk => {
         if (!trunk.trunk_name) {
           console.warn("Found trunk with no name:", trunk);
@@ -74,7 +76,18 @@ export const useDeviceList = (onRefreshNeeded?: () => void) => {
         if (!groups[trunk.trunk_name]) {
           groups[trunk.trunk_name] = [];
         }
-        groups[trunk.trunk_name].push(trunk);
+        
+        // Check if a port with this port_number already exists in the group
+        const existingPort = groups[trunk.trunk_name].find(
+          existingTrunk => existingTrunk.port_number === trunk.port_number
+        );
+        
+        // Only add if this port number doesn't already exist for this device
+        if (!existingPort) {
+          groups[trunk.trunk_name].push(trunk);
+        } else {
+          console.warn(`Duplicate port ${trunk.port_number} found for device ${trunk.trunk_name}, skipping`);
+        }
       });
       
       console.log("Device groups created:", Object.keys(groups).length);
